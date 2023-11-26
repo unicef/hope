@@ -35,7 +35,7 @@ export function NeedsAdjudicationDetailsOld({
   canApprove: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
   const [approve] = useApproveNeedsAdjudicationMutation({
@@ -210,7 +210,7 @@ export function NeedsAdjudicationDetailsOld({
                 checked={
                   selectedDuplicate === details.goldenRecordsIndividual?.id
                 }
-                onChange={(event, checked) =>
+                onChange={(_event, checked) =>
                   setSelectedDuplicate(
                     checked ? details.goldenRecordsIndividual?.id : null,
                   )
@@ -219,18 +219,28 @@ export function NeedsAdjudicationDetailsOld({
             </TableCell>
 
             <TableCell align='left'>
-              <BlackLink
-                to={`/${baseUrl}/population/individuals/${details.goldenRecordsIndividual?.id}`}
-              >
-                {details.goldenRecordsIndividual?.unicefId}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/individuals/${details.goldenRecordsIndividual?.id}`}
+                >
+                  {details.goldenRecordsIndividual?.unicefId}
+                </BlackLink>
+              ) : (
+                <span>{details.goldenRecordsIndividual?.unicefId}</span>
+              )}
             </TableCell>
             <TableCell align='left'>
-              <BlackLink
-                to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
-              >
-                {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
+                >
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </BlackLink>
+              ) : (
+                <span>
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </span>
+              )}
             </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.fullName}
@@ -285,18 +295,28 @@ export function NeedsAdjudicationDetailsOld({
               />
             </TableCell>
             <TableCell align='left'>
-              <BlackLink
-                to={`/${baseUrl}/population/individuals/${details.possibleDuplicate?.id}`}
-              >
-                {details.possibleDuplicate?.unicefId}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/individuals/${details.possibleDuplicate?.id}`}
+                >
+                  {details.possibleDuplicate?.unicefId}
+                </BlackLink>
+              ) : (
+                <span>{details.possibleDuplicate?.unicefId}</span>
+              )}
             </TableCell>
             <TableCell align='left'>
-              <BlackLink
-                to={`/${baseUrl}/population/household/${details.possibleDuplicate?.household?.id}`}
-              >
-                {details.possibleDuplicate?.household?.unicefId || '-'}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/household/${details.possibleDuplicate?.household?.id}`}
+                >
+                  {details.possibleDuplicate?.household?.unicefId || '-'}
+                </BlackLink>
+              ) : (
+                <span>
+                  {details.possibleDuplicate?.household?.unicefId || '-'}
+                </span>
+              )}
             </TableCell>
             <TableCell align='left'>
               {details.possibleDuplicate?.fullName}

@@ -23,7 +23,7 @@ export const FormikRadioGroup = ({
   alignItems = 'start',
   ...otherProps
 }): React.ReactElement => {
-  const handleChange = (event) => {
+  const handleChange = (event): void => {
     form.setFieldValue(field.name, event.target.value);
     if (otherProps.onChange) {
       otherProps.onChange(event);

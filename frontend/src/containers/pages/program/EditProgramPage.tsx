@@ -3,7 +3,6 @@ import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import {
   useAllAreasTreeQuery,
   useProgramQuery,
@@ -15,10 +14,10 @@ import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
+import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { decodeIdString } from '../../../utils/utils';
-import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
 
 export const EditProgramPage = (): ReactElement => {
   const { t } = useTranslation();
