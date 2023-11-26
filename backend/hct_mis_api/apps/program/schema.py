@@ -19,6 +19,7 @@ import graphene
 from graphene import Int, relay
 from graphene_django import DjangoObjectType
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
@@ -28,6 +29,7 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
+from hct_mis_api.apps.account.schema import PartnerNodeForProgram
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
@@ -55,48 +57,6 @@ from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.filters import ProgramFilter
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
-
-
-class PartnerNodeForProgram(graphene.ObjectType):
-    # TODO: udpdate this one as well
-    id = graphene.ID()
-    name = graphene.String()
-    areas = graphene.List(graphene.JSONString)
-
-    def resolve_areas(self, info: Any, **kwargs: Any) -> List:
-        return [
-            {
-                "id": "1",
-                "name": "Child - 1",
-                "selected": True,
-            },
-            {
-                "id": "2",
-                "name": "Child - 2",
-                "children": [
-                    {
-                        "id": "22",
-                        "name": "Child - 22",
-                        "selected": True,
-                    },
-                ],
-            },
-            {
-                "id": "3",
-                "name": "Child - 3",
-                "children": [
-                    {
-                        "id": "33",
-                        "name": "Child - 33",
-                        "selected": True,
-                    },
-                    {
-                        "id": "333",
-                        "name": "Child - 333",
-                    },
-                ],
-            },
-        ]
 
 
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -131,11 +91,12 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.households_with_tp_in_program.count()
 
     def resolve_partners(self, info: Any, **kwargs: Any) -> List:
-        # TODO: just added this one temporary for test
-        partner_abc = {"id": "1", "name": "ABC", "areas": []}
-        partner_wfp = {"id": "2", "name": "WFP", "areas": []}
-        partners = [partner_abc, partner_wfp]
-        return partners
+        # filter Partners by program_id and program.business_area_id
+        partners_list = []
+        for partner in Partner.objects.all():
+            if partner.permissions.get(str(self.business_area_id), {}).get("programs", {}).get(str(self.pk), {}):
+                partners_list.append(partner)
+        return partners_list
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
