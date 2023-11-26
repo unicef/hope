@@ -39,6 +39,7 @@ ALL_HOUSEHOLD_QUERY = """
         }
       }
     """
+
 ALL_HOUSEHOLD_QUERY_RANGE = """
     query AllHouseholds($program: ID){
       allHouseholds(
@@ -57,6 +58,7 @@ ALL_HOUSEHOLD_QUERY_RANGE = """
       }
     }
     """
+
 ALL_HOUSEHOLD_QUERY_MIN = """
     query AllHouseholds($program: ID){
       allHouseholds(orderBy: "size", size: "{\\"min\\": 3}", businessArea: "afghanistan", program: $program) {
@@ -83,6 +85,7 @@ ALL_HOUSEHOLD_QUERY_MAX = """
       }
     }
     """
+
 ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY = """
     query AllHouseholds {
       allHouseholds(businessArea: "afghanistan") {
@@ -99,6 +102,7 @@ ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY = """
       }
     }
     """
+
 HOUSEHOLD_QUERY = """
     query Household($id: ID!) {
       household(id: $id) {
