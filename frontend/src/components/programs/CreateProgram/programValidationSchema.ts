@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import moment from 'moment';
 import { today } from '../../../utils/utils';
 
-export const programValidationSchema = (t) =>
+export const programValidationSchema = (t): Yup.ObjectSchema =>
   Yup.object().shape({
     name: Yup.string()
       .required(t('Programme name is required'))

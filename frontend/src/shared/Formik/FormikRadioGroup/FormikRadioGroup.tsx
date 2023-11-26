@@ -23,6 +23,12 @@ export const FormikRadioGroup = ({
   alignItems = 'start',
   ...otherProps
 }): React.ReactElement => {
+  const handleChange = (event) => {
+    form.setFieldValue(field.name, event.target.value);
+    if (otherProps.onChange) {
+      otherProps.onChange(event);
+    }
+  };
   return (
     <>
       <Box mt={otherProps.noMargin ? 0 : 6} mb={otherProps.noMargin ? 0 : 2}>
@@ -32,9 +38,11 @@ export const FormikRadioGroup = ({
         <RadioGroup
           {...field}
           {...otherProps}
+          onChange={handleChange}
           name={field.name}
           value={form.values[field.name]}
           id={`radioGroup-${field.name}`}
+          key={form.values[field.name]}
         >
           {otherProps.choices.map(
             (each: {
@@ -44,7 +52,11 @@ export const FormikRadioGroup = ({
             }) => (
               <Box p={2} mb={2} key={each.value}>
                 <Box display='flex' alignItems={alignItems}>
-                  <Radio color='primary' value={each.value} />
+                  <Radio
+                    color='primary'
+                    value={each.value}
+                    checked={field.value === each.value}
+                  />
                   {withGreyBox ? (
                     <GreyBox p={2}>
                       <Box ml={2}>{each.optionLabel || each.name}</Box>

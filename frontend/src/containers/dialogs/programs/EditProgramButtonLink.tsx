@@ -6,11 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { ProgramQuery } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-interface EditProgramProps {
+interface EditProgramButtonLinkProps {
   program: ProgramQuery['program'];
 }
 
-export const EditProgram = ({ program }: EditProgramProps): ReactElement => {
+export const EditProgramButtonLink = ({
+  program,
+}: EditProgramButtonLinkProps): ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
