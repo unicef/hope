@@ -16,6 +16,8 @@ class CreateProgramInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
+    # areas = graphene.List(graphene.String)
+    # partner = graphene.String()
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -34,6 +36,8 @@ class UpdateProgramInput(graphene.InputObjectType):
     administrative_areas_of_implementation = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
+    # areas = graphene.List(graphene.String)
+    # partner = graphene.String()
 
 
 class CopyProgramInput(graphene.InputObjectType):
@@ -52,3 +56,6 @@ class CopyProgramInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
+    # partner = graphene.String()
+    # TODO: do we need new areas or not???
+    # areas = graphene.List(graphene.String)

@@ -6,6 +6,8 @@ from django.db import transaction
 
 import graphene
 
+from hct_mis_api.apps.account.utils import update_partner_permissions
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -53,6 +55,7 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
         if not (data_collecting_type_code := program_data.pop("data_collecting_type_code", None)):
             raise ValidationError("DataCollectingType is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+        partner_data = program_data.pop("partner", None)
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
@@ -72,6 +75,11 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             end_date=program.end_date,
             status=ProgramCycle.ACTIVE,
         )
+        if partner_data:
+            partner = Partner.objects.get(id=decode_id_string(partner_data))
+            update_partner_permissions(partner, "create_program", [])
+
+        # TODO: update partner.permissions json
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
 
@@ -131,6 +139,8 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
 
+        # TODO: update partner.permissions json
+
         program.full_clean()
         program.save()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
@@ -154,6 +164,7 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
 
         cls.validate(program=program)
 
+        # TODO: delete program id from all partner.permissions json
         program.delete()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return cls(ok=True)
@@ -177,6 +188,7 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
         )
         program = copy_program_object(program_id, program_data)
+        # TODO: how to copy program areas???
 
         copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
