@@ -2744,7 +2744,12 @@ type PaginatedPaymentRecordsAndPaymentsNode {
 type PartnerNodeForProgram {
   id: ID
   name: String
-  areas: [JSONString]
+  isUn: Boolean!
+  permissions: JSONString!
+  userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
+  individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
+  grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  areas: [AreaTreeNode]
 }
 
 type PartnerType {
@@ -5021,7 +5026,7 @@ type UserNode implements Node {
   dateJoined: DateTime!
   id: ID!
   status: UserStatus!
-  partner: PartnerType
+  partner: PartnerNodeForProgram
   email: String!
   availableForExport: Boolean!
   customFields: JSONString!

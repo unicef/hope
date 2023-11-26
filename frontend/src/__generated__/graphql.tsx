@@ -4390,7 +4390,39 @@ export type PartnerNodeForProgram = {
    __typename?: 'PartnerNodeForProgram',
   id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
-  areas?: Maybe<Array<Maybe<Scalars['JSONString']>>>,
+  isUn: Scalars['Boolean'],
+  permissions: Scalars['JSONString'],
+  userSet: UserNodeConnection,
+  individualIdentities: IndividualIdentityNodeConnection,
+  grievanceticketSet: GrievanceTicketNodeConnection,
+  areas?: Maybe<Array<Maybe<AreaTreeNode>>>,
+};
+
+
+export type PartnerNodeForProgramUserSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type PartnerNodeForProgramIndividualIdentitiesArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type PartnerNodeForProgramGrievanceticketSetArgs = {
+  offset?: Maybe<Scalars['Int']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 export type PartnerType = {
@@ -8585,7 +8617,7 @@ export type UserNode = Node & {
   dateJoined: Scalars['DateTime'],
   id: Scalars['ID'],
   status: UserStatus,
-  partner?: Maybe<PartnerType>,
+  partner?: Maybe<PartnerNodeForProgram>,
   email: Scalars['String'],
   availableForExport: Scalars['Boolean'],
   customFields: Scalars['JSONString'],
@@ -11507,8 +11539,8 @@ export type AllUsersQuery = (
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email' | 'isActive' | 'lastLogin' | 'status'>
         & { partner: Maybe<(
-          { __typename?: 'PartnerType' }
-          & Pick<PartnerType, 'name'>
+          { __typename?: 'PartnerNodeForProgram' }
+          & Pick<PartnerNodeForProgram, 'name'>
         )>, userRoles: Array<(
           { __typename?: 'UserRoleNode' }
           & { businessArea: (
@@ -28216,7 +28248,7 @@ export type ResolversTypes = {
   UserNode: ResolverTypeWrapper<UserNode>,
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   UserStatus: UserStatus,
-  PartnerType: ResolverTypeWrapper<PartnerType>,
+  PartnerNodeForProgram: ResolverTypeWrapper<PartnerNodeForProgram>,
   JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   Int: ResolverTypeWrapper<Scalars['Int']>,
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
@@ -28389,12 +28421,12 @@ export type ResolversTypes = {
   FeedbackMessageNodeConnection: ResolverTypeWrapper<FeedbackMessageNodeConnection>,
   FeedbackMessageNodeEdge: ResolverTypeWrapper<FeedbackMessageNodeEdge>,
   FeedbackMessageNode: ResolverTypeWrapper<FeedbackMessageNode>,
-  PartnerNodeForProgram: ResolverTypeWrapper<PartnerNodeForProgram>,
   UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
   RoleNode: ResolverTypeWrapper<RoleNode>,
   RoleSubsystem: RoleSubsystem,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
+  PartnerType: ResolverTypeWrapper<PartnerType>,
   TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>,
   TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
   TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
@@ -28469,6 +28501,7 @@ export type ResolversTypes = {
   TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeEdge>,
   TicketNeedsAdjudicationDetailsNodeConnection: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNodeConnection>,
   TicketNeedsAdjudicationDetailsNodeEdge: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNodeEdge>,
+  AreaTreeNode: ResolverTypeWrapper<AreaTreeNode>,
   MessageSamplingType: MessageSamplingType,
   CommunicationMessageRecipientMapNodeConnection: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeConnection>,
   CommunicationMessageRecipientMapNodeEdge: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeEdge>,
@@ -28486,7 +28519,6 @@ export type ResolversTypes = {
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
   AccountabilitySampleSizeNode: ResolverTypeWrapper<AccountabilitySampleSizeNode>,
   RapidProFlowNode: ResolverTypeWrapper<RapidProFlowNode>,
-  AreaTreeNode: ResolverTypeWrapper<AreaTreeNode>,
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
   LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
@@ -28728,7 +28760,7 @@ export type ResolversParentTypes = {
   UserNode: UserNode,
   Boolean: Scalars['Boolean'],
   UserStatus: UserStatus,
-  PartnerType: PartnerType,
+  PartnerNodeForProgram: PartnerNodeForProgram,
   JSONString: Scalars['JSONString'],
   Int: Scalars['Int'],
   UserNodeConnection: UserNodeConnection,
@@ -28901,12 +28933,12 @@ export type ResolversParentTypes = {
   FeedbackMessageNodeConnection: FeedbackMessageNodeConnection,
   FeedbackMessageNodeEdge: FeedbackMessageNodeEdge,
   FeedbackMessageNode: FeedbackMessageNode,
-  PartnerNodeForProgram: PartnerNodeForProgram,
   UserRoleNode: UserRoleNode,
   RoleNode: RoleNode,
   RoleSubsystem: RoleSubsystem,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
+  PartnerType: PartnerType,
   TicketNoteNodeConnection: TicketNoteNodeConnection,
   TicketNoteNodeEdge: TicketNoteNodeEdge,
   TicketNoteNode: TicketNoteNode,
@@ -28981,6 +29013,7 @@ export type ResolversParentTypes = {
   TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge,
   TicketNeedsAdjudicationDetailsNodeConnection: TicketNeedsAdjudicationDetailsNodeConnection,
   TicketNeedsAdjudicationDetailsNodeEdge: TicketNeedsAdjudicationDetailsNodeEdge,
+  AreaTreeNode: AreaTreeNode,
   MessageSamplingType: MessageSamplingType,
   CommunicationMessageRecipientMapNodeConnection: CommunicationMessageRecipientMapNodeConnection,
   CommunicationMessageRecipientMapNodeEdge: CommunicationMessageRecipientMapNodeEdge,
@@ -28998,7 +29031,6 @@ export type ResolversParentTypes = {
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
   AccountabilitySampleSizeNode: AccountabilitySampleSizeNode,
   RapidProFlowNode: RapidProFlowNode,
-  AreaTreeNode: AreaTreeNode,
   LogEntryNodeConnection: LogEntryNodeConnection,
   LogEntryNodeEdge: LogEntryNodeEdge,
   LogEntryNode: LogEntryNode,
@@ -31113,7 +31145,12 @@ export type PaginatedPaymentRecordsAndPaymentsNodeResolvers<ContextType = any, P
 export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerNodeForProgram'] = ResolversParentTypes['PartnerNodeForProgram']> = {
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  areas?: Resolver<Maybe<Array<Maybe<ResolversTypes['JSONString']>>>, ParentType, ContextType>,
+  isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  permissions?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerNodeForProgramUserSetArgs>,
+  individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerNodeForProgramIndividualIdentitiesArgs>,
+  grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerNodeForProgramGrievanceticketSetArgs>,
+  areas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaTreeNode']>>>, ParentType, ContextType>,
 };
 
 export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {
@@ -32776,7 +32813,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>,
-  partner?: Resolver<Maybe<ResolversTypes['PartnerType']>, ParentType, ContextType>,
+  partner?: Resolver<Maybe<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>,
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,

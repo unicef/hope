@@ -284,6 +284,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
                             name='admin2'
                             variant='outlined'
                             component={FormikAdminAreaAutocomplete}
+                            disabled={Boolean(feedback.admin2?.id)}
                           />
                         </Grid>
                         <Grid item xs={6}>

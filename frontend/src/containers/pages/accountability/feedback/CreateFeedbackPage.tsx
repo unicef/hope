@@ -432,6 +432,9 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 variant='outlined'
                                 component={FormikAdminAreaAutocomplete}
                                 dataCy='input-admin2'
+                                disabled={Boolean(
+                                  values.selectedHousehold?.admin2,
+                                )}
                               />
                             </Grid>
                             <Grid item xs={6}>
