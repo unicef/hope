@@ -30,7 +30,10 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.geo.schema import AreaTreeNode
+from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -138,6 +141,28 @@ class JSONLazyString(graphene.Scalar):
     @staticmethod
     def parse_value(value: Any) -> Dict:
         return json.loads(value)
+
+
+class PartnerNodeForProgram(DjangoObjectType):
+    id = graphene.ID()
+    name = graphene.String()
+    areas = graphene.List(AreaTreeNode)
+
+    class Meta:
+        model = Partner
+
+    def resolve_areas(self, info: Any, **kwargs: Any) -> List[Area]:
+        program_id = (
+            decode_id_string(info.context.headers.get("Program"))
+            if info.context.headers.get("Program") != "all"
+            else None
+        )
+        if program_id:
+            program = Program.objects.get(id=program_id)
+            areas_ids = self.permissions.get(str(program.business_area_id), {}).get("programs").get(str(program_id), [])
+        else:
+            areas_ids = []
+        return Area.objects.filter(id__in=areas_ids)
 
 
 class Query(graphene.ObjectType):
