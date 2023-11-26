@@ -321,18 +321,28 @@ export function NeedsAdjudicationDetailsNew({
             </TableCell>
 
             <TableCell align='left'>
-              <BlackLink
-                to={`/${baseUrl}/population/individuals/${details.goldenRecordsIndividual?.id}`}
-              >
-                {details.goldenRecordsIndividual?.unicefId}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/individuals/${details.goldenRecordsIndividual?.id}`}
+                >
+                  {details.goldenRecordsIndividual?.unicefId}
+                </BlackLink>
+              ) : (
+                <span>{details.goldenRecordsIndividual?.unicefId}</span>
+              )}
             </TableCell>
             <TableCell align='left'>
-              <BlackLink
-                to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
-              >
-                {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
+                >
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </BlackLink>
+              ) : (
+                <span>
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </span>
+              )}
             </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.fullName}
