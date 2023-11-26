@@ -3,7 +3,6 @@ import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,

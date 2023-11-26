@@ -35,7 +35,7 @@ export function NeedsAdjudicationDetailsNew({
   canApprove: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
   const [approve] = useApproveNeedsAdjudicationMutation({
@@ -151,18 +151,26 @@ export function NeedsAdjudicationDetailsNew({
           />
         </TableCell>
         <TableCell align='left'>
-          <BlackLink
-            to={`/${baseUrl}/population/individuals/${possibleDuplicate?.id}`}
-          >
-            {possibleDuplicate?.unicefId}
-          </BlackLink>
+          {!isAllPrograms ? (
+            <BlackLink
+              to={`/${baseUrl}/population/individuals/${possibleDuplicate?.id}`}
+            >
+              {possibleDuplicate?.unicefId}
+            </BlackLink>
+          ) : (
+            <span>{possibleDuplicate?.unicefId}</span>
+          )}
         </TableCell>
         <TableCell align='left'>
-          <BlackLink
-            to={`/${baseUrl}/population/household/${possibleDuplicate?.household?.id}`}
-          >
-            {possibleDuplicate?.household?.unicefId || '-'}
-          </BlackLink>
+          {!isAllPrograms ? (
+            <BlackLink
+              to={`/${baseUrl}/population/household/${possibleDuplicate?.household?.id}`}
+            >
+              {possibleDuplicate?.household?.unicefId || '-'}
+            </BlackLink>
+          ) : (
+            <span>{possibleDuplicate?.household?.unicefId || '-'}</span>
+          )}
         </TableCell>
         <TableCell align='left'>{possibleDuplicate?.fullName}</TableCell>
         <TableCell align='left'>{possibleDuplicate?.sex}</TableCell>
