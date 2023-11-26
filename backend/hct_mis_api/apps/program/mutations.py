@@ -6,9 +6,9 @@ from django.db import transaction
 
 import graphene
 
-from hct_mis_api.apps.account.utils import update_partner_permissions
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.account.utils import update_partner_permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.permissions import is_authenticated
