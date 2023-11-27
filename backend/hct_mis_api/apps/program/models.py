@@ -132,6 +132,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True)
     scope = models.CharField(
+        blank=True,
+        null=True,
         max_length=50,
         choices=SCOPE_CHOICE,
     )

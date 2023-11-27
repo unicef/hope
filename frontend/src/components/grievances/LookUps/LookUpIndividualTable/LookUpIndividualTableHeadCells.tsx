@@ -55,13 +55,6 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Programme',
-    id: 'household__programme',
-    numeric: false,
-    dataCy: 'individual-programme',
-  },
-  {
-    disablePadding: false,
     label: 'Registration Date',
     id: 'individual__last-registraton-date',
     numeric: false,
