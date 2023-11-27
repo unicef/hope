@@ -205,9 +205,7 @@ class Permissions(Enum):
     ACCOUNTABILITY_SURVEY_VIEW_DETAILS = auto()
 
     # Django Admin
-    # ...
-
-    # ...
+    CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
 
     @classmethod
     def choices(cls) -> Tuple:
