@@ -3,7 +3,7 @@ import graphene
 
 class PartnerProgramInput(graphene.InputObjectType):
     area_access = graphene.String(description="'ADMIN_AREA' or 'BUSINESS_AREA'")
-    id = graphene.String(description="Partner ID")
+    id = graphene.String(required=True, description="Partner ID")
     admin_areas = graphene.List(graphene.String)
 
 
