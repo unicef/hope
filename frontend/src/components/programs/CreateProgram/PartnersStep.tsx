@@ -4,17 +4,23 @@ import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  AllAreasTreeQuery,
+  UserPartnerChoicesQuery,
+} from '../../../__generated__/graphql';
 import { BaseSection } from '../../core/BaseSection';
 import { ProgramPartnerCard } from './ProgramPartnerCard';
 
 interface PartnersStepProps {
   values;
-  allAreasTree;
+  allAreasTree: AllAreasTreeQuery['allAreasTree'];
+  partnerChoices: UserPartnerChoicesQuery['userPartnerChoices'];
 }
 
 export const PartnersStep: React.FC<PartnersStepProps> = ({
   values,
   allAreasTree,
+  partnerChoices,
 }) => {
   const { t } = useTranslation();
   const title = t('Programme Partners');
@@ -40,6 +46,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                   values={values}
                   arrayHelpers={arrayHelpers}
                   allAreasTree={allAreasTree}
+                  partnerChoices={partnerChoices}
                   setFieldValue={setFieldValue}
                 />
               ))}

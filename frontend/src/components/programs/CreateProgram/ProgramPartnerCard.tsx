@@ -7,7 +7,10 @@ import { Field } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AllAreasTreeQuery } from '../../../__generated__/graphql';
+import {
+  AllAreasTreeQuery,
+  UserPartnerChoicesQuery,
+} from '../../../__generated__/graphql';
 import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { DividerLine } from '../../core/DividerLine';
@@ -19,6 +22,7 @@ interface ProgramPartnerCardProps {
   index: number;
   arrayHelpers;
   allAreasTree: AllAreasTreeQuery['allAreasTree'];
+  partnerChoices: UserPartnerChoicesQuery['userPartnerChoices'];
   setFieldValue;
 }
 
@@ -44,6 +48,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   index,
   arrayHelpers,
   allAreasTree,
+  partnerChoices,
   setFieldValue,
 }): React.ReactElement => {
   const { t } = useTranslation();
@@ -157,16 +162,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             label={t('Partner')}
             color='primary'
             required
-            choices={[
-              {
-                value: 'examplePartner1',
-                name: t('Example Partner 1'),
-              },
-              {
-                value: 'examplePartner2',
-                name: t('Example Partner 2'),
-              },
-            ]}
+            choices={partnerChoices}
             component={FormikSelectField}
           />
         </Grid>
