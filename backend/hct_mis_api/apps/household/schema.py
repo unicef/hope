@@ -568,6 +568,13 @@ class Query(graphene.ObjectType):
             if program and program.status == Program.DRAFT:
                 return Individual.objects.none()
 
+        queryset = Individual.objects
+        if does_path_exist_in_query("edges.node.household", info):
+            queryset = queryset.select_related("household")  # type: ignore
+        if does_path_exist_in_query("edges.node.household.admin2", info):
+            queryset = queryset.select_related("household__admin_area")  # type: ignore
+            queryset = queryset.select_related("household__admin_area__area_type")  # type: ignore
+
         try:
             partner_permission = info.context.user.partner.get_permissions()
             program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
@@ -578,13 +585,6 @@ class Query(graphene.ObjectType):
         areas_level_1 = areas.filter(level=0).values_list("id")
         areas_level_2 = areas.filter(level=1).values_list("id")
         areas_level_3 = areas.filter(level=2).values_list("id")
-
-        queryset = Individual.objects
-        if does_path_exist_in_query("edges.node.household", info):
-            queryset = queryset.select_related("household")  # type: ignore
-        if does_path_exist_in_query("edges.node.household.admin2", info):
-            queryset = queryset.select_related("household__admin_area")  # type: ignore
-            queryset = queryset.select_related("household__admin_area__area_type")  # type: ignore
 
         queryset = queryset.filter(  # type: ignore
             Q(household__admin1__in=areas_level_1)
