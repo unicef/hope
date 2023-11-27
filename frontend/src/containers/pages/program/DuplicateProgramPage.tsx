@@ -145,6 +145,8 @@ export const DuplicateProgramPage = (): ReactElement => {
                 values={values}
                 allAreasTree={allAreasTree}
                 partnerChoices={userPartnerChoices}
+                step={step}
+                setStep={setStep}
               />
             )}
           </>
