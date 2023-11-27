@@ -32,7 +32,7 @@ const NumberOfHouseHoldsValue = styled.div`
 `;
 
 const StyledBox = styled(Box)`
-  border: 1px solid #f6f6f6;
+  border: 1px solid #e3e3e3;
 `;
 
 interface ProgramDetailsProps {

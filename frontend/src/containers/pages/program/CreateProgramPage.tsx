@@ -26,6 +26,8 @@ export const CreateProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
+  //TODO: add userPartnerChoicesQuery
+  //TODO: fix checkboxes click unclick
 
   const [mutate] = useCreateProgramMutation({
     refetchQueries: () => [
@@ -109,6 +111,11 @@ export const CreateProgramPage = (): ReactElement => {
       validationSchema={programValidationSchema(t)}
     >
       {({ submitForm, values }) => {
+        console.log(
+          '😎 ~ file: CreateProgramPage.tsx:112 ~ CreateProgramPage ~ values:',
+          values,
+        );
+
         return (
           <>
             <PageHeader title={t('Create Programme')}>

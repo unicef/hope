@@ -127,7 +127,7 @@ export const LookUpHouseholdTable = ({
     ...headCells,
     {
       disablePadding: false,
-      label: 'Programmes',
+      label: 'Programme',
       id: 'programs',
       numeric: false,
       dataCy: 'programs',
@@ -151,6 +151,7 @@ export const LookUpHouseholdTable = ({
         query={useAllHouseholdsForPopulationTableQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
+        allowSort={false}
         filterOrderBy={filter.orderBy}
         onSelectAllClick={
           householdMultiSelect && handleSelectAllCheckboxesClick
