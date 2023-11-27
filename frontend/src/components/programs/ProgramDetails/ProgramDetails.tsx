@@ -14,6 +14,7 @@ import { OverviewContainer } from '../../core/OverviewContainer';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { DividerLine } from '../../core/DividerLine';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)}px;
@@ -147,6 +148,7 @@ export function ProgramDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
+      <DividerLine />
       <Title>
         <Typography variant='h6'>{t('Programme Partners')}</Typography>
       </Title>
