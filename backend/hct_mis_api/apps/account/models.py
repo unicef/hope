@@ -52,7 +52,7 @@ class BusinessAreaPartnerPermission:
     def to_dict(self) -> Dict:
         return {"roles": self.roles or [], "programs": self.programs or {}}
 
-    def in_program(self, program_id: str) -> List[str]:
+    def in_program(self, program_id: str) -> Optional[List[str]]:
         return self.programs[program_id] if program_id in self.programs else None
 
 
@@ -107,7 +107,7 @@ class PartnerPermission:
             return []
         return self._permissions[business_area_id].roles
 
-    def areas_for(self, business_area_id: str, program_id: str) -> List[str]:
+    def areas_for(self, business_area_id: str, program_id: str) -> Optional[List[str]]:
         if business_area_id not in self._available_business_areas:
             return []
         return self._permissions[business_area_id].in_program(program_id)
