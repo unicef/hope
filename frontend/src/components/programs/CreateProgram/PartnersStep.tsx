@@ -50,7 +50,9 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                 />
               ))}
               <Button
-                onClick={() => arrayHelpers.push({ id: '' })}
+                onClick={() =>
+                  arrayHelpers.push({ id: '', areaAccess: 'BUSINESS_AREA' })
+                }
                 variant='outlined'
                 color='primary'
                 endIcon={<AddIcon />}

@@ -66,6 +66,7 @@ export const FormikSelectField = ({
             const selectedItem = otherProps.choices.find(
               (choice) => choice.value === selected || choice.name === selected,
             );
+
             return selectedItem
               ? selectedItem.labelEn || selectedItem.name || selectedItem.label
               : selected;
