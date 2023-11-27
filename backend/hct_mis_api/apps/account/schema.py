@@ -158,7 +158,7 @@ class PartnerNodeForProgram(DjangoObjectType):
         return partner.get_permissions().areas_for(str(program.business_area_id), str(program_id))
 
     @staticmethod
-    def _get_program_id(info_context_headers: Dict):
+    def _get_program_id(info_context_headers: Dict) -> Optional[str]:
         return (
             decode_id_string(info_context_headers.get("Program"))
             if info_context_headers.get("Program") != "all"
