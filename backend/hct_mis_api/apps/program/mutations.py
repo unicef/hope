@@ -8,7 +8,6 @@ import graphene
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
-from hct_mis_api.apps.account.utils import update_partner_permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.permissions import is_authenticated
@@ -56,6 +55,7 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             raise ValidationError("DataCollectingType is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
         partner_data = program_data.pop("partner", None)
+        areas = [decode_id_string(area_id) for area_id in program_data.pop("areas", [])]
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
@@ -77,9 +77,8 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
         )
         if partner_data:
             partner = Partner.objects.get(id=decode_id_string(partner_data))
-            update_partner_permissions(partner, "create_program", [])
+            partner.get_permissions().set_program_areas(str(business_area.pk), str(program.pk), areas)
 
-        # TODO: update partner.permissions json
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
 
@@ -96,6 +95,8 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
+        partner_data = program_data.pop("partner", None)
+        areas = [decode_id_string(area_id) for area_id in program_data.pop("areas", [])]
 
         program = Program.objects.select_for_update().get(id=program_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
@@ -139,10 +140,13 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
 
-        # TODO: update partner.permissions json
-
         program.full_clean()
         program.save()
+
+        if partner_data:
+            partner = Partner.objects.get(id=decode_id_string(partner_data))
+            partner.get_permissions().set_program_areas(str(business_area.pk), str(program.pk), areas)
+
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
 
@@ -163,8 +167,10 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         cls.has_permission(info, Permissions.PROGRAMME_REMOVE, program.business_area)
 
         cls.validate(program=program)
+        for partner in Partner.objects.all():
+            partner.remove_program_areas(str(program.business_area_id), str(program.id))
+            partner.save()
 
-        # TODO: delete program id from all partner.permissions json
         program.delete()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return cls(ok=True)
@@ -180,6 +186,8 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
         program_id = decode_id_string_required(program_data.pop("id"))
+        partner_data = program_data.pop("partner", None)
+        areas = [decode_id_string(area_id) for area_id in program_data.pop("areas", [])]
         business_area = Program.objects.get(id=program_id).business_area
         cls.has_permission(info, Permissions.PROGRAMME_DUPLICATE, business_area)
 
@@ -188,7 +196,10 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
         )
         program = copy_program_object(program_id, program_data)
-        # TODO: how to copy program areas???
+
+        if partner_data:
+            partner = Partner.objects.get(id=decode_id_string(partner_data))
+            partner.get_permissions().set_program_areas(str(business_area.pk), str(program.pk), areas)
 
         copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
