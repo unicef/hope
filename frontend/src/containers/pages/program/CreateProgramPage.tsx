@@ -78,7 +78,7 @@ export const CreateProgramPage = (): ReactElement => {
     populationGoal: 0,
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
-    partners: [{ id: '' }],
+    partners: [{ id: '', areaAccess: 'BUSINESS_AREA' }],
   };
 
   if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
