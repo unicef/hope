@@ -159,7 +159,7 @@ class PartnerNodeForProgram(DjangoObjectType):
         )
         if program_id:
             program = Program.objects.get(id=program_id)
-            areas_ids = self.permissions.get(str(program.business_area_id), {}).get("programs").get(str(program_id), [])
+            areas_ids = self.get_permissions().areas_for(str(program.business_area_id), str(program_id))
         else:
             areas_ids = []
         return Area.objects.filter(id__in=areas_ids)

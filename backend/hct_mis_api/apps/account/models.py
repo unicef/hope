@@ -92,6 +92,11 @@ class PartnerPermission:
         permissions.programs[program_id] = areas_ids
         self._permissions[business_area_id] = permissions
 
+    def remove_program_areas(self, business_area_id: str, program_id: str) -> None:
+        permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
+        if program_id in permissions.programs:
+            permissions.programs.pop(program_id)
+
     def to_dict(self) -> Dict:
         return {business_area_id: permission.to_dict() for business_area_id, permission in self._permissions.items()}
 
