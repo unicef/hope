@@ -75,8 +75,8 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             status=ProgramCycle.ACTIVE,
         )
         for partner_data in partners_data:
-            admin_areas = [decode_id_string(area_id) for area_id in partner_data.get("admin_areas", [])]
-            partner = Partner.objects.get(id=decode_id_string(partner_data["id"]))
+            admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
+            partner = Partner.objects.get(id=partner_data["id"])
             partner.get_permissions().set_program_areas(str(business_area.pk), str(program.pk), admin_areas)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
@@ -143,8 +143,8 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
         program.save()
 
         for partner_data in partners_data:
-            admin_areas = [decode_id_string(area_id) for area_id in partner_data.get("admin_areas", [])]
-            partner = Partner.objects.get(id=decode_id_string(partner_data["id"]))
+            admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
+            partner = Partner.objects.get(id=partner_data["id"])
             partner.get_permissions().set_program_areas(str(business_area.pk), str(program.pk), admin_areas)
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
@@ -197,8 +197,8 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
         program = copy_program_object(program_id, program_data)
 
         for partner_data in partners_data:
-            admin_areas = [decode_id_string(area_id) for area_id in partner_data.get("admin_areas", [])]
-            partner = Partner.objects.get(id=decode_id_string(partner_data["id"]))
+            admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
+            partner = Partner.objects.get(id=partner_data["id"])
             partner.get_permissions().set_program_areas(str(business_area.pk), str(program.pk), admin_areas)
 
         copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)

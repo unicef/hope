@@ -13550,8 +13550,8 @@ export type ProgramQuery = (
       & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable' | 'description'>
     )>, partners: Maybe<Array<Maybe<(
       { __typename?: 'PartnerNodeForProgram' }
-      & Pick<PartnerNodeForProgram, 'id' | 'name'>
-      & { areas: Maybe<Array<Maybe<(
+      & Pick<PartnerNodeForProgram, 'id' | 'name' | 'areaAccess'>
+      & { adminAreas: Maybe<Array<Maybe<(
         { __typename?: 'AreaTreeNode' }
         & Pick<AreaTreeNode, 'id'>
       )>>> }
@@ -25838,7 +25838,8 @@ export const ProgramDocument = gql`
     partners {
       id
       name
-      areas {
+      areaAccess
+      adminAreas {
         id
       }
     }

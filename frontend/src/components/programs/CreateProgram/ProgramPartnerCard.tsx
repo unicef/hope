@@ -158,7 +158,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
       <Box display='flex' justifyContent='space-between'>
         <Grid item xs={6}>
           <Field
-            name={`partners[${index}].partner`}
+            name={`partners[${index}].id`}
             label={t('Partner')}
             color='primary'
             required
@@ -179,6 +179,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
       <Grid item xs={6}>
         <Field
           name={`partners[${index}].areaAccess`}
+          required
           choices={[
             {
               value: 'BUSINESS_AREA',

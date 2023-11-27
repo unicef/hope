@@ -3,7 +3,7 @@
 exports[`components/grievances/PaymentGrievanceDetails should render with data 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-bZQynM ccoMKx MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root sc-gzVnrw fCXiuQ MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
       class="sc-htpNat hUqbZq"
@@ -33,7 +33,7 @@ exports[`components/grievances/PaymentGrievanceDetails should render with data 1
       </div>
     </div>
     <table
-      class="MuiTable-root sc-gzVnrw gTOLhR"
+      class="MuiTable-root sc-htoDjs fmAHNm"
     >
       <thead
         class="MuiTableHead-root"

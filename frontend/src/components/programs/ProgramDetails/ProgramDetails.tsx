@@ -56,34 +56,6 @@ export function ProgramDetails({
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const programScopeChoicesDict = choicesToDict(programScopeChoices);
 
-  //TODO: remove this
-  const partners = [
-    {
-      id: '9bef9d07-d45b-4291-ade6-3227311f3cea',
-      partner: 'Partner ABC',
-      areaAccess: 'ADMIN_AREA',
-      adminAreas: [
-        '6d49768f-e5fc-4f33-92f0-5004c31dcaf5',
-        '705f5c09-484a-41d7-9aa4-6c7418d4ec80',
-        '1841435e-d530-4f87-8aa6-7b1828f4c4a3',
-        'e3c08a14-c47d-4b7a-b9e4-893dccac9622',
-      ],
-    },
-    {
-      partner: 'Partner XYZ',
-      id: '423a9e1c-4e21-485e-801d-808091e9808f',
-      areaAccess: 'BUSINESS_AREA',
-    },
-    {
-      partner: 'Partner 123',
-      id: 'ef356928-fbdf-442d-90e9-d444a2488e77',
-      areaAccess: 'ADMIN_AREA',
-      adminAreas: [
-        '6d49768f-e5fc-4f33-92f0-5004c31dcaf5',
-        '705f5c09-484a-41d7-9aa4-6c7418d4ec80',
-      ],
-    },
-  ];
   return (
     <ContainerColumnWithBorder data-cy='program-details-container'>
       <Title>
@@ -176,27 +148,28 @@ export function ProgramDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
-      <BaseSection p={0} noPaper title={t('Programme Partners')}>
-        <Box mt={2}>
-          <Grid container spacing={6}>
-            {partners.map((partner) => (
-              <Grid item xs={3}>
-                <StyledBox p={6} flexDirection='column'>
-                  <Typography variant='h6'>{partner.partner}</Typography>
-                  <LabelizedField
-                    label={t('Area Access')}
-                    value={
-                      partner.areaAccess === 'BUSINESS_AREA'
-                        ? t('Business Area')
-                        : `Admin Areas: ${partner.adminAreas?.length || 0}`
-                    }
-                  />
-                </StyledBox>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      </BaseSection>
+      <Title>
+        <Typography variant='h6'>{t('Programme Partners')}</Typography>
+      </Title>
+      <OverviewContainer>
+        <Grid container spacing={6}>
+          {program.partners.map((partner) => (
+            <Grid item xs={3}>
+              <StyledBox p={6} flexDirection='column'>
+                <Typography variant='h6'>{partner.name}</Typography>
+                <LabelizedField
+                  label={t('Area Access')}
+                  value={
+                    partner.areaAccess === 'BUSINESS_AREA'
+                      ? t('Business Area')
+                      : `Admin Areas: ${partner.adminAreas?.length || 0}`
+                  }
+                />
+              </StyledBox>
+            </Grid>
+          ))}
+        </Grid>
+      </OverviewContainer>
     </ContainerColumnWithBorder>
   );
 }

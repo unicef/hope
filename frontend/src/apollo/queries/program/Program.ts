@@ -34,8 +34,8 @@ export const PROGRAM_QUERY = gql`
       partners {
         id
         name
-        # //TODO: add areaAccess
-        areas {
+        areaAccess
+        adminAreas {
           id
         }
       }
