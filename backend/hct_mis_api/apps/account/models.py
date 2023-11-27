@@ -256,7 +256,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             id__in=partner_role_ids,
             permissions__contains=[permission],
         )
-
         user_roles = Role.objects.filter(
             permissions__contains=[permission],
             user_roles__user=self,

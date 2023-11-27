@@ -334,39 +334,3 @@ snapshots['TestHouseholdAreaQuery::test_household_many_admin_area_3_is_filtered_
         }
     ]
 }
-
-snapshots['TestHouseholdAreaQuery::test_household_with_no_admin_area_is_filtered_0_with_permission 1'] = {
-    'data': {
-        'allHouseholds': {
-            'edges': [
-                {
-                    'node': {
-                        'address': 'address_6',
-                        'countryOrigin': 'Afghanistan',
-                        'size': 1
-                    }
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestHouseholdAreaQuery::test_household_with_no_admin_area_is_filtered_1_without_permission 1'] = {
-    'data': {
-        'allHouseholds': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 5,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied',
-            'path': [
-                'allHouseholds'
-            ]
-        }
-    ]
-}

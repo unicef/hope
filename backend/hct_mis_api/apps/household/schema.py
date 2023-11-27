@@ -559,6 +559,7 @@ class Query(graphene.ObjectType):
     household_search_types_choices = graphene.List(ChoiceObject)
 
     def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
+        user = info.context.user
         program_id = decode_id_string(info.context.headers.get("Program"))
         business_area_slug = info.context.headers.get("Business-Area")
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
@@ -575,23 +576,24 @@ class Query(graphene.ObjectType):
             queryset = queryset.select_related("household__admin_area")  # type: ignore
             queryset = queryset.select_related("household__admin_area__area_type")  # type: ignore
 
-        try:
-            partner_permission = info.context.user.partner.get_permissions()
-            program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
-        except (Partner.DoesNotExist, AssertionError):
-            return Individual.objects.none()
+        if not user.partner.is_unicef:  # Full access to all AdminAreas
+            try:
+                partner_permission = user.partner.get_permissions()
+                program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
+            except (Partner.DoesNotExist, AssertionError):
+                return Individual.objects.none()
 
-        areas = Area.objects.filter(id__in=program_area_ids)
-        areas_level_1 = areas.filter(level=0).values_list("id")
-        areas_level_2 = areas.filter(level=1).values_list("id")
-        areas_level_3 = areas.filter(level=2).values_list("id")
+            areas = Area.objects.filter(id__in=program_area_ids)
+            areas_level_1 = areas.filter(level=0).values_list("id")
+            areas_level_2 = areas.filter(level=1).values_list("id")
+            areas_level_3 = areas.filter(level=2).values_list("id")
 
-        queryset = queryset.filter(  # type: ignore
-            Q(household__admin1__in=areas_level_1)
-            | Q(household__admin2__in=areas_level_2)
-            | Q(household__admin3__in=areas_level_3)
-            | Q(household__admin_area__isnull=True)
-        )
+            queryset = queryset.filter(  # type: ignore
+                Q(household__admin1__in=areas_level_1)
+                | Q(household__admin2__in=areas_level_2)
+                | Q(household__admin3__in=areas_level_3)
+                | Q(household__admin_area__isnull=True)
+            )
 
         return queryset  # type: ignore
 
@@ -606,6 +608,7 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
+        user = info.context.user
         program_id = decode_id_string(info.context.headers.get("Program"))
         business_area_slug = info.context.headers.get("Business-Area")
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
@@ -614,23 +617,26 @@ class Query(graphene.ObjectType):
             program = Program.objects.filter(id=program_id).first()
             if program and program.status == Program.DRAFT:
                 return Household.objects.none()
-        try:
-            partner_permission = info.context.user.partner.get_permissions()
-            program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
-        except (Partner.DoesNotExist, AssertionError):
-            return Household.objects.none()
 
-        areas = Area.objects.filter(id__in=program_area_ids)
-        areas_level_1 = areas.filter(level=0).values_list("id")
-        areas_level_2 = areas.filter(level=1).values_list("id")
-        areas_level_3 = areas.filter(level=2).values_list("id")
+        queryset = Household.objects.all()
+        if not user.partner.is_unicef:  # Full access to all AdminAreas
+            try:
+                partner_permission = user.partner.get_permissions()
+                program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
+            except (Partner.DoesNotExist, AssertionError):
+                return Household.objects.none()
 
-        queryset = Household.objects.order_by("created_at").filter(
-            Q(admin1__in=areas_level_1)
-            | Q(admin2__in=areas_level_2)
-            | Q(admin3__in=areas_level_3)
-            | Q(admin_area__isnull=True)
-        )
+            areas = Area.objects.filter(id__in=program_area_ids)
+            areas_level_1 = areas.filter(level=0).values_list("id")
+            areas_level_2 = areas.filter(level=1).values_list("id")
+            areas_level_3 = areas.filter(level=2).values_list("id")
+
+            queryset = Household.objects.order_by("created_at").filter(
+                Q(admin1__in=areas_level_1)
+                | Q(admin2__in=areas_level_2)
+                | Q(admin3__in=areas_level_3)
+                | Q(admin_area__isnull=True)
+            )
 
         if does_path_exist_in_query("edges.node.admin2", info):
             queryset = queryset.select_related("admin_area")
