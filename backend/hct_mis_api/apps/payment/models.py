@@ -152,7 +152,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     @property
     def get_unicef_id(self) -> str:
-        # TODO: MB 'ca_id' rename to 'unicef_id'?
+        # TODO: maybe 'ca_id' rename to 'unicef_id'?
         return self.ca_id if isinstance(self, CashPlan) else self.unicef_id
 
     def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:

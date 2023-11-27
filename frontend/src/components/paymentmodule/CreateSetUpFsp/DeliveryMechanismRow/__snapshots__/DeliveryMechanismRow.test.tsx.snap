@@ -31,7 +31,6 @@ exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should ren
               <div
                 choices="[object Object],[object Object]"
                 class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
-                inputprops="[object Object]"
               >
                 <div
                   aria-haspopup="listbox"

@@ -52,9 +52,8 @@ class BusinessAreaPartnerPermission:
     def to_dict(self) -> Dict:
         return {"roles": self.roles or [], "programs": self.programs or {}}
 
-    def in_program(self, program_id: str) -> List[str]:
-        assert program_id in self.programs
-        return self.programs[program_id]
+    def in_program(self, program_id: str) -> Optional[List[str]]:
+        return self.programs[program_id] if program_id in self.programs else None
 
 
 class PartnerPermission:
@@ -92,6 +91,11 @@ class PartnerPermission:
         permissions.programs[program_id] = areas_ids
         self._permissions[business_area_id] = permissions
 
+    def remove_program_areas(self, business_area_id: str, program_id: str) -> None:
+        permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
+        if program_id in permissions.programs:
+            permissions.programs.pop(program_id)
+
     def to_dict(self) -> Dict:
         return {business_area_id: permission.to_dict() for business_area_id, permission in self._permissions.items()}
 
@@ -103,7 +107,7 @@ class PartnerPermission:
             return []
         return self._permissions[business_area_id].roles
 
-    def areas_for(self, business_area_id: str, program_id: str) -> List[str]:
+    def areas_for(self, business_area_id: str, program_id: str) -> Optional[List[str]]:
         if business_area_id not in self._available_business_areas:
             return []
         return self._permissions[business_area_id].in_program(program_id)
@@ -205,7 +209,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return list of permissions based on User Role BA and User Partner
         if program_id in arguments need to check if user.partner.permissions json has program id
         """
-        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
+        # TODO: maybe remove in future 'has_program_access = True' or cross programs check will be without program_id ??
         has_program_access = True
         if program_id:
             if self.partner.is_unicef:
@@ -240,7 +244,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def has_permission(
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
     ) -> bool:
-        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
+        # TODO: maybe remove in future 'has_program_access = True' or cross programs check will be without program_id ??
         has_program_access = True
         if program_id:
             if self.partner.is_unicef:

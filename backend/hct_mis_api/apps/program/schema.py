@@ -19,6 +19,7 @@ import graphene
 from graphene import Int, relay
 from graphene_django import DjangoObjectType
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
@@ -28,6 +29,7 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
+from hct_mis_api.apps.account.schema import PartnerNodeForProgram
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
@@ -72,6 +74,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     total_number_of_households_with_tp_in_program = graphene.Int()
     individual_data_needed = graphene.Boolean()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
+    partners = graphene.List(PartnerNodeForProgram)
 
     class Meta:
         model = Program
@@ -86,6 +89,14 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
         return self.households_with_tp_in_program.count()
+
+    def resolve_partners(self, info: Any, **kwargs: Any) -> List:
+        # filter Partners by program_id and program.business_area_id
+        partners_list = []
+        for partner in Partner.objects.all():
+            if partner.get_permissions().areas_for(str(self.business_area_id), str(self.pk)) is not None:
+                partners_list.append(partner)
+        return partners_list
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):

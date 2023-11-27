@@ -30,7 +30,7 @@ export const DeleteHouseholdGrievanceDetails = ({
   canApproveDataChange: boolean;
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const { baseUrl } = useBaseUrl();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
 
   const {
     data: choicesData,
@@ -58,11 +58,23 @@ export const DeleteHouseholdGrievanceDetails = ({
                 <Box mr={2}>
                   <p>This household is a duplicate of a household ID:</p>
                 </Box>
-                <BlackLink
-                  to={`/${baseUrl}/population/household/${ticket.deleteHouseholdTicketDetails.reasonHousehold.id}`}
-                >
-                  {ticket.deleteHouseholdTicketDetails.reasonHousehold.unicefId}
-                </BlackLink>
+                {!isAllPrograms ? (
+                  <BlackLink
+                    to={`/${baseUrl}/population/household/${ticket.deleteHouseholdTicketDetails.reasonHousehold.id}`}
+                  >
+                    {
+                      ticket.deleteHouseholdTicketDetails.reasonHousehold
+                        .unicefId
+                    }
+                  </BlackLink>
+                ) : (
+                  <span>
+                    {
+                      ticket.deleteHouseholdTicketDetails.reasonHousehold
+                        .unicefId
+                    }
+                  </span>
+                )}
                 {canApproveDataChange && (
                   <ApproveDeleteHouseholdGrievanceDetails
                     type='edit'
