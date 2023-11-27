@@ -4397,7 +4397,8 @@ export type PartnerNodeForProgram = {
   userSet: UserNodeConnection,
   individualIdentities: IndividualIdentityNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
-  areas?: Maybe<Array<Maybe<AreaTreeNode>>>,
+  adminAreas?: Maybe<Array<Maybe<AreaTreeNode>>>,
+  areaAccess?: Maybe<Scalars['String']>,
 };
 
 
@@ -31161,7 +31162,8 @@ export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerNodeForProgramUserSetArgs>,
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerNodeForProgramIndividualIdentitiesArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerNodeForProgramGrievanceticketSetArgs>,
-  areas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaTreeNode']>>>, ParentType, ContextType>,
+  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaTreeNode']>>>, ParentType, ContextType>,
+  areaAccess?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {

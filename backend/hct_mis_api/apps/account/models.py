@@ -53,8 +53,7 @@ class BusinessAreaPartnerPermission:
         return {"roles": self.roles or [], "programs": self.programs or {}}
 
     def in_program(self, program_id: str) -> List[str]:
-        assert program_id in self.programs
-        return self.programs[program_id]
+        return self.programs[program_id] if program_id in self.programs else None
 
 
 class PartnerPermission:
