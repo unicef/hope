@@ -4429,7 +4429,7 @@ export type PartnerNodeForProgramGrievanceticketSetArgs = {
 
 export type PartnerProgramInput = {
   areaAccess?: Maybe<Scalars['String']>,
-  id?: Maybe<Scalars['String']>,
+  id: Scalars['String'],
   adminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 

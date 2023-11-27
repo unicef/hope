@@ -2756,7 +2756,7 @@ type PartnerNodeForProgram {
 
 input PartnerProgramInput {
   areaAccess: String
-  id: String
+  id: String!
   adminAreas: [String]
 }
 
