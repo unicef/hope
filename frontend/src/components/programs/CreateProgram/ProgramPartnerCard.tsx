@@ -83,6 +83,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     });
 
     setFieldValue(`partners[${index}].adminAreas`, newSelected);
+    setFieldValue(`partners[${index}].areaAccess`, 'ADMIN_AREA');
   };
 
   const renderTree = (nodes): React.ReactElement => (
@@ -194,9 +195,12 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           ]}
           component={FormikRadioGroup}
           withGreyBox
-          onChange={(event) =>
-            setIsAdminAreaExpanded(event.target.value === 'ADMIN_AREA')
-          }
+          onChange={(event) => {
+            setIsAdminAreaExpanded(event.target.value === 'ADMIN_AREA');
+            if (event.target.value === 'BUSINESS_AREA') {
+              setFieldValue(`partners[${index}].adminAreas`, []);
+            }
+          }}
         />
       </Grid>
       {index + 1 < values.partners.length && <DividerLine />}
