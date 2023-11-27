@@ -146,23 +146,37 @@ class JSONLazyString(graphene.Scalar):
 class PartnerNodeForProgram(DjangoObjectType):
     id = graphene.ID()
     name = graphene.String()
-    areas = graphene.List(AreaTreeNode)
+    admin_areas = graphene.List(AreaTreeNode)
+    area_access = graphene.String()
 
     class Meta:
         model = Partner
 
-    def resolve_areas(self, info: Any, **kwargs: Any) -> List[Area]:
-        program_id = (
-            decode_id_string(info.context.headers.get("Program"))
-            if info.context.headers.get("Program") != "all"
+    @staticmethod
+    def _get_areas_ids(partner: Partner, program_id: str) -> Optional[List[str]]:
+        program = Program.objects.get(id=program_id)
+        return partner.get_permissions().areas_for(str(program.business_area_id), str(program_id))
+
+    @staticmethod
+    def _get_program_id(info_context_headers: Dict):
+        return (
+            decode_id_string(info_context_headers.get("Program"))
+            if info_context_headers.get("Program") != "all"
             else None
         )
-        if program_id:
-            program = Program.objects.get(id=program_id)
-            areas_ids = self.get_permissions().areas_for(str(program.business_area_id), str(program_id))
-        else:
-            areas_ids = []
+
+    def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[Area]:
+        program_id = PartnerNodeForProgram._get_program_id(info.context.headers)
+        areas_ids = PartnerNodeForProgram._get_areas_ids(self, program_id) if program_id else []
         return Area.objects.filter(id__in=areas_ids)
+
+    def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
+        program_id = PartnerNodeForProgram._get_program_id(info.context.headers)
+        areas_ids = PartnerNodeForProgram._get_areas_ids(self, program_id) if program_id else []
+        if areas_ids:
+            return "ADMIN_AREA"
+        else:
+            return "BUSINESS_AREA"
 
 
 class Query(graphene.ObjectType):

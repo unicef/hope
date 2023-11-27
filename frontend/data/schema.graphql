@@ -2751,7 +2751,8 @@ type PartnerNodeForProgram {
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  areas: [AreaTreeNode]
+  adminAreas: [AreaTreeNode]
+  areaAccess: String
 }
 
 input PartnerProgramInput {

@@ -12643,7 +12643,7 @@
             "deprecationReason": null
           },
           {
-            "name": "areas",
+            "name": "adminAreas",
             "description": null,
             "args": [],
             "type": {
@@ -12654,6 +12654,18 @@
                 "name": "AreaTreeNode",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "areaAccess",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
