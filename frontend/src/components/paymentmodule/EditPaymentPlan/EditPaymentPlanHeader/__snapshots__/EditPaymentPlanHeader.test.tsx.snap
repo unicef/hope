@@ -3,14 +3,14 @@
 exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
 <div>
   <div
-    class="sc-EHOje iaZfbD"
+    class="sc-bZQynM dsDRHi"
     data-cy="page-header-container"
   >
     <div
-      class="sc-bZQynM ktisbs"
+      class="sc-gzVnrw YPbNu"
     >
       <div
-        class="sc-dnqmqq bPwZQa"
+        class="sc-iwsKbI jVTAHI"
       >
         <svg
           aria-hidden="true"
@@ -24,14 +24,14 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
         </svg>
       </div>
       <div
-        class="sc-gzVnrw eSbwlf"
+        class="sc-htoDjs dmLXTD"
       >
         <div>
           <div
-            class="sc-htpNat kquAIx"
+            class="sc-bxivhb jcdCai"
           >
             <span
-              class="sc-bwzfXH fNOhzS"
+              class="sc-htpNat iTScjb"
             >
               <a
                 class="sc-bdVaJa eFfWno"
@@ -45,7 +45,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
             class="MuiBox-root MuiBox-root-1"
           >
             <div
-              class="sc-VigVT djZJTH"
+              class="sc-jTzLTM kVKYxK"
             >
               <h5
                 class="MuiTypography-root MuiTypography-h5"
@@ -59,13 +59,13 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
                    
                   PP-0060-22-00000001
                   <div
-                    class="sc-jTzLTM dpfANN"
+                    class="sc-fjdhpX koKRxk"
                   >
                     <div
-                      class="sc-bxivhb cgarbp"
+                      class="sc-ifAKCX iPKgts"
                     >
                       <div
-                        class="sc-ifAKCX knuZap"
+                        class="sc-EHOje ruJtq"
                         data-cy="status-container"
                       >
                         LOCKED
@@ -81,7 +81,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
           </div>
         </div>
         <div
-          class="sc-htoDjs jWUwCq"
+          class="sc-dnqmqq gwXewl"
         >
           <div
             class="MuiBox-root MuiBox-root-4"
@@ -125,7 +125,7 @@ exports[`components/paymentmodule/EditPaymentPlanHeader should render 1`] = `
       </div>
     </div>
     <div
-      class="sc-iwsKbI fVvfjI"
+      class="sc-gZMcBi bLdEQm"
     />
   </div>
 </div>

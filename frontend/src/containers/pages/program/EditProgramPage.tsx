@@ -110,7 +110,11 @@ export const EditProgramPage = (): ReactElement => {
     populationGoal,
     cashPlus,
     frequencyOfPayments,
-    partners,
+    partners: partners.map((partner) => ({
+      id: partner.id,
+      adminAreas: partner.adminAreas,
+      areaAccess: partner.areaAccess
+    })),
   };
 
   const { allAreasTree } = treeData;

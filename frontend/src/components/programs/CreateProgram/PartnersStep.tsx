@@ -3,7 +3,6 @@ import AddIcon from '@material-ui/icons/Add';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { v4 as uuidv4 } from 'uuid';
 import {
   AllAreasTreeQuery,
   UserPartnerChoicesQuery,
@@ -51,7 +50,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                 />
               ))}
               <Button
-                onClick={() => arrayHelpers.push({ id: uuidv4() })}
+                onClick={() => arrayHelpers.push({ id: '' })}
                 variant='outlined'
                 color='primary'
                 endIcon={<AddIcon />}
