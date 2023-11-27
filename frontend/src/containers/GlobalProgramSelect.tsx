@@ -69,7 +69,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
 
   if (programId !== 'all') {
     const program = getCurrentProgram();
-    if (!selectedProgram || (program?.id !== programId)) {
+    if (!selectedProgram || (selectedProgram?.id !== programId)) {
       const { id, name, status, individualDataNeeded } = program;
 
       setSelectedProgram({
