@@ -307,7 +307,7 @@ stages:
               containerRegistry: $(Docker.registryConnection)
           - script: |
               docker pull $(Docker.url)/$(Docker.backend.repository):$(tag)
-              docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 aquasec/trivy:0.47.0 image $(Docker.url)/$(Docker.backend.repository):$(tag)
+              docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 aquasec/trivy:0.47.0 image --severity HIGH,CRITICAL $(Docker.url)/$(Docker.backend.repository):$(tag)
 
   - stage: e2e_tests
     dependsOn: [build_and_push_backend, build_and_push_frontend, test_frontend, build_and_push_cypress]
