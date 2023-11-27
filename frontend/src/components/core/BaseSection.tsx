@@ -14,12 +14,22 @@ const PaperContainer = styled(Paper)`
   width: 100%;
 `;
 
+const BoxContainer = styled(Box)`
+  display: flex;
+  padding: ${({ theme }) => theme.spacing(3)}px
+    ${({ theme }) => theme.spacing(4)}px;
+  margin: ${({ theme }) => theme.spacing(5)}px;
+  flex-direction: column;
+  width: 100%;
+`;
+
 interface BaseSectionProps {
   children?: ReactElement;
   buttons?: ReactElement;
   title: string | ReactElement;
   description?: string;
   p?: number;
+  noPaper?: boolean;
 }
 
 export const BaseSection = ({
@@ -28,10 +38,13 @@ export const BaseSection = ({
   title,
   description,
   p = 3,
+  noPaper = false,
 }: BaseSectionProps): React.ReactElement => {
   const { t } = useTranslation();
+  const Container = noPaper ? BoxContainer : PaperContainer;
+
   return (
-    <PaperContainer>
+    <Container>
       <Box p={p}>
         <Box display='flex' justifyContent='space-between' alignItems='center'>
           {typeof title === 'string' ? (
@@ -48,6 +61,6 @@ export const BaseSection = ({
         )}
         {children}
       </Box>
-    </PaperContainer>
+    </Container>
   );
 };
