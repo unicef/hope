@@ -1,6 +1,12 @@
 import graphene
 
 
+class PartnerProgramInput(graphene.InputObjectType):
+    area_access = graphene.String(description="'ADMIN_AREA' or 'BUSINESS_AREA'")
+    id = graphene.String(description="Partner ID")
+    admin_areas = graphene.List(graphene.String)
+
+
 class CreateProgramInput(graphene.InputObjectType):
     name = graphene.String()
     start_date = graphene.Date()
@@ -16,8 +22,7 @@ class CreateProgramInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
-    # areas = graphene.List(graphene.String)
-    # partner = graphene.String()
+    partners = graphene.List(PartnerProgramInput)
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -36,8 +41,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     administrative_areas_of_implementation = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
-    # areas = graphene.List(graphene.String)
-    # partner = graphene.String()
+    partners = graphene.List(PartnerProgramInput)
 
 
 class CopyProgramInput(graphene.InputObjectType):
@@ -56,6 +60,4 @@ class CopyProgramInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
-    # partner = graphene.String()
-    # TODO: do we need new areas or not???
-    # areas = graphene.List(graphene.String)
+    partners = graphene.List(PartnerProgramInput)

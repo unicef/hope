@@ -598,6 +598,7 @@ input CopyProgramInput {
   businessAreaSlug: String
   individualDataNeeded: Boolean
   dataCollectingTypeCode: String
+  partners: [PartnerProgramInput]
 }
 
 input CopyTargetPopulationInput {
@@ -760,6 +761,7 @@ input CreateProgramInput {
   businessAreaSlug: String
   individualDataNeeded: Boolean
   dataCollectingTypeCode: String
+  partners: [PartnerProgramInput]
 }
 
 type CreateReport {
@@ -2750,6 +2752,12 @@ type PartnerNodeForProgram {
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   areas: [AreaTreeNode]
+}
+
+input PartnerProgramInput {
+  areaAccess: String
+  id: String
+  adminAreas: [String]
 }
 
 type PartnerType {
@@ -4923,6 +4931,7 @@ input UpdateProgramInput {
   administrativeAreasOfImplementation: String
   individualDataNeeded: Boolean
   dataCollectingTypeCode: String
+  partners: [PartnerProgramInput]
 }
 
 input UpdateTargetPopulationInput {
