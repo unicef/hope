@@ -1047,6 +1047,7 @@ export type CopyProgramInput = {
   businessAreaSlug?: Maybe<Scalars['String']>,
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
   dataCollectingTypeCode?: Maybe<Scalars['String']>,
+  partners?: Maybe<Array<Maybe<PartnerProgramInput>>>,
 };
 
 export type CopyTargetPopulationInput = {
@@ -1220,6 +1221,7 @@ export type CreateProgramInput = {
   businessAreaSlug?: Maybe<Scalars['String']>,
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
   dataCollectingTypeCode?: Maybe<Scalars['String']>,
+  partners?: Maybe<Array<Maybe<PartnerProgramInput>>>,
 };
 
 export type CreateReport = {
@@ -4423,6 +4425,12 @@ export type PartnerNodeForProgramGrievanceticketSetArgs = {
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>
+};
+
+export type PartnerProgramInput = {
+  areaAccess?: Maybe<Scalars['String']>,
+  id?: Maybe<Scalars['String']>,
+  adminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 
 export type PartnerType = {
@@ -8323,6 +8331,7 @@ export type UpdateProgramInput = {
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
   dataCollectingTypeCode?: Maybe<Scalars['String']>,
+  partners?: Maybe<Array<Maybe<PartnerProgramInput>>>,
 };
 
 export type UpdateTargetPopulationInput = {
@@ -28729,6 +28738,7 @@ export type ResolversTypes = {
   SetSteficonRuleOnTargetPopulationMutationPayload: ResolverTypeWrapper<SetSteficonRuleOnTargetPopulationMutationPayload>,
   RebuildTargetPopulationMutation: ResolverTypeWrapper<RebuildTargetPopulationMutation>,
   CreateProgramInput: CreateProgramInput,
+  PartnerProgramInput: PartnerProgramInput,
   CreateProgram: ResolverTypeWrapper<CreateProgram>,
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: ResolverTypeWrapper<UpdateProgram>,
@@ -29241,6 +29251,7 @@ export type ResolversParentTypes = {
   SetSteficonRuleOnTargetPopulationMutationPayload: SetSteficonRuleOnTargetPopulationMutationPayload,
   RebuildTargetPopulationMutation: RebuildTargetPopulationMutation,
   CreateProgramInput: CreateProgramInput,
+  PartnerProgramInput: PartnerProgramInput,
   CreateProgram: CreateProgram,
   UpdateProgramInput: UpdateProgramInput,
   UpdateProgram: UpdateProgram,
