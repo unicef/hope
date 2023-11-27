@@ -1,19 +1,17 @@
-import React from 'react';
 import {
   FormControl,
   FormHelperText,
-  MenuItem,
-  InputLabel,
-  Select,
   IconButton,
   InputAdornment,
-  Box,
-  Typography,
+  InputLabel,
   ListItemText,
+  MenuItem,
+  Select,
 } from '@material-ui/core';
-import styled from 'styled-components';
-import get from 'lodash/get';
 import { Close } from '@material-ui/icons';
+import get from 'lodash/get';
+import React from 'react';
+import styled from 'styled-components';
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;

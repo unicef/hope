@@ -29,6 +29,15 @@ export const PROGRAM_QUERY = gql`
         active
         individualFiltersAvailable
         householdFiltersAvailable
+        description
+      }
+      partners {
+        id
+        name
+        # //TODO: add areaAccess
+        areas {
+          id
+        }
       }
     }
   }

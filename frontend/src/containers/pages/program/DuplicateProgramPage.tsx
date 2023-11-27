@@ -3,12 +3,12 @@ import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
   useCopyProgramMutation,
   useProgramQuery,
+  useUserPartnerChoicesQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
@@ -33,6 +33,10 @@ export const DuplicateProgramPage = (): ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
+  const {
+    data: userPartnerChoicesData,
+    loading: userPartnerChoicesLoading,
+  } = useUserPartnerChoicesQuery();
 
   const handleSubmit = async (values): Promise<void> => {
     try {
@@ -59,8 +63,9 @@ export const DuplicateProgramPage = (): ReactElement => {
     }
   };
 
-  if (!data) return null;
-  if (loadingProgram) return <LoadingComponent />;
+  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+    return <LoadingComponent />;
+  if (!data || !treeData || !userPartnerChoicesData) return null;
 
   const {
     name,
@@ -74,10 +79,8 @@ export const DuplicateProgramPage = (): ReactElement => {
     populationGoal = 0,
     cashPlus = false,
     frequencyOfPayments = 'REGULAR',
+    partners,
   } = data.program;
-
-  //TODO: remove this
-  const partners = [{ id: uuidv4() }, { id: uuidv4() }, { id: uuidv4() }];
 
   const initialValues = {
     name: `Copy of Programme: (${name})`,
@@ -94,10 +97,8 @@ export const DuplicateProgramPage = (): ReactElement => {
     partners,
   };
 
-  if (treeLoading) return <LoadingComponent />;
-  if (!treeData) return null;
-
   const { allAreasTree } = treeData;
+  const { userPartnerChoices } = userPartnerChoicesData;
 
   return (
     <Formik
@@ -140,7 +141,11 @@ export const DuplicateProgramPage = (): ReactElement => {
               <DetailsStep values={values} step={step} setStep={setStep} />
             )}
             {step === 1 && (
-              <PartnersStep values={values} allAreasTree={allAreasTree} />
+              <PartnersStep
+                values={values}
+                allAreasTree={allAreasTree}
+                partnerChoices={userPartnerChoices}
+              />
             )}
           </>
         );

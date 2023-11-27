@@ -7,6 +7,7 @@ import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
   useCreateProgramMutation,
+  useUserPartnerChoicesQuery,
 } from '../../../__generated__/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
@@ -26,7 +27,11 @@ export const CreateProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  //TODO: add userPartnerChoicesQuery
+  const {
+    data: userPartnerChoicesData,
+    loading: userPartnerChoicesLoading,
+  } = useUserPartnerChoicesQuery();
+
   //TODO: fix checkboxes click unclick
 
   const [mutate] = useCreateProgramMutation({
@@ -61,27 +66,6 @@ export const CreateProgramPage = (): ReactElement => {
     }
   };
 
-  //TODO: remove this
-  const partners = [
-    {
-      id: '9bef9d07-d45b-4291-ade6-3227311f3cea',
-      partner: 'examplePartner1',
-      areaAccess: 'ADMIN_AREA',
-      adminAreas: [
-        '6d49768f-e5fc-4f33-92f0-5004c31dcaf5',
-        '705f5c09-484a-41d7-9aa4-6c7418d4ec80',
-        '1841435e-d530-4f87-8aa6-7b1828f4c4a3',
-        'e3c08a14-c47d-4b7a-b9e4-893dccac9622',
-      ],
-    },
-    {
-      id: '423a9e1c-4e21-485e-801d-808091e9808f',
-      areaAccess: 'BUSINESS_AREA',
-    },
-    {
-      id: 'ef356928-fbdf-442d-90e9-d444a2488e77',
-    },
-  ];
   const initialValues = {
     name: '',
     startDate: '',
@@ -94,13 +78,14 @@ export const CreateProgramPage = (): ReactElement => {
     populationGoal: 0,
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
-    partners,
+    partners: [],
   };
 
-  if (treeLoading) return <LoadingComponent />;
-  if (!treeData) return null;
+  if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
+  if (!treeData || !userPartnerChoicesData) return null;
 
   const { allAreasTree } = treeData;
+  const { userPartnerChoices } = userPartnerChoicesData;
 
   return (
     <Formik
@@ -111,11 +96,6 @@ export const CreateProgramPage = (): ReactElement => {
       validationSchema={programValidationSchema(t)}
     >
       {({ submitForm, values }) => {
-        console.log(
-          '😎 ~ file: CreateProgramPage.tsx:112 ~ CreateProgramPage ~ values:',
-          values,
-        );
-
         return (
           <>
             <PageHeader title={t('Create Programme')}>
@@ -148,7 +128,11 @@ export const CreateProgramPage = (): ReactElement => {
               <DetailsStep values={values} step={step} setStep={setStep} />
             )}
             {step === 1 && (
-              <PartnersStep values={values} allAreasTree={allAreasTree} />
+              <PartnersStep
+                values={values}
+                allAreasTree={allAreasTree}
+                partnerChoices={userPartnerChoices}
+              />
             )}
           </>
         );

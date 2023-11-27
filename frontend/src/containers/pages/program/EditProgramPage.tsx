@@ -7,6 +7,7 @@ import {
   useAllAreasTreeQuery,
   useProgramQuery,
   useUpdateProgramMutation,
+  useUserPartnerChoicesQuery,
 } from '../../../__generated__/graphql';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
@@ -33,6 +34,11 @@ export const EditProgramPage = (): ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
+  const {
+    data: userPartnerChoicesData,
+    loading: userPartnerChoicesLoading,
+  } = useUserPartnerChoicesQuery();
+
   const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
       {
@@ -53,8 +59,9 @@ export const EditProgramPage = (): ReactElement => {
     },
   });
 
-  if (!data) return null;
-  if (loadingProgram) return <LoadingComponent />;
+  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+    return <LoadingComponent />;
+  if (!data || !treeData || !userPartnerChoicesData) return null;
   const {
     name,
     startDate,
@@ -68,6 +75,7 @@ export const EditProgramPage = (): ReactElement => {
     cashPlus = false,
     frequencyOfPayments = 'REGULAR',
     version,
+    partners,
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
@@ -90,28 +98,6 @@ export const EditProgramPage = (): ReactElement => {
     }
   };
 
-  //TODO: remove this
-  const partners = [
-    {
-      id: '9bef9d07-d45b-4291-ade6-3227311f3cea',
-      partner: 'examplePartner1',
-      areaAccess: 'ADMIN_AREA',
-      adminAreas: [
-        '6d49768f-e5fc-4f33-92f0-5004c31dcaf5',
-        '705f5c09-484a-41d7-9aa4-6c7418d4ec80',
-        '1841435e-d530-4f87-8aa6-7b1828f4c4a3',
-        'e3c08a14-c47d-4b7a-b9e4-893dccac9622',
-      ],
-    },
-    {
-      id: '423a9e1c-4e21-485e-801d-808091e9808f',
-      areaAccess: 'BUSINESS_AREA',
-    },
-    {
-      id: 'ef356928-fbdf-442d-90e9-d444a2488e77',
-    },
-  ];
-
   const initialValues = {
     name,
     startDate,
@@ -127,10 +113,8 @@ export const EditProgramPage = (): ReactElement => {
     partners,
   };
 
-  if (treeLoading) return <LoadingComponent />;
-  if (!treeData) return null;
-
   const { allAreasTree } = treeData;
+  const { userPartnerChoices } = userPartnerChoicesData;
 
   return (
     <Formik
@@ -173,7 +157,11 @@ export const EditProgramPage = (): ReactElement => {
               <DetailsStep values={values} step={step} setStep={setStep} />
             )}
             {step === 1 && (
-              <PartnersStep values={values} allAreasTree={allAreasTree} />
+              <PartnersStep
+                values={values}
+                allAreasTree={allAreasTree}
+                partnerChoices={userPartnerChoices}
+              />
             )}
           </>
         );

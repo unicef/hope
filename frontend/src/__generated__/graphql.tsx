@@ -11634,7 +11634,7 @@ export type DataCollectionTypeChoiceDataQuery = (
   { __typename?: 'Query' }
   & { dataCollectionTypeChoices: Maybe<Array<Maybe<(
     { __typename?: 'DataCollectingTypeChoiceObject' }
-    & Pick<DataCollectingTypeChoiceObject, 'name' | 'value'>
+    & Pick<DataCollectingTypeChoiceObject, 'name' | 'value' | 'description'>
   )>>> }
 );
 
@@ -13547,8 +13547,15 @@ export type ProgramQuery = (
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'totalNumberOfHouseholdsWithTpInProgram' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     & { dataCollectingType: Maybe<(
       { __typename?: 'DataCollectingTypeNode' }
-      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
-    )> }
+      & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable' | 'description'>
+    )>, partners: Maybe<Array<Maybe<(
+      { __typename?: 'PartnerNodeForProgram' }
+      & Pick<PartnerNodeForProgram, 'id' | 'name'>
+      & { areas: Maybe<Array<Maybe<(
+        { __typename?: 'AreaTreeNode' }
+        & Pick<AreaTreeNode, 'id'>
+      )>>> }
+    )>>> }
   )> }
 );
 
@@ -13567,6 +13574,17 @@ export type ProgrammeChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, programStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type UserPartnerChoicesQueryVariables = {};
+
+
+export type UserPartnerChoicesQuery = (
+  { __typename?: 'Query' }
+  & { userPartnerChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -21072,6 +21090,7 @@ export const DataCollectionTypeChoiceDataDocument = gql`
   dataCollectionTypeChoices {
     name
     value
+    description
   }
 }
     `;
@@ -25814,6 +25833,14 @@ export const ProgramDocument = gql`
       active
       individualFiltersAvailable
       householdFiltersAvailable
+      description
+    }
+    partners {
+      id
+      name
+      areas {
+        id
+      }
     }
   }
 }
@@ -25923,6 +25950,56 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const UserPartnerChoicesDocument = gql`
+    query UserPartnerChoices {
+  userPartnerChoices {
+    name
+    value
+  }
+}
+    `;
+export type UserPartnerChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>, 'query'>;
+
+    export const UserPartnerChoicesComponent = (props: UserPartnerChoicesComponentProps) => (
+      <ApolloReactComponents.Query<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables> query={UserPartnerChoicesDocument} {...props} />
+    );
+    
+export type UserPartnerChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables> & TChildProps;
+export function withUserPartnerChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UserPartnerChoicesQuery,
+  UserPartnerChoicesQueryVariables,
+  UserPartnerChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables, UserPartnerChoicesProps<TChildProps>>(UserPartnerChoicesDocument, {
+      alias: 'userPartnerChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUserPartnerChoicesQuery__
+ *
+ * To run a query within a React component, call `useUserPartnerChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserPartnerChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserPartnerChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUserPartnerChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>(UserPartnerChoicesDocument, baseOptions);
+      }
+export function useUserPartnerChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>(UserPartnerChoicesDocument, baseOptions);
+        }
+export type UserPartnerChoicesQueryHookResult = ReturnType<typeof useUserPartnerChoicesQuery>;
+export type UserPartnerChoicesLazyQueryHookResult = ReturnType<typeof useUserPartnerChoicesLazyQuery>;
+export type UserPartnerChoicesQueryResult = ApolloReactCommon.QueryResult<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
     query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
   allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {
