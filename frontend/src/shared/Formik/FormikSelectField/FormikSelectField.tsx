@@ -7,6 +7,9 @@ import {
   Select,
   IconButton,
   InputAdornment,
+  Box,
+  Typography,
+  ListItemText,
 } from '@material-ui/core';
 import styled from 'styled-components';
 import get from 'lodash/get';
@@ -61,6 +64,14 @@ export const FormikSelectField = ({
           value={value}
           id={`textField-${field.name}`}
           error={isInvalid}
+          renderValue={(selected) => {
+            const selectedItem = otherProps.choices.find(
+              (choice) => choice.value === selected || choice.name === selected,
+            );
+            return selectedItem
+              ? selectedItem.labelEn || selectedItem.name || selectedItem.label
+              : selected;
+          }}
           SelectDisplayProps={{ 'data-cy': `select-${field.name}` }}
           MenuProps={{
             'data-cy': `select-options-${field.name}`,
@@ -94,7 +105,18 @@ export const FormikSelectField = ({
               data-cy={`select-option-${each.name}`}
               disabled={each.disabled || false}
             >
-              {each.labelEn || each.name || each.label}
+              {each.description ? (
+                <ListItemText
+                  primary={each.labelEn || each.name || each.label}
+                  secondary={each.description}
+                  primaryTypographyProps={{ noWrap: true }}
+                  secondaryTypographyProps={{
+                    style: { whiteSpace: 'normal', maxWidth: '300px' },
+                  }}
+                />
+              ) : (
+                each.labelEn || each.name || each.label
+              )}
             </MenuItem>
           ))}
         </Select>

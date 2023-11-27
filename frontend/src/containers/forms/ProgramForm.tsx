@@ -1,4 +1,5 @@
 import { Grid } from '@material-ui/core';
+import { camelCase } from 'lodash';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form } from 'formik';
 import React, { ReactElement } from 'react';
@@ -27,9 +28,27 @@ export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
 
   if (!data || !dataCollectionTypeChoicesData) return null;
 
-  const filteredDataCollectionTypeChoicesData = dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
-    (el) => el.name !== '',
-  );
+  //TODO: Add descriptions to dataCollectionTypeChoicesData (backend)
+  const descriptions = {
+    full:
+      'Full individual collected This type indicates that data has been collected for all of the household members. [Individuals with details collected = size of household].',
+    partial:
+      'Partial individuals collected This type indicates that data has been collected for the Head of Household, collector, and at least one other individual. However, data collection has not covered every member of the household. [Individuals with details collected < size of household].',
+    sizeOnly:
+      'Size only collected This type is assigned when only the size of the household (count of individuals) has been collected without collecting specific details about the household members.',
+    sizeAgeGenderDisaggregated:
+      'No individual data This type is assigned when no data has been collected for any individual other than the head of the household.',
+  };
+
+  const filteredDataCollectionTypeChoicesData = dataCollectionTypeChoicesData?.dataCollectionTypeChoices
+    .filter((el) => el.name !== '')
+    .map((el) => {
+      const camelCaseValue = camelCase(el.value);
+      return {
+        ...el,
+        description: descriptions[camelCaseValue],
+      };
+    });
 
   return (
     <Form>
