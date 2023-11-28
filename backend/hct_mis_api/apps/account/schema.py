@@ -31,8 +31,6 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
-from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.geo.schema import AreaTreeNode
 from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
@@ -159,8 +157,12 @@ class PartnerNodeForProgram(DjangoObjectType):
             if info_context_headers.get("Program") != "all"
             else None
         )
-        program = Program.objects.get(id=program_id) if program_id else None
-        return partner.get_permissions().areas_for(str(program.business_area_id), str(program_id)) if program_id else []
+        if program_id:
+            program = Program.objects.get(id=program_id)
+            areas_ids = partner.get_permissions().areas_for(str(program.business_area_id), str(program_id))
+            return areas_ids if areas_ids else []
+        else:
+            return []
 
     def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[str]:
         areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
