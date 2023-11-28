@@ -6,7 +6,6 @@ from django.db import transaction
 
 import graphene
 
-from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
@@ -29,7 +28,11 @@ from hct_mis_api.apps.program.inputs import (
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
-from hct_mis_api.apps.program.utils import copy_program_object
+from hct_mis_api.apps.program.utils import (
+    copy_program_object,
+    remove_program_permissions_for_exists_partners,
+    update_partner_permissions_for_program,
+)
 from hct_mis_api.apps.program.validators import (
     ProgramDeletionValidator,
     ProgramValidator,
@@ -74,10 +77,8 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             end_date=program.end_date,
             status=ProgramCycle.ACTIVE,
         )
-        for partner_data in partners_data:
-            admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
-            partner = Partner.objects.get(id=partner_data["id"])
-            partner.get_permissions().set_program_areas(str(business_area.pk), str(program.pk), admin_areas)
+        for partner in partners_data:
+            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
@@ -142,10 +143,11 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
         program.full_clean()
         program.save()
 
-        for partner_data in partners_data:
-            admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
-            partner = Partner.objects.get(id=partner_data["id"])
-            partner.get_permissions().set_program_areas(str(business_area.pk), str(program.pk), admin_areas)
+        partner_ids = []
+        for partner in partners_data:
+            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
+            partner_ids.append(partner["id"])
+        remove_program_permissions_for_exists_partners(partner_ids, str(business_area.pk), str(program.pk))
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
@@ -167,9 +169,7 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         cls.has_permission(info, Permissions.PROGRAMME_REMOVE, program.business_area)
 
         cls.validate(program=program)
-        for partner in Partner.objects.all():
-            partner.remove_program_areas(str(program.business_area_id), str(program.id))
-            partner.save()
+        remove_program_permissions_for_exists_partners([], str(program.business_area.pk), str(program.pk))
 
         program.delete()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
@@ -196,10 +196,8 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
         )
         program = copy_program_object(program_id, program_data)
 
-        for partner_data in partners_data:
-            admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
-            partner = Partner.objects.get(id=partner_data["id"])
-            partner.get_permissions().set_program_areas(str(business_area.pk), str(program.pk), admin_areas)
+        for partner in partners_data:
+            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
 
         copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
