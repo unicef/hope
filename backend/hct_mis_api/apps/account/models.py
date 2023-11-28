@@ -144,6 +144,9 @@ class Partner(models.Model):
     def is_unicef(self) -> bool:
         return self.name == "UNICEF"
 
+    def has_complete_access_in_program(self, program_id: str, business_area_id: str) -> bool:
+        return self.is_unicef or self.get_permissions().areas_for(business_area_id, program_id) == []
+
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
@@ -274,9 +277,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
 
         return partner_areas_ids_per_program
-
-    def has_area_restrictions(self, program_id: UUID, business_area_id: UUID) -> bool:
-        return len(self.get_partner_areas_ids_per_program(program_id, business_area_id)) == 0
 
     def can_download_storage_files(self) -> bool:
         return any(

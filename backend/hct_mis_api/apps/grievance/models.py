@@ -803,6 +803,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     extra_data = JSONField(default=dict)
     score_min = models.FloatField(default=0.0)
     score_max = models.FloatField(default=0.0)
+    is_cross_area = models.BooleanField(default=False)
 
     @property
     def has_duplicated_document(self) -> bool:
@@ -832,6 +833,17 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     @property
     def individual(self) -> "Individual":
         return self.golden_records_individual
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        individuals = [
+            self.golden_records_individual,
+            *self.possible_duplicates.all(),
+            *self.selected_individuals.all(),
+        ]
+        unique_areas = individuals.values_list("admin2", flat=True).distinct()
+        if len(unique_areas) > 1:
+            self.is_cross_area = True
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = "Ticket Needs Adjudication Details"

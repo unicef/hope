@@ -5897,6 +5897,7 @@ export type QueryAllGrievanceTicketArgs = {
   totalDays?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['String']>,
   isActiveProgram?: Maybe<Scalars['Boolean']>,
+  isCrossArea?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -7996,6 +7997,7 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>,
   scoreMin: Scalars['Float'],
   scoreMax: Scalars['Float'],
+  isCrossArea: Scalars['Boolean'],
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
 };
 
@@ -32616,6 +32618,7 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>,
   scoreMin?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   scoreMax?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  isCrossArea?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
