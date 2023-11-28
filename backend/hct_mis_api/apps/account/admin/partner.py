@@ -46,7 +46,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     @button(permission=can_add_business_area_to_partner)
     def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
-        parent: account_models.Partner = context["original"]
+        partner: account_models.Partner = context["original"]
 
         BusinessAreaRoleFormSet = formset_factory(BusinessAreaRoleForm, extra=0, can_delete=True)
         ProgramAreaFormSet = formset_factory(ProgramAreaForm, extra=0, can_delete=True)
@@ -54,7 +54,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         business_areas = set()
 
         if request.method == "GET":
-            permissions_list = parent.get_permissions().to_list()
+            permissions_list = partner.get_permissions().to_list()
             business_area_role_data = []
             program_area_data = []
             for permission in permissions_list:
@@ -98,8 +98,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                     business_areas.add(program_area_form.cleaned_data["business_area"].id)
 
             if refresh_areas == "false" and business_area_role_form_set.is_valid() and program_area_form_set.is_valid():
-                parent.set_permissions(partner_permissions)
-                parent.save()
+                partner.set_permissions(partner_permissions)
+                partner.save()
 
                 return HttpResponseRedirect(reverse("admin:account_partner_change", args=[pk]))
 
