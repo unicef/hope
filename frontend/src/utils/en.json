@@ -840,5 +840,7 @@
   "Targeting name should have at most 255 characters.": "Targeting name should have at most 255 characters.",
   "Area Access": "Area Access",
   "DUPLICATE PROGRAMME": "DUPLICATE PROGRAMME",
-  "At least one partner is required": "At least one partner is required"
+  "At least one partner is required": "At least one partner is required",
+  "Cross-Area Tickets": "Cross-Area Tickets",
+  "Area Scope": "Area Scope"
 }
