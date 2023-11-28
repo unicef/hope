@@ -97,6 +97,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             checked={(values.partners[index]?.adminAreas || [])
               .flat()
               .includes(nodes.id)}
+            onClick={(event) => event.stopPropagation()}
             onChange={(event) => handleNodeSelect(event, nodes.id)}
           />
           {nodes.name}
