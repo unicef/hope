@@ -23,6 +23,7 @@ from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.admin.mixins import (
     CustomTargetPopulationMixin,
     HouseholdWithDrawnMixin,
@@ -33,17 +34,33 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Household,
+    HouseholdCollection,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.utils import enrol_household_to_program
 from hct_mis_api.apps.utils.admin import (
+    BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
+    IsOriginalAdminMixin,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
+
+
+class HouseholdRepresentationInline(admin.TabularInline):
+    model = Household
+    extra = 0
+    fields = ("unicef_id", "program", "is_original")
+    readonly_fields = ("unicef_id", "program", "is_original")
+    show_change_link = True
+    can_delete = False
+    verbose_name_plural = "Household representations"
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return Household.all_objects.all()
 
 
 @admin.register(Household)
@@ -57,6 +74,7 @@ class HouseholdAdmin(
     HouseholdWithDrawnMixin,
     CustomTargetPopulationMixin,
     HOPEModelAdminBase,
+    IsOriginalAdminMixin,
 ):
     list_display = (
         "unicef_id",
@@ -130,6 +148,7 @@ class HouseholdAdmin(
         "mass_enrol_to_another_program",
     ]
     cursor_ordering_field = "unicef_id"
+    inlines = [HouseholdRepresentationInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
@@ -305,3 +324,21 @@ class HouseholdAdmin(
         return TemplateResponse(request, "admin/household/household/enrol_households_to_program.html", context)
 
     mass_enrol_to_another_program.short_description = "Mass enrol households to another program"
+
+
+@admin.register(HouseholdCollection)
+class HouseholdCollectionAdmin(admin.ModelAdmin):
+    list_display = (
+        "unicef_id",
+        "business_area",
+        "number_of_representations",
+    )
+    search_fields = ("unicef_id",)
+    list_filter = [BusinessAreaForHouseholdCollectionListFilter]
+    inlines = [HouseholdRepresentationInline]
+
+    def number_of_representations(self, obj: HouseholdCollection) -> int:
+        return obj.households(manager="all_objects").count()
+
+    def business_area(self, obj: HouseholdCollection) -> Optional[BusinessArea]:
+        return obj.business_area

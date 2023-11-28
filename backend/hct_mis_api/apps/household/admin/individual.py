@@ -23,6 +23,7 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.celery_tasks import (
     revalidate_phone_number_task,
     update_individuals_iban_from_xlsx_task,
@@ -30,12 +31,15 @@ from hct_mis_api.apps.household.celery_tasks import (
 from hct_mis_api.apps.household.forms import UpdateIndividualsIBANFromXlsxForm
 from hct_mis_api.apps.household.models import (
     Individual,
+    IndividualCollection,
     IndividualIdentity,
     IndividualRoleInHousehold,
     XlsxUpdateFile,
 )
 from hct_mis_api.apps.utils.admin import (
+    BusinessAreaForIndividualCollectionListFilter,
     HOPEModelAdminBase,
+    IsOriginalAdminMixin,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
@@ -52,6 +56,7 @@ class IndividualAdmin(
     SmartFieldsetMixin,
     CursorPaginatorAdmin,
     HOPEModelAdminBase,
+    IsOriginalAdminMixin,
 ):
     # Custom template to merge AdminAdvancedFiltersMixin and ExtraButtonsMixin
     advanced_change_list_template = "admin/household/advanced_filters_extra_buttons_change_list.html"
@@ -272,3 +277,34 @@ class IndividualIdentityAdmin(HOPEModelAdminBase):
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("individual", "partner")
+
+
+class IndividualRepresentationInline(admin.TabularInline):
+    model = Individual
+    extra = 0
+    fields = ("unicef_id", "program", "is_original")
+    readonly_fields = ("unicef_id", "program", "is_original")
+    show_change_link = True
+    can_delete = False
+    verbose_name_plural = "Individual representations"
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return Individual.all_objects.all()
+
+
+@admin.register(IndividualCollection)
+class IndividualCollectionAdmin(admin.ModelAdmin):
+    list_display = (
+        "unicef_id",
+        "business_area",
+        "number_of_representations",
+    )
+    search_fields = ("unicef_id",)
+    list_filter = [BusinessAreaForIndividualCollectionListFilter]
+    inlines = [IndividualRepresentationInline]
+
+    def number_of_representations(self, obj: IndividualCollection) -> int:
+        return obj.individuals(manager="all_objects").count()
+
+    def business_area(self, obj: IndividualCollection) -> Optional[BusinessArea]:
+        return obj.business_area
