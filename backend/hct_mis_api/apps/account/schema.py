@@ -68,8 +68,7 @@ class UserBusinessAreaNode(DjangoObjectType):
     is_accountability_applicable = graphene.Boolean()
 
     def resolve_permissions(self, info: Any) -> Set:
-        user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
-        return permissions_resolver(user_roles)
+        return info.context.user.permissions_in_business_area(self.slug)
 
     def resolve_is_accountability_applicable(self, info: Any) -> bool:
         return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), self.is_accountability_applicable])
@@ -81,15 +80,15 @@ class UserBusinessAreaNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class UserObjectType(DjangoObjectType):
-    business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
-
-    def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
-        return BusinessArea.objects.filter(user_roles__user=self).distinct()
-
-    class Meta:
-        model = get_user_model()
-        exclude = ("password",)
+# class UserObjectType(DjangoObjectType):
+#     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
+#
+#     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
+#         return info.context.user.business_areas
+#
+#     class Meta:
+#         model = get_user_model()
+#         exclude = ("password",)
 
 
 class PartnerType(DjangoObjectType):
@@ -101,7 +100,7 @@ class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
 
     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
-        return BusinessArea.objects.filter(user_roles__user=self).distinct()
+        return info.context.user.business_areas
 
     class Meta:
         model = get_user_model()
