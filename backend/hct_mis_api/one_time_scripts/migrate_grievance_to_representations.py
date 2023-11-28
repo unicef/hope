@@ -4,7 +4,7 @@ from itertools import chain
 from typing import Any, Optional, Union
 
 from django.core.paginator import Paginator
-from django.db.models import Count, Q, QuerySet, F, Subquery, OuterRef
+from django.db.models import Count, OuterRef, Q, QuerySet, Subquery
 from django.utils import timezone
 
 from hct_mis_api.apps.accountability.models import Feedback, FeedbackMessage, Message
@@ -13,6 +13,7 @@ from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
 from hct_mis_api.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
+    GrievanceTicketThrough,
     TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteHouseholdDetails,
@@ -26,7 +27,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketPositiveFeedbackDetails,
     TicketReferralDetails,
     TicketSensitiveDetails,
-    TicketSystemFlaggingDetails, GrievanceTicketThrough,
+    TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.models import (
     BankAccountInfo,
@@ -198,7 +199,9 @@ def handle_complaint_tickets_without_payments(business_area: Optional[BusinessAr
     complaint_tickets_without_payments_representations = TicketComplaintDetails.objects.filter(
         payment_object_id__isnull=True, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs
     )
-    handle_bulk_update_representations_household_unicef_id(complaint_tickets_without_payments_representations, TicketComplaintDetails)
+    handle_bulk_update_representations_household_unicef_id(
+        complaint_tickets_without_payments_representations, TicketComplaintDetails
+    )
 
 
 def handle_sensitive_tickets_without_payments(business_area: Optional[BusinessArea] = None) -> None:
@@ -219,8 +222,9 @@ def handle_sensitive_tickets_without_payments(business_area: Optional[BusinessAr
     sensitive_tickets_without_payments_representations = TicketSensitiveDetails.objects.filter(
         payment_object_id__isnull=True, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs
     )
-    handle_bulk_update_representations_household_unicef_id(sensitive_tickets_without_payments_representations,
-                                                           TicketSensitiveDetails)
+    handle_bulk_update_representations_household_unicef_id(
+        sensitive_tickets_without_payments_representations, TicketSensitiveDetails
+    )
 
 
 def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticket_class: Any) -> None:
@@ -246,7 +250,9 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
             household_representation = None
             individual_representation = None
             if closed_ticket.household:
-                household_representation = closed_ticket.household.copied_to(manager="original_and_repr_objects").first()
+                household_representation = closed_ticket.household.copied_to(
+                    manager="original_and_repr_objects"
+                ).first()
                 program = household_representation.program
                 if closed_ticket.individual:
                     individual_representation = get_individual_representation_per_program_by_old_individual_id(
@@ -254,13 +260,20 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
                         old_individual_id=closed_ticket.individual,
                     )
             elif closed_ticket.individual:
-                individual_representation = closed_ticket.individual.copied_to(manager="original_and_repr_objects").first()
+                individual_representation = closed_ticket.individual.copied_to(
+                    manager="original_and_repr_objects"
+                ).first()
                 program = individual_representation.program
             else:
                 program = None
 
             if program:
-                ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_closed_ticket_with_household_and_individual(
+                (
+                    ticket_copy,
+                    grievance_ticket_data,
+                    notes_to_create,
+                    documents_to_create,
+                ) = copy_closed_ticket_with_household_and_individual(
                     closed_ticket, program, household_representation, individual_representation
                 )
                 grievance_ticket = closed_ticket.ticket
@@ -284,7 +297,9 @@ def copy_closed_ticket_with_household_and_individual(
     ticket_copy.household = household_representation
     ticket_copy.individual = individual_representation
 
-    grievance_ticket_data, notes_to_create, documents_to_create = copy_grievance_ticket(ticket_copy, program, closed_ticket)
+    grievance_ticket_data, notes_to_create, documents_to_create = copy_grievance_ticket(
+        ticket_copy, program, closed_ticket
+    )
     return ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create
 
 
@@ -309,7 +324,9 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet, ticke
         old_grievance_tickets_to_update = []
         for active_ticket in active_tickets_paginated:
             if active_ticket.individual:
-                individual_representations = active_ticket.individual.copied_to(manager="original_and_repr_objects").all()
+                individual_representations = active_ticket.individual.copied_to(
+                    manager="original_and_repr_objects"
+                ).all()
             else:
                 individual_representations = Individual.objects.none()
             if active_ticket.household:
@@ -324,7 +341,12 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet, ticke
                 all_programs = household_programs.union(individual_programs)
 
                 for program in all_programs:
-                    ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_active_ticket_with_household_and_individual(active_ticket, program)
+                    (
+                        ticket_copy,
+                        grievance_ticket_data,
+                        notes_to_create,
+                        documents_to_create,
+                    ) = copy_active_ticket_with_household_and_individual(active_ticket, program)
                     objects_to_create_dict["tickets"].append(ticket_copy)
                     objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
                     objects_to_create_dict["documents"].extend(documents_to_create)
@@ -354,7 +376,9 @@ def copy_active_ticket_with_household_and_individual(active_ticket: Any, program
         )
         ticket_copy.individual = individual_representation
 
-    grievance_ticket_data, notes_to_create, documents_to_create = copy_grievance_ticket(ticket_copy, program, active_ticket)
+    grievance_ticket_data, notes_to_create, documents_to_create = copy_grievance_ticket(
+        ticket_copy, program, active_ticket
+    )
     return ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create
 
 
@@ -363,13 +387,10 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
         filter_kwargs = {"ticket__business_area": business_area}
     else:
         filter_kwargs = {}
-    tickets_with_hh = (
-        model.objects.select_related(
-            "ticket",
-            "household",
-        )
-        .filter(household__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs)
-    )
+    tickets_with_hh = model.objects.select_related(
+        "ticket",
+        "household",
+    ).filter(household__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs)
     logger.info(f"Tickets to handle: {tickets_with_hh.count()}")
 
     # Handle closed tickets - copy only for 1 random representation
@@ -389,7 +410,9 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
             household_representation = closed_ticket.household.copied_to(manager="original_and_repr_objects").first()
 
             program = household_representation.program
-            ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(closed_ticket, program, household_representation=household_representation)
+            ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(
+                closed_ticket, program, household_representation=household_representation
+            )
             objects_to_create_dict["tickets"].append(ticket_copy)
             objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
             objects_to_create_dict["documents"].extend(documents_to_create)
@@ -419,7 +442,9 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
             household_programs = household_representations.values_list("program", flat=True).distinct()
 
             for program in household_programs.iterator():
-                ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(active_ticket, program)
+                ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(
+                    active_ticket, program
+                )
                 objects_to_create_dict["tickets"].append(ticket_copy)
                 objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
                 objects_to_create_dict["documents"].extend(documents_to_create)
@@ -472,17 +497,14 @@ def handle_tickets_with_individual(
         filter_kwargs = {"ticket__business_area": business_area}
     else:
         filter_kwargs = {}
-    tickets_with_ind = (
-        model.objects.select_related(
-            "ticket",
-            individual_field_name,
-        )
-        .filter(
-            **{f"{individual_field_name}__isnull": False},
-            ticket__is_original=True,
-            ticket__is_migration_handled=False,
-            **filter_kwargs,
-        )
+    tickets_with_ind = model.objects.select_related(
+        "ticket",
+        individual_field_name,
+    ).filter(
+        **{f"{individual_field_name}__isnull": False},
+        ticket__is_original=True,
+        ticket__is_migration_handled=False,
+        **filter_kwargs,
     )
     logger.info(f"Tickets to handle: {tickets_with_ind.count()}")
 
@@ -541,7 +563,9 @@ def handle_tickets_with_individual(
             individual_programs = individual_representations.values_list("program", flat=True).distinct()
 
             for program in individual_programs.iterator():
-                ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_individual(active_ticket, program, individual_field_name=individual_field_name)
+                ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_individual(
+                    active_ticket, program, individual_field_name=individual_field_name
+                )
                 objects_to_create_dict["tickets"].append(ticket_copy)
                 objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
                 objects_to_create_dict["documents"].extend(documents_to_create)
@@ -752,7 +776,8 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
                         program=program,
                         old_individual_id=individual,
                     )
-                    for individual in individuals if individual
+                    for individual in individuals
+                    if individual
                 ]
                 possible_duplicates = [individual for individual in possible_duplicates if individual]
                 needs_adjudication_ticket_copy.golden_records_individual = possible_duplicates.pop()
@@ -791,7 +816,9 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
             grievance_ticket.is_migration_handled = True
             old_grievance_tickets_to_update.append(grievance_ticket)
 
-        handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, TicketNeedsAdjudicationDetails)
+        handle_bulk_create_paginated_data(
+            old_grievance_tickets_to_update, objects_to_create_dict, TicketNeedsAdjudicationDetails
+        )
 
         PossibleDuplicateThrough.objects.bulk_create(new_possible_duplicates_to_create)
         SelectedIndividualThrough.objects.bulk_create(new_selected_individuals_to_create)
@@ -812,8 +839,7 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
         #     "households",
         #     "households__copied_to",
         # )
-        .filter(is_original=True, is_migration_handled=False, **filter_kwargs)
-        .distinct()
+        .filter(is_original=True, is_migration_handled=False, **filter_kwargs).distinct()
     )
     logger.info(f"Messages to handle: {message_objects.count()}")
     paginator = Paginator(message_objects, BATCH_SIZE)
@@ -869,7 +895,9 @@ def copy_message(active_message: Message, program: Program) -> tuple:
     ]
     households_representations = [household for household in households_representations if household]
     MessageHouseholdRelation = Message.households.through
-    message_household = [MessageHouseholdRelation(message=message, household_id=household.id) for household in households_representations]
+    message_household = [
+        MessageHouseholdRelation(message=message, household_id=household.id) for household in households_representations
+    ]
     return message, message_household
 
 
@@ -1135,15 +1163,21 @@ def copy_grievance_ticket(
     linked_tickets_ids = list(
         getattr(original_ticket, related_grievance_field)
         .linked_tickets(manager="default_for_migrations_fix")
-        .distinct().values_list("pk", flat=True)
+        .distinct()
+        .values_list("pk", flat=True)
     )
-    linked_tickets = [GrievanceTicketThrough(main_ticket=grievance_ticket, linked_ticket_id=lt) for lt in linked_tickets_ids]
-    linked_tickets.extend([GrievanceTicketThrough(linked_ticket=grievance_ticket, main_ticket_id=lt) for lt in linked_tickets_ids])
-    linked_tickets.extend([
-        GrievanceTicketThrough(main_ticket=grievance_ticket, linked_ticket_id=original_grievance_ticket_id),
-        GrievanceTicketThrough(linked_ticket=grievance_ticket, main_ticket_id=original_grievance_ticket_id),
+    linked_tickets = [
+        GrievanceTicketThrough(main_ticket=grievance_ticket, linked_ticket_id=lt) for lt in linked_tickets_ids
+    ]
+    linked_tickets.extend(
+        [GrievanceTicketThrough(linked_ticket=grievance_ticket, main_ticket_id=lt) for lt in linked_tickets_ids]
+    )
+    linked_tickets.extend(
+        [
+            GrievanceTicketThrough(main_ticket=grievance_ticket, linked_ticket_id=original_grievance_ticket_id),
+            GrievanceTicketThrough(linked_ticket=grievance_ticket, main_ticket_id=original_grievance_ticket_id),
         ]
-        )
+    )
 
     grievance_ticket_data = {
         "grievance_ticket": grievance_ticket,
@@ -1167,7 +1201,7 @@ def copy_grievance_ticket(
     return grievance_ticket_data, notes_to_create, documents_to_create
 
 
-def handle_grievance_ticket_data_creation(grievance_ticket_data: list):
+def handle_grievance_ticket_data_creation(grievance_ticket_data: list) -> None:
     """
     Function that bulk creates grievance tickets, add their linked tickets and programs relation.
     grievance_ticket_data consists of 3 keys:
@@ -1183,7 +1217,11 @@ def handle_grievance_ticket_data_creation(grievance_ticket_data: list):
         linked_tickets.extend(grievance_ticket["linked_tickets"])
     grievance_tickets_program = []
     for grievance_ticket in grievance_ticket_data:
-        program_id = grievance_ticket["program"].pk if isinstance(grievance_ticket["program"], Program) else grievance_ticket["program"]
+        program_id = (
+            grievance_ticket["program"].pk
+            if isinstance(grievance_ticket["program"], Program)
+            else grievance_ticket["program"]
+        )
         grievance_tickets_program.append(
             GrievanceTicketProgram(grievanceticket=grievance_ticket["grievance_ticket"], program_id=program_id)
         )
@@ -1193,7 +1231,9 @@ def handle_grievance_ticket_data_creation(grievance_ticket_data: list):
     GrievanceTicketProgram.objects.bulk_create(grievance_tickets_program, ignore_conflicts=True)
 
 
-def handle_bulk_create_paginated_data(old_grievance_tickets_to_update: list, objects_to_create_dict: dict, model: Any):
+def handle_bulk_create_paginated_data(
+    old_grievance_tickets_to_update: list, objects_to_create_dict: dict, model: Any
+) -> None:
     handle_grievance_ticket_data_creation(objects_to_create_dict["grievance_tickets"])
     TicketNote.objects.bulk_create(objects_to_create_dict["notes"])
     GrievanceDocument.objects.bulk_create(objects_to_create_dict["documents"])
@@ -1201,12 +1241,14 @@ def handle_bulk_create_paginated_data(old_grievance_tickets_to_update: list, obj
     model.objects.bulk_create(objects_to_create_dict["tickets"])
 
 
-def handle_bulk_update_representations_household_unicef_id(query: QuerySet, model: Any):
+def handle_bulk_update_representations_household_unicef_id(query: QuerySet, model: Any) -> None:
     related_name = ticket_grievance_ticket_field_name_mapping[model]
-    GrievanceTicket.default_for_migrations_fix.filter(
-        **{f"{related_name}__in": query}
-    ).update(
-        household_unicef_id=Subquery(GrievanceTicket.default_for_migrations_fix.filter(pk=OuterRef("pk")).values(f"{related_name}__household__unicef_id")[:1])
+    GrievanceTicket.default_for_migrations_fix.filter(**{f"{related_name}__in": query}).update(
+        household_unicef_id=Subquery(
+            GrievanceTicket.default_for_migrations_fix.filter(pk=OuterRef("pk")).values(
+                f"{related_name}__household__unicef_id"
+            )[:1]
+        )
     )
 
 
@@ -1240,21 +1282,37 @@ def handle_non_program_tickets(business_area: Optional[BusinessArea] = None) -> 
             Q(ticket__business_area=business_area) & Q(ticket__is_migration_handled=False) & Q(ticket__is_original=True)
         )
         non_program_tickets_dict = {
-            TicketComplaintDetails: TicketComplaintDetails.objects.filter(non_program_query & ~Q(payment_object_id__isnull=False)).order_by("id"),
-            TicketSensitiveDetails: TicketSensitiveDetails.objects.filter(non_program_query & ~Q(payment_object_id__isnull=False)).order_by("id"),
+            TicketComplaintDetails: TicketComplaintDetails.objects.filter(
+                non_program_query & ~Q(payment_object_id__isnull=False)
+            ).order_by("id"),
+            TicketSensitiveDetails: TicketSensitiveDetails.objects.filter(
+                non_program_query & ~Q(payment_object_id__isnull=False)
+            ).order_by("id"),
             TicketPaymentVerificationDetails: TicketPaymentVerificationDetails.objects.filter(
                 non_program_query
                 & ~(Q(payment_verification__isnull=False) & Q(payment_verification__payment_object_id__isnull=False))
             ).order_by("id"),
-            TicketHouseholdDataUpdateDetails: TicketHouseholdDataUpdateDetails.objects.filter(non_program_query).order_by("id"),
-            TicketIndividualDataUpdateDetails: TicketIndividualDataUpdateDetails.objects.filter(non_program_query).order_by("id"),
+            TicketHouseholdDataUpdateDetails: TicketHouseholdDataUpdateDetails.objects.filter(
+                non_program_query
+            ).order_by("id"),
+            TicketIndividualDataUpdateDetails: TicketIndividualDataUpdateDetails.objects.filter(
+                non_program_query
+            ).order_by("id"),
             TicketAddIndividualDetails: TicketAddIndividualDetails.objects.filter(non_program_query).order_by("id"),
-            TicketDeleteIndividualDetails: TicketDeleteIndividualDetails.objects.filter(non_program_query).order_by("id"),
+            TicketDeleteIndividualDetails: TicketDeleteIndividualDetails.objects.filter(non_program_query).order_by(
+                "id"
+            ),
             TicketDeleteHouseholdDetails: TicketDeleteHouseholdDetails.objects.filter(non_program_query).order_by("id"),
             TicketSystemFlaggingDetails: TicketSystemFlaggingDetails.objects.filter(non_program_query).order_by("id"),
-            TicketPositiveFeedbackDetails: TicketPositiveFeedbackDetails.objects.filter(non_program_query).order_by("id"),
-            TicketNegativeFeedbackDetails: TicketNegativeFeedbackDetails.objects.filter(non_program_query).order_by("id"),
-            TicketNeedsAdjudicationDetails: TicketNeedsAdjudicationDetails.objects.filter(non_program_query).order_by("id"),
+            TicketPositiveFeedbackDetails: TicketPositiveFeedbackDetails.objects.filter(non_program_query).order_by(
+                "id"
+            ),
+            TicketNegativeFeedbackDetails: TicketNegativeFeedbackDetails.objects.filter(non_program_query).order_by(
+                "id"
+            ),
+            TicketNeedsAdjudicationDetails: TicketNeedsAdjudicationDetails.objects.filter(non_program_query).order_by(
+                "id"
+            ),
             TicketReferralDetails: TicketReferralDetails.objects.filter(non_program_query).order_by("id"),
         }
 
@@ -1274,7 +1332,9 @@ def handle_non_program_tickets(business_area: Optional[BusinessArea] = None) -> 
                     ticket_copy = copy.deepcopy(non_program_ticket)
                     ticket_copy.pk = None
                     non_program_ticket.pk = None
-                    grievance_ticket_data, notes_to_create, documents_to_create = copy_grievance_ticket(ticket_copy, void_program, non_program_ticket)
+                    grievance_ticket_data, notes_to_create, documents_to_create = copy_grievance_ticket(
+                        ticket_copy, void_program, non_program_ticket
+                    )
 
                     objects_to_create_dict["tickets"].append(ticket_copy)
                     objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
