@@ -271,7 +271,7 @@ exports[`components/ProgramDetails should render 1`] = `
         </div>
       </div>
       <div
-        class="sc-gzVnrw bCMxAI"
+        class="sc-dnqmqq gRhSyd"
       >
         <div>
           <span
@@ -284,13 +284,20 @@ exports[`components/ProgramDetails should render 1`] = `
             data-cy="label-Total Number of Households"
           >
             <div
-              class="sc-htoDjs psyrE"
+              class="sc-iwsKbI kRgjtW"
             >
               2
             </div>
           </div>
         </div>
       </div>
+    </div>
+    <div
+      class="sc-gzVnrw bybGDk"
+    >
+      <div
+        class="sc-htoDjs ceIHRR"
+      />
     </div>
     <div
       class="sc-bZQynM ghLfwz"
@@ -311,7 +318,7 @@ exports[`components/ProgramDetails should render 1`] = `
           class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
         >
           <div
-            class="MuiBox-root MuiBox-root-1 sc-dnqmqq eMfOhs"
+            class="MuiBox-root MuiBox-root-1 sc-gZMcBi fFLApy"
           >
             <h6
               class="MuiTypography-root MuiTypography-h6"
