@@ -281,5 +281,5 @@ def remove_program_permissions_for_exists_partners(
     partner_exclude_ids: List[str], business_area_pk: str, program_pk: str
 ) -> None:
     for partner in Partner.objects.exclude(id__in=partner_exclude_ids):
-        partner.remove_program_areas(business_area_pk, program_pk)
+        partner.get_permissions().remove_program_areas(business_area_pk, program_pk)
         partner.save()
