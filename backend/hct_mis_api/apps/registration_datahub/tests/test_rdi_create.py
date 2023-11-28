@@ -755,6 +755,38 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(birth_certificate, "birth_certificate")
         self.assertEqual(national_passport, "national_passport")
 
+    def test_handle_documents_and_identities_with_empty_document_number(self) -> None:
+        task = self.RdiKoboCreateTask()
+        task.registration_data_import_mis = mock.Mock()
+        task.registration_data_import_mis.pull_pictures = False
+        task.documents = {}
+        individual = ImportedIndividualFactory()
+
+        documents_and_identities = [
+            {
+                "national_id": {
+                    "individual": individual,
+                    "issuing_country": Country("AFG"),
+                }
+            },
+            {
+                "national_passport": {
+                    "individual": individual,
+                    "issuing_country": Country("AFG"),
+                    "number": "",
+                }
+            },
+        ]
+
+        task._handle_documents_and_identities(documents_and_identities)
+
+        created_documents = ImportedDocument.objects.all()
+
+        for doc in created_documents:
+            self.assertEqual(doc.document_number, "")
+
+        self.assertEqual(created_documents.count(), 2)
+
     def _generate_huge_file(self) -> None:
         base_form = {
             "_notes": [],

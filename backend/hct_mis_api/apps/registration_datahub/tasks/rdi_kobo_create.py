@@ -138,6 +138,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 is_identity = document_name in identity_fields
 
                 country = Country(data["issuing_country"])
+                document_number = data.get("number", "")
 
                 if is_identity:
                     partner = "WFP" if document_name == "scope_id" else "UNHCR"
@@ -145,7 +146,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         ImportedIndividualIdentity(
                             partner=partner,
                             individual=data["individual"],
-                            document_number=data["number"],
+                            document_number=document_number,
                             country=country,
                         )
                     )
@@ -154,7 +155,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 file = self._handle_image_field(data.get("photo", ""), False)
                 documents.append(
                     ImportedDocument(
-                        document_number=data["number"],
+                        document_number=document_number,
                         country=country,
                         photo=file,
                         individual=data["individual"],
