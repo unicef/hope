@@ -2104,7 +2104,6 @@ export type GrievanceTicketNode = Node & {
   relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
   totalDays?: Maybe<Scalars['String']>,
   documentation?: Maybe<Array<Maybe<GrievanceDocumentNode>>>,
-  crossAreaFilterAvailable?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -5513,6 +5512,7 @@ export type Query = {
   ticketsByLocationAndCategory?: Maybe<ChartDetailedDatasetsNode>,
   grievanceTicket?: Maybe<GrievanceTicketNode>,
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>,
+  crossAreaFilterAvailable?: Maybe<Scalars['Boolean']>,
   existingGrievanceTickets?: Maybe<GrievanceTicketNodeConnection>,
   allTicketNotes?: Maybe<TicketNoteNodeConnection>,
   chartGrievances?: Maybe<ChartGrievanceTicketsNode>,
@@ -30421,7 +30421,6 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
   totalDays?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   documentation?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceDocumentNode']>>>, ParentType, ContextType>,
-  crossAreaFilterAvailable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {
@@ -31713,6 +31712,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   ticketsByLocationAndCategory?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryTicketsByLocationAndCategoryArgs, 'businessAreaSlug'>>,
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>,
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
+  crossAreaFilterAvailable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea'>>,
   allTicketNotes?: Resolver<Maybe<ResolversTypes['TicketNoteNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllTicketNotesArgs, 'ticket'>>,
   chartGrievances?: Resolver<Maybe<ResolversTypes['ChartGrievanceTicketsNode']>, ParentType, ContextType, RequireFields<QueryChartGrievancesArgs, 'businessAreaSlug' | 'year'>>,

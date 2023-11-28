@@ -2102,6 +2102,18 @@
             "deprecationReason": null
           },
           {
+            "name": "crossAreaFilterAvailable",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "existingGrievanceTickets",
             "description": null,
             "args": [
@@ -21241,18 +21253,6 @@
                 "name": "GrievanceDocumentNode",
                 "ofType": null
               }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "crossAreaFilterAvailable",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Boolean",
-              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

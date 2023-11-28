@@ -26,7 +26,7 @@ from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE, Scope
-from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.models import FlexibleAttribute, BusinessArea
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
     ChoiceObjectInt,
@@ -112,7 +112,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     partner = graphene.Field(PartnerType)
     programs = graphene.List(ProgramNode)
     documentation = graphene.List(GrievanceDocumentNode)
-    cross_area_filter_available = graphene.Boolean()
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: GrievanceTicket) -> None:
@@ -147,13 +146,6 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         convert_choices_to_enum = False
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-    @staticmethod
-    def resolve_cross_area_filter_available(grievance_ticket: GrievanceTicket, info: Any) -> bool:
-        user = info.context.user
-        program_id = get_program_id_from_headers(info.context.headers)
-
-        return user.partner.has_complete_access_in_program(program_id, str(grievance_ticket.business_area.id))
 
     @staticmethod
     def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
@@ -479,6 +471,7 @@ class Query(graphene.ObjectType):
             hopeOneOfPermissionClass(*POPULATION_DETAILS),
         ),
     )
+    cross_area_filter_available = graphene.Boolean()
     existing_grievance_tickets = DjangoPermissionFilterFastConnectionField(
         GrievanceTicketNode,
         filterset_class=ExistingGrievanceTicketFilter,
@@ -535,6 +528,13 @@ class Query(graphene.ObjectType):
                 output_field=DateField(),
             )
         ).annotate(total_days=F("total__day"))
+
+    def resolve_cross_area_filter_available(self, info: Any, **kwargs: Any) -> bool:
+        user = info.context.user
+        business_area = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area"))
+        program_id = get_program_id_from_headers(info.context.headers)
+
+        return user.partner.has_complete_access_in_program(program_id, str(business_area.id))
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
