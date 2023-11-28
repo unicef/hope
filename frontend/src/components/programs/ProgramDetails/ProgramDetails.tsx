@@ -148,29 +148,33 @@ export function ProgramDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
-      <DividerLine />
-      <Title>
-        <Typography variant='h6'>{t('Programme Partners')}</Typography>
-      </Title>
-      <OverviewContainer>
-        <Grid container spacing={6}>
-          {program.partners.map((partner) => (
-            <Grid item xs={3}>
-              <StyledBox p={6} flexDirection='column'>
-                <Typography variant='h6'>{partner.name}</Typography>
-                <LabelizedField
-                  label={t('Area Access')}
-                  value={
-                    partner.areaAccess === 'BUSINESS_AREA'
-                      ? t('Business Area')
-                      : `Admin Areas: ${partner.adminAreas?.length || 0}`
-                  }
-                />
-              </StyledBox>
+      {program.partners.length > 0 && (
+        <>
+          <DividerLine />
+          <Title>
+            <Typography variant='h6'>{t('Programme Partners')}</Typography>
+          </Title>
+          <OverviewContainer>
+            <Grid container spacing={6}>
+              {program.partners.map((partner) => (
+                <Grid item xs={3}>
+                  <StyledBox p={6} flexDirection='column'>
+                    <Typography variant='h6'>{partner.name}</Typography>
+                    <LabelizedField
+                      label={t('Area Access')}
+                      value={
+                        partner.areaAccess === 'BUSINESS_AREA'
+                          ? t('Business Area')
+                          : `Admin Areas: ${partner.adminAreas?.length || 0}`
+                      }
+                    />
+                  </StyledBox>
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
-      </OverviewContainer>
+          </OverviewContainer>
+        </>
+      )}
     </ContainerColumnWithBorder>
   );
 }
