@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Any, Union
 
 from django import forms
 from django.contrib import admin
@@ -16,6 +16,10 @@ from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.admin import HopeModelAdminMixin
 from mptt.forms import TreeNodeMultipleChoiceField
+
+
+def can_add_business_area_to_partner(request: Any, *args: Any, **kwargs: Any) -> bool:
+    return request.user.can_add_business_area_to_partner()
 
 
 class BusinessAreaRoleForm(forms.Form):
@@ -39,7 +43,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         "is_un",
     )
 
-    @button()
+    @button(permission=can_add_business_area_to_partner)
     def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
         parent: account_models.Partner = context["original"]

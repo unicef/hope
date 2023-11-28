@@ -27,6 +27,7 @@ class AreaTypeNode(DjangoObjectType):
 
 
 class AreaTreeNode(ObjectType):
+    id = graphene.ID()
     name = graphene.String()
     p_code = graphene.String()
     areas = graphene.List(lambda: AreaTreeNode)
