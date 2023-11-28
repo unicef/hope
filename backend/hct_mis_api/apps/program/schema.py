@@ -190,6 +190,7 @@ class Query(graphene.ObjectType):
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
         return (
             Program.objects.filter(
+                id__in=info.context.user.partner.program_ids,
                 business_area__slug=info.context.headers.get("Business-Area").lower(),
                 data_collecting_type__deprecated=False,
                 data_collecting_type__isnull=False,
