@@ -287,6 +287,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             for role in self.user_roles.all()
         )
 
+    def can_add_business_area_to_partner(self) -> bool:
+        return any(
+            self.has_permission(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)
+            for role in self.user_roles.all()
+        )
+
     class Meta:
         permissions = (
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
