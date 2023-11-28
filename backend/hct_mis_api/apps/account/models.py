@@ -14,7 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import JSONField, Q
+from django.db.models import JSONField, Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
@@ -120,7 +120,7 @@ class PartnerPermission:
         return self._permissions[business_area_id].in_program(program_id)
 
     def business_area_ids(self) -> List[str]:
-        return self._permissions.keys()
+        return list(self._permissions.keys())
 
     def program_ids(self) -> List[str]:
         ids = []
@@ -266,7 +266,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         )
 
     @property
-    def business_areas(self):
+    def business_areas(self) -> QuerySet[BusinessArea]:
         return BusinessArea.objects.filter(
             Q(user_roles__user=self) | Q(id__in=self.partner.business_area_ids)
         ).distinct()
