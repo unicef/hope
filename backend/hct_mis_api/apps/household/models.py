@@ -26,7 +26,7 @@ from sorl.thumbnail import ImageField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
-from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.core.utils import IsOriginalManager, SoftDeletableIsOriginalModel
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
@@ -308,6 +308,13 @@ class HouseholdCollection(UnicefIdentifiedModel):
     """
     Collection of household representations.
     """
+
+    def __str__(self) -> str:
+        return self.unicef_id or ""
+
+    @property
+    def business_area(self) -> Optional[BusinessArea]:
+        return self.households.first().business_area if self.households.first() else None
 
 
 class Household(
@@ -798,6 +805,13 @@ class IndividualCollection(UnicefIdentifiedModel):
     """
     Collection of individual representations.
     """
+
+    def __str__(self) -> str:
+        return self.unicef_id or ""
+
+    @property
+    def business_area(self) -> Optional[BusinessArea]:
+        return self.individuals.first().business_area if self.individuals.first() else None
 
 
 class Individual(
