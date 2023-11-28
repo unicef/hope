@@ -823,17 +823,19 @@ def create_storage_program_for_collecting_type(
     return Program.all_objects.get_or_create(
         name=(f"Storage program - COLLECTION TYPE {collecting_type.label}" if collecting_type else "Storage program"),
         data_collecting_type=collecting_type,
-        status=Program.DRAFT,
-        start_date=timezone.now(),
-        end_date=timezone.datetime.max,
         business_area=business_area,
-        budget=0,
-        frequency_of_payments=Program.ONE_OFF,
-        sector=Program.CHILD_PROTECTION,
-        scope=Program.SCOPE_FOR_PARTNERS,
-        cash_plus=True,
-        population_goal=1,
-        is_visible=False,
+        defaults={
+            "status": Program.DRAFT,
+            "start_date": timezone.now(),
+            "end_date": timezone.datetime.max,
+            "budget": 0,
+            "frequency_of_payments": Program.ONE_OFF,
+            "sector": Program.CHILD_PROTECTION,
+            "scope": Program.SCOPE_FOR_PARTNERS,
+            "cash_plus": True,
+            "population_goal": 1,
+            "is_visible": False,
+        },
     )[0]
 
 
