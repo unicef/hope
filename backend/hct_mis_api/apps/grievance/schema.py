@@ -112,6 +112,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     partner = graphene.Field(PartnerType)
     programs = graphene.List(ProgramNode)
     documentation = graphene.List(GrievanceDocumentNode)
+    cross_area_filter_available = graphene.Boolean()
 
     @classmethod
     def check_node_permission(cls, info: Any, object_instance: GrievanceTicket) -> None:
@@ -146,6 +147,18 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         convert_choices_to_enum = False
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    @staticmethod
+    def resolve_cross_area_filter_available(grievance_ticket: GrievanceTicket, info: Any) -> bool:
+        user = info.context.user
+        business_area = grievance_ticket.business_area
+        program_id = get_program_id_from_headers(info.context.headers)
+
+        perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
+
+        return user.has_permission(perm, business_area, program_id) and not user.has_area_restrictions(
+            program_id, business_area.id
+        )
 
     @staticmethod
     def resolve_household(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:

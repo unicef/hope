@@ -275,6 +275,9 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
         return partner_areas_ids_per_program
 
+    def has_area_restrictions(self, program_id: UUID, business_area_id: UUID) -> bool:
+        return len(self.get_partner_areas_ids_per_program(program_id, business_area_id)) == 0
+
     def can_download_storage_files(self) -> bool:
         return any(
             self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
