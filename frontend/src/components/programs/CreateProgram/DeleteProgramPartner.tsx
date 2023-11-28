@@ -14,6 +14,7 @@ import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { GreyText } from '../../core/GreyText';
 import { LoadingButton } from '../../core/LoadingButton';
+import { ErrorButton } from '../../core/ErrorButton';
 
 const WhiteDeleteIcon = styled(Delete)`
   color: #fff;
@@ -35,15 +36,13 @@ export const DeleteProgramPartner = ({
 
   return (
     <>
-      <Button
-        style={{ color: '#979797' }}
-        variant='outlined'
-        color='secondary'
+      <ErrorButton
+        data-cy='button-delete'
         onClick={() => setOpen(true)}
         disabled={!canDeleteProgramPartner}
       >
         <Delete />
-      </Button>
+      </ErrorButton>
       <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
         <DialogTitleWrapper>
           <DialogTitle>
