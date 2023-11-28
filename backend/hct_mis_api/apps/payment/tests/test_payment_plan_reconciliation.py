@@ -302,7 +302,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "programData": {
                     "name": "NName",
-                    "scope": "UNICEF",
                     "startDate": timezone.datetime(2022, 8, 24, tzinfo=utc),
                     "endDate": timezone.datetime(2022, 8, 31, tzinfo=utc),
                     "description": "desc",
