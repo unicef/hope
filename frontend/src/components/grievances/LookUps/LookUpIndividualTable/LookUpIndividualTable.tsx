@@ -91,6 +91,7 @@ export const LookUpIndividualTable = ({
     householdId,
     excludedId: excludedId || ticket?.individual?.id || null,
     program: isAllPrograms ? filter.program : programId,
+    isActiveProgram: filter.programState === 'active' ? true : null,
   };
 
   const headCellsWithProgramColumn = [

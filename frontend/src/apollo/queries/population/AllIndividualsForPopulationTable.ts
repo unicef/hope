@@ -23,6 +23,7 @@ export const AllIndividualsForPopulationTable = gql`
     $admin2: [ID]
     $flags: [String]
     $program: ID
+    $isActiveProgram: Boolean
   ) {
     allIndividuals(
       before: $before
@@ -46,6 +47,7 @@ export const AllIndividualsForPopulationTable = gql`
       admin2: $admin2
       flags: $flags
       program: $program
+      isActiveProgram: $isActiveProgram
     ) {
       totalCount
       pageInfo {
