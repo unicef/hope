@@ -591,7 +591,6 @@ input CopyProgramInput {
   budget: Decimal
   frequencyOfPayments: String
   sector: String
-  scope: String
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String
@@ -754,7 +753,6 @@ input CreateProgramInput {
   budget: Decimal
   frequencyOfPayments: String
   sector: String
-  scope: String
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String
@@ -1457,6 +1455,7 @@ type GrievanceTicketNode implements Node {
   relatedTickets: [GrievanceTicketNode]
   totalDays: String
   documentation: [GrievanceDocumentNode]
+  crossAreaFilterAvailable: Boolean
 }
 
 type GrievanceTicketNodeConnection {
@@ -3440,7 +3439,7 @@ type ProgramNode implements Node {
   budget: Decimal
   frequencyOfPayments: ProgramFrequencyOfPayments!
   sector: ProgramSector!
-  scope: ProgramScope!
+  scope: ProgramScope
   cashPlus: Boolean!
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
@@ -4926,7 +4925,6 @@ input UpdateProgramInput {
   budget: Decimal
   frequencyOfPayments: String
   sector: String
-  scope: String
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String

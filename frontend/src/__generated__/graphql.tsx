@@ -1040,7 +1040,6 @@ export type CopyProgramInput = {
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
-  scope?: Maybe<Scalars['String']>,
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
@@ -1214,7 +1213,6 @@ export type CreateProgramInput = {
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
-  scope?: Maybe<Scalars['String']>,
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
@@ -2106,6 +2104,7 @@ export type GrievanceTicketNode = Node & {
   relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
   totalDays?: Maybe<Scalars['String']>,
   documentation?: Maybe<Array<Maybe<GrievanceDocumentNode>>>,
+  crossAreaFilterAvailable?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -5251,7 +5250,7 @@ export type ProgramNode = Node & {
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments: ProgramFrequencyOfPayments,
   sector: ProgramSector,
-  scope: ProgramScope,
+  scope?: Maybe<ProgramScope>,
   cashPlus: Scalars['Boolean'],
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
@@ -8326,7 +8325,6 @@ export type UpdateProgramInput = {
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
-  scope?: Maybe<Scalars['String']>,
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
@@ -30421,6 +30419,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
   totalDays?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   documentation?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceDocumentNode']>>>, ParentType, ContextType>,
+  crossAreaFilterAvailable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {
@@ -31632,7 +31631,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   frequencyOfPayments?: Resolver<ResolversTypes['ProgramFrequencyOfPayments'], ParentType, ContextType>,
   sector?: Resolver<ResolversTypes['ProgramSector'], ParentType, ContextType>,
-  scope?: Resolver<ResolversTypes['ProgramScope'], ParentType, ContextType>,
+  scope?: Resolver<Maybe<ResolversTypes['ProgramScope']>, ParentType, ContextType>,
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
