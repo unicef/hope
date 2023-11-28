@@ -153,27 +153,22 @@ class PartnerNodeForProgram(DjangoObjectType):
         model = Partner
 
     @staticmethod
-    def _get_areas_ids(partner: Partner, program_id: str) -> Optional[List[str]]:
-        program = Program.objects.get(id=program_id)
-        return partner.get_permissions().areas_for(str(program.business_area_id), str(program_id))
-
-    @staticmethod
-    def _get_program_id(info_context_headers: Dict) -> Optional[str]:
-        return (
+    def _get_areas_ids(partner: Partner, info_context_headers: Dict) -> List[str]:
+        program_id = (
             decode_id_string(info_context_headers.get("Program"))
             if info_context_headers.get("Program") != "all"
             else None
         )
+        program = Program.objects.get(id=program_id) if program_id else None
+        return partner.get_permissions().areas_for(str(program.business_area_id), str(program_id)) if program_id else []
 
-    def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[Area]:
-        program_id = PartnerNodeForProgram._get_program_id(info.context.headers)
-        areas_ids = PartnerNodeForProgram._get_areas_ids(self, program_id) if program_id else []
+    def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[str]:
+        areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
         return areas_ids
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
-        program_id = PartnerNodeForProgram._get_program_id(info.context.headers)
-        areas_ids = PartnerNodeForProgram._get_areas_ids(self, program_id) if program_id else []
-        if areas_ids:
+        areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
+        if len(areas_ids) != 0:
             return "ADMIN_AREA"
         else:
             return "BUSINESS_AREA"
