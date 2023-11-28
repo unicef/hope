@@ -42,7 +42,7 @@ export const FeedbackTable = ({
     ...headCells,
     {
       disablePadding: false,
-      label: 'Programmes',
+      label: 'Programme',
       id: 'programs',
       numeric: false,
       dataCy: 'programs',

@@ -1,6 +1,12 @@
 import graphene
 
 
+class PartnerProgramInput(graphene.InputObjectType):
+    id = graphene.String(required=True, description="Partner ID")
+    area_access = graphene.String(description="'ADMIN_AREA' or 'BUSINESS_AREA'")
+    admin_areas = graphene.List(graphene.String)
+
+
 class CreateProgramInput(graphene.InputObjectType):
     name = graphene.String()
     start_date = graphene.Date()
@@ -9,13 +15,13 @@ class CreateProgramInput(graphene.InputObjectType):
     budget = graphene.Decimal()
     frequency_of_payments = graphene.String()
     sector = graphene.String()
-    scope = graphene.String()
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
+    partners = graphene.List(PartnerProgramInput)
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -28,12 +34,12 @@ class UpdateProgramInput(graphene.InputObjectType):
     budget = graphene.Decimal()
     frequency_of_payments = graphene.String()
     sector = graphene.String()
-    scope = graphene.String()
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
+    partners = graphene.List(PartnerProgramInput)
 
 
 class CopyProgramInput(graphene.InputObjectType):
@@ -45,10 +51,10 @@ class CopyProgramInput(graphene.InputObjectType):
     budget = graphene.Decimal()
     frequency_of_payments = graphene.String()
     sector = graphene.String()
-    scope = graphene.String()
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
     business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
+    partners = graphene.List(PartnerProgramInput)

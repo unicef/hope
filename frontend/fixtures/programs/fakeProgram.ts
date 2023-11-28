@@ -19,9 +19,16 @@ export const fakeProgram = {
   administrativeAreasOfImplementation: 'Crime book.',
   individualDataNeeded: false,
   version: 1644233612796091,
+  partners: [
+    {
+      adminAreas: [],
+      areaAccess: 'BUSINESS_AREA',
+      id: '1',
+    },
+  ],
   dataCollectingType: {
     code: '0',
-    description: 'Partial individuals collected'
+    description: 'Partial individuals collected',
   },
   __typename: 'ProgramNode',
 } as ProgramNode;

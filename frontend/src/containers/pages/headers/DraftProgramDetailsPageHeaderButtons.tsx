@@ -2,9 +2,9 @@ import { Box } from '@material-ui/core';
 import React from 'react';
 import { ProgramQuery } from '../../../__generated__/graphql';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
-import { CopyProgram } from '../../dialogs/programs/CopyProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
-import { EditProgram } from '../../dialogs/programs/EditProgram';
+import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
+import { EditProgramButtonLink } from '../../dialogs/programs/EditProgramButtonLink';
 
 export interface DraftProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
@@ -29,7 +29,7 @@ export const DraftProgramDetailsPageHeaderButtons = ({
       )}
       {canEdit && (
         <Box m={2}>
-          <EditProgram program={program} />
+          <EditProgramButtonLink program={program} />
         </Box>
       )}
       {canActivate && (
@@ -39,7 +39,7 @@ export const DraftProgramDetailsPageHeaderButtons = ({
       )}
       {canDuplicate && (
         <Box m={2}>
-          <CopyProgram program={program} />
+          <DuplicateProgramButtonLink program={program} />
         </Box>
       )}
     </Box>

@@ -1,7 +1,8 @@
-from typing import Tuple
+from typing import Dict, List, Tuple
 
 from django.db import transaction
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import (
     Household,
@@ -267,3 +268,18 @@ def create_roles_for_new_representation(new_household: Household, program: Progr
         role.household = new_household
         role.individual = individual_representation
         role.save()
+
+
+def update_partner_permissions_for_program(partner_data: Dict, business_area_pk: str, program_pk: str) -> None:
+    admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
+    partner = Partner.objects.get(id=partner_data["id"])
+    partner.get_permissions().set_program_areas(business_area_pk, program_pk, admin_areas)
+    partner.save()
+
+
+def remove_program_permissions_for_exists_partners(
+    partner_exclude_ids: List[str], business_area_pk: str, program_pk: str
+) -> None:
+    for partner in Partner.objects.exclude(id__in=partner_exclude_ids):
+        partner.get_permissions().remove_program_areas(business_area_pk, program_pk)
+        partner.save()
