@@ -93,13 +93,29 @@ export const LookUpIndividualTable = ({
     program: isAllPrograms ? filter.program : programId,
   };
 
+  const headCellsWithProgramColumn = [
+    ...headCells,
+    {
+      disablePadding: false,
+      label: 'Programme',
+      id: 'household__programme',
+      numeric: false,
+      dataCy: 'individual-programme',
+    },
+  ];
+
+  const preparedHeadcells = isAllPrograms
+    ? headCellsWithProgramColumn
+    : headCells;
+
   const renderTable = (): React.ReactElement => {
     return (
       <UniversalTable<
         AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
         AllIndividualsForPopulationTableQueryVariables
       >
-        headCells={headCells}
+        headCells={preparedHeadcells}
+        allowSort={false}
         rowsPerPageOptions={[5, 10, 15, 20]}
         filterOrderBy={filter.orderBy}
         query={useAllIndividualsForPopulationTableQuery}

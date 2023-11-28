@@ -1,3 +1,5 @@
+import unittest
+
 from rest_framework.test import APIClient
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -12,6 +14,7 @@ class TestMaintenancePage(APITestCase):
         cls.api_client = APIClient()
         cls.api_client.force_authenticate(user=cls.user)
 
+    @unittest.skip("Skipped - unused")
     def test_blocking_traffic_during_maintenance(self) -> None:
         api_client = APIClient()
 

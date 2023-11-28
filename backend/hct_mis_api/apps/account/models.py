@@ -14,7 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import JSONField, Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
@@ -43,37 +43,90 @@ USER_STATUS_CHOICES = (
 USER_PARTNER_CHOICES = Choices("UNICEF", "UNHCR", "WFP")
 
 
-@dataclasses.dataclass(frozen=True)
-class ProgramAreasList:
-    program_id: UUID
-    areas: List[UUID]
+@dataclasses.dataclass
+class BusinessAreaPartnerPermission:
+    business_area_id: str
+    roles: List[str] = dataclasses.field(default_factory=list)
+    programs: Dict[str, List[str]] = dataclasses.field(default_factory=dict)
+
+    def to_dict(self) -> Dict:
+        return {"roles": self.roles or [], "programs": self.programs or {}}
+
+    def in_program(self, program_id: str) -> Optional[List[str]]:
+        return self.programs[program_id] if program_id in self.programs else None
+
+    def get_program_ids(self) -> List[str]:
+        return list(self.programs.keys())
 
 
-@dataclasses.dataclass(frozen=True)
-class BusinessAreaPartnerPermissions:
-    business_area_id: UUID
-    roles: List[UUID]
-    programs: ProgramAreasList
+class PartnerPermission:
+    def __init__(self) -> None:
+        self._permissions: Dict[str, BusinessAreaPartnerPermission] = {}
+        self._available_business_areas = []
 
     @classmethod
-    def from_dict(cls, data_permissions: Dict) -> List["BusinessAreaPartnerPermissions"]:
-        """
-        return: [BusinessAreaPartnerPermissions(
-            business_area_id='uuid_ba',
-            roles=['role_id_1', 'role_id_2'],
-            programs={'program_id_1': ['area_1', 'area_2']}
-        )]
-        """
-        ba_partner_perms_list: List = []
-        for business_area_id in data_permissions:
-            ba_partner_perms_list.append(
-                cls(
-                    business_area_id=business_area_id,
-                    roles=data_permissions[business_area_id].get("roles", []),
-                    programs=data_permissions[business_area_id].get("programs", {}),
-                )
+    def from_dict(cls, data: Dict) -> "PartnerPermission":
+        instance = cls()
+        for business_area_id in data:
+            instance._permissions[business_area_id] = BusinessAreaPartnerPermission(
+                business_area_id=business_area_id,
+                roles=data[business_area_id].get("roles", []),
+                programs=data[business_area_id].get("programs", {}),
             )
-        return ba_partner_perms_list
+        instance._available_business_areas.extend(instance._permissions.keys())
+        return instance
+
+    @classmethod
+    def from_list(cls, data: List[BusinessAreaPartnerPermission]) -> "PartnerPermission":
+        instance = cls()
+        for permission in data:
+            instance._permissions[permission.business_area_id] = permission
+        instance._available_business_areas.extend(instance._permissions.keys())
+        return instance
+
+    def set_roles(self, business_area_id: str, roles: List[str]) -> None:
+        permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
+        permissions.roles = roles
+        self._permissions[business_area_id] = permissions
+
+    def set_program_areas(self, business_area_id: str, program_id: str, areas_ids: List[str]) -> None:
+        permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
+        permissions.programs[program_id] = areas_ids
+        self._permissions[business_area_id] = permissions
+
+    def remove_program_areas(self, business_area_id: str, program_id: str) -> None:
+        permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
+        if program_id in permissions.programs:
+            permissions.programs.pop(program_id)
+
+    def to_dict(self) -> Dict:
+        return {business_area_id: permission.to_dict() for business_area_id, permission in self._permissions.items()}
+
+    def to_list(self) -> List[BusinessAreaPartnerPermission]:
+        return list(self._permissions.values())
+
+    def roles_for(self, business_area_id: str) -> List[str]:
+        if business_area_id not in self._available_business_areas:
+            return []
+        return self._permissions[business_area_id].roles
+
+    def areas_for(self, business_area_id: str, program_id: str) -> Optional[List[str]]:
+        """
+        if return None it means that no access into BA for this partner
+        if return empty list [] it means that partner have access for all Areas
+        """
+        if business_area_id not in self._available_business_areas:
+            return None
+        return self._permissions[business_area_id].in_program(program_id)
+
+    def business_area_ids(self) -> List[str]:
+        return list(self._permissions.keys())
+
+    def program_ids(self) -> List[str]:
+        ids = []
+        for ba_perms in self._permissions.values():
+            ids.extend(ba_perms.get_program_ids())
+        return ids
 
 
 class Partner(models.Model):
@@ -93,6 +146,12 @@ class Partner(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    def get_permissions(self) -> PartnerPermission:
+        return PartnerPermission.from_dict(self.permissions)
+
+    def set_permissions(self, partner_permission: PartnerPermission) -> None:
+        self.permissions = partner_permission.to_dict()
+
     @classmethod
     def get_partners_as_choices(cls) -> List:
         return [(role.id, role.name) for role in cls.objects.all()]
@@ -100,6 +159,14 @@ class Partner(models.Model):
     @property
     def is_unicef(self) -> bool:
         return self.name == "UNICEF"
+
+    @property
+    def program_ids(self) -> List[str]:
+        return self.get_permissions().program_ids()
+
+    @property
+    def business_area_ids(self) -> List[str]:
+        return self.get_permissions().business_area_ids()
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
@@ -147,7 +214,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
         if not business_area_id and business_area_slug:
             business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
-        partner_role_ids = self.partner.permissions.get(str(business_area_id), {}).get("roles", [])
+        partner_role_ids = self.partner.get_permissions().roles_for(str(business_area_id))
         return partner_role_ids
 
     def get_partner_programs_areas_dict(
@@ -166,7 +233,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         return list of permissions based on User Role BA and User Partner
         if program_id in arguments need to check if user.partner.permissions json has program id
         """
-        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
+        # TODO: maybe remove in future 'has_program_access = True' or cross programs check will be without program_id ??
         has_program_access = True
         if program_id:
             if self.partner.is_unicef:
@@ -198,10 +265,16 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             else list()
         )
 
+    @property
+    def business_areas(self) -> QuerySet[BusinessArea]:
+        return BusinessArea.objects.filter(
+            Q(user_roles__user=self) | Q(id__in=self.partner.business_area_ids)
+        ).distinct()
+
     def has_permission(
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
     ) -> bool:
-        # TODO: MB remove in future 'has_program_access = True' or cross programs check will be without program_id ??
+        # TODO: maybe remove in future 'has_program_access = True' or cross programs check will be without program_id ??
         has_program_access = True
         if program_id:
             if self.partner.is_unicef:
@@ -241,6 +314,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def can_change_fsp(self) -> bool:
         return any(
             self.has_permission(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
+            for role in self.user_roles.all()
+        )
+
+    def can_add_business_area_to_partner(self) -> bool:
+        return any(
+            self.has_permission(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)
             for role in self.user_roles.all()
         )
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from django.contrib import admin
 from django.db.models import QuerySet
@@ -53,6 +53,9 @@ class UserRoleAdmin(HOPEModelAdminBase):
                 "role",
             )
         )
+
+    def get_actions(self, request: HttpRequest) -> Dict:
+        return admin.ModelAdmin.get_actions(self, request)  # unoverride
 
     def check_sync_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
         return request.user.is_staff

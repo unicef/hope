@@ -38,7 +38,6 @@ class TestCopyProgram(APITestCase):
           description
           frequencyOfPayments
           sector
-          scope
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
@@ -62,7 +61,6 @@ class TestCopyProgram(APITestCase):
                 "description": "my description of program",
                 "frequencyOfPayments": "REGULAR",
                 "sector": "EDUCATION",
-                "scope": "UNICEF",
                 "cashPlus": True,
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",

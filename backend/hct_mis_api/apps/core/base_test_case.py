@@ -134,7 +134,7 @@ class APITestCase(SnapshotTestTestCase):
                 partner_permissions[str(business_area.pk)]["programs"].update({str(program.pk): []})
             else:
                 pass
-                # TODO: add MB update program's areas
+                # TODO: add maybe update program's areas
         else:
             partner_permissions.update({str(business_area.pk): {"programs": {str(program.pk): []}}})
 

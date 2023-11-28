@@ -30,7 +30,8 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +68,7 @@ class UserBusinessAreaNode(DjangoObjectType):
     is_accountability_applicable = graphene.Boolean()
 
     def resolve_permissions(self, info: Any) -> Set:
-        user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
-        return permissions_resolver(user_roles)
+        return info.context.user.permissions_in_business_area(self.slug)
 
     def resolve_is_accountability_applicable(self, info: Any) -> bool:
         return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), self.is_accountability_applicable])
@@ -80,15 +80,15 @@ class UserBusinessAreaNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class UserObjectType(DjangoObjectType):
-    business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
-
-    def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
-        return BusinessArea.objects.filter(user_roles__user=self).distinct()
-
-    class Meta:
-        model = get_user_model()
-        exclude = ("password",)
+# class UserObjectType(DjangoObjectType):
+#     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
+#
+#     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
+#         return info.context.user.business_areas
+#
+#     class Meta:
+#         model = get_user_model()
+#         exclude = ("password",)
 
 
 class PartnerType(DjangoObjectType):
@@ -100,7 +100,7 @@ class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
 
     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
-        return BusinessArea.objects.filter(user_roles__user=self).distinct()
+        return info.context.user.business_areas
 
     class Meta:
         model = get_user_model()
@@ -138,6 +138,41 @@ class JSONLazyString(graphene.Scalar):
     @staticmethod
     def parse_value(value: Any) -> Dict:
         return json.loads(value)
+
+
+class PartnerNodeForProgram(DjangoObjectType):
+    id = graphene.ID()
+    name = graphene.String()
+    admin_areas = graphene.List(graphene.String)
+    area_access = graphene.String()
+
+    class Meta:
+        model = Partner
+
+    @staticmethod
+    def _get_areas_ids(partner: Partner, info_context_headers: Dict) -> List[str]:
+        program_id = (
+            decode_id_string(info_context_headers.get("Program"))
+            if info_context_headers.get("Program") != "all"
+            else None
+        )
+        if program_id:
+            program = Program.objects.get(id=program_id)
+            areas_ids = partner.get_permissions().areas_for(str(program.business_area_id), str(program_id))
+            return areas_ids if areas_ids else []
+        else:
+            return []
+
+    def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[str]:
+        areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
+        return areas_ids
+
+    def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
+        areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
+        if len(areas_ids) != 0:
+            return "ADMIN_AREA"
+        else:
+            return "BUSINESS_AREA"
 
 
 class Query(graphene.ObjectType):

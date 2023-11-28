@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -14,6 +14,7 @@ import { OverviewContainer } from '../../core/OverviewContainer';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { DividerLine } from '../../core/DividerLine';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)}px;
@@ -28,6 +29,10 @@ const NumberOfHouseHoldsValue = styled.div`
   font-size: 36px;
   line-height: 32px;
   margin-top: ${({ theme }) => theme.spacing(2)}px;
+`;
+
+const StyledBox = styled(Box)`
+  border: 1px solid #e3e3e3;
 `;
 
 interface ProgramDetailsProps {
@@ -50,6 +55,7 @@ export function ProgramDetails({
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const programScopeChoicesDict = choicesToDict(programScopeChoices);
+
   return (
     <ContainerColumnWithBorder data-cy='program-details-container'>
       <Title>
@@ -142,6 +148,33 @@ export function ProgramDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
+      {program.partners.length > 0 && (
+        <>
+          <DividerLine />
+          <Title>
+            <Typography variant='h6'>{t('Programme Partners')}</Typography>
+          </Title>
+          <OverviewContainer>
+            <Grid container spacing={6}>
+              {program.partners.map((partner) => (
+                <Grid item xs={3}>
+                  <StyledBox p={6} flexDirection='column'>
+                    <Typography variant='h6'>{partner.name}</Typography>
+                    <LabelizedField
+                      label={t('Area Access')}
+                      value={
+                        partner.areaAccess === 'BUSINESS_AREA'
+                          ? t('Business Area')
+                          : `Admin Areas: ${partner.adminAreas?.length || 0}`
+                      }
+                    />
+                  </StyledBox>
+                </Grid>
+              ))}
+            </Grid>
+          </OverviewContainer>
+        </>
+      )}
     </ContainerColumnWithBorder>
   );
 }
