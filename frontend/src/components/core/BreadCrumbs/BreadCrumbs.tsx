@@ -2,12 +2,21 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import ChevronRightRoundedIcon from '@material-ui/icons/ChevronRightRounded';
+import { Box } from '@material-ui/core';
 
 const BreadCrumbsLink = styled(Link)`
   color: rgba(0, 0, 0, 0.87);
   font-size: 16px;
   line-height: 32px;
   text-decoration: none;
+`;
+
+const BreadCrumbsItemNotLink = styled(Box)`
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 16px;
+  line-height: 32px;
+  text-decoration: none;
+  cursor: pointer;
 `;
 const BreadCrumbsElementContainer = styled.span`
   display: flex;
@@ -19,25 +28,34 @@ const Container = styled.div`
 `;
 interface BreadCrumbsElementProps {
   title: string;
-  to: string;
+  to?: string;
   last: boolean;
+  onClick?: () => void;
 }
 
-function BreadCrumbsElement({
+const BreadCrumbsElement = ({
   title,
   to,
   last = false,
-}: BreadCrumbsElementProps): React.ReactElement {
+  onClick = () => null,
+}: BreadCrumbsElementProps): React.ReactElement => {
   return (
     <BreadCrumbsElementContainer>
-      <BreadCrumbsLink to={to}>{title}</BreadCrumbsLink>
+      {to ? (
+        <BreadCrumbsLink to={to}>{title}</BreadCrumbsLink>
+      ) : (
+        <BreadCrumbsItemNotLink onClick={onClick}>
+          {title}
+        </BreadCrumbsItemNotLink>
+      )}
       {!last ? <ChevronRightRoundedIcon /> : null}
     </BreadCrumbsElementContainer>
   );
-}
+};
 export interface BreadCrumbsItem {
   title: string;
-  to: string;
+  to?: string;
+  handleClick?: () => void;
 }
 
 interface BreadCrumbsProps {
@@ -54,6 +72,7 @@ export function BreadCrumbs({
         key={item.title}
         title={item.title}
         to={item.to}
+        onClick={item.handleClick}
         last={last}
       />
     );

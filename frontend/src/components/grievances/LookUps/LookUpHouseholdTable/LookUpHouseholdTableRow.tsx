@@ -105,15 +105,17 @@ export const LookUpHouseholdTableRow = ({
       <TableCell align='left'>
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>
-        {household.program ? (
-          <BlackLink to={`/${baseUrl}/details/${household.program.id}`}>
-            {household.program.name}
-          </BlackLink>
-        ) : (
-          '-'
-        )}
-      </TableCell>
+      {isAllPrograms && (
+        <TableCell align='left'>
+          {household.program ? (
+            <BlackLink to={`/${baseUrl}/details/${household.program.id}`}>
+              {household.program.name}
+            </BlackLink>
+          ) : (
+            '-'
+          )}
+        </TableCell>
+      )}
     </ClickableTableRow>
   );
 };

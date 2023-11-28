@@ -5,10 +5,10 @@ import {
   ProgramQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
-import { FinishProgram } from '../../dialogs/programs/FinishProgram';
-import { EditProgram } from '../../dialogs/programs/EditProgram';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { CopyProgram } from '../../dialogs/programs/CopyProgram';
+import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
+import { EditProgramButtonLink } from '../../dialogs/programs/EditProgramButtonLink';
+import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
@@ -38,7 +38,7 @@ export const ActiveProgramDetailsPageHeaderButtons = ({
       )}
       {canEdit && (
         <Box m={2}>
-          <EditProgram program={program} />
+          <EditProgramButtonLink program={program} />
         </Box>
       )}
       {!isPaymentPlanApplicable && (
@@ -58,7 +58,7 @@ export const ActiveProgramDetailsPageHeaderButtons = ({
       )}
       {canDuplicate && (
         <Box m={2}>
-          <CopyProgram program={program} />
+          <DuplicateProgramButtonLink program={program} />
         </Box>
       )}
     </Box>

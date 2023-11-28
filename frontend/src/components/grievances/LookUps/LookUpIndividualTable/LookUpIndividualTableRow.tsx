@@ -64,17 +64,19 @@ export const LookUpIndividualTableRow = ({
         {individual?.household?.admin2?.name || '-'}
       </TableCell>
       <TableCell align='left'>
-        {individual.program ? (
-          <BlackLink to={`/${baseUrl}/details/${individual.program.id}`}>
-            {individual.program.name}
-          </BlackLink>
-        ) : (
-          '-'
-        )}
-      </TableCell>
-      <TableCell align='left'>
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
       </TableCell>
+      {isAllPrograms && (
+        <TableCell align='left'>
+          {individual.program ? (
+            <BlackLink to={`/${baseUrl}/details/${individual.program.id}`}>
+              {individual.program.name}
+            </BlackLink>
+          ) : (
+            '-'
+          )}
+        </TableCell>
+      )}
     </ClickableTableRow>
   );
 };

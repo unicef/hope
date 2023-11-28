@@ -3,21 +3,21 @@
 exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 1`] = `
 <div>
   <div
-    class="sc-EHOje iaZfbD"
+    class="sc-bZQynM dsDRHi"
     data-cy="page-header-container"
   >
     <div
-      class="sc-bZQynM ktisbs"
+      class="sc-gzVnrw YPbNu"
     >
       <div
-        class="sc-gzVnrw eSbwlf"
+        class="sc-htoDjs dmLXTD"
       >
         <div>
           <div
             class="MuiBox-root MuiBox-root-1"
           >
             <div
-              class="sc-VigVT djZJTH"
+              class="sc-jTzLTM kVKYxK"
             >
               <h5
                 class="MuiTypography-root MuiTypography-h5"
@@ -32,12 +32,12 @@ exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 
           </div>
         </div>
         <div
-          class="sc-htoDjs jWUwCq"
+          class="sc-dnqmqq gwXewl"
         />
       </div>
     </div>
     <div
-      class="sc-iwsKbI fVvfjI"
+      class="sc-gZMcBi bLdEQm"
     />
   </div>
 </div>
