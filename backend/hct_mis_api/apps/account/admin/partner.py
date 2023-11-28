@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Optional, Sequence, Union
 
 from django import forms
 from django.contrib import admin
@@ -43,7 +43,16 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         "is_un",
     )
 
-    @button(permission=can_add_business_area_to_partner)
+    def get_readonly_fields(self, request: HttpRequest, obj: Optional[account_models.Partner] = None) -> Sequence[str]:
+        additional_fields = []
+        if obj and obj.is_unicef:
+            additional_fields.append("name")
+        return list(super().get_readonly_fields(request, obj)) + additional_fields
+
+    @button(
+        permission=can_add_business_area_to_partner,
+        enabled=lambda obj: not obj.original.is_unicef,
+    )
     def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
         partner: account_models.Partner = context["original"]
