@@ -28,7 +28,7 @@ from hct_mis_api.apps.grievance.inputs import (
     CreateTicketNoteInput,
     UpdateGrievanceTicketInput,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote, TicketNeedsAdjudicationDetails
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
 from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
@@ -586,7 +586,20 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             notifications.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
-            # TODO add here validation
+            if isinstance(grievance_ticket.ticket_details, TicketNeedsAdjudicationDetails):
+                program_id = decode_id_string(info.context.headers.get("Program"))
+                partner = user.partner
+
+                if partner is None:
+                    raise PermissionDenied("Permission Denied: User does not have set partner")
+
+                partner_permission = partner.get_permissions()
+                areas_ids = partner_permission.areas_for(str(grievance_ticket.business_area.id), str(program_id))
+
+                for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
+                    if str(selected_individual.household.admin2.id) not in areas_ids:
+                        raise PermissionDenied("Permission Denied: User does not have access to close ticket")
+
             clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
 
         if (
@@ -1171,18 +1184,11 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         user = info.context.user
         partner = user.partner
 
-        if not partner.is_unicef:
-            try:
-                partner_permission = partner.get_permissions()
-            except Partner.DoesNotExist:
-                raise PermissionDenied("Permission Denied: User does not have set partner")
+        if partner is None:
+            raise PermissionDenied("Permission Denied: User does not have set partner")
 
-            areas_ids = partner_permission.areas_for(str(grievance_ticket.business_area.id), str(program_id))
-            grievance_admin_area = grievance_ticket.admin2
-            if areas_ids is None or str(grievance_admin_area.id) not in areas_ids:
-                raise PermissionDenied(
-                    f"Permission Denied: User does not have access to admin area {grievance_admin_area.name}"
-                )
+        partner_permission = partner.get_permissions()
+        areas_ids = partner_permission.areas_for(str(grievance_ticket.business_area.id), str(program_id))
 
         if selected_individual_id and selected_individual_ids:
             log_and_raise("Only one option for selected individuals is available")
@@ -1191,6 +1197,11 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
         if selected_individual_id:
             selected_individual = get_individual(selected_individual_id)
+
+            # Validate partner's permission
+            if not partner.is_unicef:
+                if selected_individual.household.admin2 not in areas_ids:
+                    raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
             if selected_individual not in (
                 ticket_details.golden_records_individual,
@@ -1203,6 +1214,13 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
         if selected_individual_ids:  # Allow choosing multiple individuals
             selected_individuals = [get_individual(_id) for _id in selected_individual_ids]
+
+            # Validate partner's permission
+            # if not partner.is_unicef:
+            for selected_individual in selected_individuals:
+                if str(selected_individual.household.admin2.id) not in areas_ids:
+                    raise PermissionDenied("Permission Denied: User does not have access to select individual")
+
             ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())
             ticket_details.selected_individuals.add(*selected_individuals)
 
