@@ -6,7 +6,7 @@ export default class Feedback extends BaseComponent {
   buttonSubmitNewFeedback = 'a[data-cy="button-submit-new-feedback"]';
   filterSearch = 'div[data-cy="filters-search"]';
   filterIssueType = 'div[data-cy="filters-issue-type"]';
-  filterCreatedBy = 'div[data-cy="filters-created-by"]';
+  filterCreatedBy = 'div[data-cy="Created by-input"]';
   filterCreationDateFrom = 'div[data-cy="filters-creation-date-from"]';
   filterCreationDateTo = 'div[data-cy="filters-creation-date-to"]';
   buttonClear = 'button[data-cy="button-filters-clear"]';

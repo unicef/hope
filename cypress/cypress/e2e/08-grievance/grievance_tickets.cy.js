@@ -13,11 +13,11 @@ const userType4 = "GRV-0000005";
 const userType2 = "GRV-0000002";
 const userType1 = "GRV-0000001";
 
-describe.skip("Grievance", () => {
+describe("Grievance", () => {
   before(function () {
-    cy.initScenario("init_clear");
-    cy.fixture("grievance_new_ticket").as("newTicket");
-    cy.adminLogin();
+//    cy.initScenario("init_clear");
+//    cy.fixture("grievance_new_ticket").as("newTicket");
+//    cy.adminLogin();
     cy.navigateToHomePage();
     grievancePage.clickMenuButtonGrievance();
   });
@@ -75,7 +75,7 @@ describe.skip("Grievance", () => {
     });
   });
 
-  describe("Component tests Grievance", () => {
+  describe.skip("Component tests Grievance", () => {
     context("Export", () => {
       it.skip("Export", () => {});
     });

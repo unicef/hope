@@ -12,7 +12,7 @@ let newFeedbackPage = new NewFeedback();
 let grievanceNewTicketPage = new NewTicket();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 
-describe.skip("Grievance - Feedback", () => {
+describe("Grievance - Feedback", () => {
   before(() => {
     cy.checkIfLoggedIn();
   });
@@ -54,7 +54,7 @@ describe.skip("Grievance - Feedback", () => {
     });
   });
 
-  describe("Component tests Feedback", () => {
+  describe.skip("Component tests Feedback", () => {
     context("Feedback Filters", () => {
       [["FED-23-0001", 1, "Feedback ID: FED-23-0001"]].forEach((testData) => {
         it("Grievance Search filter", () => {
@@ -135,7 +135,7 @@ describe.skip("Grievance - Feedback", () => {
         feedbackPage.getButtonApply().click();
         feedbackPage.expectedNumberOfRows(0);
       });
-      describe("Feedback Created by filter", () => {
+      describe.skip("Feedback Created by filter", () => {
         before(() => {
           feedbackPage.getButtonSubmitNewFeedback().click();
           newFeedbackPage.chooseOptionByName("Positive");
@@ -421,7 +421,7 @@ describe.skip("Grievance - Feedback", () => {
       it.skip("Edit Feedback", () => {});
     });
   });
-  describe("E2E tests Feedback", () => {
+  describe.skip("E2E tests Feedback", () => {
     // ToDo: Enable after fix
     it.skip("404 Error page - refresh", () => {
       cy.scenario([
