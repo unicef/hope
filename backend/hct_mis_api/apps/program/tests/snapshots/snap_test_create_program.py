@@ -16,7 +16,6 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'cashPlus': True,
                 'dataCollectingType': {
                     'active': True,
-                    'code': 'partial',
                     'code': 'partial_individuals',
                     'description': 'Partial individuals collected',
                     'individualFiltersAvailable': True,
@@ -27,7 +26,6 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'frequencyOfPayments': 'REGULAR',
                 'name': 'Test',
                 'populationGoal': 150000,
-                'scope': 'UNICEF',
                 'sector': 'EDUCATION',
                 'startDate': '2019-12-20',
                 'status': 'DRAFT'
