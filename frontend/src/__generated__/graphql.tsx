@@ -1040,7 +1040,6 @@ export type CopyProgramInput = {
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
-  scope?: Maybe<Scalars['String']>,
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
@@ -1214,7 +1213,6 @@ export type CreateProgramInput = {
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
-  scope?: Maybe<Scalars['String']>,
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
@@ -4429,8 +4427,8 @@ export type PartnerNodeForProgramGrievanceticketSetArgs = {
 };
 
 export type PartnerProgramInput = {
-  areaAccess?: Maybe<Scalars['String']>,
   id: Scalars['String'],
+  areaAccess?: Maybe<Scalars['String']>,
   adminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 
@@ -5251,7 +5249,7 @@ export type ProgramNode = Node & {
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments: ProgramFrequencyOfPayments,
   sector: ProgramSector,
-  scope: ProgramScope,
+  scope?: Maybe<ProgramScope>,
   cashPlus: Scalars['Boolean'],
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
@@ -8326,7 +8324,6 @@ export type UpdateProgramInput = {
   budget?: Maybe<Scalars['Decimal']>,
   frequencyOfPayments?: Maybe<Scalars['String']>,
   sector?: Maybe<Scalars['String']>,
-  scope?: Maybe<Scalars['String']>,
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
@@ -31632,7 +31629,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   frequencyOfPayments?: Resolver<ResolversTypes['ProgramFrequencyOfPayments'], ParentType, ContextType>,
   sector?: Resolver<ResolversTypes['ProgramSector'], ParentType, ContextType>,
-  scope?: Resolver<ResolversTypes['ProgramScope'], ParentType, ContextType>,
+  scope?: Resolver<Maybe<ResolversTypes['ProgramScope']>, ParentType, ContextType>,
   cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,

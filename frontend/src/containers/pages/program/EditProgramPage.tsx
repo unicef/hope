@@ -113,7 +113,7 @@ export const EditProgramPage = (): ReactElement => {
     partners: partners.map((partner) => ({
       id: partner.id,
       adminAreas: partner.adminAreas,
-      areaAccess: partner.areaAccess
+      areaAccess: partner.areaAccess,
     })),
   };
 
@@ -165,6 +165,8 @@ export const EditProgramPage = (): ReactElement => {
                 values={values}
                 allAreasTree={allAreasTree}
                 partnerChoices={userPartnerChoices}
+                step={step}
+                setStep={setStep}
               />
             )}
           </>

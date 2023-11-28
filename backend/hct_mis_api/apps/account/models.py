@@ -108,8 +108,12 @@ class PartnerPermission:
         return self._permissions[business_area_id].roles
 
     def areas_for(self, business_area_id: str, program_id: str) -> Optional[List[str]]:
+        """
+        if return None it means that no access into BA for this partner
+        if return empty list [] it means that partner have access for all Areas
+        """
         if business_area_id not in self._available_business_areas:
-            return []
+            return None
         return self._permissions[business_area_id].in_program(program_id)
 
 
