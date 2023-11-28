@@ -583,17 +583,22 @@ class Query(graphene.ObjectType):
             except (Partner.DoesNotExist, AssertionError):
                 return Individual.objects.none()
 
-            areas = Area.objects.filter(id__in=program_area_ids)
-            areas_level_1 = areas.filter(level=0).values_list("id")
-            areas_level_2 = areas.filter(level=1).values_list("id")
-            areas_level_3 = areas.filter(level=2).values_list("id")
+            if program_area_ids is None:  # If None, user's partner does not have permission
+                return Individual.objects.none()
+            elif not program_area_ids:  # If empty list, user's partner does have full permission
+                pass
+            else:  # Check to which areas user has access
+                areas = Area.objects.filter(id__in=program_area_ids)
+                areas_level_1 = areas.filter(level=0).values_list("id")
+                areas_level_2 = areas.filter(level=1).values_list("id")
+                areas_level_3 = areas.filter(level=2).values_list("id")
 
-            queryset = queryset.filter(  # type: ignore
-                Q(household__admin1__in=areas_level_1)
-                | Q(household__admin2__in=areas_level_2)
-                | Q(household__admin3__in=areas_level_3)
-                | Q(household__admin_area__isnull=True)
-            )
+                queryset = queryset.filter(  # type: ignore
+                    Q(household__admin1__in=areas_level_1)
+                    | Q(household__admin2__in=areas_level_2)
+                    | Q(household__admin3__in=areas_level_3)
+                    | Q(household__admin_area__isnull=True)
+                )
 
         return queryset  # type: ignore
 
@@ -626,17 +631,22 @@ class Query(graphene.ObjectType):
             except (Partner.DoesNotExist, AssertionError):
                 return Household.objects.none()
 
-            areas = Area.objects.filter(id__in=program_area_ids)
-            areas_level_1 = areas.filter(level=0).values_list("id")
-            areas_level_2 = areas.filter(level=1).values_list("id")
-            areas_level_3 = areas.filter(level=2).values_list("id")
+            if program_area_ids is None:  # If None, user's partner does not have permission
+                return Household.objects.none()
+            elif not program_area_ids:  # If empty list, user's partner does have full permission
+                pass
+            else:  # Check to which areas user has access
+                areas = Area.objects.filter(id__in=program_area_ids)
+                areas_level_1 = areas.filter(level=0).values_list("id")
+                areas_level_2 = areas.filter(level=1).values_list("id")
+                areas_level_3 = areas.filter(level=2).values_list("id")
 
-            queryset = Household.objects.order_by("created_at").filter(
-                Q(admin1__in=areas_level_1)
-                | Q(admin2__in=areas_level_2)
-                | Q(admin3__in=areas_level_3)
-                | Q(admin_area__isnull=True)
-            )
+                queryset = Household.objects.order_by("created_at").filter(
+                    Q(admin1__in=areas_level_1)
+                    | Q(admin2__in=areas_level_2)
+                    | Q(admin3__in=areas_level_3)
+                    | Q(admin_area__isnull=True)
+                )
 
         if does_path_exist_in_query("edges.node.admin2", info):
             queryset = queryset.select_related("admin_area")

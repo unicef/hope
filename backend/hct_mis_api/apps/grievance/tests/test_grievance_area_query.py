@@ -5,7 +5,11 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -35,6 +39,7 @@ class TestGrievanceAreaQuery(APITestCase):
         call_command("loadcountries")
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.ukraine_business_area = BusinessAreaFactory(slug="ukraine")
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
 
         cls.area_type_level_1 = AreaTypeFactory(name="Province", area_level=1)
@@ -126,6 +131,60 @@ class TestGrievanceAreaQuery(APITestCase):
                 "programs": {str(self.program.id): [str(self.doshi.id), str(self.burka.id), str(self.quadis.id)]}
             }
         }
+        partner.save()
+        user = UserFactory(partner=partner)
+        self.create_user_role_with_permissions(user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_GRIEVANCE_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_ticket_are_filtered_when_partner_is_unicef(self, _: Any, permissions: List[Permissions]) -> None:
+        partner = PartnerFactory(name="UNICEF")
+        user = UserFactory(partner=partner)
+        self.create_user_role_with_permissions(user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_GRIEVANCE_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_admin2_is_filtered_when_partner_has_business_area_access(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
+        partner = PartnerFactory(name="NOT_UNICEF")
+        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): []}}}
         partner.save()
         user = UserFactory(partner=partner)
         self.create_user_role_with_permissions(user, permissions, self.business_area)

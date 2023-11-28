@@ -342,3 +342,58 @@ class TestHouseholdAreaQuery(APITestCase):
                 },
             },
         )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_households_are_filtered_when_partner_is_unicef(self, _: Any, permissions: List[Permissions]) -> None:
+        partner = PartnerFactory(name="UNICEF")
+        user = UserFactory(partner=partner)
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area_afghanistan.slug,
+                },
+            },
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_households_are_filtered_when_partner_has_business_area_access(
+        self, _: Any, permissions: List[Permissions]
+    ) -> None:
+        # Full query returned
+        partner = PartnerFactory(name="NOT_UNICEF")
+        partner.permissions = {
+            str(self.business_area_afghanistan.id): {
+                "programs": {
+                    str(self.program.id): [],
+                }
+            }
+        }
+        partner.save()
+        user = UserFactory(partner=partner)
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+
+        self.snapshot_graphql_request(
+            request_string=ALL_HOUSEHOLD_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area_afghanistan.slug,
+                },
+            },
+        )
