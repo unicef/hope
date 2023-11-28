@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -586,6 +586,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             notifications.append(GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL))
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
+            # TODO add here validation
             clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
 
         if (
@@ -1165,6 +1166,23 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
         selected_individual_id = kwargs.get("selected_individual_id", None)
         selected_individual_ids = kwargs.get("selected_individual_ids", None)
+
+        program_id = decode_id_string(info.context.headers.get("Program"))
+        user = info.context.user
+        partner = user.partner
+
+        if not partner.is_unicef:
+            try:
+                partner_permission = partner.get_permissions()
+            except Partner.DoesNotExist:
+                raise PermissionDenied("Permission Denied: User does not have set partner")
+
+            areas_ids = partner_permission.areas_for(str(grievance_ticket.business_area.id), str(program_id))
+            grievance_admin_area = grievance_ticket.admin2
+            if areas_ids is None or str(grievance_admin_area.id) not in areas_ids:
+                raise PermissionDenied(
+                    f"Permission Denied: User does not have access to admin area {grievance_admin_area.name}"
+                )
 
         if selected_individual_id and selected_individual_ids:
             log_and_raise("Only one option for selected individuals is available")
