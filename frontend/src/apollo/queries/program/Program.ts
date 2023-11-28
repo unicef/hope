@@ -35,9 +35,7 @@ export const PROGRAM_QUERY = gql`
         id
         name
         areaAccess
-        adminAreas {
-          id
-        }
+        adminAreas
       }
     }
   }
