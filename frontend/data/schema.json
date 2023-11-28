@@ -24449,13 +24449,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "ENUM",
-                "name": "ProgramScope",
-                "ofType": null
-              }
+              "kind": "ENUM",
+              "name": "ProgramScope",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -71603,16 +71599,6 @@
             "defaultValue": null
           },
           {
-            "name": "scope",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
             "name": "cashPlus",
             "description": null,
             "type": {
@@ -71698,16 +71684,6 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "areaAccess",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
             "name": "id",
             "description": null,
             "type": {
@@ -71718,6 +71694,16 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "areaAccess",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null
           },
@@ -71867,16 +71853,6 @@
           },
           {
             "name": "sector",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "scope",
             "description": null,
             "type": {
               "kind": "SCALAR",
@@ -72094,16 +72070,6 @@
           },
           {
             "name": "sector",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "scope",
             "description": null,
             "type": {
               "kind": "SCALAR",
