@@ -146,7 +146,7 @@ class JSONLazyString(graphene.Scalar):
 class PartnerNodeForProgram(DjangoObjectType):
     id = graphene.ID()
     name = graphene.String()
-    admin_areas = graphene.List(AreaTreeNode)
+    admin_areas = graphene.List(graphene.String)
     area_access = graphene.String()
 
     class Meta:
@@ -168,7 +168,7 @@ class PartnerNodeForProgram(DjangoObjectType):
     def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[Area]:
         program_id = PartnerNodeForProgram._get_program_id(info.context.headers)
         areas_ids = PartnerNodeForProgram._get_areas_ids(self, program_id) if program_id else []
-        return Area.objects.filter(id__in=areas_ids)
+        return areas_ids
 
     def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
         program_id = PartnerNodeForProgram._get_program_id(info.context.headers)
