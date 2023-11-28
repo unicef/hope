@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -28,7 +28,11 @@ from hct_mis_api.apps.grievance.inputs import (
     CreateTicketNoteInput,
     UpdateGrievanceTicketInput,
 )
-from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote, TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.grievance.models import (
+    GrievanceTicket,
+    TicketNeedsAdjudicationDetails,
+    TicketNote,
+)
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
 from hct_mis_api.apps.grievance.services.bulk_action_service import BulkActionService
@@ -593,12 +597,13 @@ class GrievanceStatusChangeMutation(PermissionMutation):
                 if partner is None:
                     raise PermissionDenied("Permission Denied: User does not have set partner")
 
-                partner_permission = partner.get_permissions()
-                areas_ids = partner_permission.areas_for(str(grievance_ticket.business_area.id), str(program_id))
+                if not partner.is_unicef:
+                    partner_permission = partner.get_permissions()
+                    areas_ids = partner_permission.areas_for(str(grievance_ticket.business_area.id), str(program_id))
 
-                for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
-                    if str(selected_individual.household.admin2.id) not in areas_ids:
-                        raise PermissionDenied("Permission Denied: User does not have access to close ticket")
+                    for selected_individual in grievance_ticket.ticket_details.selected_individuals.all():
+                        if str(selected_individual.household.admin2.id) not in areas_ids:
+                            raise PermissionDenied("Permission Denied: User does not have access to close ticket")
 
             clear_cache(grievance_ticket.ticket_details, grievance_ticket.business_area.slug)
 
@@ -1216,10 +1221,10 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             selected_individuals = [get_individual(_id) for _id in selected_individual_ids]
 
             # Validate partner's permission
-            # if not partner.is_unicef:
-            for selected_individual in selected_individuals:
-                if str(selected_individual.household.admin2.id) not in areas_ids:
-                    raise PermissionDenied("Permission Denied: User does not have access to select individual")
+            if not partner.is_unicef:
+                for selected_individual in selected_individuals:
+                    if str(selected_individual.household.admin2.id) not in areas_ids:
+                        raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
             ticket_details.selected_individuals.remove(*ticket_details.selected_individuals.all())
             ticket_details.selected_individuals.add(*selected_individuals)
