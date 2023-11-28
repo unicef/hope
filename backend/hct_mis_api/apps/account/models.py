@@ -142,6 +142,7 @@ class Partner(models.Model):
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
+        print("***************************************************** Partner List ", [(role.id, role.name) for role in cls.objects.all()])
         return [(role.id, role.name) for role in cls.objects.all()]
 
     @property
