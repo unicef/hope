@@ -834,16 +834,23 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     def individual(self) -> "Individual":
         return self.golden_records_individual
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        individuals = [
-            self.golden_records_individual,
-            *self.possible_duplicates.all(),
-            *self.selected_individuals.all(),
-        ]
-        unique_areas = individuals.values_list("admin2", flat=True).distinct()
-        if len(unique_areas) > 1:
-            self.is_cross_area = True
-        return super().save(*args, **kwargs)
+    def populate_cross_area_flag(self, *args: Any, **kwargs: Any) -> None:
+        from hct_mis_api.apps.household.models import Individual
+
+        unique_areas_count = (
+            Individual.objects.filter(
+                id__in=[
+                    self.golden_records_individual.id,
+                    *self.possible_duplicates.values_list("id", flat=True),
+                ],
+                household__admin2__isnull=False,
+            )
+            .values_list("household__admin2", flat=True)
+            .distinct()
+            .count()
+        )
+        self.is_cross_area = unique_areas_count > 1
+        self.save()
 
     class Meta:
         verbose_name_plural = "Ticket Needs Adjudication Details"

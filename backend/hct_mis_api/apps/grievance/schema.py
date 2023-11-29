@@ -26,7 +26,7 @@ from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE, Scope
-from hct_mis_api.apps.core.models import FlexibleAttribute, BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
     ChoiceObjectInt,

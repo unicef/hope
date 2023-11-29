@@ -52,6 +52,7 @@ def traverse_sibling_tickets(grievance_ticket: GrievanceTicket, selected_individ
         )
         intersection = selected_individuals_set.intersection(possible_duplicates_set)
         ticket_details.selected_individuals.add(*intersection)
+        ticket_details.populate_cross_area_flag()
 
 
 def clear_cache(

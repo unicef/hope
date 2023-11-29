@@ -156,6 +156,7 @@ def create_grievance_ticket_with_details(
     )
 
     ticket_details.possible_duplicates.add(*possible_duplicates)
+    ticket_details.populate_cross_area_flag()
 
     GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
 
