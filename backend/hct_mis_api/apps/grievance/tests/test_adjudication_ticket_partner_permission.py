@@ -1,3 +1,4 @@
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
@@ -8,6 +9,7 @@ from hct_mis_api.apps.grievance.fixtures import (
 class TestAdjudicationTicketPartnerPermission(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.business_area = BusinessAreaFactory(slug="afghanistan")
         cls.grievance = GrievanceTicketFactory()
         cls.ticket_details = TicketNeedsAdjudicationDetailsFactory(ticket=cls.grievance)
 
