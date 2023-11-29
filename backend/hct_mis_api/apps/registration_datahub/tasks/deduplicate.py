@@ -828,5 +828,4 @@ class HardDocumentDeduplication:
                     individual=possible_duplicate_individual, ticketneedsadjudicationdetails=ticket_details
                 )
             )
-        ticket_details.populate_cross_area_flag()
         return TicketData(ticket, ticket_details, possible_duplicates_throughs)
