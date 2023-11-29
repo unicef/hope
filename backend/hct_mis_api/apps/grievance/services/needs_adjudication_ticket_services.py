@@ -87,7 +87,6 @@ def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, u
     if ticket_details.is_multiple_duplicates_version:
         selected_individuals = ticket_details.selected_individuals.all()
         traverse_sibling_tickets(grievance_ticket, selected_individuals)
-
         close_needs_adjudication_new_ticket(ticket_details, user)
     else:
         close_needs_adjudication_old_ticket(ticket_details, user)

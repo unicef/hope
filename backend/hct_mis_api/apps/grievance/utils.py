@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 def get_individual(individual_id: str) -> Individual:
     decoded_selected_individual_id = decode_id_string(individual_id)
-    individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
+    individual = get_object_or_404(Individual.objects.select_related("household"), id=decoded_selected_individual_id)
     return individual
 
 

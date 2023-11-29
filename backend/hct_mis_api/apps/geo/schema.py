@@ -46,8 +46,4 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_areas_tree(self, info: Any, business_area: str, **kwargs: Any) -> List[Area]:
-        return (
-            Area.objects.filter(area_type__country__business_areas__slug=business_area)
-            .order_by("name", "p_code")
-            .get_cached_trees()
-        )
+        return Area.objects.filter(area_type__country__business_areas__slug=business_area).get_cached_trees()

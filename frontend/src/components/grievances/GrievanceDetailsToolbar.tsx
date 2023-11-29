@@ -269,8 +269,12 @@ export const GrievanceDetailsToolbar = ({
           content: getClosingConfirmationText(),
           warningContent: closingWarningText,
           continueText: t('close ticket'),
-        }).then(() => {
-          changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+        }).then(async () => {
+          try {
+            await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+          } catch(e) {
+            e.graphQLErrors.map((x) => showMessage(x.message));
+          }
         })
       }
       data-cy='button-close-ticket'

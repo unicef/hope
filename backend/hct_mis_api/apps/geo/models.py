@@ -124,6 +124,9 @@ class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         unique_together = ("name", "p_code")
         ordering = ("name",)
 
+    class MPTTMeta:
+        order_insertion_by = ("name", "p_code")
+
     def __str__(self) -> str:
         return self.name
 
