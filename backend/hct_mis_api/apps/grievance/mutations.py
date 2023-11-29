@@ -1204,7 +1204,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
             # Validate partner's permission
             if not partner.is_unicef:
-                if selected_individual.household.admin2 not in areas_ids:
+                if selected_individual.household.admin2_id not in areas_ids:
                     raise PermissionDenied("Permission Denied: User does not have access to select individual")
 
             if selected_individual not in (
