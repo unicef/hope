@@ -16,8 +16,10 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { getPercentage } from '../../utils/utils';
 import {
   PaymentPlanQuery,
+  ProgramStatus,
   useFinishPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
+import { useProgramContext } from "../../programContext";
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
@@ -29,6 +31,7 @@ export function FinishVerificationPlan({
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
   const [mutate] = useFinishPaymentVerificationPlanMutation();
 
   const finish = async (): Promise<void> => {
@@ -81,6 +84,7 @@ export function FinishVerificationPlan({
           variant='contained'
           onClick={() => setFinishDialogOpen(true)}
           data-cy='button-ed-plan'
+          disabled={selectedProgram?.status !== ProgramStatus.Active}
         >
           {t('Finish')}
         </Button>

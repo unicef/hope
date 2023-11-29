@@ -10,6 +10,7 @@ import { renderUserName } from '../../../utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
+  ProgramStatus,
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../../__generated__/graphql';
@@ -17,6 +18,7 @@ import { LoadingButton } from '../../core/LoadingButton';
 import { OverviewContainerColumn } from '../../core/OverviewContainerColumn';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { useProgramContext } from "../../../programContext";
 
 const Name = styled.span`
   font-size: 16px;
@@ -48,6 +50,7 @@ export function Notes({
   });
 
   const { id } = useParams();
+  const { selectedProgram } = useProgramContext();
   const [mutate, { loading }] = useCreateGrievanceTicketNoteMutation();
 
   if (meLoading) {
@@ -159,6 +162,7 @@ export function Notes({
                                 color='primary'
                                 variant='contained'
                                 onClick={submitForm}
+                                disabled={selectedProgram?.status !== ProgramStatus.Active}
                               >
                                 {t('Add New Note')}
                               </LoadingButton>

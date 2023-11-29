@@ -11,6 +11,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
 import {
+  ProgramStatus,
   SurveyCategory,
   useExportSurveySampleMutation,
   useSurveyQuery,
@@ -20,12 +21,15 @@ import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/Recipie
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import {ButtonTooltip} from "../../../../components/core/ButtonTooltip";
+import {useProgramContext} from "../../../../programContext";
 
 export const SurveyDetailsPage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const { data, loading, error } = useSurveyQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -71,7 +75,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
   const renderActions = (): React.ReactElement => {
     if (survey.category === SurveyCategory.RapidPro) {
       return (
-        <Button
+        <ButtonTooltip
           variant='contained'
           color='primary'
           component={Link}
@@ -79,9 +83,11 @@ export const SurveyDetailsPage = (): React.ReactElement => {
             pathname: survey?.rapidProUrl,
           }}
           target='_blank'
+          title={t('Program has to be active to export Survey sample')}
+          disabled={selectedProgram?.status !== ProgramStatus.Active}
         >
           {t('Check Answers')}
-        </Button>
+        </ButtonTooltip>
       );
     }
     if (survey.category === SurveyCategory.Manual) {

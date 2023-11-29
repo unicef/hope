@@ -28,6 +28,7 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { getPercentage } from '../../utils/utils';
 import {
   PaymentVerificationPlanVerificationChannel,
+  ProgramStatus,
   useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useCreatePaymentVerificationPlanMutation,
@@ -39,6 +40,7 @@ import { FormikEffect } from '../core/FormikEffect';
 import { LoadingButton } from '../core/LoadingButton';
 import { TabPanel } from '../core/TabPanel';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useProgramContext } from "../../programContext";
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -110,13 +112,11 @@ function prepareVariables(
 
 export interface Props {
   cashOrPaymentPlanId: string;
-  disabled: boolean;
   canCreatePaymentVerificationPlan: boolean;
   version: number;
 }
 export function CreateVerificationPlan({
   cashOrPaymentPlanId,
-  disabled,
   canCreatePaymentVerificationPlan,
   version,
 }: Props): React.ReactElement {
@@ -127,6 +127,7 @@ export function CreateVerificationPlan({
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
   const { businessArea } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
   const [formValues, setFormValues] = useState(initialValues);
 
   const [
@@ -233,7 +234,8 @@ export function CreateVerificationPlan({
           />
           <Box mr={2}>
             <ButtonTooltip
-              disabled={disabled}
+              title={t('Program has to be active to create a VerificationPaymentPlan')}
+              disabled={selectedProgram?.status !== ProgramStatus.Active}
               color='primary'
               variant='contained'
               onClick={() => handleOpen()}

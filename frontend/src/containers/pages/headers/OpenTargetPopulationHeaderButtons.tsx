@@ -8,6 +8,7 @@ import {
   RefreshRounded,
 } from '@material-ui/icons';
 import {
+  ProgramStatus,
   TargetPopulationQuery,
   useRebuildTpMutation,
 } from '../../../__generated__/graphql';
@@ -15,6 +16,7 @@ import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTar
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useProgramContext } from "../../../programContext";
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -35,6 +37,7 @@ export const OpenTargetPopulationHeaderButtons = ({
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const { baseUrl } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
 
   const [
     rebuildTargetPopulation,
@@ -46,12 +49,17 @@ export const OpenTargetPopulationHeaderButtons = ({
         <IconButton
           onClick={() => setOpenDuplicate(true)}
           data-cy='button-target-population-duplicate'
+          disabled={selectedProgram?.status !== ProgramStatus.Active}
         >
           <FileCopy />
         </IconButton>
       )}
       {canRemove && (
-        <IconButton data-cy='button-delete' onClick={() => setOpenDelete(true)}>
+        <IconButton
+          data-cy='button-delete'
+          onClick={() => setOpenDelete(true)}
+          disabled={selectedProgram?.status !== ProgramStatus.Active}
+        >
           <Delete />
         </IconButton>
       )}
@@ -64,6 +72,7 @@ export const OpenTargetPopulationHeaderButtons = ({
             startIcon={<EditRounded />}
             component={Link}
             to={`/${baseUrl}/target-population/edit-tp/${targetPopulation.id}`}
+            disabled={selectedProgram?.status !== ProgramStatus.Active}
           >
             Edit
           </Button>
@@ -75,7 +84,7 @@ export const OpenTargetPopulationHeaderButtons = ({
             data-cy='button-rebuild'
             variant='outlined'
             color='primary'
-            disabled={rebuildTargetPopulationLoading}
+            disabled={rebuildTargetPopulationLoading || selectedProgram?.status !== ProgramStatus.Active}
             startIcon={<RefreshRounded />}
             onClick={() =>
               rebuildTargetPopulation({
@@ -94,6 +103,7 @@ export const OpenTargetPopulationHeaderButtons = ({
             color='primary'
             onClick={() => setOpenLock(true)}
             data-cy='button-target-population-lock'
+            disabled={selectedProgram?.status !== ProgramStatus.Active}
           >
             Lock
           </Button>

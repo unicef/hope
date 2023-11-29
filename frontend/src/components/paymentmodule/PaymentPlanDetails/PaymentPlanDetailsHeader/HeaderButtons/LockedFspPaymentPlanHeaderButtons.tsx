@@ -3,8 +3,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import { Action, PaymentPlanQuery, ProgramStatus } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
+import { useProgramContext } from "../../../../../programContext";
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -20,6 +21,8 @@ export const LockedFspPaymentPlanHeaderButtons = ({
   const { t } = useTranslation();
   const { id } = paymentPlan;
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+
   const {
     mutatePaymentPlanAction: unlock,
     loading: loadingUnlock,
@@ -42,6 +45,7 @@ export const LockedFspPaymentPlanHeaderButtons = ({
             variant='outlined'
             color='primary'
             onClick={() => unlock()}
+            disabled={selectedProgram?.status !== ProgramStatus.Active}
           >
             {t('Unlock FSP')}
           </LoadingButton>
@@ -55,6 +59,7 @@ export const LockedFspPaymentPlanHeaderButtons = ({
             color='primary'
             onClick={() => sendForApproval()}
             data-cy='button-send-for-approval'
+            disabled={selectedProgram?.status !== ProgramStatus.Active}
           >
             {t('Send For Approval')}
           </LoadingButton>

@@ -28,6 +28,7 @@ import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
   PaymentPlanQuery,
+  ProgramStatus,
   useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useEditPaymentVerificationPlanMutation,
@@ -38,6 +39,7 @@ import { FormikEffect } from '../core/FormikEffect';
 import { LoadingButton } from '../core/LoadingButton';
 import { TabPanel } from '../core/TabPanel';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useProgramContext } from "../../programContext";
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -116,6 +118,7 @@ export function EditVerificationPlan({
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
   const { businessArea } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
 
   useEffect(() => {
     if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
@@ -238,6 +241,7 @@ export function EditVerificationPlan({
             onClick={() => setOpen(true)}
             startIcon={<EditIcon />}
             data-cy='button-new-plan'
+            disabled={selectedProgram?.status !== ProgramStatus.Active}
           >
             {t('Edit')}
           </Button>

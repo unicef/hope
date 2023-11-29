@@ -6,10 +6,12 @@ import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
+  ProgramStatus,
   useExportXlsxPpListPerFspMutation,
 } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
+import { useProgramContext } from "../../../../../programContext";
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
@@ -26,6 +28,8 @@ export const AcceptedPaymentPlanHeaderButtons = ({
 }: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
+
   const [
     mutateExport,
     { loading: loadingExport },
@@ -35,8 +39,8 @@ export const AcceptedPaymentPlanHeaderButtons = ({
     loadingExport ||
     !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
     !canExportXlsx ||
-    paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting;
+    paymentPlan?.backgroundActionStatus === PaymentPlanBackgroundActionStatus.XlsxExporting ||
+    selectedProgram?.status !== ProgramStatus.Active;
 
   return (
     <Box display='flex' alignItems='center'>
