@@ -12,7 +12,7 @@ import { ProgramPartnerCard } from './ProgramPartnerCard';
 
 interface PartnersStepProps {
   values;
-  allAreasTree: AllAreasTreeQuery['allAreasTree'];
+  allAreasTreeData: AllAreasTreeQuery['allAreasTree'];
   partnerChoices: UserPartnerChoicesQuery['userPartnerChoices'];
   step: number;
   setStep: (step: number) => void;
@@ -20,7 +20,7 @@ interface PartnersStepProps {
 
 export const PartnersStep: React.FC<PartnersStepProps> = ({
   values,
-  allAreasTree,
+  allAreasTreeData,
   partnerChoices,
   step,
   setStep,
@@ -30,6 +30,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
   const description = t(
     'Provide info about Programme Partner and set Area Access',
   );
+
 
   return (
     <BaseSection title={title} description={description}>
@@ -48,7 +49,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                   index={index}
                   values={values}
                   arrayHelpers={arrayHelpers}
-                  allAreasTree={allAreasTree}
+                  allAreasTreeData={allAreasTreeData}
                   partnerChoices={partnerChoices}
                   setFieldValue={setFieldValue}
                 />

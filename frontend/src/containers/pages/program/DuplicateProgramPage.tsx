@@ -159,7 +159,7 @@ export const DuplicateProgramPage = (): ReactElement => {
             {step === 1 && (
               <PartnersStep
                 values={values}
-                allAreasTree={allAreasTree}
+                allAreasTreeData={allAreasTree}
                 partnerChoices={userPartnerChoices}
                 step={step}
                 setStep={setStep}
