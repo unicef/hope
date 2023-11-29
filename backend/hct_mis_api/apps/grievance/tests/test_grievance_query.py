@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -19,6 +19,8 @@ from hct_mis_api.apps.grievance.models import (
     TicketNeedsAdjudicationDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 @patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
@@ -172,9 +174,14 @@ class TestGrievanceQuery(APITestCase):
         cls.maxDiff = None
         create_afghanistan()
         call_command("loadcountries")
-        cls.user = UserFactory.create()
-        cls.user2 = UserFactory.create()
+
+        cls.partner = PartnerFactory()
+        cls.partner_2 = PartnerFactory()
+        cls.user = UserFactory.create(partner=cls.partner)
+        cls.user2 = UserFactory.create(partner=cls.partner_2)
+
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
 
         country = Country.objects.first()
         area_type = AreaTypeFactory(
@@ -236,7 +243,7 @@ class TestGrievanceQuery(APITestCase):
                 }
             ),
         )
-        GrievanceTicket.objects.bulk_create(grievances_to_create)
+        cls.grievance_tickets = GrievanceTicket.objects.bulk_create(grievances_to_create)
 
         for status, date in created_at_dates_to_set.items():
             gt = GrievanceTicket.objects.get(status=status)
@@ -250,6 +257,10 @@ class TestGrievanceQuery(APITestCase):
             score_min=100,
             score_max=150,
         )
+
+        cls.grievance_tickets[0].programs.add(cls.program)
+        cls.grievance_tickets[1].programs.add(cls.program)
+        cls.grievance_tickets[2].programs.add(cls.program)
 
     @parameterized.expand(
         [
@@ -265,7 +276,13 @@ class TestGrievanceQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_GRIEVANCE_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
         )
 
     @parameterized.expand(
@@ -280,7 +297,13 @@ class TestGrievanceQuery(APITestCase):
         gt_id = GrievanceTicket.objects.get(status=GrievanceTicket.STATUS_IN_PROGRESS).id
         self.snapshot_graphql_request(
             request_string=self.GRIEVANCE_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
 
@@ -293,7 +316,13 @@ class TestGrievanceQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ADMIN_AREA,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"admin": self.id_to_base64(self.admin_area_1.id, "GrievanceTicketNode")},
         )
 
@@ -306,7 +335,13 @@ class TestGrievanceQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"createdAtRange": '{"min": "2020-07-12", "max": "2020-09-12"}'},
         )
 
@@ -319,7 +354,13 @@ class TestGrievanceQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"status": [str(GrievanceTicket.STATUS_IN_PROGRESS)]},
         )
 
@@ -344,7 +385,13 @@ class TestGrievanceQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CATEGORY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"category": str(category)},
         )
 
@@ -357,7 +404,13 @@ class TestGrievanceQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ASSIGNED_TO,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"assignedTo": self.id_to_base64(self.user.id, "UserNode")},
         )
 
@@ -370,7 +423,13 @@ class TestGrievanceQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ASSIGNED_TO,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"assignedTo": self.id_to_base64(self.user2.id, "UserNode")},
         )
 
@@ -383,12 +442,24 @@ class TestGrievanceQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SCORE,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"scoreMin": 100, "scoreMax": 200},
         )
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SCORE,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"scoreMin": 900, "scoreMax": 999},
         )
