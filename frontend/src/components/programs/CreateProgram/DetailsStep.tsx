@@ -28,6 +28,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({
           <Box mr={2}>
             <Button
               variant='outlined'
+              data-cy='button-back'
               onClick={() => setStep(step - 1)}
               disabled={step === 0}
             >
@@ -37,6 +38,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({
           <Button
             variant='contained'
             color='primary'
+            data-cy='button-next'
             onClick={() => setStep(step + 1)}
           >
             {t('Next')}
