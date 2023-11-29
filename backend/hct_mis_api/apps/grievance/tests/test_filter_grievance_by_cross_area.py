@@ -97,6 +97,8 @@ class TestCrossAreaFilterAvailable(APITestCase):
         )
 
     def test_cross_area_filter_true(self) -> None:
+        self.needs_adjudication_ticket_cross_area.refresh_from_db()
+        self.needs_adjudication_ticket_same_area.refresh_from_db()
         self.assertEqual(self.needs_adjudication_ticket_cross_area.is_cross_area, True)
         self.assertEqual(self.needs_adjudication_ticket_same_area.is_cross_area, False)
 
