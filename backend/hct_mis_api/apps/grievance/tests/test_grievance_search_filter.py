@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from django.conf import settings
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -16,6 +16,8 @@ from hct_mis_api.apps.household.fixtures import (
     create_household,
 )
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 @patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
@@ -40,9 +42,14 @@ class TestGrievanceQuerySearchFilter(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        cls.user = UserFactory.create()
-        cls.user2 = UserFactory.create()
+
+        cls.partner = PartnerFactory()
+        cls.partner_2 = PartnerFactory()
+        cls.user = UserFactory.create(partner=cls.partner)
+        cls.user2 = UserFactory.create(partner=cls.partner_2)
+
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
 
         country = Country.objects.first()
         area_type = AreaTypeFactory(
@@ -117,6 +124,10 @@ class TestGrievanceQuerySearchFilter(APITestCase):
         cls.grievance_ticket_2 = GrievanceTicket.objects.get(household_unicef_id="HH-22-0059.7224")
         cls.grievance_ticket_3 = GrievanceTicket.objects.get(household_unicef_id="HH-22-0059.7225")
 
+        cls.grievance_ticket_1.programs.add(cls.program)
+        cls.grievance_ticket_2.programs.add(cls.program)
+        cls.grievance_ticket_3.programs.add(cls.program)
+
     def test_grievance_list_filtered_by_ticket_id(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
@@ -126,7 +137,13 @@ class TestGrievanceQuerySearchFilter(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={
                 "search": f"{self.grievance_ticket_1.unicef_id}",
                 "searchType": "ticket_id",
@@ -142,7 +159,13 @@ class TestGrievanceQuerySearchFilter(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={
                 "search": f"{self.grievance_ticket_2.household_unicef_id}",
                 "searchType": "ticket_hh_id",
@@ -158,7 +181,13 @@ class TestGrievanceQuerySearchFilter(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={
                 "search": f"{self.individual_1.full_name}",
                 "searchType": "full_name",
@@ -174,7 +203,13 @@ class TestGrievanceQuerySearchFilter(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={
                 "search": "test123",
                 "searchType": "national_id",
@@ -190,7 +225,13 @@ class TestGrievanceQuerySearchFilter(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={
                 "search": "test123",
                 "searchType": "invalid",
