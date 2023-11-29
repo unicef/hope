@@ -14,7 +14,7 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import JSONField, Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from model_utils import Choices
@@ -54,6 +54,9 @@ class BusinessAreaPartnerPermission:
 
     def in_program(self, program_id: str) -> Optional[List[str]]:
         return self.programs[program_id] if program_id in self.programs else None
+
+    def get_program_ids(self) -> List[str]:
+        return list(self.programs.keys())
 
 
 class PartnerPermission:
@@ -108,9 +111,22 @@ class PartnerPermission:
         return self._permissions[business_area_id].roles
 
     def areas_for(self, business_area_id: str, program_id: str) -> Optional[List[str]]:
+        """
+        if return None it means that no access into BA for this partner
+        if return empty list [] it means that partner have access for all Areas
+        """
         if business_area_id not in self._available_business_areas:
-            return []
+            return None
         return self._permissions[business_area_id].in_program(program_id)
+
+    def business_area_ids(self) -> List[str]:
+        return list(self._permissions.keys())
+
+    def program_ids(self) -> List[str]:
+        ids = []
+        for ba_perms in self._permissions.values():
+            ids.extend(ba_perms.get_program_ids())
+        return ids
 
 
 class Partner(models.Model):
@@ -146,6 +162,14 @@ class Partner(models.Model):
 
     def has_complete_access_in_program(self, program_id: str, business_area_id: str) -> bool:
         return self.is_unicef or self.get_permissions().areas_for(business_area_id, program_id) == []
+
+    @property
+    def program_ids(self) -> List[str]:
+        return self.get_permissions().program_ids()
+
+    @property
+    def business_area_ids(self) -> List[str]:
+        return self.get_permissions().business_area_ids()
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
@@ -244,6 +268,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             else list()
         )
 
+    @property
+    def business_areas(self) -> QuerySet[BusinessArea]:
+        return BusinessArea.objects.filter(
+            Q(user_roles__user=self) | Q(id__in=self.partner.business_area_ids)
+        ).distinct()
+
     def has_permission(
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
     ) -> bool:
@@ -287,6 +317,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def can_change_fsp(self) -> bool:
         return any(
             self.has_permission(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
+            for role in self.user_roles.all()
+        )
+
+    def can_add_business_area_to_partner(self) -> bool:
+        return any(
+            self.has_permission(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)
             for role in self.user_roles.all()
         )
 

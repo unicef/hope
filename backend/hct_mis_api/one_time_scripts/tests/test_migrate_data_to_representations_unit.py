@@ -54,6 +54,7 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     copy_document_per_individual,
     copy_entitlement_card_per_household,
     copy_household_representation,
+    copy_household_representation_for_programs_fast,
     copy_household_selections,
     copy_individual_identity_per_individual,
     copy_individual_representation,
@@ -108,7 +109,7 @@ class TestCopyDocumentPerIndividual(TestCase):
 
     def test_copy_document_per_individual(self) -> None:
         documents_count = Document.original_and_repr_objects.count()
-        copy_document_per_individual(self.individual1, self.individual_representation1)
+        copy_document_per_individual(self.individual1.documents.all(), self.individual_representation1)
 
         self.assertEqual(self.individual_representation1.documents(manager="original_and_repr_objects").count(), 2)
         self.assertEqual(Document.original_and_repr_objects.count() - documents_count, 2)
@@ -133,7 +134,7 @@ class TestCopyIndividualIdentityPerIndividual(TestCase):
 
     def test_copy_individual_identity_per_individual(self) -> None:
         individual_identities_count = IndividualIdentity.original_and_repr_objects.count()
-        copy_individual_identity_per_individual(self.individual1, self.individual_representation1)
+        copy_individual_identity_per_individual(self.individual1.identities.all(), self.individual_representation1)
 
         self.assertEqual(self.individual_representation1.identities(manager="original_and_repr_objects").count(), 2)
         self.assertEqual(IndividualIdentity.original_and_repr_objects.count() - individual_identities_count, 2)
@@ -158,7 +159,7 @@ class TestCopyBankAccountInfoPerIndividual(TestCase):
 
     def test_copy_bank_account_info_per_individual(self) -> None:
         bank_account_info_count = BankAccountInfo.original_and_repr_objects.count()
-        copy_bank_account_info_per_individual(self.individual1, self.individual_representation1)
+        copy_bank_account_info_per_individual(self.individual1.bank_account_info.all(), self.individual_representation1)
 
         self.assertEqual(
             self.individual_representation1.bank_account_info(manager="original_and_repr_objects").count(), 2
@@ -240,7 +241,7 @@ class TestCopyIndividualRepresentation(TestCase):
         individual_count = Individual.original_and_repr_objects.count()
 
         individual = copy_individual_representation(program=self.program, individual=self.individual1)
-
+        individual.refresh_from_db()
         self.individual1 = Individual.original_and_repr_objects.get(id=self.individual1_id)
 
         self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 1)
@@ -355,6 +356,60 @@ class TestCopyHouseholdRepresentation(TestCase):
         bank_account_info_count = BankAccountInfo.original_and_repr_objects.count()
 
         copy_household_representation(
+            program=self.program, household=self.household1, individuals=[self.individual1, self.individual2]
+        )
+
+        self.household1 = Household.original_and_repr_objects.get(id=self.household1_id)
+
+        household_representation = (
+            self.household1.copied_to(manager="original_and_repr_objects").filter(program=self.program).first()
+        )
+
+        self.assertEqual(household_representation.copied_from, self.household1)
+        self.assertEqual(self.household1.copied_to(manager="original_and_repr_objects").count(), 1)
+        self.assertNotEqual(household_representation.pk, self.household1.pk)
+        self.assertEqual(household_representation.copied_from, self.household1)
+        self.assertEqual(household_representation.origin_unicef_id, self.household1.unicef_id)
+        # self.assertEqual(household_representation.entitlement_cards(manager="original_and_repr_objects").count(), 2)
+        self.assertEqual(household_representation.individuals(manager="original_and_repr_objects").count(), 2)
+        self.assertEqual(
+            household_representation.individuals(manager="original_and_repr_objects")
+            .first()
+            .documents(manager="original_and_repr_objects")
+            .count(),
+            2,
+        )
+        self.assertEqual(
+            household_representation.individuals(manager="original_and_repr_objects")
+            .first()
+            .identities(manager="original_and_repr_objects")
+            .count(),
+            2,
+        )
+        self.assertEqual(
+            household_representation.individuals(manager="original_and_repr_objects")
+            .first()
+            .bank_account_info(manager="original_and_repr_objects")
+            .count(),
+            2,
+        )
+
+        self.assertEqual(Household.original_and_repr_objects.count() - household_count, 1)
+        # self.assertEqual(EntitlementCard.original_and_repr_objects.count() - entitlement_card_count, 2)
+        self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 2)
+        self.assertEqual(Document.original_and_repr_objects.count() - documents_count, 4)
+        self.assertEqual(IndividualIdentity.original_and_repr_objects.count() - individual_identities_count, 4)
+        self.assertEqual(BankAccountInfo.original_and_repr_objects.count() - bank_account_info_count, 4)
+
+    def test_copy_household_representation_for_programs_fast(self) -> None:
+        household_count = Household.original_and_repr_objects.count()
+        # entitlement_card_count = EntitlementCard.original_and_repr_objects.count()
+        individual_count = Individual.original_and_repr_objects.count()
+        documents_count = Document.original_and_repr_objects.count()
+        individual_identities_count = IndividualIdentity.original_and_repr_objects.count()
+        bank_account_info_count = BankAccountInfo.original_and_repr_objects.count()
+
+        copy_household_representation_for_programs_fast(
             program=self.program, household=self.household1, individuals=[self.individual1, self.individual2]
         )
 
@@ -900,6 +955,12 @@ class TestHandleRDIs(TestCase):
             household=self.household_rdi1_1,
             role=ROLE_PRIMARY,
         )
+        # roles for existing representations are already handled
+        IndividualRoleInHouseholdFactory(
+            individual=self.individual_rdi1_1_repr,
+            household=self.household_rdi1_1_repr,
+            role=ROLE_PRIMARY,
+        )
         # external collector individual
         self.collector_rdi1_1 = IndividualFactory(
             household=None,
@@ -916,6 +977,12 @@ class TestHandleRDIs(TestCase):
         IndividualRoleInHouseholdFactory(
             individual=self.collector_rdi1_1,
             household=self.household_rdi1_1,
+            role=ROLE_ALTERNATE,
+        )
+        # roles for existing representations are already handled
+        IndividualRoleInHouseholdFactory(
+            individual=self.collector_rdi1_1_repr,
+            household=self.household_rdi1_1_repr,
             role=ROLE_ALTERNATE,
         )
 
@@ -945,8 +1012,14 @@ class TestHandleRDIs(TestCase):
             household=self.household_rdi1_2,
             role=ROLE_PRIMARY,
         )
+        # roles for existing representations are already handled
+        IndividualRoleInHouseholdFactory(
+            individual=self.individual_rdi1_2_repr,
+            household=self.household_rdi1_2_repr,
+            role=ROLE_ALTERNATE,
+        )
 
-        # household and individual that did were not copied to any program as they did not fulfill the criteria - they will be copied while handling their RDI
+        # household and individual that were not copied to any program as they did not fulfill the criteria - they will be copied while handling their RDI
         self.household_rdi1_3, self.individual_rdi1_3 = create_origin_household_with_individual(
             business_area=self.business_area,
             household_kwargs={"registration_data_import": self.rdi1},
@@ -1017,8 +1090,8 @@ class TestHandleRDIs(TestCase):
         self.assertEqual(Household.original_and_repr_objects.count() - households_count, 2)
         # additional 1 individual_rdi1_2 copy for program1, 1 individual_rdi1_3 copy for program1, 1 collector_rdi1_3 copy for program1, 1 individual_rdi1_3_1 copy for program1
         self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 4)
-        # additional 2 roles for household_rdi1_1 in program1, 1 role for household_rdi1_2 in program1, 2 roles for household_rdi1_3 in program1
-        self.assertEqual(IndividualRoleInHousehold.original_and_repr_objects.count() - roles_count, 5)
+        # additional 0 roles for household_rdi1_1 in program1, 1 role for household_rdi1_2 in program1, 2 roles for household_rdi1_3 in program1
+        self.assertEqual(IndividualRoleInHousehold.original_and_repr_objects.count() - roles_count, 3)
 
         handle_rdis(
             rdis=RegistrationDataImport.objects.filter(business_area=self.business_area),
@@ -1035,8 +1108,8 @@ class TestHandleRDIs(TestCase):
         self.assertEqual(Household.original_and_repr_objects.count() - households_count, 4)
         # additional 1 individual_rdi1_1 copy for program2, 1 collector_rdi1_1 copy for program2, 1 individual_rdi1_2 copy for program1, 1 individual_rdi1_3 copy for program1, 1 individual_rdi1_3 copy for program2, 1 collector_rdi1_3 copy for program1, 2 individual_rdi1_3_1 copies for program1 and program2
         self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 8)
-        # additional 4 roles for household_rdi1_1 in program1 and program2, 2 roles for household_rdi1_2 in program1 and program2, 4 roles for household_rdi1_3 in program1 and program2
-        self.assertEqual(IndividualRoleInHousehold.original_and_repr_objects.count() - roles_count, 10)
+        # additional 2 roles for household_rdi1_1 in program1 and program2, 1 role for household_rdi1_2 in program1 and program2, 4 roles for household_rdi1_3 in program1 and program2
+        self.assertEqual(IndividualRoleInHousehold.original_and_repr_objects.count() - roles_count, 7)
 
         self.assertEqual(self.household_rdi1_1.copied_to(manager="original_and_repr_objects").count(), 2)
         self.assertEqual(self.individual_rdi1_1.copied_to(manager="original_and_repr_objects").count(), 2)
@@ -1126,7 +1199,6 @@ class TestHandleRDIs(TestCase):
                 copied_from=self.collector_rdi1_3, program=self.program2
             ).first()
         )
-
         self.assertEqual(
             IndividualRoleInHousehold.original_and_repr_objects.filter(
                 household__copied_from=self.household_rdi1_1, individual__copied_from=self.individual_rdi1_1

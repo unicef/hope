@@ -36,7 +36,6 @@ class TestRecalculatingCash(APITestCase):
           description
           frequencyOfPayments
           sector
-          scope
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
@@ -113,7 +112,6 @@ class TestRecalculatingCash(APITestCase):
                 "individualDataNeeded": False,
                 "name": "newprogram",
                 "populationGoal": 1,
-                "scope": "UNICEF",
                 "sector": "MULTI_PURPOSE",
                 "startDate": "2022-07-25",
                 "dataCollectingTypeCode": cls.data_collecting_type.code,

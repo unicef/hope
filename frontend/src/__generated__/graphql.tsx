@@ -4395,7 +4395,7 @@ export type PartnerNodeForProgram = {
   userSet: UserNodeConnection,
   individualIdentities: IndividualIdentityNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
-  adminAreas?: Maybe<Array<Maybe<AreaTreeNode>>>,
+  adminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
   areaAccess?: Maybe<Scalars['String']>,
 };
 
@@ -4427,8 +4427,8 @@ export type PartnerNodeForProgramGrievanceticketSetArgs = {
 };
 
 export type PartnerProgramInput = {
-  areaAccess?: Maybe<Scalars['String']>,
   id: Scalars['String'],
+  areaAccess?: Maybe<Scalars['String']>,
   adminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 
@@ -13559,11 +13559,7 @@ export type ProgramQuery = (
       & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable' | 'description'>
     )>, partners: Maybe<Array<Maybe<(
       { __typename?: 'PartnerNodeForProgram' }
-      & Pick<PartnerNodeForProgram, 'id' | 'name' | 'areaAccess'>
-      & { adminAreas: Maybe<Array<Maybe<(
-        { __typename?: 'AreaTreeNode' }
-        & Pick<AreaTreeNode, 'id'>
-      )>>> }
+      & Pick<PartnerNodeForProgram, 'id' | 'name' | 'areaAccess' | 'adminAreas'>
     )>>> }
   )> }
 );
@@ -25896,9 +25892,7 @@ export const ProgramDocument = gql`
       id
       name
       areaAccess
-      adminAreas {
-        id
-      }
+      adminAreas
     }
   }
 }
@@ -28646,7 +28640,6 @@ export type ResolversTypes = {
   TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeEdge>,
   TicketNeedsAdjudicationDetailsNodeConnection: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNodeConnection>,
   TicketNeedsAdjudicationDetailsNodeEdge: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNodeEdge>,
-  AreaTreeNode: ResolverTypeWrapper<AreaTreeNode>,
   MessageSamplingType: MessageSamplingType,
   CommunicationMessageRecipientMapNodeConnection: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeConnection>,
   CommunicationMessageRecipientMapNodeEdge: ResolverTypeWrapper<CommunicationMessageRecipientMapNodeEdge>,
@@ -28664,6 +28657,7 @@ export type ResolversTypes = {
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
   AccountabilitySampleSizeNode: ResolverTypeWrapper<AccountabilitySampleSizeNode>,
   RapidProFlowNode: ResolverTypeWrapper<RapidProFlowNode>,
+  AreaTreeNode: ResolverTypeWrapper<AreaTreeNode>,
   LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
   LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
@@ -29159,7 +29153,6 @@ export type ResolversParentTypes = {
   TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge,
   TicketNeedsAdjudicationDetailsNodeConnection: TicketNeedsAdjudicationDetailsNodeConnection,
   TicketNeedsAdjudicationDetailsNodeEdge: TicketNeedsAdjudicationDetailsNodeEdge,
-  AreaTreeNode: AreaTreeNode,
   MessageSamplingType: MessageSamplingType,
   CommunicationMessageRecipientMapNodeConnection: CommunicationMessageRecipientMapNodeConnection,
   CommunicationMessageRecipientMapNodeEdge: CommunicationMessageRecipientMapNodeEdge,
@@ -29177,6 +29170,7 @@ export type ResolversParentTypes = {
   AccountabilitySampleSizeInput: AccountabilitySampleSizeInput,
   AccountabilitySampleSizeNode: AccountabilitySampleSizeNode,
   RapidProFlowNode: RapidProFlowNode,
+  AreaTreeNode: AreaTreeNode,
   LogEntryNodeConnection: LogEntryNodeConnection,
   LogEntryNodeEdge: LogEntryNodeEdge,
   LogEntryNode: LogEntryNode,
@@ -31297,7 +31291,7 @@ export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerNodeForProgramUserSetArgs>,
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerNodeForProgramIndividualIdentitiesArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerNodeForProgramGrievanceticketSetArgs>,
-  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaTreeNode']>>>, ParentType, ContextType>,
+  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   areaAccess?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
