@@ -2,6 +2,7 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.grievance.fixtures import TicketNeedsAdjudicationDetailsFactory
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -33,7 +34,8 @@ class TestCrossAreaFilterAvailable(APITestCase):
 
         admin_area1 = AreaFactory()
         admin_area2 = AreaFactory()
-        business_area = create_afghanistan()
+        create_afghanistan()
+        business_area = BusinessArea.objects.get(slug="afghanistan")
         individual1_from_area1 = IndividualFactory(business_area=business_area, household=None)
         individual2_from_area1 = IndividualFactory(business_area=business_area, household=None)
         household1_from_area1 = HouseholdFactory(
