@@ -143,11 +143,13 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
         program.full_clean()
         program.save()
 
-        partner_ids = []
-        for partner in partners_data:
-            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
-            partner_ids.append(partner["id"])
-        remove_program_permissions_for_exists_partners(partner_ids, str(business_area.pk), str(program.pk))
+        # no need to update partners for Activation or Finish action
+        if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
+            partner_ids = []
+            for partner in partners_data:
+                update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
+                partner_ids.append(partner["id"])
+            remove_program_permissions_for_exists_partners(partner_ids, str(business_area.pk), str(program.pk))
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
