@@ -2,9 +2,13 @@ import { AllAreasTreeQuery } from '../../../__generated__/graphql';
 
 export class AreaTreeNode {
   id: string;
+
   checked: boolean | 'indeterminate';
+
   name: string;
+
   parent: AreaTreeNode;
+
   children: AreaTreeNode[];
 
   constructor(id, name) {
