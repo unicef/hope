@@ -6667,7 +6667,7 @@
       "individual_filters_available": true,
       "household_filters_available": true,
       "compatible_types": [1, 2, 3],
-      "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+      "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
     }
   },
   {
@@ -6684,7 +6684,7 @@
     "individual_filters_available": false,
     "household_filters_available": true,
     "compatible_types": [2, 3],
-    "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+    "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
   }
 },
   {
@@ -6701,7 +6701,7 @@
           "individual_filters_available": true,
           "household_filters_available": true,
           "compatible_types": [3],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {
@@ -6717,7 +6717,7 @@
           "individual_filters_available": false,
           "household_filters_available": true,
           "compatible_types": [4],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {
@@ -6733,7 +6733,7 @@
           "individual_filters_available": false,
           "household_filters_available": false,
           "compatible_types": [5],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {
@@ -6748,7 +6748,7 @@
           "active": false,
           "individual_filters_available": true,
           "compatible_types": [],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {
@@ -6764,7 +6764,7 @@
           "deprecated": true,
           "individual_filters_available": true,
           "compatible_types": [],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {

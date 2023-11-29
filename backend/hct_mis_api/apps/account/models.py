@@ -199,12 +199,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             return f"{self.first_name} {self.last_name}"
         return self.email or self.username
 
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        if not self.partner:
-            self.partner = Partner.objects.get(name="UNICEF")
-        if not self.partner.pk:
-            self.partner.save()
-        super().save(*args, **kwargs)
+    # def save(self, *args: Any, **kwargs: Any) -> None:
+    #     if not self.partner:
+    #         self.partner = Partner.objects.get(name="UNICEF")
+    #     if not self.partner.pk:
+    #         self.partner.save()
+    #     super().save(*args, **kwargs)
 
     def get_partner_role_ids_list(
         self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None
