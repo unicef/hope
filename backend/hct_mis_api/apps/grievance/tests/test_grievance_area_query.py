@@ -1,13 +1,11 @@
 from typing import Any, List
 from unittest import skip
-from unittest.mock import patch
 
 from django.core.management import call_command
 
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import (
-    BusinessAreaFactory,
     PartnerFactory,
     UserFactory,
 )
@@ -33,7 +31,6 @@ ALL_GRIEVANCE_QUERY = """
     """
 
 
-@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
 class TestGrievanceAreaQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
@@ -41,7 +38,6 @@ class TestGrievanceAreaQuery(APITestCase):
         call_command("loadcountries")
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.ukraine_business_area = BusinessAreaFactory(slug="ukraine")
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
 
         cls.area_type_level_1 = AreaTypeFactory(name="Province", area_level=1)
