@@ -31,7 +31,6 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
     'Provide info about Programme Partner and set Area Access',
   );
 
-
   return (
     <BaseSection title={title} description={description}>
       <FieldArray
