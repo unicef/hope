@@ -92,10 +92,12 @@ export const GlobalProgramSelect = (): React.ReactElement => {
       <MenuItem key='all' value='all'>
         All Programmes
       </MenuItem>
-      {data.allPrograms.edges.map((each) => (
-        <MenuItem key={each.node.id} value={each.node.id}>
-          {each.node.name}
-        </MenuItem>
+      {data.allPrograms.edges
+          .sort((objA, objB) => objA.node.name.localeCompare(objB.node.name))
+          .map((each) => (
+            <MenuItem key={each.node.id} value={each.node.id}>
+              {each.node.name}
+            </MenuItem>
       ))}
     </CountrySelect>
   );
