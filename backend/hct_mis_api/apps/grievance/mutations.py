@@ -580,7 +580,6 @@ class GrievanceStatusChangeMutation(PermissionMutation):
 
         if not grievance_ticket.can_change_status(status):
             log_and_raise("New status is incorrect")
-
         status_changer = TicketStatusChangerService(grievance_ticket, user)
         status_changer.change_status(status)
 
