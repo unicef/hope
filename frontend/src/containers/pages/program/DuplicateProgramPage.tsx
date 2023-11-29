@@ -113,13 +113,18 @@ export const DuplicateProgramPage = (): ReactElement => {
           <>
             <PageHeader title={`${t('Copy of Programme')}: (${name})`}>
               <Box display='flex' alignItems='center'>
-                <Button component={Link} to={`/${baseUrl}/details/${id}`}>
+                <Button
+                  data-cy='button-cancel'
+                  component={Link}
+                  to={`/${baseUrl}/details/${id}`}
+                >
                   {t('Cancel')}
                 </Button>
                 <Button
                   variant='contained'
                   color='primary'
                   onClick={submitForm}
+                  data-cy='button-save'
                 >
                   {t('Save')}
                 </Button>
@@ -127,12 +132,18 @@ export const DuplicateProgramPage = (): ReactElement => {
             </PageHeader>
             <Stepper activeStep={step}>
               <Step>
-                <StepButton onClick={() => setStep(0)}>
+                <StepButton
+                  data-cy='step-button-details'
+                  onClick={() => setStep(0)}
+                >
                   {t('Details')}
                 </StepButton>
               </Step>
               <Step>
-                <StepButton onClick={() => setStep(1)}>
+                <StepButton
+                  data-cy='step-button-partners'
+                  onClick={() => setStep(1)}
+                >
                   {t('Programme Partners')}
                 </StepButton>
               </Step>
