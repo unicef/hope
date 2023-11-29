@@ -273,7 +273,9 @@ def create_roles_for_new_representation(new_household: Household, program: Progr
 def update_partner_permissions_for_program(partner_data: Dict, business_area_pk: str, program_pk: str) -> None:
     admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
     partner = Partner.objects.get(id=partner_data["id"])
-    partner.get_permissions().set_program_areas(business_area_pk, program_pk, admin_areas)
+    partner_perms = partner.get_permissions()
+    partner_perms.set_program_areas(business_area_pk, program_pk, admin_areas)
+    partner.set_permissions(partner_perms)
     partner.save()
 
 
