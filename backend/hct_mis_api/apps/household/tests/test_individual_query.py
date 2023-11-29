@@ -3,7 +3,11 @@ from unittest import skip
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -11,6 +15,7 @@ from hct_mis_api.apps.core.fixtures import (
     generate_data_collecting_types,
 )
 from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
@@ -60,7 +65,9 @@ class TestIndividualQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = UserFactory()
+        cls.partner = PartnerFactory()
+        cls.user = UserFactory(partner=cls.partner)
+
         cls.business_area = create_afghanistan()
         BusinessAreaFactory(name="Democratic Republic of Congo")
         BusinessAreaFactory(name="Sudan")
@@ -71,6 +78,7 @@ class TestIndividualQuery(APITestCase):
 
         generate_data_collecting_types()
         partial = DataCollectingType.objects.get(code="partial_individuals")
+
         cls.program = ProgramFactory(
             name="Test program ONE",
             business_area=cls.business_area,
@@ -86,10 +94,10 @@ class TestIndividualQuery(APITestCase):
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
 
-        household_one = HouseholdFactory.build(business_area=cls.business_area)
-        household_one.household_collection.save()
-        household_one.registration_data_import.imported_by.save()
-        household_one.registration_data_import.save()
+        cls.household_one = HouseholdFactory.build(business_area=cls.business_area)
+        cls.household_one.household_collection.save()
+        cls.household_one.registration_data_import.imported_by.save()
+        cls.household_one.registration_data_import.save()
 
         cls.individuals_to_create = [
             {
@@ -159,16 +167,16 @@ class TestIndividualQuery(APITestCase):
         ]
 
         cls.individuals = [
-            IndividualFactory(household=household_one, **individual)
+            IndividualFactory(household=cls.household_one, **individual)
             for index, individual in enumerate(cls.individuals_to_create)
         ]
-        household_one.head_of_household = cls.individuals[0]
-        household_one.program = cls.program
-        cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == household_one]
+        cls.household_one.head_of_household = cls.individuals[0]
+        cls.household_one.program = cls.program
+        cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == cls.household_one]
         # cls.individuals_from_hh_two = [ind for ind in cls.individuals if ind.household == household_two]
-        household_one.head_of_household = cls.individuals_from_hh_one[0]
+        cls.household_one.head_of_household = cls.individuals_from_hh_one[0]
         # household_two.head_of_household = cls.individuals_from_hh_two[1]
-        household_one.save()
+        cls.household_one.save()
 
         cls.bank_account_info = BankAccountInfoFactory(
             individual=cls.individuals[5], bank_name="ING", bank_account_number=11110000222255558888999925
@@ -232,6 +240,30 @@ class TestIndividualQuery(APITestCase):
             document_number="666-777-888", type=DocumentType.objects.get(key="tax_id"), individual=cls.individuals[2]
         )
 
+        area_type_level_1 = AreaTypeFactory(
+            name="State1",
+            area_level=1,
+        )
+        area_type_level_2 = AreaTypeFactory(
+            name="State2",
+            area_level=2,
+        )
+
+        cls.area1 = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
+        cls.area2 = AreaFactory(name="City Test2", area_type=area_type_level_2, p_code="area2", parent=cls.area1)
+
+        cls.household_one.set_admin_areas(cls.area2)
+
+        cls.partner.permissions = {
+            str(cls.business_area.id): {
+                "programs": {
+                    str(cls.program.id): [str(cls.household_one.admin_area.id)],
+                    str(cls.program_draft.id): [str(cls.household_one.admin_area.id)],
+                }
+            }
+        }
+        cls.partner.save()
+
         # remove after data migration
         migrate_data_to_representations()
 
@@ -249,7 +281,13 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
         )
 
     @parameterized.expand(
@@ -263,7 +301,13 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.INDIVIDUAL_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
@@ -279,7 +323,13 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_two.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"programs": [self.program_two.id]},
         )
 
@@ -295,7 +345,13 @@ class TestIndividualQuery(APITestCase):
         # Should be Jenna Franklin
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "Jenna Franklin", "searchType": "full_name"},
         )
 
@@ -308,7 +364,10 @@ class TestIndividualQuery(APITestCase):
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={
                 "user": self.user,
-                "headers": {"Program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
+                "headers": {
+                    "Program": self.id_to_base64(self.program_draft.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
             },
             variables={"program": self.id_to_base64(self.program_draft.id, "ProgramNode")},
         )
@@ -325,7 +384,13 @@ class TestIndividualQuery(APITestCase):
         # Should be Robin Ford
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "(953)682-4596", "searchType": "phone_no"},
         )
 
@@ -341,7 +406,13 @@ class TestIndividualQuery(APITestCase):
         # Should be Benjamin Butler
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": f"{self.national_id.document_number}", "searchType": "national_id"},
         )
 
@@ -357,7 +428,13 @@ class TestIndividualQuery(APITestCase):
         # Should be Robin Ford
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": f"{self.national_passport.document_number}", "searchType": "national_passport"},
         )
 
@@ -373,7 +450,13 @@ class TestIndividualQuery(APITestCase):
         # Should be Timothy Perry
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "666-777-888", "searchType": "tax_id"},
         )
 
@@ -388,7 +471,13 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "1", "searchType": "registration_id"},
         )
 
@@ -403,7 +492,13 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={
                 "search": "1",
             },
@@ -423,7 +518,13 @@ class TestIndividualQuery(APITestCase):
         # Should be James Bond
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": self.bank_account_info.bank_account_number, "searchType": "bank_account_number"},
         )
 
@@ -439,7 +540,13 @@ class TestIndividualQuery(APITestCase):
         # Should be Jenna Franklin
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": self.birth_certificate.document_number, "searchType": "birth_certificate"},
         )
 
@@ -455,7 +562,13 @@ class TestIndividualQuery(APITestCase):
         # Should be Peter Parker
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": self.disability_card.document_number, "searchType": "disability_card"},
         )
 
@@ -471,7 +584,13 @@ class TestIndividualQuery(APITestCase):
         # Should be Benjamin Butler
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": self.drivers_license.document_number, "searchType": "drivers_license"},
         )
 
@@ -488,6 +607,12 @@ class TestIndividualQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
-            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "1", "searchType": "registration_id"},
         )
