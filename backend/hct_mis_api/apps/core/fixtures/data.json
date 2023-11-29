@@ -1299,7 +1299,7 @@
       "deduplication_golden_record_duplicates_percentage": 50,
       "deduplication_golden_record_duplicates_allowed": 5,
       "screen_beneficiary": false,
-      "countries": [],
+      "countries": ["fea412b2-a617-4c23-b773-d0001f36a932"],
       "is_payment_plan_applicable": false
     }
   },
