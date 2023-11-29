@@ -1,13 +1,15 @@
 import logging
 import os
-from typing import Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Type, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
 from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.grievance.models import (
     GrievanceDocument,
     GrievanceTicket,
@@ -20,6 +22,9 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.validators import validate_file
 from hct_mis_api.apps.household.models import Individual
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.accountability.models import Feedback
 
 logger = logging.getLogger(__name__)
 
@@ -117,3 +122,28 @@ def delete_grievance_documents(ticket_id: str, ids_to_delete: List[str]) -> None
         os.remove(document.file.path)
 
     documents_to_delete.delete()
+
+
+def filter_tickets_based_on_partner_areas_2(
+    queryset: QuerySet["GrievanceTicket", "Feedback"],
+    user_partner: Partner,
+    model: Type["GrievanceTicket", "Feedback"],
+    business_area_id: str,
+    program_id: str,
+) -> QuerySet["GrievanceTicket", "Feedback"]:
+    try:
+        partner_permission = user_partner.get_permissions()
+        program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
+    except (Partner.DoesNotExist, AssertionError):
+        return model.objects.none()
+
+    if program_area_ids is None:  # If None, user's partner does not have permission
+        return model.objects.none()
+    elif not program_area_ids:  # If empty list, user's partner does have full permission
+        pass
+    else:  # Check to which areas user has access
+        areas = Area.objects.filter(id__in=program_area_ids)
+        areas_level_2 = areas.filter(level=1).values_list("id")
+
+        queryset = queryset.filter(Q(admin2__in=areas_level_2) | Q(admin2__isnull=True))
+    return queryset

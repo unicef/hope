@@ -38,9 +38,11 @@ from hct_mis_api.apps.accountability.services.message_crud_services import (
 )
 from hct_mis_api.apps.accountability.services.sampling import Sampling
 from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVerifier
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.grievance.utils import filter_tickets_based_on_partner_areas_2
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -108,8 +110,18 @@ class Query(graphene.ObjectType):
         return Message.objects.filter(business_area__slug=business_area_slug)
 
     def resolve_all_feedback(self, info: Any, **kwargs: Any) -> QuerySet[Feedback]:
+        user = info.context.user
+        program_id = decode_id_string(info.context.headers.get("Program"))
         business_area_slug = info.context.headers.get("Business-Area")
-        return Feedback.objects.filter(business_area__slug=business_area_slug)
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+        queryset = Feedback.objects.filter(business_area__slug=business_area_slug).select_related("admin2")
+
+        if not user.partner.is_unicef:  # Full access to all AdminAreas if is_unicef
+            queryset = filter_tickets_based_on_partner_areas_2(
+                queryset, user.partner, Feedback, str(business_area_id), str(program_id)
+            )
+
+        return queryset
 
     def resolve_survey_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Survey.CATEGORY_CHOICES)
