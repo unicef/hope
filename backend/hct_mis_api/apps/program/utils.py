@@ -27,7 +27,7 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
     else:
         data_collecting_type = program.data_collecting_type
 
-    validate_data_collecting_type(program.data_collecting_type, data_collecting_type, program.business_area)
+    validate_data_collecting_type(program.business_area, program.data_collecting_type, data_collecting_type)
 
     program_data["data_collecting_type_id"] = data_collecting_type.id
 
