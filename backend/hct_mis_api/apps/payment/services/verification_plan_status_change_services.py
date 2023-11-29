@@ -144,6 +144,7 @@ class VerificationPlanStatusChangeServices:
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
                 business_area=business_area,
                 household_unicef_id=verification.payment_obj.household.unicef_id,
+                admin2_id=verification.payment_obj.household.admin2_id,
             )
             grievance_ticket_list.append(grievance_ticket)
         grievance_ticket_objs = GrievanceTicket.objects.bulk_create(grievance_ticket_list)
