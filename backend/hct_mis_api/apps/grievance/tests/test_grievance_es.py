@@ -507,7 +507,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": f"ticket_id {self.grievance_ticket_1.unicef_id}"},
         )
 
@@ -517,7 +523,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "ticket_hh_id HH-20-0000.0003"},
         )
 
@@ -527,7 +539,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_SEARCH,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"search": "family_name Kowalska_1"},
         )
 
@@ -537,7 +555,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CATEGORY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK},
         )
 
@@ -547,7 +571,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"status": [GrievanceTicket.STATUS_NEW]},
         )
 
@@ -557,7 +587,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"status": [GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_IN_PROGRESS]},
         )
 
@@ -567,7 +603,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"createdAtRange": '{"max":"2022-05-01"}'},
         )
 
@@ -577,7 +619,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"createdAtRange": '{"min":"2022-05-10"}'},
         )
 
@@ -587,7 +635,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"createdAtRange": '{"min":"2022-05-01","max":"2022-05-10"}'},
         )
 
@@ -597,7 +651,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ADMIN_AREA,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"admin": self.id_to_base64(self.admin_area_1.id, "GrievanceTicketNode")},
         )
 
@@ -607,7 +667,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ISSUE_TYPE,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"issueType": GrievanceTicket.ISSUE_TYPE_FRAUD_FORGERY},
         )
 
@@ -617,7 +683,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_PRIORITY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"priority": PRIORITY_LOW},
         )
 
@@ -627,7 +699,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_URGENCY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"urgency": URGENCY_VERY_URGENT},
         )
 
@@ -637,7 +715,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ASSIGNED_TO,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"assignedTo": self.id_to_base64(self.user2.id, "UserNode")},
         )
 
@@ -648,7 +732,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_REGISTRATION_DATA_IMPORT,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={
                 "registrationDataImport": self.id_to_base64(
                     "04992dce-154b-4938-8e47-74341541ebcf", "RegistrationDataImportNode"
@@ -662,7 +752,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_GRIEVANCE_TYPE,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"grievanceType": "system"},
         )
 
@@ -672,7 +768,13 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_MULTIPLE_FILTERS,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={
                 "status": [GrievanceTicket.STATUS_NEW],
                 "priority": PRIORITY_HIGH,
@@ -687,6 +789,12 @@ class TestGrievanceQueryElasticSearch(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_PROGRAM,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program_1.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"program": self.id_to_base64(self.program_2.id, "ProgramNode")},
         )

@@ -55,6 +55,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
               ))}
               <Box display='flex' justifyContent='space-between'>
                 <Button
+                  data-cy='button-add-partner'
                   onClick={() =>
                     arrayHelpers.push({ id: '', areaAccess: 'BUSINESS_AREA' })
                   }
@@ -65,6 +66,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                   {t('Add Partner')}
                 </Button>
                 <Button
+                  data-cy='button-back'
                   variant='outlined'
                   onClick={() => setStep(step - 1)}
                   disabled={step === 0}

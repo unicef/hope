@@ -188,13 +188,15 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
+        filters = {
+            "business_area__slug": info.context.headers.get("Business-Area").lower(),
+            "data_collecting_type__deprecated": False,
+            "data_collecting_type__isnull": False,
+        }
+        if not info.context.user.partner.is_unicef:
+            filters.update({"id__in": info.context.user.partner.program_ids})
         return (
-            Program.objects.filter(
-                id__in=info.context.user.partner.program_ids,
-                business_area__slug=info.context.headers.get("Business-Area").lower(),
-                data_collecting_type__deprecated=False,
-                data_collecting_type__isnull=False,
-            )
+            Program.objects.filter(**filters)
             .exclude(data_collecting_type__code="unknown")
             .annotate(
                 custom_order=Case(
