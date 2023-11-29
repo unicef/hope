@@ -43,6 +43,7 @@ export const DuplicateProgramPage = (): ReactElement => {
       const response = await mutate({
         variables: {
           programData: {
+            id,
             ...values,
             businessAreaSlug: businessArea,
           },
@@ -94,7 +95,11 @@ export const DuplicateProgramPage = (): ReactElement => {
     populationGoal,
     cashPlus,
     frequencyOfPayments,
-    partners,
+    partners: partners.map((partner) => ({
+      id: partner.id,
+      adminAreas: partner.adminAreas,
+      areaAccess: partner.areaAccess,
+    })),
   };
 
   const { allAreasTree } = treeData;

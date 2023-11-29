@@ -40,10 +40,10 @@ interface ProgramDetailsProps {
   choices: ProgrammeChoiceDataQuery;
 }
 
-export function ProgramDetails({
+export const ProgramDetails = ({
   program,
   choices,
-}: ProgramDetailsProps): React.ReactElement {
+}: ProgramDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const {
     programFrequencyOfPaymentsChoices,
@@ -157,7 +157,7 @@ export function ProgramDetails({
           <OverviewContainer>
             <Grid container spacing={6}>
               {program.partners.map((partner) => (
-                <Grid item xs={3}>
+                <Grid key={partner.id} item xs={3}>
                   <StyledBox p={6} flexDirection='column'>
                     <Typography variant='h6'>{partner.name}</Typography>
                     <LabelizedField
@@ -177,4 +177,4 @@ export function ProgramDetails({
       )}
     </ContainerColumnWithBorder>
   );
-}
+};
