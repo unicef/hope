@@ -849,8 +849,8 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
             .distinct()
             .count()
         )
-        self.is_cross_area = unique_areas_count > 1
-        TicketNeedsAdjudicationDetails.objects.filter(id=self.id).update(is_cross_area=self.is_cross_area)
+        is_cross_area = unique_areas_count > 1
+        TicketNeedsAdjudicationDetails.objects.filter(id=self.id).update(is_cross_area=is_cross_area)
 
     class Meta:
         verbose_name_plural = "Ticket Needs Adjudication Details"
