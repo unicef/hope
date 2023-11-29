@@ -40,12 +40,10 @@ export const programValidationSchema = (t): Yup.ObjectSchema =>
     populationGoal: Yup.number()
       .min(0)
       .max(99999999, t('Number is too big')),
-    partners: Yup.array()
-      .of(
-        Yup.object().shape({
-          id: Yup.string().required(t('Partner ID is required')),
-          areaAccess: Yup.string().required(t('Area Access is required')),
-        }),
-      )
-      .required(t('At least one partner is required')),
+    partners: Yup.array().of(
+      Yup.object().shape({
+        id: Yup.string().required(t('Partner ID is required')),
+        areaAccess: Yup.string().required(t('Area Access is required')),
+      }),
+    ),
   });
