@@ -4,11 +4,15 @@ from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.fixtures import AreaFactory
-from hct_mis_api.apps.grievance.fixtures import TicketNeedsAdjudicationDetailsFactory
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceTicketFactory,
+    TicketNeedsAdjudicationDetailsFactory,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 FILTER_GRIEVANCE_BY_CROSS_AREA = """
 query AllGrievanceTickets($isCrossArea: Boolean) {
@@ -37,8 +41,9 @@ class TestCrossAreaFilterAvailable(APITestCase):
 
         admin_area1 = AreaFactory()
         admin_area2 = AreaFactory()
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.business_area = create_afghanistan()
+        cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
+
         individual1_from_area1 = IndividualFactory(business_area=cls.business_area, household=None)
         individual2_from_area1 = IndividualFactory(business_area=cls.business_area, household=None)
         household1_from_area1 = HouseholdFactory(
@@ -59,38 +64,40 @@ class TestCrossAreaFilterAvailable(APITestCase):
         individual_from_area2.household = household_from_area2
         individual_from_area2.save()
 
+        grievance_ticket_cross_area = GrievanceTicketFactory(
+            business_area=cls.business_area,
+            language="Polish",
+            consent=True,
+            description="Cross Area Grievance",
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            status=GrievanceTicket.STATUS_NEW,
+            created_by=cls.user,
+            assigned_to=cls.user,
+            admin2=None,
+        )
+        grievance_ticket_cross_area.programs.set([cls.program])
         cls.needs_adjudication_ticket_cross_area = TicketNeedsAdjudicationDetailsFactory(
             golden_records_individual=individual1_from_area1,
-            ticket=GrievanceTicket.objects.create(
-                **{
-                    "business_area": cls.business_area,
-                    "language": "Polish",
-                    "consent": True,
-                    "description": "Cross Area Grievance",
-                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                    "status": GrievanceTicket.STATUS_NEW,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                }
-            ),
+            ticket=grievance_ticket_cross_area,
         )
         cls.needs_adjudication_ticket_cross_area.possible_duplicates.set([individual_from_area2])
         cls.needs_adjudication_ticket_cross_area.populate_cross_area_flag()
 
+        grievance_ticket_same_area = GrievanceTicketFactory(
+            business_area=cls.business_area,
+            language="Polish",
+            consent=True,
+            description="Same Area Grievance",
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            status=GrievanceTicket.STATUS_NEW,
+            created_by=cls.user,
+            assigned_to=cls.user,
+            admin2=None,
+        )
+        grievance_ticket_same_area.programs.set([cls.program])
         cls.needs_adjudication_ticket_same_area = TicketNeedsAdjudicationDetailsFactory(
             golden_records_individual=individual1_from_area1,
-            ticket=GrievanceTicket.objects.create(
-                **{
-                    "business_area": cls.business_area,
-                    "language": "Polish",
-                    "consent": True,
-                    "description": "Same Area Grievance",
-                    "category": GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-                    "status": GrievanceTicket.STATUS_NEW,
-                    "created_by": cls.user,
-                    "assigned_to": cls.user,
-                }
-            ),
+            ticket=grievance_ticket_same_area,
         )
         cls.needs_adjudication_ticket_same_area.possible_duplicates.set([individual2_from_area1])
         cls.needs_adjudication_ticket_same_area.populate_cross_area_flag()
@@ -109,7 +116,13 @@ class TestCrossAreaFilterAvailable(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=FILTER_GRIEVANCE_BY_CROSS_AREA,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"isCrossArea": True},
         )
 
@@ -122,6 +135,12 @@ class TestCrossAreaFilterAvailable(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=FILTER_GRIEVANCE_BY_CROSS_AREA,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"isCrossArea": None},
         )
