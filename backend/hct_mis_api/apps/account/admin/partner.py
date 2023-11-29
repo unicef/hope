@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Optional, Sequence, Union
 
 from django import forms
 from django.contrib import admin
@@ -43,10 +43,19 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         "is_un",
     )
 
-    @button(permission=can_add_business_area_to_partner)
+    def get_readonly_fields(self, request: HttpRequest, obj: Optional[account_models.Partner] = None) -> Sequence[str]:
+        additional_fields = []
+        if obj and obj.is_unicef:
+            additional_fields.append("name")
+        return list(super().get_readonly_fields(request, obj)) + additional_fields
+
+    @button(
+        permission=can_add_business_area_to_partner,
+        enabled=lambda obj: not obj.original.is_unicef,
+    )
     def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
-        parent: account_models.Partner = context["original"]
+        partner: account_models.Partner = context["original"]
 
         BusinessAreaRoleFormSet = formset_factory(BusinessAreaRoleForm, extra=0, can_delete=True)
         ProgramAreaFormSet = formset_factory(ProgramAreaForm, extra=0, can_delete=True)
@@ -54,7 +63,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         business_areas = set()
 
         if request.method == "GET":
-            permissions_list = parent.get_permissions().to_list()
+            permissions_list = partner.get_permissions().to_list()
             business_area_role_data = []
             program_area_data = []
             for permission in permissions_list:
@@ -98,8 +107,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                     business_areas.add(program_area_form.cleaned_data["business_area"].id)
 
             if refresh_areas == "false" and business_area_role_form_set.is_valid() and program_area_form_set.is_valid():
-                parent.set_permissions(partner_permissions)
-                parent.save()
+                partner.set_permissions(partner_permissions)
+                partner.save()
 
                 return HttpResponseRedirect(reverse("admin:account_partner_change", args=[pk]))
 
