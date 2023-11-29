@@ -1,5 +1,6 @@
 from typing import Any, List
 from unittest import skip
+from unittest.mock import patch
 
 from django.core.management import call_command
 
@@ -32,6 +33,7 @@ ALL_GRIEVANCE_QUERY = """
     """
 
 
+@patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
 class TestGrievanceAreaQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
