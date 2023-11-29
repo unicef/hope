@@ -5,6 +5,7 @@ import { TestProviders } from './testProviders';
 import { MockLink } from '@apollo/react-testing';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
+import {ProgramStatus} from "../__generated__/graphql";
 
 const customRender = (
   ui: ReactElement,
@@ -53,4 +54,10 @@ export class ApolloLoadingLink extends MockLink {
   request(operation) {
     return null;
   }
+}
+
+export const fakeContextProgram = {
+    id: 1,
+    name: "someName",
+    status: ProgramStatus.Active
 }

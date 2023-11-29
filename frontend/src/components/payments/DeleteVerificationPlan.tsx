@@ -8,10 +8,11 @@ import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDeletePaymentVerificationPlanMutation } from '../../__generated__/graphql';
+import { ProgramStatus, useDeletePaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
+import { useProgramContext } from "../../programContext";
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -26,6 +27,7 @@ export function DeleteVerificationPlan({
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const { selectedProgram } = useProgramContext();
   const [mutate] = useDeletePaymentVerificationPlanMutation();
 
   const handleDeleteVerificationPlan = async (): Promise<void> => {
@@ -47,6 +49,7 @@ export function DeleteVerificationPlan({
           startIcon={<ClearIcon />}
           onClick={() => setDeleteDialogOpen(true)}
           data-cy='button-delete-plan'
+          disabled={selectedProgram?.status !== ProgramStatus.Active}
         >
           DELETE
         </ErrorButton>

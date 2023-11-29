@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
+  ProgramStatus,
   useCreateFollowUpPpMutation,
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
@@ -32,6 +33,7 @@ import { FieldBorder } from '../../core/FieldBorder';
 import { GreyText } from '../../core/GreyText';
 import { LabelizedField } from '../../core/LabelizedField';
 import { LoadingButton } from '../../core/LoadingButton';
+import { useProgramContext } from "../../../programContext";
 
 export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -45,6 +47,7 @@ export const CreateFollowUpPaymentPlan = ({
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const [mutate, { loading }] = useCreateFollowUpPpMutation();
+  const { selectedProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
   const {
@@ -115,7 +118,10 @@ export const CreateFollowUpPaymentPlan = ({
               variant='outlined'
               color='primary'
               onClick={() => setDialogOpen(true)}
-              disabled={!hasPermissions(PERMISSIONS.PM_CREATE, permissions)}
+               disabled={
+                !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
+                selectedProgram?.status !== ProgramStatus.Active
+              }
             >
               {t('Create Follow-up Payment Plan')}
             </Button>
