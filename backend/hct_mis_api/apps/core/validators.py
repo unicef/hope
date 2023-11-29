@@ -20,7 +20,12 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     Scope,
 )
 from hct_mis_api.apps.core.utils import decode_id_string_required, xlrd_rows_iterator
-from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
+from hct_mis_api.apps.household.models import (
+    BLANK,
+    NOT_PROVIDED,
+    RELATIONSHIP_UNKNOWN,
+    Household,
+)
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -331,10 +336,16 @@ class DataCollectingTypeValidator(BaseValidator):
         if data_collecting_type:
             if (
                 program
-                and program.status != Program.DRAFT
                 and program.data_collecting_type.code != data_collecting_type.code
+                and program.status != Program.DRAFT
             ):
                 raise ValidationError("DataCollectingType can be updated only for Program within status draft")
+            elif (
+                program
+                and program.data_collecting_type.code != data_collecting_type.code
+                and Household.objects.filter(program=program).exists()
+            ):
+                raise ValidationError("DataCollectingType can be updated only for Program without any households")
             elif not data_collecting_type.active:
                 raise ValidationError("Only active DataCollectingType can be used in Program")
             elif data_collecting_type.deprecated:
