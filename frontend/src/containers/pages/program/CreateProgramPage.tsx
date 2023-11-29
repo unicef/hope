@@ -78,7 +78,7 @@ export const CreateProgramPage = (): ReactElement => {
     populationGoal: 0,
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
-    partners: [{ id: '', areaAccess: 'BUSINESS_AREA' }],
+    partners: [],
   };
 
   if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
@@ -100,10 +100,15 @@ export const CreateProgramPage = (): ReactElement => {
           <>
             <PageHeader title={t('Create Programme')}>
               <Box display='flex' alignItems='center'>
-                <Button component={Link} to={`/${baseUrl}/list`}>
+                <Button
+                  data-cy='button-cancel'
+                  component={Link}
+                  to={`/${baseUrl}/list`}
+                >
                   {t('Cancel')}
                 </Button>
                 <Button
+                  data-cy='button-save'
                   variant='contained'
                   color='primary'
                   onClick={submitForm}
@@ -114,12 +119,18 @@ export const CreateProgramPage = (): ReactElement => {
             </PageHeader>
             <Stepper activeStep={step}>
               <Step>
-                <StepButton onClick={() => setStep(0)}>
+                <StepButton
+                  data-cy='step-button-details'
+                  onClick={() => setStep(0)}
+                >
                   {t('Details')}
                 </StepButton>
               </Step>
               <Step>
-                <StepButton onClick={() => setStep(1)}>
+                <StepButton
+                  data-cy='step-button-partners'
+                  onClick={() => setStep(1)}
+                >
                   {t('Programme Partners')}
                 </StepButton>
               </Step>

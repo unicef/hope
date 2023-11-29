@@ -163,7 +163,6 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             name={`partners[${index}].id`}
             label={t('Partner')}
             color='primary'
-            required
             choices={partnerChoices}
             component={FormikSelectField}
           />
@@ -181,7 +180,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
       <Grid item xs={6}>
         <Field
           name={`partners[${index}].areaAccess`}
-          required
+          required={values.partners[index]?.id !== ''}
           choices={[
             {
               value: 'BUSINESS_AREA',
