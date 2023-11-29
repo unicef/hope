@@ -4,8 +4,8 @@ export default class ProgramDetails extends BaseComponent {
   // Locators
   buttonActivateProgram = 'button[data-cy="button-activate-program"]';
   buttonRemoveProgram = 'button[data-cy="button-remove-program"]';
-  buttonEditProgram = 'button[data-cy="button-edit-program"]';
-  buttonCopyProgram = 'button[data-cy="button-copy-program"]';
+  buttonEditProgram = '[data-cy="button-edit-program"]';
+  buttonCopyProgram = '[data-cy="button-copy-program"]';
   buttonFinishProgram = 'button[data-cy="button-finish-program"]';
   dialogPopupActivate = 'div[data-cy="dialog-actions-container"]';
   buttonDataCyButtonReactivateProgram =

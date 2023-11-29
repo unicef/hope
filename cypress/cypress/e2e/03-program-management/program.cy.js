@@ -39,14 +39,12 @@ describe("Program Management", () => {
       programManagement.getButtonNewProgram().click({ force: true });
       programManagement
         .getDialogTitle()
-        .should("contain", "Set-up a new Programme");
+        .should("contain", "Create Programme");
       cy.uniqueSeed().then((seed) => {
         const programName = `Test Program ${seed}`;
         programManagement.getInputProgrammeName().type(programName);
-        programManagement.getInputCashAssistScope().click();
-        programManagement.getSelectOptionUnicef().click();
-        programManagement.getInputSector().first().click();
-        programManagement.getSelectOptionByName("Multi Purpose").click();
+        programManagement.getInputSector().click()
+        programManagement.getSelectOptionByName("Health").click();
         programManagement.getInputDataCollectingType().click();
         programManagement.getSelectOptionByName("Full").click();
         programManagement.getInputStartDate().click().type("2023-01-01");
@@ -94,11 +92,9 @@ describe("Program Management", () => {
       cy.uniqueSeed().then((seed) => {
         const editedProgramName = `Edited program ${seed}`;
         programManagement
-          .getInputProgrammeName()
+          .getInputProgrammeName().find("input")
           .clear()
           .type(editedProgramName);
-        programManagement.getInputCashAssistScope().click();
-        programManagement.getSelectOptionForPartners().click();
         programManagement.getInputSector().click();
         programManagement.getSelectOptionByName("Health").click();
         programManagement
@@ -125,17 +121,12 @@ describe("Program Management", () => {
           .getInputFrequencyOfPayment()
           .contains("One-off")
           .click();
-        programManagement.getInputAdminArea().clear().type("Some Admin Area");
+        programManagement.getInputAdminArea().find("input").clear().type("Some Admin Area");
         programManagement.getInputCashPlus().uncheck();
         programManagement
           .getInputPopulationGoal()
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}2000");
-        programManagement
-          .getInputIndividualDataNeeded()
-          .find("input")
-          .eq(1)
-          .click();
         programManagement.getButtonSave().click();
         programManagement.getPageHeaderTitle().contains(editedProgramName);
       });
@@ -172,12 +163,10 @@ describe("Program Management", () => {
       programManagement.getButtonNewProgram().click({ force: true });
       programManagement
         .getDialogTitle()
-        .should("contain", "Set-up a new Programme");
+        .should("contain", "Create Programme");
       cy.uniqueSeed().then((seed) => {
         const programName = `Test Program ${seed}`;
         programManagement.getInputProgrammeName().type(programName);
-        programManagement.getInputCashAssistScope().click();
-        programManagement.getSelectOptionUnicef().click();
         programManagement.getInputSector().first().click();
         programManagement.getSelectOptionByName("Multi Purpose").click();
         programManagement.getInputStartDate().click().type("2023-01-01");

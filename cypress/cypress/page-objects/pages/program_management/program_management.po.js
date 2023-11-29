@@ -2,9 +2,9 @@ import BaseComponent from "../../base.component";
 
 export default class ProgramManagement extends BaseComponent {
   // Locators
-  buttonNewProgram = 'button[data-cy="button-new-program"]';
+  buttonNewProgram = '[data-cy="button-new-program"]';
   pageHeaderTitle = 'h5[data-cy="page-header-title"]';
-  dialogTitle = 'h6[data-cy="dialog-title"]';
+  dialogTitle = '[data-cy="page-header-title"]';
   inputProgrammeName = 'div[data-cy="input-programme-name"]';
   inputCashAssistScope = 'div[data-cy="input-cash-assist-scope"]';
   selectOptionUnicef = 'li[data-cy="select-option-Unicef"]';
@@ -37,7 +37,6 @@ export default class ProgramManagement extends BaseComponent {
   getDialogTitle = () => cy.get(this.dialogTitle);
 
   getInputProgrammeName = () => cy.get(this.inputProgrammeName);
-  getInputCashAssistScope = () => cy.get(this.inputCashAssistScope).first();
   getSelectOptionUnicef = () => cy.get(this.selectOptionUnicef);
   getSelectOptionForPartners = () => cy.get(this.selectOptionForPartners);
   getInputSector = () => cy.get(this.inputSector).first();
