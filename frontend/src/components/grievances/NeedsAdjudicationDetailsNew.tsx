@@ -26,6 +26,7 @@ import {
   ApproveBox,
   StyledTable,
 } from './GrievancesApproveSection/ApproveSectionStyles';
+import {useSnackbar} from "../../hooks/useSnackBar";
 
 export function NeedsAdjudicationDetailsNew({
   ticket,
@@ -38,6 +39,8 @@ export function NeedsAdjudicationDetailsNew({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
+  const { showMessage } = useSnackbar();
+
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {
@@ -243,13 +246,17 @@ export function NeedsAdjudicationDetailsNew({
                   confirm({
                     content: getConfirmationText(),
                     disabled: allSelected(),
-                  }).then(() => {
-                    approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        selectedIndividualIds: selectedDuplicates,
-                      },
-                    });
+                  }).then(async () => {
+                    try {
+                      await approve({
+                        variables: {
+                          grievanceTicketId: ticket.id,
+                          selectedIndividualIds: selectedDuplicates,
+                        },
+                      });
+                    } catch(e) {
+                      e.graphQLErrors.map((x) => showMessage(x.message));
+                    }
                     setIsEditMode(false);
                   })
                 }
