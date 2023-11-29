@@ -32,8 +32,6 @@ export const CreateProgramPage = (): ReactElement => {
     loading: userPartnerChoicesLoading,
   } = useUserPartnerChoicesQuery();
 
-  //TODO: fix checkboxes click unclick
-
   const [mutate] = useCreateProgramMutation({
     refetchQueries: () => [
       { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
