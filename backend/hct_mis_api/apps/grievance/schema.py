@@ -68,6 +68,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
+from hct_mis_api.apps.grievance.utils import filter_tickets_based_on_partner_areas_2
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
@@ -523,22 +524,10 @@ class Query(graphene.ObjectType):
 
         queryset = queryset.prefetch_related(*to_prefetch)
 
-        if not user.partner.is_unicef:  # Full access to all AdminAreas
-            try:
-                partner_permission = user.partner.get_permissions()
-                program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
-            except (Partner.DoesNotExist, AssertionError):
-                return GrievanceTicket.objects.none()
-
-            if program_area_ids is None:  # If None, user's partner does not have permission
-                return GrievanceTicket.objects.none()
-            elif not program_area_ids:  # If empty list, user's partner does have full permission
-                pass
-            else:  # Check to which areas user has access
-                areas = Area.objects.filter(id__in=program_area_ids)
-                areas_level_2 = areas.filter(level=1).values_list("id")
-
-                queryset = queryset.filter(Q(admin2__in=areas_level_2) | Q(admin2__isnull=True))
+        if not user.partner.is_unicef:  # Full access to all AdminAreas if is_unicef
+            queryset = filter_tickets_based_on_partner_areas_2(
+                queryset, user.partner, GrievanceTicket, str(business_area_id), str(program_id)
+            )
 
         return queryset.annotate(
             total=Case(
