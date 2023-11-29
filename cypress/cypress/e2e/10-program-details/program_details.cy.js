@@ -28,7 +28,7 @@ describe("Program Details", () => {
       programDetails.getTableTitle().should("be.visible");
       programDetails.getCashPlanTableRow().should("have.length", 2);
       programDetails.getLabelAdministrativeAreasOfImplementation();
-      programDetails.getButtonEditProgram().should("be.visible");
+      programDetails.getButtonEditProgram().scrollIntoView().should("be.visible");
       programDetails.getLabelTotalNumberOfHouseholds().should("be.visible");
       programDetails.getLabelIndividualsData().should("be.visible");
       programDetails.getLabelCASH().should("be.visible");
@@ -41,9 +41,9 @@ describe("Program Details", () => {
       programDetails.getStatusContainer().should("be.visible");
       programDetails.getLabelStatus().should("be.visible");
       programDetails.getPageHeaderTitle().should("be.visible");
-      programDetails.getTablePagination().should("be.visible");
+      programDetails.getTablePagination().scrollIntoView().should("be.visible");
       programDetails.getTableLabel().should("be.visible");
-      programDetails.getButtonCopyProgram().should("be.visible");
+      programDetails.getButtonCopyProgram().scrollIntoView().should("be.visible");
 
       programDetails.getGlobalProgramFilter().click();
       programDetails

@@ -3,7 +3,7 @@ import BaseComponent from "../../base.component";
 export default class AllProgrammes extends BaseComponent {
   // Locators
   pageHeaderTitle = 'h5[data-cy="page-header-title"]';
-  buttonNewProgram = 'button[data-cy="button-new-program"]';
+  buttonNewProgram = '[data-cy="button-new-program"]';
   filtersSearch = 'div[data-cy="filters-search"]';
   filtersStatus = 'div[data-cy="filters-status"]';
   filtersStartDate = 'div[data-cy="filters-start-date"]';
