@@ -94,6 +94,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         # filter Partners by program_id and program.business_area_id
         partners_list = []
         for partner in Partner.objects.all():
+            partner.program = self
             if partner.get_permissions().areas_for(str(self.business_area_id), str(self.pk)) is not None:
                 partners_list.append(partner)
         return partners_list
