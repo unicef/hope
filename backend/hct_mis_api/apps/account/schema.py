@@ -151,11 +151,7 @@ class PartnerNodeForProgram(DjangoObjectType):
 
     @staticmethod
     def _get_areas_ids(partner: Partner, info_context_headers: Dict) -> List[str]:
-        program_id = (
-            decode_id_string(info_context_headers.get("Program"))
-            if info_context_headers.get("Program") != "all"
-            else None
-        )
+        program_id = partner.program.id
         if program_id:
             program = Program.objects.get(id=program_id)
             areas_ids = partner.get_permissions().areas_for(str(program.business_area_id), str(program_id))
