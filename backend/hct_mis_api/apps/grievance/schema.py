@@ -472,6 +472,7 @@ class Query(graphene.ObjectType):
             hopeOneOfPermissionClass(*POPULATION_DETAILS),
         ),
     )
+    cross_area_filter_available = graphene.Boolean()
     existing_grievance_tickets = DjangoPermissionFilterFastConnectionField(
         GrievanceTicketNode,
         filterset_class=ExistingGrievanceTicketFilter,
@@ -550,6 +551,13 @@ class Query(graphene.ObjectType):
                 output_field=DateField(),
             )
         ).annotate(total_days=F("total__day"))
+
+    def resolve_cross_area_filter_available(self, info: Any, **kwargs: Any) -> bool:
+        user = info.context.user
+        business_area = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area"))
+        program_id = get_program_id_from_headers(info.context.headers)
+
+        return user.partner.has_complete_access_in_program(program_id, str(business_area.id))
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
