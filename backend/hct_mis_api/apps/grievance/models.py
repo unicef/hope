@@ -486,7 +486,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return self.description or str(self.pk)
+        return f"{self.unicef_id} - {self.description or str(self.pk)}"
 
     def get_issue_type(self) -> str:
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
