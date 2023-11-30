@@ -14,6 +14,7 @@ import { useHistory } from 'react-router-dom';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
+  ProgramStatus,
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
@@ -26,6 +27,7 @@ import {
   ApproveBox,
   StyledTable,
 } from './GrievancesApproveSection/ApproveSectionStyles';
+import { useProgramContext } from "../../programContext";
 
 export function NeedsAdjudicationDetailsOld({
   ticket,
@@ -38,6 +40,8 @@ export function NeedsAdjudicationDetailsOld({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
+  const { selectedProgram } = useProgramContext();
+
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {
@@ -134,7 +138,7 @@ export function NeedsAdjudicationDetailsOld({
             )}
             {isEditable && canApprove && (
               <Button
-                disabled={isApproveDisabled()}
+                disabled={isApproveDisabled() || selectedProgram?.status !== ProgramStatus.Active}
                 data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({
