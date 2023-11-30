@@ -29,6 +29,19 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
     'Provide info about Programme Partner and set Area Access',
   );
 
+  const addPartnerDisabled =
+    partnerChoices.every((choice) => choice.disabled) ||
+    values.partners.some((partner) => !partner.id);
+
+  let tooltipText = '';
+  if (addPartnerDisabled) {
+    if (values.partners.some((partner) => !partner.id)) {
+      tooltipText = t('Select partner first');
+    } else {
+      tooltipText = t('All partners have been added');
+    }
+  }
+
   return (
     <BaseSection title={title} description={description}>
       <FieldArray
@@ -53,9 +66,9 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
               ))}
               <Box display='flex' justifyContent='space-between'>
                 <ButtonTooltip
-                  disabled={partnerChoices.every((choice) => choice.disabled)}
+                  disabled={addPartnerDisabled}
                   data-cy='button-add-partner'
-                  title={t('All partners have been added')}
+                  title={tooltipText}
                   onClick={() =>
                     arrayHelpers.push({ id: '', areaAccess: 'BUSINESS_AREA' })
                   }
