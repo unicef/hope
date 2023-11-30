@@ -94,6 +94,12 @@ export const CreateProgramPage = (): ReactElement => {
       validationSchema={programValidationSchema(t)}
     >
       {({ submitForm, values }) => {
+        const mappedPartnerChoices = userPartnerChoices.map((partner) => ({
+          value: partner.value,
+          label: partner.name,
+          disabled: values.partners.some((p) => p.id === partner.value),
+        }));
+
         return (
           <>
             <PageHeader title={t('Create Programme')}>
@@ -115,36 +121,38 @@ export const CreateProgramPage = (): ReactElement => {
                 </Button>
               </Box>
             </PageHeader>
-            <Stepper activeStep={step}>
-              <Step>
-                <StepButton
-                  data-cy='step-button-details'
-                  onClick={() => setStep(0)}
-                >
-                  {t('Details')}
-                </StepButton>
-              </Step>
-              <Step>
-                <StepButton
-                  data-cy='step-button-partners'
-                  onClick={() => setStep(1)}
-                >
-                  {t('Programme Partners')}
-                </StepButton>
-              </Step>
-            </Stepper>
-            {step === 0 && (
-              <DetailsStep values={values} step={step} setStep={setStep} />
-            )}
-            {step === 1 && (
-              <PartnersStep
-                values={values}
-                allAreasTree={allAreasTree}
-                partnerChoices={userPartnerChoices}
-                step={step}
-                setStep={setStep}
-              />
-            )}
+            <Box p={6}>
+              <Stepper activeStep={step}>
+                <Step>
+                  <StepButton
+                    data-cy='step-button-details'
+                    onClick={() => setStep(0)}
+                  >
+                    {t('Details')}
+                  </StepButton>
+                </Step>
+                <Step>
+                  <StepButton
+                    data-cy='step-button-partners'
+                    onClick={() => setStep(1)}
+                  >
+                    {t('Programme Partners')}
+                  </StepButton>
+                </Step>
+              </Stepper>
+              {step === 0 && (
+                <DetailsStep values={values} step={step} setStep={setStep} />
+              )}
+              {step === 1 && (
+                <PartnersStep
+                  values={values}
+                  allAreasTreeData={allAreasTree}
+                  partnerChoices={mappedPartnerChoices}
+                  step={step}
+                  setStep={setStep}
+                />
+              )}
+            </Box>
           </>
         );
       }}

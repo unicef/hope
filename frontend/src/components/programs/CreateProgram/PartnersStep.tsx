@@ -3,24 +3,22 @@ import AddIcon from '@material-ui/icons/Add';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  AllAreasTreeQuery,
-  UserPartnerChoicesQuery,
-} from '../../../__generated__/graphql';
+import { AllAreasTreeQuery } from '../../../__generated__/graphql';
 import { BaseSection } from '../../core/BaseSection';
+import { ButtonTooltip } from '../../core/ButtonTooltip';
 import { ProgramPartnerCard } from './ProgramPartnerCard';
 
 interface PartnersStepProps {
   values;
-  allAreasTree: AllAreasTreeQuery['allAreasTree'];
-  partnerChoices: UserPartnerChoicesQuery['userPartnerChoices'];
+  allAreasTreeData: AllAreasTreeQuery['allAreasTree'];
+  partnerChoices;
   step: number;
   setStep: (step: number) => void;
 }
 
 export const PartnersStep: React.FC<PartnersStepProps> = ({
   values,
-  allAreasTree,
+  allAreasTreeData,
   partnerChoices,
   step,
   setStep,
@@ -48,14 +46,16 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                   index={index}
                   values={values}
                   arrayHelpers={arrayHelpers}
-                  allAreasTree={allAreasTree}
+                  allAreasTreeData={allAreasTreeData}
                   partnerChoices={partnerChoices}
                   setFieldValue={setFieldValue}
                 />
               ))}
               <Box display='flex' justifyContent='space-between'>
-                <Button
+                <ButtonTooltip
+                  disabled={partnerChoices.every((choice) => choice.disabled)}
                   data-cy='button-add-partner'
+                  title={t('All partners have been added')}
                   onClick={() =>
                     arrayHelpers.push({ id: '', areaAccess: 'BUSINESS_AREA' })
                   }
@@ -64,7 +64,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                   endIcon={<AddIcon />}
                 >
                   {t('Add Partner')}
-                </Button>
+                </ButtonTooltip>
                 <Button
                   data-cy='button-back'
                   variant='outlined'
