@@ -135,36 +135,38 @@ export const DuplicateProgramPage = (): ReactElement => {
                 </Button>
               </Box>
             </PageHeader>
-            <Stepper activeStep={step}>
-              <Step>
-                <StepButton
-                  data-cy='step-button-details'
-                  onClick={() => setStep(0)}
-                >
-                  {t('Details')}
-                </StepButton>
-              </Step>
-              <Step>
-                <StepButton
-                  data-cy='step-button-partners'
-                  onClick={() => setStep(1)}
-                >
-                  {t('Programme Partners')}
-                </StepButton>
-              </Step>
-            </Stepper>
-            {step === 0 && (
-              <DetailsStep values={values} step={step} setStep={setStep} />
-            )}
-            {step === 1 && (
-              <PartnersStep
-                values={values}
-                allAreasTreeData={allAreasTree}
-                partnerChoices={userPartnerChoices}
-                step={step}
-                setStep={setStep}
-              />
-            )}
+            <Box p={6}>
+              <Stepper activeStep={step}>
+                <Step>
+                  <StepButton
+                    data-cy='step-button-details'
+                    onClick={() => setStep(0)}
+                  >
+                    {t('Details')}
+                  </StepButton>
+                </Step>
+                <Step>
+                  <StepButton
+                    data-cy='step-button-partners'
+                    onClick={() => setStep(1)}
+                  >
+                    {t('Programme Partners')}
+                  </StepButton>
+                </Step>
+              </Stepper>
+              {step === 0 && (
+                <DetailsStep values={values} step={step} setStep={setStep} />
+              )}
+              {step === 1 && (
+                <PartnersStep
+                  values={values}
+                  allAreasTreeData={allAreasTree}
+                  partnerChoices={userPartnerChoices}
+                  step={step}
+                  setStep={setStep}
+                />
+              )}
+            </Box>
           </>
         );
       }}
