@@ -22,11 +22,11 @@ import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
+import {useSnackbar} from "../../hooks/useSnackBar";
 import {
   ApproveBox,
   StyledTable,
 } from './GrievancesApproveSection/ApproveSectionStyles';
-import {useSnackbar} from "../../hooks/useSnackBar";
 
 export function NeedsAdjudicationDetailsNew({
   ticket,

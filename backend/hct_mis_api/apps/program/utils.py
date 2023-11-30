@@ -27,7 +27,7 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
     else:
         data_collecting_type = program.data_collecting_type
 
-    validate_data_collecting_type(program.data_collecting_type, data_collecting_type, program.business_area)
+    validate_data_collecting_type(program.business_area, program.data_collecting_type, data_collecting_type)
 
     program_data["data_collecting_type_id"] = data_collecting_type.id
 
@@ -273,7 +273,9 @@ def create_roles_for_new_representation(new_household: Household, program: Progr
 def update_partner_permissions_for_program(partner_data: Dict, business_area_pk: str, program_pk: str) -> None:
     admin_areas = [area_id for area_id in partner_data.get("admin_areas", [])]
     partner = Partner.objects.get(id=partner_data["id"])
-    partner.get_permissions().set_program_areas(business_area_pk, program_pk, admin_areas)
+    partner_perms = partner.get_permissions()
+    partner_perms.set_program_areas(business_area_pk, program_pk, admin_areas)
+    partner.set_permissions(partner_perms)
     partner.save()
 
 
