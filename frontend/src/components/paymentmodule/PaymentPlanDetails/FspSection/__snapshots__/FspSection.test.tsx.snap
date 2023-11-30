@@ -17,20 +17,17 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
           FSPs
         </h6>
         <a
-          aria-disabled="false"
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+          aria-disabled="true"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
           href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/undefined/setup-fsp/edit"
           role="button"
-          tabindex="0"
+          tabindex="-1"
         >
           <span
             class="MuiButton-label"
           >
             Edit FSP
           </span>
-          <span
-            class="MuiTouchRipple-root"
-          />
         </a>
       </div>
       <div
