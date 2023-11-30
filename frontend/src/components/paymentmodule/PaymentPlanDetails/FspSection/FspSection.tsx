@@ -59,6 +59,7 @@ export const FspSection = ({
               to={`/${baseUrl}/payment-module/${
                 isFollowUp ? 'followup-payment-plans' : 'payment-plans'
               }/${id}/setup-fsp/edit`}
+              disabled={selectedProgram?.status !== ProgramStatus.Active}
             >
               {t('Edit FSP')}
             </Button>
