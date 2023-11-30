@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import TYPE_CHECKING, Dict, List, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
@@ -129,11 +129,16 @@ def filter_tickets_based_on_partner_areas_2(
     user_partner: Partner,
     model: Type["GrievanceTicket", "Feedback"],
     business_area_id: str,
-    program_id: str,
+    program_id: Optional[str],
 ) -> QuerySet["GrievanceTicket", "Feedback"]:
     try:
         partner_permission = user_partner.get_permissions()
-        program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
+
+        if not program_id:
+            # get all areas if no program_id, when info.context.headers.get("Program") == "all"
+            program_area_ids = partner_permission.all_areas_for(str(business_area_id))
+        else:
+            program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
     except (Partner.DoesNotExist, AssertionError):
         return model.objects.none()
 

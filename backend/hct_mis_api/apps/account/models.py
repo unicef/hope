@@ -58,6 +58,12 @@ class BusinessAreaPartnerPermission:
     def get_program_ids(self) -> List[str]:
         return list(self.programs.keys())
 
+    def get_all_area_ids(self) -> List[str]:
+        all_area_ids = []
+        for program_id, area_ids in self.programs.items():
+            all_area_ids.extend(area_ids)
+        return all_area_ids
+
 
 class PartnerPermission:
     def __init__(self) -> None:
@@ -118,6 +124,14 @@ class PartnerPermission:
         if business_area_id not in self._available_business_areas:
             return None
         return self._permissions[business_area_id].in_program(program_id)
+
+    def all_areas_for(self, business_area_id: str) -> Optional[List[str]]:
+        """
+        return list for all Areas or None
+        """
+        if business_area_id not in self._available_business_areas:
+            return None
+        return self._permissions[business_area_id].get_all_area_ids()
 
     def business_area_ids(self) -> List[str]:
         return list(self._permissions.keys())
@@ -198,13 +212,6 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         if self.first_name or self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.email or self.username
-
-    # def save(self, *args: Any, **kwargs: Any) -> None:
-    #     if not self.partner:
-    #         self.partner = Partner.objects.get(name="UNICEF")
-    #     if not self.partner.pk:
-    #         self.partner.save()
-    #     super().save(*args, **kwargs)
 
     def get_partner_role_ids_list(
         self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None

@@ -509,7 +509,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> QuerySet:
         user = info.context.user
-        program_id = decode_id_string(info.context.headers.get("Program"))
+        program_id = get_program_id_from_headers(info.context.headers)
         business_area_slug = info.context.headers.get("Business-Area")
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
