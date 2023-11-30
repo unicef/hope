@@ -29,6 +29,8 @@ from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+from mptt.fields import TreeForeignKey
+from mptt.models import MPTTModel
 
 logger = logging.getLogger(__name__)
 
@@ -129,8 +131,15 @@ class PartnerPermission:
         return ids
 
 
-class Partner(models.Model):
+class Partner(MPTTModel, models.Model):
     name = CICharField(max_length=100, unique=True)
+    parent = TreeForeignKey(
+        "self",
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        verbose_name=_("Parent"),
+    )
     is_un = models.BooleanField(verbose_name="U.N.", default=False)
     """
         permissions structure
