@@ -60,7 +60,7 @@ class BusinessAreaPartnerPermission:
 
     def get_all_area_ids(self) -> List[str]:
         all_area_ids = []
-        for program_id, area_ids in self.programs.items():
+        for _program_id, area_ids in self.programs.items():
             all_area_ids.extend(area_ids)
         return all_area_ids
 
@@ -142,8 +142,9 @@ class PartnerPermission:
             ids.extend(ba_perms.get_program_ids())
         return ids
 
-    def get_programs_for_business_area(self, business_area_id: str) -> dict:
+    def get_programs_for_business_area(self, business_area_id: str) -> "BusinessAreaPartnerPermission":
         return self._permissions[business_area_id]
+
 
 class Partner(models.Model):
     name = CICharField(max_length=100, unique=True)
