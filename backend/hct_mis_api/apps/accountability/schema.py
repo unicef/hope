@@ -46,7 +46,7 @@ from hct_mis_api.apps.core.utils import (
     get_program_id_from_headers,
     to_choice_object,
 )
-from hct_mis_api.apps.grievance.utils import filter_tickets_based_on_partner_areas_2
+from hct_mis_api.apps.grievance.utils import filter_grievance_tickets_based_on_partner_areas_2
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -121,7 +121,7 @@ class Query(graphene.ObjectType):
         queryset = Feedback.objects.filter(business_area__slug=business_area_slug).select_related("admin2")
 
         if not user.partner.is_unicef:  # Full access to all AdminAreas if is_unicef
-            queryset = filter_tickets_based_on_partner_areas_2(
+            queryset = filter_grievance_tickets_based_on_partner_areas_2(
                 queryset, user.partner, Feedback, str(business_area_id), str(program_id)
             )
 

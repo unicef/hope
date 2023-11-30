@@ -68,7 +68,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.grievance.utils import filter_tickets_based_on_partner_areas_2
+from hct_mis_api.apps.grievance.utils import filter_grievance_tickets_based_on_partner_areas_2
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
@@ -525,8 +525,8 @@ class Query(graphene.ObjectType):
         queryset = queryset.prefetch_related(*to_prefetch)
 
         if not user.partner.is_unicef:  # Full access to all AdminAreas if is_unicef
-            queryset = filter_tickets_based_on_partner_areas_2(
-                queryset, user.partner, GrievanceTicket, str(business_area_id), str(program_id)
+            queryset = filter_grievance_tickets_based_on_partner_areas_2(
+                queryset, user.partner, business_area_id, program_id
             )
 
         return queryset.annotate(

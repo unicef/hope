@@ -22,6 +22,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.validators import validate_file
 from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
     from hct_mis_api.apps.accountability.models import Feedback
@@ -124,31 +125,78 @@ def delete_grievance_documents(ticket_id: str, ids_to_delete: List[str]) -> None
     documents_to_delete.delete()
 
 
-def filter_tickets_based_on_partner_areas_2(
-    queryset: QuerySet["GrievanceTicket", "Feedback"],
+def filter_grievance_tickets_based_on_partner_areas_2(
+    queryset: QuerySet["GrievanceTicket"],
     user_partner: Partner,
-    model: Type["GrievanceTicket", "Feedback"],
     business_area_id: str,
     program_id: Optional[str],
 ) -> QuerySet["GrievanceTicket", "Feedback"]:
+
+    return filter_based_on_partner_areas_2(
+        queryset=queryset,
+        user_partner=user_partner,
+        business_area_id=business_area_id,
+        program_id=program_id,
+        lookup_id="programs__id__in",
+        id_container=lambda program_id: [program_id],
+    )
+
+
+def filter_feedback_based_on_partner_areas_2(
+    queryset: QuerySet["Feedback"],
+    user_partner: Partner,
+    business_area_id: str,
+    program_id: Optional[str],
+) -> QuerySet["GrievanceTicket", "Feedback"]:
+
+    return filter_based_on_partner_areas_2(
+        queryset=queryset,
+        user_partner=user_partner,
+        business_area_id=business_area_id,
+        program_id=program_id,
+        lookup_id="programs__id__in",
+        id_container=lambda program_id: [program_id],
+    )
+
+
+def filter_based_on_partner_areas_2(
+    queryset: QuerySet["GrievanceTicket", "Feedback"],
+    user_partner: Partner,
+    business_area_id: str,
+    program_id: Optional[str],
+    lookup_id: str,
+    id_container,
+) -> QuerySet["GrievanceTicket", "Feedback"]:
+    business_area_id_str = str(business_area_id)
+    if program_id:
+        program_id_str = str(program_id)
     try:
         partner_permission = user_partner.get_permissions()
-
-        if not program_id:
-            # get all areas if no program_id, when info.context.headers.get("Program") == "all"
-            program_area_ids = partner_permission.all_areas_for(str(business_area_id))
+        filter_q = Q()
+        if program_id:
+            programs_permissions = partner_permission.get_programs_for_business_area(
+                business_area_id_str
+            ).programs.items()
         else:
-            program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
+            areas = partner_permission.areas_for(business_area_id_str, program_id_str)
+            if areas is None:
+                return queryset.model.objects.none()
+            programs_permissions = (
+                program_id_str,
+                areas,
+            )
+
+        for program_id, areas_ids in programs_permissions:
+            program_q = Q(**{lookup_id: id_container(program_id)})
+            print(
+                Program.objects.get(id=program_id).name, '*'*30
+            )
+            if areas_ids:
+                filter_q |= Q(program_q & Q(admin2__in=areas_ids))
+            else:
+                filter_q |= program_q
+            print(filter_q, '*'*30)
+        queryset = queryset.filter(filter_q)
+        return queryset
     except (Partner.DoesNotExist, AssertionError):
-        return model.objects.none()
-
-    if program_area_ids is None:  # If None, user's partner does not have permission
-        return model.objects.none()
-    elif not program_area_ids:  # If empty list, user's partner does have full permission
-        pass
-    else:  # Check to which areas user has access
-        areas = Area.objects.filter(id__in=program_area_ids)
-        areas_level_2 = areas.filter(level=1).values_list("id")
-
-        queryset = queryset.filter(Q(admin2__in=areas_level_2) | Q(admin2__isnull=True))
-    return queryset
+        return queryset.model.objects.none()

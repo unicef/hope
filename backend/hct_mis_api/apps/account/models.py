@@ -142,6 +142,8 @@ class PartnerPermission:
             ids.extend(ba_perms.get_program_ids())
         return ids
 
+    def get_programs_for_business_area(self, business_area_id: str) -> dict:
+        return self._permissions[business_area_id]
 
 class Partner(models.Model):
     name = CICharField(max_length=100, unique=True)
