@@ -173,7 +173,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
     # TODO: in future will remove null=True after migrate prod data
-    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True)
+    partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True, blank=True)
     email = models.EmailField(_("email address"), blank=True, unique=True)
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
