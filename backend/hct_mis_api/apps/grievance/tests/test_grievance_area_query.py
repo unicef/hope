@@ -5,7 +5,11 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -35,6 +39,7 @@ class TestGrievanceAreaQuery(APITestCase):
         call_command("loadcountries")
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.ukraine_business_area = BusinessAreaFactory(slug="ukraine")
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
 
         cls.area_type_level_1 = AreaTypeFactory(name="Province", area_level=1)
@@ -45,10 +50,12 @@ class TestGrievanceAreaQuery(APITestCase):
         cls.burka = AreaFactory(name="Burka", area_type=cls.area_type_level_2, p_code="area3", parent=cls.ghazni)
         cls.quadis = AreaFactory(name="Quadis", area_type=cls.area_type_level_2, p_code="area3", parent=cls.ghazni)
 
-        cls.grievance_1 = GrievanceTicketFactory(admin2=cls.doshi, description="doshi")
-        cls.grievance_2 = GrievanceTicketFactory(admin2=cls.burka, description="burka")
-        cls.grievance_3 = GrievanceTicketFactory(admin2=cls.quadis, description="quadis")
-        cls.grievance_4 = GrievanceTicketFactory(admin2=None, description="no_admin")
+        cls.grievance_1 = GrievanceTicketFactory(admin2=cls.doshi, description="doshi", business_area=cls.business_area)
+        cls.grievance_2 = GrievanceTicketFactory(admin2=cls.burka, description="burka", business_area=cls.business_area)
+        cls.grievance_3 = GrievanceTicketFactory(
+            admin2=cls.quadis, description="quadis", business_area=cls.business_area
+        )
+        cls.grievance_4 = GrievanceTicketFactory(admin2=None, description="no_admin", business_area=cls.business_area)
 
         cls.grievance_1.programs.add(cls.program)
         cls.grievance_2.programs.add(cls.program)
