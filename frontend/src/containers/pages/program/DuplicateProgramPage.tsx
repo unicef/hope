@@ -114,6 +114,12 @@ export const DuplicateProgramPage = (): ReactElement => {
       validationSchema={programValidationSchema(t)}
     >
       {({ submitForm, values }) => {
+        const mappedPartnerChoices = userPartnerChoices.map((partner) => ({
+          value: partner.value,
+          label: partner.name,
+          disabled: values.partners.some((p) => p.id === partner.value),
+        }));
+
         return (
           <>
             <PageHeader title={`${t('Copy of Programme')}: (${name})`}>
@@ -161,7 +167,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                 <PartnersStep
                   values={values}
                   allAreasTreeData={allAreasTree}
-                  partnerChoices={userPartnerChoices}
+                  partnerChoices={mappedPartnerChoices}
                   step={step}
                   setStep={setStep}
                 />
