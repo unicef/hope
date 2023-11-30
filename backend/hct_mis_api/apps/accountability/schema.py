@@ -41,7 +41,11 @@ from hct_mis_api.apps.accountability.services.verifiers import MessageArgumentVe
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    get_program_id_from_headers,
+    to_choice_object,
+)
 from hct_mis_api.apps.grievance.utils import filter_tickets_based_on_partner_areas_2
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
@@ -111,7 +115,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_feedback(self, info: Any, **kwargs: Any) -> QuerySet[Feedback]:
         user = info.context.user
-        program_id = decode_id_string(info.context.headers.get("Program"))
+        program_id = get_program_id_from_headers(info.context.headers)
         business_area_slug = info.context.headers.get("Business-Area")
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
         queryset = Feedback.objects.filter(business_area__slug=business_area_slug).select_related("admin2")
