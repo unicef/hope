@@ -74,6 +74,7 @@ export const GrievancesTable = ({
     preferredLanguage: filter.preferredLanguage,
     program: isAllPrograms ? filter.program : programId,
     isActiveProgram: filter.programState === 'active' ? true : null,
+    isCrossArea: filter.areaScope === 'cross-area' ? true : null,
   };
 
   const [inputValue, setInputValue] = useState('');

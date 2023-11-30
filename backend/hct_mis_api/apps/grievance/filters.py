@@ -166,6 +166,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     total_days = IntegerFilter(field_name="total_days")
     program = CharFilter(method="filter_by_program")
     is_active_program = BooleanFilter(method="filter_is_active_program")
+    is_cross_area = BooleanFilter(method="filter_is_cross_area")
 
     class Meta:
         fields = {
@@ -349,6 +350,12 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs.filter(programs__status=Program.ACTIVE)
         elif value is False:
             return qs.filter(programs__status=Program.FINISHED)
+        else:
+            return qs
+
+    def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        if value is True:
+            return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)
         else:
             return qs
 

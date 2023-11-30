@@ -169,6 +169,9 @@ class Partner(MPTTModel, models.Model):
     def is_unicef(self) -> bool:
         return self.name == "UNICEF"
 
+    def has_complete_access_in_program(self, program_id: str, business_area_id: str) -> bool:
+        return self.is_unicef or self.get_permissions().areas_for(business_area_id, program_id) == []
+
     @property
     def program_ids(self) -> List[str]:
         return self.get_permissions().program_ids()

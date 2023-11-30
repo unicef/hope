@@ -48,6 +48,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     preferredLanguage: '',
     program: '',
     programState: 'active',
+    areaScope: 'all',
   };
 
   const [selectedTab, setSelectedTab] = useState(
