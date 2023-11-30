@@ -37,7 +37,6 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
     chart_permission_decorator,
-    decode_id_string,
     encode_ids,
     get_program_id_from_headers,
     to_choice_object,
@@ -68,7 +67,9 @@ from hct_mis_api.apps.grievance.models import (
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
-from hct_mis_api.apps.grievance.utils import filter_grievance_tickets_based_on_partner_areas_2
+from hct_mis_api.apps.grievance.utils import (
+    filter_grievance_tickets_based_on_partner_areas_2,
+)
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.schema import PaymentRecordAndPaymentNode
