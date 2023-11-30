@@ -15,13 +15,14 @@ import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
 import { DividerLine } from '../../core/DividerLine';
 import { DeleteProgramPartner } from './DeleteProgramPartner';
+import { AreaTreeNode } from './AreaTreeNode';
 
 interface ProgramPartnerCardProps {
   values;
   partner;
   index: number;
   arrayHelpers;
-  allAreasTree: AllAreasTreeQuery['allAreasTree'];
+  allAreasTreeData: AllAreasTreeQuery['allAreasTree'];
   partnerChoices: UserPartnerChoicesQuery['userPartnerChoices'];
   setFieldValue;
 }
@@ -47,7 +48,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   partner,
   index,
   arrayHelpers,
-  allAreasTree,
+  allAreasTreeData,
   partnerChoices,
   setFieldValue,
 }): React.ReactElement => {
@@ -56,6 +57,10 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const initialExpanded = selectedAdminAreasLength > 0;
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(
     initialExpanded,
+  );
+  const allAreasTree = AreaTreeNode.buildTree(
+    allAreasTreeData,
+    values.partners[index]?.adminAreas,
   );
 
   const businessAreaOptionLabel = (
@@ -67,48 +72,44 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     </Box>
   );
 
-  const handleNodeSelect = (_event, nodeId): void => {
-    let selectedNodeId = nodeId;
-    let newSelected = [...(values.partners[index]?.adminAreas || [])].flat();
-    selectedNodeId = Array.isArray(selectedNodeId)
-      ? selectedNodeId.flat()
-      : [selectedNodeId];
-
-    selectedNodeId.forEach((id) => {
-      if (newSelected.includes(id)) {
-        newSelected = newSelected.filter((newId) => newId !== id);
-      } else {
-        newSelected.push(id);
-      }
-    });
-
-    setFieldValue(`partners[${index}].adminAreas`, newSelected);
+  const handleCheckBoxSelect = (_event, node): void => {
+    _event.stopPropagation();
+    node.toggleCheck();
+    setFieldValue(
+      `partners[${index}].adminAreas`,
+      AreaTreeNode.getAllSelectedIds(allAreasTree),
+    );
     setFieldValue(`partners[${index}].areaAccess`, 'ADMIN_AREA');
   };
-
-  const renderTree = (nodes): React.ReactElement => (
-    <TreeItem
-      key={nodes.id}
-      nodeId={nodes.id}
-      label={
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Checkbox
-            color='primary'
-            checked={(values.partners[index]?.adminAreas || [])
-              .flat()
-              .includes(nodes.id)}
-            onClick={(event) => event.stopPropagation()}
-            onChange={(event) => handleNodeSelect(event, nodes.id)}
-          />
-          {nodes.name}
-        </div>
-      }
-    >
-      {Array.isArray(nodes.areas)
-        ? nodes.areas.map((node) => renderTree(node))
-        : null}
-    </TreeItem>
-  );
+  let renderTree = null;
+  const renderNode = (node: AreaTreeNode): React.ReactElement => {
+    return (
+      <TreeItem
+        key={node.id}
+        nodeId={node.id}
+        label={
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Checkbox
+              color='primary'
+              checked={Boolean(node.checked)}
+              indeterminate={node.checked === 'indeterminate'}
+              onChange={(event) => handleCheckBoxSelect(event, node)}
+              onClick={(event) => event.stopPropagation()}
+            />
+            {node.name}
+          </div>
+        }
+      >
+        {renderTree(node.children)}
+      </TreeItem>
+    );
+  };
+  renderTree = (children: AreaTreeNode[]): React.ReactElement => {
+    if (!children.length) {
+      return null;
+    }
+    return <>{children.map((node) => renderNode(node))}</>;
+  };
 
   const adminAreaOptionLabel = (
     <Box display='flex' flexDirection='column'>
@@ -139,9 +140,8 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             defaultExpandIcon={<ChevronRightIcon />}
             multiSelect
             selected={(values.partners[index]?.adminAreas || []).map(String)}
-            onNodeSelect={handleNodeSelect}
           >
-            {allAreasTree.map((tree) => renderTree(tree))}
+            {renderTree(allAreasTree)}
           </TreeView>
         </Box>
       </Collapse>
