@@ -52,7 +52,7 @@ export class AreaTreeNode {
       root = root.parent;
     }
 
-    const updateFromTop = (node: AreaTreeNode) => {
+    const updateFromTop = (node: AreaTreeNode): void => {
       const allChecked = node.children.length
         ? node.children.every((child) => child.checked === true)
         : node.checked;
