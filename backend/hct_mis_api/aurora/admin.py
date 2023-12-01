@@ -67,8 +67,8 @@ class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                 }
                 if form.cleaned_data["registration"]:
                     filters["registration"] = form.cleaned_data["registration"].source_id
-            info = fetch_records(aurora_token, form.cleaned_data["overwrite"], **filters)
-            ctx["info"] = info
+                info = fetch_records(aurora_token, form.cleaned_data["overwrite"], **filters)
+                ctx["info"] = info
         else:
             form = FetchForm()
 
