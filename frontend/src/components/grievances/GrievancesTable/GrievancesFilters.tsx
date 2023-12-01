@@ -27,7 +27,6 @@ import { FiltersSection } from '../../core/FiltersSection';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
-import { LoadingComponent } from '../../core/LoadingComponent';
 
 interface GrievancesFiltersProps {
   filter;
@@ -51,10 +50,7 @@ export const GrievancesFilters = ({
   const { isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const location = useLocation();
-  const {
-    data: areaScopeData,
-    loading: areaScopeLoading,
-  } = useGrievanceTicketAreaScopeQuery();
+  const { data: areaScopeData } = useGrievanceTicketAreaScopeQuery();
 
   const {
     handleFilterChange,
@@ -119,11 +115,6 @@ export const GrievancesFilters = ({
   }, [choicesData.grievanceTicketUrgencyChoices]);
 
   const subCategories = issueTypeDict[filter.category]?.subCategories || [];
-
-  if (!areaScopeData) return null;
-  if (areaScopeLoading) return <LoadingComponent />;
-
-  const { crossAreaFilterAvailable } = areaScopeData;
 
   return (
     <FiltersSection
@@ -407,7 +398,7 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated &&
-          crossAreaFilterAvailable && (
+          areaScopeData?.crossAreaFilterAvailable && (
             <Grid item xs={3}>
               <SelectFilter
                 onChange={(e) =>
