@@ -17,7 +17,6 @@ from django.db import models
 from django.db.models import JSONField, Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
-from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
@@ -42,7 +41,6 @@ USER_STATUS_CHOICES = (
     (INACTIVE, _("Inactive")),
     (INVITED, _("Invited")),
 )
-USER_PARTNER_CHOICES = Choices("UNICEF", "UNHCR", "WFP")
 
 
 @dataclasses.dataclass
@@ -180,11 +178,19 @@ class Partner(MPTTModel, models.Model):
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
-        return [(role.id, role.name) for role in cls.objects.all()]
+        return [(role.id, role.name) for role in cls.objects.exclude(name="Default Empty Partner")]
 
     @property
     def is_unicef(self) -> bool:
         return self.name == "UNICEF"
+
+    @property
+    def is_default(self) -> bool:
+        return self.name == "Default Empty Partner"
+
+    @property
+    def is_editable(self) -> bool:
+        return not self.is_unicef or not self.is_default
 
     def has_complete_access_in_program(self, program_id: str, business_area_id: str) -> bool:
         return self.is_unicef or self.get_permissions().areas_for(business_area_id, program_id) == []
@@ -200,7 +206,6 @@ class Partner(MPTTModel, models.Model):
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
-    # org = models.CharField(choices=USER_PARTNER_CHOICES, max_length=10, default=USER_PARTNER_CHOICES.UNICEF)
     # TODO: in future will remove null=True after migrate prod data
     partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True)
     email = models.EmailField(_("email address"), blank=True, unique=True)
@@ -227,6 +232,13 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
         if self.first_name or self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.email or self.username
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if not self.partner:
+            self.partner, _ = Partner.objects.get_or_create(name="Default Empty Partner")
+        if not self.partner.pk:
+            self.partner.save()
+        super().save(*args, **kwargs)
 
     def get_partner_role_ids_list(
         self, business_area_slug: Optional[str] = None, business_area_id: Optional["UUID"] = None

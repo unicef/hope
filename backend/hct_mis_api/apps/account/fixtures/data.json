@@ -21,7 +21,8 @@
     "lft": 1,
     "rght": 2,
     "tree_id": 2,
-    "is_un": true
+    "is_un": true,
+    "permissions": {}
   }
 },
 {
@@ -50,6 +51,19 @@
         }
       }
     }
+  }
+},
+{
+  "model": "account.partner",
+  "pk": 4,
+  "fields": {
+    "name": "Default Empty Partner",
+    "level": 0,
+    "lft": 1,
+    "rght": 2,
+    "tree_id": 4,
+    "is_un": false,
+    "permissions": {}
   }
 },
 {
