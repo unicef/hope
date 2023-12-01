@@ -11,6 +11,7 @@ export const LookUpHouseholdIndividualSelection = ({
   touched,
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
+  isFeedbackWithAdmin,
 }: {
   onValueChange: (field: string, value, shouldValidate?: boolean) => void;
   values;
@@ -18,6 +19,7 @@ export const LookUpHouseholdIndividualSelection = ({
   touched?;
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
+  isFeedbackWithAdmin?: boolean;
 }): React.ReactElement => {
   const [selectedHousehold, setSelectedHousehold] = useState(
     values.selectedHousehold,
@@ -27,6 +29,8 @@ export const LookUpHouseholdIndividualSelection = ({
   );
 
   useEffect(() => {
+    //if admin value from feedback do not clear it
+    if (isFeedbackWithAdmin) return;
     if (selectedHousehold?.admin2) {
       onValueChange('admin', { node: selectedHousehold.admin2 });
       onValueChange('admin2', { node: selectedHousehold.admin2 });
@@ -34,7 +38,7 @@ export const LookUpHouseholdIndividualSelection = ({
       onValueChange('admin', null);
       onValueChange('admin2', null);
     }
-  }, [selectedHousehold, onValueChange]);
+  }, [selectedHousehold, onValueChange, isFeedbackWithAdmin]);
 
   return (
     <>

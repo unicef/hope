@@ -97,13 +97,15 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const redirectedFromRelatedTicket = Boolean(category);
   const isFeedbackWithHouseholdOnly =
     history.location.state?.isFeedbackWithHouseholdOnly;
+  const linkedFeedbackAdmin2Name =
+    history.location.state?.linkedFeedbackAdmin2Name;
 
   const initialValues = {
     description: '',
     category: category || null,
     language: '',
     consent: false,
-    admin: null,
+    admin: linkedFeedbackAdmin2Name || null,
     area: '',
     selectedHousehold: selectedHousehold || null,
     selectedIndividual: selectedIndividual || null,
@@ -364,6 +366,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                               isFeedbackWithHouseholdOnly={
                                 isFeedbackWithHouseholdOnly
                               }
+                              isFeedbackWithAdmin={Boolean(
+                                linkedFeedbackAdmin2Name,
+                              )}
                             />
                           </Box>
                         </BoxWithBorders>
@@ -384,6 +389,9 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             setFieldValue={setFieldValue}
                             errors={errors}
                             permissions={permissions}
+                            isFeedbackWithAdmin={Boolean(
+                              linkedFeedbackAdmin2Name,
+                            )}
                           />
                           <DataChangeComponent
                             values={values}

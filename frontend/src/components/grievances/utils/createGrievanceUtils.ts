@@ -335,7 +335,8 @@ export function prepareVariables(businessArea, values) {
     category: parseInt(values.category, 10),
     consent: values.consent,
     language: values.language,
-    admin: values?.admin?.node?.id,
+    admin:
+      typeof values.admin === 'object' ? values.admin?.node?.id : values.admin,
     area: values.area,
     priority:
       values.priority === 'Not set' || values.priority === null

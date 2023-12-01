@@ -89,7 +89,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     issueType: Yup.string()
       .required('Issue Type is required')
       .nullable(),
-    admin: Yup.string().nullable(),
+    admin2: Yup.string().nullable(),
     description: Yup.string().nullable(),
     consent: Yup.bool().nullable(),
     area: Yup.string().nullable(),
@@ -158,7 +158,6 @@ export const CreateFeedbackPage = (): React.ReactElement => {
   const [activeStep, setActiveStep] = useState(FeedbackSteps.Selection);
   const [validateData, setValidateData] = useState(false);
 
-  //TODO:
   const initialValues = {
     category: 'Feedback',
     issueType: null,

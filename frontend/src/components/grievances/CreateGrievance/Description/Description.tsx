@@ -55,6 +55,7 @@ export interface DescriptionProps {
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
   permissions: string[];
+  isFeedbackWithAdmin?: boolean;
 }
 
 export const Description = ({
@@ -68,6 +69,7 @@ export const Description = ({
   setFieldValue,
   errors,
   permissions,
+  isFeedbackWithAdmin,
 }: DescriptionProps): React.ReactElement => {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
@@ -216,7 +218,9 @@ export const Description = ({
               name='admin'
               variant='outlined'
               component={FormikAdminAreaAutocomplete}
-              disabled={Boolean(values.selectedHousehold?.admin2)}
+              disabled={
+                Boolean(values.selectedHousehold?.admin2) || isFeedbackWithAdmin
+              }
             />
           </Grid>
           <Grid item xs={6}>

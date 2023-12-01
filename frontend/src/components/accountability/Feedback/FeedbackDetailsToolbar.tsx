@@ -70,6 +70,7 @@ export const FeedbackDetailsToolbar = ({
                     selectedIndividual: feedback?.individualLookup,
                     linkedFeedbackId: id,
                     isFeedbackWithHouseholdOnly,
+                    linkedFeedbackAdmin2Name: feedback.admin2?.name,
                   },
                 })
               }
