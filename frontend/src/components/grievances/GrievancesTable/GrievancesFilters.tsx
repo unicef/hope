@@ -3,7 +3,10 @@ import { AccountBalance } from '@material-ui/icons';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import {
+  GrievancesChoiceDataQuery,
+  useGrievanceTicketAreaScopeQuery,
+} from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
@@ -24,6 +27,7 @@ import { FiltersSection } from '../../core/FiltersSection';
 import { NumberTextField } from '../../core/NumberTextField';
 import { SearchTextField } from '../../core/SearchTextField';
 import { SelectFilter } from '../../core/SelectFilter';
+import { LoadingComponent } from '../../core/LoadingComponent';
 
 interface GrievancesFiltersProps {
   filter;
@@ -47,6 +51,10 @@ export const GrievancesFilters = ({
   const { isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const location = useLocation();
+  const {
+    data: areaScopeData,
+    loading: areaScopeLoading,
+  } = useGrievanceTicketAreaScopeQuery();
 
   const {
     handleFilterChange,
@@ -111,6 +119,11 @@ export const GrievancesFilters = ({
   }, [choicesData.grievanceTicketUrgencyChoices]);
 
   const subCategories = issueTypeDict[filter.category]?.subCategories || [];
+
+  if (!areaScopeData) return null;
+  if (areaScopeLoading) return <LoadingComponent />;
+
+  const { crossAreaFilterAvailable } = areaScopeData;
 
   return (
     <FiltersSection
@@ -393,6 +406,26 @@ export const GrievancesFilters = ({
             </SelectFilter>
           </Grid>
         )}
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated &&
+          crossAreaFilterAvailable && (
+            <Grid item xs={3}>
+              <SelectFilter
+                onChange={(e) =>
+                  handleFilterChange('areaScope', e.target.value)
+                }
+                label={t('Area Scope')}
+                value={filter.areaScope}
+                fullWidth
+                disableClearable
+                data-cy='filters-area-scope'
+              >
+                <MenuItem value='cross-area'>
+                  {t('Cross-Area Tickets')}
+                </MenuItem>
+                <MenuItem value='all'>{t('All Tickets')}</MenuItem>
+              </SelectFilter>
+            </Grid>
+          )}
       </Grid>
     </FiltersSection>
   );

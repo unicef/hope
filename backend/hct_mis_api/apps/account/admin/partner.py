@@ -1,8 +1,8 @@
-from typing import Any, Optional, Sequence, Union
+from typing import Any, Optional, Sequence, Type, Union
 
 from django import forms
 from django.contrib import admin
-from django.forms import CheckboxSelectMultiple, formset_factory
+from django.forms import CheckboxSelectMultiple, ModelForm, formset_factory
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -48,6 +48,13 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         if obj and obj.is_unicef:
             additional_fields.append("name")
         return list(super().get_readonly_fields(request, obj)) + additional_fields
+
+    def get_form(
+        self, request: HttpRequest, obj: Optional[account_models.Partner] = None, change: bool = False, **kwargs: Any
+    ) -> Type[ModelForm]:
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields["parent"].queryset = account_models.Partner.objects.filter(level=0)
+        return form
 
     @button(
         permission=can_add_business_area_to_partner,
