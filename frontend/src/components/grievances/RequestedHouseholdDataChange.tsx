@@ -11,6 +11,7 @@ import {
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
+import { useProgramContext } from "../../programContext";
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 
 export function RequestedHouseholdDataChange({
@@ -23,6 +24,8 @@ export function RequestedHouseholdDataChange({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
+  const { isActiveProgram } = useProgramContext();
+
   const getConfirmationText = (values): string => {
     const allSelected =
       values.selected.length + values.selectedFlexFields.length || 0;
@@ -66,8 +69,10 @@ export function RequestedHouseholdDataChange({
           onClick={submitForm}
           variant='contained'
           color='primary'
-          disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
           data-cy='button-approve'
+          disabled={
+            ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL || !isActiveProgram
+          }
         >
           {t('Approve')}
         </Button>
@@ -85,8 +90,11 @@ export function RequestedHouseholdDataChange({
         }
         variant='contained'
         color='primary'
-        disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
         data-cy='button-approve'
+        title={t('Program has to be active to create a Linked Ticket to Feedback')}
+        disabled={
+          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL || !isActiveProgram
+        }
       >
         {t('Approve')}
       </Button>

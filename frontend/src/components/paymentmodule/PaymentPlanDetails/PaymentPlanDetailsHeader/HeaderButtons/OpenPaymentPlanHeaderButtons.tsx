@@ -7,6 +7,7 @@ import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { DeletePaymentPlan } from '../DeletePaymentPlan';
 import { LockPaymentPlan } from '../LockPaymentPlan';
 import { useBaseUrl } from '../../../../../hooks/useBaseUrl';
+import {useProgramContext} from "../../../../../programContext";
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -23,6 +24,7 @@ export const OpenPaymentPlanHeaderButtons = ({
 }: OpenPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
+  const { isActiveProgram } = useProgramContext();
   const { id, isFollowUp } = paymentPlan;
 
   return (
@@ -38,6 +40,7 @@ export const OpenPaymentPlanHeaderButtons = ({
             to={`/${baseUrl}/payment-module/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
             }/${id}/edit`}
+            disabled={!isActiveProgram}
           >
             {t('Edit')}
           </Button>

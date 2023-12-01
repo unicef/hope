@@ -6,6 +6,7 @@ import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { LockFspPaymentPlan } from '../LockFspPaymentPlan';
+import {useProgramContext} from "../../../../../programContext";
 
 export interface LockedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -21,6 +22,8 @@ export const LockedPaymentPlanHeaderButtons = ({
   const { t } = useTranslation();
   const { id } = paymentPlan;
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
+
   const {
     mutatePaymentPlanAction: unlock,
     loading: loadingUnlock,
@@ -37,6 +40,7 @@ export const LockedPaymentPlanHeaderButtons = ({
             variant='outlined'
             color='primary'
             onClick={() => unlock()}
+            disabled={!isActiveProgram}
           >
             {t('Unlock')}
           </LoadingButton>

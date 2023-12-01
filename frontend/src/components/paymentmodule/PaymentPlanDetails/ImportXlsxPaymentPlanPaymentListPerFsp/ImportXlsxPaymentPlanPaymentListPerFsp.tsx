@@ -22,6 +22,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { useProgramContext } from "../../../../programContext";
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -30,6 +31,10 @@ const Error = styled.div`
 
 const UploadIcon = styled(Publish)`
   color: #043f91;
+`;
+
+const DisabledUploadIcon = styled(Publish)`
+  color: #00000042;
 `;
 
 interface ImportXlsxPaymentPlanPaymentListPerFspProps {
@@ -51,7 +56,7 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
-
+  const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
   const [
@@ -104,10 +109,11 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
       {canUploadReconciliation && (
         <Box key='import'>
           <Button
-            startIcon={<UploadIcon />}
+            startIcon={!isActiveProgram ? <DisabledUploadIcon /> : <UploadIcon />}
             color='primary'
             data-cy='button-import'
             onClick={() => setOpenImport(true)}
+            disabled={!isActiveProgram}
           >
             {t('Upload Reconciliation Info')}
           </Button>

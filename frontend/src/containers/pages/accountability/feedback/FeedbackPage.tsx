@@ -1,4 +1,3 @@
-import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +12,8 @@ import { FeedbackTable } from '../../../tables/Feedback/FeedbackTable';
 import { FeedbackFilters } from '../../../../components/accountability/Feedback/FeedbackTable/FeedbackFilters';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
+import {useProgramContext} from "../../../../programContext";
 
 const initialFilter = {
   feedbackId: '',
@@ -29,6 +30,7 @@ export const FeedbackPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { t } = useTranslation();
   const location = useLocation();
+  const { isActiveProgram } = useProgramContext();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -53,15 +55,17 @@ export const FeedbackPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title={t('Feedback')}>
-        <Button
+        <ButtonTooltip
           variant='contained'
           color='primary'
           component={Link}
           to={`/${baseUrl}/grievance/feedback/create`}
           data-cy='button-submit-new-feedback'
+          title={t('Program has to be active to create a new Feedback')}
+          disabled={!isActiveProgram}
         >
           {t('Submit New Feedback')}
-        </Button>
+        </ButtonTooltip>
       </PageHeader>
       <FeedbackFilters
         filter={filter}

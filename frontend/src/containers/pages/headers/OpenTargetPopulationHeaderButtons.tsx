@@ -15,6 +15,7 @@ import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTar
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useProgramContext } from "../../../programContext";
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -35,6 +36,7 @@ export const OpenTargetPopulationHeaderButtons = ({
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const { baseUrl } = useBaseUrl();
+  const { isActiveProgram } = useProgramContext();
 
   const [
     rebuildTargetPopulation,
@@ -46,12 +48,17 @@ export const OpenTargetPopulationHeaderButtons = ({
         <IconButton
           onClick={() => setOpenDuplicate(true)}
           data-cy='button-target-population-duplicate'
+          disabled={!isActiveProgram}
         >
           <FileCopy />
         </IconButton>
       )}
       {canRemove && (
-        <IconButton data-cy='button-delete' onClick={() => setOpenDelete(true)}>
+        <IconButton
+          data-cy='button-delete'
+          onClick={() => setOpenDelete(true)}
+          disabled={!isActiveProgram}
+        >
           <Delete />
         </IconButton>
       )}
@@ -64,6 +71,7 @@ export const OpenTargetPopulationHeaderButtons = ({
             startIcon={<EditRounded />}
             component={Link}
             to={`/${baseUrl}/target-population/edit-tp/${targetPopulation.id}`}
+            disabled={!isActiveProgram}
           >
             Edit
           </Button>
@@ -75,7 +83,7 @@ export const OpenTargetPopulationHeaderButtons = ({
             data-cy='button-rebuild'
             variant='outlined'
             color='primary'
-            disabled={rebuildTargetPopulationLoading}
+            disabled={rebuildTargetPopulationLoading || !isActiveProgram}
             startIcon={<RefreshRounded />}
             onClick={() =>
               rebuildTargetPopulation({
@@ -94,6 +102,7 @@ export const OpenTargetPopulationHeaderButtons = ({
             color='primary'
             onClick={() => setOpenLock(true)}
             data-cy='button-target-population-lock'
+            disabled={!isActiveProgram}
           >
             Lock
           </Button>
