@@ -58,11 +58,12 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(
     initialExpanded,
   );
-  const allAreasTree = AreaTreeNode.buildTree(
-    allAreasTreeData,
-    values.partners[index]?.adminAreas,
+  const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
+    AreaTreeNode.buildTree(
+      allAreasTreeData,
+      values.partners[index]?.adminAreas,
+    ),
   );
-
   const businessAreaOptionLabel = (
     <Box display='flex' flexDirection='column'>
       <BigText>{t('Business Area')}</BigText>
@@ -80,6 +81,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
       AreaTreeNode.getAllSelectedIds(allAreasTree),
     );
     setFieldValue(`partners[${index}].areaAccess`, 'ADMIN_AREA');
+    setAllAreasTree([...allAreasTree]);
   };
   let renderTree = null;
   const renderNode = (node: AreaTreeNode): React.ReactElement => {

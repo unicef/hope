@@ -768,12 +768,16 @@ class HardDocumentDeduplication:
             ticket_data_collected.append(prepared_ticket)
 
         GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
-        TicketNeedsAdjudicationDetails.objects.bulk_create([x.ticket_details for x in ticket_data_collected])
+        created_tickets = TicketNeedsAdjudicationDetails.objects.bulk_create(
+            [x.ticket_details for x in ticket_data_collected]
+        )
         # makes flat list from list of lists models
         duplicates_models_to_create_flat = list(
             itertools.chain(*[x.possible_duplicates_throughs for x in ticket_data_collected])
         )
         PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
+        for created_ticket in created_tickets:
+            created_ticket.populate_cross_area_flag()
 
     def _generate_signature(self, document: Document) -> str:
         if document.type.valid_for_deduplication:
