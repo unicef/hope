@@ -187,12 +187,12 @@ export const CreateSurveyPage = (): React.ReactElement => {
     };
     if (activeStep === SurveySteps.Details) {
       datum.title = Yup.string()
-        .min(2, t('Too short'))
+        .min(4, t('Too short'))
         .max(255, t('Too long'))
         .required(t('Title is required'));
       if (category === 'SMS') {
         datum.body = Yup.string()
-          .min(2, t('Too short'))
+          .min(4, t('Too short'))
           .max(255, t('Too long'))
           .required(t('Message is required'));
       }

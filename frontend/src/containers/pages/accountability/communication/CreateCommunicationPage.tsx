@@ -160,11 +160,11 @@ export const CreateCommunicationPage = (): React.ReactElement => {
 
     if (activeStep === CommunicationSteps.Details) {
       datum.title = Yup.string()
-        .min(2, t('Too short'))
+        .min(4, t('Too short'))
         .max(60, t('Too long'))
         .required(t('Title is required'));
       datum.body = Yup.string()
-        .min(2, t('Too short'))
+        .min(4, t('Too short'))
         .max(1000, t('Too long'))
         .required(t('Message is required'));
     }
