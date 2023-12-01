@@ -82,12 +82,8 @@ const redirectLink = new ApolloLink((operation, forward) => {
         window.location.href = `/error/${businessArea}`;
       }
     }
-    // If there are no errors and the data is null, redirect to a 404 page
-    else if (
-      response.data &&
-      isDataNull(response.data) &&
-      !hasResponseErrors(response)
-    ) {
+    // If data is null, redirect to a 404 page
+    else if (isDataNull(response.data)) {
       // Get the business area from the URL
       const pathSegments = window.location.pathname.split('/');
       const businessArea = pathSegments[1];
