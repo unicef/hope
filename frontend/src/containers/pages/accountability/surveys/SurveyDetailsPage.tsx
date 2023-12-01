@@ -11,7 +11,6 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
 import {
-  ProgramStatus,
   SurveyCategory,
   useExportSurveySampleMutation,
   useSurveyQuery,
@@ -29,7 +28,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const { data, loading, error } = useSurveyQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -84,7 +83,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
           }}
           target='_blank'
           title={t('Program has to be active to export Survey sample')}
-          disabled={selectedProgram?.status !== ProgramStatus.Active}
+          disabled={!isActiveProgram}
         >
           {t('Check Answers')}
         </ButtonTooltip>

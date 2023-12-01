@@ -3,7 +3,7 @@ import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { FeedbackQuery, ProgramStatus } from '../../../__generated__/graphql';
+import { FeedbackQuery } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { PageHeader } from '../../core/PageHeader';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
@@ -23,7 +23,7 @@ export const FeedbackDetailsToolbar = ({
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
   const history = useHistory();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -53,7 +53,7 @@ export const FeedbackDetailsToolbar = ({
               startIcon={<EditIcon />}
               data-cy='button-edit'
               title={t('Program has to be active to edit a Feedback')}
-              disabled={selectedProgram?.status !== ProgramStatus.Active}
+              disabled={!isActiveProgram}
             >
               {t('Edit')}
             </ButtonTooltip>
@@ -77,7 +77,7 @@ export const FeedbackDetailsToolbar = ({
               color='primary'
               data-cy='button-create-linked-ticket'
               title={t('Program has to be active to create a Linked Ticket to Feedback')}
-              disabled={selectedProgram?.status !== ProgramStatus.Active}
+              disabled={!isActiveProgram}
             >
               {t('Create Linked Ticket')}
             </ButtonTooltip>

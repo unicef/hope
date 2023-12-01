@@ -15,7 +15,6 @@ import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import {
   PaymentPlanQuery,
-  ProgramStatus,
   useDeletePpMutation,
 } from '../../../../__generated__/graphql';
 import { LoadingButton } from '../../../core/LoadingButton';
@@ -36,7 +35,7 @@ export const DeletePaymentPlan = ({
   const { showMessage } = useSnackbar();
   const [mutate, { loading: loadingDelete }] = useDeletePpMutation();
   const { id } = paymentPlan;
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const handleDelete = async (): Promise<void> => {
     try {
@@ -59,7 +58,7 @@ export const DeletePaymentPlan = ({
       <Box p={2}>
         <IconButton
           onClick={() => setDeleteDialogOpen(true)}
-          disabled={selectedProgram?.status !== ProgramStatus.Active}
+          disabled={!isActiveProgram}
         >
           <Delete />
         </IconButton>

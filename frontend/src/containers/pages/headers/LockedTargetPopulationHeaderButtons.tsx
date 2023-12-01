@@ -47,7 +47,7 @@ export const LockedTargetPopulationHeaderButtons = ({
   const [openFinalize, setOpenFinalize] = useState(false);
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const [mutate, { loading }] = useUnlockTpMutation();
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
 
@@ -57,7 +57,7 @@ export const LockedTargetPopulationHeaderButtons = ({
         <IconContainer>
          <Button
               onClick={() => setOpenDuplicate(true)}
-              disabled={selectedProgram?.status !== ProgramStatus.Active}
+              disabled={!isActiveProgram}
           >
             <FileCopy />
           </Button>
@@ -80,7 +80,7 @@ export const LockedTargetPopulationHeaderButtons = ({
               }
             }}
             data-cy='button-target-population-unlocked'
-            disabled={selectedProgram?.status !== ProgramStatus.Active}
+            disabled={!isActiveProgram}
           >
             Unlock
           </LoadingButton>
@@ -100,7 +100,7 @@ export const LockedTargetPopulationHeaderButtons = ({
                 <Button
                   variant='contained'
                   color='primary'
-                  disabled={selectedProgram?.status !== ProgramStatus.Active}
+                  disabled={!isActiveProgram}
                   onClick={() => setOpenFinalizePaymentPlan(true)}
                   data-cy='button-target-population-send-to-hope'
                 >

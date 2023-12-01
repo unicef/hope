@@ -10,7 +10,6 @@ import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { ProgramStatus } from "../../../__generated__/graphql";
 import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
 import { useProgramContext } from "../../../programContext";
 
@@ -30,7 +29,7 @@ export const PaymentModulePage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -55,7 +54,7 @@ export const PaymentModulePage = (): React.ReactElement => {
               to={`/${baseUrl}/payment-module/new-plan`}
               data-cy='button-new-payment-plan'
               title={t('Program has to be active to create new Payment Program')}
-              disabled={selectedProgram?.status !== ProgramStatus.Active}
+              disabled={!isActiveProgram}
             >
               {t('NEW PAYMENT PLAN')}
             </ButtonTooltip>

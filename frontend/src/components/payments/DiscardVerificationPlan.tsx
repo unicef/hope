@@ -8,7 +8,7 @@ import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper'
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { ProgramStatus, useDiscardPaymentVerificationPlanMutation } from '../../__generated__/graphql';
+import { useDiscardPaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
 import { useProgramContext } from "../../programContext";
@@ -23,7 +23,7 @@ export function DiscardVerificationPlan({
   const { t } = useTranslation();
   const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const [mutate] = useDiscardPaymentVerificationPlanMutation();
 
   const discard = async (): Promise<void> => {
@@ -44,7 +44,7 @@ export function DiscardVerificationPlan({
           startIcon={<ClearIcon />}
           onClick={() => setDiscardDialogOpen(true)}
           data-cy='button-discard-plan'
-          disabled={selectedProgram?.status !== ProgramStatus.Active}
+          disabled={!isActiveProgram}
         >
           DISCARD
         </ErrorButton>

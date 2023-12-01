@@ -10,7 +10,6 @@ import { renderUserName } from '../../../utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
-  ProgramStatus,
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../../__generated__/graphql';
@@ -50,7 +49,7 @@ export function Notes({
   });
 
   const { id } = useParams();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const [mutate, { loading }] = useCreateGrievanceTicketNoteMutation();
 
   if (meLoading) {
@@ -162,7 +161,7 @@ export function Notes({
                                 color='primary'
                                 variant='contained'
                                 onClick={submitForm}
-                                disabled={selectedProgram?.status !== ProgramStatus.Active}
+                                disabled={!isActiveProgram}
                               >
                                 {t('Add New Note')}
                               </LoadingButton>

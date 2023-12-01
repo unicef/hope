@@ -16,7 +16,7 @@ import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWr
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
-import { Action, PaymentPlanQuery, ProgramStatus } from '../../../../__generated__/graphql';
+import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
@@ -30,7 +30,7 @@ export const MarkAsReleasedPaymentPlan = ({
   paymentPlan,
 }: MarkAsReleasedPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const [markAsReleasedDialogOpen, setMarkAsReleasedDialogOpen] = useState(
     false,
   );
@@ -83,7 +83,7 @@ export const MarkAsReleasedPaymentPlan = ({
                 variant='contained'
                 onClick={() => setMarkAsReleasedDialogOpen(true)}
                 data-cy='button-mark-as-released'
-                disabled={selectedProgram?.status !== ProgramStatus.Active}
+                disabled={!isActiveProgram}
               >
                 {t('Mark as released')}
               </Button>

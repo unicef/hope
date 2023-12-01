@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { ProgramStatus, useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
+import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { CommunicationFilters } from '../../../../components/accountability/Communication/CommunicationTable/CommunicationFilters';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
@@ -22,7 +22,7 @@ export const CommunicationPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const initialFilter = {
     createdBy: '',
@@ -63,7 +63,7 @@ export const CommunicationPage = (): React.ReactElement => {
           to={`/${baseUrl}/accountability/communication/create`}
           data-cy='button-communication-create-new'
           title={t('Program has to be active to create new Message')}
-          disabled={selectedProgram?.status !== ProgramStatus.Active}
+          disabled={!isActiveProgram}
         >
           {t('New message')}
         </ButtonTooltip>

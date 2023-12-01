@@ -18,7 +18,6 @@ import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
   PaymentPlanQuery,
-  ProgramStatus,
   useImportXlsxPpListPerFspMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
@@ -57,7 +56,7 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
   const [
@@ -110,11 +109,11 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
       {canUploadReconciliation && (
         <Box key='import'>
           <Button
-            startIcon={selectedProgram?.status !== ProgramStatus.Active ? <DisabledUploadIcon /> : <UploadIcon />}
+            startIcon={!isActiveProgram ? <DisabledUploadIcon /> : <UploadIcon />}
             color='primary'
             data-cy='button-import'
             onClick={() => setOpenImport(true)}
-            disabled={selectedProgram?.status !== ProgramStatus.Active}
+            disabled={!isActiveProgram}
           >
             {t('Upload Reconciliation Info')}
           </Button>

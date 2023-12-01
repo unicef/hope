@@ -5,13 +5,13 @@ import { Link, useParams } from 'react-router-dom';
 import {
   PaymentPlanQuery,
   PaymentPlanStatus,
-  ProgramStatus,
 } from '../../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { DividerLine } from '../../../core/DividerLine';
 import { LabelizedField } from '../../../core/LabelizedField';
-import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
 import { useProgramContext } from "../../../../programContext";
+import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
+
 
 interface FspSectionProps {
   baseUrl: string;
@@ -24,7 +24,7 @@ export const FspSection = ({
 }: FspSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const { deliveryMechanisms, isFollowUp } = paymentPlan;
   const showFspDisplay = deliveryMechanisms.length;
@@ -35,7 +35,7 @@ export const FspSection = ({
     if (!paymentPlan.totalEntitledQuantityUsd) {
       return true;
     }
-    if (selectedProgram?.status !== ProgramStatus.Active) {
+    if (!isActiveProgram) {
       return true;
     }
     return false;
@@ -59,7 +59,7 @@ export const FspSection = ({
               to={`/${baseUrl}/payment-module/${
                 isFollowUp ? 'followup-payment-plans' : 'payment-plans'
               }/${id}/setup-fsp/edit`}
-              disabled={selectedProgram?.status !== ProgramStatus.Active}
+              disabled={!isActiveProgram}
             >
               {t('Edit FSP')}
             </Button>

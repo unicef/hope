@@ -3,7 +3,6 @@ import { Info } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { ProgramStatus } from '../../../__generated__/graphql';
 import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
@@ -30,7 +29,7 @@ export const TargetPopulationsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -68,7 +67,7 @@ export const TargetPopulationsPage = (): React.ReactElement => {
               component={Link}
               to={`/${baseUrl}/target-population/create`}
               data-cy='button-target-population-create-new'
-              disabled={selectedProgram?.status !== ProgramStatus.Active}
+              disabled={!isActiveProgram}
             >
               Create new
             </ButtonTooltip>

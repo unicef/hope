@@ -20,9 +20,10 @@ export const ProgramContext = createContext(null);
 
 export const ProgramProvider = ({ children }): ReactElement => {
     const [selectedProgram, setSelectedProgram] = useState<ProgramContextType>(null);
+    const isActiveProgram = selectedProgram?.status === ProgramStatus.Active;
 
     return (
-        <ProgramContext.Provider value={{ selectedProgram, setSelectedProgram }}>
+        <ProgramContext.Provider value={{ selectedProgram, setSelectedProgram, isActiveProgram }}>
             {children}
         </ProgramContext.Provider>
     )

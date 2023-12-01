@@ -28,7 +28,6 @@ import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
   PaymentPlanQuery,
-  ProgramStatus,
   useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useEditPaymentVerificationPlanMutation,
@@ -118,7 +117,7 @@ export function EditVerificationPlan({
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
   const { businessArea } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   useEffect(() => {
     if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
@@ -241,7 +240,7 @@ export function EditVerificationPlan({
             onClick={() => setOpen(true)}
             startIcon={<EditIcon />}
             data-cy='button-new-plan'
-            disabled={selectedProgram?.status !== ProgramStatus.Active}
+            disabled={!isActiveProgram}
           >
             {t('Edit')}
           </Button>
