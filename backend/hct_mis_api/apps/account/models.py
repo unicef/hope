@@ -201,6 +201,8 @@ class Partner(MPTTModel, models.Model):
 
     @property
     def business_area_ids(self) -> List[str]:
+        if self.is_unicef:
+            return list(BusinessArea.objects.filter(active=True).values_list("id", flat=True))
         return self.get_permissions().business_area_ids()
 
 
@@ -292,7 +294,14 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             list(
                 set(
                     [perm for perms in all_partner_roles_permissions_list for perm in perms]
-                    + [perm for perms in all_user_roles_permissions_list for perm in perms]
+                    + [
+                        perm
+                        for perms in all_user_roles_permissions_list
+                        for perm in perms
+                        if all_user_roles_permissions_list
+                    ]
+                    if all_user_roles_permissions_list is not None
+                    else []
                 )
             )
             if has_program_access
@@ -329,7 +338,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             user_roles__user=self,
             user_roles__business_area=business_area,
         )
-        return has_program_access and (user_roles.count() > 0 or partner_roles.count() > 0)
+        # TODO: Question... Do we need check user_roles.count() OR partner_roles.count() if partner.is_unicef???
+        return (has_program_access and (user_roles.count() > 0 or partner_roles.count() > 0)) or self.partner.is_unicef
 
     def get_partner_areas_ids_per_program(self, program_id: UUID, business_area_id: UUID) -> List:
         partner_areas_ids_per_program = self.get_partner_programs_areas_dict(business_area_id=business_area_id).get(
