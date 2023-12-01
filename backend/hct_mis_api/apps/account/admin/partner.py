@@ -58,7 +58,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
     @button(
         permission=can_add_business_area_to_partner,
-        enabled=lambda obj: not obj.original.is_editable,
+        enabled=lambda obj: obj.original.is_editable,
     )
     def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")

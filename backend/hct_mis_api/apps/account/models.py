@@ -190,7 +190,7 @@ class Partner(MPTTModel, models.Model):
 
     @property
     def is_editable(self) -> bool:
-        return not self.is_unicef or not self.is_default
+        return not self.is_unicef and not self.is_default
 
     def has_complete_access_in_program(self, program_id: str, business_area_id: str) -> bool:
         return self.is_unicef or self.get_permissions().areas_for(business_area_id, program_id) == []
