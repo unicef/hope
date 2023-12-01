@@ -7,7 +7,6 @@ import styled from 'styled-components';
 import {
   PaymentPlanQuery,
   PaymentPlanStatus,
-  ProgramStatus,
   useExportPdfPpSummaryMutation,
 } from '../../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
@@ -16,8 +15,8 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { Title } from '../../../core/Title';
-import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 import { useProgramContext } from "../../../../programContext";
+import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 
 const ButtonContainer = styled(Box)`
   width: 200px;
@@ -33,7 +32,7 @@ export const AcceptanceProcess = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const { edges } = paymentPlan.approvalProcess;
   const [showAll, setShowAll] = useState(false);
@@ -83,7 +82,7 @@ export const AcceptanceProcess = ({
               color='primary'
               variant='contained'
               onClick={handleExportPdf}
-              disabled={selectedProgram?.status !== ProgramStatus.Active}
+              disabled={!isActiveProgram}
             >
               {t('Download Payment Plan Summary')}
             </LoadingButton>

@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
-  ProgramStatus,
   useAllGrievanceTicketQuery,
   useAllUsersForFiltersLazyQuery,
   useGrievancesChoiceDataQuery,
@@ -51,7 +50,7 @@ export const GrievancesTable = ({
 }: GrievancesTableProps): React.ReactElement => {
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
@@ -280,7 +279,7 @@ export const GrievancesTable = ({
                     title={t('Program has to be active to create a new Grievance Ticket')}
                     to={`/${baseUrl}/grievance/new-ticket`}
                     data-cy='button-new-ticket'
-                    disabled={selectedProgram?.status !== ProgramStatus.Active}
+                    disabled={!isActiveProgram}
                   >
                     {t('NEW TICKET')}
                   </ButtonTooltip>

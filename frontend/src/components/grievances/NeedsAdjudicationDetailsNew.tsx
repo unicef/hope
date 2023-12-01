@@ -14,7 +14,6 @@ import { useHistory } from 'react-router-dom';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
-  ProgramStatus,
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
@@ -24,11 +23,11 @@ import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
 import { useSnackbar } from "../../hooks/useSnackBar";
+import { useProgramContext } from "../../programContext";
 import {
   ApproveBox,
   StyledTable,
 } from './GrievancesApproveSection/ApproveSectionStyles';
-import { useProgramContext } from "../../programContext";
 
 export function NeedsAdjudicationDetailsNew({
   ticket,
@@ -41,7 +40,7 @@ export function NeedsAdjudicationDetailsNew({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
   const [approve] = useApproveNeedsAdjudicationMutation({
@@ -243,7 +242,7 @@ export function NeedsAdjudicationDetailsNew({
             )}
             {isEditable && canApprove && (
               <Button
-                disabled={isApproveDisabled() || selectedProgram?.status !== ProgramStatus.Active}
+                disabled={isApproveDisabled() || !isActiveProgram}
                 data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({

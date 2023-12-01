@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { Dialog } from '../../../../containers/dialogs/Dialog';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import {AllGrievanceTicketQuery, ProgramStatus} from '../../../../__generated__/graphql';
+import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
 import { useProgramContext } from "../../../../programContext";
 
 export const StyledLink = styled.div`
@@ -59,7 +59,7 @@ export const BulkBaseModal = ({
 }: BulkBaseModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const renderButton = (): React.ReactElement => {
     return (
@@ -67,7 +67,7 @@ export const BulkBaseModal = ({
         variant='outlined'
         color='primary'
         startIcon={icon}
-        disabled={!selectedTickets.length || selectedProgram?.status !== ProgramStatus.Active}
+        disabled={!selectedTickets.length || !isActiveProgram}
         onClick={() => setDialogOpen(true)}
       >
         {buttonTitle}

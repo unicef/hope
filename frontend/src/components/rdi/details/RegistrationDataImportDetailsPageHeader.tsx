@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  ProgramStatus,
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
   useEraseRdiMutation,
@@ -42,7 +41,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
@@ -66,7 +65,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
       }
       variant='contained'
       color='primary'
-      disabled={selectedProgram?.status !== ProgramStatus.Active}
+      disabled={!isActiveProgram}
     >
       {t('Erase import')}
     </LoadingButton>
@@ -86,7 +85,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
               onClick={() => setShowRefuseRdiForm(true)}
               variant='contained'
               color='primary'
-              disabled={selectedProgram?.status !== ProgramStatus.Active}
+              disabled={!isActiveProgram}
             >
               {t('Refuse Import')}
             </LoadingButton>

@@ -5,7 +5,7 @@ import { TestProviders } from './testProviders';
 import { MockLink } from '@apollo/react-testing';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
-import {ProgramStatus} from "../__generated__/graphql";
+import { ProgramStatus } from "../__generated__/graphql";
 
 const customRender = (
   ui: ReactElement,

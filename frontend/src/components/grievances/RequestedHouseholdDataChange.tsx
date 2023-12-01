@@ -6,14 +6,13 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketQuery,
-  ProgramStatus,
   useApproveHouseholdDataChangeMutation,
 } from '../../__generated__/graphql';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
-import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 import { useProgramContext } from "../../programContext";
+import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 
 export function RequestedHouseholdDataChange({
   ticket,
@@ -25,7 +24,7 @@ export function RequestedHouseholdDataChange({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const confirm = useConfirmation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const getConfirmationText = (values): string => {
     const allSelected =
@@ -72,7 +71,7 @@ export function RequestedHouseholdDataChange({
           color='primary'
           data-cy='button-approve'
           disabled={
-            ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL || selectedProgram?.status !== ProgramStatus.Active
+            ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL || !isActiveProgram
           }
         >
           {t('Approve')}
@@ -94,7 +93,7 @@ export function RequestedHouseholdDataChange({
         data-cy='button-approve'
         title={t('Program has to be active to create a Linked Ticket to Feedback')}
         disabled={
-          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL || selectedProgram?.status !== ProgramStatus.Active
+          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL || !isActiveProgram
         }
       >
         {t('Approve')}

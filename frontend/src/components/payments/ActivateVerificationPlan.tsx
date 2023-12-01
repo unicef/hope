@@ -7,7 +7,7 @@ import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { ProgramStatus, useActivatePaymentVerificationPlanMutation } from '../../__generated__/graphql';
+import { useActivatePaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { useProgramContext } from "../../programContext";
 
 export interface ActivateVerificationPlanProps {
@@ -19,7 +19,7 @@ export const ActivateVerificationPlan = ({
 }: ActivateVerificationPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const { showMessage } = useSnackbar();
   const [mutate] = useActivatePaymentVerificationPlanMutation();
@@ -42,7 +42,7 @@ export const ActivateVerificationPlan = ({
           variant='contained'
           onClick={() => setActivateDialogOpen(true)}
           data-cy='button-activate-plan'
-          disabled={selectedProgram?.status !== ProgramStatus.Active}
+          disabled={!isActiveProgram}
         >
           {t('ACTIVATE')}
         </Button>

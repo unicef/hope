@@ -14,7 +14,6 @@ import {
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
-  ProgramStatus,
   useExcludeHouseholdsPpMutation,
 } from '../../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
@@ -25,8 +24,8 @@ import { StyledTextField } from '../../../../shared/StyledTextField';
 import { ButtonTooltip } from '../../../core/ButtonTooltip';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { ExcludedItem } from './ExcludedItem';
 import { useProgramContext } from "../../../../programContext";
+import { ExcludedItem } from './ExcludedItem';
 
 interface ExcludeSectionProps {
   initialOpen?: boolean;
@@ -55,7 +54,7 @@ export const ExcludeSection = ({
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const { t } = useTranslation();
   const permissions = usePermissions();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const hasExcludePermission = hasPermissions(
     PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
@@ -274,7 +273,7 @@ export const ExcludeSection = ({
             setExclusionsOpen(true);
             setEdit(true);
           }}
-          disabled={selectedProgram?.status !== ProgramStatus.Active}
+          disabled={!isActiveProgram}
         >
           {t('Create')}
         </Button>

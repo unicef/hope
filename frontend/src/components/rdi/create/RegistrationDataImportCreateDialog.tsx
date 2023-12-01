@@ -17,7 +17,6 @@ import { DialogActions } from '../../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
-import { ProgramStatus } from "../../../__generated__/graphql";
 import { ButtonTooltip } from "../../core/ButtonTooltip";
 import { useProgramContext } from "../../../programContext";
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
@@ -47,7 +46,7 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
   const [importType, setImportType] = useState('');
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [submitForm, setSubmitForm] = usePassFunctionFromChild();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   useEffect(() => {
     if (!open) {
@@ -63,7 +62,7 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
       onClick={() => setOpen(true)}
       data-cy='button-import'
       title={t('Program has to be active to create a new RegistrationDataImport')}
-      disabled={selectedProgram?.status !== ProgramStatus.Active}
+      disabled={!isActiveProgram}
     >
       {t('IMPORT')}
     </ButtonTooltip>

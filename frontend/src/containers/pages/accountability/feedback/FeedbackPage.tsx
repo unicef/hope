@@ -13,7 +13,6 @@ import { FeedbackFilters } from '../../../../components/accountability/Feedback/
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
-import { ProgramStatus } from "../../../../__generated__/graphql";
 import {useProgramContext} from "../../../../programContext";
 
 const initialFilter = {
@@ -31,7 +30,7 @@ export const FeedbackPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { t } = useTranslation();
   const location = useLocation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -63,7 +62,7 @@ export const FeedbackPage = (): React.ReactElement => {
           to={`/${baseUrl}/grievance/feedback/create`}
           data-cy='button-submit-new-feedback'
           title={t('Program has to be active to create a new Feedback')}
-          disabled={selectedProgram?.status !== ProgramStatus.Active}
+          disabled={!isActiveProgram}
         >
           {t('Submit New Feedback')}
         </ButtonTooltip>

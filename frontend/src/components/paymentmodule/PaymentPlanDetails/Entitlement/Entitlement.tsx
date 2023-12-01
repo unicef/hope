@@ -20,7 +20,6 @@ import {
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
-  ProgramStatus,
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
   useSetSteficonRuleOnPpListMutation,
@@ -100,7 +99,7 @@ export const Entitlement = ({
 }: EntitlementProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
 
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
     paymentPlan.steficonRule?.rule.id || '',
@@ -144,16 +143,16 @@ export const Entitlement = ({
 
   const shouldDisableEntitlementSelect =
     !canApplySteficonRule || paymentPlan.status !== PaymentPlanStatus.Locked ||
-    selectedProgram?.status !== ProgramStatus.Active;
+    !isActiveProgram;
 
   const shouldDisableDownloadTemplate =
-    paymentPlan.status !== PaymentPlanStatus.Locked || selectedProgram?.status !== ProgramStatus.Active;
+    paymentPlan.status !== PaymentPlanStatus.Locked || !isActiveProgram;
 
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
     paymentPlan?.backgroundActionStatus === PaymentPlanBackgroundActionStatus.XlsxExporting ||
-    selectedProgram?.status !== ProgramStatus.Active;
+    !isActiveProgram;
 
   return (
     <Box m={5}>
@@ -201,7 +200,7 @@ export const Entitlement = ({
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatus.Locked ||
                     paymentPlan.backgroundActionStatus === PaymentPlanBackgroundActionStatus.RuleEngineRun ||
-                    selectedProgram?.status !== ProgramStatus.Active
+                    !isActiveProgram
                   }
                   data-cy='button-apply-steficon'
                   onClick={async () => {

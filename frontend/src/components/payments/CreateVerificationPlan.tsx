@@ -28,7 +28,6 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { getPercentage } from '../../utils/utils';
 import {
   PaymentVerificationPlanVerificationChannel,
-  ProgramStatus,
   useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useCreatePaymentVerificationPlanMutation,
@@ -127,7 +126,7 @@ export function CreateVerificationPlan({
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
   const { businessArea } = useBaseUrl();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const [formValues, setFormValues] = useState(initialValues);
 
   const [
@@ -235,7 +234,7 @@ export function CreateVerificationPlan({
           <Box mr={2}>
             <ButtonTooltip
               title={t('Program has to be active to create a VerificationPaymentPlan')}
-              disabled={selectedProgram?.status !== ProgramStatus.Active}
+              disabled={!isActiveProgram}
               color='primary'
               variant='contained'
               onClick={() => handleOpen()}

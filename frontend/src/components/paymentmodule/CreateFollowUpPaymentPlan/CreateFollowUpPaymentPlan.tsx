@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
-  ProgramStatus,
   useCreateFollowUpPpMutation,
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
@@ -47,7 +46,7 @@ export const CreateFollowUpPaymentPlan = ({
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const [mutate, { loading }] = useCreateFollowUpPpMutation();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
   const {
@@ -120,7 +119,7 @@ export const CreateFollowUpPaymentPlan = ({
               onClick={() => setDialogOpen(true)}
                disabled={
                 !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
-                selectedProgram?.status !== ProgramStatus.Active
+                !isActiveProgram
               }
             >
               {t('Create Follow-up Payment Plan')}

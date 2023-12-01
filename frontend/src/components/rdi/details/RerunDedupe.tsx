@@ -12,7 +12,6 @@ import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
-  ProgramStatus,
   RegistrationDetailedFragment,
   useRerunDedupeMutation,
 } from '../../../__generated__/graphql';
@@ -29,7 +28,7 @@ export function RerunDedupe({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const { selectedProgram } = useProgramContext();
+  const { isActiveProgram } = useProgramContext();
   const [mutate, { loading }] = useRerunDedupeMutation({
     variables: { registrationDataImportDatahubId: registration.datahubId },
   });
@@ -48,7 +47,7 @@ export function RerunDedupe({
           color='primary'
           variant='contained'
           onClick={() => setOpen(true)}
-          disabled={selectedProgram?.status !== ProgramStatus.Active}
+          disabled={!isActiveProgram}
       >
         {t('Rerun Deduplication')}
       </Button>
