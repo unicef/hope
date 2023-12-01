@@ -37,7 +37,6 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_get_filtered_qs,
     chart_permission_decorator,
-    decode_id_string,
     encode_ids,
     get_program_id_from_headers,
     to_choice_object,
@@ -67,6 +66,9 @@ from hct_mis_api.apps.grievance.models import (
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
+)
+from hct_mis_api.apps.grievance.utils import (
+    filter_grievance_tickets_based_on_partner_areas_2,
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -509,7 +511,7 @@ class Query(graphene.ObjectType):
 
     def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> QuerySet:
         user = info.context.user
-        program_id = decode_id_string(info.context.headers.get("Program"))
+        program_id = get_program_id_from_headers(info.context.headers)
         business_area_slug = info.context.headers.get("Business-Area")
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
@@ -524,22 +526,10 @@ class Query(graphene.ObjectType):
 
         queryset = queryset.prefetch_related(*to_prefetch)
 
-        if not user.partner.is_unicef:  # Full access to all AdminAreas
-            try:
-                partner_permission = user.partner.get_permissions()
-                program_area_ids = partner_permission.areas_for(str(business_area_id), str(program_id))
-            except (Partner.DoesNotExist, AssertionError):
-                return GrievanceTicket.objects.none()
-
-            if program_area_ids is None:  # If None, user's partner does not have permission
-                return GrievanceTicket.objects.none()
-            elif not program_area_ids:  # If empty list, user's partner does have full permission
-                pass
-            else:  # Check to which areas user has access
-                areas = Area.objects.filter(id__in=program_area_ids)
-                areas_level_2 = areas.filter(level=1).values_list("id")
-
-                queryset = queryset.filter(Q(admin2__in=areas_level_2) | Q(admin2__isnull=True))
+        if not user.partner.is_unicef:  # Full access to all AdminAreas if is_unicef
+            queryset = filter_grievance_tickets_based_on_partner_areas_2(
+                queryset, user.partner, business_area_id, program_id
+            )
 
         return queryset.annotate(
             total=Case(
