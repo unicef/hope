@@ -68,11 +68,11 @@ class GenericRegistrationService(BaseRegistrationService):
 
     @staticmethod
     def get_relationship(value: str) -> str:
-        return value.upper()
+        return value.upper() if value else None
 
     @staticmethod
     def get_marital_status(value: str) -> str:
-        return value.upper()
+        return value.upper() if value else None
 
     @staticmethod
     def get_disability(value: Any) -> str:
