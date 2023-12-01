@@ -22,7 +22,8 @@ import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-import {useSnackbar} from "../../hooks/useSnackBar";
+import { useSnackbar } from "../../hooks/useSnackBar";
+import { useProgramContext } from "../../programContext";
 import {
   ApproveBox,
   StyledTable,
@@ -39,6 +40,7 @@ export function NeedsAdjudicationDetailsNew({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
+  const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
   const [approve] = useApproveNeedsAdjudicationMutation({
@@ -240,7 +242,7 @@ export function NeedsAdjudicationDetailsNew({
             )}
             {isEditable && canApprove && (
               <Button
-                disabled={isApproveDisabled()}
+                disabled={isApproveDisabled() || !isActiveProgram}
                 data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({
