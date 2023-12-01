@@ -223,14 +223,14 @@ export const EditFeedbackPage = (): React.ReactElement => {
                                 <BlackLink
                                   to={
                                     canViewHouseholdDetails
-                                      ? `/${baseUrl}/population/household/${feedback.householdLookup.id}`
+                                      ? `/${baseUrl}/population/household/${feedback.householdLookup?.id}`
                                       : undefined
                                   }
                                 >
-                                  {feedback.householdLookup.unicefId}
+                                  {feedback.householdLookup?.unicefId}
                                 </BlackLink>
                               ) : (
-                                feedback.householdLookup.unicefId || '-'
+                                feedback.householdLookup?.unicefId || '-'
                               )}
                             </LabelizedField>
                           </Grid>
@@ -241,14 +241,14 @@ export const EditFeedbackPage = (): React.ReactElement => {
                                 <BlackLink
                                   to={
                                     canViewIndividualDetails
-                                      ? `/${baseUrl}/population/individuals/${feedback.individualLookup.id}`
+                                      ? `/${baseUrl}/population/individuals/${feedback.individualLookup?.id}`
                                       : undefined
                                   }
                                 >
-                                  {feedback.individualLookup.unicefId}
+                                  {feedback.individualLookup?.unicefId}
                                 </BlackLink>
                               ) : (
-                                feedback.individualLookup.unicefId || '-'
+                                feedback.individualLookup?.unicefId || '-'
                               )}
                             </LabelizedField>
                           </Grid>

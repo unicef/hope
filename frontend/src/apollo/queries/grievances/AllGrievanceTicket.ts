@@ -31,6 +31,7 @@ export const AllGrievanceTicket = gql`
     $preferredLanguage: String
     $program: String
     $isActiveProgram: Boolean
+    $isCrossArea: Boolean
   ) {
     allGrievanceTicket(
       before: $before
@@ -62,6 +63,7 @@ export const AllGrievanceTicket = gql`
       preferredLanguage: $preferredLanguage
       program: $program
       isActiveProgram: $isActiveProgram
+      isCrossArea: $isCrossArea
     ) {
       totalCount
       pageInfo {

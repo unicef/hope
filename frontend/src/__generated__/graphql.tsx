@@ -5512,6 +5512,7 @@ export type Query = {
   ticketsByLocationAndCategory?: Maybe<ChartDetailedDatasetsNode>,
   grievanceTicket?: Maybe<GrievanceTicketNode>,
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>,
+  crossAreaFilterAvailable?: Maybe<Scalars['Boolean']>,
   existingGrievanceTickets?: Maybe<GrievanceTicketNodeConnection>,
   allTicketNotes?: Maybe<TicketNoteNodeConnection>,
   chartGrievances?: Maybe<ChartGrievanceTicketsNode>,
@@ -5896,6 +5897,7 @@ export type QueryAllGrievanceTicketArgs = {
   totalDays?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['String']>,
   isActiveProgram?: Maybe<Scalars['Boolean']>,
+  isCrossArea?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -7995,6 +7997,7 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   extraData?: Maybe<TicketNeedsAdjudicationDetailsExtraDataNode>,
   scoreMin: Scalars['Float'],
   scoreMax: Scalars['Float'],
+  isCrossArea: Scalars['Boolean'],
   hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
 };
 
@@ -11994,7 +11997,8 @@ export type AllGrievanceTicketQueryVariables = {
   urgency?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   program?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>
+  isActiveProgram?: Maybe<Scalars['Boolean']>,
+  isCrossArea?: Maybe<Scalars['Boolean']>
 };
 
 
@@ -12031,6 +12035,14 @@ export type AllGrievanceTicketQuery = (
       )> }
     )>> }
   )> }
+);
+
+export type GrievanceTicketAreaScopeQueryVariables = {};
+
+
+export type GrievanceTicketAreaScopeQuery = (
+  { __typename?: 'Query' }
+  & Pick<Query, 'crossAreaFilterAvailable'>
 );
 
 export type ExistingGrievanceTicketsQueryVariables = {
@@ -22046,8 +22058,8 @@ export type AllGrievanceDashboardChartsQueryHookResult = ReturnType<typeof useAl
 export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsLazyQuery>;
 export type AllGrievanceDashboardChartsQueryResult = ApolloReactCommon.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $searchType: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean) {
-  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, searchType: $searchType, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin2: $admin2, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, createdBy: $createdBy, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency, preferredLanguage: $preferredLanguage, program: $program, isActiveProgram: $isActiveProgram) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $searchType: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, searchType: $searchType, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin2: $admin2, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, createdBy: $createdBy, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency, preferredLanguage: $preferredLanguage, program: $program, isActiveProgram: $isActiveProgram, isCrossArea: $isCrossArea) {
     totalCount
     pageInfo {
       startCursor
@@ -22152,6 +22164,7 @@ export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOption
  *      preferredLanguage: // value for 'preferredLanguage'
  *      program: // value for 'program'
  *      isActiveProgram: // value for 'isActiveProgram'
+ *      isCrossArea: // value for 'isCrossArea'
  *   },
  * });
  */
@@ -22164,6 +22177,53 @@ export function useAllGrievanceTicketLazyQuery(baseOptions?: ApolloReactHooks.La
 export type AllGrievanceTicketQueryHookResult = ReturnType<typeof useAllGrievanceTicketQuery>;
 export type AllGrievanceTicketLazyQueryHookResult = ReturnType<typeof useAllGrievanceTicketLazyQuery>;
 export type AllGrievanceTicketQueryResult = ApolloReactCommon.QueryResult<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>;
+export const GrievanceTicketAreaScopeDocument = gql`
+    query GrievanceTicketAreaScope {
+  crossAreaFilterAvailable
+}
+    `;
+export type GrievanceTicketAreaScopeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>, 'query'>;
+
+    export const GrievanceTicketAreaScopeComponent = (props: GrievanceTicketAreaScopeComponentProps) => (
+      <ApolloReactComponents.Query<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables> query={GrievanceTicketAreaScopeDocument} {...props} />
+    );
+    
+export type GrievanceTicketAreaScopeProps<TChildProps = {}> = ApolloReactHoc.DataProps<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables> & TChildProps;
+export function withGrievanceTicketAreaScope<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievanceTicketAreaScopeQuery,
+  GrievanceTicketAreaScopeQueryVariables,
+  GrievanceTicketAreaScopeProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables, GrievanceTicketAreaScopeProps<TChildProps>>(GrievanceTicketAreaScopeDocument, {
+      alias: 'grievanceTicketAreaScope',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievanceTicketAreaScopeQuery__
+ *
+ * To run a query within a React component, call `useGrievanceTicketAreaScopeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGrievanceTicketAreaScopeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGrievanceTicketAreaScopeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGrievanceTicketAreaScopeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>) {
+        return ApolloReactHooks.useQuery<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>(GrievanceTicketAreaScopeDocument, baseOptions);
+      }
+export function useGrievanceTicketAreaScopeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>(GrievanceTicketAreaScopeDocument, baseOptions);
+        }
+export type GrievanceTicketAreaScopeQueryHookResult = ReturnType<typeof useGrievanceTicketAreaScopeQuery>;
+export type GrievanceTicketAreaScopeLazyQueryHookResult = ReturnType<typeof useGrievanceTicketAreaScopeLazyQuery>;
+export type GrievanceTicketAreaScopeQueryResult = ApolloReactCommon.QueryResult<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>;
 export const ExistingGrievanceTicketsDocument = gql`
     query ExistingGrievanceTickets($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $businessArea: String!, $household: ID, $individual: ID, $paymentRecord: [ID], $category: String, $issueType: String, $orderBy: String) {
   existingGrievanceTickets(before: $before, after: $after, first: $first, last: $last, id: $id, businessArea: $businessArea, household: $household, individual: $individual, paymentRecord: $paymentRecord, category: $category, issueType: $issueType, orderBy: $orderBy) {
@@ -31705,6 +31765,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   ticketsByLocationAndCategory?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryTicketsByLocationAndCategoryArgs, 'businessAreaSlug'>>,
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>,
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
+  crossAreaFilterAvailable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea'>>,
   allTicketNotes?: Resolver<Maybe<ResolversTypes['TicketNoteNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllTicketNotesArgs, 'ticket'>>,
   chartGrievances?: Resolver<Maybe<ResolversTypes['ChartGrievanceTicketsNode']>, ParentType, ContextType, RequireFields<QueryChartGrievancesArgs, 'businessAreaSlug' | 'year'>>,
@@ -32610,6 +32671,7 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   extraData?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsExtraDataNode']>, ParentType, ContextType>,
   scoreMin?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   scoreMax?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  isCrossArea?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 

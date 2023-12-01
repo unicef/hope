@@ -3,7 +3,10 @@ import { AccountBalance } from '@material-ui/icons';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import {
+  GrievancesChoiceDataQuery,
+  useGrievanceTicketAreaScopeQuery,
+} from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
@@ -47,6 +50,7 @@ export const GrievancesFilters = ({
   const { isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const location = useLocation();
+  const { data: areaScopeData } = useGrievanceTicketAreaScopeQuery();
 
   const {
     handleFilterChange,
@@ -393,6 +397,26 @@ export const GrievancesFilters = ({
             </SelectFilter>
           </Grid>
         )}
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated &&
+          areaScopeData?.crossAreaFilterAvailable && (
+            <Grid item xs={3}>
+              <SelectFilter
+                onChange={(e) =>
+                  handleFilterChange('areaScope', e.target.value)
+                }
+                label={t('Area Scope')}
+                value={filter.areaScope}
+                fullWidth
+                disableClearable
+                data-cy='filters-area-scope'
+              >
+                <MenuItem value='cross-area'>
+                  {t('Cross-Area Tickets')}
+                </MenuItem>
+                <MenuItem value='all'>{t('All Tickets')}</MenuItem>
+              </SelectFilter>
+            </Grid>
+          )}
       </Grid>
     </FiltersSection>
   );

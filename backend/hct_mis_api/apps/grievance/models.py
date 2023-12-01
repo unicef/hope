@@ -486,7 +486,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return self.description or str(self.pk)
+        return f"{self.unicef_id} - {self.description or str(self.pk)}"
 
     def get_issue_type(self) -> str:
         return dict(self.ALL_ISSUE_TYPES).get(self.issue_type, "")
@@ -803,6 +803,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     extra_data = JSONField(default=dict)
     score_min = models.FloatField(default=0.0)
     score_max = models.FloatField(default=0.0)
+    is_cross_area = models.BooleanField(default=False)
 
     @property
     def has_duplicated_document(self) -> bool:
@@ -832,6 +833,24 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     @property
     def individual(self) -> "Individual":
         return self.golden_records_individual
+
+    def populate_cross_area_flag(self, *args: Any, **kwargs: Any) -> None:
+        from hct_mis_api.apps.household.models import Individual
+
+        unique_areas_count = (
+            Individual.objects.filter(
+                id__in=[
+                    self.golden_records_individual.id,
+                    *self.possible_duplicates.values_list("id", flat=True),
+                ],
+                household__admin2__isnull=False,
+            )
+            .values_list("household__admin2", flat=True)
+            .distinct()
+            .count()
+        )
+        is_cross_area = unique_areas_count > 1
+        TicketNeedsAdjudicationDetails.objects.filter(id=self.id).update(is_cross_area=is_cross_area)
 
     class Meta:
         verbose_name_plural = "Ticket Needs Adjudication Details"
