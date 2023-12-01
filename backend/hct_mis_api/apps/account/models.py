@@ -17,7 +17,6 @@ from django.db import models
 from django.db.models import JSONField, Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 
-from model_utils import Choices
 from model_utils.models import UUIDModel
 from natural_keys import NaturalKeyModel
 
