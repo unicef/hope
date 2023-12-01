@@ -136,7 +136,7 @@ class TestHouseholdAreaQuery(APITestCase):
     @skip(reason="Check after merge")
     def test_household_with_no_admin_area_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # No permissions
-        partner = PartnerFactory(name="NOT_UNICEF")
+        partner = PartnerFactory(name="NOT_UNICEF_1")
         partner.permissions = {}
         partner.save()
         user = UserFactory(partner=partner)
@@ -161,7 +161,7 @@ class TestHouseholdAreaQuery(APITestCase):
     )
     def test_household_admin_area_3_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access to admin3
-        partner = PartnerFactory(name="NOT_UNICEF")
+        partner = PartnerFactory(name="NOT_UNICEF_2")
         partner.permissions = {
             str(self.business_area_afghanistan.id): {
                 "programs": {
@@ -192,7 +192,7 @@ class TestHouseholdAreaQuery(APITestCase):
     )
     def test_household_many_admin_area_3_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access to many admin3
-        partner = PartnerFactory(name="NOT_UNICEF")
+        partner = PartnerFactory(name="NOT_UNICEF_3")
         partner.permissions = {
             str(self.business_area_afghanistan.id): {
                 "programs": {
@@ -223,7 +223,7 @@ class TestHouseholdAreaQuery(APITestCase):
     )
     def test_household_admin_area_2_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access to admin2
-        partner = PartnerFactory(name="NOT_UNICEF")
+        partner = PartnerFactory(name="NOT_UNICEF_4")
         partner.permissions = {
             str(self.business_area_afghanistan.id): {
                 "programs": {
@@ -254,7 +254,7 @@ class TestHouseholdAreaQuery(APITestCase):
     )
     def test_household_many_admin_area_2_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access many admin2
-        partner = PartnerFactory(name="NOT_UNICEF")
+        partner = PartnerFactory(name="NOT_UNICEF_5")
         partner.permissions = {
             str(self.business_area_afghanistan.id): {
                 "programs": {
@@ -285,7 +285,7 @@ class TestHouseholdAreaQuery(APITestCase):
     )
     def test_household_admin_area_2_and_admin_area_3_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access many admin2 and admin3
-        partner = PartnerFactory(name="NOT_UNICEF")
+        partner = PartnerFactory(name="NOT_UNICEF_6")
         partner.permissions = {
             str(self.business_area_afghanistan.id): {
                 "programs": {
@@ -320,7 +320,7 @@ class TestHouseholdAreaQuery(APITestCase):
     )
     def test_household_admin_area_1_is_filtered(self, _: Any, permissions: List[Permissions]) -> None:
         # Access to admin1
-        partner = PartnerFactory(name="NOT_UNICEF")
+        partner = PartnerFactory(name="NOT_UNICEF_7")
         partner.permissions = {
             str(self.business_area_afghanistan.id): {
                 "programs": {
@@ -375,7 +375,7 @@ class TestHouseholdAreaQuery(APITestCase):
         self, _: Any, permissions: List[Permissions]
     ) -> None:
         # Full query returned
-        partner = PartnerFactory(name="NOT_UNICEF")
+        partner = PartnerFactory(name="NOT_UNICEF_8")
         partner.permissions = {
             str(self.business_area_afghanistan.id): {
                 "programs": {
