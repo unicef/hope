@@ -2,10 +2,13 @@ import { MenuItem, Select } from '@material-ui/core';
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { useAllProgramsForChoicesQuery } from '../__generated__/graphql';
+import {
+  AllProgramsForChoicesQuery,
+  useAllProgramsForChoicesQuery,
+} from '../__generated__/graphql';
 import { LoadingComponent } from '../components/core/LoadingComponent';
 import { useBaseUrl } from '../hooks/useBaseUrl';
-import {useProgramContext} from "../programContext";
+import { useProgramContext } from '../programContext';
 
 const CountrySelect = styled(Select)`
   && {
@@ -60,16 +63,18 @@ export const GlobalProgramSelect = (): React.ReactElement => {
     [data],
   );
 
-  const getCurrentProgram = () => {
-  const obj = data?.allPrograms.edges.filter(
-        (el) => el.node.id === programId
-    )
-    return obj ? obj[0].node : null
+  const getCurrentProgram = ():
+    | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
+    | null => {
+    const obj = data?.allPrograms.edges.filter(
+      (el) => el.node.id === programId,
+    );
+    return obj ? obj[0].node : null;
   };
 
   if (programId !== 'all') {
     const program = getCurrentProgram();
-    if (!selectedProgram || (selectedProgram?.id !== programId)) {
+    if (!selectedProgram || selectedProgram?.id !== programId) {
       const { id, name, status, individualDataNeeded } = program;
 
       setSelectedProgram({
@@ -79,10 +84,12 @@ export const GlobalProgramSelect = (): React.ReactElement => {
         individualDataNeeded,
         dataCollectingType: {
           id: program.dataCollectingType?.id,
-          householdFiltersAvailable: program.dataCollectingType?.householdFiltersAvailable,
-          individualFiltersAvailable: program.dataCollectingType?.individualFiltersAvailable,
-        }
-      })
+          householdFiltersAvailable:
+            program.dataCollectingType?.householdFiltersAvailable,
+          individualFiltersAvailable:
+            program.dataCollectingType?.individualFiltersAvailable,
+        },
+      });
     }
   }
 
@@ -121,12 +128,12 @@ export const GlobalProgramSelect = (): React.ReactElement => {
         All Programmes
       </MenuItem>
       {data.allPrograms.edges
-          .sort((objA, objB) => objA.node.name.localeCompare(objB.node.name))
-          .map((each) => (
-            <MenuItem key={each.node.id} value={each.node.id}>
-              {each.node.name}
-            </MenuItem>
-      ))}
+        .sort((objA, objB) => objA.node.name.localeCompare(objB.node.name))
+        .map((each) => (
+          <MenuItem key={each.node.id} value={each.node.id}>
+            {each.node.name}
+          </MenuItem>
+        ))}
     </CountrySelect>
   );
 };

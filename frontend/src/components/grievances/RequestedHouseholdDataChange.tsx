@@ -2,16 +2,16 @@ import { Box, Button, Typography } from '@material-ui/core';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
 } from '../../__generated__/graphql';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { useProgramContext } from '../../programContext';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
-import { useProgramContext } from "../../programContext";
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 
 export function RequestedHouseholdDataChange({
@@ -71,7 +71,8 @@ export function RequestedHouseholdDataChange({
           color='primary'
           data-cy='button-approve'
           disabled={
-            ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL || !isActiveProgram
+            ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+            !isActiveProgram
           }
         >
           {t('Approve')}
@@ -91,9 +92,12 @@ export function RequestedHouseholdDataChange({
         variant='contained'
         color='primary'
         data-cy='button-approve'
-        title={t('Program has to be active to create a Linked Ticket to Feedback')}
+        title={t(
+          'Program has to be active to create a Linked Ticket to Feedback',
+        )}
         disabled={
-          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL || !isActiveProgram
+          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+          !isActiveProgram
         }
       >
         {t('Approve')}

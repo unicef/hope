@@ -21,18 +21,18 @@ import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useProgramContext } from '../../../programContext';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import { choicesToDict, dateToIsoString } from '../../../utils/utils';
+import { ButtonTooltip } from '../../core/ButtonTooltip';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { EnhancedTableToolbar } from '../../core/Table/EnhancedTableToolbar';
 import { TableWrapper } from '../../core/TableWrapper';
 import { headCells } from './GrievancesTableHeadCells';
-import { ButtonTooltip } from "../../core/ButtonTooltip";
-import { useProgramContext } from "../../../programContext";
 import { GrievancesTableRow } from './GrievancesTableRow';
 import { BulkAddNoteModal } from './bulk/BulkAddNoteModal';
 import { BulkAssignModal } from './bulk/BulkAssignModal';
@@ -276,7 +276,9 @@ export const GrievancesTable = ({
                     variant='contained'
                     color='primary'
                     component={Link}
-                    title={t('Program has to be active to create a new Grievance Ticket')}
+                    title={t(
+                      'Program has to be active to create a new Grievance Ticket',
+                    )}
                     to={`/${baseUrl}/grievance/new-ticket`}
                     data-cy='button-new-ticket'
                     disabled={!isActiveProgram}
