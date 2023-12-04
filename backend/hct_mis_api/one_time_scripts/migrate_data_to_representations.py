@@ -558,7 +558,9 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     Because TargetPopulation is per program, HouseholdSelections are per program.
     """
     household_selections_ids = list(household_selections.values_list("id", flat=True))
-    household_selections_queryset = HouseholdSelection.objects.filter(id__in=household_selections_ids).order_by("id")
+    household_selections_queryset = HouseholdSelection.objects.filter(
+        id__in=household_selections_ids, household__is_removed=False
+    ).order_by("id")
     paginator = Paginator(household_selections_queryset, BATCH_SIZE)
     for page_number in paginator.page_range:
         batched_household_selections = paginator.page(page_number).object_list
