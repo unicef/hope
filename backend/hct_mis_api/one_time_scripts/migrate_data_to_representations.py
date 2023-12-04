@@ -432,6 +432,7 @@ def copy_roles(households: QuerySet, program: Program) -> None:
                     identities_to_create_batch,
                     bank_account_info_to_create_batch,
                 ) = copy_individual_representation_fast(program=program, individual=role.individual)
+                individual_representation_dict[individual_representation.copied_from_id] = individual_representation
                 individuals_to_create.append(individual_representation)
                 documents_to_create.extend(documents_to_create_batch)
                 identities_to_create.extend(identities_to_create_batch)
