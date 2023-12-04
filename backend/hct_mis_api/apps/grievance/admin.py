@@ -106,12 +106,12 @@ class TicketNoteAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
 @admin.register(TicketComplaintDetails)
 class TicketComplaintDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "payment_record", "household", "individual")
+    raw_id_fields = ("ticket", "household", "individual")
 
 
 @admin.register(TicketSensitiveDetails)
 class TicketSensitiveDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "payment_record", "household", "individual")
+    raw_id_fields = ("ticket", "household", "individual")
 
 
 @admin.register(TicketHouseholdDataUpdateDetails)
@@ -176,4 +176,4 @@ class TicketReferralDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 @admin.register(GrievanceDocument)
 class GrievanceDocumentAdmin(HOPEModelAdminBase):
     list_display = ("file_name",)
-    raw_id_fields = ("created_by", "grievance_ticket", "content_type")
+    raw_id_fields = ("created_by", "grievance_ticket")
