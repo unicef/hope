@@ -2,9 +2,9 @@
 {% load i18n admin_urls static admin_modify mptt_tags engine %}
 
 {% block extrahead %}{{ block.super }}
-    <script type="text/javascript" src="/api/static/admin/js/vendor/jquery/jquery.js"></script>
-    <link rel="stylesheet" type="text/css" href="/api/static/admin/css/base.css">
-    <link rel="stylesheet" type="text/css" href="/api/static/admin/css/forms.css">
+    <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/base.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
     {{ media }}
     {{ business_area_role_formset.media }}
     {{ program_area_formset.media }}
