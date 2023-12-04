@@ -592,7 +592,10 @@ class Query(graphene.ObjectType):
             filter_q = Q()
             for program_id, areas_ids in programs_permissions:
                 if areas_ids:
-                    filter_q |= Q(Q(program_id=program_id) & Q(admin2__in=areas_ids))
+                    areas_query = Q(
+                        Q(admin1__in=areas_ids) | Q(admin2__in=areas_ids) | Q(admin3__in=areas_ids) | Q(admin_area__isnull=True)
+                    )
+                    filter_q |= Q(Q(program_id=program_id) & areas_query)
                 else:
                     filter_q |= Q(program_id=program_id)
 
@@ -641,7 +644,10 @@ class Query(graphene.ObjectType):
             filter_q = Q()
             for program_id, areas_ids in programs_permissions:
                 if areas_ids:
-                    filter_q |= Q(Q(program_id=program_id) & Q(admin2__in=areas_ids))
+                    areas_query = Q(
+                        Q(admin1__in=areas_ids) | Q(admin2__in=areas_ids) | Q(admin3__in=areas_ids) | Q(admin_area__isnull=True)
+                    )
+                    filter_q |= Q(Q(program_id=program_id) & areas_query)
                 else:
                     filter_q |= Q(program_id=program_id)
 
