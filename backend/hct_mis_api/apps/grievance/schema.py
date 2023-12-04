@@ -531,6 +531,9 @@ class Query(graphene.ObjectType):
                 queryset, user.partner, business_area_id, program_id
             )
 
+        if program_id is None:
+            queryset = queryset.filter(programs=None)
+
         return queryset.annotate(
             total=Case(
                 When(

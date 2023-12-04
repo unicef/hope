@@ -113,7 +113,7 @@ class Query(graphene.ObjectType):
         business_area_slug = info.context.headers.get("Business-Area")
         return Message.objects.filter(business_area__slug=business_area_slug)
 
-    def resolve_all_feedback(self, info: Any, **kwargs: Any) -> QuerySet[Feedback]:
+    def resolve_all_feedbacks(self, info: Any, **kwargs: Any) -> QuerySet[Feedback]:
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
         business_area_slug = info.context.headers.get("Business-Area")
@@ -122,7 +122,6 @@ class Query(graphene.ObjectType):
 
         if not user.partner.is_unicef:  # Full access to all AdminAreas if is_unicef
             queryset = filter_feedback_based_on_partner_areas_2(queryset, user.partner, business_area_id, program_id)
-
         return queryset
 
     def resolve_survey_category_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
