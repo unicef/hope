@@ -672,7 +672,6 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
     program = models.ForeignKey("program.Program", null=True, related_name="+", on_delete=models.CASCADE)
 
     is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -753,7 +752,6 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -1228,7 +1226,6 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
-    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,

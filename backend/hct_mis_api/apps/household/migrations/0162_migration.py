@@ -11,27 +11,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="bankaccountinfo",
-            name="migrated_at",
-            field=models.DateTimeField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="document",
-            name="migrated_at",
-            field=models.DateTimeField(blank=True, null=True),
-        ),
-        migrations.AddField(
             model_name="household",
             name="migrated_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="individual",
-            name="migrated_at",
-            field=models.DateTimeField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="individualidentity",
             name="migrated_at",
             field=models.DateTimeField(blank=True, null=True),
         ),

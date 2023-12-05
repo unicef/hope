@@ -132,22 +132,30 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         copy_household_selections(household_selections, program)
         logger.info(f"Finished creating representations for program: {program}")
 
+    # mark programs households as migrated and exclude in rerun
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True
     ).update(is_migration_handled=True, migrated_at=timezone.now())
+
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
     handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
 
+    logger.info("Updating Households with migration date")
     Household.original_and_repr_objects.filter(
-        business_area=business_area, copied_to__isnull=False, is_original=True
+        business_area=business_area,
+        copied_to__isnull=False,
+        is_original=True,
+        is_migration_handled=False,
     ).update(is_migration_handled=True, migrated_at=timezone.now())
 
+    logger.info("Updating Individuals with migration date")
     Individual.original_and_repr_objects.filter(
-        business_area=business_area, copied_to__isnull=False, is_original=True
+        business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
     ).update(is_migration_handled=True, migrated_at=timezone.now())
 
+    logger.info("Updating IndividualRoleInHouseholds with migration date")
     IndividualRoleInHousehold.original_and_repr_objects.filter(
-        household__business_area=business_area, copied_to__isnull=False, is_original=True
+        household__business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
     ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     if business_area.name == "Democratic Republic of Congo":
