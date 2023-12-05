@@ -9,6 +9,7 @@ import {
 import { LoadingComponent } from '../components/core/LoadingComponent';
 import { useBaseUrl } from '../hooks/useBaseUrl';
 import { useProgramContext } from '../programContext';
+import { isProgramNodeUuidFormat } from '../utils/utils';
 
 const CountrySelect = styled(Select)`
   && {
@@ -56,7 +57,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
     fetchPolicy: 'network-only',
   });
 
-  const isValidProgramId = useCallback(
+  const isOneOfAvailableProgramsId = useCallback(
     (id: string): boolean => {
       return data?.allPrograms.edges.some((each) => each.node.id === id);
     },
@@ -66,10 +67,8 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   const getCurrentProgram = ():
     | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
     | null => {
-    const obj = data?.allPrograms.edges.filter(
-      (el) => el.node.id === programId,
-    );
-    return obj ? obj[0].node : null;
+    const obj = data?.allPrograms.edges.find((el) => el.node.id === programId);
+    return obj ? obj.node : null;
   };
 
   if (programId !== 'all') {
@@ -102,18 +101,27 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   }
 
   useEffect(() => {
+    // If the programId is not in a valid format, redirect to the 404 page
     if (
-      !loading &&
       programId &&
-      !isValidProgramId(programId) &&
+      !isProgramNodeUuidFormat(programId) &&
       programId !== 'all'
     ) {
-      history.push(`/${businessArea}/programs/all/list`);
+      history.push(`/404/${businessArea}`);
     }
-  }, [programId, history, businessArea, isValidProgramId, loading]);
+    // If the programId is valid but not one of the available programs, redirect to the access denied page
+    else if (
+      !loading &&
+      programId &&
+      !isOneOfAvailableProgramsId(programId) &&
+      programId !== 'all'
+    ) {
+      history.push(`/access-denied/${businessArea}`);
+    }
+  }, [programId, history, businessArea, isOneOfAvailableProgramsId, loading]);
 
   const onChange = (e): void => {
-    if (e.target.value === 'all' || !isValidProgramId(e.target.value)) {
+    if (e.target.value === 'all') {
       history.push(`/${businessArea}/programs/all/list`);
     } else {
       history.push(
