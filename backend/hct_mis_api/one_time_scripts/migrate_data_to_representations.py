@@ -96,7 +96,8 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         households = Household.original_and_repr_objects.filter(
             id__in=household_ids, is_migration_handled=False, is_original=True
         ).order_by("id")
-        households_count = households.count()
+        households_filtered = households.exclude(copied_to__program=program)
+        households_count = households_filtered.count()
 
         logger.info(f"Handling households for program: {program}")
 
@@ -104,8 +105,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             batch_end = batch_start + BATCH_SIZE
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
-
-            batched_households = exclude_already_handled_households(batch_end, batch_start, households, program)
+            batched_households = households_filtered[0:BATCH_SIZE]
             for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
                 "documents", "identities", "bank_account_info"
             ):
