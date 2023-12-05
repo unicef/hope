@@ -331,6 +331,7 @@ class HouseholdSelection(TimeStampedUUIDModel):
     )
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
 
     objects = IsOriginalManager()
     original_and_repr_objects = models.Manager()

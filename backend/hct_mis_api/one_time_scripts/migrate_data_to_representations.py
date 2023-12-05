@@ -134,12 +134,12 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
 
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True
-    ).update(is_migration_handled=True)
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
     handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True
-    ).update(is_migration_handled=True)
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     if business_area.name == "Democratic Republic of Congo":
         apply_congo_withdrawal()
@@ -577,7 +577,7 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
         with transaction.atomic():
             HouseholdSelection.original_and_repr_objects.bulk_create(household_selections_to_create)
             HouseholdSelection.objects.filter(id__in=batched_household_selections.values_list("id", flat=True)).update(
-                is_migration_handled=True
+                is_migration_handled=True, migrated_at=timezone.now()
             )
 
 

@@ -225,7 +225,8 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet) -> No
             )
             grievance_ticket = closed_ticket.ticket
             grievance_ticket.is_migration_handled = True
-            grievance_ticket.save(update_fields=["is_migration_handled"])
+            grievance_ticket.migrated_at = timezone.now()
+            grievance_ticket.save(update_fields=["is_migration_handled", "migrated_at"])
 
 
 def copy_closed_ticket_with_household_and_individual(
@@ -270,7 +271,8 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet) -> No
                 copy_active_ticket_with_household_and_individual(active_ticket, program)
             grievance_ticket = active_ticket.ticket
             grievance_ticket.is_migration_handled = True
-            grievance_ticket.save(update_fields=["is_migration_handled"])
+            grievance_ticket.migrated_at = timezone.now()
+            grievance_ticket.save(update_fields=["is_migration_handled", "migrated_at"])
 
 
 def copy_active_ticket_with_household_and_individual(active_ticket: Any, program: Program) -> None:
@@ -316,7 +318,8 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
         copy_ticket_with_household(closed_ticket, program, household_representation=household_representation)
         grievance_ticket = closed_ticket.ticket
         grievance_ticket.is_migration_handled = True
-        grievance_ticket.save(update_fields=["is_migration_handled"])
+        grievance_ticket.migrated_at = timezone.now()
+        grievance_ticket.save(update_fields=["is_migration_handled", "migrated_at"])
 
     # Handle active tickets - copy for all representations
     for active_ticket in tickets_with_hh.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator():
@@ -327,7 +330,8 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
             copy_ticket_with_household(active_ticket, program)
         grievance_ticket = active_ticket.ticket
         grievance_ticket.is_migration_handled = True
-        grievance_ticket.save(update_fields=["is_migration_handled"])
+        grievance_ticket.migrated_at = timezone.now()
+        grievance_ticket.save(update_fields=["is_migration_handled", "migrated_at"])
 
 
 def copy_ticket_with_household(
@@ -384,7 +388,8 @@ def handle_tickets_with_individual(
         )
         grievance_ticket = closed_ticket.ticket
         grievance_ticket.is_migration_handled = True
-        grievance_ticket.save(update_fields=["is_migration_handled"])
+        grievance_ticket.migrated_at = timezone.now()
+        grievance_ticket.save(update_fields=["is_migration_handled", "migrated_at"])
 
     # Handle active tickets
     for active_ticket in tickets_with_ind.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).iterator():
@@ -397,7 +402,8 @@ def handle_tickets_with_individual(
             copy_ticket_with_individual(active_ticket, program, individual_field_name=individual_field_name)
         grievance_ticket = active_ticket.ticket
         grievance_ticket.is_migration_handled = True
-        grievance_ticket.save(update_fields=["is_migration_handled"])
+        grievance_ticket.migrated_at = timezone.now()
+        grievance_ticket.save(update_fields=["is_migration_handled", "migrated_at"])
 
 
 def copy_ticket_with_individual(
@@ -526,7 +532,8 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
         if not programs:
             grievance_ticket = needs_adjudication_ticket.ticket
             grievance_ticket.is_migration_handled = True
-            grievance_ticket.save(update_fields=["is_migration_handled"])
+            grievance_ticket.migrated_at = timezone.now()
+            grievance_ticket.save(update_fields=["is_migration_handled", "migrated_at"])
             continue
 
         for program in programs:
@@ -570,7 +577,8 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
 
         grievance_ticket = needs_adjudication_ticket.ticket
         grievance_ticket.is_migration_handled = True
-        grievance_ticket.save(update_fields=["is_migration_handled"])
+        grievance_ticket.migrated_at = timezone.now()
+        grievance_ticket.save(update_fields=["is_migration_handled", "migrated_at"])
 
 
 def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
@@ -597,13 +605,15 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
                 program = message.target_population.program
                 copy_message(message, program)
                 message.is_migration_handled = True
-                message.save(update_fields=["is_migration_handled"])
+                message.migrated_at = timezone.now()
+                message.save(update_fields=["is_migration_handled", "migrated_at"])
             else:
                 programs = list(message.households.values_list("copied_to__program", flat=True).distinct())
                 for program in programs:
                     copy_message(message, program)
                 message.is_migration_handled = True
-                message.save(update_fields=["is_migration_handled"])
+                message.migrated_at = timezone.now()
+                message.save(update_fields=["is_migration_handled", "migrated_at"])
 
     logger.info("Handle Messages not connected to any program")
     handle_non_program_messages(business_area)
@@ -701,10 +711,12 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
         if program:
             copy_feedback(feedback_obj, program, household_representation, individual_representation)
             feedback_obj.is_migration_handled = True
-            feedback_obj.save(update_fields=["is_migration_handled"])
+            feedback_obj.migrated_at = timezone.now()
+            feedback_obj.save(update_fields=["is_migration_handled", "migrated_at"])
             if linked_grievance := feedback_obj.linked_grievance:
                 linked_grievance.is_migration_handled = True
-                linked_grievance.save(update_fields=["is_migration_handled"])
+                linked_grievance.migrated_at = timezone.now()
+                linked_grievance.save(update_fields=["is_migration_handled", "migrated_at"])
 
 
 def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None:
@@ -759,10 +771,12 @@ def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None
             for program in all_programs:
                 copy_feedback(feedback_obj, program)
             feedback_obj.is_migration_handled = True
-            feedback_obj.save(update_fields=["is_migration_handled"])
+            feedback_obj.migrated_at = timezone.now()
+            feedback_obj.save(update_fields=["is_migration_handled", "migrated_at"])
             if linked_grievance := feedback_obj.linked_grievance:
                 linked_grievance.is_migration_handled = True
-                linked_grievance.save(update_fields=["is_migration_handled"])
+                linked_grievance.migrated_at = timezone.now()
+                linked_grievance.save(update_fields=["is_migration_handled", "migrated_at"])
 
 
 def copy_feedback(
@@ -902,7 +916,8 @@ def handle_non_program_tickets(business_area: Optional[BusinessArea] = None) -> 
             ticket.save()
             grievance_ticket = non_program_ticket.ticket
             grievance_ticket.is_migration_handled = True
-            grievance_ticket.save()
+            grievance_ticket.migrated_at = timezone.now()
+            grievance_ticket.save(update_fields=["is_migration_handled", "migrated_at"])
 
 
 def handle_non_program_feedback(business_area: Optional[BusinessArea] = None) -> None:
@@ -918,7 +933,7 @@ def handle_non_program_feedback(business_area: Optional[BusinessArea] = None) ->
             void_program = create_void_program(business_area)  # type: ignore[arg-type]
             for feedback in non_program_feedback_objects:
                 copy_feedback(feedback, void_program)
-            non_program_feedback_objects.update(is_migration_handled=True)
+            non_program_feedback_objects.update(is_migration_handled=True, migrated_at=timezone.now())
 
 
 def handle_non_program_messages(business_area: Optional[BusinessArea] = None) -> None:
@@ -931,7 +946,7 @@ def handle_non_program_messages(business_area: Optional[BusinessArea] = None) ->
             void_program = create_void_program(business_area)  # type: ignore[arg-type]
             for message in non_program_messages:
                 copy_message(message, void_program)
-            non_program_messages.update(is_migration_handled=True)
+            non_program_messages.update(is_migration_handled=True, migrated_at=timezone.now())
 
 
 def handle_role_reassign_data(ticket: Any, program: Program) -> Any:
@@ -1293,16 +1308,10 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
     else:
         filter_kwargs = {}
     # Fetch all objects of TicketComplaintDetails and TicketSensitiveDetails with non-null payment_obj
-    complaint_tickets_with_payments = TicketComplaintDetails.objects.select_related(
-        "household",
-        "individual",
-    ).filter(
+    complaint_tickets_with_payments = TicketComplaintDetails.objects.select_related("household", "individual",).filter(
         payment_object_id__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs
     )
-    sensitive_tickets_with_payments = TicketSensitiveDetails.objects.select_related(
-        "household",
-        "individual",
-    ).filter(
+    sensitive_tickets_with_payments = TicketSensitiveDetails.objects.select_related("household", "individual",).filter(
         payment_object_id__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs
     )
 
@@ -1365,7 +1374,7 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
         Q(complaint_ticket_details__in=complaint_tickets_with_payments)
         | Q(sensitive_ticket_details__in=sensitive_tickets_with_payments)
         | Q(payment_verification_ticket_details__in=payment_verification_tickets)
-    ).update(is_original=False, is_migration_handled=True)
+    ).update(is_original=False, is_migration_handled=True, migrated_at=timezone.now())
 
 
 def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDetails, TicketSensitiveDetails]) -> tuple:
