@@ -1,3 +1,4 @@
+from copy import copy
 from typing import List, Optional
 from unittest.mock import patch
 
@@ -46,6 +47,7 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulati
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
     adjust_payment_records,
     adjust_payments,
+    copy_household_representation_for_programs_fast,
     migrate_data_to_representations,
     migrate_data_to_representations_per_business_area,
 )
@@ -684,6 +686,55 @@ class TestMigrateDataToRepresentations(TestCase):
             except ZeroDivisionError:
                 pass
             self.assertEqual(Household.original_and_repr_objects.count(), 31)
+
+    def test_already_migrated_in_different_program(self) -> None:
+        self.refresh_objects()
+        hh1_id = self.household1.id
+        self.assertEqual(Household.original_and_repr_objects.exclude(copied_from=None).count(), 0)
+        copy_household_representation_for_programs_fast(
+            self.household1, self.program_active, Individual.objects.filter(household=self.household1)  # type: ignore
+        )
+        self.refresh_objects()
+        programs = [str(x.program.id) for x in Household.original_and_repr_objects.filter(copied_from_id=hh1_id)]
+        self.assertIn(str(self.program_active.id), programs)
+        self.assertEqual(Household.original_and_repr_objects.exclude(copied_from=None).count(), 1)
+        migrate_data_to_representations_per_business_area(business_area=self.business_area)
+        programs = [str(x.program.id) for x in Household.original_and_repr_objects.filter(copied_from_id=hh1_id)]
+        self.assertIn(str(self.program_active.id), programs)
+        self.assertIn(str(self.program_finished1.id), programs)
+        self.assertEqual(Household.original_and_repr_objects.filter(copied_from_id=hh1_id).count(), 2)
+
+    def test_already_migrated_in_different_program2(self) -> None:
+        self.refresh_objects()
+        hh1_id = self.household1.id
+        self.assertEqual(Household.original_and_repr_objects.exclude(copied_from=None).count(), 0)
+        old_copy_household_representation_for_programs_fast = copy_household_representation_for_programs_fast
+        copy_household_representation_for_programs_fast(
+            self.household1, self.program_active, Individual.objects.filter(household=self.household1)  # type: ignore
+        )
+        self.refresh_objects()
+        programs = [str(x.program.id) for x in Household.original_and_repr_objects.filter(copied_from_id=hh1_id)]
+        self.assertIn(str(self.program_active.id), programs)
+        self.assertEqual(Household.original_and_repr_objects.exclude(copied_from=None).count(), 1)
+        with patch(
+            "hct_mis_api.one_time_scripts.migrate_data_to_representations.copy_household_representation_for_programs_fast"
+        ) as mock:
+            mock.side_effect = (
+                lambda household, program, individuals: old_copy_household_representation_for_programs_fast(
+                    copy(household), program, individuals
+                )
+            )
+            migrate_data_to_representations_per_business_area(business_area=self.business_area)
+            programs = [str(x.program.id) for x in Household.original_and_repr_objects.filter(copied_from_id=hh1_id)]
+            self.assertIn(str(self.program_active.id), programs)
+            self.assertIn(str(self.program_finished1.id), programs)
+            self.assertEqual(Household.original_and_repr_objects.filter(copied_from_id=hh1_id).count(), 2)
+            calls_for_hh1 = [call for call in mock.mock_calls if call[1][0].id == hh1_id]
+            self.assertEqual(len(calls_for_hh1), 1)
+            calls_for_program_active = [
+                call for call in mock.mock_calls if call[1][1].id == self.program_active.id and call[1][0].id == hh1_id
+            ]
+            self.assertEqual(len(calls_for_program_active), 0)
 
     def test_migrate_data_to_representations_per_business_area(self) -> None:
         household_count = Household.original_and_repr_objects.filter(business_area=self.business_area).count()
