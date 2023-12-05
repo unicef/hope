@@ -2,7 +2,7 @@ from typing import Callable, Sequence, Union
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.fixtures import CommunicationMessageFactory

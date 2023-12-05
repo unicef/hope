@@ -9,7 +9,7 @@ from django.utils import timezone
 from parameterized import parameterized
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
