@@ -4,7 +4,7 @@ from django.conf import settings
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -41,7 +41,8 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        cls.user = UserFactory.create()
+        cls.partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory(partner=cls.partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         household, _ = create_household(
             {
