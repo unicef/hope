@@ -113,13 +113,21 @@ export const DuplicateProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values }) => {
+      {({ submitForm, values, validateForm, setFieldTouched }) => {
         const mappedPartnerChoices = userPartnerChoices.map((partner) => ({
           value: partner.value,
           label: partner.name,
           disabled: values.partners.some((p) => p.id === partner.value),
         }));
 
+        const handleNext = async (): Promise<void> => {
+          const errors = await validateForm();
+          if (Object.keys(errors).length === 0 && step === 0) {
+            setStep(1);
+          } else {
+            Object.keys(values).forEach((field) => setFieldTouched(field));
+          }
+        };
         return (
           <>
             <PageHeader title={`${t('Copy of Programme')}: (${name})`}>
@@ -161,7 +169,12 @@ export const DuplicateProgramPage = (): ReactElement => {
                 </Step>
               </Stepper>
               {step === 0 && (
-                <DetailsStep values={values} step={step} setStep={setStep} />
+                <DetailsStep
+                  values={values}
+                  step={step}
+                  setStep={setStep}
+                  handleNext={handleNext}
+                />
               )}
               {step === 1 && (
                 <PartnersStep
