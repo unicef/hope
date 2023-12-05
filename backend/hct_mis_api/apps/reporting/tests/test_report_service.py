@@ -9,7 +9,7 @@ from django.utils import timezone
 from parameterized import parameterized
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo import models as geo_models
@@ -42,7 +42,8 @@ class TestGenerateReportService(TestCase):
         self.GenerateReportService = GenerateReportService
 
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        self.user = UserFactory.create()
+        self.partner = PartnerFactory(name="Test1")
+        self.user = UserFactory.create(partner=self.partner)
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         last_registration_dates = (
             timezone.datetime(2020, 1, 1, tzinfo=utc),

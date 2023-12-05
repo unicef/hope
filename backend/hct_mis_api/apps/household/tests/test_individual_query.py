@@ -65,7 +65,7 @@ class TestIndividualQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.partner = PartnerFactory()
+        cls.partner = PartnerFactory(name="Test123")
         cls.user = UserFactory(partner=cls.partner)
 
         cls.business_area = create_afghanistan()
@@ -88,7 +88,7 @@ class TestIndividualQuery(APITestCase):
         cls.program_draft = ProgramFactory(
             name="Test program DRAFT",
             business_area=cls.business_area,
-            status=Program.ACTIVE,
+            status=Program.DRAFT,
             data_collecting_type=partial,
         )
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
@@ -277,7 +277,7 @@ class TestIndividualQuery(APITestCase):
     )
     @skip(reason="Remove 2nd program after merging to develop")
     def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
@@ -297,7 +297,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_individual_query_single(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.INDIVIDUAL_QUERY,
@@ -319,7 +319,7 @@ class TestIndividualQuery(APITestCase):
     )
     @skip("After merging GPF, remove 2nd program")
     def test_individual_programme_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program_two)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
@@ -340,7 +340,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_full_name_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         # Should be Jenna Franklin
         self.snapshot_graphql_request(
@@ -357,7 +357,7 @@ class TestIndividualQuery(APITestCase):
 
     def test_individual_query_draft(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area
+            self.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], self.business_area, self.program_draft
         )
 
         self.snapshot_graphql_request(
@@ -379,7 +379,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_phone_no_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         # Should be Robin Ford
         self.snapshot_graphql_request(
@@ -401,7 +401,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_national_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         # Should be Benjamin Butler
         self.snapshot_graphql_request(
@@ -423,7 +423,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_national_passport_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         # Should be Robin Ford
         self.snapshot_graphql_request(
@@ -445,7 +445,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_tax_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         # Should be Timothy Perry
         self.snapshot_graphql_request(
@@ -467,7 +467,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_registration_id_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
@@ -488,7 +488,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_without_search_type(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
@@ -513,7 +513,7 @@ class TestIndividualQuery(APITestCase):
     def test_query_individuals_by_search_bank_account_number_filter(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         # Should be James Bond
         self.snapshot_graphql_request(
@@ -535,7 +535,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_birth_certificate_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         # Should be Jenna Franklin
         self.snapshot_graphql_request(
@@ -557,7 +557,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_disability_card_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         # Should be Peter Parker
         self.snapshot_graphql_request(
@@ -579,7 +579,7 @@ class TestIndividualQuery(APITestCase):
         ]
     )
     def test_query_individuals_by_search_drivers_license_filter(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         # Should be Benjamin Butler
         self.snapshot_graphql_request(
@@ -603,7 +603,7 @@ class TestIndividualQuery(APITestCase):
     def test_query_individuals_by_search_registration_id_filter_with_search_type(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,

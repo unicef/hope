@@ -2,7 +2,7 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -27,7 +27,8 @@ class TestFilterIndividualsByProgram(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = UserFactory()
+        cls.partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory(partner=cls.partner)
         cls.business_area = create_afghanistan()
         cls.program1 = ProgramFactory(name="Test program ONE", business_area=cls.business_area, status="ACTIVE")
         cls.program2 = ProgramFactory(name="Test program TWO", business_area=cls.business_area, status="ACTIVE")
@@ -109,7 +110,7 @@ class TestFilterIndividualsByProgram(APITestCase):
         ]
     )
     def test_individual_query_all(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program1)
 
         headers = {
             "Business-Area": self.business_area.slug,

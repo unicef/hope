@@ -1,4 +1,4 @@
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.activity_log.utils import create_diff
@@ -60,7 +60,8 @@ class TestLogEntriesQueries(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.user = UserFactory(first_name="First", last_name="Last")
+        cls.partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory(first_name="First", last_name="Last", partner=cls.partner)
         cls.user_without_perms = UserFactory()
         cls.create_user_role_with_permissions(cls.user, [Permissions.ACTIVITY_LOG_VIEW], business_area)
 

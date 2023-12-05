@@ -2,7 +2,7 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory, PartnerFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.fixtures import SurveyFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -25,7 +25,8 @@ class TestSurveyQueries(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
-        cls.user = UserFactory(first_name="John", last_name="Wick")
+        cls.partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory.create(first_name="John", last_name="Wick", partner=cls.partner)
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area)
 
         create_household()

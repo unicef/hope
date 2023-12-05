@@ -241,11 +241,17 @@ DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER = (
     Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
     Permissions.DASHBOARD_VIEW_COUNTRY,
     Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    Permissions.TARGETING_VIEW_LIST,
+    Permissions.TARGETING_VIEW_DETAILS,
     Permissions.PM_VIEW_LIST,
+    Permissions.PM_VIEW_DETAILS,
+    Permissions.PAYMENT_VERIFICATION_VIEW_LIST,
+    Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
     Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
     Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
     Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
     Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+    Permissions.GRIEVANCES_FEEDBACK_VIEW_CREATE,
     Permissions.USER_MANAGEMENT_VIEW_LIST,
     Permissions.REPORTING_EXPORT,
     Permissions.ACTIVITY_LOG_VIEW,
@@ -289,8 +295,10 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     program_id = get_program_id_from_headers(kwargs)
     # is_unicef has access to all Programs
     if user.partner.is_unicef:
+        print("=====>>>>>===== PARTNER UNICEF === ", user.partner.name)
         return any(perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER for perm in permissions)
     else:
+        print("=====>>>>> NOT unicef partner ", user.partner.name)
         return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
 
 
