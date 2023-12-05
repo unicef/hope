@@ -104,7 +104,8 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
         partners_data = program_data.pop("partners", [])
 
         partners_ids = [int(partner["id"]) for partner in partners_data]
-        if info.context.user.partner.id not in partners_ids:
+        partner = info.context.user.partner
+        if not partner.is_unicef and partner.id not in partners_ids:
             raise ValidationError("User is not allowed to create program for partner different than his partner.")
 
         program = Program.objects.select_for_update().get(id=program_id)
