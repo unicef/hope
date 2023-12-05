@@ -93,9 +93,9 @@ export const PageNotFound: React.FC = () => {
           color='primary'
           variant='contained'
           component={Link}
-          to={`/${businessArea}/programs/all/country-dashboard`}
+          to={`/${businessArea}/programs/all/list`}
         >
-          GO TO COUNTRY DASHBOARD
+          GO TO PROGRAMME MANAGEMENT
         </Button>
       </Box>
     </Container>

@@ -14,6 +14,7 @@ import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { useConfirmation } from '../../core/ConfirmationDialog';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
+import { useProgramContext } from "../../../programContext";
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
@@ -40,6 +41,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
+  const { isActiveProgram } = useProgramContext();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
@@ -63,6 +65,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
       }
       variant='contained'
       color='primary'
+      disabled={!isActiveProgram}
     >
       {t('Erase import')}
     </LoadingButton>
@@ -82,6 +85,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
               onClick={() => setShowRefuseRdiForm(true)}
               variant='contained'
               color='primary'
+              disabled={!isActiveProgram}
             >
               {t('Refuse Import')}
             </LoadingButton>

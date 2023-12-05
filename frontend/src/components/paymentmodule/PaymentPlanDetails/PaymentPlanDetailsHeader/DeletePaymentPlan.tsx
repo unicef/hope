@@ -20,6 +20,7 @@ import {
 import { LoadingButton } from '../../../core/LoadingButton';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useProgramContext } from "../../../../programContext";
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -34,6 +35,7 @@ export const DeletePaymentPlan = ({
   const { showMessage } = useSnackbar();
   const [mutate, { loading: loadingDelete }] = useDeletePpMutation();
   const { id } = paymentPlan;
+  const { isActiveProgram } = useProgramContext();
 
   const handleDelete = async (): Promise<void> => {
     try {
@@ -54,7 +56,10 @@ export const DeletePaymentPlan = ({
   return (
     <>
       <Box p={2}>
-        <IconButton onClick={() => setDeleteDialogOpen(true)}>
+        <IconButton
+          onClick={() => setDeleteDialogOpen(true)}
+          disabled={!isActiveProgram}
+        >
           <Delete />
         </IconButton>
       </Box>

@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
@@ -21,12 +21,14 @@ import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useProgramContext } from '../../../programContext';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../../utils/constants';
 import { choicesToDict, dateToIsoString } from '../../../utils/utils';
+import { ButtonTooltip } from '../../core/ButtonTooltip';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { EnhancedTableToolbar } from '../../core/Table/EnhancedTableToolbar';
 import { TableWrapper } from '../../core/TableWrapper';
@@ -48,6 +50,8 @@ export const GrievancesTable = ({
 }: GrievancesTableProps): React.ReactElement => {
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const { t } = useTranslation();
+  const { isActiveProgram } = useProgramContext();
+
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search.trim(),
@@ -267,15 +271,20 @@ export const GrievancesTable = ({
               />
               {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
                 hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
-                  <Button
+                  <ButtonTooltip
+                    alignItems='center'
                     variant='contained'
                     color='primary'
                     component={Link}
+                    title={t(
+                      'Program has to be active to create a new Grievance Ticket',
+                    )}
                     to={`/${baseUrl}/grievance/new-ticket`}
                     data-cy='button-new-ticket'
+                    disabled={!isActiveProgram}
                   >
                     {t('NEW TICKET')}
-                  </Button>
+                  </ButtonTooltip>
                 )}
             </Box>
             <UniversalTable<

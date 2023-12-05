@@ -32,6 +32,7 @@ import { Title } from '../../../core/Title';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
+import { useProgramContext } from "../../../../programContext";
 
 const GreyText = styled.p`
   color: #9e9e9e;
@@ -98,6 +99,8 @@ export const Entitlement = ({
 }: EntitlementProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
+
   const [steficonRuleValue, setSteficonRuleValue] = useState<string>(
     paymentPlan.steficonRule?.rule.id || '',
   );
@@ -139,16 +142,17 @@ export const Entitlement = ({
   );
 
   const shouldDisableEntitlementSelect =
-    !canApplySteficonRule || paymentPlan.status !== PaymentPlanStatus.Locked;
+    !canApplySteficonRule || paymentPlan.status !== PaymentPlanStatus.Locked ||
+    !isActiveProgram;
 
   const shouldDisableDownloadTemplate =
-    paymentPlan.status !== PaymentPlanStatus.Locked;
+    paymentPlan.status !== PaymentPlanStatus.Locked || !isActiveProgram;
 
   const shouldDisableExportXlsx =
     loadingExport ||
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting;
+    paymentPlan?.backgroundActionStatus === PaymentPlanBackgroundActionStatus.XlsxExporting ||
+    !isActiveProgram;
 
   return (
     <Box m={5}>
@@ -195,7 +199,8 @@ export const Entitlement = ({
                     loadingSetSteficonRule ||
                     !steficonRuleValue ||
                     paymentPlan.status !== PaymentPlanStatus.Locked ||
-                    paymentPlan.backgroundActionStatus === PaymentPlanBackgroundActionStatus.RuleEngineRun
+                    paymentPlan.backgroundActionStatus === PaymentPlanBackgroundActionStatus.RuleEngineRun ||
+                    !isActiveProgram
                   }
                   data-cy='button-apply-steficon'
                   onClick={async () => {

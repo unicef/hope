@@ -22,6 +22,7 @@ import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
+import { useProgramContext } from "../../programContext";
 import {
   ApproveBox,
   StyledTable,
@@ -38,6 +39,8 @@ export function NeedsAdjudicationDetailsOld({
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
+  const { isActiveProgram } = useProgramContext();
+
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {
@@ -134,7 +137,7 @@ export function NeedsAdjudicationDetailsOld({
             )}
             {isEditable && canApprove && (
               <Button
-                disabled={isApproveDisabled()}
+                disabled={isApproveDisabled() || !isActiveProgram}
                 data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({

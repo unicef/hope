@@ -2,9 +2,13 @@ import { MenuItem, Select } from '@material-ui/core';
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { useAllProgramsForChoicesQuery } from '../__generated__/graphql';
+import {
+  AllProgramsForChoicesQuery,
+  useAllProgramsForChoicesQuery,
+} from '../__generated__/graphql';
 import { LoadingComponent } from '../components/core/LoadingComponent';
 import { useBaseUrl } from '../hooks/useBaseUrl';
+import { useProgramContext } from '../programContext';
 
 const CountrySelect = styled(Select)`
   && {
@@ -45,6 +49,7 @@ const CountrySelect = styled(Select)`
 
 export const GlobalProgramSelect = (): React.ReactElement => {
   const { businessArea, programId } = useBaseUrl();
+  const { selectedProgram, setSelectedProgram } = useProgramContext();
   const history = useHistory();
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea, first: 100 },
@@ -57,6 +62,36 @@ export const GlobalProgramSelect = (): React.ReactElement => {
     },
     [data],
   );
+
+  const getCurrentProgram = ():
+    | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
+    | null => {
+    const obj = data?.allPrograms.edges.filter(
+      (el) => el.node.id === programId,
+    );
+    return obj ? obj[0].node : null;
+  };
+
+  if (programId !== 'all') {
+    const program = getCurrentProgram();
+    if (!selectedProgram || selectedProgram?.id !== programId) {
+      const { id, name, status, individualDataNeeded } = program;
+
+      setSelectedProgram({
+        id,
+        name,
+        status,
+        individualDataNeeded,
+        dataCollectingType: {
+          id: program.dataCollectingType?.id,
+          householdFiltersAvailable:
+            program.dataCollectingType?.householdFiltersAvailable,
+          individualFiltersAvailable:
+            program.dataCollectingType?.individualFiltersAvailable,
+        },
+      });
+    }
+  }
 
   useEffect(() => {
     if (programId && !isValidProgramId(programId) && programId !== 'all') {
@@ -93,12 +128,12 @@ export const GlobalProgramSelect = (): React.ReactElement => {
         All Programmes
       </MenuItem>
       {data.allPrograms.edges
-          .sort((objA, objB) => objA.node.name.localeCompare(objB.node.name))
-          .map((each) => (
-            <MenuItem key={each.node.id} value={each.node.id}>
-              {each.node.name}
-            </MenuItem>
-      ))}
+        .sort((objA, objB) => objA.node.name.localeCompare(objB.node.name))
+        .map((each) => (
+          <MenuItem key={each.node.id} value={each.node.id}>
+            {each.node.name}
+          </MenuItem>
+        ))}
     </CountrySelect>
   );
 };
