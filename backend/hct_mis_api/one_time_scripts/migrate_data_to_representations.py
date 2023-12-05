@@ -96,7 +96,8 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         households = Household.original_and_repr_objects.filter(
             id__in=household_ids, is_migration_handled=False, is_original=True
         ).order_by("id")
-        households_count = households.count()
+        households_filtered = households.exclude(copied_to__program=program)
+        households_count = households_filtered.count()
 
         logger.info(f"Handling households for program: {program}")
 
@@ -104,8 +105,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             batch_end = batch_start + BATCH_SIZE
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
-
-            batched_households = exclude_already_handled_households(batch_end, batch_start, households, program)
+            batched_households = households_filtered[0:BATCH_SIZE]
             for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
                 "documents", "identities", "bank_account_info"
             ):
@@ -437,6 +437,7 @@ def copy_roles(households: QuerySet, program: Program) -> None:
                     identities_to_create_batch,
                     bank_account_info_to_create_batch,
                 ) = copy_individual_representation_fast(program=program, individual=role.individual)
+                individual_representation_dict[individual_representation.copied_from_id] = individual_representation
                 individuals_to_create.append(individual_representation)
                 documents_to_create.extend(documents_to_create_batch)
                 identities_to_create.extend(identities_to_create_batch)
@@ -562,7 +563,9 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     Because TargetPopulation is per program, HouseholdSelections are per program.
     """
     household_selections_ids = list(household_selections.values_list("id", flat=True))
-    household_selections_queryset = HouseholdSelection.objects.filter(id__in=household_selections_ids).order_by("id")
+    household_selections_queryset = HouseholdSelection.objects.filter(
+        id__in=household_selections_ids, household__is_removed=False
+    ).order_by("id")
     paginator = Paginator(household_selections_queryset, BATCH_SIZE)
     for page_number in paginator.page_range:
         batched_household_selections = paginator.page(page_number).object_list
