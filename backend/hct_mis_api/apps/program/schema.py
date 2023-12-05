@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Tuple, Type
 
+from django.core.exceptions import PermissionDenied
 from django.db.models import (
     Case,
     Count,
@@ -19,7 +20,6 @@ import graphene
 from graphene import Int, relay
 from graphene_django import DjangoObjectType
 
-from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
@@ -37,6 +37,7 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_map_choices,
     chart_permission_decorator,
+    decode_id_string,
     to_choice_object,
 )
 from hct_mis_api.apps.payment.filters import (
@@ -90,14 +91,8 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
         return self.households_with_tp_in_program.count()
 
-    def resolve_partners(self, info: Any, **kwargs: Any) -> List:
-        # filter Partners by program_id and program.business_area_id
-        partners_list = []
-        for partner in Partner.objects.all():
-            partner.program = self
-            if partner.get_permissions().areas_for(str(self.business_area_id), str(self.pk)) is not None:
-                partners_list.append(partner)
-        return partners_list
+    def resolve_partners(self, info: Any, **kwargs: Any) -> graphene.List:
+        return self.partners
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
@@ -141,7 +136,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
-    program = relay.Node.Field(ProgramNode)
+    program = graphene.Field(ProgramNode, id=graphene.ID())
     all_programs = DjangoPermissionFilterConnectionField(
         ProgramNode,
         filterset_class=ProgramFilter,
@@ -187,6 +182,13 @@ class Query(graphene.ObjectType):
             hopeOneOfPermissionClass(Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST, Permissions.RDI_IMPORT_DATA),
         ),
     )
+
+    def resolve_program(self, info: Any, **kwargs: Any) -> Program:
+        user = info.context.user
+        program = Program.objects.get(id=decode_id_string(kwargs.get("id")))
+        if user.partner.id not in [partner.id for partner in program.partners]:
+            raise PermissionDenied("Permission Denied")
+        return program
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
         filters = {

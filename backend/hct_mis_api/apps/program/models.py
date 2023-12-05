@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Collection, Optional, Union
+from typing import Collection, List, Optional, Union
 
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
@@ -16,6 +16,7 @@ from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import SoftDeletableModel
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import SoftDeletableIsVisibleManager
@@ -203,6 +204,16 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
                 f"Program for name: {self.name} and business_area: {self.business_area.slug} already exists."
             )
         super(Program, self).validate_unique()
+
+    @property
+    def partners(self) -> List["Partner"]:
+        # filter Partners by program_id and program.business_area_id
+        partners_list = []
+        for partner in Partner.objects.all():
+            partner.program = self
+            if partner.get_permissions().areas_for(str(self.business_area_id), str(self.pk)) is not None:
+                partners_list.append(partner)
+        return partners_list
 
 
 class ProgramCycle(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
