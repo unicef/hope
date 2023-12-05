@@ -122,6 +122,26 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
     ]
 }
 
+snapshots['TestUpdateProgram::test_update_program_of_other_partner_raise_error 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['User is not allowed to create program for partner different than his partner.']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestUpdateProgram::test_update_program_when_finished 1'] = {
     'data': {
         'updateProgram': None
