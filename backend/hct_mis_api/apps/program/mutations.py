@@ -59,6 +59,11 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
         partners_data = program_data.pop("partners", [])
 
+        partners_ids = [int(partner["id"]) for partner in partners_data]
+        partner = info.context.user.partner
+        if not partner.is_unicef and partner.id not in partners_ids:
+            raise ValidationError("User is not allowed to create program for partner different than his partner.")
+
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
@@ -97,6 +102,10 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
         partners_data = program_data.pop("partners", [])
+
+        partners_ids = [int(partner["id"]) for partner in partners_data]
+        if info.context.user.partner.id not in partners_ids:
+            raise ValidationError("User is not allowed to create program for partner different than his partner.")
 
         program = Program.objects.select_for_update().get(id=program_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program)

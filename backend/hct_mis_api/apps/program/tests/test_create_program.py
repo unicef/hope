@@ -2,7 +2,7 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -42,7 +42,8 @@ class TestCreateProgram(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        cls.user = UserFactory.create()
+        cls.partner = PartnerFactory(name="WFP")
+        cls.user = UserFactory.create(partner=cls.partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.data_collecting_type = DataCollectingType.objects.create(
             code="partial_individuals",
@@ -66,6 +67,7 @@ class TestCreateProgram(APITestCase):
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
                 "businessAreaSlug": cls.business_area.slug,
                 "dataCollectingTypeCode": cls.data_collecting_type.code,
+                "partners": [{"id": str(cls.partner.id), "areaAccess": "BUSINESS_AREA"}],
             }
         }
 
