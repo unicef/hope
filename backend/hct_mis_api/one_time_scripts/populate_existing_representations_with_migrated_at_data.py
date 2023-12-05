@@ -10,7 +10,6 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
