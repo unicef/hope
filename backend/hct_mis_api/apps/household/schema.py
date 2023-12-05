@@ -593,10 +593,10 @@ class Query(graphene.ObjectType):
             for program_id, areas_ids in programs_permissions:
                 if areas_ids:
                     areas_query = Q(
-                        Q(admin1__in=areas_ids)
-                        | Q(admin2__in=areas_ids)
-                        | Q(admin3__in=areas_ids)
-                        | Q(admin_area__isnull=True)
+                        Q(household__admin1__in=areas_ids)
+                        | Q(household__admin2__in=areas_ids)
+                        | Q(household__admin3__in=areas_ids)
+                        | Q(household__admin_area__isnull=True)
                     )
                     filter_q |= Q(Q(program_id=program_id) & areas_query)
                 else:
