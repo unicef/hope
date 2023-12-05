@@ -104,7 +104,6 @@ class HouseholdAdmin(
         "business_area",
         "country",
         "country_origin",
-        "currency",
         "head_of_household",
         "registration_data_import",
     )
