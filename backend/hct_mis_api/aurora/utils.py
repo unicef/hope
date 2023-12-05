@@ -11,7 +11,8 @@ from constance import config
 from coreapi import codecs
 from coreapi.exceptions import NoCodecAvailable
 
-from hct_mis_api.aurora.models import Organization, Project, Record, Registration
+from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.aurora.models import Organization, Project, Registration
 
 logger = logging.getLogger(__name__)
 
@@ -95,10 +96,10 @@ def fetch_records(auth_token: str, overwrite: bool = False, **filters: Any) -> D
                 records += 1
                 data = {x: v for x, v in record.items() if x in field_names}
                 data.pop("id")
-                __, c = Record.objects.get_or_create(source_id=record["id"], defaults=data)
-                if c:
+                __, cr = Record.objects.get_or_create(source_id=record["id"], defaults=data)
+                if cr:
                     created += 1
-        url = page["next"]
+        url = ""  # page["next"] we want to import only a sample
     return {
         "pages": pages,
         "records": records,

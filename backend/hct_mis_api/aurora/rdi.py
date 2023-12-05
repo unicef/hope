@@ -6,7 +6,7 @@ class AuroraProcessor:
         return self.__class__.__name__
 
 
-registry = Registry(AuroraProcessor, label_attribute="label")
+registry = Registry(AuroraProcessor)
 
 
 class DefaultProcessor(AuroraProcessor):
