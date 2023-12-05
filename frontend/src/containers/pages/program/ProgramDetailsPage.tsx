@@ -56,7 +56,7 @@ export const ProgramDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const { data, loading, error } = useProgramQuery({
     variables: { id },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   });
   const { businessArea } = useBaseUrl();
   const {

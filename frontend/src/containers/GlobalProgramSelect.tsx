@@ -53,7 +53,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   const history = useHistory();
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea, first: 100 },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'network-only',
   });
 
   const isValidProgramId = useCallback(
@@ -75,29 +75,42 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   if (programId !== 'all') {
     const program = getCurrentProgram();
     if (!selectedProgram || selectedProgram?.id !== programId) {
-      const { id, name, status, individualDataNeeded } = program;
+      if (program) {
+        const {
+          id,
+          name,
+          status,
+          individualDataNeeded,
+          dataCollectingType,
+        } = program;
 
-      setSelectedProgram({
-        id,
-        name,
-        status,
-        individualDataNeeded,
-        dataCollectingType: {
-          id: program.dataCollectingType?.id,
-          householdFiltersAvailable:
-            program.dataCollectingType?.householdFiltersAvailable,
-          individualFiltersAvailable:
-            program.dataCollectingType?.individualFiltersAvailable,
-        },
-      });
+        setSelectedProgram({
+          id,
+          name,
+          status,
+          individualDataNeeded,
+          dataCollectingType: {
+            id: dataCollectingType?.id,
+            householdFiltersAvailable:
+              dataCollectingType?.householdFiltersAvailable,
+            individualFiltersAvailable:
+              dataCollectingType?.individualFiltersAvailable,
+          },
+        });
+      }
     }
   }
 
   useEffect(() => {
-    if (programId && !isValidProgramId(programId) && programId !== 'all') {
+    if (
+      !loading &&
+      programId &&
+      !isValidProgramId(programId) &&
+      programId !== 'all'
+    ) {
       history.push(`/${businessArea}/programs/all/list`);
     }
-  }, [programId, history, businessArea, isValidProgramId]);
+  }, [programId, history, businessArea, isValidProgramId, loading]);
 
   const onChange = (e): void => {
     if (e.target.value === 'all' || !isValidProgramId(e.target.value)) {

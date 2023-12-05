@@ -189,6 +189,8 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
+        if not info.context.user.is_authenticated:
+            return Program.objects.none()
         filters = {
             "business_area__slug": info.context.headers.get("Business-Area").lower(),
             "data_collecting_type__deprecated": False,
