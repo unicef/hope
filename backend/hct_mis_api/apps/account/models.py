@@ -145,7 +145,9 @@ class PartnerPermission:
             ids.extend(ba_perms.get_program_ids())
         return ids
 
-    def get_programs_for_business_area(self, business_area_id: str) -> "BusinessAreaPartnerPermission":
+    def get_programs_for_business_area(self, business_area_id: str) -> "Optional[BusinessAreaPartnerPermission]":
+        if business_area_id not in self._available_business_areas:
+            return None
         return self._permissions[business_area_id]
 
 

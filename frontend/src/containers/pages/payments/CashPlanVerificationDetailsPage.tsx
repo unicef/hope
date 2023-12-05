@@ -139,7 +139,6 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
       <>
         {canCreate && (
           <CreateVerificationPlan
-            disabled={false}
             cashOrPaymentPlanId={cashPlan.id}
             canCreatePaymentVerificationPlan={
               cashPlan.canCreatePaymentVerificationPlan

@@ -1,4 +1,3 @@
-import Button from '@material-ui/core/Button';
 import { useHistory } from 'react-router-dom';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu, { MenuProps } from '@material-ui/core/Menu';
@@ -8,8 +7,10 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from "@material-ui/core";
 import { SurveyCategory } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useProgramContext } from "../../../programContext";
 
 const StyledMenu = withStyles({
   paper: {
@@ -47,6 +48,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { isActiveProgram } = useProgramContext();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
@@ -72,6 +74,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
         onClick={handleClick}
         endIcon={anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         data-cy='button-new-survey'
+        disabled={!isActiveProgram}
       >
         {t('New Survey')}
       </Button>

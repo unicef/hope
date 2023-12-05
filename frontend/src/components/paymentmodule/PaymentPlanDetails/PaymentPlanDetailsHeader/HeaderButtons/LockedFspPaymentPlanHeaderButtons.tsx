@@ -5,6 +5,7 @@ import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction'
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
+import { useProgramContext } from "../../../../../programContext";
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -20,6 +21,8 @@ export const LockedFspPaymentPlanHeaderButtons = ({
   const { t } = useTranslation();
   const { id } = paymentPlan;
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
+
   const {
     mutatePaymentPlanAction: unlock,
     loading: loadingUnlock,
@@ -42,6 +45,7 @@ export const LockedFspPaymentPlanHeaderButtons = ({
             variant='outlined'
             color='primary'
             onClick={() => unlock()}
+            disabled={!isActiveProgram}
           >
             {t('Unlock FSP')}
           </LoadingButton>
@@ -55,6 +59,7 @@ export const LockedFspPaymentPlanHeaderButtons = ({
             color='primary'
             onClick={() => sendForApproval()}
             data-cy='button-send-for-approval'
+            disabled={!isActiveProgram}
           >
             {t('Send For Approval')}
           </LoadingButton>

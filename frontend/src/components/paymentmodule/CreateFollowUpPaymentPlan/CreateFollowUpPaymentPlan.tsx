@@ -32,6 +32,7 @@ import { FieldBorder } from '../../core/FieldBorder';
 import { GreyText } from '../../core/GreyText';
 import { LabelizedField } from '../../core/LabelizedField';
 import { LoadingButton } from '../../core/LoadingButton';
+import { useProgramContext } from "../../../programContext";
 
 export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -45,6 +46,7 @@ export const CreateFollowUpPaymentPlan = ({
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const [mutate, { loading }] = useCreateFollowUpPpMutation();
+  const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
   const {
@@ -115,7 +117,10 @@ export const CreateFollowUpPaymentPlan = ({
               variant='outlined'
               color='primary'
               onClick={() => setDialogOpen(true)}
-              disabled={!hasPermissions(PERMISSIONS.PM_CREATE, permissions)}
+               disabled={
+                !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
+                !isActiveProgram
+              }
             >
               {t('Create Follow-up Payment Plan')}
             </Button>

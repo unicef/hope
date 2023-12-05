@@ -24,6 +24,7 @@ import { StyledTextField } from '../../../../shared/StyledTextField';
 import { ButtonTooltip } from '../../../core/ButtonTooltip';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
+import { useProgramContext } from "../../../../programContext";
 import { ExcludedItem } from './ExcludedItem';
 
 interface ExcludeSectionProps {
@@ -53,6 +54,8 @@ export const ExcludeSection = ({
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const { t } = useTranslation();
   const permissions = usePermissions();
+  const { isActiveProgram } = useProgramContext();
+
   const hasExcludePermission = hasPermissions(
     PERMISSIONS.PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP,
     permissions,
@@ -270,6 +273,7 @@ export const ExcludeSection = ({
             setExclusionsOpen(true);
             setEdit(true);
           }}
+          disabled={!isActiveProgram}
         >
           {t('Create')}
         </Button>

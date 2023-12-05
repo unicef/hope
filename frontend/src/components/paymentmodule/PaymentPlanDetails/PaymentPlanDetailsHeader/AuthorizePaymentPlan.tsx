@@ -20,6 +20,7 @@ import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+import { useProgramContext } from "../../../../programContext";
 
 export interface AuthorizePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -30,6 +31,8 @@ export const AuthorizePaymentPlan = ({
 }: AuthorizePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const [authorizeDialogOpen, setAuthorizeDialogOpen] = useState(false);
+  const { isActiveProgram } = useProgramContext();
+
   const { showMessage } = useSnackbar();
   const {
     mutatePaymentPlanAction: authorize,
@@ -79,6 +82,7 @@ export const AuthorizePaymentPlan = ({
                 variant='contained'
                 onClick={() => setAuthorizeDialogOpen(true)}
                 data-cy='button-authorize'
+                disabled={!isActiveProgram}
               >
                 {t('Authorize')}
               </Button>
