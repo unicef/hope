@@ -1308,10 +1308,16 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
     else:
         filter_kwargs = {}
     # Fetch all objects of TicketComplaintDetails and TicketSensitiveDetails with non-null payment_obj
-    complaint_tickets_with_payments = TicketComplaintDetails.objects.select_related("household", "individual",).filter(
+    complaint_tickets_with_payments = TicketComplaintDetails.objects.select_related(
+        "household",
+        "individual",
+    ).filter(
         payment_object_id__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs
     )
-    sensitive_tickets_with_payments = TicketSensitiveDetails.objects.select_related("household", "individual",).filter(
+    sensitive_tickets_with_payments = TicketSensitiveDetails.objects.select_related(
+        "household",
+        "individual",
+    ).filter(
         payment_object_id__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs
     )
 

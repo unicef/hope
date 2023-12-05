@@ -3,10 +3,10 @@ from django.utils import timezone
 from hct_mis_api.apps.accountability.models import Feedback, Message
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
-    Household,
-    Individual,
     BankAccountInfo,
     Document,
+    Household,
+    Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
