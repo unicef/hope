@@ -4,6 +4,8 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { getClient } from '../../../apollo/client';
+import { clearCache } from '../../../utils/utils';
 import SomethingWentWrongGraphic from './something_went_wrong_graphic.png';
 import HopeLogo from './something_went_wrong_hope_logo.png';
 
@@ -48,10 +50,11 @@ const Paragraph = styled.p`
 `;
 
 export const SomethingWentWrong: React.FC = () => {
-  const goBack = (): void => {
+  const goBackAndClearCache = async (): Promise<void> => {
+    const client = await getClient();
+    await clearCache(client);
     window.history.back();
   };
-
   const history = useHistory();
   const pathSegments = history.location.pathname.split('/');
   const businessArea = pathSegments[2];
@@ -82,7 +85,7 @@ export const SomethingWentWrong: React.FC = () => {
             endIcon={<Refresh />}
             variant='outlined'
             color='primary'
-            onClick={goBack}
+            onClick={goBackAndClearCache}
           >
             REFRESH PAGE
           </Button>
