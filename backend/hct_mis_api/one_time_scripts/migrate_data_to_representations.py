@@ -4,7 +4,6 @@ import os
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
-from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
@@ -431,25 +430,25 @@ def copy_roles(households: QuerySet, program: Program) -> None:
         individual_representation_dict = {
             individual.copied_from_id: individual for individual in individual_representations
         }
-        individuals_to_create = []
-        documents_to_create = []
-        identities_to_create = []
-        bank_account_info_to_create = []
+        individuals_to_create_batch = []
+        documents_to_create_batch = []
+        identities_to_create_batch = []
+        bank_account_info_to_create_batch = []
         for role in roles_batch:
             household_representation = household_representations_dict[role.household_id]
             individual_representation = individual_representation_dict.get(role.individual_id)
             if not individual_representation:
                 (
                     individual_representation,
-                    documents_to_create_batch,
-                    identities_to_create_batch,
-                    bank_account_info_to_create_batch,
+                    documents_to_create_individual_batch,
+                    identities_to_create_individual_batch,
+                    bank_account_info_to_create_individual_batch,
                 ) = copy_individual_representation_fast(program=program, individual=role.individual)
                 individual_representation_dict[individual_representation.copied_from_id] = individual_representation
-                individuals_to_create.append(individual_representation)
-                documents_to_create.extend(documents_to_create_batch)
-                identities_to_create.extend(identities_to_create_batch)
-                bank_account_info_to_create.extend(bank_account_info_to_create_batch)
+                individuals_to_create_batch.append(individual_representation)
+                documents_to_create_batch.extend(documents_to_create_individual_batch)
+                identities_to_create_batch.extend(identities_to_create_individual_batch)
+                bank_account_info_to_create_batch.extend(bank_account_info_to_create_individual_batch)
 
             original_role_id = role.id
             role.copied_from_id = original_role_id
@@ -459,10 +458,10 @@ def copy_roles(households: QuerySet, program: Program) -> None:
             role.is_original = False
             roles_list.append(role)
         with transaction.atomic():
-            Individual.objects.bulk_create(individuals_to_create)
-            Document.objects.bulk_create(documents_to_create)
-            IndividualIdentity.objects.bulk_create(identities_to_create)
-            BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
+            Individual.objects.bulk_create(individuals_to_create_batch)
+            Document.objects.bulk_create(documents_to_create_batch)
+            IndividualIdentity.objects.bulk_create(identities_to_create_batch)
+            BankAccountInfo.objects.bulk_create(bank_account_info_to_create_batch)
             IndividualRoleInHousehold.original_and_repr_objects.bulk_create(roles_list)
         del roles_list
 
@@ -570,14 +569,14 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     Copy HouseholdSelections to new households representations. By this TargetPopulations are adjusted.
     Because TargetPopulation is per program, HouseholdSelections are per program.
     """
-    household_selections_ids = list(household_selections.values_list("id", flat=True))
-    household_selections_queryset = HouseholdSelection.objects.filter(
-        id__in=household_selections_ids, household__is_removed=False
-    ).order_by("id")
-    paginator = Paginator(household_selections_queryset, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        batched_household_selections = paginator.page(page_number).object_list
-        logger.info(f"Copying household selections {page_number} of {paginator.num_pages}")
+    household_selections_ids = list(
+        household_selections.filter(household__is_removed=False).values_list("id", flat=True)
+    )
+
+    for batch_start in range(0, len(household_selections_ids), BATCH_SIZE):
+        batched_ids = household_selections_ids[batch_start : batch_start + BATCH_SIZE]
+        batched_household_selections = HouseholdSelection.original_and_repr_objects.filter(id__in=batched_ids)
+        logger.info(f"Copying household selections {batch_start} of {len(household_selections_ids)}")
         household_selections_to_create = []
         household_ids = [x.household_id for x in batched_household_selections]
         household_representations = Household.original_and_repr_objects.filter(
@@ -700,6 +699,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
         rdi_households = rdi.households.filter(is_original=True, withdrawn=False)
         if hhs_to_ignore:
             rdi_households = rdi_households.exclude(id__in=hhs_to_ignore)
+        rdi_households = rdi_households.exclude(copied_to__program=program)
         household_count = rdi_households.count()
         for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
             batch_end = batch_start + BATCH_SIZE_SMALL
