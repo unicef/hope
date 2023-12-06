@@ -16,6 +16,7 @@ import {
   GrievanceTypes,
 } from '../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../utils/utils';
+import { useProgramContext } from "../../../programContext";
 
 export const GrievancesTablePage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
@@ -23,6 +24,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const { id, cashPlanId } = useParams();
   const location = useLocation();
   const history = useHistory();
+  const { isActiveProgram } = useProgramContext();
   const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
 
   const initialFilter = {
@@ -47,7 +49,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     urgency: '',
     preferredLanguage: '',
     program: '',
-    programState: 'active',
+    programState: isActiveProgram,
     areaScope: 'all',
   };
 

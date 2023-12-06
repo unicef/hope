@@ -20,7 +20,7 @@ ALL_HOUSEHOLD_QUERY = """
     allHouseholds(
         search: $search,
         searchType: $searchType,
-        orderBy: "size",
+        orderBy: "address",
         program: $program,
         businessArea: "afghanistan"
     ) {
