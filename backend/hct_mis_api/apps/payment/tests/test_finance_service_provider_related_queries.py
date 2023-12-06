@@ -195,7 +195,7 @@ class TestFSPRelatedSchema(APITestCase):
         self.snapshot_graphql_request(
             request_string=QUERY_ALL_FINANCIAL_SERVICE_PROVIDERS,
             context={"user": self.user},
-            variables={"orderBy": "name"}
+            variables={"orderBy": "name"},
         )
 
     def test_query_all_financial_service_provider_xlsx_reports(self) -> None:
