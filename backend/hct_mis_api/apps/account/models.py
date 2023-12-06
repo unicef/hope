@@ -53,7 +53,7 @@ class BusinessAreaPartnerPermission:
         return {"roles": self.roles or [], "programs": self.programs or {}}
 
     def in_program(self, program_id: str) -> Optional[List[str]]:
-        return self.programs[program_id] if program_id in self.programs else None
+        return self.programs.get(program_id, None)
 
     def get_program_ids(self) -> List[str]:
         return list(self.programs.keys())
@@ -180,7 +180,7 @@ class Partner(MPTTModel, models.Model):
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
-        return [(role.id, role.name) for role in cls.objects.exclude(name="Default Empty Partner")]
+        return [(role.id, role.name) for role in cls.objects.exclude(name__in=["Default Empty Partner", "UNICEF"])]
 
     @property
     def is_unicef(self) -> bool:
