@@ -281,9 +281,9 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
                 objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
                 objects_to_create_dict["documents"].extend(documents_to_create)
                 objects_to_create_dict["notes"].extend(notes_to_create)
-            grievance_ticket = closed_ticket.ticket
-            grievance_ticket.is_migration_handled = True
-            old_grievance_tickets_to_update.append(grievance_ticket)
+                grievance_ticket = closed_ticket.ticket
+                grievance_ticket.is_migration_handled = True
+                old_grievance_tickets_to_update.append(grievance_ticket)
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, ticket_class)
 
 
@@ -420,9 +420,9 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
                 objects_to_create_dict["documents"].extend(documents_to_create)
                 objects_to_create_dict["notes"].extend(notes_to_create)
 
-            grievance_ticket = closed_ticket.ticket
-            grievance_ticket.is_migration_handled = True
-            old_grievance_tickets_to_update.append(grievance_ticket)
+                grievance_ticket = closed_ticket.ticket
+                grievance_ticket.is_migration_handled = True
+                old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
 
@@ -539,9 +539,9 @@ def handle_tickets_with_individual(
                 objects_to_create_dict["documents"].extend(documents_to_create)
                 objects_to_create_dict["notes"].extend(notes_to_create)
 
-            grievance_ticket = closed_ticket.ticket
-            grievance_ticket.is_migration_handled = True
-            old_grievance_tickets_to_update.append(grievance_ticket)
+                grievance_ticket = closed_ticket.ticket
+                grievance_ticket.is_migration_handled = True
+                old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
 
