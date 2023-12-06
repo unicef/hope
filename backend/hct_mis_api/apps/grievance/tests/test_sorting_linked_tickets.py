@@ -54,8 +54,8 @@ class TestGrievanceQuery(APITestCase):
 
         call_command("loadcountries")
 
-        cls.partner = PartnerFactory()
-        cls.partner_2 = PartnerFactory()
+        cls.partner = PartnerFactory(name="Test1")
+        cls.partner_2 = PartnerFactory(name="Test2")
         cls.user = UserFactory.create(partner=cls.partner)
         cls.user2 = UserFactory.create(partner=cls.partner_2)
 
@@ -113,7 +113,7 @@ class TestGrievanceQuery(APITestCase):
         ]
     )
     def test_grievance_query_sort_by_linked_tickets_ascending(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.snapshot_graphql_request(
             request_string=self.SORT_GRIEVANCE_QUERY_BY_LINKED_TICKETS_ASC,
             context={
@@ -135,7 +135,7 @@ class TestGrievanceQuery(APITestCase):
         ]
     )
     def test_grievance_query_sort_by_linked_tickets_descending(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.snapshot_graphql_request(
             request_string=self.SORT_GRIEVANCE_QUERY_BY_LINKED_TICKETS_DESC,
             context={

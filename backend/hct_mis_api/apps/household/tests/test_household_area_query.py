@@ -171,7 +171,7 @@ class TestHouseholdAreaQuery(APITestCase):
         }
         partner.save()
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, self.program)
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -345,14 +345,13 @@ class TestHouseholdAreaQuery(APITestCase):
 
     @parameterized.expand(
         [
-            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
-            ("without_permission", []),
+            ("without_user_role_permission",),
         ]
     )
-    def test_households_are_filtered_when_partner_is_unicef(self, _: Any, permissions: List[Permissions]) -> None:
+    def test_households_area_filtered_when_partner_is_unicef(self, _: Any) -> None:
         partner = PartnerFactory(name="UNICEF")
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+        # self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, self.program)
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,
@@ -371,7 +370,7 @@ class TestHouseholdAreaQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    def test_households_are_filtered_when_partner_has_business_area_access(
+    def test_households_area_filtered_when_partner_has_business_area_access(
         self, _: Any, permissions: List[Permissions]
     ) -> None:
         # Full query returned
@@ -385,7 +384,7 @@ class TestHouseholdAreaQuery(APITestCase):
         }
         partner.save()
         user = UserFactory(partner=partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan)
+        self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, self.program)
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,

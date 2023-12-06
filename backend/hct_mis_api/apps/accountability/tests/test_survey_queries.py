@@ -2,7 +2,7 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.fixtures import SurveyFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -45,7 +45,8 @@ class TestSurveyQueries(APITestCase):
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(status=Program.ACTIVE)
-        cls.user = UserFactory(first_name="John", last_name="Wick")
+        cls.partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory(first_name="John", last_name="Wick", partner=cls.partner)
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area)
 
         households = [create_household()[0] for _ in range(14)]
@@ -67,7 +68,7 @@ class TestSurveyQueries(APITestCase):
 
     def test_query_list_filter_by_search(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(
@@ -78,7 +79,7 @@ class TestSurveyQueries(APITestCase):
 
     def test_query_list_filter_by_program(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(
@@ -91,7 +92,7 @@ class TestSurveyQueries(APITestCase):
 
     def test_query_list_filter_by_target_population(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(
@@ -105,7 +106,7 @@ class TestSurveyQueries(APITestCase):
 
     def test_query_list_filter_by_created_by(self) -> None:
         self.create_user_role_with_permissions(
-            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area
+            self.user, [Permissions.ACCOUNTABILITY_SURVEY_VIEW_LIST], self.business_area, self.program
         )
 
         self.snapshot_graphql_request(

@@ -41,8 +41,8 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        partner = PartnerFactory(name="UNICEF")
-        cls.user = UserFactory.create(partner=partner)
+        partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory(partner=partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         household, _ = create_household(
             {
@@ -136,7 +136,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         ]
     )
     def test_household_query_single(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
