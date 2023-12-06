@@ -4,7 +4,7 @@ from django.conf import settings
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -41,7 +41,8 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        cls.user = UserFactory.create()
+        partner = PartnerFactory(name="UNICEF")
+        cls.user = UserFactory.create(partner=partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         household, _ = create_household(
             {
@@ -98,6 +99,8 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
 
         cls.household.programs.add(program1)
         cls.household.programs.add(program2)
+        cls.household.program = program1
+        cls.household.save()
 
         payment_plan_program1 = PaymentPlanFactory(program=program1)
         payment_plan_program2 = PaymentPlanFactory(program=program2)
@@ -124,6 +127,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
             delivered_quantity=166,
             household=cls.household,
         )
+        cls.program = program1
 
     @parameterized.expand(
         [
@@ -136,6 +140,12 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={"id": self.id_to_base64(self.household.id, "HouseholdNode")},
         )
