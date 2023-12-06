@@ -250,20 +250,20 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
             household_representation = None
             individual_representation = None
             if closed_ticket.household:
-                household_representation = closed_ticket.household.copied_to(
+                if household_representation := closed_ticket.household.copied_to(
                     manager="original_and_repr_objects"
-                ).first()
-                program = household_representation.program
-                if closed_ticket.individual:
-                    individual_representation = get_individual_representation_per_program_by_old_individual_id(
-                        program=program,
-                        old_individual_id=closed_ticket.individual,
-                    )
+                ).first():
+                    program = household_representation.program
+                    if closed_ticket.individual:
+                        individual_representation = get_individual_representation_per_program_by_old_individual_id(
+                            program=program,
+                            old_individual_id=closed_ticket.individual,
+                        )
             elif closed_ticket.individual:
-                individual_representation = closed_ticket.individual.copied_to(
+                if individual_representation := closed_ticket.individual.copied_to(
                     manager="original_and_repr_objects"
-                ).first()
-                program = individual_representation.program
+                ).first():
+                    program = individual_representation.program
             else:
                 program = None
 
@@ -276,14 +276,13 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
                 ) = copy_closed_ticket_with_household_and_individual(
                     closed_ticket, program, household_representation, individual_representation
                 )
-                grievance_ticket = closed_ticket.ticket
-                grievance_ticket.is_migration_handled = True
-                grievance_ticket.migrated_at = timezone.now()
-                old_grievance_tickets_to_update.append(grievance_ticket)
                 objects_to_create_dict["tickets"].append(ticket_copy)
                 objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
                 objects_to_create_dict["documents"].extend(documents_to_create)
                 objects_to_create_dict["notes"].extend(notes_to_create)
+                grievance_ticket = closed_ticket.ticket
+                grievance_ticket.is_migration_handled = True
+                old_grievance_tickets_to_update.append(grievance_ticket)
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, ticket_class)
 
 
@@ -409,21 +408,21 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
         }
         old_grievance_tickets_to_update = []
         for closed_ticket in closed_tickets_paginated:
-            household_representation = closed_ticket.household.copied_to(manager="original_and_repr_objects").first()
-
-            program = household_representation.program
-            ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(
-                closed_ticket, program, household_representation=household_representation
-            )
-            objects_to_create_dict["tickets"].append(ticket_copy)
-            objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
-            objects_to_create_dict["documents"].extend(documents_to_create)
-            objects_to_create_dict["notes"].extend(notes_to_create)
-
-            grievance_ticket = closed_ticket.ticket
-            grievance_ticket.is_migration_handled = True
-            grievance_ticket.migrated_at = timezone.now()
-            old_grievance_tickets_to_update.append(grievance_ticket)
+            if household_representation := closed_ticket.household.copied_to(
+                manager="original_and_repr_objects"
+            ).first():
+                program = household_representation.program
+                ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(
+                    closed_ticket, program, household_representation=household_representation
+                )
+                objects_to_create_dict["tickets"].append(ticket_copy)
+                objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
+                objects_to_create_dict["documents"].extend(documents_to_create)
+                objects_to_create_dict["notes"].extend(notes_to_create)
+                grievance_ticket = closed_ticket.ticket
+                grievance_ticket.is_migration_handled = True
+                grievance_ticket.migrated_at = timezone.now()
+                old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
 
@@ -525,25 +524,23 @@ def handle_tickets_with_individual(
         }
         old_grievance_tickets_to_update = []
         for closed_ticket in closed_tickets_paginated:
-            individual_representation = (
+            if individual_representation := (
                 getattr(closed_ticket, individual_field_name).copied_to(manager="original_and_repr_objects").first()
-            )
-            program = individual_representation.program
-            ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_individual(
-                closed_ticket,
-                program,
-                individual_field_name=individual_field_name,
-                individual_representation=individual_representation,
-            )
-            objects_to_create_dict["tickets"].append(ticket_copy)
-            objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
-            objects_to_create_dict["documents"].extend(documents_to_create)
-            objects_to_create_dict["notes"].extend(notes_to_create)
-
-            grievance_ticket = closed_ticket.ticket
-            grievance_ticket.is_migration_handled = True
-            grievance_ticket.migrated_at = timezone.now()
-            old_grievance_tickets_to_update.append(grievance_ticket)
+            ):
+                program = individual_representation.program
+                ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_individual(
+                    closed_ticket,
+                    program,
+                    individual_field_name=individual_field_name,
+                    individual_representation=individual_representation,
+                )
+                objects_to_create_dict["tickets"].append(ticket_copy)
+                objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
+                objects_to_create_dict["documents"].extend(documents_to_create)
+                objects_to_create_dict["notes"].extend(notes_to_create)
+                grievance_ticket = closed_ticket.ticket
+                grievance_ticket.is_migration_handled = True
+                old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
 
@@ -975,20 +972,20 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
                         old_individual_id=feedback_obj.individual_lookup,
                     )
             elif feedback_obj.household_lookup:
-                household_representation = feedback_obj.household_lookup.copied_to(
+                if household_representation := feedback_obj.household_lookup.copied_to(
                     manager="original_and_repr_objects"
-                ).first()
-                program = household_representation.program
-                if feedback_obj.individual_lookup:
-                    individual_representation = get_individual_representation_per_program_by_old_individual_id(
-                        program=program,
-                        old_individual_id=feedback_obj.individual_lookup,
-                    )
+                ).first():
+                    program = household_representation.program
+                    if feedback_obj.individual_lookup:
+                        individual_representation = get_individual_representation_per_program_by_old_individual_id(
+                            program=program,
+                            old_individual_id=feedback_obj.individual_lookup,
+                        )
             elif feedback_obj.individual_lookup:
-                individual_representation = feedback_obj.individual_lookup.copied_to(
+                if individual_representation := feedback_obj.individual_lookup.copied_to(
                     manager="original_and_repr_objects"
-                ).first()
-                program = individual_representation.program
+                ).first():
+                    program = individual_representation.program
             else:
                 program = None
 
