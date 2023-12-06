@@ -86,7 +86,6 @@ class UserPartnerTest(TestCase):
         default_list = [
             "USER_MANAGEMENT_VIEW_LIST",
             "RDI_VIEW_DETAILS",
-            "GRIEVANCES_FEEDBACK_VIEW_CREATE",
             "ACTIVITY_LOG_VIEW",
             "PM_VIEW_LIST",
             "PAYMENT_VERIFICATION_VIEW_DETAILS",
@@ -105,6 +104,8 @@ class UserPartnerTest(TestCase):
             "PROGRAMME_CREATE",
             "GRIEVANCES_VIEW_LIST_SENSITIVE",
             "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE",
+            "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE",
+            "GRIEVANCES_VIEW_DETAILS_SENSITIVE",
             "DASHBOARD_VIEW_COUNTRY",
             "TARGETING_VIEW_DETAILS",
         ].sort()
