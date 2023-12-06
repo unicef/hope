@@ -15,22 +15,22 @@ import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
 import {useProgramContext} from "../../../../programContext";
 
-const initialFilter = {
-  feedbackId: '',
-  issueType: '',
-  createdBy: '',
-  createdAtRangeMin: '',
-  createdAtRangeMax: '',
-  program: '',
-  programState: 'active',
-};
-
 export const FeedbackPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
   const location = useLocation();
   const { isActiveProgram } = useProgramContext();
+
+  const initialFilter = {
+    feedbackId: '',
+    issueType: '',
+    createdBy: '',
+    createdAtRangeMin: '',
+    createdAtRangeMax: '',
+    program: '',
+    programState: isActiveProgram,
+  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
