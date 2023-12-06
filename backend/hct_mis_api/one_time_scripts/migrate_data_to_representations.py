@@ -4,7 +4,6 @@ import os
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
-from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
@@ -541,14 +540,14 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     Copy HouseholdSelections to new households representations. By this TargetPopulations are adjusted.
     Because TargetPopulation is per program, HouseholdSelections are per program.
     """
-    household_selections_ids = list(household_selections.values_list("id", flat=True))
-    household_selections_queryset = HouseholdSelection.objects.filter(
-        id__in=household_selections_ids, household__is_removed=False
-    ).order_by("id")
-    paginator = Paginator(household_selections_queryset, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        batched_household_selections = paginator.page(page_number).object_list
-        logger.info(f"Copying household selections {page_number} of {paginator.num_pages}")
+    household_selections_ids = list(
+        household_selections.filter(household__is_removed=False).values_list("id", flat=True)
+    )
+
+    for batch_start in range(0, len(household_selections_ids), BATCH_SIZE):
+        batched_ids = household_selections_ids[batch_start : batch_start + BATCH_SIZE]
+        batched_household_selections = HouseholdSelection.original_and_repr_objects.filter(id__in=batched_ids)
+        logger.info(f"Copying household selections {batch_start} of {len(household_selections_ids)}")
         household_selections_to_create = []
         household_ids = [x.household_id for x in batched_household_selections]
         household_representations = Household.original_and_repr_objects.filter(
