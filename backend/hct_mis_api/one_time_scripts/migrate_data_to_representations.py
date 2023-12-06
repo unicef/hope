@@ -135,7 +135,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     logger.info("Updating is_migration_handled for households")
     # mark programs households as migrated and exclude in rerun
     Household.original_and_repr_objects.filter(
-        business_area=business_area, copied_to__isnull=False, is_original=True
+        business_area=business_area, copied_to__isnull=False, is_original=True, is_migration_handled=False
     ).update(is_migration_handled=True, migrated_at=timezone.now())
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
     handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
