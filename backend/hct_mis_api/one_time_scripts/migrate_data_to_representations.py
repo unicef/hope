@@ -593,7 +593,7 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
         with transaction.atomic():
             HouseholdSelection.original_and_repr_objects.bulk_create(household_selections_to_create)
             HouseholdSelection.objects.filter(id__in=batched_household_selections.values_list("id", flat=True)).update(
-                is_migration_handled=True, migrated_at=timezone.now()
+                is_migration_handled=True
             )
 
 
