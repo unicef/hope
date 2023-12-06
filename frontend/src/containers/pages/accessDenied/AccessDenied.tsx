@@ -4,6 +4,8 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
+import { getClient } from '../../../apollo/client';
+import { clearCache } from '../../../utils/utils';
 import AccessDeniedGraphic from './access_denied.png';
 import HopeLogo from './access_denied_hope_logo.png';
 
@@ -48,10 +50,11 @@ const Paragraph = styled.p`
 `;
 
 export const AccessDenied: React.FC = () => {
-  const goBack = (): void => {
+  const goBackAndClearCache = async (): Promise<void> => {
+    const client = await getClient();
+    await clearCache(client);
     window.history.back();
   };
-
   const history = useHistory();
   const pathSegments = history.location.pathname.split('/');
   const businessArea = pathSegments[2];
@@ -64,7 +67,7 @@ export const AccessDenied: React.FC = () => {
       <SquareLogo>
         <img
           src={AccessDeniedGraphic}
-          alt='sad face'
+          alt='Hand denying access'
           width='354'
           height='293'
         />
@@ -83,20 +86,22 @@ export const AccessDenied: React.FC = () => {
             endIcon={<Refresh />}
             variant='outlined'
             color='primary'
-            onClick={goBack}
+            onClick={goBackAndClearCache}
           >
             REFRESH PAGE
           </Button>
         </Box>
-        <Button
-          endIcon={<DashboardIcon />}
-          color='primary'
-          variant='contained'
-          component={Link}
-          to={`/${businessArea}/programs/all/list`}
-        >
-          GO TO PROGRAMME MANAGEMENT
-        </Button>
+        {businessArea && (
+          <Button
+            endIcon={<DashboardIcon />}
+            color='primary'
+            variant='contained'
+            component={Link}
+            to={`/${businessArea}/programs/all/list`}
+          >
+            GO TO PROGRAMME MANAGEMENT
+          </Button>
+        )}
       </Box>
     </Container>
   );

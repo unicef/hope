@@ -53,10 +53,18 @@ const hasResponseErrors = (response): boolean => {
 };
 
 const redirectLink = new ApolloLink((operation, forward) => {
+  const businessAreaSlug = window.location.pathname.split('/')[1];
   // Call the next link in the chain and get the response
   return forward(operation).map((response) => {
     // Check if the response has any errors
     if (hasResponseErrors(response)) {
+      // Check if the error message is "Permission Denied"
+      if (
+        response?.errors?.some((error) => error.message === 'Permission Denied')
+      ) {
+        // Redirect to the access denied page
+        window.location.href = `/access-denied/${businessAreaSlug}`;
+      }
       // Check if the operation is a mutation
       const isMutation = operation.query.definitions.some(
         (definition) =>

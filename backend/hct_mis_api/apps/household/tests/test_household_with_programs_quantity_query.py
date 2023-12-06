@@ -136,7 +136,7 @@ class TestHouseholdWithProgramsQuantityQuery(APITestCase):
         ]
     )
     def test_household_query_single(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY,
