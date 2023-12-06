@@ -180,7 +180,7 @@ class Partner(MPTTModel, models.Model):
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
-        return [(role.id, role.name) for role in cls.objects.exclude(name="Default Empty Partner")]
+        return [(role.id, role.name) for role in cls.objects.exclude(name__in=["Default Empty Partner", "UNICEF"])]
 
     @property
     def is_unicef(self) -> bool:
