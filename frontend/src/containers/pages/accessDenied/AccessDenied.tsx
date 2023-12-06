@@ -88,15 +88,17 @@ export const AccessDenied: React.FC = () => {
             REFRESH PAGE
           </Button>
         </Box>
-        <Button
-          endIcon={<DashboardIcon />}
-          color='primary'
-          variant='contained'
-          component={Link}
-          to={`/${businessArea}/programs/all/list`}
-        >
-          GO TO PROGRAMME MANAGEMENT
-        </Button>
+        {businessArea && (
+          <Button
+            endIcon={<DashboardIcon />}
+            color='primary'
+            variant='contained'
+            component={Link}
+            to={`/${businessArea}/programs/all/list`}
+          >
+            GO TO PROGRAMME MANAGEMENT
+          </Button>
+        )}
       </Box>
     </Container>
   );
