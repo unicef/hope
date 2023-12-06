@@ -274,6 +274,7 @@ def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
             user = info.context.user
             permissions = [permission]
             kwargs["Program"] = info.context.headers.get("Program")
+            kwargs["Referer"] = info.context.headers.get("Referer")
             return check_permissions(user, permissions, **kwargs)
 
     return XDPerm
