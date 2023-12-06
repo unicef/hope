@@ -13,7 +13,7 @@ import { Providers } from './providers';
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { ProtectedRoute } from './components/core/ProtectedRoute';
 import { PageNotFound } from './containers/pages/404/PageNotFound';
-import { SomethingWentWrong } from './containers/pages/somethingWentWrong/SomethingWentWrong';
+import { SomethingWentWrong } from './containers/pages/SomethingWentWrong/SomethingWentWrong';
 import { AccessDenied } from './containers/pages/accessDenied/AccessDenied';
 
 export const App: React.FC = () => {
