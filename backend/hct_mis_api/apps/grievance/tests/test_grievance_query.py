@@ -249,7 +249,7 @@ class TestGrievanceQuery(APITestCase):
         for status, date in created_at_dates_to_set.items():
             gt = GrievanceTicket.objects.get(status=status)
             gt.created_at = date
-            gt.save()
+            gt.save(update_fields=("created_at",))
 
         TicketNeedsAdjudicationDetails.objects.create(
             ticket=GrievanceTicket.objects.first(),
