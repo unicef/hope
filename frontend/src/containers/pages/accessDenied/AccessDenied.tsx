@@ -4,8 +4,8 @@ import DashboardIcon from '@material-ui/icons/Dashboard';
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import SomethingWentWrongGraphic from './something_went_wrong_graphic.png';
-import HopeLogo from './something_went_wrong_hope_logo.png';
+import AccessDeniedGraphic from './access_denied.png';
+import HopeLogo from './access_denied_hope_logo.png';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -47,7 +47,7 @@ const Paragraph = styled.p`
   line-height: 32px;
 `;
 
-export const SomethingWentWrong: React.FC = () => {
+export const AccessDenied: React.FC = () => {
   const goBack = (): void => {
     window.history.back();
   };
@@ -63,17 +63,18 @@ export const SomethingWentWrong: React.FC = () => {
       </LogoContainer>
       <SquareLogo>
         <img
-          src={SomethingWentWrongGraphic}
-          alt='Sad face'
+          src={AccessDeniedGraphic}
+          alt='sad face'
           width='354'
           height='293'
         />
       </SquareLogo>
       <TextContainer>
-        <Title>Oops! Something went wrong</Title>
+        <Title>Access Denied</Title>
         <Paragraph>
-          Don&apos;t worry! Our team is on it, working to fix the issue. Please
-          try again later. Thank you for your patience.
+          You don&apos;t have the necessary permissions to access this page.
+          Please check your access rights or contact your system administrator
+          for assistance.
         </Paragraph>
       </TextContainer>
       <Box display='flex' justifyContent='center' alignItems='center'>
