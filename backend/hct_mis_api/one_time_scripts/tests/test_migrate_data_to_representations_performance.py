@@ -702,7 +702,7 @@ class TestMigrateDataToRepresentationsPerformance(TestCase):
     def test_migrate_data_to_representations_per_business_area_running_number_queries(self) -> None:
         self.refresh_objects()
         with self.assertNumQueries(
-            375,
+            372,
         ):
             migrate_data_to_representations_per_business_area(business_area=self.business_area)
 
