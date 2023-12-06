@@ -4,7 +4,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -30,7 +30,8 @@ class TestChangeProgramStatus(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
-        cls.user = UserFactory.create()
+        cls.partner = PartnerFactory(name="WFP")
+        cls.user = UserFactory.create(partner=cls.partner)
 
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
@@ -89,5 +90,11 @@ class TestChangeProgramStatus(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": self.user},
-            variables={"programData": {"id": self.id_to_base64(program.id, "ProgramNode"), "status": target_status}},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(program.id, "ProgramNode"),
+                    "status": target_status,
+                    "partners": [{"id": str(self.user.partner.id), "areaAccess": "BUSINESS_AREA"}],
+                }
+            },
         )

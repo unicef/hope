@@ -2,7 +2,7 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -51,6 +51,8 @@ class TestUpdateProgram(APITestCase):
             business_area=cls.business_area,
         )
 
+        cls.partner = PartnerFactory(name="WFP")
+
     def test_update_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
@@ -80,7 +82,7 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_authenticated(
         self, _: Any, permissions: List[Permissions], should_be_updated: bool
     ) -> None:
-        user = UserFactory.create()
+        user = UserFactory.create(partner=self.partner)
         self.create_user_role_with_permissions(user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
@@ -91,6 +93,7 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": Program.ACTIVE,
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                     "dataCollectingTypeCode": "partial_individuals",
                 },
                 "version": self.program.version,
@@ -106,7 +109,7 @@ class TestUpdateProgram(APITestCase):
             assert updated_program.name == "initial name"
 
     def test_update_active_program_with_dct(self) -> None:
-        user = UserFactory.create()
+        user = UserFactory.create(partner=self.partner)
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
         data_collecting_type.limit_to.add(self.business_area)
@@ -125,6 +128,7 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "partial_individuals",
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
@@ -132,7 +136,7 @@ class TestUpdateProgram(APITestCase):
         self.assertEqual(self.program.data_collecting_type.code, "full_collection")
 
     def test_update_draft_not_empty_program_with_dct(self) -> None:
-        user = UserFactory.create()
+        user = UserFactory.create(partner=self.partner)
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
         data_collecting_type.limit_to.add(self.business_area)
@@ -145,6 +149,7 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "partial_individuals",
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
@@ -157,7 +162,7 @@ class TestUpdateProgram(APITestCase):
         )
         dct.limit_to.add(self.business_area)
 
-        user = UserFactory.create()
+        user = UserFactory.create(partner=self.partner)
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
         self.snapshot_graphql_request(
@@ -167,6 +172,7 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "deprecated",
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
@@ -178,7 +184,7 @@ class TestUpdateProgram(APITestCase):
         )
         dct.limit_to.add(self.business_area)
 
-        user = UserFactory.create()
+        user = UserFactory.create(partner=self.partner)
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
         self.snapshot_graphql_request(
@@ -188,6 +194,7 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "inactive",
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
@@ -197,7 +204,7 @@ class TestUpdateProgram(APITestCase):
         DataCollectingType.objects.update_or_create(
             **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA"}
         )
-        user = UserFactory.create()
+        user = UserFactory.create(partner=self.partner)
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         self.snapshot_graphql_request(
@@ -207,20 +214,44 @@ class TestUpdateProgram(APITestCase):
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "dataCollectingTypeCode": "test_wrong_ba",
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
                 },
                 "version": self.program.version,
             },
         )
 
     def test_update_program_when_finished(self) -> None:
-        user = UserFactory.create()
+        user = UserFactory.create(partner=self.partner)
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
             context={"user": user},
             variables={
-                "programData": {"id": self.id_to_base64(self.program_finished.id, "ProgramNode"), "name": "xyz"},
+                "programData": {
+                    "id": self.id_to_base64(self.program_finished.id, "ProgramNode"),
+                    "name": "xyz",
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
+                },
                 "version": self.program_finished.version,
+            },
+        )
+
+    def test_update_program_of_other_partner_raise_error(self) -> None:
+        partner = PartnerFactory(name="UHCR")
+        another_partner = PartnerFactory(name="WFP")
+        user = UserFactory.create(partner=partner)
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "name": "xyz",
+                    "partners": [{"id": str(another_partner.id), "areaAccess": "BUSINESS_AREA"}],
+                },
+                "version": self.program.version,
             },
         )
