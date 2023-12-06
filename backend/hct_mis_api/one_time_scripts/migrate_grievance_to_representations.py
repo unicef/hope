@@ -1249,7 +1249,7 @@ def handle_bulk_create_paginated_data(
     handle_grievance_ticket_data_creation(objects_to_create_dict["grievance_tickets"])
     TicketNote.objects.bulk_create(objects_to_create_dict["notes"])
     GrievanceDocument.objects.bulk_create(objects_to_create_dict["documents"])
-    GrievanceTicket.objects.bulk_update(old_grievance_tickets_to_update, ["is_migration_handled"])
+    GrievanceTicket.objects.bulk_update(old_grievance_tickets_to_update, ["is_migration_handled", "migrated_at"])
     model.objects.bulk_create(objects_to_create_dict["tickets"])
 
 
