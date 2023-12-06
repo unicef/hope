@@ -1,5 +1,5 @@
 import { MenuItem, Select } from '@material-ui/core';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -57,6 +57,15 @@ export const GlobalProgramSelect = (): React.ReactElement => {
     fetchPolicy: 'network-only',
   });
 
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const isOneOfAvailableProgramsId = useCallback(
     (id: string): boolean => {
       return data?.allPrograms.edges.some((each) => each.node.id === id);
@@ -64,41 +73,43 @@ export const GlobalProgramSelect = (): React.ReactElement => {
     [data],
   );
 
-  const getCurrentProgram = ():
+  const getCurrentProgram = useCallback(():
     | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
     | null => {
     const obj = data?.allPrograms.edges.find((el) => el.node.id === programId);
     return obj ? obj.node : null;
-  };
+  }, [data, programId]);
 
-  if (programId !== 'all') {
-    const program = getCurrentProgram();
-    if (!selectedProgram || selectedProgram?.id !== programId) {
-      if (program) {
-        const {
-          id,
-          name,
-          status,
-          individualDataNeeded,
-          dataCollectingType,
-        } = program;
+  useEffect(() => {
+    if (programId !== 'all') {
+      const program = getCurrentProgram();
+      if (!selectedProgram || selectedProgram?.id !== programId) {
+        if (program && isMounted.current) {
+          const {
+            id,
+            name,
+            status,
+            individualDataNeeded,
+            dataCollectingType,
+          } = program;
 
-        setSelectedProgram({
-          id,
-          name,
-          status,
-          individualDataNeeded,
-          dataCollectingType: {
-            id: dataCollectingType?.id,
-            householdFiltersAvailable:
-              dataCollectingType?.householdFiltersAvailable,
-            individualFiltersAvailable:
-              dataCollectingType?.individualFiltersAvailable,
-          },
-        });
+          setSelectedProgram({
+            id,
+            name,
+            status,
+            individualDataNeeded,
+            dataCollectingType: {
+              id: dataCollectingType?.id,
+              householdFiltersAvailable:
+                dataCollectingType?.householdFiltersAvailable,
+              individualFiltersAvailable:
+                dataCollectingType?.individualFiltersAvailable,
+            },
+          });
+        }
       }
     }
-  }
+  }, [programId, selectedProgram, setSelectedProgram, getCurrentProgram]);
 
   useEffect(() => {
     // If the programId is not in a valid format, redirect to the 404 page
