@@ -1046,3 +1046,14 @@ export const handleOptionSelected = (
   }
   return optionValue === value;
 };
+
+export const isProgramNodeUuidFormat = (id: string): boolean => {
+  const regex = /^ProgramNode:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+  try {
+    const base64 = id.replace(/-/g, '+').replace(/_/g, '/');
+    const decodedId = atob(base64);
+    return regex.test(decodedId);
+  } catch (e) {
+    return false;
+  }
+};
