@@ -417,25 +417,25 @@ def copy_roles(households: QuerySet, program: Program) -> None:
         individual_representation_dict = {
             individual.copied_from_id: individual for individual in individual_representations
         }
-        individuals_to_create = []
-        documents_to_create = []
-        identities_to_create = []
-        bank_account_info_to_create = []
+        individuals_to_create_batch = []
+        documents_to_create_batch = []
+        identities_to_create_batch = []
+        bank_account_info_to_create_batch = []
         for role in roles_batch:
             household_representation = household_representations_dict[role.household_id]
             individual_representation = individual_representation_dict.get(role.individual_id)
             if not individual_representation:
                 (
                     individual_representation,
-                    documents_to_create_batch,
-                    identities_to_create_batch,
-                    bank_account_info_to_create_batch,
+                    documents_to_create_individual_batch,
+                    identities_to_create_individual_batch,
+                    bank_account_info_to_create_individual_batch,
                 ) = copy_individual_representation_fast(program=program, individual=role.individual)
                 individual_representation_dict[individual_representation.copied_from_id] = individual_representation
-                individuals_to_create.append(individual_representation)
-                documents_to_create.extend(documents_to_create_batch)
-                identities_to_create.extend(identities_to_create_batch)
-                bank_account_info_to_create.extend(bank_account_info_to_create_batch)
+                individuals_to_create_batch.append(individual_representation)
+                documents_to_create_batch.extend(documents_to_create_individual_batch)
+                identities_to_create_batch.extend(identities_to_create_individual_batch)
+                bank_account_info_to_create_batch.extend(bank_account_info_to_create_individual_batch)
 
             original_role_id = role.id
             role.copied_from_id = original_role_id
@@ -445,10 +445,10 @@ def copy_roles(households: QuerySet, program: Program) -> None:
             role.is_original = False
             roles_list.append(role)
         with transaction.atomic():
-            Individual.objects.bulk_create(individuals_to_create)
-            Document.objects.bulk_create(documents_to_create)
-            IndividualIdentity.objects.bulk_create(identities_to_create)
-            BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
+            Individual.objects.bulk_create(individuals_to_create_batch)
+            Document.objects.bulk_create(documents_to_create_batch)
+            IndividualIdentity.objects.bulk_create(identities_to_create_batch)
+            BankAccountInfo.objects.bulk_create(bank_account_info_to_create_batch)
             IndividualRoleInHousehold.original_and_repr_objects.bulk_create(roles_list)
         del roles_list
 
