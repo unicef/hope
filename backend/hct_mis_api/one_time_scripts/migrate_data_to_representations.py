@@ -669,16 +669,17 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
     for i, rdi in enumerate(rdis):
         if i % 100 == 0:
             logger.info(f"Handling {i} - {i + 99}/{rdis_count} RDIs")
-        rdi_households = rdi.households.filter(is_original=True, withdrawn=False)
+        rdi_households = rdi.households.filter(is_original=True, withdrawn=False).exclude(copied_to__program=program)
         if hhs_to_ignore:
             rdi_households = rdi_households.exclude(id__in=hhs_to_ignore)
-        rdi_households_filtered = rdi_households.exclude(copied_to__program=program)
-        household_count = rdi_households_filtered.count()
-        for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
+        rdi_households_ids = list(rdi_households.values_list("id", flat=True))
+        households_count = len(rdi_households_ids)
+        for batch_start in range(0, households_count, BATCH_SIZE_SMALL):
             batch_end = batch_start + BATCH_SIZE_SMALL
-            logger.info(f"Copying {batch_start} - {batch_end}/{household_count} households for RDI")
+            logger.info(f"Copying {batch_start} - {batch_end}/{households_count} households for RDI")
             household_dict = {}
-            batched_households = rdi_households_filtered[0:BATCH_SIZE_SMALL]
+            batched_household_ids = rdi_households_ids[batch_start:batch_end]
+            batched_households = Household.original_and_repr_objects.filter(id__in=batched_household_ids)
             with transaction.atomic():
                 individuals_per_household_dict = defaultdict(list)
                 for individual in Individual.objects.filter(household__in=batched_households):
