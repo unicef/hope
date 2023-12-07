@@ -48,7 +48,6 @@ logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 100
 
-
 ticket_grievance_ticket_field_name_mapping = {
     TicketComplaintDetails: "complaint_ticket_details",
     TicketSensitiveDetails: "sensitive_ticket_details",
@@ -512,10 +511,14 @@ def handle_tickets_with_individual(
 
     # Handle closed tickets
     closed_tickets = tickets_with_ind.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
-    paginator = Paginator(closed_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        closed_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling closed tickets with individual: {page_number} of {paginator.num_pages}")
+    closed_tickets_ids = list(closed_tickets.values_list("pk", flat=True))
+    closed_count = len(closed_tickets_ids)
+    for batch_start in range(0, len(closed_tickets_ids), BATCH_SIZE):
+        batched_ids = closed_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        closed_tickets_paginated = model.objects.select_related("ticket", individual_field_name).filter(
+            id__in=batched_ids
+        )
+        logger.info(f"Handling closed tickets with individual: {batch_start} of {closed_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -547,10 +550,14 @@ def handle_tickets_with_individual(
 
     # Handle active tickets
     active_tickets = tickets_with_ind.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
-    paginator = Paginator(active_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        active_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling active tickets with individual: {page_number} of {paginator.num_pages}")
+    active_tickets_ids = list(active_tickets.values_list("pk", flat=True))
+    active_count = len(active_tickets_ids)
+    for batch_start in range(0, len(active_tickets_ids), BATCH_SIZE):
+        batched_ids = active_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        active_tickets_paginated = model.objects.select_related("ticket", individual_field_name).filter(
+            id__in=batched_ids
+        )
+        logger.info(f"Handling active tickets with individual: {batch_start} of {active_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -717,12 +724,20 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
 
     PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
     SelectedIndividualThrough = TicketNeedsAdjudicationDetails.selected_individuals.through
-
-    logger.info(f"Tickets to handle: {needs_adjudication_tickets.count()}")
-    paginator = Paginator(needs_adjudication_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        needs_adjudication_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling needs adjudication tickets: {page_number} of {paginator.num_pages}")
+    needs_adjudication_tickets_ids = list(needs_adjudication_tickets.values_list("pk", flat=True))
+    count = len(needs_adjudication_tickets_ids)
+    logger.info(f"Tickets to handle: {count}")
+    for batch_start in range(0, len(needs_adjudication_tickets_ids), BATCH_SIZE):
+        batched_ids = needs_adjudication_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        needs_adjudication_tickets_paginated = (
+            TicketNeedsAdjudicationDetails.objects.filter(id__in=batched_ids)
+            .select_related(
+                "ticket",
+                "golden_records_individual",
+            )
+            .prefetch_related("possible_duplicates", "selected_individuals")
+        )
+        logger.info(f"Handling needs adjudication tickets: {batch_start} of {count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
