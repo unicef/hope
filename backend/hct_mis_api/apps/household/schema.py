@@ -25,6 +25,7 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     BasePermission,
+    DjangoPermissionFilterConnectionField,
     DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
@@ -318,7 +319,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
             if str(object_instance.program_id) != program_id:
                 raise PermissionDenied("Permission Denied")
 
-            if len(areas_from_partner) > 0:
+            if len(areas_from_partner) > 0 and object_instance.household_id and object_instance.household.admin_area_id:
                 household = object_instance.household
                 areas_from_household = {
                     str(household.admin1_id),
@@ -474,7 +475,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             if str(object_instance.program_id) != program_id:
                 raise PermissionDenied("Permission Denied")
 
-            if len(areas_from_partner) > 0:
+            if len(areas_from_partner) > 0 and object_instance.admin_area_id:
                 areas_from_household = {
                     str(object_instance.admin1_id),
                     str(object_instance.admin2_id),
@@ -519,7 +520,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoPermissionFilterFastConnectionField(
+    all_households = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
         permission_classes=(
@@ -527,7 +528,7 @@ class Query(graphene.ObjectType):
         ),
     )
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoPermissionFilterFastConnectionField(
+    all_individuals = DjangoPermissionFilterConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
         permission_classes=(
