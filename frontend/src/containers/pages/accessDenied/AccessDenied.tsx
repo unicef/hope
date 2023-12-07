@@ -6,8 +6,8 @@ import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import { clearCache } from '../../../utils/utils';
-import PageNotFoundGraphic from './404_graphic.png';
-import HopeLogo from './404_hope_logo.png';
+import AccessDeniedGraphic from './access_denied.png';
+import HopeLogo from './access_denied_hope_logo.png';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -49,7 +49,7 @@ const Paragraph = styled.p`
   line-height: 32px;
 `;
 
-export const PageNotFound: React.FC = () => {
+export const AccessDenied: React.FC = () => {
   const goBackAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);
@@ -66,18 +66,18 @@ export const PageNotFound: React.FC = () => {
       </LogoContainer>
       <SquareLogo>
         <img
-          src={PageNotFoundGraphic}
-          alt='Brush with paint 404'
+          src={AccessDeniedGraphic}
+          alt='Hand denying access'
           width='354'
           height='293'
         />
       </SquareLogo>
       <TextContainer>
-        <Title>Oops! Page Not Found</Title>
+        <Title>Access Denied</Title>
         <Paragraph>
-          Looks like you&apos;ve ventured off the map. Don&apos;t worry, we can
-          help you get back on track. Please try again or explore our other
-          exciting content.
+          You don&apos;t have the necessary permissions to access this page.
+          Please check your access rights or contact your system administrator
+          for assistance.
         </Paragraph>
       </TextContainer>
       <Box display='flex' justifyContent='center' alignItems='center'>
@@ -91,15 +91,17 @@ export const PageNotFound: React.FC = () => {
             REFRESH PAGE
           </Button>
         </Box>
-        <Button
-          endIcon={<DashboardIcon />}
-          color='primary'
-          variant='contained'
-          component={Link}
-          to={`/${businessArea}/programs/all/list`}
-        >
-          GO TO PROGRAMME MANAGEMENT
-        </Button>
+        {businessArea && (
+          <Button
+            endIcon={<DashboardIcon />}
+            color='primary'
+            variant='contained'
+            component={Link}
+            to={`/${businessArea}/programs/all/list`}
+          >
+            GO TO PROGRAMME MANAGEMENT
+          </Button>
+        )}
       </Box>
     </Container>
   );

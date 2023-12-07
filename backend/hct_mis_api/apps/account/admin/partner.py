@@ -1,7 +1,8 @@
+from collections import defaultdict
 from typing import Any, Optional, Sequence, Type, Union
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.forms import CheckboxSelectMultiple, ModelForm, formset_factory
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -10,7 +11,7 @@ from django.urls import reverse
 from admin_extra_buttons.decorators import button
 
 from hct_mis_api.apps.account import models as account_models
-from hct_mis_api.apps.account.models import PartnerPermission, Role
+from hct_mis_api.apps.account.models import IncompatibleRoles, PartnerPermission, Role
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.program.models import Program
@@ -93,6 +94,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
             business_area_role_form_set = BusinessAreaRoleFormSet(request.POST or None, prefix="business_area_role")
             program_area_form_set = ProgramAreaFormSet(request.POST or None, prefix="program_areas")
             refresh_areas = request.POST["refresh-areas"]
+            incompatible_roles = defaultdict(list)
 
             if business_area_role_form_set.is_valid():
                 for form in business_area_role_form_set.cleaned_data:
@@ -100,6 +102,13 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                         business_area_id = str(form["business_area"].id)
                         role_ids = list(map(lambda role: str(role.id), form["roles"]))
                         partner_permissions.set_roles(business_area_id, role_ids)
+
+                        if incompatible_role := IncompatibleRoles.objects.filter(
+                            role_one__in=role_ids, role_two__in=role_ids
+                        ).first():
+                            incompatible_roles[form["business_area"]].append(str(incompatible_role))
+                        else:
+                            partner_permissions.set_roles(business_area_id, role_ids)
 
             if program_area_form_set.is_valid():
                 for form in program_area_form_set.cleaned_data:
@@ -113,7 +122,18 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                 if program_area_form.cleaned_data.get("business_area"):
                     business_areas.add(program_area_form.cleaned_data["business_area"].id)
 
-            if refresh_areas == "false" and business_area_role_form_set.is_valid() and program_area_form_set.is_valid():
+            if incompatible_roles:
+                for business_area, roles in incompatible_roles.items():
+                    self.message_user(
+                        request, (f"Roles in {business_area} are incompatible: {', '.join(roles)}"), messages.ERROR
+                    )
+
+            if (
+                refresh_areas == "false"
+                and business_area_role_form_set.is_valid()
+                and program_area_form_set.is_valid()
+                and not incompatible_roles
+            ):
                 partner.set_permissions(partner_permissions)
                 partner.save()
 

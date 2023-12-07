@@ -13,7 +13,8 @@ import { Providers } from './providers';
 import { SanctionList } from './containers/pages/core/SanctionList';
 import { ProtectedRoute } from './components/core/ProtectedRoute';
 import { PageNotFound } from './containers/pages/404/PageNotFound';
-import { SomethingWentWrong } from './containers/pages/SomethingWentWrong/SomethingWentWrong';
+import { AccessDenied } from './containers/pages/accessDenied/AccessDenied';
+import { SomethingWentWrong } from './containers/pages/somethingWentWrong/SomethingWentWrong';
 
 export const App: React.FC = () => {
   return (
@@ -32,6 +33,9 @@ export const App: React.FC = () => {
           </SentryRoute>
           <SentryRoute path='/error'>
             <SomethingWentWrong />
+          </SentryRoute>
+          <SentryRoute path='/access-denied'>
+            <AccessDenied />
           </SentryRoute>
           <SentryRoute path='/sentry-check'>
             <button

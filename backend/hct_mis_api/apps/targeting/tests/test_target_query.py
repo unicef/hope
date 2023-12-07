@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -62,6 +62,7 @@ class TestTargetPopulationQuery(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
+        cls.partner = PartnerFactory(name="TestPartner")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(name="test_program", status=Program.ACTIVE)
 
@@ -79,7 +80,7 @@ class TestTargetPopulationQuery(APITestCase):
         cls.household_residence_status_refugee = household
         cls.household_size_2 = cls.household_residence_status_refugee
 
-        cls.user = UserFactory.create()
+        cls.user = UserFactory(partner=cls.partner)
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
         )
@@ -148,7 +149,7 @@ class TestTargetPopulationQuery(APITestCase):
         ]
     )
     def test_simple_all_targets_query(self, _: Any, permissions: List[Permissions], variables: Dict) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.ALL_TARGET_POPULATION_QUERY,
@@ -169,7 +170,7 @@ class TestTargetPopulationQuery(APITestCase):
         ]
     )
     def test_simple_target_query(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,
@@ -195,7 +196,7 @@ class TestTargetPopulationQuery(APITestCase):
         ]
     )
     def test_simple_target_query_2(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=TestTargetPopulationQuery.TARGET_POPULATION_QUERY,

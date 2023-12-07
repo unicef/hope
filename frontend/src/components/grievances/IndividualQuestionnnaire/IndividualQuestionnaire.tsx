@@ -21,7 +21,7 @@ export const IndividualQuestionnaire = ({
     <Grid container spacing={6}>
       {[
         {
-          name: 'fullName',
+          name: 'questionnaire_fullName',
           label: t('Individual Full Name'),
           value: (
             <ContentLink
@@ -33,25 +33,25 @@ export const IndividualQuestionnaire = ({
           size: 3,
         },
         {
-          name: 'birthDate',
+          name: 'questionnaire_birthDate',
           label: t('Birth Date'),
           value: selectedIndividualData.birthDate,
           size: 3,
         },
         {
-          name: 'sex',
+          name: 'questionnaire_sex',
           label: t('Gender'),
           value: selectedIndividualData.sex,
           size: 3,
         },
         {
-          name: 'phoneNo',
+          name: 'questionnaire_phoneNo',
           label: t('Phone Number'),
           value: selectedIndividualData.phoneNo,
           size: 3,
         },
         {
-          name: 'relationship',
+          name: 'questionnaire_relationship',
           label: t('Relationship to HOH'),
           value: selectedIndividualData.relationship,
           size: 3,
