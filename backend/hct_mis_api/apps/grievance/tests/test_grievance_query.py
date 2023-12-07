@@ -172,12 +172,11 @@ class TestGrievanceQuery(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.maxDiff = None
         create_afghanistan()
         call_command("loadcountries")
 
-        cls.partner = PartnerFactory()
-        cls.partner_2 = PartnerFactory()
+        cls.partner = PartnerFactory(name="Partner1")
+        cls.partner_2 = PartnerFactory(name="Partner2")
         cls.user = UserFactory.create(partner=cls.partner)
         cls.user2 = UserFactory.create(partner=cls.partner_2)
 
@@ -249,7 +248,7 @@ class TestGrievanceQuery(APITestCase):
         for status, date in created_at_dates_to_set.items():
             gt = GrievanceTicket.objects.get(status=status)
             gt.created_at = date
-            gt.save()
+            gt.save(update_fields=("created_at",))
 
         TicketNeedsAdjudicationDetails.objects.create(
             ticket=GrievanceTicket.objects.first(),
@@ -274,7 +273,7 @@ class TestGrievanceQuery(APITestCase):
     )
     @skip(reason="Unstable test")
     def test_grievance_query_all(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         self.snapshot_graphql_request(
             request_string=self.ALL_GRIEVANCE_QUERY,
@@ -294,7 +293,7 @@ class TestGrievanceQuery(APITestCase):
         ]
     )
     def test_grievance_query_single(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         gt_id = GrievanceTicket.objects.get(status=GrievanceTicket.STATUS_IN_PROGRESS).id
         self.snapshot_graphql_request(
@@ -314,6 +313,7 @@ class TestGrievanceQuery(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -333,6 +333,7 @@ class TestGrievanceQuery(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -352,6 +353,7 @@ class TestGrievanceQuery(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -383,6 +385,7 @@ class TestGrievanceQuery(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -402,6 +405,7 @@ class TestGrievanceQuery(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -421,6 +425,7 @@ class TestGrievanceQuery(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(
@@ -440,6 +445,7 @@ class TestGrievanceQuery(APITestCase):
             self.user,
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
             self.business_area,
+            self.program,
         )
 
         self.snapshot_graphql_request(

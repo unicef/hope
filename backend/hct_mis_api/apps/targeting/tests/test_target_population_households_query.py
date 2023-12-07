@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -63,7 +63,8 @@ class TargetPopulationHouseholdsQueryTestCase(APITestCase):
         )
         cls.household_residence_status_refugee = household
         cls.household_size_2 = household
-        cls.user = UserFactory.create()
+        cls.partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory(partner=cls.partner)
         targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparison_method": "EQUALS"}
         )

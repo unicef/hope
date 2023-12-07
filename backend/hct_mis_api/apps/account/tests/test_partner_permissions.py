@@ -83,7 +83,33 @@ class UserPartnerTest(TestCase):
 
         # one role with program
         role_1 = User.permissions_in_business_area(self.user, business_area_slug=self.business_area.slug)
-        self.assertEqual(role_1, ["PROGRAMME_CREATE"])
+        default_list = [
+            "USER_MANAGEMENT_VIEW_LIST",
+            "RDI_VIEW_DETAILS",
+            "ACTIVITY_LOG_VIEW",
+            "PM_VIEW_LIST",
+            "PAYMENT_VERIFICATION_VIEW_DETAILS",
+            "GRIEVANCES_FEEDBACK_VIEW_LIST",
+            "PM_VIEW_DETAILS",
+            "POPULATION_VIEW_INDIVIDUALS_LIST",
+            "PROGRAMME_VIEW_LIST_AND_DETAILS",
+            "PAYMENT_VERIFICATION_VIEW_LIST",
+            "POPULATION_VIEW_HOUSEHOLDS_DETAILS",
+            "RDI_VIEW_LIST",
+            "REPORTING_EXPORT",
+            "TARGETING_VIEW_LIST",
+            "POPULATION_VIEW_HOUSEHOLDS_LIST",
+            "POPULATION_VIEW_INDIVIDUALS_DETAILS",
+            "GRIEVANCES_FEEDBACK_VIEW_DETAILS",
+            "PROGRAMME_CREATE",
+            "GRIEVANCES_VIEW_LIST_SENSITIVE",
+            "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE",
+            "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE",
+            "GRIEVANCES_VIEW_DETAILS_SENSITIVE",
+            "DASHBOARD_VIEW_COUNTRY",
+            "TARGETING_VIEW_DETAILS",
+        ].sort()
+        self.assertEqual(role_1.sort(), default_list)
 
         # empty list because wrong program id
         empty_list = User.permissions_in_business_area(
@@ -95,7 +121,7 @@ class UserPartnerTest(TestCase):
         roles_1_for_unicef_user = User.permissions_in_business_area(
             self.user, business_area_slug=self.business_area.slug, program_id=self.program.pk
         )
-        self.assertEqual(roles_1_for_unicef_user, ["PROGRAMME_CREATE"])
+        self.assertEqual(roles_1_for_unicef_user.sort(), default_list)
 
     def test_partner_has_permission(self) -> None:
         # check user_roles

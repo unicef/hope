@@ -35,7 +35,7 @@ export const FeedbackTable = ({
           })
         : '',
     program: isAllPrograms ? filter.program : programId,
-    isActiveProgram: filter.programState === 'active' ? true : null,
+    isActiveProgram: filter.programState,
   };
 
   const headCellsWithProgramColumn = [
