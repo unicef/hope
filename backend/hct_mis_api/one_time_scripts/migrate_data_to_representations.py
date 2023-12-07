@@ -4,7 +4,6 @@ import os
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
-from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
@@ -96,7 +95,9 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         households = Household.original_and_repr_objects.filter(
             id__in=household_ids, is_migration_handled=False, is_original=True
         ).order_by("id")
-        households_count = households.count()
+        households_filtered = households.exclude(copied_to__program=program)
+        households_filtered_ids = list(households_filtered.values_list("id", flat=True))
+        households_count = len(households_filtered_ids)
 
         logger.info(f"Handling households for program: {program}")
 
@@ -104,8 +105,8 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             batch_end = batch_start + BATCH_SIZE
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
-
-            batched_households = exclude_already_handled_households(batch_end, batch_start, households, program)
+            batched_household_ids = households_filtered_ids[batch_start:batch_end]
+            batched_households = Household.original_and_repr_objects.filter(id__in=batched_household_ids)
             for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
                 "documents", "identities", "bank_account_info"
             ):
@@ -131,34 +132,34 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         logger.info(f"Copying household selections for program: {program}")
         copy_household_selections(household_selections, program)
         logger.info(f"Finished creating representations for program: {program}")
-
+    logger.info("Updating is_migration_handled for households")
+    # mark programs households as migrated and exclude in rerun
     Household.original_and_repr_objects.filter(
-        business_area=business_area, copied_to__isnull=False, is_original=True
-    ).update(is_migration_handled=True)
+        business_area=business_area, copied_to__isnull=False, is_original=True, is_migration_handled=False
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
     handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
+
+    logger.info("Updating Households with migration date")
     Household.original_and_repr_objects.filter(
-        business_area=business_area, copied_to__isnull=False, is_original=True
-    ).update(is_migration_handled=True)
+        business_area=business_area,
+        copied_to__isnull=False,
+        is_original=True,
+        is_migration_handled=False,
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
+
+    logger.info("Updating Individuals with migration date")
+    Individual.original_and_repr_objects.filter(
+        business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
+
+    logger.info("Updating IndividualRoleInHouseholds with migration date")
+    IndividualRoleInHousehold.original_and_repr_objects.filter(
+        household__business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     if business_area.name == "Democratic Republic of Congo":
         apply_congo_withdrawal()
-
-
-def exclude_already_handled_households(
-    batch_end: int, batch_start: int, households: QuerySet[Household], program: Program
-) -> QuerySet[Household]:
-    batched_households = households[batch_start:batch_end]
-    batched_households_ids = list(batched_households.values_list("id", flat=True))
-    already_copied_households_ids = list(
-        Household.original_and_repr_objects.filter(
-            program=program,
-            copied_from__in=batched_households_ids,
-            is_original=False,
-        ).values_list("copied_from_id", flat=True)
-    )
-    batched_households = households.exclude(id__in=already_copied_households_ids).filter(id__in=batched_households_ids)
-    return batched_households
 
 
 def get_household_representation_per_program_by_old_household_id(
@@ -259,7 +260,6 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
     household.program = program
     household.is_original = False
     external_collectors_id_to_update = []
-    individuals_to_update = []
     individuals_to_create = []
     documents_to_create = []
     identities_to_create = []
@@ -281,12 +281,11 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
             identities_to_create_batch,
             bank_account_info_to_create_batch,
         ) = copy_individual_representation_fast(program, individual)
-        individuals_to_update.append(individual_to_create)
         documents_to_create.extend(documents_to_create_batch)
         identities_to_create.extend(identities_to_create_batch)
         bank_account_info_to_create.extend(bank_account_info_to_create_batch)
         individuals_to_create.append(individual_to_create)
-    individuals_dict = {i.copied_from_id: i for i in individuals_to_update}
+    individuals_dict = {i.copied_from_id: i for i in individuals_to_create}
     Individual.objects.bulk_create(individuals_to_create)
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
@@ -297,14 +296,12 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
         copied_individual_id = individuals_to_exclude_dict[str(original_head_of_household_id)]
         household.head_of_household_id = copied_individual_id
     Household.objects.bulk_create([household])
-    for individual in individuals_to_update:
-        individual.household = household
-    ids_to_update = [x.pk for x in individuals_to_update] + external_collectors_id_to_update
+    ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
     Individual.original_and_repr_objects.filter(id__in=ids_to_update).update(household=household)
 
     # copy_entitlement_card_per_household(household=original_household, household_representation=household)
 
-    del individuals_to_update
+    del individuals_to_create
     return household
 
 
@@ -365,7 +362,7 @@ def copy_individual(individual: Individual, program: Program) -> Individual:
 def copy_individual_fast(individual: Individual, program: Program) -> tuple:
     documents = list(individual.documents.all())
     identities = list(individual.identities.all())
-    bank_account_info = list(individual.bank_account_info.all())
+    bank_accounts_info = list(individual.bank_account_info.all())
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.origin_unicef_id = individual.unicef_id
@@ -376,7 +373,7 @@ def copy_individual_fast(individual: Individual, program: Program) -> tuple:
     individual.is_original = False
     documents_to_create = copy_document_per_individual_fast(documents, individual)
     identities_to_create = copy_individual_identity_per_individual_fast(identities, individual)
-    bank_account_info_to_create = copy_bank_account_info_per_individual_fast(bank_account_info, individual)
+    bank_account_info_to_create = copy_bank_account_info_per_individual_fast(bank_accounts_info, individual)
     return individual, documents_to_create, identities_to_create, bank_account_info_to_create
 
 
@@ -418,25 +415,25 @@ def copy_roles(households: QuerySet, program: Program) -> None:
         individual_representation_dict = {
             individual.copied_from_id: individual for individual in individual_representations
         }
-        individuals_to_create = []
-        documents_to_create = []
-        identities_to_create = []
-        bank_account_info_to_create = []
+        individuals_to_create_batch = []
+        documents_to_create_batch = []
+        identities_to_create_batch = []
+        bank_account_info_to_create_batch = []
         for role in roles_batch:
             household_representation = household_representations_dict[role.household_id]
             individual_representation = individual_representation_dict.get(role.individual_id)
             if not individual_representation:
                 (
                     individual_representation,
-                    documents_to_create_batch,
-                    identities_to_create_batch,
-                    bank_account_info_to_create_batch,
+                    documents_to_create_individual_batch,
+                    identities_to_create_individual_batch,
+                    bank_account_info_to_create_individual_batch,
                 ) = copy_individual_representation_fast(program=program, individual=role.individual)
                 individual_representation_dict[individual_representation.copied_from_id] = individual_representation
-                individuals_to_create.append(individual_representation)
-                documents_to_create.extend(documents_to_create_batch)
-                identities_to_create.extend(identities_to_create_batch)
-                bank_account_info_to_create.extend(bank_account_info_to_create_batch)
+                individuals_to_create_batch.append(individual_representation)
+                documents_to_create_batch.extend(documents_to_create_individual_batch)
+                identities_to_create_batch.extend(identities_to_create_individual_batch)
+                bank_account_info_to_create_batch.extend(bank_account_info_to_create_individual_batch)
 
             original_role_id = role.id
             role.copied_from_id = original_role_id
@@ -446,10 +443,10 @@ def copy_roles(households: QuerySet, program: Program) -> None:
             role.is_original = False
             roles_list.append(role)
         with transaction.atomic():
-            Individual.objects.bulk_create(individuals_to_create)
-            Document.objects.bulk_create(documents_to_create)
-            IndividualIdentity.objects.bulk_create(identities_to_create)
-            BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
+            Individual.objects.bulk_create(individuals_to_create_batch)
+            Document.objects.bulk_create(documents_to_create_batch)
+            IndividualIdentity.objects.bulk_create(identities_to_create_batch)
+            BankAccountInfo.objects.bulk_create(bank_account_info_to_create_batch)
             IndividualRoleInHousehold.original_and_repr_objects.bulk_create(roles_list)
         del roles_list
 
@@ -557,14 +554,14 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
     Copy HouseholdSelections to new households representations. By this TargetPopulations are adjusted.
     Because TargetPopulation is per program, HouseholdSelections are per program.
     """
-    household_selections_ids = list(household_selections.values_list("id", flat=True))
-    household_selections_queryset = HouseholdSelection.objects.filter(
-        id__in=household_selections_ids, household__is_removed=False
-    ).order_by("id")
-    paginator = Paginator(household_selections_queryset, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        batched_household_selections = paginator.page(page_number).object_list
-        logger.info(f"Copying household selections {page_number} of {paginator.num_pages}")
+    household_selections_ids = list(
+        household_selections.filter(household__is_removed=False).values_list("id", flat=True)
+    )
+
+    for batch_start in range(0, len(household_selections_ids), BATCH_SIZE):
+        batched_ids = household_selections_ids[batch_start : batch_start + BATCH_SIZE]
+        batched_household_selections = HouseholdSelection.original_and_repr_objects.filter(id__in=batched_ids)
+        logger.info(f"Copying household selections {batch_start} of {len(household_selections_ids)}")
         household_selections_to_create = []
         household_ids = [x.household_id for x in batched_household_selections]
         household_representations = Household.original_and_repr_objects.filter(
@@ -684,15 +681,17 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
     for i, rdi in enumerate(rdis):
         if i % 100 == 0:
             logger.info(f"Handling {i} - {i + 99}/{rdis_count} RDIs")
-        rdi_households = rdi.households.filter(is_original=True, withdrawn=False)
+        rdi_households = rdi.households.filter(is_original=True, withdrawn=False).exclude(copied_to__program=program)
         if hhs_to_ignore:
             rdi_households = rdi_households.exclude(id__in=hhs_to_ignore)
-        household_count = rdi_households.count()
-        for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
+        rdi_households_ids = list(rdi_households.values_list("id", flat=True))
+        households_count = len(rdi_households_ids)
+        for batch_start in range(0, households_count, BATCH_SIZE_SMALL):
             batch_end = batch_start + BATCH_SIZE_SMALL
-            logger.info(f"Copying {batch_start} - {batch_end}/{household_count} households for RDI")
+            logger.info(f"Copying {batch_start} - {batch_end}/{households_count} households for RDI")
             household_dict = {}
-            batched_households = exclude_already_handled_households(batch_end, batch_start, rdi_households, program)
+            batched_household_ids = rdi_households_ids[batch_start:batch_end]
+            batched_households = Household.original_and_repr_objects.filter(id__in=batched_household_ids)
             with transaction.atomic():
                 individuals_per_household_dict = defaultdict(list)
                 for individual in Individual.objects.filter(household__in=batched_households):
@@ -737,9 +736,12 @@ def handle_non_program_objects(
             program__isnull=True,
         ).update(program=program)
 
-        household_count = households_with_collecting_type.count()
-        for batch_start in range(0, household_count, BATCH_SIZE_SMALL):
-            batch_end = batch_start + BATCH_SIZE_SMALL
+        logger.info(f"Handling households with collecting type {collecting_type}")
+        households_with_collecting_type_ids = list(households_with_collecting_type.values_list("id", flat=True))
+        household_count = len(households_with_collecting_type_ids)
+        logger.info(f"Households with collecting type {collecting_type}: {household_count}")
+        for batch_start in range(0, household_count, BATCH_SIZE):
+            batch_end = batch_start + BATCH_SIZE
             logger.info(
                 f"Copying {batch_start} - {batch_end}/{household_count} "
                 f"households to program with collect_individual_data {collecting_type}"
@@ -747,12 +749,15 @@ def handle_non_program_objects(
             household_dict = {}
             with transaction.atomic():
                 individuals_per_household_dict = defaultdict(list)
-                batched_households = households_with_collecting_type[0:BATCH_SIZE_SMALL]
-                for individual in Individual.objects.filter(household__in=batched_households):
+                households_ids_batch = households_with_collecting_type_ids[batch_start:batch_end]
+                batched_households = Household.original_and_repr_objects.filter(id__in=households_ids_batch)
+                for individual in Individual.objects.filter(household_id__in=households_ids_batch).prefetch_related(
+                    "documents", "identities", "bank_account_info"
+                ):
                     individuals_per_household_dict[individual.household_id].append(individual)
                 for household in batched_households:
                     household_original_id = household.pk
-                    household_representation = copy_household(
+                    household_representation = copy_household_fast(
                         household,
                         program,
                         individuals_per_household_dict[household_original_id],

@@ -6,12 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("grievance", "0064_migration"),
+        ("accountability", "0009_migration"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="grievanceticket",
+            model_name="feedback",
+            name="migrated_at",
+            field=models.DateTimeField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="message",
             name="migrated_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
