@@ -63,7 +63,7 @@ export class AreaTreeNode {
       if (allChecked) {
         // eslint-disable-next-line no-param-reassign
         node.checked = true;
-      } else if (someChecked) {
+      } else if (someChecked && !allChecked) {
         // eslint-disable-next-line no-param-reassign
         node.checked = 'indeterminate';
       } else {
@@ -86,7 +86,7 @@ export class AreaTreeNode {
     this.checked = newState;
     this.children.forEach((child) => child.setChecked(newState));
     if (this.parent) {
-      this.parent.updateCheckStatus();
+      this.parent.updateCheckStatusFromTop();
     }
   }
 
