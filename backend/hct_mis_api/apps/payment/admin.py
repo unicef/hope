@@ -83,7 +83,6 @@ class PaymentRecordAdmin(AdminAdvancedFiltersMixin, LinkedObjectsMixin, HOPEMode
         "head_of_household",
         "target_population",
         "service_provider",
-        "copied_from",
     )
 
     def cash_plan_name(self, obj: Any) -> str:
@@ -144,7 +143,7 @@ class PaymentVerificationPlanAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
     )
     date_hierarchy = "updated_at"
     search_fields = ("payment_plan__name",)
-    raw_id_fields = ("payment_plan", "payment_plan_content_type")
+    raw_id_fields = ("payment_plan_content_type",)
 
     @button()
     def verifications(self, request: HttpRequest, pk: "UUID") -> HttpResponseRedirect:
@@ -300,7 +299,6 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "collector",
         "program",
         "source_payment",
-        "copied_from",
         "head_of_household",
         "financial_service_provider",
     )
@@ -328,7 +326,7 @@ class FinancialServiceProviderXlsxTemplateAdmin(HOPEModelAdminBase):
     )
     list_filter = (("created_by", AutoCompleteFilter),)
     search_fields = ("name",)
-    filter_horizontal = ("core_fields",)
+    # filter_horizontal = ("core_fields",)
     fields = ("name", "columns", "core_fields")
 
     def total_selected_columns(self, obj: Any) -> str:
@@ -406,7 +404,7 @@ class FspXlsxTemplatePerDeliveryMechanismAdminInline(admin.TabularInline):
     model = FspXlsxTemplatePerDeliveryMechanism
     extra = 0
     readonly_fields = ("created_by",)
-    raw_id_fields = ("financial_service_provider", "delivery_mechanisms")
+    raw_id_fields = ("financial_service_provider",)
 
 
 @admin.register(FinancialServiceProvider)
@@ -421,7 +419,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "communication_channel",
     )
     search_fields = ("name",)
-    filter_horizontal = ("delivery_mechanisms",)
+    # filter_horizontal = ("delivery_mechanisms",)
     autocomplete_fields = ("created_by",)
     list_select_related = ("created_by",)
     fields = (

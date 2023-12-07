@@ -30,7 +30,11 @@ if TYPE_CHECKING:
     from uuid import UUID
 
     from django.db.models.query import QuerySet
-    from django.http import HttpRequest, HttpResponsePermanentRedirect
+    from django.http import (
+        HttpRequest,
+        HttpResponsePermanentRedirect,
+        HttpResponseRedirect,
+    )
 
 
 class NumberValidator(RegexValidator):
@@ -121,14 +125,13 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     )
     date_hierarchy = "create_date"
     form = FundsCommitmentAddForm
-    raw_id_fields = ("business_area", "currency_code", "business_office_code")
 
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
     def assign_business_office(
         self, request: "HttpRequest", pk: "UUID"
-    ) -> Union["HttpResponsePermanentRedirect", TemplateResponse]:
+    ) -> Union["HttpResponsePermanentRedirect", "HttpResponseRedirect", TemplateResponse]:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: FundsCommitment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
@@ -218,14 +221,13 @@ class DownPaymentAdmin(HOPEModelAdminBase):
     )
     form = DownPaymentAddForm
     date_hierarchy = "create_date"
-    raw_id_fields = ("business_area", "business_office_code")
 
     @atomic(using="cash_assist_datahub_erp")
     @atomic(using="default")
     @button(permission=should_show_assign_business_office)
     def assign_business_office(
         self, request: "HttpRequest", pk: "UUID"
-    ) -> Union["HttpResponsePermanentRedirect", TemplateResponse]:
+    ) -> Union["HttpResponsePermanentRedirect", "HttpResponseRedirect", TemplateResponse]:
         context = self.get_common_context(request, pk, title="Please assign business office")
         obj: DownPayment = context["original"]
         business_area = BusinessArea.objects.get(code=obj.business_area)
