@@ -1,5 +1,6 @@
 import datetime
 import io
+import logging
 from decimal import Decimal
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
@@ -28,6 +29,8 @@ if TYPE_CHECKING:
 
 
 class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
+    logger = logging.getLogger(__name__)
+
     class XlsxPaymentPlanImportPerFspServiceException(Exception):
         pass
 
@@ -45,10 +48,12 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         self.is_updated: bool = False
 
     def open_workbook(self) -> openpyxl.Workbook:
+        self.logger.info(f"Opening workbook for payment plan: {self.payment_plan.id}")
         wb = openpyxl.load_workbook(self.file, data_only=True)
         self.wb = wb
         self.ws_payments = wb[wb.sheetnames[0]]
         self.sheetname = wb.sheetnames[0]
+        self.logger.info("Generating headers")
         self.xlsx_headers = [header.value for header in self.ws_payments[1]]
         return wb
 
@@ -182,17 +187,25 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             )
 
     def validate(self) -> None:
+        self.logger.info("Starting validation")
+        self.logger.info("Validating headers")
         self._validate_headers()
         if not self.errors:
+            self.logger.info("Validating rows")
             self._validate_rows()
+
+            self.logger.info("Validating if the file was changed")
             self._validate_imported_file()
+        self.logger.info("Finished validation")
 
     def import_payment_list(self) -> None:
+        self.logger.info("Starting importing payment list")
         exchange_rate = self.payment_plan.get_exchange_rate()
 
         for row in self.ws_payments.iter_rows(min_row=2):
             self._import_row(row, exchange_rate)
 
+        self.logger.info("Updating signatures")
         Payment.signature_manager.bulk_update_with_signature(
             self.payments_to_save,
             (
@@ -206,8 +219,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 "additional_document_number",
             ),
         )
+        self.logger.info("Update total cash in households")
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
+        self.logger.info("Updating status and status date in payment verifications")
         PaymentVerification.objects.bulk_update(self.payment_verifications_to_save, ("status", "status_date"))
+        self.logger.info("Finished import payment list")
 
     def _get_delivered_quantity_status_and_value(
         self, delivered_quantity: float, entitlement_quantity: Decimal, payment_id: str
@@ -241,6 +257,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         if payment_id is None:
             return  # safety check
         payment = self.payments_dict[payment_id]
+        self.logger.info(f"Importing row for payment {payment_id}")
         delivered_quantity = row[self.xlsx_headers.index("delivered_quantity")].value
 
         if "delivery_date" in self.xlsx_headers:
@@ -322,5 +339,9 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                         payment_verification.status_date = timezone.now()
                         self.payment_verifications_to_save.append(payment_verification)
 
-                        calculate_counts(payment_verification.payment_verification_plan)
-                        payment_verification.payment_verification_plan.save()
+                        payment_verification_plan = payment_verification.payment_verification_plan
+                        self.logger.info(
+                            f"Calculating counts for payment verification plan {payment_verification_plan.id}"
+                        )
+                        calculate_counts(payment_verification_plan)
+                        payment_verification_plan.save()
