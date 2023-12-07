@@ -226,8 +226,8 @@ stages:
       - job: publish_artifacts
         pool:
           vmImage: ubuntu-latest
-          displayName: "[PUBLISH_ARTIFACTS]"
-          steps:
+        displayName: "[PUBLISH_ARTIFACTS]"
+        steps:
           - script: |
               mkdir -p $(Build.ArtifactStagingDirectory)/tag
               echo $(tag) > $(Build.ArtifactStagingDirectory)/tag/hope.txt
