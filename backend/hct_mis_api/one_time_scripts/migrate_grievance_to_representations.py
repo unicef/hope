@@ -3,7 +3,6 @@ import logging
 from itertools import chain
 from typing import Any, Optional, Union
 
-from django.core.paginator import Paginator
 from django.db.models import Count, OuterRef, Q, QuerySet, Subquery
 from django.utils import timezone
 
@@ -47,7 +46,6 @@ from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 100
-
 
 ticket_grievance_ticket_field_name_mapping = {
     TicketComplaintDetails: "complaint_ticket_details",
@@ -234,11 +232,15 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
     """
     logger.info("Handle closed tickets with household and individual")
     closed_tickets = tickets.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
-    logger.info(f"Tickets to handle: {closed_tickets.count()}")
-    paginator = Paginator(closed_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        closed_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling closed tickets with household and individuals: {page_number} of {paginator.num_pages}")
+    closed_tickets_ids = list(closed_tickets.values_list("pk", flat=True))
+    closed_count = len(closed_tickets_ids)
+    logger.info(f"Tickets to handle: {closed_count}")
+    for batch_start in range(0, closed_count, BATCH_SIZE):
+        batched_ids = closed_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        closed_tickets_batch = ticket_class.objects.filter(id__in=batched_ids).select_related(
+            "ticket", "household", "individual"
+        )
+        logger.info(f"Handling closed tickets with household and individuals: {batch_start} of {closed_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -246,7 +248,7 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
             "tickets": [],
         }
         old_grievance_tickets_to_update = []
-        for closed_ticket in closed_tickets_paginated:
+        for closed_ticket in closed_tickets_batch:
             household_representation = None
             individual_representation = None
             if closed_ticket.household:
@@ -309,12 +311,15 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet, ticke
     """
     logger.info("Handle active tickets with household and individual")
     active_tickets = tickets.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
-    logger.info(f"Tickets to handle: {active_tickets.count()}")
-
-    paginator = Paginator(active_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        active_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling active tickets with household and individuals: {page_number} of {paginator.num_pages}")
+    active_tickets_ids = list(active_tickets.values_list("pk", flat=True))
+    active_count = len(active_tickets_ids)
+    logger.info(f"Tickets to handle: {active_count}")
+    for batch_start in range(0, active_count, BATCH_SIZE):
+        batched_ids = active_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        active_tickets_batch = ticket_class.objects.filter(id__in=batched_ids).select_related(
+            "ticket", "household", "individual"
+        )
+        logger.info(f"Handling closed tickets with household and individuals: {batch_start} of {active_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -322,7 +327,7 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet, ticke
             "tickets": [],
         }
         old_grievance_tickets_to_update = []
-        for active_ticket in active_tickets_paginated:
+        for active_ticket in active_tickets_batch:
             if active_ticket.individual:
                 individual_representations = active_ticket.individual.copied_to(
                     manager="original_and_repr_objects"
@@ -396,10 +401,13 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
 
     # Handle closed tickets - copy only for 1 random representation
     closed_tickets = tickets_with_hh.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
-    paginator = Paginator(closed_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        closed_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling closed tickets with household : {page_number} of {paginator.num_pages}")
+    closed_tickets_ids = list(closed_tickets.values_list("pk", flat=True))
+    closed_count = len(closed_tickets_ids)
+    logger.info(f"Tickets to handle: {closed_count}")
+    for batch_start in range(0, closed_count, BATCH_SIZE):
+        closed_batched_ids = closed_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        closed_tickets_batch = model.objects.filter(id__in=closed_batched_ids).select_related("ticket", "household")
+        logger.info(f"Handling closed tickets with household and individuals: {batch_start} of {closed_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -407,7 +415,7 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
             "tickets": [],
         }
         old_grievance_tickets_to_update = []
-        for closed_ticket in closed_tickets_paginated:
+        for closed_ticket in closed_tickets_batch:
             if household_representation := closed_ticket.household.copied_to(
                 manager="original_and_repr_objects"
             ).first():
@@ -428,10 +436,13 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
 
     # Handle active tickets - copy for all representations
     active_tickets = tickets_with_hh.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
-    paginator = Paginator(active_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        active_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling active tickets with household : {page_number} of {paginator.num_pages}")
+    active_tickets_ids = list(active_tickets.values_list("pk", flat=True))
+    active_count = len(active_tickets_ids)
+    logger.info(f"Tickets to handle: {active_count}")
+    for batch_start in range(0, active_count, BATCH_SIZE):
+        active_batched_ids = active_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        active_tickets_batch = model.objects.filter(id__in=active_batched_ids).select_related("ticket", "household")
+        logger.info(f"Handling closed tickets with household and individuals: {batch_start} of {active_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -439,7 +450,7 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
             "tickets": [],
         }
         old_grievance_tickets_to_update = []
-        for active_ticket in active_tickets_paginated:
+        for active_ticket in active_tickets_batch:
             household_representations = active_ticket.household.copied_to(manager="original_and_repr_objects").all()
             household_programs = household_representations.values_list("program", flat=True).distinct()
 
@@ -512,10 +523,12 @@ def handle_tickets_with_individual(
 
     # Handle closed tickets
     closed_tickets = tickets_with_ind.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
-    paginator = Paginator(closed_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        closed_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling closed tickets with individual: {page_number} of {paginator.num_pages}")
+    closed_tickets_ids = list(closed_tickets.values_list("pk", flat=True))
+    closed_count = len(closed_tickets_ids)
+    for batch_start in range(0, len(closed_tickets_ids), BATCH_SIZE):
+        batched_ids = closed_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        closed_tickets_batch = model.objects.select_related("ticket", individual_field_name).filter(id__in=batched_ids)
+        logger.info(f"Handling closed tickets with individual: {batch_start} of {closed_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -523,7 +536,7 @@ def handle_tickets_with_individual(
             "tickets": [],
         }
         old_grievance_tickets_to_update = []
-        for closed_ticket in closed_tickets_paginated:
+        for closed_ticket in closed_tickets_batch:
             if individual_representation := (
                 getattr(closed_ticket, individual_field_name).copied_to(manager="original_and_repr_objects").first()
             ):
@@ -546,10 +559,13 @@ def handle_tickets_with_individual(
 
     # Handle active tickets
     active_tickets = tickets_with_ind.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
-    paginator = Paginator(active_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        active_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling active tickets with individual: {page_number} of {paginator.num_pages}")
+    active_tickets_ids = list(active_tickets.values_list("pk", flat=True))
+    active_count = len(active_tickets_ids)
+    logger.info(f"Tickets to handle: {active_count}")
+    for batch_start in range(0, len(active_tickets_ids), BATCH_SIZE):
+        batched_ids = active_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        active_tickets_batch = model.objects.select_related("ticket", individual_field_name).filter(id__in=batched_ids)
+        logger.info(f"Handling active tickets with individual: {batch_start} of {active_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -557,7 +573,7 @@ def handle_tickets_with_individual(
             "tickets": [],
         }
         old_grievance_tickets_to_update = []
-        for active_ticket in active_tickets_paginated:
+        for active_ticket in active_tickets_batch:
             individual_representations = (
                 getattr(active_ticket, individual_field_name).copied_to(manager="original_and_repr_objects").all()
             )
@@ -716,12 +732,20 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
 
     PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
     SelectedIndividualThrough = TicketNeedsAdjudicationDetails.selected_individuals.through
-
-    logger.info(f"Tickets to handle: {needs_adjudication_tickets.count()}")
-    paginator = Paginator(needs_adjudication_tickets, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        needs_adjudication_tickets_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling needs adjudication tickets: {page_number} of {paginator.num_pages}")
+    needs_adjudication_tickets_ids = list(needs_adjudication_tickets.values_list("pk", flat=True))
+    tickets_count = len(needs_adjudication_tickets_ids)
+    logger.info(f"Tickets to handle: {tickets_count}")
+    for batch_start in range(0, tickets_count, BATCH_SIZE):
+        batched_ids = needs_adjudication_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        needs_adjudication_tickets_batch = (
+            TicketNeedsAdjudicationDetails.objects.filter(id__in=batched_ids)
+            .select_related(
+                "ticket",
+                "golden_records_individual",
+            )
+            .prefetch_related("possible_duplicates", "selected_individuals")
+        )
+        logger.info(f"Handling needs adjudication tickets: {batch_start} of {tickets_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -733,7 +757,7 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
         new_possible_duplicates_to_create = []
         new_selected_individuals_to_create = []
 
-        for needs_adjudication_ticket in needs_adjudication_tickets_paginated:
+        for needs_adjudication_ticket in needs_adjudication_tickets_batch:
             individuals = [
                 needs_adjudication_ticket.golden_records_individual,
                 *needs_adjudication_ticket.possible_duplicates.all(),
@@ -844,15 +868,21 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
         # )
         .filter(is_original=True, is_migration_handled=False, **filter_kwargs).distinct()
     )
-    logger.info(f"Messages to handle: {message_objects.count()}")
-    paginator = Paginator(message_objects, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        messages_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling messages: {page_number} of {paginator.num_pages}")
+
+    message_objects_ids = list(message_objects.values_list("pk", flat=True))
+    message_objects_count = len(message_objects_ids)
+    logger.info(f"Messages to handle: {message_objects_count}")
+    for batch_start in range(0, message_objects_count, BATCH_SIZE):
+        message_objects_batched_ids = message_objects_ids[batch_start : batch_start + BATCH_SIZE]
+        message_objects_batch = Message.objects.filter(id__in=message_objects_batched_ids).select_related(
+            "target_population",
+            "target_population__program",
+        )
+        logger.info(f"Handling  messages: {batch_start} of {message_objects_count}")
         new_messages_to_create = []
         message_household_to_create = []
         old_messages_to_update = []
-        for message in messages_paginated:
+        for message in message_objects_batch:
             if message.households.exists():
                 if message.target_population:
                     program = message.target_population.program
@@ -940,12 +970,27 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
         .distinct()
     )
     logger.info("Handle Feedback objects with program or closed grievance ticket")
-    logger.info(f"Feedback objects to handle: {feedback_objects_for_specific_program.count()}")
 
-    paginator = Paginator(feedback_objects_for_specific_program, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        feedbacks_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling feedbacks to specific program: {page_number} of {paginator.num_pages}")
+    feedback_objects_for_specific_program_ids = list(feedback_objects_for_specific_program.values_list("pk", flat=True))
+    feedback_objects_for_specific_program_count = len(feedback_objects_for_specific_program_ids)
+    logger.info(f"Feedback objects to handle: {feedback_objects_for_specific_program_count}")
+    for batch_start in range(0, feedback_objects_for_specific_program_count, BATCH_SIZE):
+        feedback_objects_for_specific_program_batched_ids = feedback_objects_for_specific_program_ids[
+            batch_start : batch_start + BATCH_SIZE
+        ]
+        feedback_objects_for_specific_program_batch = Feedback.objects.filter(
+            id__in=feedback_objects_for_specific_program_batched_ids
+        ).select_related(
+            "program",
+            "household_lookup",
+            "individual_lookup",
+            "linked_grievance",
+            "household_lookup__program",
+            "individual_lookup__program",
+        )
+        logger.info(
+            f"Handling  feedbacks to specific program: {batch_start} of {feedback_objects_for_specific_program_count}"
+        )
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -956,7 +1001,7 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
         old_feedbacks_to_update = []
         new_feedback_messages_to_create = []
 
-        for feedback_obj in feedbacks_paginated:
+        for feedback_obj in feedback_objects_for_specific_program_batch:
             household_representation = None
             individual_representation = None
             if feedback_obj.program:
@@ -1044,12 +1089,23 @@ def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None
         .distinct()
     )
     logger.info("Handle Feedback objects without program and without closed grievance ticket")
-    logger.info(f"Feedback objects to handle: {active_feedback_objects.count()}")
 
-    paginator = Paginator(active_feedback_objects, BATCH_SIZE)
-    for page_number in paginator.page_range:
-        feedbacks_paginated = paginator.page(page_number).object_list
-        logger.info(f"Handling active feedbacks: {page_number} of {paginator.num_pages}")
+    active_feedback_objects_ids = list(active_feedback_objects.values_list("pk", flat=True))
+    active_feedback_objects_count = len(active_feedback_objects_ids)
+    logger.info(f"Active Feedback objects to handle: {active_feedback_objects_count}")
+    for batch_start in range(0, active_feedback_objects_count, BATCH_SIZE):
+        active_feedback_objects_batched_ids = active_feedback_objects_ids[batch_start : batch_start + BATCH_SIZE]
+        active_feedback_objects_batch = Feedback.objects.filter(
+            id__in=active_feedback_objects_batched_ids
+        ).select_related(
+            "linked_grievance",
+            "program",
+            "household_lookup",
+            "individual_lookup",
+            "household_lookup__program",
+            "individual_lookup__program",
+        )
+        logger.info(f"Handling  active feedbacks: {batch_start} of {active_feedback_objects_count}")
         objects_to_create_dict = {
             "notes": [],
             "documents": [],
@@ -1060,7 +1116,7 @@ def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None
         old_feedbacks_to_update = []
         new_feedback_messages_to_create = []
 
-        for feedback_obj in feedbacks_paginated:
+        for feedback_obj in active_feedback_objects_batch:
             if feedback_obj.individual_lookup:
                 individual_representations = feedback_obj.individual_lookup.copied_to(
                     manager="original_and_repr_objects"
@@ -1327,9 +1383,13 @@ def handle_non_program_tickets(business_area: Optional[BusinessArea] = None) -> 
 
         void_program = create_void_program(business_area)  # type: ignore[arg-type]
         for model, query in non_program_tickets_dict.items():
-            paginator = Paginator(query, BATCH_SIZE)
-            for page_number in paginator.page_range:
-                query_paginated = paginator.page(page_number).object_list
+            objects_ids = list(query.values_list("pk", flat=True))
+            objects_count = len(objects_ids)
+            logger.info(f"Non-program tickets of type {model.__name__} to handle: {objects_count}")
+            for batch_start in range(0, objects_count, BATCH_SIZE):
+                objects_batched_ids = objects_ids[batch_start : batch_start + BATCH_SIZE]
+                objects_batch = model.objects.filter(id__in=objects_batched_ids).select_related("ticket")
+                logger.info(f"Handling non-program tickets of type {model.__name__}: {batch_start} of {objects_count}")
                 objects_to_create_dict = {
                     "notes": [],
                     "documents": [],
@@ -1337,7 +1397,7 @@ def handle_non_program_tickets(business_area: Optional[BusinessArea] = None) -> 
                     "tickets": [],
                 }
                 old_grievance_tickets_to_update = []
-                for non_program_ticket in query_paginated:
+                for non_program_ticket in objects_batch:
                     ticket_copy = copy.deepcopy(non_program_ticket)
                     ticket_copy.pk = None
                     non_program_ticket.pk = None
@@ -1369,10 +1429,20 @@ def handle_non_program_feedback(business_area: Optional[BusinessArea] = None) ->
         )
         if non_program_feedback_objects:
             void_program = create_void_program(business_area)  # type: ignore[arg-type]
-            paginator = Paginator(non_program_feedback_objects, BATCH_SIZE)
-            for page_number in paginator.page_range:
-                feedbacks_paginated = paginator.page(page_number).object_list
-                logger.info(f"Handling non program feedback: {page_number} of {paginator.num_pages}")
+
+            non_program_feedback_objects_ids = list(non_program_feedback_objects.values_list("pk", flat=True))
+            non_program_feedback_objects_count = len(non_program_feedback_objects_ids)
+            logger.info(f"Non-program feedback objects to handle: {non_program_feedback_objects_count}")
+            for batch_start in range(0, non_program_feedback_objects_count, BATCH_SIZE):
+                non_program_feedback_objects_batched_ids = non_program_feedback_objects_ids[
+                    batch_start : batch_start + BATCH_SIZE
+                ]
+                non_program_feedback_objects_batch = Feedback.objects.filter(
+                    id__in=non_program_feedback_objects_batched_ids
+                ).select_related("linked_grievance")
+                logger.info(
+                    f"Handling non-program feedback objects: {batch_start} of {non_program_feedback_objects_count}"
+                )
                 objects_to_create_dict = {
                     "notes": [],
                     "documents": [],
@@ -1383,7 +1453,7 @@ def handle_non_program_feedback(business_area: Optional[BusinessArea] = None) ->
                 old_feedbacks_to_update = []
                 new_feedback_messages_to_create = []
 
-                for feedback in feedbacks_paginated:
+                for feedback in non_program_feedback_objects_batch:
                     (
                         feedback_copy,
                         grievance_ticket_data,
@@ -1415,14 +1485,24 @@ def handle_non_program_messages(business_area: Optional[BusinessArea] = None) ->
         )
         if non_program_messages:
             void_program = create_void_program(business_area)  # type: ignore[arg-type]
-            paginator = Paginator(non_program_messages, BATCH_SIZE)
-            for page_number in paginator.page_range:
-                messages_paginated = paginator.page(page_number).object_list
-                logger.info(f"Handling non program messages: {page_number} of {paginator.num_pages}")
+
+            non_program_message_objects_ids = list(non_program_messages.values_list("pk", flat=True))
+            non_program_message_objects_count = len(non_program_message_objects_ids)
+            logger.info(f"Non-program message objects to handle: {non_program_message_objects_count}")
+            for batch_start in range(0, non_program_message_objects_count, BATCH_SIZE):
+                non_program_message_objects_batched_ids = non_program_message_objects_ids[
+                    batch_start : batch_start + BATCH_SIZE
+                ]
+                non_program_message_objects_batch = Message.objects.filter(
+                    id__in=non_program_message_objects_batched_ids
+                )
+                logger.info(
+                    f"Handling non-program message objects: {batch_start} of {non_program_message_objects_count}"
+                )
                 new_messages_to_create = []
                 message_household_to_create = []
                 old_messages_to_update = []
-                for message in messages_paginated:
+                for message in non_program_message_objects_batch:
                     message_copy, message_household = copy_message(message, void_program)
                     new_messages_to_create.append(message_copy)
                     message_household_to_create.extend(message_household)
