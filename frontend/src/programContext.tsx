@@ -26,8 +26,12 @@ export const ProgramProvider = ({ children }): ReactElement => {
   const [selectedProgram, setSelectedProgram] = useState<ProgramContextType>(
     null,
   );
-  const isActiveProgram = selectedProgram?.status === ProgramStatus.Active;
+  let isActiveProgram = selectedProgram?.status === ProgramStatus.Active;
 
+  //Set isActiveProgram to true if All Programs is selected
+  if (selectedProgram === null) {
+    isActiveProgram = true;
+  }
   return (
     <ProgramContext.Provider
       value={{ selectedProgram, setSelectedProgram, isActiveProgram }}
