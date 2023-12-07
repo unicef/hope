@@ -11540,50 +11540,6 @@
   }
 },
 {
-      "model":"geo.areatype",
-      "pk":"e7d29898-ecc6-4212-b667-3f1ab90a2337",
-      "fields":{
-          "created_at":"2023-11-24T08:36:09.696Z",
-          "updated_at":"2023-11-24T08:36:09.697Z",
-          "original_id":null,
-          "name":"Village",
-          "country":"b902840f-68d3-40a0-b74d-0fb14096a11e",
-          "area_level":3,
-          "parent":"4a68ac90-c463-4d75-9f4b-e2baba736ae4",
-          "valid_from":"2023-11-24T08:36:09.697Z",
-          "valid_until":null,
-          "extras":{
-
-          },
-          "lft":1,
-          "rght":2,
-          "tree_id":127,
-          "level":0
-      }
-},
-{
-      "model":"geo.areatype",
-      "pk":"3eee67b2-737c-4b04-91aa-7a7e67dd766c",
-      "fields":{
-          "created_at":"2023-11-24T08:46:44.728Z",
-          "updated_at":"2023-11-24T08:46:44.728Z",
-          "original_id":null,
-          "name":"Small Village",
-          "country":"b902840f-68d3-40a0-b74d-0fb14096a11e",
-          "area_level":4,
-          "parent":"e7d29898-ecc6-4212-b667-3f1ab90a2337",
-          "valid_from":"2023-11-24T08:46:44.728Z",
-          "valid_until":null,
-          "extras":{
-
-          },
-          "lft":1,
-          "rght":2,
-          "tree_id":128,
-          "level":0
-      }
-  },
-{
   "model": "geo.area",
   "pk": "0154f6ea-362f-47c3-819b-e83738286a3e",
   "fields": {
@@ -14090,78 +14046,6 @@
     "tree_id": 4,
     "level": 1
   }
-},
-{
-      "model":"geo.area",
-      "pk":"4ebaad95-7bce-43c2-a600-eac51583a068",
-      "fields":{
-          "created_at":"2023-11-24T08:36:54.707Z",
-          "updated_at":"2023-11-24T08:36:54.707Z",
-          "original_id":null,
-          "name":"Test Doshi Level_3",
-          "parent":"18ff6f29-cd4d-4e80-8e80-13494b32ee53",
-          "p_code":"AF0901123",
-          "area_type":"e7d29898-ecc6-4212-b667-3f1ab90a2337",
-          "geom":null,
-          "point":null,
-          "valid_from":"2023-11-24T08:36:54.707Z",
-          "valid_until":null,
-          "extras":{
-
-          },
-          "lft":3,
-          "rght":6,
-          "tree_id":4,
-          "level":2
-      }
-},
-{
-      "model":"geo.area",
-      "pk":"d0ea963e-fb03-46ac-bae5-21189bbba74e",
-      "fields":{
-          "created_at":"2023-11-24T08:36:54.707Z",
-          "updated_at":"2023-11-24T08:36:54.707Z",
-          "original_id":null,
-          "name":"Test Doshi One More",
-          "parent":"18ff6f29-cd4d-4e80-8e80-13494b32ee53",
-          "p_code":"AF0901123",
-          "area_type":"e7d29898-ecc6-4212-b667-3f1ab90a2337",
-          "geom":null,
-          "point":null,
-          "valid_from":"2023-11-24T08:36:54.707Z",
-          "valid_until":null,
-          "extras":{
-
-          },
-          "lft":3,
-          "rght":6,
-          "tree_id":4,
-          "level":2
-      }
-},
-{
-      "model":"geo.area",
-      "pk":"59c1baf6-9e92-4e68-82fd-47ae71ce127e",
-      "fields":{
-          "created_at":"2023-11-24T08:47:37.510Z",
-          "updated_at":"2023-11-24T08:47:37.511Z",
-          "original_id":null,
-          "name":"Test_Level_4",
-          "parent":"4ebaad95-7bce-43c2-a600-eac51583a068",
-          "p_code":"AF090112344",
-          "area_type":"3eee67b2-737c-4b04-91aa-7a7e67dd766c",
-          "geom":null,
-          "point":null,
-          "valid_from":"2023-11-24T08:47:37.511Z",
-          "valid_until":null,
-          "extras":{
-
-          },
-          "lft":4,
-          "rght":5,
-          "tree_id":4,
-          "level":3
-      }
 },
 {
   "model": "geo.area",
