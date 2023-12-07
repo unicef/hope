@@ -8,6 +8,8 @@ from django.contrib.postgres.fields import CICharField
 from django.db.models import JSONField
 from django.utils.translation import gettext_lazy as _
 
+from natural_keys import NaturalKeyModel
+
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
@@ -71,7 +73,7 @@ class Country(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         ]
 
 
-class AreaType(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
+class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     name = CICharField(max_length=255, db_index=True)
     country = models.ForeignKey(Country, on_delete=models.CASCADE)
     area_level = models.PositiveIntegerField(default=1)
@@ -97,7 +99,7 @@ class AreaType(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
         return self.name
 
 
-class Area(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
+class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     name = models.CharField(max_length=255)
     parent = TreeForeignKey(
         "self",
