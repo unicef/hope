@@ -532,7 +532,9 @@ class Query(graphene.ObjectType):
             )
 
         if program_id is None:
-            queryset = queryset.filter(programs=None)
+            queryset = queryset | GrievanceTicket.objects.filter(
+                business_area_id=business_area_id, programs=None, created_by__partner=user.partner
+            )
 
         return queryset.annotate(
             total=Case(

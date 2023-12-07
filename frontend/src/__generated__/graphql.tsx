@@ -4390,8 +4390,14 @@ export type PartnerNodeForProgram = {
    __typename?: 'PartnerNodeForProgram',
   id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
+  parent?: Maybe<PartnerNodeForProgram>,
   isUn: Scalars['Boolean'],
   permissions: Scalars['JSONString'],
+  lft: Scalars['Int'],
+  rght: Scalars['Int'],
+  treeId: Scalars['Int'],
+  level: Scalars['Int'],
+  partnerSet: Array<PartnerNodeForProgram>,
   userSet: UserNodeConnection,
   individualIdentities: IndividualIdentityNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -4436,8 +4442,14 @@ export type PartnerType = {
    __typename?: 'PartnerType',
   id: Scalars['ID'],
   name: Scalars['String'],
+  parent?: Maybe<PartnerNodeForProgram>,
   isUn: Scalars['Boolean'],
   permissions: Scalars['JSONString'],
+  lft: Scalars['Int'],
+  rght: Scalars['Int'],
+  treeId: Scalars['Int'],
+  level: Scalars['Int'],
+  partnerSet: Array<PartnerNodeForProgram>,
   userSet: UserNodeConnection,
   individualIdentities: IndividualIdentityNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -5896,7 +5908,7 @@ export type QueryAllGrievanceTicketArgs = {
   grievanceStatus?: Maybe<Scalars['String']>,
   totalDays?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>,
+  isActiveProgram?: Maybe<Scalars['String']>,
   isCrossArea?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -11997,7 +12009,7 @@ export type AllGrievanceTicketQueryVariables = {
   urgency?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   program?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>,
+  isActiveProgram?: Maybe<Scalars['String']>,
   isCrossArea?: Maybe<Scalars['Boolean']>
 };
 
@@ -22058,7 +22070,7 @@ export type AllGrievanceDashboardChartsQueryHookResult = ReturnType<typeof useAl
 export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsLazyQuery>;
 export type AllGrievanceDashboardChartsQueryResult = ApolloReactCommon.QueryResult<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $searchType: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: Boolean, $isCrossArea: Boolean) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $issueType: String, $businessArea: String!, $search: String, $searchType: String, $status: [String], $fsp: String, $createdAtRange: String, $admin2: ID, $orderBy: String, $registrationDataImport: ID, $assignedTo: ID, $createdBy: ID, $cashPlan: String, $scoreMin: String, $scoreMax: String, $household: String, $grievanceType: String, $grievanceStatus: String, $priority: String, $urgency: String, $preferredLanguage: String, $program: String, $isActiveProgram: String, $isCrossArea: Boolean) {
   allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, issueType: $issueType, businessArea: $businessArea, search: $search, searchType: $searchType, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin2: $admin2, registrationDataImport: $registrationDataImport, assignedTo: $assignedTo, createdBy: $createdBy, cashPlan: $cashPlan, scoreMin: $scoreMin, scoreMax: $scoreMax, household: $household, grievanceType: $grievanceType, grievanceStatus: $grievanceStatus, priority: $priority, urgency: $urgency, preferredLanguage: $preferredLanguage, program: $program, isActiveProgram: $isActiveProgram, isCrossArea: $isCrossArea) {
     totalCount
     pageInfo {
@@ -31288,8 +31300,14 @@ export type PaginatedPaymentRecordsAndPaymentsNodeResolvers<ContextType = any, P
 export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerNodeForProgram'] = ResolversParentTypes['PartnerNodeForProgram']> = {
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  parent?: Resolver<Maybe<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>,
   isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   permissions?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  partnerSet?: Resolver<Array<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerNodeForProgramUserSetArgs>,
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerNodeForProgramIndividualIdentitiesArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerNodeForProgramGrievanceticketSetArgs>,
@@ -31300,8 +31318,14 @@ export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends
 export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  parent?: Resolver<Maybe<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>,
   isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   permissions?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  partnerSet?: Resolver<Array<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerTypeUserSetArgs>,
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerTypeIndividualIdentitiesArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerTypeGrievanceticketSetArgs>,

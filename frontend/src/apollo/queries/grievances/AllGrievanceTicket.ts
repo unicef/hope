@@ -30,7 +30,7 @@ export const AllGrievanceTicket = gql`
     $urgency: String
     $preferredLanguage: String
     $program: String
-    $isActiveProgram: Boolean
+    $isActiveProgram: String
     $isCrossArea: Boolean
   ) {
     allGrievanceTicket(

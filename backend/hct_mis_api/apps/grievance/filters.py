@@ -165,7 +165,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     grievance_status = CharFilter(method="filter_grievance_status")
     total_days = IntegerFilter(field_name="total_days")
     program = CharFilter(method="filter_by_program")
-    is_active_program = BooleanFilter(method="filter_is_active_program")
+    is_active_program = CharFilter(method="filter_is_active_program")
     is_cross_area = BooleanFilter(method="filter_is_cross_area")
 
     class Meta:
@@ -345,13 +345,13 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
         return qs
 
-    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
-        if value is True:
-            return qs.filter(programs__status=Program.ACTIVE)
-        elif value is False:
-            return qs.filter(programs__status=Program.FINISHED)
-        else:
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        if value == "all":
             return qs
+        if value in ("true", "active"):
+            return qs.filter(programs__status=Program.ACTIVE)
+        else:
+            return qs.filter(programs__status=Program.FINISHED)
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
         if value is True:
