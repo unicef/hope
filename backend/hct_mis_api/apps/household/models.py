@@ -516,6 +516,7 @@ class Household(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
 
     class Meta:
@@ -785,6 +786,7 @@ class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDMod
     )
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -992,6 +994,7 @@ class Individual(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 
