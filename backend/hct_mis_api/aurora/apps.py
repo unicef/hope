@@ -8,6 +8,9 @@ class Config(AppConfig):
         from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
             CzechRepublicFlexRegistration,
         )
+        from hct_mis_api.apps.registration_datahub.services.generic_registration_service import (
+            GenericRegistrationService,
+        )
         from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
             SriLankaRegistrationService,
         )
@@ -19,6 +22,7 @@ class Config(AppConfig):
 
         from . import admin  # noqa
 
+        registry.register(GenericRegistrationService)
         registry.register(SriLankaRegistrationService)
         registry.register(UkraineBaseRegistrationService)
         registry.register(UkraineRegistrationService)

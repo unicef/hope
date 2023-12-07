@@ -21,6 +21,7 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 
 from admin_extra_buttons.decorators import button
+from admin_sync.mixin import SyncMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
@@ -29,7 +30,11 @@ from hct_mis_api.apps.geo.models import Area, AreaType, Country
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 if TYPE_CHECKING:
-    from django.http import HttpRequest, HttpResponsePermanentRedirect
+    from django.http import (
+        HttpRequest,
+        HttpResponsePermanentRedirect,
+        HttpResponseRedirect,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +121,7 @@ class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
 
 
 @admin.register(AreaType)
-class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBase):
     list_display = ("name", "country", "area_level", "parent")
     list_filter = (("country", AutoCompleteFilter), ("area_level", NumberFilter))
 
@@ -152,7 +157,7 @@ class AreaTypeFilter(RelatedFieldListFilter):
 
 
 @admin.register(Area)
-class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class AreaAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdminBase):
     list_display = (
         "name",
         "area_type",
@@ -185,7 +190,9 @@ class AreaAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
     )
 
     @button()
-    def import_areas(self, request: "HttpRequest") -> Union["HttpResponsePermanentRedirect", TemplateResponse]:
+    def import_areas(
+        self, request: "HttpRequest"
+    ) -> Union["HttpResponsePermanentRedirect", "HttpResponseRedirect", TemplateResponse]:
         context = self.get_common_context(request, processed=False)
         if request.method == "POST":
             form = ImportCSVForm(data=request.POST, files=request.FILES)

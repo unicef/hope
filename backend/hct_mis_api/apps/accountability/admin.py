@@ -1,13 +1,14 @@
 from typing import Any, Optional, Sequence, Union
 
 from django.contrib import admin
+from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.accountability.models import Message
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, IsOriginalAdminMixin
 
 
 class MessageRecipientMapInline(admin.TabularInline):
@@ -26,8 +27,21 @@ class MessageRecipientMapInline(admin.TabularInline):
     get_hoh_name.short_description = "HoH Full Name"
 
 
+class MessageCopiedToInline(admin.TabularInline):
+    model = Message
+    extra = 0
+    fields = ("unicef_id",)
+    readonly_fields = ("unicef_id",)
+    show_change_link = True
+    can_delete = False
+    verbose_name_plural = "Message representations"
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return Message.original_and_repr_objects.all()
+
+
 @admin.register(Message)
-class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
+class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdminMixin):
     exclude = (
         "number_of_recipients",
         "unicef_id",
@@ -35,7 +49,7 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
         "random_sampling_arguments",
         "households",
     )
-    inlines = [MessageRecipientMapInline]
+    inlines = [MessageRecipientMapInline, MessageCopiedToInline]
     list_select_related: Union[bool, Sequence[str]] = ("created_by",)
     list_prefetch_related: Union[bool, Sequence[str]] = ("recipients",)
     readonly_fields: Sequence[str] = (
@@ -52,3 +66,6 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     )
     raw_id_fields = ["created_by", "target_population", "program"]
     filter_horizontal = ["households"]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return self.model.original_and_repr_objects.get_queryset()
