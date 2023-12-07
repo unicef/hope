@@ -133,14 +133,30 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         copy_household_selections(household_selections, program)
         logger.info(f"Finished creating representations for program: {program}")
     logger.info("Updating is_migration_handled for households")
+    # mark programs households as migrated and exclude in rerun
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True, is_migration_handled=False
-    ).update(is_migration_handled=True)
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
     handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
+
+    logger.info("Updating Households with migration date")
     Household.original_and_repr_objects.filter(
-        business_area=business_area, copied_to__isnull=False, is_original=True, is_migration_handled=False
-    ).update(is_migration_handled=True)
+        business_area=business_area,
+        copied_to__isnull=False,
+        is_original=True,
+        is_migration_handled=False,
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
+
+    logger.info("Updating Individuals with migration date")
+    Individual.original_and_repr_objects.filter(
+        business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
+
+    logger.info("Updating IndividualRoleInHouseholds with migration date")
+    IndividualRoleInHousehold.original_and_repr_objects.filter(
+        household__business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     if business_area.name == "Democratic Republic of Congo":
         apply_congo_withdrawal()
@@ -244,7 +260,6 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
     household.program = program
     household.is_original = False
     external_collectors_id_to_update = []
-    individuals_to_update = []
     individuals_to_create = []
     documents_to_create = []
     identities_to_create = []
@@ -266,12 +281,11 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
             identities_to_create_batch,
             bank_account_info_to_create_batch,
         ) = copy_individual_representation_fast(program, individual)
-        individuals_to_update.append(individual_to_create)
         documents_to_create.extend(documents_to_create_batch)
         identities_to_create.extend(identities_to_create_batch)
         bank_account_info_to_create.extend(bank_account_info_to_create_batch)
         individuals_to_create.append(individual_to_create)
-    individuals_dict = {i.copied_from_id: i for i in individuals_to_update}
+    individuals_dict = {i.copied_from_id: i for i in individuals_to_create}
     Individual.objects.bulk_create(individuals_to_create)
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
@@ -282,14 +296,12 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
         copied_individual_id = individuals_to_exclude_dict[str(original_head_of_household_id)]
         household.head_of_household_id = copied_individual_id
     Household.objects.bulk_create([household])
-    for individual in individuals_to_update:
-        individual.household = household
-    ids_to_update = [x.pk for x in individuals_to_update] + external_collectors_id_to_update
+    ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
     Individual.original_and_repr_objects.filter(id__in=ids_to_update).update(household=household)
 
     # copy_entitlement_card_per_household(household=original_household, household_representation=household)
 
-    del individuals_to_update
+    del individuals_to_create
     return household
 
 
@@ -350,7 +362,7 @@ def copy_individual(individual: Individual, program: Program) -> Individual:
 def copy_individual_fast(individual: Individual, program: Program) -> tuple:
     documents = list(individual.documents.all())
     identities = list(individual.identities.all())
-    bank_account_info = list(individual.bank_account_info.all())
+    bank_accounts_info = list(individual.bank_account_info.all())
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.origin_unicef_id = individual.unicef_id
@@ -361,7 +373,7 @@ def copy_individual_fast(individual: Individual, program: Program) -> tuple:
     individual.is_original = False
     documents_to_create = copy_document_per_individual_fast(documents, individual)
     identities_to_create = copy_individual_identity_per_individual_fast(identities, individual)
-    bank_account_info_to_create = copy_bank_account_info_per_individual_fast(bank_account_info, individual)
+    bank_account_info_to_create = copy_bank_account_info_per_individual_fast(bank_accounts_info, individual)
     return individual, documents_to_create, identities_to_create, bank_account_info_to_create
 
 
