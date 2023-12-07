@@ -278,7 +278,6 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
                 ) = copy_closed_ticket_with_household_and_individual(
                     closed_ticket, program, household_representation, individual_representation
                 )
-
                 objects_to_create_dict["tickets"].append(ticket_copy)
                 objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
                 objects_to_create_dict["documents"].extend(documents_to_create)
@@ -360,6 +359,7 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet, ticke
 
                 grievance_ticket = active_ticket.ticket
                 grievance_ticket.is_migration_handled = True
+                grievance_ticket.migrated_at = timezone.now()
                 old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, ticket_class)
@@ -427,9 +427,9 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
                 objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
                 objects_to_create_dict["documents"].extend(documents_to_create)
                 objects_to_create_dict["notes"].extend(notes_to_create)
-
                 grievance_ticket = closed_ticket.ticket
                 grievance_ticket.is_migration_handled = True
+                grievance_ticket.migrated_at = timezone.now()
                 old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
@@ -551,7 +551,6 @@ def handle_tickets_with_individual(
                 objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
                 objects_to_create_dict["documents"].extend(documents_to_create)
                 objects_to_create_dict["notes"].extend(notes_to_create)
-
                 grievance_ticket = closed_ticket.ticket
                 grievance_ticket.is_migration_handled = True
                 old_grievance_tickets_to_update.append(grievance_ticket)
@@ -776,6 +775,7 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
             if not programs:
                 grievance_ticket = needs_adjudication_ticket.ticket
                 grievance_ticket.is_migration_handled = True
+                grievance_ticket.migrated_at = timezone.now()
                 old_grievance_tickets_to_update.append(grievance_ticket)
                 continue
 
@@ -840,6 +840,7 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
 
             grievance_ticket = needs_adjudication_ticket.ticket
             grievance_ticket.is_migration_handled = True
+            grievance_ticket.migrated_at = timezone.now()
             old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(
@@ -890,6 +891,7 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
                     message_household_to_create.extend(message_household)
 
                     message.is_migration_handled = True
+                    message.migrated_at = timezone.now()
                     old_messages_to_update.append(message)
                 else:
                     programs = list(message.households.values_list("copied_to__program", flat=True).distinct())
@@ -898,11 +900,12 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
                         new_messages_to_create.append(message_copy)
                         message_household_to_create.extend(message_household)
                     message.is_migration_handled = True
+                    message.migrated_at = timezone.now()
                     old_messages_to_update.append(message)
         Message.objects.bulk_create(new_messages_to_create)
         MessageHouseholdRelation = Message.households.through
         MessageHouseholdRelation.objects.bulk_create(message_household_to_create)
-        Message.objects.bulk_update(old_messages_to_update, ["is_migration_handled"])
+        Message.objects.bulk_update(old_messages_to_update, ["is_migration_handled", "migrated_at"])
     logger.info("Handle Messages not connected to any program")
     handle_non_program_messages(business_area)
 
@@ -1047,14 +1050,16 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
                 new_feedback_messages_to_create.extend(messages_to_create)
 
                 feedback_obj.is_migration_handled = True
+                feedback_obj.migrated_at = timezone.now()
                 old_feedbacks_to_update.append(feedback_obj)
                 if linked_grievance := feedback_obj.linked_grievance:
                     linked_grievance.is_migration_handled = True
+                    linked_grievance.migrated_at = timezone.now()
                     old_grievance_tickets_to_update.append(linked_grievance)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, Feedback)
         FeedbackMessage.objects.bulk_create(new_feedback_messages_to_create)
-        Feedback.objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled"])
+        Feedback.objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled", "migrated_at"])
 
 
 def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None:
@@ -1151,15 +1156,17 @@ def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None
                     new_feedback_messages_to_create.extend(messages_to_create)
 
                 feedback_obj.is_migration_handled = True
+                feedback_obj.migrated_at = timezone.now()
                 old_feedbacks_to_update.append(feedback_obj)
 
                 if linked_grievance := feedback_obj.linked_grievance:
                     linked_grievance.is_migration_handled = True
+                    linked_grievance.migrated_at = timezone.now()
                     old_grievance_tickets_to_update.append(linked_grievance)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, Feedback)
         FeedbackMessage.objects.bulk_create(new_feedback_messages_to_create)
-        Feedback.objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled"])
+        Feedback.objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled", "migrated_at"])
 
 
 def copy_feedback(
@@ -1295,7 +1302,7 @@ def handle_bulk_create_paginated_data(
     handle_grievance_ticket_data_creation(objects_to_create_dict["grievance_tickets"])
     TicketNote.objects.bulk_create(objects_to_create_dict["notes"])
     GrievanceDocument.objects.bulk_create(objects_to_create_dict["documents"])
-    GrievanceTicket.objects.bulk_update(old_grievance_tickets_to_update, ["is_migration_handled"])
+    GrievanceTicket.objects.bulk_update(old_grievance_tickets_to_update, ["is_migration_handled", "migrated_at"])
     model.objects.bulk_create(objects_to_create_dict["tickets"])
 
 
@@ -1405,6 +1412,7 @@ def handle_non_program_tickets(business_area: Optional[BusinessArea] = None) -> 
 
                     grievance_ticket = non_program_ticket.ticket
                     grievance_ticket.is_migration_handled = True
+                    grievance_ticket.migrated_at = timezone.now()
                     old_grievance_tickets_to_update.append(grievance_ticket)
 
                 handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
@@ -1461,11 +1469,12 @@ def handle_non_program_feedback(business_area: Optional[BusinessArea] = None) ->
                     new_feedback_messages_to_create.extend(messages_to_create)
 
                     feedback.is_migration_handled = True
+                    feedback.migrated_at = timezone.now()
                     old_feedbacks_to_update.append(feedback)
 
                 handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, Feedback)
                 FeedbackMessage.objects.bulk_create(new_feedback_messages_to_create)
-                Feedback.objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled"])
+                Feedback.objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled", "migrated_at"])
 
 
 def handle_non_program_messages(business_area: Optional[BusinessArea] = None) -> None:
@@ -1498,11 +1507,12 @@ def handle_non_program_messages(business_area: Optional[BusinessArea] = None) ->
                     new_messages_to_create.append(message_copy)
                     message_household_to_create.extend(message_household)
                     message.is_migration_handled = True
+                    message.migrated_at = timezone.now()
                     old_messages_to_update.append(message)
                 Message.objects.bulk_create(new_messages_to_create)
                 MessageHouseholdRelation = Message.households.through
                 MessageHouseholdRelation.objects.bulk_create(message_household_to_create)
-                Message.objects.bulk_update(old_messages_to_update, ["is_migration_handled"])
+                Message.objects.bulk_update(old_messages_to_update, ["is_migration_handled", "migrated_at"])
 
 
 def handle_role_reassign_data(ticket: Any, program: Program) -> Any:
@@ -1936,7 +1946,7 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
         Q(complaint_ticket_details__in=complaint_tickets_with_payments)
         | Q(sensitive_ticket_details__in=sensitive_tickets_with_payments)
         | Q(payment_verification_ticket_details__in=payment_verification_tickets)
-    ).update(is_original=False, is_migration_handled=True)
+    ).update(is_original=False, is_migration_handled=True, migrated_at=timezone.now())
 
 
 def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDetails, TicketSensitiveDetails]) -> tuple:
