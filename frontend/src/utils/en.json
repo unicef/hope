@@ -822,6 +822,8 @@
   "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data": "Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data",
   "PDF generated. Please check your email.": "PDF generated. Please check your email.",
   "Program has to be active to create a new Target Population": "Program has to be active to create a new Target Population",
+  "Program has to be active to create a Verification Plan": "Program has to be active to create a Verification Plan",
+  "There are no payment records that could be assigned to a new Verification Plan.": "There are no payment records that could be assigned to a new Verification Plan.",
   "Preview Exclusion": "Preview Exclusion",
   "Data Collecting Type is required": "Data Collecting Type is required",
   "Registration Group": "Registration Group",
