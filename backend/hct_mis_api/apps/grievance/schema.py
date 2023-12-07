@@ -532,8 +532,10 @@ class Query(graphene.ObjectType):
             )
 
         if program_id is None:
-            queryset = queryset | GrievanceTicket.objects.filter(
-                business_area_id=business_area_id, programs=None, created_by__partner=user.partner
+            queryset = queryset | (
+                GrievanceTicket.objects.select_related("admin2", "assigned_to", "created_by")
+                .prefetch_related(*to_prefetch)
+                .filter(business_area_id=business_area_id, programs=None, created_by__partner=user.partner)
             )
 
         return queryset.annotate(
