@@ -234,3 +234,23 @@ stages:
               targetPath: backend/coverage.xml
               artifact: BackendLineCoverage
               publishLocation: 'pipeline'
+
+  - stage: publish_artifacts
+    displayName: PUBLISH_ARTIFACTS
+    dependsOn: [test]
+    jobs:
+      - job: publish_artifacts
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[PUBLISH_ARTIFACTS]"
+        steps:
+          - script: |
+              mkdir -p $(Build.ArtifactStagingDirectory)/tag
+              echo $(tag) > $(Build.ArtifactStagingDirectory)/tag/hope.txt
+            displayName: "Save tag to file"
+          - task: PublishPipelineArtifact@1
+            inputs:
+              pathToPublish: "$(Build.ArtifactStagingDirectory)/tag"
+              artifact: 'hope'
+              publishLocation: 'pipeline'
+            displayName: "Publish tag"
