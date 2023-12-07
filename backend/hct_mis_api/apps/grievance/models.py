@@ -380,6 +380,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
 
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,

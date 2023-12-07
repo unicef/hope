@@ -26,7 +26,7 @@ from sorl.thumbnail import ImageField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
-from hct_mis_api.apps.core.models import StorageFile
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.core.utils import IsOriginalManager, SoftDeletableIsOriginalModel
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
@@ -309,6 +309,13 @@ class HouseholdCollection(UnicefIdentifiedModel):
     Collection of household representations.
     """
 
+    def __str__(self) -> str:
+        return self.unicef_id or ""
+
+    @property
+    def business_area(self) -> Optional[BusinessArea]:
+        return self.households.first().business_area if self.households.first() else None
+
 
 class Household(
     SoftDeletableModelWithDate,
@@ -509,6 +516,7 @@ class Household(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
 
     class Meta:
@@ -778,6 +786,7 @@ class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDMod
     )
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -798,6 +807,13 @@ class IndividualCollection(UnicefIdentifiedModel):
     """
     Collection of individual representations.
     """
+
+    def __str__(self) -> str:
+        return self.unicef_id or ""
+
+    @property
+    def business_area(self) -> Optional[BusinessArea]:
+        return self.individuals.first().business_area if self.individuals.first() else None
 
 
 class Individual(
@@ -978,6 +994,7 @@ class Individual(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 

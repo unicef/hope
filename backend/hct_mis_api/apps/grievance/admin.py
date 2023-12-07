@@ -23,11 +23,24 @@ from hct_mis_api.apps.grievance.models import (
     TicketReferralDetails,
     TicketSensitiveDetails,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, IsOriginalAdminMixin
+
+
+class GrievanceTicketCopiedToInline(admin.TabularInline):
+    model = GrievanceTicket
+    extra = 0
+    fields = ("unicef_id",)
+    readonly_fields = ("unicef_id",)
+    show_change_link = True
+    can_delete = False
+    verbose_name_plural = "Grievance Ticket representations"
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
+        return GrievanceTicket.default_for_migrations_fix.all()
 
 
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
+class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase, IsOriginalAdminMixin):
     list_display = (
         "unicef_id",
         "created_at",
@@ -70,19 +83,20 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
     readonly_fields = ("unicef_id",)
     filter_horizontal = ("linked_tickets", "programs")
+    inlines = [GrievanceTicketCopiedToInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet["GrievanceTicket"]:
-        return (
-            super()
-            .get_queryset(request)
-            .select_related(
-                "registration_data_import",
-                "business_area",
-                "assigned_to",
-                "created_by",
-                "admin2",
-            )
+        qs = self.model.default_for_migrations_fix.get_queryset().select_related(
+            "registration_data_import",
+            "business_area",
+            "assigned_to",
+            "created_by",
+            "admin2",
         )
+        ordering = self.get_ordering(request)
+        if ordering:
+            qs = qs.order_by(*ordering)
+        return qs
 
 
 @admin.register(TicketNote)
@@ -92,12 +106,12 @@ class TicketNoteAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 
 @admin.register(TicketComplaintDetails)
 class TicketComplaintDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "payment_record", "household", "individual")
+    raw_id_fields = ("ticket", "household", "individual")
 
 
 @admin.register(TicketSensitiveDetails)
 class TicketSensitiveDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
-    raw_id_fields = ("ticket", "payment_record", "household", "individual")
+    raw_id_fields = ("ticket", "household", "individual")
 
 
 @admin.register(TicketHouseholdDataUpdateDetails)
@@ -162,4 +176,4 @@ class TicketReferralDetailsAdmin(LinkedObjectsMixin, HOPEModelAdminBase):
 @admin.register(GrievanceDocument)
 class GrievanceDocumentAdmin(HOPEModelAdminBase):
     list_display = ("file_name",)
-    raw_id_fields = ("created_by", "grievance_ticket", "content_type")
+    raw_id_fields = ("created_by", "grievance_ticket")
