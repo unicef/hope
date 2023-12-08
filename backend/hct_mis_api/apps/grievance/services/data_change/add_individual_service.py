@@ -112,6 +112,7 @@ class AddIndividualService(DataChangeService):
             first_registration_date=first_registration_date,
             last_registration_date=first_registration_date,
             business_area=self.grievance_ticket.business_area,
+            program_id=household.program_id,
             **individual_data,
         )
         individual.refresh_from_db()
