@@ -184,7 +184,7 @@ class Partner(MPTTModel, models.Model):
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
-        return [(role.id, role.name) for role in cls.objects.exclude(name__in=["Default Empty Partner", "UNICEF"])]
+        return [(role.id, role.name) for role in cls.objects.exclude(name="Default Empty Partner")]
 
     @property
     def is_unicef(self) -> bool:
@@ -216,7 +216,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     status = models.CharField(choices=USER_STATUS_CHOICES, max_length=10, default=INVITED)
     # TODO: in future will remove null=True after migrate prod data
     partner = models.ForeignKey(Partner, on_delete=models.PROTECT, null=True)
-    email = models.EmailField(_("email address"), blank=True, unique=True)
+    email = models.EmailField(_("email address"), unique=True)
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
