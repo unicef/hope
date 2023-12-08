@@ -94,7 +94,7 @@ export const CreateProgramPage = (): ReactElement => {
       validationSchema={programValidationSchema(t)}
     >
       {({ submitForm, values, validateForm, setFieldTouched }) => {
-        const mappedPartnerChoices = userPartnerChoices.map((partner) => ({
+        const mappedPartnerChoices = userPartnerChoices.filter(partner => partner.name !== "UNICEF").map((partner) => ({
           value: partner.value,
           label: partner.name,
           disabled: values.partners.some((p) => p.id === partner.value),
