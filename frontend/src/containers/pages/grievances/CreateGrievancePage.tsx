@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
-  useAllProgramsQuery,
+  useAllProgramsForChoicesQuery,
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -42,7 +42,7 @@ import {
   hasPermissions,
 } from '../../../config/permissions';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
@@ -82,7 +82,7 @@ export const dataChangeComponentDict = {
 export const CreateGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
@@ -114,7 +114,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     priority: null,
     urgency: null,
     partner: null,
-    programme: null,
+    program: isAllPrograms ? '' : programId,
     comments: null,
     linkedFeedbackId: linkedFeedbackId
       ? decodeIdString(linkedFeedbackId)
@@ -131,6 +131,15 @@ export const CreateGrievancePage = (): React.ReactElement => {
   } = useGrievancesChoiceDataQuery();
   const { data: userChoices } = useUserChoiceDataQuery();
   const [mutate, { loading }] = useCreateGrievanceMutation();
+  const {
+    data: programsData,
+    loading: programsDataLoading,
+  } = useAllProgramsForChoicesQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
+  });
 
   const {
     data: allAddIndividualFieldsData,
@@ -151,20 +160,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
     '*',
   );
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allProgramsEdges = allProgramsData?.allPrograms?.edges || [];
-  const mappedPrograms = allProgramsEdges.map((edge) => ({
-    name: edge.node?.name,
-    value: edge.node.id,
-  }));
-
   const showIssueType = (values): boolean => {
     return (
       values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
@@ -178,7 +173,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     choicesLoading ||
     allAddIndividualFieldsDataLoading ||
     householdFieldsLoading ||
-    loadingPrograms
+    programsDataLoading
   )
     return <LoadingComponent />;
   if (permissions === null) return null;
@@ -192,14 +187,15 @@ export const CreateGrievancePage = (): React.ReactElement => {
     !allAddIndividualFieldsData ||
     !householdFieldsData ||
     !householdFieldsDict ||
-    !individualFieldsDict
+    !individualFieldsDict ||
+    !programsData
   )
     return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance/tickets/`,
+      to: `/${baseUrl}/grievance/tickets/`,
     },
   ];
 
@@ -261,7 +257,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   'Grievance Tickets created',
                 )}.`,
                 {
-                  pathname: `/${businessArea}/grievance/tickets`,
+                  pathname: `/${baseUrl}/grievance/tickets`,
                   historyMethod: 'push',
                 },
               );
@@ -271,7 +267,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   response.data.createGrievanceTicket.grievanceTickets[0].id,
                   response.data.createGrievanceTicket.grievanceTickets[0]
                     .category,
-                  businessArea,
+                  baseUrl,
                 ),
                 historyMethod: 'push',
               });
@@ -381,10 +377,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             values={values}
                             showIssueType={showIssueType}
                             selectedIssueType={selectedIssueType}
-                            businessArea={businessArea}
+                            baseUrl={baseUrl}
                             choicesData={choicesData}
                             userChoices={userChoices}
-                            mappedPrograms={mappedPrograms}
+                            programsData={programsData}
                             setFieldValue={setFieldValue}
                             errors={errors}
                             permissions={permissions}
@@ -400,7 +396,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         <Box mr={3}>
                           <Button
                             component={Link}
-                            to={`/${businessArea}/grievance/tickets/user-generated`}
+                            to={`/${baseUrl}/grievance/tickets/user-generated`}
                           >
                             {t('Cancel')}
                           </Button>

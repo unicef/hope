@@ -7,7 +7,7 @@ import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { DedupeResults } from '../../../../components/rdi/details/DedupeResults';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
 
 interface ImportedIndividualsTableRowProps {
@@ -16,13 +16,13 @@ interface ImportedIndividualsTableRowProps {
   isMerged?: boolean;
 }
 
-export function ImportedIndividualsTableRow({
+export const ImportedIndividualsTableRow = ({
   individual,
   choices,
   isMerged,
-}: ImportedIndividualsTableRowProps): React.ReactElement {
+}: ImportedIndividualsTableRowProps): React.ReactElement => {
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
   const roleChoicesDict = choicesToDict(choices.roleChoices);
@@ -33,8 +33,8 @@ export function ImportedIndividualsTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
-  const importedIndividualPath = `/${businessArea}/registration-data-import/individual/${individual.id}`;
-  const mergedIndividualPath = `/${businessArea}/population/individuals/${individual.id}`;
+  const importedIndividualPath = `/${baseUrl}/registration-data-import/individual/${individual.id}`;
+  const mergedIndividualPath = `/${baseUrl}/population/individuals/${individual.id}`;
   const url = isMerged ? mergedIndividualPath : importedIndividualPath;
 
   const handleClick = (e): void => {
@@ -99,4 +99,4 @@ export function ImportedIndividualsTableRow({
       </TableCell>
     </ClickableTableRow>
   );
-}
+};

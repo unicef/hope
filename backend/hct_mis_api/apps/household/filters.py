@@ -91,6 +91,7 @@ class HouseholdFilter(FilterSet):
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     withdrawn = BooleanFilter(field_name="withdrawn")
     country_origin = CharFilter(field_name="country_origin__iso_code3", lookup_expr="startswith")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
         model = Household
@@ -102,9 +103,9 @@ class HouseholdFilter(FilterSet):
             "admin_area": ["exact"],
             "admin2": ["exact"],
             "target_populations": ["exact"],
-            "programs": ["exact"],
             "residence_status": ["exact"],
             "withdrawn": ["exact"],
+            "program": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -206,6 +207,8 @@ class HouseholdFilter(FilterSet):
                     # if user put something like 'KOBO-111222', 'HOPE-20220531-3/111222', 'HOPE-2022531111222'
                     # will filter by '111222' like 111222 is ID
                     inner_query |= Q(kobo_asset_id__endswith=_value)
+                else:
+                    inner_query = Q(kobo_asset_id__endswith=search)
             return qs.filter(inner_query)
         if search_type == "bank_account_number":
             return qs.filter(head_of_household__bank_account_info__bank_account_number__icontains=search)
@@ -218,6 +221,14 @@ class HouseholdFilter(FilterSet):
 
     def search_type_filter(self, qs: QuerySet[Household], name: str, value: str) -> QuerySet[Household]:
         return qs
+
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        if value is True:
+            return qs.filter(program__status=Program.ACTIVE)
+        elif value is False:
+            return qs.filter(program__status=Program.FINISHED)
+        else:
+            return qs
 
 
 class IndividualFilter(FilterSet):
@@ -235,6 +246,7 @@ class IndividualFilter(FilterSet):
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
     flags = MultipleChoiceFilter(choices=INDIVIDUAL_FLAGS_CHOICES, method="flags_filter")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
 
     class Meta:
         model = Individual
@@ -245,6 +257,7 @@ class IndividualFilter(FilterSet):
             "sex": ["exact"],
             "household__admin_area": ["exact"],
             "withdrawn": ["exact"],
+            "program": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -339,6 +352,14 @@ class IndividualFilter(FilterSet):
 
     def filter_excluded_id(self, qs: QuerySet, name: str, value: Any) -> QuerySet:
         return qs.exclude(id=decode_id_string(value))
+
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> "QuerySet[Individual]":
+        if value is True:
+            return qs.filter(program__status=Program.ACTIVE)
+        elif value is False:
+            return qs.filter(program__status=Program.FINISHED)
+        else:
+            return qs
 
 
 def get_elasticsearch_query_for_individuals(search: str, search_type: str, business_area: "BusinessArea") -> Dict:

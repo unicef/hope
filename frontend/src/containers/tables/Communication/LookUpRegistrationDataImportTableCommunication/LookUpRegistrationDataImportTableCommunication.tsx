@@ -49,8 +49,8 @@ export const LookUpRegistrationDataImportTableCommunication = ({
     status: filter.status !== '' ? filter.status : undefined,
     businessArea,
     importDateRange: JSON.stringify({
-      min: filter.importDateRangeMin,
-      max: filter.importDateRangeMax,
+      min: filter.importDateRangeMin || null,
+      max: filter.importDateRangeMax || null,
     }),
     totalHouseholdsCountWithValidPhoneNoMin:
       filter.totalHouseholdsCountWithValidPhoneNoMin,

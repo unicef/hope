@@ -1,26 +1,21 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleApplyFilterChange } from '../../utils/utils';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
-import TextField from '../TextField';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')};
-`;
+import {
+  createHandleApplyFilterChange,
+  getAutocompleteOptionLabel,
+  handleAutocompleteChange,
+  handleAutocompleteClose,
+  handleOptionSelected,
+} from '../../utils/utils';
+import { BaseAutocomplete } from './BaseAutocomplete';
 
 export const CreatedByAutocomplete = ({
   disabled,
-  fullWidth = true,
   name,
   filter,
   value,
@@ -29,10 +24,9 @@ export const CreatedByAutocomplete = ({
   appliedFilter,
   setAppliedFilter,
   setFilter,
-  dataCy,
+  additionalVariables,
 }: {
   disabled?: boolean;
-  fullWidth?: boolean;
   name: string;
   filter;
   value: string;
@@ -41,14 +35,14 @@ export const CreatedByAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
-  dataCy?: string;
+  additionalVariables;
 }): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 500);
+  const debouncedInputText = useDebounce(inputValue, 800);
   const businessArea = useBusinessArea();
 
   const [loadData, { data, loading }] = useAllUsersForFiltersLazyQuery({
@@ -57,8 +51,9 @@ export const CreatedByAutocomplete = ({
       first: 100,
       orderBy: 'first_name,last_name,email',
       search: debouncedInputText,
-      isTicketCreator: true,
+      ...additionalVariables,
     },
+    fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {
@@ -72,6 +67,12 @@ export const CreatedByAutocomplete = ({
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    if (!value) {
+      onInputTextChange('');
+    }
+  }, [value, onInputTextChange]);
+
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
     history,
@@ -83,62 +84,42 @@ export const CreatedByAutocomplete = ({
   );
   if (!data) return null;
 
+  const allEdges = get(data, 'allUsers.edges', []);
+
   return (
-    <StyledAutocomplete
+    <BaseAutocomplete
       value={value}
-      data-cy={dataCy}
-      fullWidth={fullWidth}
-      open={open}
-      filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.id)
-      }
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={(e, reason) => {
-        setOpen(false);
-        if (reason === 'select-option') return;
-        onInputTextChange('');
-      }}
-      getOptionSelected={(option, value1) => {
-        return option.node?.id === value1;
-      }}
-      getOptionLabel={(option) => {
-        let optionLabel;
-        if (option.node) {
-          optionLabel = `${option.node.email}`;
-        } else {
-          optionLabel =
-            data?.allUsers?.edges?.find((el) => el.node.id === option)?.node
-              .email || '';
-        }
-        return `${optionLabel}`;
-      }}
       disabled={disabled}
-      options={get(data, 'allUsers.edges', [])}
+      label={label || t('Created By')}
+      dataCy='filters-created-by-autocomplete'
+      loadData={loadData}
       loading={loading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label || t('Created By')}
-          variant='outlined'
-          margin='dense'
-          value={inputValue}
-          onChange={(e) => onInputTextChange(e.target.value)}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color='inherit' size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
+      allEdges={allEdges}
+      handleChange={(_, selectedValue) => {
+        if (!selectedValue) {
+          onInputTextChange('');
+        }
+        handleAutocompleteChange(
+          name,
+          selectedValue?.node?.id,
+          handleFilterChange,
+        );
+      }}
+      handleOpen={() => setOpen(true)}
+      open={open}
+      handleClose={(_, reason) =>
+        handleAutocompleteClose(setOpen, onInputTextChange, reason)
+      }
+      handleOptionSelected={(option, value1) =>
+        handleOptionSelected(option?.node?.id, value1)
+      }
+      handleOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue, 'individual')
+      }
+      data={data}
+      inputValue={inputValue}
+      onInputTextChange={onInputTextChange}
+      debouncedInputText={debouncedInputText}
     />
   );
 };

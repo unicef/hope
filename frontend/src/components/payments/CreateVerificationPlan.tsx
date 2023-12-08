@@ -12,21 +12,6 @@ import { Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { getPercentage } from '../../utils/utils';
 import {
   PaymentVerificationPlanVerificationChannel,
   useAllAdminAreasQuery,
@@ -34,6 +19,22 @@ import {
   useCreatePaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
+import { Dialog } from '../../containers/dialogs/Dialog';
+import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { DialogContainer } from '../../containers/dialogs/DialogContainer';
+import { DialogFooter } from '../../containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { useProgramContext } from '../../programContext';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
+import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
+import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
+import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
+import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { getPercentage } from '../../utils/utils';
 import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { ButtonTooltip } from '../core/ButtonTooltip';
 import { FormikEffect } from '../core/FormikEffect';
@@ -110,13 +111,11 @@ function prepareVariables(
 
 export interface Props {
   cashOrPaymentPlanId: string;
-  disabled: boolean;
   canCreatePaymentVerificationPlan: boolean;
   version: number;
 }
 export function CreateVerificationPlan({
   cashOrPaymentPlanId,
-  disabled,
   canCreatePaymentVerificationPlan,
   version,
 }: Props): React.ReactElement {
@@ -126,7 +125,8 @@ export function CreateVerificationPlan({
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
+  const { isActiveProgram } = useProgramContext();
   const [formValues, setFormValues] = useState(initialValues);
 
   const [
@@ -210,16 +210,16 @@ export function CreateVerificationPlan({
     )})`;
   };
 
-  const handleOpen = (): void => {
-    if (canCreatePaymentVerificationPlan) {
-      setOpen(true);
-    } else {
-      showMessage(
-        t(
-          'There are no payment records that could be assigned to a new verification plan.',
-        ),
+  const getTooltipTitle = (): string => {
+    if (!canCreatePaymentVerificationPlan) {
+      return t(
+        'There are no payment records that could be assigned to a new Verification Plan.',
       );
     }
+    if (!isActiveProgram) {
+      return t('Program has to be active to create a Verification Plan');
+    }
+    return '';
   };
 
   return (
@@ -233,10 +233,11 @@ export function CreateVerificationPlan({
           />
           <Box mr={2}>
             <ButtonTooltip
-              disabled={disabled}
+              title={getTooltipTitle()}
+              disabled={!isActiveProgram || !canCreatePaymentVerificationPlan}
               color='primary'
               variant='contained'
-              onClick={() => handleOpen()}
+              onClick={() => setOpen(true)}
               data-cy='button-new-plan'
             >
               {t('CREATE VERIFICATION PLAN')}

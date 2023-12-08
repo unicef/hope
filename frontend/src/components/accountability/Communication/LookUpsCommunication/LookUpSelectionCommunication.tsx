@@ -4,9 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  ProgramNode,
   RegistrationDataImportStatus,
-  useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { CommunicationTabsValues } from '../../../../utils/constants';
@@ -44,10 +42,10 @@ export const LookUpSelectionCommunication = ({
     search: '',
     importedBy: '',
     status: RegistrationDataImportStatus.Merged,
-    sizeMin: '',
-    sizeMax: '',
-    importDateRangeMin: undefined,
-    importDateRangeMax: undefined,
+    totalHouseholdsCountWithValidPhoneNoMin: '',
+    totalHouseholdsCountWithValidPhoneNoMax: '',
+    importDateRangeMin: '',
+    importDateRangeMax: '',
   };
 
   const [filterRDI, setFilterRDI] = useState(
@@ -60,11 +58,10 @@ export const LookUpSelectionCommunication = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    program: '',
-    numIndividualsMin: null,
-    numIndividualsMax: null,
-    totalHouseholdsCountWithValidPhoneNoMin: null,
-    totalHouseholdsCountWithValidPhoneNoMax: null,
+    totalHouseholdsCountWithValidPhoneNoMin: '',
+    totalHouseholdsCountWithValidPhoneNoMax: '',
+    createdAtRangeMin: '',
+    createdAtRangeMax: '',
   };
 
   const [filterTP, setFilterTP] = useState(
@@ -77,7 +74,6 @@ export const LookUpSelectionCommunication = ({
   const initialFilterHH = {
     search: '',
     searchType: 'household_id',
-    program: '',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',
@@ -102,14 +98,6 @@ export const LookUpSelectionCommunication = ({
     variables: { businessArea },
   });
 
-  const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
-
   const handleChange = (type: number, value: string[] | string): void => {
     setValues({
       ...values,
@@ -129,7 +117,7 @@ export const LookUpSelectionCommunication = ({
     });
   };
 
-  if (programsLoading || choicesLoading) return null;
+  if (choicesLoading) return null;
 
   return (
     <Box>
@@ -165,7 +153,6 @@ export const LookUpSelectionCommunication = ({
       <Box p={4} mt={4}>
         {selectedTab === CommunicationTabsValues.HOUSEHOLD && (
           <LookUpHouseholdFiltersCommunication
-            programs={programs as ProgramNode[]}
             filter={filterHH}
             choicesData={choicesData}
             setFilter={setFilterHH}
@@ -177,12 +164,10 @@ export const LookUpSelectionCommunication = ({
         {selectedTab === CommunicationTabsValues.TARGET_POPULATION && (
           <LookUpTargetPopulationFiltersCommunication
             filter={filterTP}
-            programs={programs as ProgramNode[]}
             setFilter={setFilterTP}
             initialFilter={initialFilterTP}
             appliedFilter={appliedFilterTP}
             setAppliedFilter={setAppliedFilterTP}
-            addBorder={false}
           />
         )}
         {selectedTab === CommunicationTabsValues.RDI && (
@@ -192,7 +177,6 @@ export const LookUpSelectionCommunication = ({
             initialFilter={initialFilterRDI}
             appliedFilter={appliedFilterRDI}
             setAppliedFilter={setAppliedFilterRDI}
-            addBorder={false}
           />
         )}
       </Box>
@@ -202,10 +186,10 @@ export const LookUpSelectionCommunication = ({
         filtersHouseholdApplied={appliedFilterHH}
         filtersTargetPopulationApplied={appliedFilterTP}
         filtersRDIApplied={appliedFilterRDI}
-        businessArea={businessArea}
         onValueChange={onValueChange}
         values={values}
         handleChange={handleChange}
+        businessArea={businessArea}
       />
     </Box>
   );

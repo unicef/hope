@@ -124,13 +124,17 @@ class Area(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     class Meta:
         verbose_name_plural = "Areas"
         unique_together = ("name", "p_code")
+        ordering = ("name",)
+
+    class MPTTMeta:
+        order_insertion_by = ("name", "p_code")
 
     def __str__(self) -> str:
         return self.name
 
     @classmethod
     def get_admin_areas_as_choices(
-        cls, admin_level: Optional[int] = None, business_area_slug: Optional[str] = None
+        cls, admin_level: Optional[int] = None, business_area_slug: Optional[str] = None, *args: Any, **kwargs: Any
     ) -> List[Dict[str, Any]]:
         params: Dict[str, Any] = {}
         if admin_level:

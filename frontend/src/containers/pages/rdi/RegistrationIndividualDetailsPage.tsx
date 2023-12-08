@@ -10,7 +10,6 @@ import { ImportedIndividualPhotoModal } from '../../../components/population/Imp
 import { RegistrationIndividualBioData } from '../../../components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
 import { RegistrationIndividualVulnerabilities } from '../../../components/rdi/details/individual/RegistrationIndividualVulnerabilities/RegistrationIndividualVulnerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import {
@@ -19,6 +18,7 @@ import {
   useHouseholdChoiceDataQuery,
   useImportedIndividualQuery,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;
@@ -32,7 +32,7 @@ const Container = styled.div`
 export function RegistrationIndividualDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const {
     data: flexFieldsData,
@@ -61,13 +61,13 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
       ? [
           {
             title: t('Registration Data import'),
-            to: `/${businessArea}/registration-data-import/`,
+            to: `/${baseUrl}/registration-data-import/`,
           },
         ]
       : []),
     {
       title: importedIndividual.registrationDataImport.name,
-      to: `/${businessArea}/registration-data-import/${btoa(
+      to: `/${baseUrl}/registration-data-import/${btoa(
         `RegistrationDataImportNode:${importedIndividual.registrationDataImport.hctId}`,
       )}`,
     },
@@ -76,7 +76,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   if (importedIndividual?.household?.id) {
     breadCrumbsItems.push({
       title: `${t('HOUSEHOLD ID')}: ${importedIndividual?.household.importId}`,
-      to: `/${businessArea}/registration-data-import/household/${importedIndividual?.household?.id}`,
+      to: `/${baseUrl}/registration-data-import/household/${importedIndividual?.household?.id}`,
     });
   }
 
@@ -94,7 +94,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
       </PageHeader>
       <Container>
         <RegistrationIndividualBioData
-          businessArea={businessArea}
+          baseUrl={baseUrl}
           individual={importedIndividual}
           choicesData={choicesData}
         />

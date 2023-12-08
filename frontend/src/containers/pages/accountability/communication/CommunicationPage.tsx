@@ -1,4 +1,3 @@
-import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
@@ -11,24 +10,26 @@ import {
   PERMISSIONS,
   hasPermissionInModule,
 } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
-
-const initialFilter = {
-  createdBy: '',
-  createdAtRangeMin: '',
-  createdAtRangeMax: '',
-  program: '',
-  targetPopulation: '',
-};
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { ButtonTooltip } from "../../../../components/core/ButtonTooltip";
+import { useProgramContext } from "../../../../programContext";
 
 export const CommunicationPage = (): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
   const { t } = useTranslation();
+  const { isActiveProgram } = useProgramContext();
+
+  const initialFilter = {
+    createdBy: '',
+    createdAtRangeMin: null,
+    createdAtRangeMax: null,
+    targetPopulation: '',
+  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -55,15 +56,17 @@ export const CommunicationPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title={t('Communication')}>
-        <Button
+        <ButtonTooltip
           variant='contained'
           color='primary'
           component={Link}
-          to={`/${businessArea}/accountability/communication/create`}
+          to={`/${baseUrl}/accountability/communication/create`}
           data-cy='button-communication-create-new'
+          title={t('Program has to be active to create new Message')}
+          disabled={!isActiveProgram}
         >
           {t('New message')}
-        </Button>
+        </ButtonTooltip>
       </PageHeader>
       <CommunicationFilters
         filter={filter}

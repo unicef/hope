@@ -6,21 +6,20 @@ import { fakeHouseholdChoices } from '../../../../fixtures/population/fakeHouseh
 import { fakeApolloAllGrievances } from '../../../../fixtures/grievances/fakeApolloAllGrievances';
 import { fakeGrievancesChoices } from '../../../../fixtures/grievances/fakeGrievancesChoices';
 import { HouseholdDetails } from './HouseholdDetails';
+import { fakeBaseUrl } from '../../../../fixtures/core/fakeBaseUrl';
 
 describe('components/population/HouseholdDetails', () => {
   it('should render', () => {
     const { container } = render(
-      <MockedProvider
-        addTypename={false}
-        mocks={fakeApolloAllGrievances}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllGrievances}>
         <HouseholdDetails
           businessArea='afghanistan'
+          baseUrl={fakeBaseUrl}
           household={fakeHousehold}
           choicesData={fakeHouseholdChoices}
           grievancesChoices={fakeGrievancesChoices}
         />
-      </MockedProvider>
+      </MockedProvider>,
     );
     expect(container).toMatchSnapshot();
   });

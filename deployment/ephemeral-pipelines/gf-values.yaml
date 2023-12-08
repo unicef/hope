@@ -5,7 +5,8 @@ global:
 backend:
   image: uniappsakshopedev.azurecr.io/hope-backend:d981ad2d4f4b0aebebfc86e799a79b113a9b584f
   replicaCount: 1
-  initCommand: "python3 /code/manage.py initdemo"
+  initCommand: "python3 /code/manage.py initdemo" # when we want to clear, call initdemo
+  # initCommand: "python3 /code/manage.py upgrade" # if we're using an existing db which we want to keep, call upgrade
   secret:
     AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
@@ -13,7 +14,8 @@ backend:
     STORAGE_AZURE_ACCOUNT_NAME: hctmisdev
     STORAGE_AZURE_ACCOUNT_KEY: #secret-variables: STORAGE_AZURE_ACCOUNT_KEY
     SECRET_KEY: r4nd0m5ecretkeyf0rrandomenv
-    SENTRY_DSN: "https://88d65a39ff5d42a9bff63f6b0eff4c19@excubo.unicef.io/43"
+    SENTRY_DSN: "https://4a4edc89afb74f3fbd421924efd9366b@excubo.unicef.io/52"
+    SENTRY_ENVIRONMENT: ephemeral
     EMAIL_HOST: extmail01.unicef.org
     EMAIL_USE_TLS: "false"
     EXCHANGE_RATES_API_KEY: #secret-variables: EXCHANGE_RATES_API_KEY
@@ -34,7 +36,7 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    appgw.ingress.kubernetes.io/appgw-ssl-certificate: cert-ictd-hope-dev-aks-unitst-tls
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: kv-cert-unitst
   host: eph-1-hope.unitst.org
 
 #
@@ -62,6 +64,7 @@ psql-resources-default: &psql-resources-default
 #
 postgresql:
   enabled: true
+  ephemeral: true
   <<: *psql-image-default
   auth:
     database: hope-pm
@@ -72,6 +75,7 @@ postgresql:
 
 registrationdatahubpostgresql:
   enabled: true
+  ephemeral: true
   <<: *psql-image-default
   auth:
     database: registrationdatahubpostgresql
@@ -82,6 +86,7 @@ registrationdatahubpostgresql:
 
 cashassistdatahubpostgresql:
   <<: *psql-image-default
+  ephemeral: true
   enabled: true
   auth:
     database: cashassistdatahubpostgresql

@@ -17,7 +17,7 @@ import { PaymentPlanDetailsHeader } from '../../../components/paymentmodule/Paym
 import { PaymentPlanDetailsResults } from '../../../components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '../../../components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
@@ -26,7 +26,7 @@ import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const {
     data,
     loading,
@@ -80,33 +80,35 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
     <Box display='flex' flexDirection='column'>
       <PaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
-        businessArea={businessArea}
+        baseUrl={baseUrl}
         permissions={permissions}
       />
-      <PaymentPlanDetails
-        businessArea={businessArea}
-        paymentPlan={paymentPlan}
-      />
-      <AcceptanceProcess paymentPlan={paymentPlan} />
-      {shouldDisplayEntitlement && (
-        <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
-      )}
-      {shouldDisplayFsp && (
-        <FspSection businessArea={businessArea} paymentPlan={paymentPlan} />
-      )}
-      <ExcludeSection paymentPlan={paymentPlan} />
-      <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
-      <PaymentsTable
-        businessArea={businessArea}
-        paymentPlan={paymentPlan}
-        permissions={permissions}
-        canViewDetails
-      />
-      {shouldDisplayReconciliationSummary && (
-        <ReconciliationSummary paymentPlan={paymentPlan} />
-      )}
-      {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
-        <UniversalActivityLogTable objectId={paymentPlan.id} />
+      <PaymentPlanDetails baseUrl={baseUrl} paymentPlan={paymentPlan} />
+      {status !== PaymentPlanStatus.Preparing && (
+        <>
+          <AcceptanceProcess paymentPlan={paymentPlan} />
+          {shouldDisplayEntitlement && (
+            <Entitlement paymentPlan={paymentPlan} permissions={permissions} />
+          )}
+          {shouldDisplayFsp && (
+            <FspSection baseUrl={baseUrl} paymentPlan={paymentPlan} />
+          )}
+          <ExcludeSection paymentPlan={paymentPlan} />
+          <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
+          <PaymentsTable
+            baseUrl={baseUrl}
+            businessArea={businessArea}
+            paymentPlan={paymentPlan}
+            permissions={permissions}
+            canViewDetails
+          />
+          {shouldDisplayReconciliationSummary && (
+            <ReconciliationSummary paymentPlan={paymentPlan} />
+          )}
+          {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+            <UniversalActivityLogTable objectId={paymentPlan.id} />
+          )}
+        </>
       )}
     </Box>
   );

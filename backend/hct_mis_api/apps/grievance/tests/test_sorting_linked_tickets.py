@@ -5,7 +5,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -18,6 +18,8 @@ from hct_mis_api.apps.grievance.fixtures import (
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 @patch("hct_mis_api.apps.core.es_filters.ElasticSearchFilterSet.USE_ALL_FIELDS_AS_POSTGRES_DB", True)
@@ -51,9 +53,14 @@ class TestGrievanceQuery(APITestCase):
         create_afghanistan()
 
         call_command("loadcountries")
-        cls.user = UserFactory.create()
-        cls.user2 = UserFactory.create()
+
+        cls.partner = PartnerFactory(name="Test1")
+        cls.partner_2 = PartnerFactory(name="Test2")
+        cls.user = UserFactory.create(partner=cls.partner)
+        cls.user2 = UserFactory.create(partner=cls.partner_2)
+
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
+        cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
 
         country = Country.objects.first()
         area_type = AreaTypeFactory(
@@ -88,6 +95,12 @@ class TestGrievanceQuery(APITestCase):
         cls.ticket_5 = GrievanceTicketFactory(category=GrievanceTicket.CATEGORY_REFERRAL, description="2")
         ReferralTicketWithoutExtrasFactory(ticket=cls.ticket_5)
 
+        cls.ticket_1.programs.add(cls.program)
+        cls.ticket_2.programs.add(cls.program)
+        cls.ticket_3.programs.add(cls.program)
+        cls.ticket_4.programs.add(cls.program)
+        cls.ticket_5.programs.add(cls.program)
+
         cls.ticket_1.linked_tickets.add(cls.ticket_5)
 
     @parameterized.expand(
@@ -100,10 +113,16 @@ class TestGrievanceQuery(APITestCase):
         ]
     )
     def test_grievance_query_sort_by_linked_tickets_ascending(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.snapshot_graphql_request(
             request_string=self.SORT_GRIEVANCE_QUERY_BY_LINKED_TICKETS_ASC,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
         )
 
     @parameterized.expand(
@@ -116,7 +135,14 @@ class TestGrievanceQuery(APITestCase):
         ]
     )
     def test_grievance_query_sort_by_linked_tickets_descending(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.snapshot_graphql_request(
-            request_string=self.SORT_GRIEVANCE_QUERY_BY_LINKED_TICKETS_DESC, context={"user": self.user}
+            request_string=self.SORT_GRIEVANCE_QUERY_BY_LINKED_TICKETS_DESC,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
         )

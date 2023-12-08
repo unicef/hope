@@ -53,10 +53,18 @@ const hasResponseErrors = (response): boolean => {
 };
 
 const redirectLink = new ApolloLink((operation, forward) => {
+  const businessAreaSlug = window.location.pathname.split('/')[1];
   // Call the next link in the chain and get the response
   return forward(operation).map((response) => {
     // Check if the response has any errors
     if (hasResponseErrors(response)) {
+      // Check if the error message is "Permission Denied"
+      if (
+        response?.errors?.some((error) => error.message === 'Permission Denied')
+      ) {
+        // Redirect to the access denied page
+        window.location.href = `/access-denied/${businessAreaSlug}`;
+      }
       // Check if the operation is a mutation
       const isMutation = operation.query.definitions.some(
         (definition) =>
@@ -82,12 +90,8 @@ const redirectLink = new ApolloLink((operation, forward) => {
         window.location.href = `/error/${businessArea}`;
       }
     }
-    // If there are no errors and the data is null, redirect to a 404 page
-    else if (
-      response.data &&
-      isDataNull(response.data) &&
-      !hasResponseErrors(response)
-    ) {
+    // If data is null, redirect to a 404 page
+    else if (isDataNull(response.data)) {
       // Get the business area from the URL
       const pathSegments = window.location.pathname.split('/');
       const businessArea = pathSegments[1];
@@ -161,11 +165,14 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
 });
 
 const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
-  operation.setContext({
-    headers: {
-      'Business-Area': window.location.pathname.split('/')[1],
-    },
-  });
+  const businessAreaSlug = window.location.pathname.split('/')[1];
+  const programId = window.location.pathname.split('/')[3];
+  const headers = {
+    'Business-Area': businessAreaSlug,
+    Program: programId,
+  };
+
+  operation.setContext({ headers });
   return forward(operation);
 });
 

@@ -64,7 +64,7 @@ export const fakeApolloAllUsers = [
                         'POPULATION_VIEW_HOUSEHOLDS_DETAILS',
                         'POPULATION_VIEW_INDIVIDUALS_LIST',
                         'POPULATION_VIEW_INDIVIDUALS_DETAILS',
-                        'PRORGRAMME_VIEW_LIST_AND_DETAILS',
+                        'PROGRAMME_VIEW_LIST_AND_DETAILS',
                         'PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS',
                         'PROGRAMME_CREATE',
                         'PROGRAMME_UPDATE',

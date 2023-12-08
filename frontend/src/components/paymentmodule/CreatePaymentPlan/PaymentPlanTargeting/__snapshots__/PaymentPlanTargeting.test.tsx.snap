@@ -54,7 +54,6 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
                 choices="[object Object]"
                 class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
                 data-cy="input-target-population"
-                inputprops="[object Object]"
                 required=""
               >
                 <div

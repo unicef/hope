@@ -8,7 +8,6 @@ import {
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
 import {
@@ -21,6 +20,8 @@ import { ButtonDialog } from '../core/ButtonDialog';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { LoadingButton } from '../core/LoadingButton';
 import { PageHeader } from '../core/PageHeader';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useProgramContext } from "../../programContext";
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 
 const Separator = styled.div`
@@ -69,13 +70,15 @@ export const GrievanceDetailsToolbar = ({
 }): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
   const history = useHistory();
+  const { isActiveProgram } = useProgramContext();
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Grievance and Feedback'),
-      to: `/${businessArea}/grievance/tickets/user-generated`,
+      to: `/${baseUrl}/grievance/tickets/user-generated`,
     },
   ];
   const [mutate, { loading }] = useGrievanceTicketStatusChangeMutation();
@@ -269,11 +272,16 @@ export const GrievanceDetailsToolbar = ({
           content: getClosingConfirmationText(),
           warningContent: closingWarningText,
           continueText: t('close ticket'),
-        }).then(() => {
-          changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+        }).then(async () => {
+          try {
+            await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+          } catch(e) {
+            e.graphQLErrors.map((x) => showMessage(x.message));
+          }
         })
       }
       data-cy='button-close-ticket'
+      disabled={!isActiveProgram}
     >
       {t('Close Ticket')}
     </LoadingButton>
@@ -319,6 +327,12 @@ export const GrievanceDetailsToolbar = ({
     ].includes(ticket.issueType?.toString());
   };
 
+  const grievanceEditPath = getGrievanceEditPath(
+    ticket.id,
+    ticket.category,
+    baseUrl,
+  );
+
   return (
     <PageHeader
       title={`Ticket ID: ${ticket.unicefId}`}
@@ -331,13 +345,10 @@ export const GrievanceDetailsToolbar = ({
               color='primary'
               variant='outlined'
               component={Link}
-              to={getGrievanceEditPath(
-                ticket.id,
-                ticket.category,
-                businessArea,
-              )}
+              to={grievanceEditPath}
               startIcon={<EditIcon />}
               data-cy='button-edit'
+              disabled={!isActiveProgram}
             >
               {t('Edit')}
             </Button>
@@ -352,6 +363,7 @@ export const GrievanceDetailsToolbar = ({
               variant='contained'
               onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
               data-cy='button-assign-to-me'
+              disabled={!isActiveProgram}
             >
               {t('ASSIGN TO ME')}
             </LoadingButton>
@@ -367,6 +379,7 @@ export const GrievanceDetailsToolbar = ({
                 changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
               }}
               data-cy='button-set-to-in-progress'
+              disabled={!isActiveProgram}
             >
               {t('Set to in progress')}
             </LoadingButton>
@@ -382,6 +395,7 @@ export const GrievanceDetailsToolbar = ({
                   variant='outlined'
                   onClick={() => changeState(GRIEVANCE_TICKET_STATES.ON_HOLD)}
                   data-cy='button-set-on-hold'
+                  disabled={!isActiveProgram}
                 >
                   {t('Set On Hold')}
                 </LoadingButton>
@@ -397,6 +411,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
                   data-cy='button-send-for-approval'
+                  disabled={!isActiveProgram}
                 >
                   {t('Send For Approval')}
                 </LoadingButton>
@@ -413,6 +428,7 @@ export const GrievanceDetailsToolbar = ({
                   }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
                 }
                 data-cy='button-close-ticket'
+                disabled={!isActiveProgram}
               >
                 {t('Close Ticket')}
               </Button>
@@ -431,6 +447,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
                   data-cy='button-set-to-in-progress'
+                  disabled={!isActiveProgram}
                 >
                   {t('Set to in progress')}
                 </LoadingButton>
@@ -446,6 +463,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
                   data-cy='button-send-for-approval'
+                  disabled={!isActiveProgram}
                 >
                   {t('Send For Approval')}
                 </LoadingButton>
@@ -463,6 +481,7 @@ export const GrievanceDetailsToolbar = ({
                   }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
                 }
                 data-cy='button-close-ticket'
+                disabled={!isActiveProgram}
               >
                 {t('Close Ticket')}
               </LoadingButton>
@@ -481,6 +500,7 @@ export const GrievanceDetailsToolbar = ({
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
                   data-cy='button-send-back'
+                  disabled={!isActiveProgram}
                 >
                   {t('Send Back')}
                 </LoadingButton>
@@ -491,7 +511,7 @@ export const GrievanceDetailsToolbar = ({
                 <Button
                   onClick={() =>
                     history.push({
-                      pathname: `/${businessArea}/grievance/new-ticket`,
+                      pathname: `/${baseUrl}/grievance/new-ticket`,
                       state: {
                         category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
                         selectedIndividual: ticket.individual,
@@ -503,6 +523,7 @@ export const GrievanceDetailsToolbar = ({
                   variant='outlined'
                   color='primary'
                   data-cy='button-create-data-change'
+                  disabled={!isActiveProgram}
                 >
                   {t('Create a Data Change ticket')}
                 </Button>

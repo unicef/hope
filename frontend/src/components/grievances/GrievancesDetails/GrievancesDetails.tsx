@@ -23,11 +23,13 @@ import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { BlackLink } from '../../core/BlackLink';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   choicesData: GrievancesChoiceDataQuery;
-  businessArea: string;
+  baseUrl: string;
   canViewHouseholdDetails: boolean;
   canViewIndividualDetails: boolean;
 }
@@ -35,11 +37,12 @@ interface GrievancesDetailsProps {
 export const GrievancesDetails = ({
   ticket,
   choicesData,
-  businessArea,
+  baseUrl,
   canViewHouseholdDetails,
   canViewIndividualDetails,
 }: GrievancesDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { isAllPrograms } = useBaseUrl();
   const statusChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData.grievanceTicketStatusChoices);
@@ -66,8 +69,6 @@ export const GrievancesDetails = ({
       GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
     ticket.category.toString() ===
       GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
-  const showProgramme =
-    ticket.issueType !== +GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL;
   const showPartner =
     ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 
@@ -101,7 +102,7 @@ export const GrievancesDetails = ({
     if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
       return (
         <ContentLink
-          href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
+          href={`/${baseUrl}/payment-records/${ticket.paymentRecord.id}`}
         >
           {ticket.paymentRecord.caId}
         </ContentLink>
@@ -110,7 +111,7 @@ export const GrievancesDetails = ({
     if (ticket?.paymentRecord?.objType === 'Payment') {
       return (
         <ContentLink
-          href={`/${businessArea}/payment-module/payments/${ticket.paymentRecord.id}`}
+          href={`/${baseUrl}/payment-module/payments/${ticket.paymentRecord.id}`}
         >
           {ticket.paymentRecord.caId}
         </ContentLink>
@@ -118,6 +119,24 @@ export const GrievancesDetails = ({
     }
 
     return <>-</>;
+  };
+
+  const mappedPrograms = (): React.ReactElement => {
+    if (!ticket.programs?.length) {
+      return <>-</>;
+    }
+    return (
+      <Box display='flex' flexDirection='column'>
+        {ticket.programs.map((program) => (
+          <ContentLink
+            key={program.id}
+            href={`/${baseUrl}/details/${program.id}`}
+          >
+            {program.name}
+          </ContentLink>
+        ))}
+      </Box>
+    );
   };
 
   return (
@@ -190,18 +209,20 @@ export const GrievancesDetails = ({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {ticket.household?.id ? (
-                      <ContentLink
-                        href={
+                    {ticket.household?.id && !isAllPrograms ? (
+                      <BlackLink
+                        to={
                           canViewHouseholdDetails
-                            ? `/${businessArea}/population/household/${ticket.household.id}`
+                            ? `/${baseUrl}/population/household/${ticket.household.id}`
                             : undefined
                         }
                       >
                         {ticket.household.unicefId}
-                      </ContentLink>
+                      </BlackLink>
                     ) : (
-                      '-'
+                      <div>
+                        {ticket.household?.id ? ticket.household.unicefId : '-'}
+                      </div>
                     )}
                   </span>
                 ),
@@ -211,37 +232,41 @@ export const GrievancesDetails = ({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {ticket.individual?.id ? (
-                      <ContentLink
-                        href={
+                    {ticket.individual?.id && !isAllPrograms ? (
+                      <BlackLink
+                        to={
                           canViewIndividualDetails
-                            ? `/${businessArea}/population/individuals/${ticket.individual.id}`
+                            ? `/${baseUrl}/population/individuals/${ticket.individual.id}`
                             : undefined
                         }
                       >
                         {ticket.individual.unicefId}
-                      </ContentLink>
+                      </BlackLink>
                     ) : (
-                      '-'
+                      <div>
+                        {ticket.individual?.id
+                          ? ticket.individual.unicefId
+                          : '-'}
+                      </div>
                     )}
                   </span>
                 ),
-                size: showIssueType ? 3 : 6,
+                size: 3,
               },
               {
                 label: t('Payment ID'),
                 value: <span>{renderPaymentUrl()}</span>,
-                size: showProgramme || showPartner ? 3 : 12,
+                size: 3,
               },
-              showProgramme && {
+              {
                 label: t('Programme'),
-                value: ticket.programme?.name,
-                size: showPartner ? 3 : 9,
+                value: mappedPrograms(),
+                size: 3,
               },
               showPartner && {
                 label: t('Partner'),
                 value: ticket.partner?.name,
-                size: 6,
+                size: 3,
               },
               {
                 label: t('Created By'),
@@ -256,7 +281,7 @@ export const GrievancesDetails = ({
               {
                 label: t('Last Modified Date'),
                 value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
-                size: 6,
+                size: 3,
               },
               {
                 label: t('Administrative Level 2'),

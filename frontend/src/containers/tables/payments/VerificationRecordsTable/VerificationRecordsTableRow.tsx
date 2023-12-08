@@ -4,13 +4,13 @@ import React from 'react';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../../../utils/utils';
 import { PaymentVerificationNode } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface VerificationRecordsTableRowProps {
   paymentVerification: PaymentVerificationNode;
@@ -25,10 +25,12 @@ export function VerificationRecordsTableRow({
   canViewRecordDetails,
   showStatusColumn = true,
 }: VerificationRecordsTableRowProps): React.ReactElement {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
 
-  const nodeType = atob(paymentVerification.payment.id).split(":")[0];
-  const linkPath = `/${businessArea}/verification/payment${nodeType === "PaymentRecordNode" ? "-record" : ""}/${paymentVerification.payment.id}`;
+  const nodeType = atob(paymentVerification.payment.id).split(':')[0];
+  const linkPath = `/${baseUrl}/verification/payment${
+    nodeType === 'PaymentRecordNode' ? '-record' : ''
+  }/${paymentVerification.payment.id}`;
 
   return (
     <TableRow hover role='checkbox' key={paymentVerification.id}>
@@ -83,8 +85,8 @@ export function VerificationRecordsTableRow({
         {paymentVerification.payment.household.headOfHousehold.phoneNo}
       </TableCell>
       <TableCell align='left'>
-        {paymentVerification.payment.household.headOfHousehold.phoneNoAlternative ||
-          '-'}
+        {paymentVerification.payment.household.headOfHousehold
+          .phoneNoAlternative || '-'}
       </TableCell>
     </TableRow>
   );

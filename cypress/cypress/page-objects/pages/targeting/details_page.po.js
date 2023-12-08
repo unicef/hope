@@ -10,7 +10,7 @@ export default class TDetailsPage extends BaseComponent {
   getStatus = () => cy.get(this.status);
 
   checkElementsOnPage(status) {
-    this.getTitlePage().should("be.visible");
+    this.getTitlePage().scrollIntoView().should("be.visible");
     this.getStatus().contains(status);
   }
 }

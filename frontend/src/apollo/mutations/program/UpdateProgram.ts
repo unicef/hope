@@ -27,6 +27,7 @@ export const UPDATE_PROGRAM_MUTATION = gql`
           label
           active
           individualFiltersAvailable
+          householdFiltersAvailable
         }
       }
       validationErrors

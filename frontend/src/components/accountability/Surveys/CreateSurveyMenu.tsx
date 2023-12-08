@@ -1,4 +1,3 @@
-import Button from '@material-ui/core/Button';
 import { useHistory } from 'react-router-dom';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu, { MenuProps } from '@material-ui/core/Menu';
@@ -8,8 +7,10 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { Button } from "@material-ui/core";
 import { SurveyCategory } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useProgramContext } from "../../../programContext";
 
 const StyledMenu = withStyles({
   paper: {
@@ -45,8 +46,9 @@ const StyledMenuItem = withStyles((theme) => ({
 export const CreateSurveyMenu = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { isActiveProgram } = useProgramContext();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
@@ -58,7 +60,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
 
   const handleMenuItemClick = (category: string): void => {
     history.push({
-      pathname: `/${businessArea}/accountability/surveys/create/${category}`,
+      pathname: `/${baseUrl}/accountability/surveys/create/${category}`,
     });
   };
 
@@ -72,6 +74,7 @@ export const CreateSurveyMenu = (): React.ReactElement => {
         onClick={handleClick}
         endIcon={anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         data-cy='button-new-survey'
+        disabled={!isActiveProgram}
       >
         {t('New Survey')}
       </Button>
@@ -82,23 +85,23 @@ export const CreateSurveyMenu = (): React.ReactElement => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <StyledMenuItem>
+        <StyledMenuItem data-cy='menu-item-rapid-pro'>
           <ListItemText
-            data-cy='menu-item-rapid-pro'
+            data-cy='menu-item-rapid-pro-text'
             onClick={() => handleMenuItemClick(SurveyCategory.RapidPro)}
             primary={t('New Survey with Rapid Pro')}
           />
         </StyledMenuItem>
-        <StyledMenuItem>
+        <StyledMenuItem data-cy='menu-item-sms-text'>
           <ListItemText
-            data-cy='menu-item-sms'
+            data-cy='menu-item-sms-text'
             onClick={() => handleMenuItemClick(SurveyCategory.Sms)}
             primary={t('New Survey with SMS')}
           />
         </StyledMenuItem>
-        <StyledMenuItem>
+        <StyledMenuItem data-cy='menu-item-manual'>
           <ListItemText
-            data-cy='menu-item-manual'
+            data-cy='menu-item-manual-text'
             onClick={() => handleMenuItemClick(SurveyCategory.Manual)}
             primary={t('New Survey with Manual Process')}
           />

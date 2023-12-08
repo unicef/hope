@@ -7,7 +7,7 @@ from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 from django.utils import timezone
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
+from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
     generate_payment_plan,
@@ -120,9 +120,10 @@ class Command(BaseCommand):
 
         role_with_all_perms = Role.objects.get(name="Role with all permissions")
         afghanistan = BusinessArea.objects.get(slug="afghanistan")
+        partner = Partner.objects.get(name="UNICEF")
 
         for email in email_list + tester_list:
-            user = User.objects.create_user(email, email, "password")
+            user = User.objects.create_user(email, email, "password", partner=partner)
             UserRole.objects.create(
                 user=user,
                 role=role_with_all_perms,

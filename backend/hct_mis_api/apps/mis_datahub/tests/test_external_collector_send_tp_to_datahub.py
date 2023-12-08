@@ -112,6 +112,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             registration_data_import=rdi,
             admin_area=admin_area,
         )
+        cls.household.household_collection.save()
         cls.household1_individual_primary_and_head = IndividualFactory(
             household=cls.household,
             relationship="HEAD",
@@ -149,11 +150,13 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             registration_data_import=rdi_second,
             admin_area=admin_area,
         )
+        cls.household_second.household_collection.save()
         cls.external_primary_collector_household = HouseholdFactory.build(
             size=1,
             registration_data_import=rdi_second,
             admin_area=admin_area,
         )
+        cls.external_primary_collector_household.household_collection.save()
         cls.second_household_head = IndividualFactory(
             household=cls.household_second,
             relationship="HEAD",
@@ -190,11 +193,13 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             registration_data_import=rdi_second,
             admin_area=admin_area,
         )
+        household_third.household_collection.save()
         external_primary_collector_household = HouseholdFactory.build(
             size=1,
             registration_data_import=rdi_second,
             admin_area=admin_area,
         )
+        external_primary_collector_household.household_collection.save()
         household_third_head = IndividualFactory(
             household=household_third,
             relationship="HEAD",

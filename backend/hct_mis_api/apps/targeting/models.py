@@ -10,6 +10,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import JSONField, Q
+from django.db.models.constraints import UniqueConstraint
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
@@ -123,7 +124,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     )
 
     name = CICharField(
-        unique=True,
         db_index=True,
         max_length=255,
         validators=[
@@ -311,7 +311,13 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return self.name
 
     class Meta:
-        unique_together = ("name", "business_area")
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "business_area", "program", "is_removed"],
+                condition=Q(is_removed=False),
+                name="target_population_unique_if_not_removed",
+            )
+        ]
         verbose_name = "Target Population"
 
 

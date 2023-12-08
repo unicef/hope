@@ -4,11 +4,11 @@ import capitalize from 'lodash/capitalize';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
   GrievanceTicketQuery,
   IndividualRoleInHouseholdRole,
 } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
@@ -39,7 +39,7 @@ export const ReassignMultipleRoleBox = ({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
 
   const selectedIndividualsToReassign = ticket.needsAdjudicationTicketDetails.selectedIndividuals?.filter(
     (el) =>
@@ -69,7 +69,7 @@ export const ReassignMultipleRoleBox = ({
                     </LabelizedField>
                     <LabelizedField label={t('INDIVIDUAL ID')}>
                       <ContentLink
-                        href={`/${businessArea}/population/individuals/${householdAndRole.individual.id}`}
+                        href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}
                       >
                         {householdAndRole.individual.unicefId}
                       </ContentLink>{' '}
@@ -77,7 +77,7 @@ export const ReassignMultipleRoleBox = ({
                     </LabelizedField>
                     <LabelizedField label={t('HOUSEHOLD ID')}>
                       <ContentLink
-                        href={`/${businessArea}/population/household/${householdAndRole.household.id}`}
+                        href={`/${baseUrl}/population/household/${householdAndRole.household.id}`}
                       >
                         {householdAndRole.household.unicefId}
                       </ContentLink>
@@ -112,7 +112,7 @@ export const ReassignMultipleRoleBox = ({
                     </LabelizedField>
                     <LabelizedField label={t('INDIVIDUAL ID')}>
                       <ContentLink
-                        href={`/${businessArea}/population/individuals/${ticket.individual.id}`}
+                        href={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
                       >
                         {ticket.individual.unicefId}
                       </ContentLink>{' '}
@@ -120,7 +120,7 @@ export const ReassignMultipleRoleBox = ({
                     </LabelizedField>
                     <LabelizedField label={t('HOUSEHOLD ID')}>
                       <ContentLink
-                        href={`/${businessArea}/population/household/${ticket?.household.id}`}
+                        href={`/${baseUrl}/population/household/${ticket?.household.id}`}
                       >
                         {household.unicefId}
                       </ContentLink>

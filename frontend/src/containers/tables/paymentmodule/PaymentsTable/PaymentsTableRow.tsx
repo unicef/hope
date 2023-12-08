@@ -7,7 +7,6 @@ import ErrorOutlineRoundedIcon from '@material-ui/icons/ErrorOutlineRounded';
 import { BlackLink } from '../../../../components/core/BlackLink';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   opacityToHex,
@@ -17,6 +16,7 @@ import {
   AllPaymentsForTableQuery,
   PaymentStatus,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -67,10 +67,10 @@ export const PaymentsTableRow = ({
   onWarningClick,
 }: PaymentsTableRowProps): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
-  const paymentDetailsPath = `/${businessArea}/payment-module/payments/${payment.id}`;
-  const householdDetailsPath = `/${businessArea}/population/household/${payment.household.id}`;
-  const collectorDetailsPath = `/${businessArea}/population/individuals/${payment.collector.id}`;
+  const { baseUrl } = useBaseUrl();
+  const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/household/${payment.household.id}`;
+  const collectorDetailsPath = `/${baseUrl}/population/individuals/${payment.collector.id}`;
 
   const handleDialogWarningOpen = (
     e: React.SyntheticEvent<HTMLDivElement>,

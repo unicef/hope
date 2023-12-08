@@ -226,8 +226,7 @@ class TestGenericRegistrationService(TestCase):
         registration_datahub_import = ImportedHousehold.objects.all()[0].registration_data_import
         registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
         self.assertIn("ff", ImportedHousehold.objects.all()[0].flex_fields.keys())
-        self.assertEqual(registration_data_import.programs.count(), 1)
-        self.assertEqual(registration_data_import.programs.all()[0], self.program)
+        self.assertEqual(registration_data_import.program, self.program)
 
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)

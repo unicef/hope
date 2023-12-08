@@ -2,8 +2,8 @@ import { MenuItem, Select } from '@material-ui/core';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { useBusinessArea } from '../hooks/useBusinessArea';
 import { useCachedMe } from '../hooks/useCachedMe';
+import { useBaseUrl } from '../hooks/useBaseUrl';
 
 const CountrySelect = styled(Select)`
   && {
@@ -44,10 +44,10 @@ const CountrySelect = styled(Select)`
 
 export function BusinessAreaSelect(): React.ReactElement {
   const { data } = useCachedMe();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const history = useHistory();
   const onChange = (e): void => {
-    history.push(`/${e.target.value}`);
+    history.push(`/${e.target.value}/programs/all/list`);
   };
   if (!data) {
     return null;
