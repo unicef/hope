@@ -7,7 +7,7 @@ import { FormikDateField } from '../../../../shared/Formik/FormikDateField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { Title } from '../../../core/Title';
-import { FormikCurrencyAutocomplete } from '../../../../shared/FormikCurrencyAutocomplete';
+import { FormikCurrencyAutocomplete } from '../../../../shared/Formik/FormikCurrencyAutocomplete';
 import { useTargetPopulationLazyQuery } from '../../../../__generated__/graphql';
 import { tomorrow } from '../../../../utils/utils';
 

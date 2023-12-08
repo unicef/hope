@@ -25,7 +25,11 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
-from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    decode_id_string_required,
+    encode_id_base64,
+)
 from hct_mis_api.apps.household.fixtures import (
     IndividualRoleInHouseholdFactory,
     create_household_and_individuals,
@@ -55,6 +59,7 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.steficon.fixtures import RuleCommitFactory, RuleFactory
 
@@ -109,6 +114,7 @@ mutation LockTP($id: ID!) {
     lockTargetPopulation(id: $id) {
         targetPopulation {
             id
+            status
         }
     }
 }
@@ -301,7 +307,6 @@ class TestPaymentPlanReconciliation(APITestCase):
             variables={
                 "programData": {
                     "name": "NName",
-                    "scope": "UNICEF",
                     "startDate": timezone.datetime(2022, 8, 24, tzinfo=utc),
                     "endDate": timezone.datetime(2022, 8, 31, tzinfo=utc),
                     "description": "desc",
@@ -329,6 +334,9 @@ class TestPaymentPlanReconciliation(APITestCase):
                 },
             },
         )
+
+        program = Program.objects.get(id=decode_id_string_required(program_id))
+        self.update_user_partner_perm_for_program(self.user, self.business_area, program)
 
         create_target_population_response = self.graphql_request(
             request_string=CREATE_TARGET_POPULATION_MUTATION,
@@ -362,13 +370,15 @@ class TestPaymentPlanReconciliation(APITestCase):
             "id"
         ]
 
-        self.graphql_request(
+        locked_tp_response = self.graphql_request(
             request_string=LOCK_TARGET_POPULATION_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(program.id, "ProgramNode")}},
             variables={
                 "id": target_population_id,
             },
         )
+        status = locked_tp_response["data"]["lockTargetPopulation"]["targetPopulation"]["status"]
+        self.assertEqual(status, "LOCKED")
 
         finalize_tp_response = self.graphql_request(
             request_string=FINALIZE_TARGET_POPULATION_MUTATION,

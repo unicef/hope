@@ -258,7 +258,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             # 7. Bulk Create TicketNeedsAdjudicationDetails
             # 8. Bulk Create PossibleDuplicateThrough
             # 9. Transaction savepoint release
-            self.assertEqual(first_dedup_query_count, 9, "Should only use 9 queries")
+            # 10 - 12. Queries for `is_cross_area` update
+            self.assertEqual(first_dedup_query_count, 12, "Should only use 12 queries")
 
     def test_ticket_created_correctly(self) -> None:
         HardDocumentDeduplication().deduplicate(

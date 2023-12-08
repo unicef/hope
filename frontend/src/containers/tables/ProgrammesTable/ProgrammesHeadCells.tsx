@@ -1,7 +1,9 @@
+import { AllProgramsQuery } from '../../../__generated__/graphql';
 import { HeadCell } from '../../../components/core/Table/EnhancedTableHead';
-import { ProgramNode } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<ProgramNode>[] = [
+export const headCells: HeadCell<
+  AllProgramsQuery['allPrograms']['edges'][number]['node']
+>[] = [
   {
     disablePadding: false,
     label: 'Name',

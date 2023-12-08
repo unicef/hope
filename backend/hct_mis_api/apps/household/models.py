@@ -516,6 +516,7 @@ class Household(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
 
     class Meta:
@@ -574,11 +575,11 @@ class Household(
         for admin in admins:
             setattr(self, admin, None)
 
-        new_admin_area_level = new_admin_area.area_type.area_level
+        new_admin_area_level = new_admin_area.area_type.area_level if new_admin_area else 1
 
         for admin_level in reversed(range(1, new_admin_area_level + 1)):
             setattr(self, f"admin{admin_level}", new_admin_area)
-            new_admin_area = new_admin_area.parent
+            new_admin_area = getattr(new_admin_area, "parent", None)
 
         if save:
             self.save(update_fields=["admin_area"] + admins)
@@ -691,7 +692,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["type", "country"],  # TODO: after GPF merge will add "program"
+                fields=["type", "country", "program"],
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
@@ -705,7 +706,7 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
                 name="unique_for_individual_if_not_removed_and_valid",
             ),
             UniqueConstraint(
-                fields=["document_number", "type", "country"],  # TODO: after GPF merge will add "program"
+                fields=["document_number", "type", "country", "program"],
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
@@ -785,6 +786,7 @@ class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDMod
     )
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -992,6 +994,7 @@ class Individual(
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
     is_original = models.BooleanField(default=True)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 

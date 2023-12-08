@@ -65,9 +65,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       class="MuiBox-root MuiBox-root-5"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
         data-cy="button-export-xlsx"
-        tabindex="0"
+        disabled=""
+        tabindex="-1"
         type="button"
       >
         <span
@@ -89,9 +90,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
           </span>
           Export Xlsx
         </span>
-        <span
-          class="MuiTouchRipple-root"
-        />
       </button>
     </div>
     <div

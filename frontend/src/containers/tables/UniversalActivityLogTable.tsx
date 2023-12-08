@@ -1,12 +1,12 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { ActivityLogTable } from '../../components/core/ActivityLogTable/ActivityLogTable';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { decodeIdString } from '../../utils/utils';
 import {
   LogEntryNode,
   useAllLogEntriesQuery,
 } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const TableWrapper = styled.div`
   display: flex;
@@ -22,7 +22,7 @@ export function UniversalActivityLogTable({
   objectId,
 }: UniversalActivityLogTableProps): ReactElement {
   const [page, setPage] = useState(0);
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const { data, refetch } = useAllLogEntriesQuery({
     variables: {

@@ -227,6 +227,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
             >
               <tr
                 class="MuiTableRow-root sc-gZMcBi Qfbta MuiTableRow-hover"
+                data-cy="table-row-Notice hair fall college enough perhaps."
                 role="checkbox"
               >
                 <td
@@ -234,7 +235,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 >
                   <a
                     class="sc-htoDjs clPmKI"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/details/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
                   >
                     Notice hair fall college enough perhaps.
                   </a>

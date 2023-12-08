@@ -18,14 +18,14 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                     'active': True,
                     'code': 'partial_individuals',
                     'description': 'Partial individuals collected',
-                    'individualFiltersAvailable': True
+                    'individualFiltersAvailable': True,
+                    'label': 'Partial'
                 },
                 'description': 'my description of program',
                 'endDate': '2021-12-20',
                 'frequencyOfPayments': 'REGULAR',
                 'name': 'Test',
                 'populationGoal': 150000,
-                'scope': 'UNICEF',
                 'sector': 'EDUCATION',
                 'startDate': '2019-12-20',
                 'status': 'DRAFT'

@@ -8,7 +8,6 @@ import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
 import {
@@ -20,12 +19,16 @@ import {
 import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import {ButtonTooltip} from "../../../../components/core/ButtonTooltip";
+import {useProgramContext} from "../../../../programContext";
 
 export const SurveyDetailsPage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
+  const { isActiveProgram } = useProgramContext();
   const { data, loading, error } = useSurveyQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
@@ -51,7 +54,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Surveys'),
-      to: `/${businessArea}/accountability/surveys`,
+      to: `/${baseUrl}/accountability/surveys`,
     },
   ];
 
@@ -71,7 +74,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
   const renderActions = (): React.ReactElement => {
     if (survey.category === SurveyCategory.RapidPro) {
       return (
-        <Button
+        <ButtonTooltip
           variant='contained'
           color='primary'
           component={Link}
@@ -79,9 +82,11 @@ export const SurveyDetailsPage = (): React.ReactElement => {
             pathname: survey?.rapidProUrl,
           }}
           target='_blank'
+          title={t('Program has to be active to export Survey sample')}
+          disabled={!isActiveProgram}
         >
           {t('Check Answers')}
-        </Button>
+        </ButtonTooltip>
       );
     }
     if (survey.category === SurveyCategory.Manual) {

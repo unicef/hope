@@ -7,7 +7,6 @@ export const fakeApolloAllPaymentRecords = [
       variables: {
         parent:
           'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
-        businessArea: 'afghanistan',
         first: 5,
         orderBy: null,
       },

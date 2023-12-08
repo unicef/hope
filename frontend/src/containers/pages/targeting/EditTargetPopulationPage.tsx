@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
 import {
   TargetPopulationBuildStatus,
   useBusinessAreaDataQuery,
   useTargetPopulationQuery,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { EditTargetPopulation } from '../../../components/targeting/EditTargetPopulation/EditTargetPopulation';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { isPermissionDeniedError } from '../../../utils/utils';
 
 export const EditTargetPopulationPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -25,7 +25,7 @@ export const EditTargetPopulationPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },

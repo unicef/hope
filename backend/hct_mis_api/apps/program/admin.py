@@ -42,3 +42,4 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
     filter_horizontal = ("admin_areas",)
 
     inlines = (ProgramCycleAdminInline,)
+    ordering = ("name",)

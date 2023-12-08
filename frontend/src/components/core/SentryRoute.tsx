@@ -14,14 +14,16 @@ export const SentryRoute = ({
   children,
   label,
   exact,
-}: SentryRouteProps): React.ReactElement => (
-  <Route exact={exact} path={path}>
-    <Sentry.ErrorBoundary
-      beforeCapture={(scope) => {
-        scope.setTag('location', label || path);
-      }}
-    >
-      {children}
-    </Sentry.ErrorBoundary>
-  </Route>
-);
+}: SentryRouteProps): React.ReactElement => {
+  return (
+    <Route exact={exact} path={path}>
+      <Sentry.ErrorBoundary
+        beforeCapture={(scope) => {
+          scope.setTag('location', label || path);
+        }}
+      >
+        {children}
+      </Sentry.ErrorBoundary>
+    </Route>
+  );
+};

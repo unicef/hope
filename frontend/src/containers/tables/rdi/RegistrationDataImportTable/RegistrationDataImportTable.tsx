@@ -7,7 +7,7 @@ import {
   useAllRegistrationDataImportsQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { dateToIsoString, decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RegistrationDataImportTableHeadCells';
@@ -30,7 +30,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export function RegistrationDataImportTable({
+export const RegistrationDataImportTable = ({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -38,9 +38,9 @@ export function RegistrationDataImportTable({
   handleChange,
   noTableStyling,
   noTitle,
-}: RegistrationDataImportProps): ReactElement {
+}: RegistrationDataImportProps): ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea, programId } = useBaseUrl();
   const initialVariables = {
     search: filter.search,
     importedBy: filter.importedBy
@@ -48,6 +48,7 @@ export function RegistrationDataImportTable({
       : undefined,
     status: filter.status !== '' ? filter.status : undefined,
     businessArea,
+    program: programId,
     importDateRange: JSON.stringify({
       min: dateToIsoString(filter.importDateRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.importDateRangeMax, 'endOfDay'),
@@ -99,4 +100,4 @@ export function RegistrationDataImportTable({
   ) : (
     renderTable()
   );
-}
+};

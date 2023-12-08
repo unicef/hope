@@ -117,6 +117,7 @@ class TicketCreatorService:
                 GrievanceTicket.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 user,
+                grievance_ticket.programs.all(),
                 None,
                 grievance,
             )
@@ -145,19 +146,19 @@ class TicketCreatorService:
         partner = decode_and_get_object(input_data.pop("partner", None), Partner, False)
         assigned_to = decode_and_get_object(input_data.pop("assigned_to", None), get_user_model(), False)
         admin = input_data.pop("admin", None)
-        programme = input_data.pop("programme", None)
+        program = input_data.pop("program", None)
 
         if admin:
             admin = get_object_or_404(Area, id=decode_id_string(admin))
         else:
             admin = None
 
-        if programme:
-            programme = get_object_or_404(Program, pk=decode_id_string(programme))
+        if program:
+            program = get_object_or_404(Program, pk=decode_id_string(program))
         else:
-            programme = None
+            program = None
 
-        return GrievanceTicket.objects.create(
+        new_ticket = GrievanceTicket.objects.create(
             **input_data,
             admin2=admin,
             business_area=business_area,
@@ -166,5 +167,8 @@ class TicketCreatorService:
             assigned_to=assigned_to,
             status=GrievanceTicket.STATUS_ASSIGNED if assigned_to else GrievanceTicket.STATUS_NEW,
             partner=partner,
-            programme=programme,
         )
+        if program:
+            new_ticket.programs.add(program)
+
+        return new_ticket

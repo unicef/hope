@@ -2,13 +2,18 @@ import { Grid } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import {
+  AllChartsQueryVariables,
+  useAllChartsQuery,
+  useGlobalAreaChartsLazyQuery,
+} from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { TabPanel } from '../../../components/core/TabPanel';
+import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
 import { PaymentsChart } from '../../../components/dashboard/charts/PaymentsChart';
 import { ProgrammesBySector } from '../../../components/dashboard/charts/ProgrammesBySector';
 import { TotalTransferredByMonth } from '../../../components/dashboard/charts/TotalTransferredByMonth';
 import { VolumeByDeliveryMechanism } from '../../../components/dashboard/charts/VolumeByDeliveryMechanism';
-import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
 import { GrievancesSection } from '../../../components/dashboard/sections/GrievancesSection/GrievancesSection';
 import { PaymentVerificationSection } from '../../../components/dashboard/sections/PaymentVerificationSection/PaymentVerificationSection';
 import { TotalAmountTransferredSectionByAdminAreaSection } from '../../../components/dashboard/sections/TotalAmountTransferredByAdminAreaSection/TotalAmountTransferredByAdminAreaSection';
@@ -17,11 +22,7 @@ import { TotalAmountTransferredSection } from '../../../components/dashboard/sec
 import { TotalNumberOfChildrenReachedSection } from '../../../components/dashboard/sections/TotalNumberOfChildrenReachedSection/TotalNumberOfChildrenReachedSection';
 import { TotalNumberOfHouseholdsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfHouseholdsReachedSection/TotalNumberOfHouseholdsReachedSection';
 import { TotalNumberOfIndividualsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfIndividualsReachedSection/TotalNumberOfIndividualsReachedSection';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import {
-  useAllChartsQuery,
-  useGlobalAreaChartsLazyQuery,
-} from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -50,22 +51,24 @@ export function DashboardYearPage({
   filter,
 }: DashboardYearPageProps): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
-  const isGlobal = businessArea === 'global';
+  const { businessArea, isGlobal, isAllPrograms, programId } = useBaseUrl();
 
-  const sharedVariables = {
+  const variables: AllChartsQueryVariables = {
     year: parseInt(year, 10),
+    businessAreaSlug: businessArea,
   };
 
+  if (!isGlobal) {
+    variables.program = filter.program;
+    variables.administrativeArea = filter.administrativeArea;
+  }
+
+  if (!isAllPrograms) {
+    variables.program = programId;
+  }
+
   const { data, loading } = useAllChartsQuery({
-    variables: {
-      ...sharedVariables,
-      businessAreaSlug: businessArea,
-      ...(!isGlobal && {
-        program: filter.program,
-        administrativeArea: filter.administrativeArea,
-      }),
-    },
+    variables,
     fetchPolicy: 'cache-and-network',
   });
 
@@ -73,7 +76,9 @@ export function DashboardYearPage({
     loadGlobal,
     { data: globalData, loading: globalLoading },
   ] = useGlobalAreaChartsLazyQuery({
-    variables: sharedVariables,
+    variables: {
+      year: parseInt(year, 10),
+    },
   });
 
   useEffect(() => {
@@ -98,18 +103,22 @@ export function DashboardYearPage({
             <TotalAmountTransferredSection
               data={data.sectionTotalTransferred}
             />
-            <TotalAmountTransferredByCountrySection
-              data={globalData?.chartTotalTransferredCashByCountry}
-            />
-            <DashboardPaper title={t('Number of Programmes by Sector')}>
-              <ChartWrapper
-                numberOfProgrammes={
-                  data.chartProgrammesBySector?.labels.length || 0
-                }
-              >
-                <ProgrammesBySector data={data.chartProgrammesBySector} />
-              </ChartWrapper>
-            </DashboardPaper>
+            {isGlobal && (
+              <TotalAmountTransferredByCountrySection
+                data={globalData?.chartTotalTransferredCashByCountry}
+              />
+            )}
+            {isAllPrograms && (
+              <DashboardPaper title={t('Number of Programmes by Sector')}>
+                <ChartWrapper
+                  numberOfProgrammes={
+                    data.chartProgrammesBySector?.labels.length || 0
+                  }
+                >
+                  <ProgrammesBySector data={data.chartProgrammesBySector} />
+                </ChartWrapper>
+              </DashboardPaper>
+            )}
             <DashboardPaper title={t('Total Transferred by Month')}>
               <TotalTransferredByMonth
                 data={data.chartTotalTransferredByMonth}

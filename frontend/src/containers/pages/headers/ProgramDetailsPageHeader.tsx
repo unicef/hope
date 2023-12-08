@@ -1,28 +1,35 @@
 import React from 'react';
-import { ProgramNode, ProgramStatus } from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/core/PageHeader';
+import { useTranslation } from 'react-i18next';
+import { ProgramQuery, ProgramStatus } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
+import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
 
 export interface ProgramDetailsPageHeaderPropTypes {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
   canActivate: boolean;
   canEdit: boolean;
   canRemove: boolean;
   canFinish: boolean;
+  canDuplicate: boolean;
+  isPaymentPlanApplicable: boolean;
 }
 
-export function ProgramDetailsPageHeader({
+export const ProgramDetailsPageHeader = ({
   program,
   canActivate,
   canEdit,
   canRemove,
   canFinish,
-}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
+  canDuplicate,
+  isPaymentPlanApplicable,
+}: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   let buttons;
+  const { t } = useTranslation();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   switch (program.status) {
     case ProgramStatus.Active:
       buttons = (
@@ -30,6 +37,8 @@ export function ProgramDetailsPageHeader({
           program={program}
           canFinish={canFinish}
           canEdit={canEdit}
+          canDuplicate={canDuplicate}
+          isPaymentPlanApplicable={isPaymentPlanApplicable}
         />
       );
       break;
@@ -40,6 +49,7 @@ export function ProgramDetailsPageHeader({
           canRemove={canRemove}
           canEdit={canEdit}
           canActivate={canActivate}
+          canDuplicate={canDuplicate}
         />
       );
       break;
@@ -48,19 +58,22 @@ export function ProgramDetailsPageHeader({
         <FinishedProgramDetailsPageHeaderButtons
           program={program}
           canActivate={canActivate}
+          canDuplicate={canDuplicate}
+          isPaymentPlanApplicable={isPaymentPlanApplicable}
         />
       );
   }
-  const businessArea = useBusinessArea();
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Programme Management',
-      to: `/${businessArea}/programs/`,
-    },
-  ];
+  const breadCrumbsItems: BreadCrumbsItem[] = [];
+  if (isAllPrograms) {
+    breadCrumbsItems.unshift({
+      title: t('Programme Management'),
+      to: `/${baseUrl}/list/`,
+    });
+  }
+
   return (
     <PageHeader title={program.name} breadCrumbs={breadCrumbsItems}>
       {buttons}
     </PageHeader>
   );
-}
+};

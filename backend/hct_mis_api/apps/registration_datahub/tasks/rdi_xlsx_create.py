@@ -461,11 +461,13 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "BOOL": self._handle_bool_field,
         }
 
+        program_id = RegistrationDataImport.objects.get(id=registration_data_import.hct_id).program.id
+
         sheet_title = str(sheet.title.lower())
         if sheet_title == "households":
-            obj = partial(ImportedHousehold, registration_data_import=registration_data_import)
+            obj = partial(ImportedHousehold, registration_data_import=registration_data_import, program_id=program_id)
         elif sheet_title == "individuals":
-            obj = partial(ImportedIndividual, registration_data_import=registration_data_import)
+            obj = partial(ImportedIndividual, registration_data_import=registration_data_import, program_id=program_id)
         else:
             raise ValueError(f"Unhandled sheet label '{sheet.title!r}'")
 
@@ -610,10 +612,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="registration_datahub")
     def execute(
-        self,
-        registration_data_import_id: str,
-        import_data_id: str,
-        business_area_id: str,
+        self, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: str
     ) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
@@ -642,7 +641,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
             rdi_mis.status = RegistrationDataImport.DEDUPLICATION
             rdi_mis.save()
-            DeduplicateTask(self.business_area.slug).deduplicate_imported_individuals(
+            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
                 registration_data_import_datahub=registration_data_import
             )
             logger.info("Finished deduplication of %s", registration_data_import.id)
@@ -654,6 +653,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 RegistrationDataImport.ACTIVITY_LOG_MAPPING,
                 "business_area",
                 None,
+                rdi_mis.program_id,
                 old_rdi_mis,
                 rdi_mis,
             )
