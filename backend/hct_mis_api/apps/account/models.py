@@ -137,7 +137,8 @@ class PartnerPermission:
         return self._permissions[business_area_id].get_all_area_ids()
 
     def business_area_ids(self) -> List[str]:
-        return list(self._permissions.keys())
+        # return only BA with roles NOT []
+        return [ba_id for ba_id in self._available_business_areas if self._permissions[ba_id].roles]
 
     def program_ids(self) -> List[str]:
         ids = []
