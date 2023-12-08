@@ -72,7 +72,9 @@ export const BulkSetUrgencyModal = ({
           label={t('Urgency')}
         >
           {urgencyChoices.map((choice) => (
-            <MenuItem value={choice.value}>{choice.name}</MenuItem>
+            <MenuItem key={choice.value} value={choice.value}>
+              {choice.name}
+            </MenuItem>
           ))}
         </Select>
       </BulkBaseModal>
