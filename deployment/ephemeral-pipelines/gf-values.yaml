@@ -3,9 +3,9 @@ global:
   storageClass: default
 
 backend:
-  image: uniappsakshopedev.azurecr.io/hope-backend:d981ad2d4f4b0aebebfc86e799a79b113a9b584f
+  image: ""
   replicaCount: 1
-  initCommand: "python3 /code/manage.py initdemo"
+  initCommand: "python3 /code/manage.py upgrade"
   secret:
     AZURE_CLIENT_ID: #secret-variables: AZURE_CLIENT_ID
     AZURE_CLIENT_SECRET: #secret-variables: AZURE_CLIENT_SECRET
@@ -20,10 +20,10 @@ backend:
     ROOT_ACCESS_TOKEN: r4nd0mrootaccesstokenf0rrandomenv
 
 frontend:
-  image: uniappsakshopedev.azurecr.io/hope-frontend:d981ad2d4f4b0aebebfc86e799a79b113a9b584f
+  image: ""
 
 celery:
-  image: uniappsakshopedev.azurecr.io/hope-backend:d981ad2d4f4b0aebebfc86e799a79b113a9b584f
+  image: ""
   replicaCount: 1
 
 celeryflower:
