@@ -1,5 +1,6 @@
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
+from django.core.exceptions import PermissionDenied
 from django.db.models import (
     Case,
     F,
@@ -24,6 +25,7 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     BasePermission,
+    DjangoPermissionFilterConnectionField,
     DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
@@ -302,6 +304,31 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         super().check_node_permission(info, object_instance)
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
+        business_area_slug = info.context.headers.get("Business-Area")
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+
+        if not program_id:
+            raise PermissionDenied("Permission Denied")
+
+        if not user.partner.is_unicef:
+            partner_permission = user.partner.get_permissions()
+            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(program_id))
+            if areas_from_partner is None:
+                raise PermissionDenied("Permission Denied")
+
+            if str(object_instance.program_id) != program_id:
+                raise PermissionDenied("Permission Denied")
+
+            if len(areas_from_partner) > 0 and object_instance.household_id and object_instance.household.admin_area_id:
+                household = object_instance.household
+                areas_from_household = {
+                    str(household.admin1_id),
+                    str(household.admin2_id),
+                    str(household.admin3_id),
+                }
+                if not areas_from_household.intersection(areas_from_partner):
+                    raise PermissionDenied("Permission Denied")
+
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
             Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area, program_id
@@ -433,6 +460,29 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         super().check_node_permission(info, object_instance)
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
+        business_area_slug = info.context.headers.get("Business-Area")
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+
+        if not program_id:
+            raise PermissionDenied("Permission Denied")
+
+        if not user.partner.is_unicef:
+            partner_permission = user.partner.get_permissions()
+            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(program_id))
+            if areas_from_partner is None:
+                raise PermissionDenied("Permission Denied")
+
+            if str(object_instance.program_id) != program_id:
+                raise PermissionDenied("Permission Denied")
+
+            if len(areas_from_partner) > 0 and object_instance.admin_area_id:
+                areas_from_household = {
+                    str(object_instance.admin1_id),
+                    str(object_instance.admin2_id),
+                    str(object_instance.admin3_id),
+                }
+                if not areas_from_household.intersection(areas_from_partner):
+                    raise PermissionDenied("Permission Denied")
 
         # if user doesn't have permission to view all households, we check based on their grievance tickets
         if not user.has_permission(
@@ -470,7 +520,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoPermissionFilterFastConnectionField(
+    all_households = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
         permission_classes=(
@@ -478,7 +528,7 @@ class Query(graphene.ObjectType):
         ),
     )
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoPermissionFilterFastConnectionField(
+    all_individuals = DjangoPermissionFilterConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
         permission_classes=(

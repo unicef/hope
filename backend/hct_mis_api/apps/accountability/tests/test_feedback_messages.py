@@ -4,7 +4,7 @@ from django.conf import settings
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.fixtures import (
     FeedbackFactory,
@@ -65,8 +65,9 @@ class TestFeedbackMessages(APITestCase):
             area_level=2,
         )
         AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
+        cls.partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory.create(first_name="John", last_name="Doe", partner=cls.partner)
 
-        cls.user = UserFactory.create(first_name="John", last_name="Doe")
         cls.feedback = FeedbackFactory(id="1761d020-ead2-489f-95a8-61853fbe568e", issue_type=Feedback.NEGATIVE_FEEDBACK)
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
@@ -80,7 +81,7 @@ class TestFeedbackMessages(APITestCase):
         ]
     )
     def test_create_feedback_message(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
         self.snapshot_graphql_request(
             request_string=self.CREATE_FEEDBACK_MESSAGE_MUTATION,
             context={
@@ -108,7 +109,7 @@ class TestFeedbackMessages(APITestCase):
         ]
     )
     def test_feedback_query_shows_feedback_messages(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
 
         FeedbackMessageFactory(
             id="c86d8a58-c4b8-4066-9821-98e236b17742",

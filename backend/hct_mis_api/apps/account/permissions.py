@@ -232,6 +232,34 @@ POPULATION_DETAILS = (
     Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
 )
 
+DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER = (
+    Permissions.RDI_VIEW_LIST,
+    Permissions.RDI_VIEW_DETAILS,
+    Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
+    Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
+    Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+    Permissions.DASHBOARD_VIEW_COUNTRY,
+    Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    Permissions.TARGETING_VIEW_LIST,
+    Permissions.TARGETING_VIEW_DETAILS,
+    Permissions.PM_VIEW_LIST,
+    Permissions.PM_VIEW_DETAILS,
+    Permissions.PAYMENT_VERIFICATION_VIEW_LIST,
+    Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
+    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+    Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+    Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+    Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+    Permissions.USER_MANAGEMENT_VIEW_LIST,
+    Permissions.REPORTING_EXPORT,
+    Permissions.ACTIVITY_LOG_VIEW,
+)
+
+DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER = [str(perm.value) for perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER]
+
 
 class BasePermission:
     @classmethod
@@ -257,14 +285,22 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     business_area_arg = kwargs.get("business_area")
     if business_area_arg is None:
         return False
-    if isinstance(business_area_arg, BusinessArea):
-        business_area = business_area_arg
-    else:
-        business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
+
+    business_area = (
+        business_area_arg
+        if isinstance(business_area_arg, BusinessArea)
+        else BusinessArea.objects.filter(slug=business_area_arg).first()
+    )
     if business_area is None:
         return False
     program_id = get_program_id_from_headers(kwargs)
-    return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
+    # is_unicef has access to all Programs
+    if user.partner.is_unicef:
+        return any(perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER for perm in permissions) or any(
+            user.has_permission(permission.name, business_area, program_id) for permission in permissions
+        )
+    else:
+        return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
 
 
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:

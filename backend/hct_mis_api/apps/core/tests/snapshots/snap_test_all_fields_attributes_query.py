@@ -20327,26 +20327,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'UA0106047'
                     },
                     {
-                        'labelEn': 'Test Doshi Level_3-AF0901123',
-                        'labels': [
-                            {
-                                'label': 'Test Doshi Level_3-AF0901123',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AF0901123'
-                    },
-                    {
-                        'labelEn': 'Test Doshi One More-AF0901123',
-                        'labels': [
-                            {
-                                'label': 'Test Doshi One More-AF0901123',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AF0901123'
-                    },
-                    {
                         'labelEn': 'Tinystivska-UA0102045',
                         'labels': [
                             {
@@ -20853,16 +20833,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
-                    {
-                        'labelEn': 'Test_Level_4-AF090112344',
-                        'labels': [
-                            {
-                                'label': 'Test_Level_4-AF090112344',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AF090112344'
-                    }
                 ],
                 'hint': '',
                 'isFlexField': False,

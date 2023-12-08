@@ -1,5 +1,5 @@
 import { MenuItem, Select } from '@material-ui/core';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -9,6 +9,7 @@ import {
 import { LoadingComponent } from '../components/core/LoadingComponent';
 import { useBaseUrl } from '../hooks/useBaseUrl';
 import { useProgramContext } from '../programContext';
+import { isProgramNodeUuidFormat } from '../utils/utils';
 
 const CountrySelect = styled(Select)`
   && {
@@ -56,64 +57,84 @@ export const GlobalProgramSelect = (): React.ReactElement => {
     fetchPolicy: 'network-only',
   });
 
-  const isValidProgramId = useCallback(
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const isOneOfAvailableProgramsId = useCallback(
     (id: string): boolean => {
       return data?.allPrograms.edges.some((each) => each.node.id === id);
     },
     [data],
   );
 
-  const getCurrentProgram = ():
+  const getCurrentProgram = useCallback(():
     | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
     | null => {
-    const obj = data?.allPrograms.edges.filter(
-      (el) => el.node.id === programId,
-    );
-    return obj ? obj[0].node : null;
-  };
-
-  if (programId !== 'all') {
-    const program = getCurrentProgram();
-    if (!selectedProgram || selectedProgram?.id !== programId) {
-      if (program) {
-        const {
-          id,
-          name,
-          status,
-          individualDataNeeded,
-          dataCollectingType,
-        } = program;
-
-        setSelectedProgram({
-          id,
-          name,
-          status,
-          individualDataNeeded,
-          dataCollectingType: {
-            id: dataCollectingType?.id,
-            householdFiltersAvailable:
-              dataCollectingType?.householdFiltersAvailable,
-            individualFiltersAvailable:
-              dataCollectingType?.individualFiltersAvailable,
-          },
-        });
-      }
-    }
-  }
+    const obj = data?.allPrograms.edges.find((el) => el.node.id === programId);
+    return obj ? obj.node : null;
+  }, [data, programId]);
 
   useEffect(() => {
+    if (programId !== 'all') {
+      const program = getCurrentProgram();
+      if (!selectedProgram || selectedProgram?.id !== programId) {
+        if (program && isMounted.current) {
+          const {
+            id,
+            name,
+            status,
+            individualDataNeeded,
+            dataCollectingType,
+          } = program;
+
+          setSelectedProgram({
+            id,
+            name,
+            status,
+            individualDataNeeded,
+            dataCollectingType: {
+              id: dataCollectingType?.id,
+              householdFiltersAvailable:
+                dataCollectingType?.householdFiltersAvailable,
+              individualFiltersAvailable:
+                dataCollectingType?.individualFiltersAvailable,
+            },
+          });
+        }
+      }
+    } else {
+      setSelectedProgram(null);
+    }
+  }, [programId, selectedProgram, setSelectedProgram, getCurrentProgram]);
+
+  useEffect(() => {
+    // If the programId is not in a valid format, redirect to the 404 page
     if (
-      !loading &&
       programId &&
-      !isValidProgramId(programId) &&
+      !isProgramNodeUuidFormat(programId) &&
       programId !== 'all'
     ) {
-      history.push(`/${businessArea}/programs/all/list`);
+      history.push(`/404/${businessArea}`);
     }
-  }, [programId, history, businessArea, isValidProgramId, loading]);
+    // If the programId is valid but not one of the available programs, redirect to the access denied page
+    else if (
+      !loading &&
+      programId &&
+      !isOneOfAvailableProgramsId(programId) &&
+      programId !== 'all'
+    ) {
+      history.push(`/access-denied/${businessArea}`);
+    }
+  }, [programId, history, businessArea, isOneOfAvailableProgramsId, loading]);
 
   const onChange = (e): void => {
-    if (e.target.value === 'all' || !isValidProgramId(e.target.value)) {
+    if (e.target.value === 'all') {
       history.push(`/${businessArea}/programs/all/list`);
     } else {
       history.push(

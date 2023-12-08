@@ -34,6 +34,8 @@ export const DeleteProgramPartner = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
+  const partnerId = partner.id ? `#${partner.id}` : '';
+
   return (
     <>
       <ErrorButton
@@ -46,7 +48,7 @@ export const DeleteProgramPartner = ({
       <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
         <DialogTitleWrapper>
           <DialogTitle>
-            {`Are you sure you want to delete the Program Partner #${partner.id}`}
+            {`Are you sure you want to delete the Program Partner ${partnerId}`}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>

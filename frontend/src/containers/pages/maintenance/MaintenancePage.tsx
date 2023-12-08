@@ -1,7 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import HopeLogo from './maintenance_hope_logo.png';
+import { getClient } from '../../../apollo/client';
+import { clearCache } from '../../../utils/utils';
 import MaintenanceGraphic from './maintenance_graphic_painter.png';
+import HopeLogo from './maintenance_hope_logo.png';
 
 const Container = styled.div`
   background-color: #ffffff;
@@ -64,10 +66,11 @@ const Icon = styled.img`
 `;
 
 export const MaintenancePage: React.FC = () => {
-  const goBack = (): void => {
+  const goBackAndClearCache = async (): Promise<void> => {
+    const client = await getClient();
+    await clearCache(client);
     window.history.back();
   };
-
   return (
     <Container>
       <LogoContainer>
@@ -91,7 +94,7 @@ export const MaintenancePage: React.FC = () => {
         </Paragraph>
       </TextContainer>
 
-      <Button onClick={goBack}>
+      <Button onClick={goBackAndClearCache}>
         REFRESH PAGE
         <Icon
           src='./refresh_icon.png'

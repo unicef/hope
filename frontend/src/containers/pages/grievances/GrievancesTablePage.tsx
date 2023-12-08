@@ -47,7 +47,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
     urgency: '',
     preferredLanguage: '',
     program: '',
-    programState: 'active',
+    programState: 'all',
     areaScope: 'all',
   };
 
