@@ -108,6 +108,8 @@ export const GlobalProgramSelect = (): React.ReactElement => {
           });
         }
       }
+    } else {
+      setSelectedProgram(null);
     }
   }, [programId, selectedProgram, setSelectedProgram, getCurrentProgram]);
 
