@@ -6,18 +6,18 @@ import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
-  useRefuseRdiMutation,
   useEraseRdiMutation,
+  useRefuseRdiMutation,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { useConfirmation } from '../../core/ConfirmationDialog';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
+import { useProgramContext } from "../../../programContext";
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
-
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -31,16 +31,17 @@ const MergeButtonContainer = styled.span`
   margin-left: ${({ theme }) => theme.spacing(4)}px;
 `;
 
-export function RegistrationDataImportDetailsPageHeader({
+export const RegistrationDataImportDetailsPageHeader = ({
   registration,
   canMerge,
   canRerunDedupe,
   canViewList,
   canRefuse,
-}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
+}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
+  const { isActiveProgram } = useProgramContext();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
@@ -64,6 +65,7 @@ export function RegistrationDataImportDetailsPageHeader({
       }
       variant='contained'
       color='primary'
+      disabled={!isActiveProgram}
     >
       {t('Erase import')}
     </LoadingButton>
@@ -83,6 +85,7 @@ export function RegistrationDataImportDetailsPageHeader({
               onClick={() => setShowRefuseRdiForm(true)}
               variant='contained'
               color='primary'
+              disabled={!isActiveProgram}
             >
               {t('Refuse Import')}
             </LoadingButton>
@@ -110,14 +113,14 @@ export function RegistrationDataImportDetailsPageHeader({
     case RegistrationDataImportStatus.Merged:
       buttons = (
         <MergeButtonContainer>
-          <Button
-            variant='contained'
-            color='primary'
-            component={Link}
-            to={`/${businessArea}/grievance/rdi/${registration.id}`}
-          >
-            {t('View Tickets')}
-          </Button>
+            <Button
+              variant='contained'
+              color='primary'
+              component={Link}
+              to={`/${baseUrl}/grievance/rdi/${registration.id}`}
+            >
+              {t('View Tickets')}
+            </Button>
         </MergeButtonContainer>
       );
       break;
@@ -126,7 +129,7 @@ export function RegistrationDataImportDetailsPageHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Registration Data import'),
-      to: `/${businessArea}/registration-data-import/`,
+      to: `/${baseUrl}/registration-data-import/`,
     },
   ];
 
@@ -135,7 +138,6 @@ export function RegistrationDataImportDetailsPageHeader({
       <PageHeader
         title={registration.name}
         breadCrumbs={canViewList ? breadCrumbsItems : null}
-        isErased={registration.erased}
       >
         {registration.erased ? null : buttons}
       </PageHeader>
@@ -147,4 +149,4 @@ export function RegistrationDataImportDetailsPageHeader({
       />
     </>
   );
-}
+};

@@ -44,6 +44,7 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
         )
 
         household_one = HouseholdFactory.build()
+        household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)

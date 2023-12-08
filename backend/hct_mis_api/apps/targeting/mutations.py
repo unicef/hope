@@ -22,6 +22,7 @@ from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
 )
+from hct_mis_api.apps.core.validators import raise_program_status_is
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
@@ -126,6 +127,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         user = info.context.user
         input = kwargs.pop("input")
         program = get_object_or_404(Program, pk=decode_id_string(input.get("program_id")))
+        business_area = BusinessArea.objects.get(slug=input.get("business_area_slug"))
 
         cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
 
@@ -133,8 +135,12 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             raise ValidationError("Only Active program can be assigned to Targeting")
 
         tp_name = input.get("name", "").strip()
-        if TargetPopulation.objects.filter(name=tp_name).exists():
-            raise ValidationError(f"Target population with name {tp_name} already exists")
+        if TargetPopulation.objects.filter(
+            name=tp_name, program=program, business_area=business_area, is_removed=False
+        ).exists():
+            raise ValidationError(
+                f"Target population with name: {tp_name}, program: {program.name} and business_area: {business_area.slug} already exists."
+            )
 
         targeting_criteria_input = input.get("targeting_criteria")
 
@@ -153,7 +159,14 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         target_population.full_clean()
         target_population.save()
         transaction.on_commit(lambda: target_population_full_rebuild.delay(target_population.id))
-        log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            program.pk,
+            None,
+            target_population,
+        )
         return cls(target_population=target_population)
 
 
@@ -166,6 +179,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UpdateTargetPopulationMutation":
         input = kwargs.get("input")
@@ -235,6 +249,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -298,6 +313,7 @@ class LockTargetPopulationMutation(ValidatedMutation):
         version = BigInt(required=False)
 
     @classmethod
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "LockTargetPopulationMutation":
         user = info.context.user
@@ -315,6 +331,7 @@ class LockTargetPopulationMutation(ValidatedMutation):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -332,6 +349,7 @@ class UnlockTargetPopulationMutation(ValidatedMutation):
         version = BigInt(required=False)
 
     @classmethod
+    @raise_program_status_is(Program.FINISHED)
     def validated_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UnlockTargetPopulationMutation":
         target_population = kwargs.get("model_object")
         old_target_population = kwargs.get("old_model_object")
@@ -343,6 +361,7 @@ class UnlockTargetPopulationMutation(ValidatedMutation):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -387,6 +406,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -403,6 +423,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def mutate_and_get_payload(cls, _root: Any, info: Any, **kwargs: Any) -> "CopyTargetPopulationMutation":
         try:
@@ -440,7 +461,12 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             target_population_copy.refresh_from_db()
             transaction.on_commit(lambda: target_population_full_rebuild.delay(target_population_copy.id))
             log_create(
-                TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population
+                TargetPopulation.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                info.context.user,
+                getattr(target_population.program, "pk", None),
+                None,
+                target_population,
             )
             return CopyTargetPopulationMutation(target_population_copy)
         except ValidationError as e:
@@ -479,6 +505,7 @@ class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
     @classmethod
     @is_authenticated
+    @raise_program_status_is(Program.FINISHED)
     def mutate_and_get_payload(cls, _root: Any, _info: Any, **kwargs: Any) -> "DeleteTargetPopulationMutation":
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
@@ -492,6 +519,7 @@ class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             _info.context.user,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -546,6 +574,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             _info.context.user,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )
@@ -573,6 +602,7 @@ class RebuildTargetPopulationMutation(ValidatedMutation):
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",
             info.context.user,
+            getattr(target_population.program, "pk", None),
             old_target_population,
             target_population,
         )

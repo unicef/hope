@@ -15,6 +15,7 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { Title } from '../../../core/Title';
+import { useProgramContext } from "../../../../programContext";
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 
 const ButtonContainer = styled(Box)`
@@ -31,6 +32,8 @@ export const AcceptanceProcess = ({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
+  const { isActiveProgram } = useProgramContext();
+
   const { edges } = paymentPlan.approvalProcess;
   const [showAll, setShowAll] = useState(false);
   const [
@@ -79,6 +82,7 @@ export const AcceptanceProcess = ({
               color='primary'
               variant='contained'
               onClick={handleExportPdf}
+              disabled={!isActiveProgram}
             >
               {t('Download Payment Plan Summary')}
             </LoadingButton>

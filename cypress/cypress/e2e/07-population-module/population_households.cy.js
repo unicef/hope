@@ -5,6 +5,9 @@ let populationHouseholds = new PopulationHouseholds();
 let householdsDetailsPage = new HPDetailsPage();
 
 describe("Households Module", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.initScenario("payment_plan");
     cy.navigateToHomePage();
@@ -12,22 +15,26 @@ describe("Households Module", () => {
     cy.get("span").contains("Individuals");
     cy.get("span").contains("Households");
     cy.get("span").contains("Households").click();
+    // populationHouseholds.getButtonFiltersExpand().click();
   });
   describe("Smoke tests Households Population module", () => {
-    it.skip("Check Households Population page", () => {});
+    it("Check Households Population page", () => {
+      populationHouseholds.checkElementsOnPage();
+    });
     it("Check Households Population Details page", () => {
+      // ToDo: Global Programme changes
       cy.scenario([
         "Go to Population page",
         "Check if page is in Households",
         "Choose first Household from list",
         "Check if all elements on page exist",
       ]);
-      cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-      cy.get("div").contains("Households");
+      cy.get("div").contains("Households", { timeout: 10000 });
       cy.get('[data-cy="table-title"]').contains("Households");
       cy.get('[data-cy="household-table-row"]').first().click({ force: true });
-      cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-      cy.get('[data-cy="page-header-container"]').contains("Household ID:");
+      cy.get('[data-cy="page-header-container"]').contains("Household ID:", {
+        timeout: 10000,
+      });
       cy.get("h6").contains("Details");
       cy.get("h6").contains("Benefits");
       cy.get("h6").contains("Household Composition");
@@ -52,7 +59,7 @@ describe("Households Module", () => {
   describe.skip("E2E tests Households Population", () => {});
 
   describe("Regression tests Households Population", () => {
-    it("174517: Check clear cash", () => {
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Households page",
         "Press Menu User Profile button",
@@ -60,7 +67,9 @@ describe("Households Module", () => {
         "Check if page was opened properly",
       ]);
       populationHouseholds.clearCache();
-      populationHouseholds.getTitle().contains(populationHouseholds.textTitle);
+      populationHouseholds
+        .getPageHeaderTitle()
+        .contains(populationHouseholds.textTitle);
     });
   });
 });

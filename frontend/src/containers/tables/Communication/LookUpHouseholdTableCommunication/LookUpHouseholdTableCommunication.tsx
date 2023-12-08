@@ -68,9 +68,7 @@ export const LookUpHouseholdTableCommunication = ({
     orderBy: filter.orderBy,
     headOfHouseholdPhoneNoValid: true,
   };
-  if (filter.program) {
-    initialVariables.programs = [filter.program];
-  }
+
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
   );

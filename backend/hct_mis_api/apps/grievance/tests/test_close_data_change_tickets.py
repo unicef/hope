@@ -42,6 +42,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
@@ -91,12 +92,21 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
+        cls.program = ProgramFactory(
+            status=Program.ACTIVE,
+            business_area=BusinessArea.objects.first(),
+        )
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, program_one)
+
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", admin_area=cls.admin_area_1)
+        household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
 
         household_two = HouseholdFactory.build(id="603dfd3f-baca-42d1-aac6-3e1c537ddbef", admin_area=cls.admin_area_1)
+        household_two.household_collection.save()
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.save()
         household_two.programs.add(program_one)
@@ -301,13 +311,14 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
-    def test_close_add_individual(cls, _: Any, permissions: List[Permissions], should_close: bool) -> None:
-        cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
-        cls.graphql_request(
-            request_string=cls.STATUS_CHANGE_MUTATION,
-            context={"user": cls.user},
+    def test_close_add_individual(self, _: Any, permissions: List[Permissions], should_close: bool) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
-                "grievanceTicketId": cls.id_to_base64(cls.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
+                "grievanceTicketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
@@ -319,24 +330,24 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             sex="MALE",
         )
         if should_close:
-            cls.assertTrue(created_individual.exists())
+            self.assertTrue(created_individual.exists())
             created_individual = created_individual.first()  # type: ignore
 
             document = Document.objects.get(document_number="123-123-UX-321")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
-            cls.assertEqual(document.country, country_pl)
-            cls.assertEqual(document.photo, "test_file_name.jpg")
+            self.assertEqual(document.country, country_pl)
+            self.assertEqual(document.photo, "test_file_name.jpg")
 
             role = created_individual.households_and_roles.get(
-                role=ROLE_PRIMARY, household=cls.household_one, individual=created_individual
+                role=ROLE_PRIMARY, household=self.household_one, individual=created_individual
             )
-            cls.assertEqual(str(role.household.id), str(cls.household_one.id))
+            self.assertEqual(str(role.household.id), str(self.household_one.id))
 
             bank_account_info = BankAccountInfo.objects.get(individual=created_individual)
-            cls.assertEqual(bank_account_info.bank_name, "privatbank")
-            cls.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
+            self.assertEqual(bank_account_info.bank_name, "privatbank")
+            self.assertEqual(bank_account_info.bank_account_number, "2356789789789789")
         else:
-            cls.assertFalse(created_individual.exists())
+            self.assertFalse(created_individual.exists())
 
     @parameterized.expand(
         [
@@ -344,50 +355,51 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
-    def test_close_update_individual(cls, _: Any, permissions: List[Permissions], should_close: bool) -> None:
-        cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
+    def test_close_update_individual(self, _: Any, permissions: List[Permissions], should_close: bool) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        cls.graphql_request(
-            request_string=cls.STATUS_CHANGE_MUTATION,
-            context={"user": cls.user},
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
-                "grievanceTicketId": cls.id_to_base64(
-                    cls.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"
+                "grievanceTicketId": self.id_to_base64(
+                    self.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"
                 ),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
-        individual = cls.individuals[0]
+        individual = self.individuals[0]
         individual.refresh_from_db()
 
         if should_close:
-            cls.assertEqual(individual.given_name, "Test")
-            cls.assertEqual(individual.full_name, "Test Example")
-            cls.assertEqual(individual.family_name, "Example")
-            cls.assertEqual(individual.phone_no_alternative, "+48602203689")
-            cls.assertEqual(individual.phone_no_alternative_valid, True)
-            cls.assertEqual(individual.marital_status, SINGLE)
-            cls.assertNotEqual(individual.birth_date, date(year=1980, month=2, day=1))
+            self.assertEqual(individual.given_name, "Test")
+            self.assertEqual(individual.full_name, "Test Example")
+            self.assertEqual(individual.family_name, "Example")
+            self.assertEqual(individual.phone_no_alternative, "+48602203689")
+            self.assertEqual(individual.phone_no_alternative_valid, True)
+            self.assertEqual(individual.marital_status, SINGLE)
+            self.assertNotEqual(individual.birth_date, date(year=1980, month=2, day=1))
 
             role = individual.households_and_roles.get(role=ROLE_PRIMARY, individual=individual)
-            cls.assertEqual(str(role.household.id), str(cls.household_one.id))
+            self.assertEqual(str(role.household.id), str(self.household_one.id))
 
             document = Document.objects.get(document_number="999-888-777")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")
-            cls.assertEqual(document.country, country_pl)
-            cls.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
-            cls.assertEqual(document.photo, "test_file_name.jpg")
 
-            cls.assertFalse(Document.objects.filter(id=cls.national_id.id).exists())
-            cls.assertTrue(Document.objects.filter(id=cls.birth_certificate.id).exists())
+            self.assertEqual(document.country, country_pl)
+            self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
+            self.assertEqual(document.photo, "test_file_name.jpg")
+
+            self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
+            self.assertTrue(Document.objects.filter(id=self.birth_certificate.id).exists())
         else:
-            cls.assertEqual(individual.given_name, "Benjamin")
-            cls.assertEqual(individual.full_name, "Benjamin Butler")
-            cls.assertEqual(individual.family_name, "Butler")
+            self.assertEqual(individual.given_name, "Benjamin")
+            self.assertEqual(individual.full_name, "Benjamin Butler")
+            self.assertEqual(individual.family_name, "Butler")
 
-    def test_close_update_individual_document_photo(cls) -> None:
-        cls.create_user_role_with_permissions(
-            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
+    def test_close_update_individual_document_photo(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )
         country_pl = geo_models.Country.objects.get(iso_code2="PL")
         national_id_type = DocumentType.objects.get(
@@ -396,7 +408,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
         national_id = DocumentFactory(
             type=national_id_type,
             document_number="999-888-777",
-            individual=cls.individuals[0],
+            individual=self.individuals[0],
             photo="test_file_name.jpg",
             country=country_pl,
         )
@@ -405,18 +417,18 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             id="32c3ae7d-fb39-4d69-8559-9d0fa4284790",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin2=cls.admin_area_1,
-            business_area=cls.business_area,
+            admin2=self.admin_area_1,
+            business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         TicketIndividualDataUpdateDetailsFactory(
             ticket=grievance_ticket,
-            individual=cls.individuals[0],
+            individual=self.individuals[0],
             individual_data={
                 "documents_to_edit": [
                     {
                         "value": {
-                            "id": cls.id_to_base64(national_id.id, "DocumentNode"),
+                            "id": self.id_to_base64(national_id.id, "DocumentNode"),
                             "country": "POL",
                             "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                             "number": "999-888-777",
@@ -424,7 +436,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
                             "photoraw": "new_test_file_name.jpg",
                         },
                         "previous_value": {
-                            "id": cls.id_to_base64(national_id.id, "DocumentNode"),
+                            "id": self.id_to_base64(national_id.id, "DocumentNode"),
                             "country": "POL",
                             "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
                             "number": "999-888-777",
@@ -437,21 +449,21 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             },
         )
 
-        cls.graphql_request(
-            request_string=cls.STATUS_CHANGE_MUTATION,
-            context={"user": cls.user},
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
-                "grievanceTicketId": cls.id_to_base64(grievance_ticket.id, "GrievanceTicketNode"),
+                "grievanceTicketId": self.id_to_base64(grievance_ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
-        individual = cls.individuals[0]
+        individual = self.individuals[0]
         individual.refresh_from_db()
 
         document = Document.objects.get(document_number="999-888-777")
-        cls.assertEqual(document.country, country_pl)
-        cls.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
-        cls.assertEqual(document.photo.name, "new_test_file_name.jpg")
+        self.assertEqual(document.country, country_pl)
+        self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID])
+        self.assertEqual(document.photo.name, "new_test_file_name.jpg")
 
     @parameterized.expand(
         [
@@ -459,55 +471,59 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
             ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
         ]
     )
-    def test_close_update_household(cls, _: Any, permissions: List[Permissions], should_close: bool) -> None:
-        cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
-        cls.graphql_request(
-            request_string=cls.STATUS_CHANGE_MUTATION,
-            context={"user": cls.user},
+    def test_close_update_household(self, _: Any, permissions: List[Permissions], should_close: bool) -> None:
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
-                "grievanceTicketId": cls.id_to_base64(
-                    cls.household_data_change_grievance_ticket.id, "GrievanceTicketNode"
+                "grievanceTicketId": self.id_to_base64(
+                    self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"
                 ),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
-        cls.household_one.refresh_from_db()
+        self.household_one.refresh_from_db()
         if should_close:
-            cls.assertEqual(cls.household_one.village, "Test Village")
+            self.assertEqual(self.household_one.village, "Test Village")
 
-    def test_close_individual_delete_with_correct_permissions(cls) -> None:
-        cls.create_user_role_with_permissions(
-            cls.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], cls.business_area
+    def test_close_individual_delete_with_correct_permissions(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], self.business_area
         )
 
-        cls.graphql_request(
-            request_string=cls.STATUS_CHANGE_MUTATION,
-            context={"user": cls.user},
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
-                "grievanceTicketId": cls.id_to_base64(cls.individual_delete_grievance_ticket.id, "GrievanceTicketNode"),
+                "grievanceTicketId": self.id_to_base64(
+                    self.individual_delete_grievance_ticket.id, "GrievanceTicketNode"
+                ),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
-        ind = Individual.objects.filter(id=cls.individuals_household_two[0].id).first()
+        ind = Individual.objects.filter(id=self.individuals_household_two[0].id).first()
         ind.refresh_from_db()
-        cls.assertTrue(ind.withdrawn)
+        self.assertTrue(ind.withdrawn)
         changed_role_exists = IndividualRoleInHousehold.objects.filter(
-            role=ROLE_PRIMARY, household=cls.household_two, individual=cls.individuals_household_two[1]
+            role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
         ).exists()
-        cls.assertTrue(changed_role_exists)
+        self.assertTrue(changed_role_exists)
 
-    def test_close_individual_delete_without_permissions(cls) -> None:
-        cls.create_user_role_with_permissions(cls.user, [], cls.business_area)
+    def test_close_individual_delete_without_permissions(self) -> None:
+        self.create_user_role_with_permissions(self.user, [], self.business_area)
 
-        cls.graphql_request(
-            request_string=cls.STATUS_CHANGE_MUTATION,
-            context={"user": cls.user},
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
-                "grievanceTicketId": cls.id_to_base64(cls.individual_delete_grievance_ticket.id, "GrievanceTicketNode"),
+                "grievanceTicketId": self.id_to_base64(
+                    self.individual_delete_grievance_ticket.id, "GrievanceTicketNode"
+                ),
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
-        cls.assertTrue(Individual.objects.filter(id=cls.individuals_household_two[0].id).exists())
+        self.assertTrue(Individual.objects.filter(id=self.individuals_household_two[0].id).exists())
 
     def test_close_household_delete(cls) -> None:
         cls.create_user_role_with_permissions(
@@ -552,7 +568,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "grievanceTicketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
@@ -605,7 +621,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,
@@ -665,7 +681,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
 
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "grievanceTicketId": self.id_to_base64(ticket.id, "GrievanceTicketNode"),
                 "status": GrievanceTicket.STATUS_CLOSED,

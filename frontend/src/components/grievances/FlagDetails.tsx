@@ -26,13 +26,13 @@ import { UniversalMoment } from '../core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
 
-export function FlagDetails({
+export const FlagDetails = ({
   ticket,
   canApproveFlag,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveFlag: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const confirm = useConfirmation();
   const useStyles = makeStyles(() => ({
@@ -154,4 +154,4 @@ export function FlagDetails({
       </Table>
     </ApproveBox>
   );
-}
+};

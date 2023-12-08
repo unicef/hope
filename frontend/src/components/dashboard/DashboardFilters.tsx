@@ -1,30 +1,15 @@
-import { Grid, MenuItem, Paper } from '@material-ui/core';
+import { Grid, MenuItem } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
-import { ClearApplyButtons } from '../core/ClearApplyButtons';
+import { FiltersSection } from '../core/FiltersSection';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { SelectFilter } from '../core/SelectFilter';
-
-const Container = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  align-items: center;
-  && > div {
-    margin: 5px;
-  }
-`;
 
 interface DashboardFiltersProps {
   filter;
@@ -34,17 +19,17 @@ interface DashboardFiltersProps {
   setAppliedFilter;
 }
 
-export const DashboardFilters = ({
-  filter,
-  setFilter,
-  initialFilter,
-  appliedFilter,
-  setAppliedFilter,
-}: DashboardFiltersProps): React.ReactElement => {
+interface ProgramSelectProps {
+  onChange: CallableFunction;
+  value: string;
+}
+
+const ProgramSelect = ({
+  onChange,
+  value,
+}: ProgramSelectProps): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
-  const history = useHistory();
-  const location = useLocation();
+  const { businessArea } = useBaseUrl();
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-and-network',
@@ -53,6 +38,35 @@ export const DashboardFilters = ({
 
   const allPrograms = data?.allPrograms?.edges || [];
   const programs = allPrograms.map((edge) => edge.node);
+
+  return (
+    <SelectFilter
+      onChange={onChange}
+      label={t('Programme')}
+      value={value}
+      icon={<FlashOnIcon />}
+      data-cy='filter-program'
+      fullWidth
+    >
+      {programs.map((program) => (
+        <MenuItem key={program.id} value={program.id}>
+          {program.name}
+        </MenuItem>
+      ))}
+    </SelectFilter>
+  );
+};
+
+export const DashboardFilters = ({
+  filter,
+  setFilter,
+  initialFilter,
+  appliedFilter,
+  setAppliedFilter,
+}: DashboardFiltersProps): React.ReactElement => {
+  const history = useHistory();
+  const location = useLocation();
+  const { isAllPrograms } = useBaseUrl();
 
   const {
     handleFilterChange,
@@ -76,26 +90,21 @@ export const DashboardFilters = ({
   };
 
   return (
-    <Container>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item xs={5}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-            icon={<FlashOnIcon />}
-            fullWidth
-          >
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
+        {isAllPrograms && (
+          <Grid item xs={5}>
+            <ProgramSelect
+              onChange={(e) => handleFilterChange('program', e.target.value)}
+              value={filter.program}
+            />
+          </Grid>
+        )}
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            fullWidth
             name='administrativeArea'
             value={filter.administrativeArea}
             filter={filter}
@@ -103,13 +112,10 @@ export const DashboardFilters = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
+            dataCy='filter-administrative-area'
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        applyHandler={handleApplyFilter}
-        clearHandler={handleClearFilter}
-      />
-    </Container>
+    </FiltersSection>
   );
 };

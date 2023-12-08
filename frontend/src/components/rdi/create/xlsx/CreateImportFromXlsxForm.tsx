@@ -1,24 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { CircularProgress } from '@material-ui/core';
+import { Field, FormikProvider, useFormik } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
-import { Field, FormikProvider, useFormik } from 'formik';
-import { CircularProgress } from '@material-ui/core';
-import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
+import styled from 'styled-components';
+import * as Yup from 'yup';
 import {
-  ImportDataStatus, useAllActiveProgramsQuery,
+  ImportDataStatus,
   useCreateRegistrationXlsxImportMutation,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
-import {LoadingComponent} from "../../../core/LoadingComponent";
-import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
-import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
+import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
+import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
+import { useSaveXlsxImportDataAndCheckStatus } from './useSaveXlsxImportDataAndCheckStatus';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -30,12 +28,8 @@ const CircularProgressContainer = styled.div`
 const validationSchema = Yup.object().shape({
   name: Yup.string()
     .required('Title is required')
-    .min(2, 'Too short')
+    .min(4, 'Too short')
     .max(255, 'Too long'),
-  programId: Yup.string()
-    .required('Programme Name is required')
-    .min(2, 'Too short')
-    .max(150, 'Too long'),
 });
 export function CreateImportFromXlsxForm({
   setSubmitForm,
@@ -47,18 +41,11 @@ export function CreateImportFromXlsxForm({
     loading: saveXlsxLoading,
     xlsxImportData,
   } = useSaveXlsxImportDataAndCheckStatus();
-  const businessAreaSlug = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const history = useHistory();
   const [createImport] = useCreateRegistrationXlsxImportMutation();
-
-  const { data: programData, loading } = useAllActiveProgramsQuery({
-    variables: {
-      first: 100,
-      businessArea: businessAreaSlug
-    }
-  });
 
   const onSubmit = async (values): Promise<void> => {
     try {
@@ -68,15 +55,14 @@ export function CreateImportFromXlsxForm({
             importDataId: xlsxImportData.id,
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
-            businessAreaSlug,
-            programId: values.programId
+            businessAreaSlug: businessArea,
           },
         },
       });
       history.push(
-        `/${businessAreaSlug}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
+        `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
       );
-    }catch (e) {
+    } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
@@ -86,7 +72,6 @@ export function CreateImportFromXlsxForm({
       name: '',
       screenBeneficiary: false,
       file: null,
-      programId: ''
     },
     validationSchema,
     onSubmit,
@@ -99,7 +84,7 @@ export function CreateImportFromXlsxForm({
     setSubmitDisabled(true);
     stopPollingImportData();
     await saveAndStartPolling({
-      businessAreaSlug,
+      businessAreaSlug: businessArea,
       file: formik.values.file,
     });
   };
@@ -116,14 +101,6 @@ export function CreateImportFromXlsxForm({
     }
   }, [xlsxImportData]);
 
-  if (loading) {
-    return <LoadingComponent />
-  }
-
-  const mappedProgramChoices = programData?.allActivePrograms?.edges?.map(
-      (element) => ({name: element.node.name, value: element.node.id})
-  );
-
   return (
     <div>
       <FormikProvider value={formik}>
@@ -135,16 +112,6 @@ export function CreateImportFromXlsxForm({
           required
           variant='outlined'
           component={FormikTextField}
-        />
-        <Field
-          name='programId'
-          label={t('Program Name')}
-          fullWidth
-          variant='outlined'
-          required
-          choices={mappedProgramChoices}
-          component={FormikSelectField}
-          data-cy='input-data-program-name'
         />
         <ScreenBeneficiaryField />
         <CircularProgressContainer>

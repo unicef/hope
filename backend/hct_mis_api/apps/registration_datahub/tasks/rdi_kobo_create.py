@@ -175,7 +175,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(self, registration_data_import_id: str, import_data_id: str, business_area_id: str) -> None:
+    def execute(
+        self,
+        registration_data_import_id: str,
+        import_data_id: str,
+        business_area_id: str,
+        program_id: Optional[str] = None,
+    ) -> None:
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
@@ -329,9 +335,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()
-        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, rdi_mis.program_id, old_rdi_mis, rdi_mis
+        )
         if not self.business_area.postpone_deduplication:
-            DeduplicateTask(self.business_area.slug).deduplicate_imported_individuals(
+            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
                 registration_data_import_datahub=registration_data_import
             )
 

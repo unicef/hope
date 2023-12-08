@@ -9,8 +9,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       class="MuiBox-root MuiBox-root-2"
     >
       <button
-        class="MuiButtonBase-root MuiIconButton-root"
-        tabindex="0"
+        class="MuiButtonBase-root MuiIconButton-root Mui-disabled Mui-disabled"
+        disabled=""
+        tabindex="-1"
         type="button"
       >
         <span
@@ -27,20 +28,17 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
             />
           </svg>
         </span>
-        <span
-          class="MuiTouchRipple-root"
-        />
       </button>
     </div>
     <div
       class="MuiBox-root MuiBox-root-3"
     >
       <a
-        aria-disabled="false"
-        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary"
-        href="/afghanistan/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ==/edit"
+        aria-disabled="true"
+        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary Mui-disabled Mui-disabled"
+        href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmE5YzJjMmM4LWJmYWUtNDBhMy05YmYwLWIxYWE1ZmRlMDE0YQ==/edit"
         role="button"
-        tabindex="0"
+        tabindex="-1"
       >
         <span
           class="MuiButton-label"
@@ -61,9 +59,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
           </span>
           Edit
         </span>
-        <span
-          class="MuiTouchRipple-root"
-        />
       </a>
     </div>
     <div

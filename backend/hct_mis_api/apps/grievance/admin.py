@@ -57,7 +57,6 @@ class GrievanceTicketAdmin(LinkedObjectsMixin, HOPEModelAdminBase, IsOriginalAdm
         "business_area",
         "registration_data_import",
         "partner",
-        "programme",
         "copied_from",
     )
     search_fields = ("unicef_id",)

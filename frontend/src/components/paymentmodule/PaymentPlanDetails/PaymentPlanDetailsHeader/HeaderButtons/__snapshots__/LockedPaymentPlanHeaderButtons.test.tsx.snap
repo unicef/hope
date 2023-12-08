@@ -9,9 +9,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       class="MuiBox-root MuiBox-root-2"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
         data-cy="button-lock-plan"
-        tabindex="0"
+        disabled=""
+        tabindex="-1"
         type="button"
       >
         <span
@@ -19,9 +20,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
         >
           Lock FSP
         </span>
-        <span
-          class="MuiTouchRipple-root"
-        />
       </button>
     </div>
   </div>

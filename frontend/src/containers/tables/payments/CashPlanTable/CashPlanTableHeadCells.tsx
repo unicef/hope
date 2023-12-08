@@ -5,7 +5,7 @@ export const headCells: HeadCell<CashPlanAndPaymentPlanNode>[] = [
   {
     disablePadding: false,
     label: 'Payment Plan ID',
-    id: 'ca_id',
+    id: 'unicef_id',
     numeric: false,
   },
   {
@@ -17,31 +17,31 @@ export const headCells: HeadCell<CashPlanAndPaymentPlanNode>[] = [
   {
     disablePadding: false,
     label: 'Num. of Households',
-    id: 'total_number_of_hh',
+    id: 'total_number_of_households',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Currency',
-    id: 'assistance_measurement',
+    id: 'currency_order',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Total Entitled Quantity',
-    id: 'total_entitled_quantity',
+    id: 'total_entitled_quantity_order',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Total Delivered Quantity',
-    id: 'total_delivered_quantity',
+    id: 'total_delivered_quantity_order',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Total Undelivered Quantity',
-    id: 'total_undelivered_quantity',
+    id: 'total_undelivered_quantity_order',
     numeric: true,
   },
   {

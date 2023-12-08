@@ -19,6 +19,7 @@ import graphene
 from graphene import Int, relay
 from graphene_django import DjangoObjectType
 
+from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
@@ -28,9 +29,7 @@ from hct_mis_api.apps.account.permissions import (
     hopeOneOfPermissionClass,
     hopePermissionClass,
 )
-from hct_mis_api.apps.core.cache_keys import (
-    PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY,
-)
+from hct_mis_api.apps.account.schema import PartnerNodeForProgram
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
@@ -38,7 +37,6 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_map_choices,
     chart_permission_decorator,
-    save_data_in_cache,
     to_choice_object,
 )
 from hct_mis_api.apps.payment.filters import (
@@ -64,7 +62,7 @@ from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(
-            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
         ),
     )
 
@@ -76,6 +74,7 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     total_number_of_households_with_tp_in_program = graphene.Int()
     individual_data_needed = graphene.Boolean()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
+    partners = graphene.List(PartnerNodeForProgram)
 
     class Meta:
         model = Program
@@ -85,21 +84,26 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_history(self, info: Any) -> QuerySet:
-        return self.history.all()
-
     def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
-        cache_key = PROGRAM_TOTAL_NUMBER_OF_HOUSEHOLDS_CACHE_KEY.format(self.business_area_id, self.id)
-        return save_data_in_cache(cache_key, lambda: self.total_number_of_households)
+        return self.total_number_of_households
 
     def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
         return self.households_with_tp_in_program.count()
+
+    def resolve_partners(self, info: Any, **kwargs: Any) -> List:
+        # filter Partners by program_id and program.business_area_id
+        partners_list = []
+        for partner in Partner.objects.all():
+            partner.program = self
+            if partner.get_permissions().areas_for(str(self.business_area_id), str(self.pk)) is not None:
+                partners_list.append(partner)
+        return partners_list
 
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes: Tuple[Type[BasePermission], ...] = (
         hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+        hopePermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS),
     )
 
     bank_reconciliation_success = graphene.Int()
@@ -142,7 +146,7 @@ class Query(graphene.ObjectType):
         ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(
-            hopeOneOfPermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
+            hopeOneOfPermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
     )
     chart_programmes_by_sector = graphene.Field(
@@ -167,7 +171,7 @@ class Query(graphene.ObjectType):
         permission_classes=(
             hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_LIST),
             hopePermissionClass(
-                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+                Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
             ),
         ),
     )
@@ -185,12 +189,17 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_programs(self, info: Any, **kwargs: Any) -> QuerySet[Program]:
+        if not info.context.user.is_authenticated:
+            return Program.objects.none()
+        filters = {
+            "business_area__slug": info.context.headers.get("Business-Area").lower(),
+            "data_collecting_type__deprecated": False,
+            "data_collecting_type__isnull": False,
+        }
+        if not info.context.user.partner.is_unicef:
+            filters.update({"id__in": info.context.user.partner.program_ids})
         return (
-            Program.objects.filter(
-                business_area__slug=info.context.headers.get("Business-Area").lower(),
-                data_collecting_type__deprecated=False,
-                data_collecting_type__isnull=False,
-            )
+            Program.objects.filter(**filters)
             .exclude(data_collecting_type__code="unknown")
             .annotate(
                 custom_order=Case(

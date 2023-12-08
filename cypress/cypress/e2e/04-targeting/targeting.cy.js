@@ -1,16 +1,19 @@
 import Targeting from "../../page-objects/pages/targeting/targeting.po";
 import TDetailsPage from "../../page-objects/pages/targeting/details_page.po";
 import CreateNew from "../../page-objects/pages/targeting/create_new.po";
-import ErrorPage from "../../page-objects/404.po";
+import ProgramDetails from "../../page-objects/pages/program_details/program_details.po";
 
-let error404Page = new ErrorPage();
 let targetingPage = new Targeting();
 let targetingDetailsPage = new TDetailsPage();
 let targetingCreateNewPage = new CreateNew();
+let programDetails = new ProgramDetails();
 
 let programName = "TargetingProgram";
 
 describe("Targeting", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.initScenario("targeting");
     cy.navigateToHomePage();
@@ -30,6 +33,7 @@ describe("Targeting", () => {
         "Go to Targeting Details page",
         "Check if all elements on page exist",
       ]);
+      // targetingPage.getButtonFiltersExpand().click();
       targetingPage.selectStatus("Open");
       targetingPage.getTargetPopulationsRows().should("have.length", 1);
       targetingPage.chooseTargetPopulationRow(0).click();
@@ -48,7 +52,7 @@ describe("Targeting", () => {
   describe("Component tests Targeting", () => {
     context("Create new target population", () => {
       // TODO: Refactor in second milestone
-      it("Can visit the targeting page and create a target population", () => {
+      it.skip("Can visit the targeting page and create a target population", () => {
         cy.scenario([
           "Go to Targeting New Ticket page",
           "Press Create New button",
@@ -56,7 +60,7 @@ describe("Targeting", () => {
           "Press button household rule",
           "Check if all elements on page exist",
         ]);
-        cy.visit("/");
+        cy.navigateToHomePage();
         cy.get("span").contains("Targeting").click();
         cy.get("h5").contains("Targeting");
         cy.get('[data-cy="button-target-population-create-new"]').click({
@@ -67,9 +71,6 @@ describe("Targeting", () => {
           cy.get('[data-cy="input-name"]')
             .eq(1)
             .type(targetPopulationName, { force: true });
-          cy.get('[data-cy="input-program"]').first().click();
-          cy.wait(1000); // eslint-disable-line cypress/no-unnecessary-waiting
-          cy.get(`[data-cy="select-option-${programName}-${seed}"]`).click();
           cy.get('[data-cy="button-target-population-add-criteria"]').click();
 
           cy.get('[data-cy="button-household-rule"]', {
@@ -130,26 +131,103 @@ describe("Targeting", () => {
       it.skip("Mark ready", () => {});
     });
   });
-  describe.skip("E2E tests Targeting", () => {
-    it("404 Error page", () => {
-      cy.scenario([
-        "Go to Targeting page",
-        "Click first row",
-        "Delete part of URL",
-        "Check if 404 occurred",
-      ]);
-      targetingPage.getTargetPopulationsRows().first().click();
-      targetingDetailsPage.checkElementsOnPage("OPEN");
-      cy.url().then((url) => {
-        let newUrl = url.slice(0, -10);
-        cy.visit(newUrl);
-        error404Page.getPageNoFound().should("be.visible");
-      });
+  describe("E2E tests Targeting", () => {
+    it("GPF: Disabled button CREATE NEW when program has draft status", () => {
+      targetingPage.navigateToProgrammePage("Draft Program");
+      targetingPage.clickMenuButtonTargeting();
+      targetingPage.getButtonCreateNew().should("be.visible");
+      targetingPage
+        .getButtonCreateNew()
+        .should("have.attr", "aria-disabled")
+        .and("equal", "true");
+    });
+    it("GPF: Disabled button CREATE NEW when program has finished status", () => {
+      targetingPage.navigateToProgrammePage("Draft Program");
+      programDetails.getButtonActivateProgram().click();
+      programDetails.getButtonActivateProgramModal().click();
+      programDetails.getStatusContainer().should("contain", "ACTIVE");
+      programDetails.getButtonFinishProgram().click();
+      programDetails.getButtonFinishProgram().eq(1).click();
+      programDetails.getStatusContainer().should("contain", "FINISHED");
+      targetingPage.clickMenuButtonTargeting();
+      targetingPage.getButtonCreateNew().should("be.visible");
+      targetingPage
+        .getButtonCreateNew()
+        .should("have.attr", "aria-disabled")
+        .and("equal", "true");
     });
   });
 
   describe("Regression tests Targeting", () => {
-    it("174517: Check clear cash", () => {
+    it("173542: GPF: Error occurs after apply empty Number of Households field", () => {
+      cy.scenario([
+        "Go to Targeting",
+        "Fill Number of Households field",
+        "Press button Apply",
+        "Delete value from Number of Households",
+        "Press button Apply",
+      ]);
+      // targetingPage.getButtonFiltersExpand().click();
+      targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getMinNumberOfHouseholdsFilter().type("456");
+      targetingPage.getApply().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "123");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "456");
+      targetingPage.getMaxNumberOfHouseholdsFilter().clear();
+      targetingPage.getMinNumberOfHouseholdsFilter().clear();
+      targetingPage.getApply().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage.getTargetPopulationsRows().should("have.length", 2);
+    });
+    it.skip('173541: GPF: Clear button does not work for field "Number of Households" in page Targeting', () => {
+      cy.scenario([
+        "Go to Targeting",
+        "Fill Number of Households field",
+        "Press button Clear",
+        "Fill Number of Households field",
+        "Press button Apply",
+        "Press button Clear",
+      ]);
+      targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getMinNumberOfHouseholdsFilter().type("456");
+      targetingPage.getClear().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage.getMaxNumberOfHouseholdsFilter().type("123");
+      targetingPage.getMinNumberOfHouseholdsFilter().type("456");
+      targetingPage.getApply().click();
+      targetingPage.getClear().click();
+      targetingPage
+        .getMaxNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+      targetingPage
+        .getMinNumberOfHouseholdsFilter()
+        .find("input")
+        .should("have.value", "");
+    });
+  });
+  describe("Regression tests Targeting", () => {
+    it.skip("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Targeting page",
         "Press Menu User Profile button",

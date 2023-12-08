@@ -11,17 +11,19 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
+import { useSnackbar } from "../../hooks/useSnackBar";
+import { useProgramContext } from "../../programContext";
 import {
   ApproveBox,
   StyledTable,
@@ -35,9 +37,12 @@ export function NeedsAdjudicationDetailsNew({
   canApprove: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
+  const { isActiveProgram } = useProgramContext();
+  const { showMessage } = useSnackbar();
+
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {
@@ -151,18 +156,26 @@ export function NeedsAdjudicationDetailsNew({
           />
         </TableCell>
         <TableCell align='left'>
-          <BlackLink
-            to={`/${businessArea}/population/individuals/${possibleDuplicate?.id}`}
-          >
-            {possibleDuplicate?.unicefId}
-          </BlackLink>
+          {!isAllPrograms ? (
+            <BlackLink
+              to={`/${baseUrl}/population/individuals/${possibleDuplicate?.id}`}
+            >
+              {possibleDuplicate?.unicefId}
+            </BlackLink>
+          ) : (
+            <span>{possibleDuplicate?.unicefId}</span>
+          )}
         </TableCell>
         <TableCell align='left'>
-          <BlackLink
-            to={`/${businessArea}/population/household/${possibleDuplicate?.household?.id}`}
-          >
-            {possibleDuplicate?.household?.unicefId || '-'}
-          </BlackLink>
+          {!isAllPrograms ? (
+            <BlackLink
+              to={`/${baseUrl}/population/household/${possibleDuplicate?.household?.id}`}
+            >
+              {possibleDuplicate?.household?.unicefId || '-'}
+            </BlackLink>
+          ) : (
+            <span>{possibleDuplicate?.household?.unicefId || '-'}</span>
+          )}
         </TableCell>
         <TableCell align='left'>{possibleDuplicate?.fullName}</TableCell>
         <TableCell align='left'>{possibleDuplicate?.sex}</TableCell>
@@ -204,7 +217,7 @@ export function NeedsAdjudicationDetailsNew({
             <Button
               onClick={() =>
                 history.push({
-                  pathname: `/${businessArea}/grievance/new-ticket`,
+                  pathname: `/${baseUrl}/grievance/new-ticket`,
                   state: { linkedTicketId: ticket.id },
                 })
               }
@@ -229,19 +242,23 @@ export function NeedsAdjudicationDetailsNew({
             )}
             {isEditable && canApprove && (
               <Button
-                disabled={isApproveDisabled()}
+                disabled={isApproveDisabled() || !isActiveProgram}
                 data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({
                     content: getConfirmationText(),
                     disabled: allSelected(),
-                  }).then(() => {
-                    approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        selectedIndividualIds: selectedDuplicates,
-                      },
-                    });
+                  }).then(async () => {
+                    try {
+                      await approve({
+                        variables: {
+                          grievanceTicketId: ticket.id,
+                          selectedIndividualIds: selectedDuplicates,
+                        },
+                      });
+                    } catch(e) {
+                      e.graphQLErrors.map((x) => showMessage(x.message));
+                    }
                     setIsEditMode(false);
                   })
                 }
@@ -313,18 +330,28 @@ export function NeedsAdjudicationDetailsNew({
             </TableCell>
 
             <TableCell align='left'>
-              <BlackLink
-                to={`/${businessArea}/population/individuals/${details.goldenRecordsIndividual?.id}`}
-              >
-                {details.goldenRecordsIndividual?.unicefId}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/individuals/${details.goldenRecordsIndividual?.id}`}
+                >
+                  {details.goldenRecordsIndividual?.unicefId}
+                </BlackLink>
+              ) : (
+                <span>{details.goldenRecordsIndividual?.unicefId}</span>
+              )}
             </TableCell>
             <TableCell align='left'>
-              <BlackLink
-                to={`/${businessArea}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
-              >
-                {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
+                >
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </BlackLink>
+              ) : (
+                <span>
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </span>
+              )}
             </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.fullName}

@@ -13,12 +13,10 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { ALL_REPORTS_QUERY } from '../../apollo/queries/reporting/AllReports';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
@@ -34,13 +32,13 @@ import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { FieldLabel } from '../core/FieldLabel';
 import { LoadingButton } from '../core/LoadingButton';
 import { LoadingComponent } from '../core/LoadingComponent';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 export const NewReportForm = (): React.ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
-
+  const { businessArea, baseUrl } = useBaseUrl();
   const validationSchema = Yup.object().shape({
     reportType: Yup.string().required(t('Report type is required')),
     dateFrom: Yup.date().required(t('Date From is required')),
@@ -141,13 +139,10 @@ export const NewReportForm = (): React.ReactElement => {
       variables: {
         reportData: prepareVariables(values),
       },
-      refetchQueries: () => [
-        { query: ALL_REPORTS_QUERY, variables: { businessArea } },
-      ],
     });
     if (!response.errors && response.data.createReport) {
       showMessage('Report created.', {
-        pathname: `/${businessArea}/reporting/${response.data.createReport.report.id}`,
+        pathname: `/${baseUrl}/reporting/${response.data.createReport.report.id}`,
         historyMethod: 'push',
       });
     } else {

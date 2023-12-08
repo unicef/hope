@@ -16,9 +16,9 @@ import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
 import { UniversalMoment } from '../core/UniversalMoment';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BlackLink } from '../core/BlackLink';
 import { Title } from '../core/Title';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -27,7 +27,7 @@ const Overview = styled(Paper)`
 `;
 
 interface VerificationPaymentRecordDetailsProps {
-  paymentRecord: PaymentRecordQuery["paymentRecord"];
+  paymentRecord: PaymentRecordQuery['paymentRecord'];
   canViewActivityLog: boolean;
   choicesData;
 }
@@ -38,7 +38,7 @@ export function VerificationPaymentRecordDetails({
   choicesData,
 }: VerificationPaymentRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const deliveryTypeDict = choicesToDict(
     choicesData.paymentRecordDeliveryTypeChoices,
   );
@@ -62,7 +62,7 @@ export function VerificationPaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('Household')}>
               <BlackLink
-                to={`/${businessArea}/population/household/${paymentRecord.household.id}`}
+                to={`/${baseUrl}/population/household/${paymentRecord.household.id}`}
               >
                 {paymentRecord.household.unicefId}
               </BlackLink>
@@ -133,10 +133,8 @@ export function VerificationPaymentRecordDetails({
             <LabelizedField
               label={t('PHONE NUMBER')}
               value={getPhoneNoLabel(
-                paymentRecord.household.headOfHousehold
-                  .phoneNo,
-                paymentRecord.household.headOfHousehold
-                  .phoneNoValid,
+                paymentRecord.household.headOfHousehold.phoneNo,
+                paymentRecord.household.headOfHousehold.phoneNoValid,
               )}
             />
           </Grid>
@@ -144,10 +142,8 @@ export function VerificationPaymentRecordDetails({
             <LabelizedField
               label={t('ALT. PHONE NUMBER')}
               value={getPhoneNoLabel(
-                paymentRecord.household.headOfHousehold
-                  .phoneNoAlternative,
-                paymentRecord.household.headOfHousehold
-                  .phoneNoAlternativeValid,
+                paymentRecord.household.headOfHousehold.phoneNoAlternative,
+                paymentRecord.household.headOfHousehold.phoneNoAlternativeValid,
               )}
             />
           </Grid>
@@ -179,18 +175,14 @@ export function VerificationPaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY TYPE')}
-              value={
-                deliveryTypeDict[paymentRecord.deliveryType]
-              }
+              value={deliveryTypeDict[paymentRecord.deliveryType]}
             />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
               label={t('DELIVERY DATE')}
               value={
-                <UniversalMoment>
-                  {paymentRecord.deliveryDate}
-                </UniversalMoment>
+                <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
               }
             />
           </Grid>

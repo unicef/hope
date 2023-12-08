@@ -8,9 +8,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
     class="MuiBox-root MuiBox-root-1"
   >
     <button
-      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary"
+      class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary Mui-disabled Mui-disabled"
       data-cy="button-import"
-      tabindex="0"
+      disabled=""
+      tabindex="-1"
       type="button"
     >
       <span
@@ -21,7 +22,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root sc-bZQynM bKNwua"
+            class="MuiSvgIcon-root sc-gzVnrw jxpDBy"
             focusable="false"
             viewBox="0 0 24 24"
           >
@@ -32,9 +33,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymen
         </span>
         Upload Reconciliation Info
       </span>
-      <span
-        class="MuiTouchRipple-root"
-      />
     </button>
   </div>
 </div>

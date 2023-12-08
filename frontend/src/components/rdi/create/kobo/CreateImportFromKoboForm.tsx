@@ -1,26 +1,23 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { CircularProgress } from '@material-ui/core';
+import { Field, FormikProvider, useFormik } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as Yup from 'yup';
-import { Field, FormikProvider, useFormik } from 'formik';
-import { CircularProgress } from '@material-ui/core';
-import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import styled from 'styled-components';
+import * as Yup from 'yup';
+import {
+  ImportDataStatus,
+  useCreateRegistrationKoboImportMutation,
+} from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
-import {
-  ImportDataStatus,
-  useAllActiveProgramsQuery,
-  useCreateRegistrationKoboImportMutation
-} from '../../../../__generated__/graphql';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import {LoadingComponent} from "../../../core/LoadingComponent";
-import {FormikSelectField} from "../../../../shared/Formik/FormikSelectField";
-import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
-import { KoboProjectSelect } from './KoboProjectSelect';
 import { KoboImportDataRepresentation } from './KoboImportDataRepresentation';
+import { KoboProjectSelect } from './KoboProjectSelect';
+import { useSaveKoboImportDataAndCheckStatus } from './useSaveKoboImportDataAndCheckStatus';
 
 const CircularProgressContainer = styled.div`
   display: flex;
@@ -32,12 +29,8 @@ const CircularProgressContainer = styled.div`
 const validationSchema = Yup.object().shape({
   name: Yup.string()
     .required('Title is required')
-    .min(2, 'Too short')
+    .min(4, 'Too short')
     .max(255, 'Too long'),
-  programId: Yup.string()
-    .required('Programme Name is required')
-    .min(2, 'Too short')
-    .max(150, 'Too long'),
 });
 export function CreateImportFromKoboForm({
   setSubmitForm,
@@ -52,15 +45,8 @@ export function CreateImportFromKoboForm({
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const history = useHistory();
-  const businessAreaSlug = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [createImport] = useCreateRegistrationKoboImportMutation();
-
-  const { data: programData, loading } = useAllActiveProgramsQuery({
-    variables: {
-      first: 100,
-      businessArea: businessAreaSlug
-    }
-  });
 
   const onSubmit = async (values): Promise<void> => {
     try {
@@ -70,13 +56,12 @@ export function CreateImportFromKoboForm({
             importDataId: koboImportData.id,
             name: values.name,
             screenBeneficiary: values.screenBeneficiary,
-            businessAreaSlug,
-            programId: values.programId
+            businessAreaSlug: businessArea,
           },
         },
       });
       history.push(
-        `/${businessAreaSlug}/registration-data-import/${data.data.registrationKoboImport.registrationDataImport.id}`,
+        `/${baseUrl}/registration-data-import/${data.data.registrationKoboImport.registrationDataImport.id}`,
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -88,7 +73,6 @@ export function CreateImportFromKoboForm({
       koboAssetId: '',
       onlyActiveSubmissions: true,
       screenBeneficiary: false,
-      programId: ''
     },
     validationSchema,
     onSubmit,
@@ -100,7 +84,7 @@ export function CreateImportFromKoboForm({
     setSubmitDisabled(true);
     stopPollingImportData();
     await saveAndStartPolling({
-      businessAreaSlug,
+      businessAreaSlug: businessArea,
       onlyActiveSubmissions: formik.values.onlyActiveSubmissions,
       koboAssetId: formik.values.koboAssetId,
     });
@@ -117,14 +101,6 @@ export function CreateImportFromKoboForm({
       setSubmitDisabled(false);
     }
   }, [koboImportData]);
-
-  if (loading) {
-    return <LoadingComponent />
-  }
-
-  const mappedProgramChoices = programData?.allActivePrograms?.edges?.map(
-      (element) => ({name: element.node.name, value: element.node.id})
-  );
 
   return (
     <div>
@@ -149,16 +125,6 @@ export function CreateImportFromKoboForm({
           required
           variant='outlined'
           component={FormikTextField}
-        />
-        <Field
-          name='programId'
-          label={t('Program Name')}
-          fullWidth
-          variant='outlined'
-          required
-          choices={mappedProgramChoices}
-          component={FormikSelectField}
-          data-cy='input-data-program-name'
         />
         <ScreenBeneficiaryField />
         <CircularProgressContainer>

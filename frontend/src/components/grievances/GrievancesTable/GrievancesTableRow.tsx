@@ -7,7 +7,7 @@ import {
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAssigneeMutation,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
 import {
@@ -54,13 +54,13 @@ export const GrievancesTableRow = ({
   setInputValue,
   initialVariables,
 }: GrievancesTableRowProps): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const { showMessage } = useSnackbar();
   const detailsPath = getGrievanceDetailsPath(
     ticket.id,
     ticket.category,
-    businessArea,
+    baseUrl,
   );
   const issueType = ticket.issueType
     ? issueTypeChoicesData
@@ -99,6 +99,26 @@ export const GrievancesTableRow = ({
     }
     return null;
   };
+
+  const getMappedPrograms = (): React.ReactElement => {
+    if (ticket.programs?.length) {
+      return (
+        <TableCell align='left'>
+          {ticket.programs.map((program) => (
+            <BlackLink
+              key={program.id}
+              to={`/${baseUrl}/details/${program.id}`}
+            >
+              {program.name}
+            </BlackLink>
+          ))}
+        </TableCell>
+      );
+    }
+    return <div>-</div>;
+  };
+
+  const mappedPrograms = getMappedPrograms();
 
   return (
     <ClickableTableRow
@@ -180,7 +200,7 @@ export const GrievancesTableRow = ({
           statusChoices={statusChoices}
           issueTypeChoicesData={issueTypeChoicesData}
           canViewDetails={canViewDetails}
-          businessArea={businessArea}
+          baseUrl={baseUrl}
         />
       </TableCell>
       <TableCell align='left'>
@@ -190,6 +210,7 @@ export const GrievancesTableRow = ({
         <UniversalMoment>{ticket.userModified}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>{ticket.totalDays}</TableCell>
+      {isAllPrograms && <TableCell align='left'>{mappedPrograms}</TableCell>}
     </ClickableTableRow>
   );
 };

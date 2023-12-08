@@ -19,6 +19,8 @@ import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
+import { BlackLink } from '../core/BlackLink';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -26,16 +28,17 @@ const Overview = styled(Paper)`
     ${({ theme }) => theme.spacing(11)}px;
 `;
 
-interface VerificationRecordDetailsProps {
+interface PaymentRecordDetailsProps {
   paymentRecord: PaymentRecordNode;
   canViewActivityLog: boolean;
 }
 
-export function PaymentRecordDetails({
+export const PaymentRecordDetails = ({
   paymentRecord,
   canViewActivityLog,
-}: VerificationRecordDetailsProps): React.ReactElement {
+}: PaymentRecordDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { baseUrl } = useBaseUrl();
   let paymentVerification: PaymentVerificationNode = null;
   if (paymentRecord.verification) {
     paymentVerification = paymentRecord.verification;
@@ -57,10 +60,13 @@ export function PaymentRecordDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField
-              label={t('Household')}
-              value={paymentRecord.registrationCaId}
-            />
+            <LabelizedField label={t('Household')}>
+              <BlackLink
+                to={`/${baseUrl}/population/household/${paymentRecord.household.id}`}
+              >
+                {paymentRecord.household.unicefId}
+              </BlackLink>
+            </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
@@ -217,4 +223,4 @@ export function PaymentRecordDetails({
       ) : null}
     </>
   );
-}
+};

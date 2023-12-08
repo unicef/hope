@@ -128,31 +128,6 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 </th>
                 <th
                   class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
-                  data-cy="program"
-                  scope="col"
-                >
-                  <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
-                    data-cy="table-label"
-                    role="button"
-                    tabindex="0"
-                  >
-                    Programme
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
-                  </span>
-                </th>
-                <th
-                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                   data-cy="num-of-households"
                   scope="col"
                 >
@@ -265,9 +240,9 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <a
                     class="sc-htoDjs clPmKI"
-                    href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZTY2MDQyNDItYjk5Yi00ZjY3LWFjYTQtMzg3ZDk2YjIyNTky"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MjQyZmQ4NDQtOTYzOC00MTdhLTkzZWMtYjQzMjY0Y2Y4YmRj"
                   >
-                    Image until technology travel.
+                    Our ball many investment look like.
                   </a>
                 </td>
                 <td
@@ -287,37 +262,32 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Where analysis hand stand film.
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  2
+                  0
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <time
-                    datetime="1695725901441"
+                    datetime="1695984753042"
                   >
-                    26 Sep 2023
+                    29 Sep 2023
                   </time>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <time
-                    datetime="1695725901464"
+                    datetime="1695984753068"
                   >
-                    26 Sep 2023
+                    29 Sep 2023
                   </time>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Michael
+                  Mary
                    
-                  Jones
+                  Reyes
                 </td>
               </tr>
               <tr
@@ -329,9 +299,9 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <a
                     class="sc-htoDjs clPmKI"
-                    href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6ZjUyOWE0N2QtZjc2Ni00NjQ3LWE1NjItZTQ4MjQ2N2ZjZjJh"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6YjI0ZDA5ZTUtN2E1Yy00MjgyLWI4ZmItYWY4MDkwMGY5YzRm"
                   >
-                    Actually entire probably road just share fire.
+                    Less road structure audience those modern.
                   </a>
                 </td>
                 <td
@@ -351,37 +321,32 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Where analysis hand stand film.
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  2
+                  0
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <time
-                    datetime="1695725901314"
+                    datetime="1695984750379"
                   >
-                    26 Sep 2023
+                    29 Sep 2023
                   </time>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <time
-                    datetime="1695725901338"
+                    datetime="1695984750412"
                   >
-                    26 Sep 2023
+                    29 Sep 2023
                   </time>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Frances
+                  Elizabeth
                    
-                  Ruiz
+                  Coleman
                 </td>
               </tr>
               <tr
@@ -393,9 +358,9 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <a
                     class="sc-htoDjs clPmKI"
-                    href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6YTRhYTQ4MDctNjBiNy00YTU1LTlmNjUtMjQ3Zjg4ODljMjIw"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6YzBiMzE0NjItNmIzMC00OGNiLTljMmMtZDgzM2JkZTJmNGYx"
                   >
-                    Lead if southern service no use nothing.
+                    Score visit write ask whole myself.
                   </a>
                 </td>
                 <td
@@ -415,37 +380,32 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Where analysis hand stand film.
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
-                  2
+                  0
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <time
-                    datetime="1695725901176"
+                    datetime="1695984750190"
                   >
-                    26 Sep 2023
+                    29 Sep 2023
                   </time>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <time
-                    datetime="1695725901201"
+                    datetime="1695984750220"
                   >
-                    26 Sep 2023
+                    29 Sep 2023
                   </time>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Sharon
+                  Jennifer
                    
-                  Schwartz
+                  Bailey
                 </td>
               </tr>
               <tr
@@ -457,7 +417,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 >
                   <a
                     class="sc-htoDjs clPmKI"
-                    href="/afghanistan/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMTIz"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/target-population/VGFyZ2V0UG9wdWxhdGlvbk5vZGU6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtZmFjZWIwMGMwMTIz"
                   >
                     Test Target Population
                   </a>
@@ -479,29 +439,24 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
-                  Test Program
-                </td>
-                <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-                >
                   2
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <time
-                    datetime="1695725900825"
+                    datetime="1695984749726"
                   >
-                    26 Sep 2023
+                    29 Sep 2023
                   </time>
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <time
-                    datetime="1695725900864"
+                    datetime="1695984749779"
                   >
-                    26 Sep 2023
+                    29 Sep 2023
                   </time>
                 </td>
                 <td
@@ -518,7 +473,7 @@ exports[`containers/tables/targeting/TargetPopulation/TargetPopulationTable shou
               >
                 <td
                   class="MuiTableCell-root MuiTableCell-body"
-                  colspan="7"
+                  colspan="6"
                 />
               </tr>
             </tbody>

@@ -1,4 +1,5 @@
 import { AllIndividualsForPopulationTableDocument } from '../../src/__generated__/graphql';
+import { fakeProgram } from '../programs/fakeProgram';
 
 export const fakeApolloAllIndividualsForPopulationTable = [
   {

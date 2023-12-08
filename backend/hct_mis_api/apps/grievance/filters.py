@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import Count, F, Func, Q, QuerySet, Window
 
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     ChoiceFilter,
     FilterSet,
@@ -19,12 +20,14 @@ from django_filters import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.es_filters import ElasticSearchFilterSet
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.geo.models import ValidityQuerySet
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.household.models import HEAD, DocumentType, Household, Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +82,7 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         "grievance_type",
         "grievance_status",
         "business_area",
+        "program",
     )
 
     def elasticsearch_filter_queryset(self) -> List[str]:
@@ -89,7 +93,9 @@ class GrievanceTicketElasticSearchFilterSet(ElasticSearchFilterSet):
         filters = {}
         for field in allowed_fields:
             if self.form.data.get(field):
-                if field in (
+                if field == "program":
+                    filters["programs"] = decode_id_string(self.form.data[field])
+                elif field in (
                     "category",
                     "status",
                     "issue_type",
@@ -158,6 +164,9 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
     grievance_type = CharFilter(method="filter_grievance_type")
     grievance_status = CharFilter(method="filter_grievance_status")
     total_days = IntegerFilter(field_name="total_days")
+    program = CharFilter(method="filter_by_program")
+    is_active_program = BooleanFilter(method="filter_is_active_program")
+    is_cross_area = BooleanFilter(method="filter_is_cross_area")
 
     class Meta:
         fields = {
@@ -187,6 +196,11 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             "total_days",
         )
     )
+
+    def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
+        if value:
+            return qs.filter(programs__in=[decode_id_string(value)])
+        return qs
 
     def preferred_language_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         q_obj = Q()
@@ -253,7 +267,7 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
                 .values_list("household__unicef_id", flat=True)
             )
             return qs.filter(household_unicef_id__in=unicef_ids)
-        return qs.none()
+        raise KeyError(f"Invalid search search_type '{search_type}'")
 
     def search_type_filter(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs
@@ -330,6 +344,20 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
         if val == "active":
             return qs.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
         return qs
+
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        if value is True:
+            return qs.filter(programs__status=Program.ACTIVE)
+        elif value is False:
+            return qs.filter(programs__status=Program.FINISHED)
+        else:
+            return qs
+
+    def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        if value is True:
+            return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)
+        else:
+            return qs
 
 
 class ExistingGrievanceTicketFilter(FilterSet):

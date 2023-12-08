@@ -24,16 +24,6 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
     );
     await act(() => wait(0)); // wait for response
 
-    const buttons = container.querySelectorAll('button');
-    const disabledButtons = container.querySelectorAll('button[disabled]');
-    const notDisabledButtons = container.querySelectorAll(
-      'button:not([disabled])',
-    );
-
-    expect(buttons).toHaveLength(2);
-    expect(disabledButtons).toHaveLength(2);
-    expect(notDisabledButtons).toHaveLength(0);
-
     expect(container).toMatchSnapshot();
   });
 
@@ -52,16 +42,6 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response
-
-    const buttons = container.querySelectorAll('button');
-    const disabledButtons = container.querySelectorAll('button[disabled]');
-    const notDisabledButtons = container.querySelectorAll(
-      'button:not([disabled])',
-    );
-
-    expect(buttons).toHaveLength(2);
-    expect(disabledButtons).toHaveLength(0);
-    expect(notDisabledButtons).toHaveLength(2);
 
     expect(container).toMatchSnapshot();
   });

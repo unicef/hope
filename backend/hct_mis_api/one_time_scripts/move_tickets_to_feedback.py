@@ -37,24 +37,47 @@ def move_ticket_model_to_feedback(model_type: Type[object], batch_size: int = 10
             logger.info(f"Migration {page_number}/{pages} page")
             page = paginator.page(page_number)
             for obj in page.object_list:
-                feedbacks_to_create.append(
-                    Feedback(
-                        created_at=obj.created_at,
-                        household_lookup=getattr(obj, "household", None),
-                        individual_lookup=getattr(obj, "individual", None),
-                        business_area=obj.ticket.business_area,
-                        issue_type=issue_type,
-                        description=obj.ticket.description,
-                        admin2_id=getattr(obj.ticket.admin2, "id", None),
-                        language=obj.ticket.language,
-                        area=obj.ticket.area,
-                        consent=obj.ticket.consent,
-                        comments=obj.ticket.comments,
-                        program=getattr(obj.ticket, "programme", None),
-                        created_by_id=getattr(obj.ticket.created_by, "id", None),
-                        linked_grievance_id=obj.ticket.id,
+                # TODO: maybe refactor this one after Paulina's migration for Grievances
+                if obj.ticket.programs.all():
+                    # create feedback for every program
+                    for program in obj.ticket.programs.all():
+                        feedbacks_to_create.append(
+                            Feedback(
+                                created_at=obj.created_at,
+                                household_lookup=getattr(obj, "household", None),
+                                individual_lookup=getattr(obj, "individual", None),
+                                business_area=obj.ticket.business_area,
+                                issue_type=issue_type,
+                                description=obj.ticket.description,
+                                admin2_id=getattr(obj.ticket.admin2, "id", None),
+                                language=obj.ticket.language,
+                                area=obj.ticket.area,
+                                consent=obj.ticket.consent,
+                                comments=obj.ticket.comments,
+                                program=program,
+                                created_by_id=getattr(obj.ticket.created_by, "id", None),
+                                linked_grievance_id=obj.ticket.id,
+                            )
+                        )
+                else:
+                    feedbacks_to_create.append(
+                        Feedback(
+                            created_at=obj.created_at,
+                            household_lookup=getattr(obj, "household", None),
+                            individual_lookup=getattr(obj, "individual", None),
+                            business_area=obj.ticket.business_area,
+                            issue_type=issue_type,
+                            description=obj.ticket.description,
+                            admin2_id=getattr(obj.ticket.admin2, "id", None),
+                            language=obj.ticket.language,
+                            area=obj.ticket.area,
+                            consent=obj.ticket.consent,
+                            comments=obj.ticket.comments,
+                            program=None,
+                            created_by_id=getattr(obj.ticket.created_by, "id", None),
+                            linked_grievance_id=obj.ticket.id,
+                        )
                     )
-                )
             Feedback.objects.bulk_create(feedbacks_to_create)
     except Exception:
         logger.error("Migrating tickets to feedback failed")
