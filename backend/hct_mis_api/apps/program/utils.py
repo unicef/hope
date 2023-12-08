@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, Sequence, Tuple, Union
 
 from django.db import transaction
 
@@ -280,7 +280,7 @@ def update_partner_permissions_for_program(partner_data: Dict, business_area_pk:
 
 
 def remove_program_permissions_for_exists_partners(
-    partner_exclude_ids: List[str], business_area_pk: str, program_pk: str
+    partner_exclude_ids: Sequence[Union[str, int]], business_area_pk: str, program_pk: str
 ) -> None:
     for partner in Partner.objects.exclude(id__in=partner_exclude_ids):
         partner.get_permissions().remove_program_areas(business_area_pk, program_pk)
