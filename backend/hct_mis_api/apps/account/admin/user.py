@@ -44,6 +44,15 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
     Results = namedtuple("Results", "created,missing,updated,errors")
     add_form = HopeUserCreationForm
     add_form_template = "admin/auth/user/add_form.html"
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("username", "password1", "password2", "email"),
+            },
+        ),
+    )
     readonly_fields = ("ad_uuid", "last_modify_date", "doap_hash")
 
     change_form_template = None
