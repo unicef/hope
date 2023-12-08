@@ -208,7 +208,8 @@ export function NeedsAdjudicationDetailsOld({
                 data-cy='checkbox-individual'
                 disabled={
                   !isEditable ||
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+                  !isActiveProgram
                 }
                 checked={
                   selectedDuplicate === details.goldenRecordsIndividual?.id
@@ -287,7 +288,8 @@ export function NeedsAdjudicationDetailsOld({
                 color='primary'
                 disabled={
                   !isEditable ||
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+                  !isActiveProgram
                 }
                 checked={selectedDuplicate === details.possibleDuplicate?.id}
                 onChange={(event, checked) =>
