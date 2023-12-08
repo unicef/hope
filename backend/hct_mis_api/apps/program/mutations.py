@@ -101,18 +101,13 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
-        partners_data = program_data.pop("partners", [])
-
-        if partners_data:
-            partners_ids = [int(partner["id"]) for partner in partners_data]
-            partner = info.context.user.partner
-            if not partner.is_unicef and partner.id not in partners_ids:
-                raise ValidationError("User is not allowed to create program for partner different than his partner.")
-
         program = Program.objects.select_for_update().get(id=program_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
         old_program = Program.objects.get(id=program_id)
         business_area = program.business_area
+        partners_data = program_data.pop("partners", [])
+        partners_ids = [int(partner["id"]) for partner in partners_data]
+        partner = info.context.user.partner
 
         # status update permissions if status is passed
         status_to_set = program_data.get("status")
@@ -121,6 +116,10 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
                 cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
+
+        if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
+            if not partner.is_unicef and partner.id not in partners_ids:
+                raise ValidationError("User is not allowed to create program for partner different than his partner.")
 
         data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
         data_collecting_type = old_program.data_collecting_type
@@ -156,11 +155,9 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
 
         # no need to update partners for Activation or Finish action
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
-            partner_ids = []
             for partner in partners_data:
                 update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
-                partner_ids.append(partner["id"])
-            remove_program_permissions_for_exists_partners(partner_ids, str(business_area.pk), str(program.pk))
+            remove_program_permissions_for_exists_partners(partners_ids, str(business_area.pk), str(program.pk))
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
