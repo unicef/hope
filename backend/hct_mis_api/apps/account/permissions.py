@@ -296,7 +296,9 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     program_id = get_program_id_from_headers(kwargs)
     # is_unicef has access to all Programs
     if user.partner.is_unicef:
-        return any(perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER for perm in permissions)
+        return any(perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER for perm in permissions) or any(
+            user.has_permission(permission.name, business_area, program_id) for permission in permissions
+        )
     else:
         return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
 
