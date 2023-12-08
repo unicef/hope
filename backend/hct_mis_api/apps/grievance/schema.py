@@ -531,6 +531,13 @@ class Query(graphene.ObjectType):
                 queryset, user.partner, business_area_id, program_id
             )
 
+        if program_id is None:
+            queryset = queryset | (
+                GrievanceTicket.objects.select_related("admin2", "assigned_to", "created_by")
+                .prefetch_related(*to_prefetch)
+                .filter(business_area_id=business_area_id, programs=None, created_by__partner=user.partner)
+            )
+
         return queryset.annotate(
             total=Case(
                 When(
