@@ -149,7 +149,8 @@ export function NeedsAdjudicationDetailsNew({
             color='primary'
             disabled={
               !isEditable ||
-              ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+              ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+              !isActiveProgram
             }
             checked={selectedDuplicates.includes(possibleDuplicate?.id)}
             onChange={() => handleChecked(possibleDuplicate?.id)}
@@ -224,6 +225,7 @@ export function NeedsAdjudicationDetailsNew({
               variant='outlined'
               color='primary'
               data-cy='button-create-linked-ticket'
+              disabled={!isActiveProgram}
             >
               {t('Create Linked Ticket')}
             </Button>
@@ -318,7 +320,8 @@ export function NeedsAdjudicationDetailsNew({
                 data-cy='checkbox-individual'
                 disabled={
                   !isEditable ||
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+                  !isActiveProgram
                 }
                 checked={selectedDuplicates.includes(
                   details.goldenRecordsIndividual?.id,
