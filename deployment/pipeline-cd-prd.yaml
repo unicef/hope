@@ -15,9 +15,9 @@ resources:
 
 
 variables:
-  # ========================================================================
+  # =======================================================================
   #                          Mandatory variables 
-  # ========================================================================
+  # =======================================================================
   Kubernetes.serviceConnection: "ICTD-HOPE-PRD-uni-apps-aks-hope-prd-ictd-hope-prd-1617968749291"
   Kubernetes.namespace: "ictd-hope-prd"
   Docker.backend.repository: "hope-backend"
