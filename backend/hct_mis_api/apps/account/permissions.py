@@ -18,7 +18,7 @@ from graphene_django.filter.utils import (
 
 from hct_mis_api.apps.core.extended_connection import DjangoFastConnectionField
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import get_program_id_from_headers, decode_id_string
+from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
 
 logger = logging.getLogger(__name__)
 
@@ -280,7 +280,9 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
-def compare_program_id_with_url(user: Any, business_area: BusinessArea, business_area_arg: str, url: str) -> bool:
+def compare_program_id_with_url(
+    user: Any, business_area: BusinessArea, business_area_arg: str, url: Optional[Any]
+) -> bool:
     url = urlparse(url)
     url_elements = str(url.path).rsplit("/", 1)
     if url_elements[0] == f"/{business_area_arg}/programs/all/details":
