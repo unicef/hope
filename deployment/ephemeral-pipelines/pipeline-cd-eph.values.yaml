@@ -61,3 +61,4 @@ cashassistdatahubpostgresql:
 
 pgadmin:
   password: #secret-variables: PGADMIN_PASSWORD
+  storage: 250Gi
