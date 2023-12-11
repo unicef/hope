@@ -53,7 +53,7 @@ stages:
               waitForExecution: false
               failOnStderr: false
               force: $[not(empty(variables['REDEPLOY']))]
-              valueFile: 'hct-mis/deployment/pipeline-cd-eph.values.yaml'
+              valueFile: 'hct-mis/deployment/ephemeral-pipelines/pipeline-cd-eph.values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
                 git.sha=$(Build.SourceVersion),\
