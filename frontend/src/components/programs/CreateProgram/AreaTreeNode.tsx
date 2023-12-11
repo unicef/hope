@@ -85,8 +85,12 @@ export class AreaTreeNode {
   }
 
   toggleCheck(): void {
-    const newState = this.checked === false;
-    this.setChecked(newState);
+    if (this.checked === 'indeterminate') {
+      this.setChecked(true);
+    } else {
+      const newState = !this.checked;
+      this.setChecked(newState);
+    }
   }
 
   setChecked(newState): void {
@@ -140,12 +144,14 @@ export class AreaTreeNode {
           node.addChild(childNode);
         });
       }
+
+      node.updateCheckStatusFromRoot();
+
       return node;
     };
 
     return areas.map((area) => {
       const node = createNode(area, null);
-      node.updateCheckStatusFromTop();
       return node;
     });
   }
