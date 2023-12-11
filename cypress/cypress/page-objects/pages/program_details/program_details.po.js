@@ -14,8 +14,6 @@ export default class ProgramDetails extends BaseComponent {
     'button[data-cy="button-reactivate-program-popup"]';
   labelTotalNumberOfHouseholds =
     'div[data-cy="label-Total Number of Households"]';
-  labelIndividualsData =
-    'div[data-cy="label-Does this programme use individuals’ data for targeting or entitlement calculation?"]';
   labelCASH = 'div[data-cy="label-CASH+"]';
   labelDescription = 'div[data-cy="label-Description"]';
   labelAdministrativeAreasOfImplementation =
@@ -47,7 +45,6 @@ export default class ProgramDetails extends BaseComponent {
   getDialogPopupActivate = () => cy.get(this.dialogPopupActivate);
   getLabelTotalNumberOfHouseholds = () =>
     cy.get(this.labelTotalNumberOfHouseholds);
-  getLabelIndividualsData = () => cy.get(this.labelIndividualsData);
   getLabelCASH = () => cy.get(this.labelCASH);
   getLabelDescription = () => cy.get(this.labelDescription);
   getLabelAdministrativeAreasOfImplementation = () =>
