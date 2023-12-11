@@ -5,6 +5,7 @@ export const UserChoiceData = gql`
     userRolesChoices {
       name
       value
+      subsystem
     }
     userStatusChoices {
       name
