@@ -6,6 +6,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
+  DataCollectingTypeType,
   IndividualChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
@@ -18,6 +19,7 @@ import { FiltersSection } from '../core/FiltersSection';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { useProgramContext } from '../../programContext';
 
 interface IndividualsFilterProps {
   filter;
@@ -44,6 +46,7 @@ export const IndividualsFilter = ({
   const history = useHistory();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
+  const { selectedProgram } = useProgramContext();
 
   const {
     handleFilterChange,
@@ -66,6 +69,11 @@ export const IndividualsFilter = ({
   const handleClearFilter = (): void => {
     clearFilter();
   };
+
+  //Show admin area filter only for social programs
+  const showAdminAreaFilter =
+    selectedProgram?.dataCollectingType.code.toUpperCase() ===
+    DataCollectingTypeType.Social;
 
   return (
     <FiltersSection
@@ -121,18 +129,20 @@ export const IndividualsFilter = ({
             </SelectFilter>
           </Grid>
         )}
-        <Grid item xs={3}>
-          <AdminAreaAutocomplete
-            name='admin2'
-            value={filter.admin2}
-            setFilter={setFilter}
-            filter={filter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            dataCy='ind-filters-admin2'
-          />
-        </Grid>
+        {showAdminAreaFilter && (
+          <Grid item xs={3}>
+            <AdminAreaAutocomplete
+              name='admin2'
+              value={filter.admin2}
+              setFilter={setFilter}
+              filter={filter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+              dataCy='ind-filters-admin2'
+            />
+          </Grid>
+        )}
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sex', e.target.value)}

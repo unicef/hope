@@ -13,7 +13,10 @@ import React, { Fragment, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TargetPopulationQuery } from '../../../__generated__/graphql';
+import {
+  DataCollectingTypeType,
+  TargetPopulationQuery,
+} from '../../../__generated__/graphql';
 import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
 import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { Criteria } from './Criteria';
@@ -136,15 +139,23 @@ export function TargetingCriteria({
 
   if (selectedProgram) {
     const { dataCollectingType } = selectedProgram;
-    individualFiltersAvailable = dataCollectingType?.individualFiltersAvailable
+    individualFiltersAvailable = dataCollectingType?.individualFiltersAvailable;
     householdFiltersAvailable = dataCollectingType?.householdFiltersAvailable;
 
     // Allow use filters on non-migrated programs
     if (individualFiltersAvailable === undefined) {
-      individualFiltersAvailable = true
+      individualFiltersAvailable = true;
     }
     if (householdFiltersAvailable === undefined) {
-      householdFiltersAvailable = true
+      householdFiltersAvailable = true;
+    }
+
+    // Disable household filters for social programs
+    if (
+      selectedProgram?.dataCollectingType.code.toUpperCase() ===
+      DataCollectingTypeType.Social
+    ) {
+      householdFiltersAvailable = false;
     }
   }
 
@@ -302,7 +313,5 @@ export function TargetingCriteria({
       </PaperContainer>
     );
   }
-  return (
-    <TargetingCriteriaDisabled showTooltip />
-  )
+  return <TargetingCriteriaDisabled showTooltip />;
 }
