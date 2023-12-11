@@ -17,7 +17,7 @@ from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import Payment, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportSevice,
 )
@@ -255,7 +255,7 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str, file_pk: str) -> None:
+def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str, file_pk: str) -> bool:
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
@@ -278,6 +278,9 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 
                     payment_plan.save()
 
+                    logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
+                    transaction.on_commit(lambda: update_payments_signature.delay(payment_plan_id))
+
         except Exception as e:
             logger.exception("Unexpected error during xlsx per fsp import")
             payment_plan.background_action_status_xlsx_import_error()
@@ -287,6 +290,31 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
+    return True
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def update_payments_signature(self: Any, payment_plan_id: str, batch_size: int = 1000) -> bool:
+    try:
+        from hct_mis_api.apps.payment.models import PaymentPlan
+
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        with configure_scope() as scope:
+            scope.set_tag("business_area", payment_plan.business_area)
+            payments_ids = payment_plan.eligible_payments.values_list("id", flat=True)
+
+            for batch_start in range(0, len(payments_ids), batch_size):
+                batched_ids = payments_ids[batch_start : batch_start + batch_size]
+                payments = Payment.objects.filter(id__in=batched_ids).select_related("household_snapshot")
+                for payment in payments:
+                    payment.update_signature_hash()
+                Payment.objects.bulk_update(payments, ("signature_hash",))
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)
+    return True
 
 
 @app.task
