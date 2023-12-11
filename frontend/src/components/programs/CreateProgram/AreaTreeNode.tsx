@@ -140,12 +140,14 @@ export class AreaTreeNode {
           node.addChild(childNode);
         });
       }
+
+      node.updateCheckStatusFromRoot();
+
       return node;
     };
 
     return areas.map((area) => {
       const node = createNode(area, null);
-      node.updateCheckStatusFromTop();
       return node;
     });
   }
