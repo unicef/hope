@@ -85,8 +85,12 @@ export class AreaTreeNode {
   }
 
   toggleCheck(): void {
-    const newState = this.checked === false;
-    this.setChecked(newState);
+    if (this.checked === 'indeterminate') {
+      this.setChecked(true);
+    } else {
+      const newState = !this.checked;
+      this.setChecked(newState);
+    }
   }
 
   setChecked(newState): void {
