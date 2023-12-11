@@ -188,10 +188,10 @@ class Query(graphene.ObjectType):
         return info.context.user
 
     def resolve_user_roles_choices(self, info: Any) -> List[Dict[str, Any]]:
-        return sorted(
-            [dict(name=role.name, value=role.id, subsystem=role.subsystem) for role in Role.objects.all()],
-            key=lambda choice: choice["name"],
-        )
+        return [
+            dict(name=role.name, value=role.id, subsystem=role.subsystem)
+            for role in Role.objects.all().order_by("name")
+        ]
 
     def resolve_user_status_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
