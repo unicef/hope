@@ -17,7 +17,7 @@ variables:
   # ========================================================================
   #                          Mandatory variables 
   # ========================================================================
-  Kubernetes.serviceConnection: "ICTD-HOPE-AKS-DEV-uni-apps-aks-hope-dev-ictd-hope-dev-1614134848610"
+  Kubernetes.serviceConnection: "aks-hope-pm-azure-devops-sa"
   Kubernetes.namespace: "ictd-hope-pm"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
