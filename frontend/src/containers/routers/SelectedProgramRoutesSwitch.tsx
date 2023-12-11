@@ -220,7 +220,7 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <SentryRoute path={`${path}/edit/:id`}>
         <EditProgramPage />
       </SentryRoute>
-      <SentryRoute path={`${path}/edit/:id`}>
+      <SentryRoute path={`${path}/duplicate/:id`}>
         <DuplicateProgramPage />
       </SentryRoute>
       <SentryRoute path={`${path}/details/:id`}>
