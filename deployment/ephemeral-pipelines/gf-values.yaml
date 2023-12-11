@@ -64,8 +64,9 @@ postgresql:
   enabled: true
   <<: *psql-image-default
   auth:
-    database: hope-pm
-    <<: *psql-auth-default
+    database: dump_hope_tmp_2
+    username: devcashubusr
+    password: #secret-variables: POSTGRES_PASSWORD
   persistence:
     enabled: false
   <<: *psql-resources-default
