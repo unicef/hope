@@ -404,7 +404,7 @@ export const GrievancesFilters = ({
                 onChange={(e) =>
                   handleFilterChange('areaScope', e.target.value)
                 }
-                label={t('Area Scope')}
+                label={t('Ticket Type')}
                 value={filter.areaScope}
                 fullWidth
                 disableClearable
