@@ -131,14 +131,6 @@ export const ProgramDetails = ({
               value={program.cashPlus ? t('Yes') : t('No')}
             />
           </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t(
-                'Does this programme use individuals’ data for targeting or entitlement calculation?',
-              )}
-              value={program.individualDataNeeded ? t('Yes') : t('No')}
-            />
-          </Grid>
         </Grid>
         <NumberOfHouseHolds>
           <LabelizedField label={t('Total Number of Households')}>
