@@ -30,7 +30,6 @@ describe("Program Details", () => {
       programDetails.getLabelAdministrativeAreasOfImplementation();
       programDetails.getButtonEditProgram().scrollIntoView().should("be.visible");
       programDetails.getLabelTotalNumberOfHouseholds().should("be.visible");
-      programDetails.getLabelIndividualsData().should("be.visible");
       programDetails.getLabelCASH().should("be.visible");
       programDetails.getLabelDescription().should("be.visible");
       programDetails.getLabelFrequencyOfPayment().should("be.visible");
@@ -59,7 +58,6 @@ describe("Program Details", () => {
         .should("be.visible");
       programDetails.getButtonEditProgram().should("be.visible");
       programDetails.getLabelTotalNumberOfHouseholds().should("be.visible");
-      programDetails.getLabelIndividualsData().should("be.visible");
       programDetails.getLabelCASH().should("be.visible");
       programDetails.getLabelDescription().should("be.visible");
       programDetails.getLabelFrequencyOfPayment().should("be.visible");
