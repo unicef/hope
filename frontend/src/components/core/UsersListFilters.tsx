@@ -91,7 +91,7 @@ export const UsersListFilters = ({
             {choices.userRolesChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
-                  {item.name}
+                  {item.name} ({item.subsystem === "CA" ? "Cash Assist" : item.subsystem})
                 </MenuItem>
               );
             })}
