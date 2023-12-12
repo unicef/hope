@@ -53,54 +53,44 @@ const hasResponseErrors = (response): boolean => {
 };
 
 const redirectLink = new ApolloLink((operation, forward) => {
-  const businessAreaSlug = window.location.pathname.split('/')[1];
-  // Call the next link in the chain and get the response
+  // Check if the app is not running on localhost, dev, or stg environment
+  const isNotLocalhostDevOrStg = !window.location.hostname.includes('localhost') &&
+    !window.location.href.includes('dev') &&
+    !window.location.href.includes('stg');
+
+  const businessArea = window.location.pathname.split('/')[1];
+
   return forward(operation).map((response) => {
+    // Check if the operation is a mutation
+    const isMutation = operation.query.definitions.some(
+      (definition) =>
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'mutation',
+    );
+
+    // Check if the error message is "Permission Denied"
+    const isPermissionDenied = response?.errors?.some((error) => error.message === 'Permission Denied');
+
+    // If the error message is "Permission Denied" or data is null, redirect to the access denied page
+    if (isPermissionDenied || isDataNull(response.data)) {
+      window.location.href = `/access-denied/${businessArea}`;
+    }
     // Check if the response has any errors
-    if (hasResponseErrors(response)) {
-      // Check if the error message is "Permission Denied"
-      if (
-        response?.errors?.some((error) => error.message === 'Permission Denied')
-      ) {
-        // Redirect to the access denied page
-        window.location.href = `/access-denied/${businessAreaSlug}`;
-      }
-      // Check if the operation is a mutation
-      const isMutation = operation.query.definitions.some(
-        (definition) =>
-          definition.kind === 'OperationDefinition' &&
-          definition.operation === 'mutation',
-      );
+    else if (hasResponseErrors(response)) {
       // If it's a mutation, log the error to the console
       if (isMutation) {
-        // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
       }
-      // If it's not a mutation and the app is not running on localhost or a dev environment, redirect to an error page
-      else if (
-        !window.location.hostname.includes('localhost') &&
-        !window.location.href.includes('dev') &&
-        !window.location.href.includes('stg')
-      ) {
-        // Get the business area from the URL
-        const pathSegments = window.location.pathname.split('/');
-        const businessArea = pathSegments[1];
-
-        // Redirect to the error page for the business area
+      // If it's not a mutation and the app is not running on localhost, dev, or stg environment, redirect to an error page
+      else if (isNotLocalhostDevOrStg) {
         window.location.href = `/error/${businessArea}`;
       }
-    }
-    // If data is null, redirect to a 404 page
-    else if (isDataNull(response.data)) {
-      // Get the business area from the URL
-      const pathSegments = window.location.pathname.split('/');
-      const businessArea = pathSegments[1];
-
-      // Redirect to the 404 page for the business area
-      window.location.href = `/404/${businessArea}`;
+      // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
+      else {
+        console.error(response.data?.error || response.data?.errors);
+      }
     }
 
-    // Return the response
     return response;
   });
 });
