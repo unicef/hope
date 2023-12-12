@@ -16,7 +16,7 @@ snapshots['TestProgramChoices::test_dashboard_years_choices 1'] = {
     }
 }
 
-snapshots['TestProgramChoices::test_dashboard_years_choices__no_objects 1'] = {
+snapshots['TestProgramChoices::test_dashboard_years_choices_no_objects 1'] = {
     'data': {
         'dashboardYearsChoices': [
             '2021',
@@ -63,7 +63,7 @@ snapshots['TestProgramChoices::test_report_types_choices 1'] = {
             {
                 'name': 'Payments',
                 'value': '4'
-            },
+            }
         ]
     }
 }
