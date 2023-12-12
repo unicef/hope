@@ -92,6 +92,6 @@ class TestFinishVerificationPlan(TestCase):
 
         ticket = GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION).first()
         household = Household.objects.get(unicef_id=ticket.household_unicef_id)
-        self.assertIsNotNone(household.admin2_id)
         self.assertIsNotNone(ticket.admin2_id)
+        self.assertIsNotNone(household.admin2_id)
         self.assertEqual(ticket.admin2_id, household.admin2_id)
