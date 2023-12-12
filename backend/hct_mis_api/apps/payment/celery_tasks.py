@@ -300,7 +300,7 @@ def update_payments_signature(self: Any, payment_plan_id: str, batch_size: int =
     try:
         from hct_mis_api.apps.payment.models import PaymentPlan
 
-        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        payment_plan = PaymentPlan.objects.select_related("business_area").get(id=payment_plan_id)
         with configure_scope() as scope:
             scope.set_tag("business_area", payment_plan.business_area)
             payments_ids = payment_plan.eligible_payments.values_list("id", flat=True)
