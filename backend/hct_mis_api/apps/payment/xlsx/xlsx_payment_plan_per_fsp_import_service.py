@@ -36,7 +36,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
 
     def __init__(self, payment_plan: "PaymentPlan", file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
-        self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments.select_related("household_snapshot")
+        self.payment_list: QuerySet["Payment"] = payment_plan.eligible_payments
         self.file = file
         self.errors: List[XlsxError] = []
         self.payments_dict: Dict = {str(x.unicef_id): x for x in self.payment_list}
@@ -205,8 +205,8 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         for row in self.ws_payments.iter_rows(min_row=2):
             self._import_row(row, exchange_rate)
 
-        self.logger.info("Updating signatures")
-        Payment.signature_manager.bulk_update_with_signature(
+        self.logger.info("Updating payments")
+        Payment.objects.bulk_update(
             self.payments_to_save,
             (
                 "delivered_quantity",
