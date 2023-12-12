@@ -530,6 +530,7 @@ type CommunicationMessageNode implements Node {
   program: ProgramNode
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
+  migratedAt: DateTime
   copiedFrom: CommunicationMessageNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): CommunicationMessageNodeConnection!
 }
@@ -1152,6 +1153,7 @@ type FeedbackNode implements Node {
   linkedGrievance: GrievanceTicketNode
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
+  migratedAt: DateTime
   copiedFrom: FeedbackNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackNodeConnection!
   feedbackMessages(offset: Int, before: String, after: String, first: Int, last: Int): FeedbackMessageNodeConnection!
@@ -1429,6 +1431,7 @@ type GrievanceTicketNode implements Node {
   comments: String
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
+  migratedAt: DateTime
   copiedFrom: GrievanceTicketNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(offset: Int, before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
@@ -1584,6 +1587,7 @@ type HouseholdNode implements Node {
   originUnicefId: String
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
+  migratedAt: DateTime
   isRecalculatedGroupAges: Boolean!
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
@@ -2348,6 +2352,7 @@ type IndividualNode implements Node {
   originUnicefId: String
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
+  migratedAt: DateTime
   representedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -2421,6 +2426,7 @@ type IndividualRoleInHouseholdNode {
   role: IndividualRoleInHouseholdRole
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
+  migratedAt: DateTime
   copiedFrom: IndividualRoleInHouseholdNode
   copiedTo: [IndividualRoleInHouseholdNode!]!
 }
@@ -2744,8 +2750,14 @@ type PaginatedPaymentRecordsAndPaymentsNode {
 type PartnerNodeForProgram {
   id: ID
   name: String
+  parent: PartnerNodeForProgram
   isUn: Boolean!
   permissions: JSONString!
+  lft: Int!
+  rght: Int!
+  treeId: Int!
+  level: Int!
+  partnerSet: [PartnerNodeForProgram!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -2762,8 +2774,14 @@ input PartnerProgramInput {
 type PartnerType {
   id: ID!
   name: String!
+  parent: PartnerNodeForProgram
   isUn: Boolean!
   permissions: JSONString!
+  lft: Int!
+  rght: Int!
+  treeId: Int!
+  level: Int!
+  partnerSet: [PartnerNodeForProgram!]!
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -3649,7 +3667,7 @@ type Query {
   householdSearchTypesChoices: [ChoiceObject]
   me: UserNode
   allUsers(offset: Int, before: String, after: String, first: Int, last: Int, status: [String], partner: [String], businessArea: String!, search: String, roles: [String], isTicketCreator: Boolean, isSurveyCreator: Boolean, isMessageCreator: Boolean, isFeedbackCreator: Boolean, orderBy: String): UserNodeConnection
-  userRolesChoices: [ChoiceObject]
+  userRolesChoices: [RoleChoiceObject]
   userStatusChoices: [ChoiceObject]
   userPartnerChoices: [ChoiceObject]
   hasAvailableUsersToExport(businessAreaSlug: String!): Boolean
@@ -3945,6 +3963,12 @@ type RevertMarkPaymentAsFailedMutation {
 
 type RevertMarkPaymentRecordAsFailedMutation {
   paymentRecord: PaymentRecordNode
+}
+
+type RoleChoiceObject {
+  name: String
+  value: String
+  subsystem: String
 }
 
 type RoleNode {
