@@ -27,11 +27,12 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
-from hct_mis_api.apps.core.utils import IsOriginalManager, SoftDeletableIsOriginalModel
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
+    RepresentationManager,
+    SoftDeletableIsOriginalModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
@@ -514,7 +515,7 @@ class Household(
         "this field will contain the household it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
@@ -745,7 +746,7 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
         on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
@@ -779,7 +780,7 @@ class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDMod
         blank=True,
         choices=ROLE_CHOICE,
     )
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
@@ -987,7 +988,7 @@ class Individual(
         "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
 
@@ -1196,9 +1197,9 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
 
-    objects = IsOriginalManager()
+    objects = RepresentationManager()
     original_and_repr_objects = models.Manager()
 
 
@@ -1219,7 +1220,7 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
