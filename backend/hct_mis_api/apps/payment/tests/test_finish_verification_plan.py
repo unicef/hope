@@ -34,7 +34,7 @@ class TestFinishVerificationPlan(TestCase):
         payment_record_amount = 10
         user = UserFactory()
 
-        afghanistan_areas_qs = Area.objects.filter(area_type__area_level=1, area_type__country__iso_code3="AFG")
+        afghanistan_areas_qs = Area.objects.filter(area_type__area_level=2, area_type__country__iso_code3="AFG")
 
         program = ProgramFactory(business_area=business_area)
         program.admin_areas.set(afghanistan_areas_qs.order_by("?")[:3])
@@ -69,6 +69,7 @@ class TestFinishVerificationPlan(TestCase):
             )
             household.set_admin_areas()
             household.programs.add(program)
+            household.refresh_from_db()
 
             payment_record = PaymentRecordFactory(
                 parent=cash_plan,
