@@ -7,8 +7,10 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentRecordFactory
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 
 
 class TestProgramChoices(APITestCase):
@@ -53,7 +55,14 @@ class TestProgramChoices(APITestCase):
         )
 
     @freeze_time("2023-10-10")
-    def test_dashboard_years_choices__no_objects(self) -> None:
+    def test_dashboard_years_choices_no_objects(self) -> None:
+        PaymentRecord.objects.all().delete()
+        Payment.objects.all().delete()
+        GrievanceTicket.objects.all().delete()
+        self.assertEqual(PaymentRecord.objects.count(), 0)
+        self.assertEqual(Payment.objects.count(), 0)
+        self.assertEqual(GrievanceTicket.objects.count(), 0)
+
         self.snapshot_graphql_request(
             request_string=self.QUERY_DASHBOARD_YEARS_CHOICES,
             context={"user": self.user},
@@ -80,6 +89,8 @@ class TestProgramChoices(APITestCase):
             household=household,
             currency="PLN",
         )
+        self.assertEqual(PaymentRecord.objects.count(), 1)
+        self.assertEqual(Payment.objects.count(), 1)
 
         self.snapshot_graphql_request(
             request_string=self.QUERY_DASHBOARD_YEARS_CHOICES,
