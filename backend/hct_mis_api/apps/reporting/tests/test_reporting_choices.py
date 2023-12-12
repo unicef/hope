@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.utils import timezone
 
 from freezegun import freeze_time
@@ -56,6 +57,7 @@ class TestProgramChoices(APITestCase):
 
     @freeze_time("2023-10-10")
     def test_dashboard_years_choices_no_objects(self) -> None:
+        cache.clear()
         PaymentRecord.objects.all().delete()
         Payment.objects.all().delete()
         GrievanceTicket.objects.all().delete()
@@ -71,6 +73,7 @@ class TestProgramChoices(APITestCase):
 
     @freeze_time("2023-10-10")
     def test_dashboard_years_choices(self) -> None:
+        cache.clear()
         create_afghanistan()
         business_area = BusinessArea.objects.get(slug="afghanistan")
 
