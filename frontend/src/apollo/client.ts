@@ -79,6 +79,7 @@ const redirectLink = new ApolloLink((operation, forward) => {
     else if (hasResponseErrors(response)) {
       // If it's a mutation, log the error to the console
       if (isMutation) {
+        // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
       }
       // If it's not a mutation and the app is not running on localhost, dev, or stg environment, redirect to an error page
@@ -87,6 +88,7 @@ const redirectLink = new ApolloLink((operation, forward) => {
       }
       // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
       else {
+        // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
       }
     }
