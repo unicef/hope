@@ -78,6 +78,23 @@ class TestHousehold(TestCase):
         self.assertEqual(household.admin3, self.area3)
         self.assertEqual(household.admin4, None)
 
+    def test_household_set_admin_area_none_clears_all_admin_fields_when_area_is_none(self) -> None:
+        household, _ = create_household(household_args={"size": 1, "business_area": self.business_area})
+        household.admin_area = None
+        household.admin1 = self.area1
+        household.admin2 = self.area2
+        household.admin3 = self.area3
+        household.admin4 = self.area4
+
+        household.set_admin_areas(None)
+        household.refresh_from_db()
+
+        self.assertIsNone(household.admin_area)
+        self.assertIsNone(household.admin1)
+        self.assertIsNone(household.admin2)
+        self.assertIsNone(household.admin3)
+        self.assertIsNone(household.admin4)
+
 
 class TestDocument(TestCase):
     @classmethod
