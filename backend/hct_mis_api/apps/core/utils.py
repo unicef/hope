@@ -42,9 +42,9 @@ logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
-    def __contains__(
+    def __contains__(  # type: ignore # FIXME Signature of "__contains__" incompatible with supertype tuple
         self, key: str, *args: Any, **kwargs: Any
-    ) -> bool:  # type: ignore # FIXME Signature of "__contains__" incompatible with supertype tuple
+    ) -> bool:
         return key.casefold() in (element.casefold() for element in self)
 
 

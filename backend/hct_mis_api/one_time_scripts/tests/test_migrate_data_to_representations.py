@@ -704,7 +704,7 @@ class TestMigrateDataToRepresentations(TestCase):
         hh1_id = self.household1.id
         self.assertEqual(Household.original_and_repr_objects.exclude(copied_from=None).count(), 0)
         copy_household_representation_for_programs_fast(
-            self.household1, self.program_active, Individual.objects.filter(household=self.household1)  # type: ignore
+            self.household1, self.program_active, Individual.objects.filter(household=self.household1)
         )
         self.refresh_objects()
         programs = [str(x.program.id) for x in Household.original_and_repr_objects.filter(copied_from_id=hh1_id)]
@@ -722,7 +722,7 @@ class TestMigrateDataToRepresentations(TestCase):
         self.assertEqual(Household.original_and_repr_objects.exclude(copied_from=None).count(), 0)
         old_copy_household_representation_for_programs_fast = copy_household_representation_for_programs_fast
         copy_household_representation_for_programs_fast(
-            self.household1, self.program_active, Individual.objects.filter(household=self.household1)  # type: ignore
+            self.household1, self.program_active, Individual.objects.filter(household=self.household1)
         )
         self.refresh_objects()
         programs = [str(x.program.id) for x in Household.original_and_repr_objects.filter(copied_from_id=hh1_id)]
