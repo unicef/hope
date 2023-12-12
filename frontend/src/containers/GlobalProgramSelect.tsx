@@ -100,6 +100,8 @@ export const GlobalProgramSelect = (): React.ReactElement => {
             individualDataNeeded,
             dataCollectingType: {
               id: dataCollectingType?.id,
+              code: dataCollectingType?.code,
+              label: dataCollectingType?.label,
               householdFiltersAvailable:
                 dataCollectingType?.householdFiltersAvailable,
               individualFiltersAvailable:
