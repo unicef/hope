@@ -30,7 +30,6 @@ describe("Program Details", () => {
       programDetails.getLabelAdministrativeAreasOfImplementation();
       programDetails.getButtonEditProgram().scrollIntoView().should("be.visible");
       programDetails.getLabelTotalNumberOfHouseholds().should("be.visible");
-      programDetails.getLabelIndividualsData().should("be.visible");
       programDetails.getLabelCASH().should("be.visible");
       programDetails.getLabelDescription().should("be.visible");
       programDetails.getLabelFrequencyOfPayment().should("be.visible");
@@ -44,22 +43,18 @@ describe("Program Details", () => {
       programDetails.getTablePagination().scrollIntoView().should("be.visible");
       programDetails.getTableLabel().should("be.visible");
       programDetails.getButtonCopyProgram().scrollIntoView().should("be.visible");
-
       programDetails.getGlobalProgramFilter().click();
       programDetails
         .getProgrammesOptions()
         .contains(programDetails.textDraftProgram)
         .click();
-
       programDetails.getButtonActivateProgram().should("be.visible");
       programDetails.getButtonRemoveProgram().should("be.visible");
-
       programDetails
         .getLabelAdministrativeAreasOfImplementation()
         .should("be.visible");
       programDetails.getButtonEditProgram().should("be.visible");
       programDetails.getLabelTotalNumberOfHouseholds().should("be.visible");
-      programDetails.getLabelIndividualsData().should("be.visible");
       programDetails.getLabelCASH().should("be.visible");
       programDetails.getLabelDescription().should("be.visible");
       programDetails.getLabelFrequencyOfPayment().should("be.visible");

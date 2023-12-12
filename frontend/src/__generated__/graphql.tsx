@@ -900,6 +900,7 @@ export type CommunicationMessageNode = Node & {
   program?: Maybe<ProgramNode>,
   isOriginal: Scalars['Boolean'],
   isMigrationHandled: Scalars['Boolean'],
+  migratedAt?: Maybe<Scalars['DateTime']>,
   copiedFrom?: Maybe<CommunicationMessageNode>,
   copiedTo: CommunicationMessageNodeConnection,
 };
@@ -1698,6 +1699,7 @@ export type FeedbackNode = Node & {
   linkedGrievance?: Maybe<GrievanceTicketNode>,
   isOriginal: Scalars['Boolean'],
   isMigrationHandled: Scalars['Boolean'],
+  migratedAt?: Maybe<Scalars['DateTime']>,
   copiedFrom?: Maybe<FeedbackNode>,
   copiedTo: FeedbackNodeConnection,
   feedbackMessages: FeedbackMessageNodeConnection,
@@ -2078,6 +2080,7 @@ export type GrievanceTicketNode = Node & {
   comments?: Maybe<Scalars['String']>,
   isOriginal: Scalars['Boolean'],
   isMigrationHandled: Scalars['Boolean'],
+  migratedAt?: Maybe<Scalars['DateTime']>,
   copiedFrom?: Maybe<GrievanceTicketNode>,
   copiedTo: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
@@ -2270,6 +2273,7 @@ export type HouseholdNode = Node & {
   originUnicefId?: Maybe<Scalars['String']>,
   isOriginal: Scalars['Boolean'],
   isMigrationHandled: Scalars['Boolean'],
+  migratedAt?: Maybe<Scalars['DateTime']>,
   isRecalculatedGroupAges: Scalars['Boolean'],
   copiedTo: HouseholdNodeConnection,
   individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
@@ -3309,6 +3313,7 @@ export type IndividualNode = Node & {
   originUnicefId?: Maybe<Scalars['String']>,
   isOriginal: Scalars['Boolean'],
   isMigrationHandled: Scalars['Boolean'],
+  migratedAt?: Maybe<Scalars['DateTime']>,
   representedHouseholds: HouseholdNodeConnection,
   headingHousehold?: Maybe<HouseholdNode>,
   documents: DocumentNodeConnection,
@@ -3556,6 +3561,7 @@ export type IndividualRoleInHouseholdNode = {
   role?: Maybe<IndividualRoleInHouseholdRole>,
   isOriginal: Scalars['Boolean'],
   isMigrationHandled: Scalars['Boolean'],
+  migratedAt?: Maybe<Scalars['DateTime']>,
   copiedFrom?: Maybe<IndividualRoleInHouseholdNode>,
   copiedTo: Array<IndividualRoleInHouseholdNode>,
 };
@@ -4390,8 +4396,14 @@ export type PartnerNodeForProgram = {
    __typename?: 'PartnerNodeForProgram',
   id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
+  parent?: Maybe<PartnerNodeForProgram>,
   isUn: Scalars['Boolean'],
   permissions: Scalars['JSONString'],
+  lft: Scalars['Int'],
+  rght: Scalars['Int'],
+  treeId: Scalars['Int'],
+  level: Scalars['Int'],
+  partnerSet: Array<PartnerNodeForProgram>,
   userSet: UserNodeConnection,
   individualIdentities: IndividualIdentityNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -4436,8 +4448,14 @@ export type PartnerType = {
    __typename?: 'PartnerType',
   id: Scalars['ID'],
   name: Scalars['String'],
+  parent?: Maybe<PartnerNodeForProgram>,
   isUn: Scalars['Boolean'],
   permissions: Scalars['JSONString'],
+  lft: Scalars['Int'],
+  rght: Scalars['Int'],
+  treeId: Scalars['Int'],
+  level: Scalars['Int'],
+  partnerSet: Array<PartnerNodeForProgram>,
   userSet: UserNodeConnection,
   individualIdentities: IndividualIdentityNodeConnection,
   grievanceticketSet: GrievanceTicketNodeConnection,
@@ -5622,7 +5640,7 @@ export type Query = {
   householdSearchTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   me?: Maybe<UserNode>,
   allUsers?: Maybe<UserNodeConnection>,
-  userRolesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  userRolesChoices?: Maybe<Array<Maybe<RoleChoiceObject>>>,
   userStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   userPartnerChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   hasAvailableUsersToExport?: Maybe<Scalars['Boolean']>,
@@ -7064,6 +7082,13 @@ export type RevertMarkPaymentAsFailedMutation = {
 export type RevertMarkPaymentRecordAsFailedMutation = {
    __typename?: 'RevertMarkPaymentRecordAsFailedMutation',
   paymentRecord?: Maybe<PaymentRecordNode>,
+};
+
+export type RoleChoiceObject = {
+   __typename?: 'RoleChoiceObject',
+  name?: Maybe<Scalars['String']>,
+  value?: Maybe<Scalars['String']>,
+  subsystem?: Maybe<Scalars['String']>,
 };
 
 export type RoleNode = {
@@ -11676,8 +11701,8 @@ export type UserChoiceDataQueryVariables = {};
 export type UserChoiceDataQuery = (
   { __typename?: 'Query' }
   & { userRolesChoices: Maybe<Array<Maybe<(
-    { __typename?: 'ChoiceObject' }
-    & Pick<ChoiceObject, 'name' | 'value'>
+    { __typename?: 'RoleChoiceObject' }
+    & Pick<RoleChoiceObject, 'name' | 'value' | 'subsystem'>
   )>>>, userStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
@@ -13537,7 +13562,7 @@ export type AllProgramsForChoicesQuery = (
         & Pick<ProgramNode, 'id' | 'name' | 'status' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
-          & Pick<DataCollectingTypeNode, 'id' | 'individualFiltersAvailable' | 'householdFiltersAvailable'>
+          & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable' | 'description'>
         )> }
       )> }
     )>> }
@@ -21259,6 +21284,7 @@ export const UserChoiceDataDocument = gql`
   userRolesChoices {
     name
     value
+    subsystem
   }
   userStatusChoices {
     name
@@ -25796,8 +25822,12 @@ export const AllProgramsForChoicesDocument = gql`
         individualDataNeeded
         dataCollectingType {
           id
+          code
+          label
+          active
           individualFiltersAvailable
           householdFiltersAvailable
+          description
         }
       }
     }
@@ -28707,6 +28737,7 @@ export type ResolversTypes = {
   LanguageObjectEdge: ResolverTypeWrapper<LanguageObjectEdge>,
   LanguageObject: ResolverTypeWrapper<LanguageObject>,
   DataCollectingTypeChoiceObject: ResolverTypeWrapper<DataCollectingTypeChoiceObject>,
+  RoleChoiceObject: ResolverTypeWrapper<RoleChoiceObject>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
   ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -29220,6 +29251,7 @@ export type ResolversParentTypes = {
   LanguageObjectEdge: LanguageObjectEdge,
   LanguageObject: LanguageObject,
   DataCollectingTypeChoiceObject: DataCollectingTypeChoiceObject,
+  RoleChoiceObject: RoleChoiceObject,
   ImportedHouseholdNode: ImportedHouseholdNode,
   ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
   ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
@@ -29825,6 +29857,7 @@ export type CommunicationMessageNodeResolvers<ContextType = any, ParentType exte
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['CommunicationMessageNode']>, ParentType, ContextType>,
   copiedTo?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, CommunicationMessageNodeCopiedToArgs>,
 };
@@ -30214,6 +30247,7 @@ export type FeedbackNodeResolvers<ContextType = any, ParentType extends Resolver
   linkedGrievance?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['FeedbackNode']>, ParentType, ContextType>,
   copiedTo?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, FeedbackNodeCopiedToArgs>,
   feedbackMessages?: Resolver<ResolversTypes['FeedbackMessageNodeConnection'], ParentType, ContextType, FeedbackNodeFeedbackMessagesArgs>,
@@ -30448,6 +30482,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
   copiedTo?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeCopiedToArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
@@ -30586,6 +30621,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   originUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   isRecalculatedGroupAges?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   copiedTo?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, HouseholdNodeCopiedToArgs>,
   individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
@@ -30989,6 +31025,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   originUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
   headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
@@ -31041,6 +31078,7 @@ export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType
   role?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>, ParentType, ContextType>,
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  migratedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   copiedTo?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
 };
@@ -31288,8 +31326,14 @@ export type PaginatedPaymentRecordsAndPaymentsNodeResolvers<ContextType = any, P
 export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerNodeForProgram'] = ResolversParentTypes['PartnerNodeForProgram']> = {
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  parent?: Resolver<Maybe<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>,
   isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   permissions?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  partnerSet?: Resolver<Array<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerNodeForProgramUserSetArgs>,
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerNodeForProgramIndividualIdentitiesArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerNodeForProgramGrievanceticketSetArgs>,
@@ -31300,8 +31344,14 @@ export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends
 export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  parent?: Resolver<Maybe<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>,
   isUn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   permissions?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  partnerSet?: Resolver<Array<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>,
   userSet?: Resolver<ResolversTypes['UserNodeConnection'], ParentType, ContextType, PartnerTypeUserSetArgs>,
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, PartnerTypeIndividualIdentitiesArgs>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, PartnerTypeGrievanceticketSetArgs>,
@@ -31875,7 +31925,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   householdSearchTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>,
-  userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['RoleChoiceObject']>>>, ParentType, ContextType>,
   userStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   userPartnerChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   hasAvailableUsersToExport?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryHasAvailableUsersToExportArgs, 'businessAreaSlug'>>,
@@ -32103,6 +32153,12 @@ export type RevertMarkPaymentAsFailedMutationResolvers<ContextType = any, Parent
 
 export type RevertMarkPaymentRecordAsFailedMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RevertMarkPaymentRecordAsFailedMutation'] = ResolversParentTypes['RevertMarkPaymentRecordAsFailedMutation']> = {
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+};
+
+export type RoleChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleChoiceObject'] = ResolversParentTypes['RoleChoiceObject']> = {
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  subsystem?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleNode'] = ResolversParentTypes['RoleNode']> = {
@@ -33286,6 +33342,7 @@ export type Resolvers<ContextType = any> = {
   RestartCreateReport?: RestartCreateReportResolvers<ContextType>,
   RevertMarkPaymentAsFailedMutation?: RevertMarkPaymentAsFailedMutationResolvers<ContextType>,
   RevertMarkPaymentRecordAsFailedMutation?: RevertMarkPaymentRecordAsFailedMutationResolvers<ContextType>,
+  RoleChoiceObject?: RoleChoiceObjectResolvers<ContextType>,
   RoleNode?: RoleNodeResolvers<ContextType>,
   RuleCommitNode?: RuleCommitNodeResolvers<ContextType>,
   RuleCommitNodeConnection?: RuleCommitNodeConnectionResolvers<ContextType>,
