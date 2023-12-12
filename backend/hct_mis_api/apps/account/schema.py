@@ -62,6 +62,12 @@ class RoleNode(DjangoObjectType):
         exclude = ("id",)
 
 
+class RoleChoiceObject(graphene.ObjectType):
+    name = graphene.String()
+    value = graphene.String()
+    subsystem = graphene.String()
+
+
 class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
     is_accountability_applicable = graphene.Boolean()
@@ -77,17 +83,6 @@ class UserBusinessAreaNode(DjangoObjectType):
         filter_fields = ["id"]
         interfaces = (graphene.relay.Node,)
         connection_class = ExtendedConnection
-
-
-# class UserObjectType(DjangoObjectType):
-#     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
-#
-#     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
-#         return info.context.user.business_areas
-#
-#     class Meta:
-#         model = get_user_model()
-#         exclude = ("password",)
 
 
 class PartnerType(DjangoObjectType):
@@ -179,7 +174,7 @@ class Query(graphene.ObjectType):
         ),
         max_limit=1000,
     )
-    user_roles_choices = graphene.List(ChoiceObject)
+    user_roles_choices = graphene.List(RoleChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
@@ -193,7 +188,10 @@ class Query(graphene.ObjectType):
         return info.context.user
 
     def resolve_user_roles_choices(self, info: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(Role.get_roles_as_choices())
+        return [
+            dict(name=role.name, value=role.id, subsystem=role.subsystem)
+            for role in Role.objects.all().order_by("name")
+        ]
 
     def resolve_user_status_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)

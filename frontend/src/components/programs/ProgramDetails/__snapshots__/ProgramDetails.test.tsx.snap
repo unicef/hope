@@ -247,28 +247,6 @@ exports[`components/ProgramDetails should render 1`] = `
             </div>
           </div>
         </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              Does this programme use individuals’ data for targeting or entitlement calculation?
-            </span>
-            <div
-              data-cy="label-Does this programme use individuals’ data for targeting or entitlement calculation?"
-            >
-              <span
-                class="sc-htpNat gXZdAP"
-                color="textSecondary"
-              >
-                No
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
       <div
         class="sc-dnqmqq gRhSyd"

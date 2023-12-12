@@ -15,6 +15,8 @@ export interface ProgramInterface {
     id: string;
     householdFiltersAvailable: boolean;
     individualFiltersAvailable: boolean;
+    label: string;
+    code: string;
   };
 }
 
