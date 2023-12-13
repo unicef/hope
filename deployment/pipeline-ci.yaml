@@ -8,6 +8,7 @@ trigger:
     - global-program-filter
     - testing-ephemeral
     - ops/*
+    - cicd-tests
   paths:
     exclude:
     -  docs/*
