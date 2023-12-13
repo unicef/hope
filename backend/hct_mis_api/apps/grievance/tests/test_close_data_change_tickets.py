@@ -331,7 +331,7 @@ class TestCloseDataChangeTickets(BaseElasticSearchTestCase, APITestCase):
         )
         if should_close:
             self.assertTrue(created_individual.exists())
-            created_individual = created_individual.first()  # type: ignore
+            created_individual = created_individual.first()
 
             document = Document.objects.get(document_number="123-123-UX-321")
             country_pl = geo_models.Country.objects.get(iso_code2="PL")

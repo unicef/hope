@@ -6,7 +6,7 @@ let grievancePage = new Grievance();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 let error404Page = new ErrorPage();
 
-describe.skip("404 Page", () => {
+describe("404 Page", () => {
   before(function () {
     cy.initScenario("init_clear");
     cy.fixture("grievance_new_ticket").as("newTicket");
@@ -39,7 +39,7 @@ describe.skip("404 Page", () => {
       cy.url().then((url) => {
         let newUrl = url.slice(0, -10);
         cy.visit(newUrl);
-        cy.intercept("/404/**").as("error404");
+        cy.intercept("/access-denied/**").as("error404");
         error404Page.getPageNoFound();
         error404Page.getButtonRefresh().click();
         cy.wait("@error404").its("response.statusCode").should("eq", 200);
@@ -60,10 +60,10 @@ describe.skip("404 Page", () => {
       cy.url().then((url) => {
         let newUrl = url.slice(0, -10);
         cy.visit(newUrl);
-        cy.intercept("/404/**").as("error404");
+        cy.intercept("/access-denied/**").as("error404");
         error404Page.getPageNoFound();
-        error404Page.getGoToCountryDashboard().click();
         cy.wait("@error404").its("response.statusCode").should("eq", 200);
+        error404Page.getGoToCountryDashboard().click();
         cy.get("h5").contains("Programme Management");
       });
     });

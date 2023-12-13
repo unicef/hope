@@ -75,9 +75,7 @@ export const AccessDenied: React.FC = () => {
       <TextContainer>
         <Title>Access Denied</Title>
         <Paragraph>
-          You don&apos;t have the necessary permissions to access this page.
-          Please check your access rights or contact your system administrator
-          for assistance.
+        Sorry, the page you&apos;re trying to reach either doesn&apos;t exist or you don&apos;t have the required permissions to view it.
         </Paragraph>
       </TextContainer>
       <Box display='flex' justifyContent='center' alignItems='center'>
@@ -97,6 +95,7 @@ export const AccessDenied: React.FC = () => {
             color='primary'
             variant='contained'
             component={Link}
+            data-cy='button-go-to-programme-management'
             to={`/${businessArea}/programs/all/list`}
           >
             GO TO PROGRAMME MANAGEMENT
