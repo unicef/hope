@@ -9,11 +9,12 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.grievance.models import (
-    OnlyOriginalManager,
-    OriginalAndRepresentationsManager,
+from hct_mis_api.apps.grievance.models import OriginalAndRepresentationsManager
+from hct_mis_api.apps.utils.models import (
+    RepresentationManager,
+    TimeStampedUUIDModel,
+    UnicefIdentifiedModel,
 )
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, UnicefIdentifiedModel
 
 
 class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
@@ -69,7 +70,7 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
     program = models.ForeignKey(
         "program.Program", null=True, blank=True, on_delete=models.CASCADE, related_name="messages"
     )
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
@@ -82,7 +83,7 @@ class Message(TimeStampedUUIDModel, UnicefIdentifiedModel):
     )
 
     # TODO: remove both after data migration
-    objects = OnlyOriginalManager()
+    objects = RepresentationManager()
     original_and_repr_objects = OriginalAndRepresentationsManager()
 
     class Meta:
@@ -155,7 +156,7 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
         blank=True,
         verbose_name=_("Linked grievance"),
     )
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
@@ -168,7 +169,7 @@ class Feedback(TimeStampedUUIDModel, UnicefIdentifiedModel):
     )
 
     # TODO: remove both after data migration
-    objects = OnlyOriginalManager()
+    objects = RepresentationManager()
     original_and_repr_objects = OriginalAndRepresentationsManager()
 
     class Meta:
