@@ -60,4 +60,4 @@ stages:
               artifact: $(Build.SourceBranchName)
               publishLocation: 'pipeline'
             displayName: "Publish tag"
-            condition: ${{ contains(variables['Build.SourceVersionMessage'], 'skip-tests') }}
+            condition: ${{ not(contains(variables['Build.SourceVersionMessage'], 'skip-tests')) }}
