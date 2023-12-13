@@ -106,7 +106,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
             batched_household_ids = households_filtered_ids[batch_start:batch_end]
-            batched_households = Household.original_and_repr_objects.filter(id__in=batched_household_ids)
+            batched_households = list(Household.all_objects.filter(id__in=batched_household_ids))
             for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
                 "documents", "identities", "bank_account_info"
             ):
@@ -266,8 +266,8 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
     bank_account_info_to_create = []
     individuals_to_exclude_dict = {
         str(x["copied_from_id"]): str(x["pk"])
-        for x in Individual.original_and_repr_objects.filter(
-            copied_from_id__in=individuals, is_original=False, program=program
+        for x in Individual.all_objects.filter(
+            copied_from__in=individuals, is_original=False, program=program
         ).values("copied_from_id", "pk")
     }
 
