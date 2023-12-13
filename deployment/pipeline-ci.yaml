@@ -251,6 +251,6 @@ stages:
           - task: PublishPipelineArtifact@1
             inputs:
               pathToPublish: "$(Build.ArtifactStagingDirectory)/tag"
-              artifact: $(Build.SourceBranchName)
+              artifact: 'hope'
               publishLocation: 'pipeline'
             displayName: "Publish tag"
