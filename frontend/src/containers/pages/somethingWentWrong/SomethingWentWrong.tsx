@@ -58,6 +58,9 @@ export const SomethingWentWrong: React.FC = () => {
   const history = useHistory();
   const pathSegments = history.location.pathname.split('/');
   const businessArea = pathSegments[2];
+  const errorMessage = history.location.state?.errorMessage;
+
+
 
   return (
     <Container>
@@ -74,10 +77,14 @@ export const SomethingWentWrong: React.FC = () => {
       </SquareLogo>
       <TextContainer>
         <Title>Oops! Something went wrong</Title>
-        <Paragraph>
-          Don&apos;t worry! Our team is on it, working to fix the issue. Please
-          try again later. Thank you for your patience.
-        </Paragraph>
+        {errorMessage ? (
+          <Paragraph>{errorMessage}</Paragraph>
+        ) : (
+          <Paragraph>
+            Don&apos;t worry! Our team is on it, working to fix the issue. Please
+            try again later. Thank you for your patience.
+          </Paragraph>
+        )}
       </TextContainer>
       <Box display='flex' justifyContent='center' alignItems='center'>
         <Box mr={4}>
