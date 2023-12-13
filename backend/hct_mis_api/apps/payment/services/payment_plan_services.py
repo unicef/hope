@@ -637,3 +637,13 @@ class PaymentPlanService:
         transaction.on_commit(lambda: prepare_follow_up_payment_plan_task.delay(follow_up_pp.id))
 
         return follow_up_pp
+
+    def recalculate_signatures_in_batch(self, batch_size: int = 500) -> None:
+        payment_plan = self.payment_plan
+        payments_ids = list(payment_plan.eligible_payments.values_list("id", flat=True))
+        for batch_start in range(0, len(payments_ids), batch_size):
+            batched_ids = payments_ids[batch_start : batch_start + batch_size]
+            payments = Payment.objects.filter(id__in=batched_ids).select_related("household_snapshot")
+            for payment in payments:
+                payment.update_signature_hash()
+            Payment.objects.bulk_update(payments, ("signature_hash",))
