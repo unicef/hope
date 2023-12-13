@@ -38,10 +38,12 @@ variables:
   isDev: $[eq(variables['Build.SourceBranchName'], 'develop')]
   tag: $(Build.SourceVersion)
   additionalTag: $(Build.SourceBranchName)
+  skipTests: $[contains(variables['Build.SourceVersionMessage'], '[skip-tests]')]
 
 stages:
   - stage: publish_artifacts
     displayName: PUBLISH_ARTIFACTS
+    condition: and(succeeded(), ne(variables['skipTests'], 'true'))
     jobs:
       - job: publish_artifacts
         pool:
