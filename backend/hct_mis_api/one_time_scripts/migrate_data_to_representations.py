@@ -266,9 +266,9 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
     bank_account_info_to_create = []
     individuals_to_exclude_dict = {
         str(x["copied_from_id"]): str(x["pk"])
-        for x in Individual.all_objects.filter(
-            copied_from__in=individuals, is_original=False, program=program
-        ).values("copied_from_id", "pk")
+        for x in Individual.all_objects.filter(copied_from__in=individuals, is_original=False, program=program).values(
+            "copied_from_id", "pk"
+        )
     }
 
     for individual in individuals:
