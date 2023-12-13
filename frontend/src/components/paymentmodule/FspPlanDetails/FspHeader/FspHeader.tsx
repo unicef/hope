@@ -8,12 +8,12 @@ import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 
 interface FspHeaderProps {
-  businessArea: string;
+  baseUrl: string;
   permissions: string[];
 }
 
 export function FspHeader({
-  businessArea,
+  baseUrl,
   permissions,
 }: FspHeaderProps): React.ReactElement {
   const { t } = useTranslation();
@@ -21,7 +21,7 @@ export function FspHeader({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/`,
+      to: `/${baseUrl}/payment-module/`,
     },
   ];
 
@@ -40,7 +40,7 @@ export function FspHeader({
             color='primary'
             variant='outlined'
             component={Link}
-            to={`/${businessArea}/fsp/`}
+            to={`/${baseUrl}/fsp/`}
             startIcon={<EditIcon />}
           >
             {t('Edit')}

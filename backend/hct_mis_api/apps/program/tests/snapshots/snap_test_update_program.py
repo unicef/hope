@@ -27,6 +27,26 @@ snapshots['TestUpdateProgram::test_update_active_program_with_dct 1'] = {
     ]
 }
 
+snapshots['TestUpdateProgram::test_update_draft_not_empty_program_with_dct 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'DataCollectingType can be updated only for Program without any households',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissions 1'] = {
     'data': {
         'updateProgram': {
@@ -95,6 +115,46 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
                 }
             ],
             'message': 'Permission Denied: User is not authenticated.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_of_other_partner_raise_error 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['User is not allowed to create program for partner different than his partner.']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_when_finished 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['You cannot change finished program']",
             'path': [
                 'updateProgram'
             ]

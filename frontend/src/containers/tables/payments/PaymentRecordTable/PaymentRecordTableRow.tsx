@@ -6,7 +6,6 @@ import { StatusBox } from '../../../../components/core/StatusBox';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
@@ -14,6 +13,7 @@ import {
   paymentStatusDisplayMap,
 } from '../../../../utils/utils';
 import { PaymentRecordNode } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface PaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
@@ -24,9 +24,9 @@ export function PaymentRecordTableRow({
   paymentRecord,
   openInNewTab,
 }: PaymentRecordTableRowProps): React.ReactElement {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const history = useHistory();
-  const paymentRecordPath = `/${businessArea}/payment-records/${paymentRecord.id}`;
+  const paymentRecordPath = `/${baseUrl}/payment-records/${paymentRecord.id}`;
   const handleClick = (): void => {
     if (openInNewTab) {
       window.open(paymentRecordPath);

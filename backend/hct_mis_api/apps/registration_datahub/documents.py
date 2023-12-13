@@ -58,6 +58,7 @@ class ImportedIndividualDocument(Document):
             "partner": fields.KeywordField(attr="partner", similarity="boolean"),
         }
     )
+    program_id = fields.KeywordField(attr="program_id")
 
     def prepare_admin1(self, instance: ImportedIndividual) -> Optional["Area"]:
         household = instance.household

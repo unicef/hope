@@ -7,7 +7,9 @@ from django.utils.encoding import force_str
 
 import graphene
 
+from hct_mis_api.apps.core.utils import decode_id_string_required
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode
 
 TICKET_ORDERING_KEYS = [
@@ -61,6 +63,23 @@ def create_type_generated_queries() -> Tuple[Q, Q]:
     return user_generated, system_generated
 
 
+def pre_filter_query_with_headers(info: Any) -> QuerySet:
+    business_area_slug = info.context.headers.get("Business-Area")
+    encoded_program_id = info.context.headers.get("Program")
+
+    query = GrievanceTicket.objects.filter(ignored=False)
+
+    if business_area_slug:
+        query = query.filter(business_area__slug=business_area_slug)
+
+    if encoded_program_id and encoded_program_id != "all":
+        decoded_id = decode_id_string_required(encoded_program_id)
+        program = Program.objects.get(id=decoded_id)
+        query = query.filter(programs__in=[program])
+
+    return query
+
+
 class BusinessAreaInput(graphene.InputObjectType):
     business_area = graphene.String()
 
@@ -105,7 +124,7 @@ class Query(graphene.ObjectType):
         user_generated, system_generated = create_type_generated_queries()
 
         qs = (
-            GrievanceTicket.objects.filter(ignored=False, business_area__slug=kwargs.get("business_area_slug"))
+            pre_filter_query_with_headers(info)
             .annotate(
                 category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"),
                 days_diff=Extract(F("updated_at") - F("created_at"), "days"),
@@ -128,7 +147,7 @@ class Query(graphene.ObjectType):
 
     def resolve_tickets_by_category(self, info: Any, **kwargs: Any) -> Dict:
         qs = (
-            GrievanceTicket.objects.filter(ignored=False, business_area__slug=kwargs.get("business_area_slug"))
+            pre_filter_query_with_headers(info)
             .annotate(category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"))
             .values("category_name")
             .annotate(count=Count("category"))
@@ -140,7 +159,7 @@ class Query(graphene.ObjectType):
 
     def resolve_tickets_by_status(self, info: Any, **kwargs: Any) -> Dict:
         qs = (
-            GrievanceTicket.objects.filter(ignored=False, business_area__slug=kwargs.get("business_area_slug"))
+            pre_filter_query_with_headers(info)
             .annotate(status_name=display_value(GrievanceTicket.STATUS_CHOICES, "status"))
             .values("status_name")
             .annotate(count=Count("status"))
@@ -152,8 +171,8 @@ class Query(graphene.ObjectType):
 
     def resolve_tickets_by_location_and_category(self, info: Any, **kwargs: Any) -> Dict:
         qs = (
-            GrievanceTicket.objects.select_related("admin2")
-            .filter(ignored=False, business_area__slug=kwargs.get("business_area_slug"))
+            pre_filter_query_with_headers(info)
+            .select_related("admin2")
             .values_list("admin2__name", "category")
             .annotate(
                 category_name=display_value(GrievanceTicket.CATEGORY_CHOICES, "category"), count=Count("category")
@@ -161,10 +180,7 @@ class Query(graphene.ObjectType):
             .order_by("admin2__name", "-count")
         )
 
-        results = []
-        labels = []
-        totals = []
-
+        results, labels, totals = [], [], []
         for key, group in itertools.groupby(qs, lambda x: x[0]):
             if key is None:
                 continue

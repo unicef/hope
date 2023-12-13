@@ -15,6 +15,7 @@ from hct_mis_api.apps.household.models import (
     WIFE_HUSBAND,
     Individual,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
@@ -58,6 +59,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             deduplication_golden_record_duplicates_percentage=100,
             deduplication_golden_record_duplicates_allowed=10,
         )
+        cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
             import_data=import_data,
             business_area_slug=cls.business_area.slug,
@@ -87,6 +89,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-04",
+                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -99,6 +102,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
                     "birth_date": "1957-10-10",
+                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -111,6 +115,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1996-12-12",
+                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -123,6 +128,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1997-07-07",
+                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -135,6 +141,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-04",
+                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -147,6 +154,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1997-08-08",
+                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -159,6 +167,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1997-07-07",
+                    "program_id": cls.program.id,
                 },
             ],
         )
@@ -167,6 +176,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             household_data={
                 "registration_data_import": registration_data_import_second,
                 "business_area": cls.business_area,
+                "program": cls.program,
             },
             individuals_data=[
                 {
@@ -180,6 +190,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-04",
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -192,6 +203,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1997-08-08",
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -204,6 +216,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1997-07-07",
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -216,6 +229,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1996-12-12",
+                    "program": cls.program,
                 },
             ],
         )
@@ -223,7 +237,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     def test_batch_deduplication(self) -> None:
-        task = DeduplicateTask(self.business_area.slug)
+        task = DeduplicateTask(self.business_area.slug, self.program.id)
 
         with self.assertNumQueries(9):
             task.deduplicate_imported_individuals(self.registration_data_import_datahub)
@@ -307,12 +321,14 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             deduplication_possible_duplicate_score=11.0,
             has_data_sharing_agreement=True,
         )
+        cls.program = ProgramFactory(status="ACTIVE")
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
         registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
                 "business_area": cls.business_area,
+                "program": cls.program,
             },
             individuals_data=[
                 {
@@ -326,6 +342,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
+                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -338,6 +355,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
                     "birth_date": "1955-09-05",
+                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -350,6 +368,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
+                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -362,6 +381,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1989-09-10",
+                    "program_id": cls.program.id,
                 },
             ],
         )
@@ -369,6 +389,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             household_data={
                 "registration_data_import": registration_data_import_second,
                 "business_area": cls.business_area,
+                "program": cls.program,
             },
             individuals_data=[
                 {
@@ -382,6 +403,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -394,13 +416,14 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1989-09-10",
+                    "program": cls.program,
                 },
             ],
         )
         super().setUpTestData()
 
     def test_golden_record_deduplication(self) -> None:
-        task = DeduplicateTask(self.business_area.slug)
+        task = DeduplicateTask(self.business_area.slug, self.program.id)
         individuals = evaluate_qs(
             Individual.objects.filter(registration_data_import=self.registration_data_import)
             .select_for_update()
@@ -417,7 +440,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(duplicate.count(), 4)
 
     def test_deduplicate_individuals_from_other_source(self) -> None:
-        task = DeduplicateTask(self.business_area.slug)
+        task = DeduplicateTask(self.business_area.slug, self.program.id)
         individuals = evaluate_qs(
             Individual.objects.filter(registration_data_import=self.registration_data_import)
             .select_for_update()

@@ -43,6 +43,7 @@ export default class Grievance extends BaseComponent {
   tabTotalDays = 'th[data-cy="totalDays"]';
   ticketListRow = 'tr[role="checkbox"]';
   statusOptions = 'li[role="option"]';
+  filtersCreatedBy = 'div[data-cy="filters-created-by-input"]';
 
   dateTitleFilterPopup =
     'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]';
@@ -71,6 +72,7 @@ export default class Grievance extends BaseComponent {
   getPriorityFilter = () => cy.get(this.priorityFilter);
   getUrgencyFilter = () => cy.get(this.urgencyFilter);
   getActiveTicketsFilter = () => cy.get(this.activeTicketsFilter);
+  getFiltersCreatedBy = () => cy.get(this.filtersCreatedBy);
   getSimilarityScoreFromFilter = () => cy.get(this.similarityScoreFromFilter);
   getSimilarityScoreToFilter = () => cy.get(this.similarityScoreToFilter);
   getButtonApply = () => cy.get(this.buttonApply);
@@ -244,22 +246,16 @@ export default class Grievance extends BaseComponent {
   }
 
   openCreationDateFromFilter() {
-    this.getCreationDateFromFilter()
-      .find("button")
-      .click();
+    this.getCreationDateFromFilter().find("button").click();
   }
 
   chooseDayFilterPopup(day) {
-    this.getDaysFilterPopup()
-      .contains("p", day)
-      .click();
+    this.getDaysFilterPopup().contains("p", day).click();
   }
 
   checkDateFilterFrom(date) {
     // Date format (String): YYYY-MM-DD
-    this.getCreationDateFromFilter()
-      .find("input")
-      .should("have.value", date);
+    this.getCreationDateFromFilter().find("input").should("have.value", date);
   }
 
   changeCreationDateTo(date) {
@@ -268,24 +264,18 @@ export default class Grievance extends BaseComponent {
   }
 
   openCreationDateToFilter() {
-    this.getCreationDateToFilter()
-      .find("button")
-      .click();
+    this.getCreationDateToFilter().find("button").click();
   }
 
   checkDateFilterTo(date) {
     // Date format (String): YYYY-MM-DD
-    this.getCreationDateToFilter()
-      .find("input")
-      .should("have.value", date);
+    this.getCreationDateToFilter().find("input").should("have.value", date);
   }
 
   checkDateTitleFilter(date) {
     // Date format (String): Www, Mmm D
     // Example: Sat, Jan 1
-    this.getDateTitleFilterPopup()
-      .contains(date)
-      .type("{esc}");
+    this.getDateTitleFilterPopup().contains(date).type("{esc}");
   }
   chooseTab(tabName) {
     // Possibilities (String): USER-GENERATED, SYSTEM-GENERATED

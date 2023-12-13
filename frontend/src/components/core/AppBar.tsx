@@ -1,16 +1,17 @@
 import { Box, Button, makeStyles } from '@material-ui/core';
 import MuiAppBar from '@material-ui/core/AppBar';
 import IconButton from '@material-ui/core/IconButton';
-import TextsmsIcon from '@material-ui/icons/Textsms';
 import Toolbar from '@material-ui/core/Toolbar';
 import MenuIcon from '@material-ui/icons/Menu';
+import TextsmsIcon from '@material-ui/icons/Textsms';
 import clsx from 'clsx';
 import React from 'react';
 import styled from 'styled-components';
 import { BusinessAreaSelect } from '../../containers/BusinessAreaSelect';
+import { GlobalProgramSelect } from '../../containers/GlobalProgramSelect';
 import { UserProfileMenu } from '../../containers/UserProfileMenu';
-import { MiśTheme } from '../../theme';
 import { useCachedMe } from '../../hooks/useCachedMe';
+import { MiśTheme } from '../../theme';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   root: {
@@ -52,9 +53,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
   },
   appBarSpacer: theme.mixins.toolbar,
 }));
-const BusinessAreaContainer = styled.div`
-  margin-left: ${({ theme }) => theme.spacing(11)}px;
-`;
+
 const StyledToolbar = styled(Toolbar)`
   display: flex;
   justify-content: space-between;
@@ -64,7 +63,7 @@ const StyledLink = styled.a`
   color: #e3e6e7;
 `;
 
-export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
+export const AppBar = ({ open, handleDrawerOpen }): React.ReactElement => {
   const { data: meData, loading: meLoading } = useCachedMe();
   const classes = useStyles({});
   const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${
@@ -72,6 +71,7 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   }&Workspace: ${window.location.pathname.split('/')[1]} \n Url: ${
     window.location.href
   }`;
+
   if (meLoading) {
     return null;
   }
@@ -93,9 +93,14 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
               <MenuIcon />
             </IconButton>
           </Box>
-          <BusinessAreaContainer data-cy='business-area-container'>
-            <BusinessAreaSelect />
-          </BusinessAreaContainer>
+          <Box display='flex' alignItems='center'>
+            <Box ml={6} data-cy='business-area-container'>
+              <BusinessAreaSelect />
+            </Box>
+            <Box ml={6} data-cy='global-program-filter-container'>
+              <GlobalProgramSelect />
+            </Box>
+          </Box>
         </Box>
         <Box display='flex' justifyContent='flex-end'>
           <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
@@ -108,4 +113,4 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
       </StyledToolbar>
     </MuiAppBar>
   );
-}
+};

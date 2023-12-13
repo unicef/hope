@@ -46,7 +46,9 @@ def refresh_stats(target_population: TargetPopulation) -> TargetPopulation:
 
 
 def full_rebuild(target_population: TargetPopulation, batch_size: int = 10000) -> TargetPopulation:
-    households = Household.objects.filter(business_area=target_population.business_area)
+    households = Household.objects.filter(
+        business_area=target_population.business_area, program=target_population.program
+    )
     households = households.filter(target_population.targeting_criteria.get_query())
     households = households.only("id")
     target_population.households.clear()

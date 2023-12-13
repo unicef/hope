@@ -2,9 +2,8 @@ import { Checkbox, FormControlLabel, Grid, MenuItem } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { ClearApplyButtons } from '../../../components/core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../components/core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
+import { FiltersSection } from '../../../components/core/FiltersSection';
 import { SelectFilter } from '../../../components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '../../../utils/utils';
 
@@ -52,7 +51,10 @@ export const ReportingFilters = ({
   };
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      applyHandler={handleApplyFilter}
+      clearHandler={handleClearFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SelectFilter
@@ -115,10 +117,6 @@ export const ReportingFilters = ({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

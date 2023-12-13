@@ -27,6 +27,7 @@ export default class Targeting extends BaseComponent {
   textTabLastEdited = "Last Edited";
   textTabCreatedBy = "Created by";
   buttonApply = 'button[data-cy="button-filters-apply"]';
+  buttonClear = 'button[data-cy="button-filters-clear"]';
 
   // Elements
 
@@ -40,29 +41,27 @@ export default class Targeting extends BaseComponent {
   getTabTitle = () => cy.get(this.tabTitle);
   getTabColumnName = () => cy.get(this.tabColumnLabel).eq(0);
   getTabColumnStatus = () => cy.get(this.tabColumnLabel).eq(1);
-  getTabColumnProgramme = () => cy.get(this.tabColumnLabel).eq(2);
-  getTabColumnNOHouseholds = () => cy.get(this.tabColumnLabel).eq(3);
-  getTabColumnDateCreated = () => cy.get(this.tabColumnLabel).eq(4);
-  getTabColumnLastEdited = () => cy.get(this.tabColumnLabel).eq(5);
-  getTabColumnCreatedBy = () => cy.get(this.tabColumnLabel).eq(6);
+  getTabColumnNOHouseholds = () => cy.get(this.tabColumnLabel).eq(2);
+  getTabColumnDateCreated = () => cy.get(this.tabColumnLabel).eq(3);
+  getTabColumnLastEdited = () => cy.get(this.tabColumnLabel).eq(4);
+  getTabColumnCreatedBy = () => cy.get(this.tabColumnLabel).eq(5);
   getStatusOption = () => cy.get(this.statusOptions);
   getApply = () => cy.get(this.buttonApply);
+  getClear = () => cy.get(this.buttonClear);
+
   getTargetPopulationsRows = () => cy.get(this.rows);
 
   checkElementsOnPage() {
     this.getTitlePage().should("be.visible").contains(this.textTitlePage);
+    // this.getButtonFiltersExpand().click();
     this.getSearchFilter().should("be.visible");
     this.getStatusFilter().should("be.visible");
-    this.getProgramFilter().should("be.visible");
     this.getMinNumberOfHouseholdsFilter().should("be.visible");
     this.getMaxNumberOfHouseholdsFilter().should("be.visible");
     this.getButtonCreateNew().should("be.visible").contains(this.textCreateNew);
     this.getTabTitle().should("be.visible").contains(this.textTabTitle);
     this.getTabColumnName().should("be.visible").contains(this.textTabName);
     this.getTabColumnStatus().should("be.visible").contains(this.textTabStatus);
-    this.getTabColumnProgramme()
-      .should("be.visible")
-      .contains(this.textTabProgramme);
     this.getTabColumnNOHouseholds()
       .should("be.visible")
       .contains(this.textTabNOHouseholds);

@@ -13,17 +13,14 @@ import { PaymentRecordTableRow } from './PaymentRecordTableRow';
 interface PaymentRecordTableProps {
   cashPlan: CashPlanNode;
   openInNewTab?: boolean;
-  businessArea: string;
 }
-export function PaymentRecordTable({
+export const PaymentRecordTable = ({
   cashPlan,
   openInNewTab = false,
-  businessArea,
-}: PaymentRecordTableProps): ReactElement {
+}: PaymentRecordTableProps): ReactElement => {
   const { t } = useTranslation();
   const initialVariables: AllPaymentRecordsQueryVariables = {
     parent: cashPlan.id,
-    businessArea,
   };
   return (
     <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>
@@ -41,4 +38,4 @@ export function PaymentRecordTable({
       )}
     />
   );
-}
+};

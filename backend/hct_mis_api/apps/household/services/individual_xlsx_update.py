@@ -145,7 +145,7 @@ class IndividualXlsxUpdate:
 
         if not form.is_valid():
             raise ValidationError(form.errors)
-
-        log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", None, old_individual, individual)
+        # TODO: add 'program_id' arg or None? individual.program_id
+        log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", None, None, old_individual, individual)
 
         return individual

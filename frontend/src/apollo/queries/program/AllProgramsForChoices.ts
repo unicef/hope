@@ -44,11 +44,16 @@ export const AllProgramsForChoices = gql`
         node {
           id
           name
+          status
           individualDataNeeded
           dataCollectingType {
             id
+            code
+            label
+            active
             individualFiltersAvailable
             householdFiltersAvailable
+            description
           }
         }
       }

@@ -9,6 +9,8 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
@@ -59,7 +61,11 @@ class TestCopyTargetPopulationMutation(APITestCase):
             {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household = household
-        tp = TargetPopulation(name="Original Target Population", status="LOCKED", business_area=cls.business_area)
+        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+        tp = TargetPopulation(
+            name="Original Target Population", status="LOCKED", business_area=cls.business_area, program=cls.program
+        )
 
         tp.targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [1], "comparison_method": "EQUALS"}
@@ -68,7 +74,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
         tp.households.add(cls.household)
         cls.target_population = tp
         cls.empty_target_population_1 = TargetPopulation(
-            name="emptyTargetPopulation1", status="LOCKED", business_area=cls.business_area
+            name="emptyTargetPopulation1", status="LOCKED", business_area=cls.business_area, program=cls.program
         )
         cls.empty_target_population_1.save()
 
@@ -93,7 +99,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.COPY_TARGET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     "targetPopulationData": {
@@ -123,7 +129,9 @@ class TestCopyTargetPopulationMutation(APITestCase):
                     }
                 }
             },
-            context=self.generate_context(**{"user": self.user}),
+            context=self.generate_context(
+                **{"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}}
+            ),
         )
         if should_have_copy:
             target_population_copy = TargetPopulation.objects.get(
@@ -158,7 +166,7 @@ class TestCopyTargetPopulationMutation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.COPY_TARGET_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables={
                 "input": {
                     "targetPopulationData": {

@@ -1,4 +1,3 @@
-import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,27 +5,32 @@ import {
   hasPermissionInModule,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { PageHeader } from '../../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../../components/core/PermissionDenied';
 import { FeedbackTable } from '../../../tables/Feedback/FeedbackTable';
 import { FeedbackFilters } from '../../../../components/accountability/Feedback/FeedbackTable/FeedbackFilters';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
-
-const initialFilter = {
-  feedbackId: '',
-  issueType: '',
-  createdBy: '',
-  createdAtRangeMin: '',
-  createdAtRangeMax: '',
-};
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
+import {useProgramContext} from "../../../../programContext";
 
 export const FeedbackPage = (): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
   const location = useLocation();
+  const { isActiveProgram } = useProgramContext();
+
+  const initialFilter = {
+    feedbackId: '',
+    issueType: '',
+    createdBy: '',
+    createdAtRangeMin: '',
+    createdAtRangeMax: '',
+    program: '',
+    programState: isActiveProgram,
+  };
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -51,15 +55,17 @@ export const FeedbackPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title={t('Feedback')}>
-        <Button
+        <ButtonTooltip
           variant='contained'
           color='primary'
           component={Link}
-          to={`/${businessArea}/grievance/feedback/create`}
+          to={`/${baseUrl}/grievance/feedback/create`}
           data-cy='button-submit-new-feedback'
+          title={t('Program has to be active to create a new Feedback')}
+          disabled={!isActiveProgram}
         >
           {t('Submit New Feedback')}
-        </Button>
+        </ButtonTooltip>
       </PageHeader>
       <FeedbackFilters
         filter={filter}

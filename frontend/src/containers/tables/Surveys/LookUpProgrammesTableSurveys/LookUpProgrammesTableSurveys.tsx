@@ -1,12 +1,12 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
 import {
   AllActiveProgramsQueryVariables,
+  AllProgramsQuery,
   ProgrammeChoiceDataQuery,
-  ProgramNode,
   useAllActiveProgramsQuery,
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpProgrammesHeadCellsSurveys';
 import { LookUpProgrammesTableRowSurveys } from './LookUpProgrammesTableRowSurveys';
@@ -43,7 +43,7 @@ export const LookUpProgrammesTableSurveys = ({
     status: filter.status,
     sector: filter.sector,
     numberOfHouseholdsWithTpInProgram: JSON.stringify({
-      min: filter.numberOfHouseholdsMin,
+      min: filter.numberOfHouseholdsMin || 1,
       max: filter.numberOfHouseholdsMax,
     }),
     budget: JSON.stringify(filter.budget),
@@ -57,7 +57,10 @@ export const LookUpProgrammesTableSurveys = ({
   return (
     <NoTableStyling>
       <TableWrapper>
-        <UniversalTable<ProgramNode, AllActiveProgramsQueryVariables>
+        <UniversalTable<
+          AllProgramsQuery['allPrograms']['edges'][number]['node'],
+          AllActiveProgramsQueryVariables
+        >
           headCells={headCells}
           query={useAllActiveProgramsQuery}
           queriedObjectName='allActivePrograms'

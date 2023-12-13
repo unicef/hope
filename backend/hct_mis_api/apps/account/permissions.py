@@ -3,6 +3,7 @@ from collections import OrderedDict
 from enum import Enum, auto, unique
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from urllib.parse import urlparse
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
@@ -17,6 +18,7 @@ from graphene_django.filter.utils import (
 
 from hct_mis_api.apps.core.extended_connection import DjangoFastConnectionField
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +43,15 @@ class Permissions(Enum):
     POPULATION_VIEW_INDIVIDUALS_DETAILS = auto()
 
     # Programme
-    PRORGRAMME_VIEW_LIST_AND_DETAILS = auto()
+    PROGRAMME_VIEW_LIST_AND_DETAILS = auto()
+    PROGRAMME_MANAGEMENT_VIEW = auto()
     PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS = auto()
     PROGRAMME_CREATE = auto()
     PROGRAMME_UPDATE = auto()
     PROGRAMME_REMOVE = auto()
     PROGRAMME_ACTIVATE = auto()
     PROGRAMME_FINISH = auto()
+    PROGRAMME_DUPLICATE = auto()
 
     # Targeting
     TARGETING_VIEW_LIST = auto()
@@ -202,9 +206,7 @@ class Permissions(Enum):
     ACCOUNTABILITY_SURVEY_VIEW_DETAILS = auto()
 
     # Django Admin
-    # ...
-
-    # ...
+    CAN_ADD_BUSINESS_AREA_TO_PARTNER = auto()
 
     @classmethod
     def choices(cls) -> Tuple:
@@ -231,17 +233,33 @@ POPULATION_DETAILS = (
     Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
 )
 
-
-POPULATION_LIST = (
+DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER = (
+    Permissions.RDI_VIEW_LIST,
+    Permissions.RDI_VIEW_DETAILS,
     Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST,
-    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
-)
-
-
-POPULATION_DETAILS = (
     Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+    Permissions.POPULATION_VIEW_INDIVIDUALS_LIST,
     Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+    Permissions.DASHBOARD_VIEW_COUNTRY,
+    Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS,
+    Permissions.TARGETING_VIEW_LIST,
+    Permissions.TARGETING_VIEW_DETAILS,
+    Permissions.PM_VIEW_LIST,
+    Permissions.PM_VIEW_DETAILS,
+    Permissions.PAYMENT_VERIFICATION_VIEW_LIST,
+    Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
+    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+    Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+    Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+    Permissions.GRIEVANCES_FEEDBACK_VIEW_LIST,
+    Permissions.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
+    Permissions.USER_MANAGEMENT_VIEW_LIST,
+    Permissions.REPORTING_EXPORT,
+    Permissions.ACTIVITY_LOG_VIEW,
 )
+
+DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER = [str(perm.value) for perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER]
 
 
 class BasePermission:
@@ -262,19 +280,41 @@ class AllowAuthenticated(BasePermission):
         return info.context.user.is_authenticated
 
 
+def compare_program_id_with_url(
+    user: Any, business_area: BusinessArea, business_area_arg: str, url: Optional[Any]
+) -> bool:
+    url = urlparse(url)
+    url_elements = str(url.path).rsplit("/", 1)
+    if url_elements[0] == f"/{business_area_arg}/programs/all/details":
+        program_id = decode_id_string(url_elements[1])
+        return str(program_id) in user.get_partner_programs_areas_dict(business_area_id=business_area.pk)
+    return True
+
+
 def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
     if not user.is_authenticated:
         return False
     business_area_arg = kwargs.get("business_area")
     if business_area_arg is None:
         return False
-    if isinstance(business_area_arg, BusinessArea):
-        business_area = business_area_arg
-    else:
-        business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
+
+    business_area = (
+        business_area_arg
+        if isinstance(business_area_arg, BusinessArea)
+        else BusinessArea.objects.filter(slug=business_area_arg).first()
+    )
     if business_area is None:
         return False
-    return any(user.has_permission(permission.name, business_area) for permission in permissions)
+    program_id = get_program_id_from_headers(kwargs)
+    # is_unicef has access to all Programs
+    if user.partner.is_unicef:
+        return any(perm in DEFAULT_PERMISSIONS_IS_UNICEF_PARTNER for perm in permissions) or any(
+            user.has_permission(permission.name, business_area, program_id) for permission in permissions
+        )
+    else:
+        if not compare_program_id_with_url(user, business_area, business_area_arg, kwargs.get("Referer")):
+            return False
+        return any(user.has_permission(permission.name, business_area, program_id) for permission in permissions)
 
 
 def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
@@ -283,6 +323,8 @@ def hopePermissionClass(permission: Permissions) -> Type[BasePermission]:
         def has_permission(cls, info: Any, **kwargs: Any) -> bool:
             user = info.context.user
             permissions = [permission]
+            kwargs["Program"] = info.context.headers.get("Program")
+            kwargs["Referer"] = info.context.headers.get("Referer")
             return check_permissions(user, permissions, **kwargs)
 
     return XDPerm
@@ -293,6 +335,7 @@ def hopeOneOfPermissionClass(*permissions: Permissions) -> Type[BasePermission]:
         @classmethod
         def has_permission(cls, info: Any, **kwargs: Any) -> bool:
             user = info.context.user
+            kwargs["Program"] = info.context.headers.get("Program")
             return check_permissions(user, permissions, **kwargs)
 
     return XDPerm
@@ -332,10 +375,11 @@ class BaseNodePermissionMixin:
     ) -> None:
         user = info.context.user
         business_area = object_instance.business_area
+        program_id = get_program_id_from_headers(info.context.headers)
         if not user.is_authenticated or not (
-            user.has_permission(general_permission, business_area)
-            or (is_creator and user.has_permission(creator_permission, business_area))
-            or (is_owner and user.has_permission(owner_permission, business_area))
+            user.has_permission(general_permission, business_area, program_id)
+            or (is_creator and user.has_permission(creator_permission, business_area, program_id))
+            or (is_owner and user.has_permission(owner_permission, business_area, program_id))
         ):
             raise PermissionDenied("Permission Denied")
 
@@ -399,11 +443,14 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         if business_area := info.context.headers.get("Business-Area"):
             filter_kwargs["business_area"] = business_area
+        if program_id := get_program_id_from_headers(info.context.headers):
+            filter_kwargs["Program"] = program_id
+
         if not any(perm.has_permission(info, **filter_kwargs) for perm in permission_classes):
             raise PermissionDenied("Permission Denied")
         if "permissions" in filtering_args:
             filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
-                filter_kwargs.get("business_area")
+                business_area_slug=filter_kwargs.get("business_area"), program_id=program_id
             )
         qs = super().resolve_queryset(connection, iterable, info, args)
         return filterset_class(data=filter_kwargs, queryset=qs, request=info.context).qs
@@ -430,7 +477,11 @@ class BaseMutationPermissionMixin:
 
     @classmethod
     def has_permission(
-        cls, info: Any, permission: Any, business_area_arg: Union[str, BusinessArea], raise_error: bool = True
+        cls,
+        info: Any,
+        permission: Any,
+        business_area_arg: Union[str, BusinessArea],
+        raise_error: bool = True,
     ) -> bool:
         cls.is_authenticated(info)
         permissions: Iterable = (permission,) if not isinstance(permission, list) else permission
@@ -442,11 +493,12 @@ class BaseMutationPermissionMixin:
             business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
             if business_area is None:
                 return cls.raise_permission_denied_error(raise_error=raise_error)
+        program_id = get_program_id_from_headers(info.context.headers)
         if not any(
             [
                 permission.name
                 for permission in permissions
-                if info.context.user.has_permission(permission.name, business_area)
+                if info.context.user.has_permission(permission.name, business_area, program_id)
             ]
         ):
             return cls.raise_permission_denied_error(raise_error=raise_error)

@@ -112,6 +112,7 @@ class AddIndividualService(DataChangeService):
             first_registration_date=first_registration_date,
             last_registration_date=first_registration_date,
             business_area=self.grievance_ticket.business_area,
+            program_id=household.program_id,
             **individual_data,
         )
         individual.refresh_from_db()
@@ -143,7 +144,14 @@ class AddIndividualService(DataChangeService):
             recalculate_data(household)
         else:
             individual.recalculate_data()
-        log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, None, individual)
+        log_create(
+            Individual.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            self.grievance_ticket.programs.all(),
+            None,
+            individual,
+        )
 
         update_es(individual)
 

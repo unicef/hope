@@ -10,7 +10,6 @@ import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
 import { WarningTooltip } from '../../../../components/core/WarningTooltip';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   choicesToDict,
   formatCurrencyWithSymbol,
@@ -20,6 +19,7 @@ import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface HouseholdTableRowProps {
   household: HouseholdNode;
@@ -34,11 +34,11 @@ export const HouseholdTableRow = ({
 }: HouseholdTableRowProps): React.ReactElement => {
   const history = useHistory();
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const residenceStatusChoiceDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
-  const householdDetailsPath = `/${businessArea}/population/household/${household.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
   const handleClick = (): void => {
     history.push(householdDetailsPath);
   };

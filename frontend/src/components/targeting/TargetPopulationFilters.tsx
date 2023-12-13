@@ -1,28 +1,21 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import { Group, Person } from '@material-ui/icons';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  ProgramNode,
-  TargetPopulationStatus,
-} from '../../__generated__/graphql';
+import { TargetPopulationStatus } from '../../__generated__/graphql';
 import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
 } from '../../utils/utils';
-import { ClearApplyButtons } from '../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../core/ContainerWithBorder';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { FiltersSection } from '../core/FiltersSection';
 
 interface TargetPopulationFiltersProps {
   filter;
-  programs: ProgramNode[];
-  addBorder?: boolean;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
@@ -30,8 +23,6 @@ interface TargetPopulationFiltersProps {
 }
 export const TargetPopulationFilters = ({
   filter,
-  programs,
-  addBorder = true,
   setFilter,
   initialFilter,
   appliedFilter,
@@ -68,8 +59,11 @@ export const TargetPopulationFilters = ({
     ? Object.values(TargetPopulationStatus).filter((key) => key !== 'OPEN')
     : Object.values(TargetPopulationStatus);
 
-  const renderTable = (): React.ReactElement => (
-    <>
+  return (
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -92,22 +86,6 @@ export const TargetPopulationFilters = ({
             {preparedStatusChoices.sort().map((key) => (
               <MenuItem key={key} value={key}>
                 {targetPopulationStatusMapping(key)}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
-        <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-            icon={<FlashOnIcon />}
-            fullWidth
-            data-cy='filters-program'
-          >
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
               </MenuItem>
             ))}
           </SelectFilter>
@@ -151,16 +129,6 @@ export const TargetPopulationFilters = ({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        applyHandler={handleApplyFilter}
-        clearHandler={handleClearFilter}
-      />
-    </>
-  );
-
-  return addBorder ? (
-    <ContainerWithBorder>{renderTable()}</ContainerWithBorder>
-  ) : (
-    renderTable()
+    </FiltersSection>
   );
 };

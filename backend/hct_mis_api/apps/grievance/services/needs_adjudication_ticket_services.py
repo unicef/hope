@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Tuple
 
 from django.contrib.auth.models import AbstractUser
 from django.db.models import QuerySet
@@ -28,6 +28,9 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
 from hct_mis_api.apps.utils.elasticsearch_utils import (
     remove_elasticsearch_documents_by_matching_ids,
 )
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.program.models import Program
 
 
 def _clear_deduplication_individuals_fields(individuals: Sequence[Individual]) -> None:
@@ -84,7 +87,6 @@ def close_needs_adjudication_ticket_service(grievance_ticket: GrievanceTicket, u
     if ticket_details.is_multiple_duplicates_version:
         selected_individuals = ticket_details.selected_individuals.all()
         traverse_sibling_tickets(grievance_ticket, selected_individuals)
-
         close_needs_adjudication_new_ticket(ticket_details, user)
     else:
         close_needs_adjudication_old_ticket(ticket_details, user)
@@ -134,6 +136,7 @@ def create_grievance_ticket_with_details(
         area=area,
         registration_data_import=registration_data_import,
     )
+    ticket.programs.set([main_individual.program])
     golden_records = main_individual.get_deduplication_golden_record()
     extra_data = {
         "golden_records": golden_records,
@@ -152,6 +155,7 @@ def create_grievance_ticket_with_details(
     )
 
     ticket_details.possible_duplicates.add(*possible_duplicates)
+    ticket_details.populate_cross_area_flag()
 
     GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
 
@@ -218,23 +222,36 @@ def mark_as_duplicate_individual_and_reassign_roles(
             individual_to_remove,
             ticket_details.role_reassign_data,
             user,
+            ticket_details.ticket.programs.all(),
             "new_individual",
         )
     else:
         household = reassign_roles_on_disable_individual_service(
-            individual_to_remove, ticket_details.role_reassign_data, user
+            individual_to_remove, ticket_details.role_reassign_data, user, ticket_details.ticket.programs.all()
         )
-    mark_as_duplicate_individual(individual_to_remove, unique_individual, household, user)
+    mark_as_duplicate_individual(
+        individual_to_remove, unique_individual, household, user, ticket_details.ticket.programs.all()
+    )
 
 
 def mark_as_duplicate_individual(
-    individual_to_remove: Individual, unique_individual: Individual, household: Household, user: AbstractUser
+    individual_to_remove: Individual,
+    unique_individual: Individual,
+    household: Household,
+    user: AbstractUser,
+    program: "Program",
 ) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
 
     individual_to_remove.mark_as_duplicate(unique_individual)
-
-    log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", user, old_individual, individual_to_remove)
+    log_create(
+        Individual.ACTIVITY_LOG_MAPPING,
+        "business_area",
+        user,
+        getattr(program, "pk", None),
+        old_individual,
+        individual_to_remove,
+    )
     household.refresh_from_db()
     if household.active_individuals.count() == 0:
         household.withdraw()
