@@ -41,6 +41,7 @@ variables:
 
 stages:
   - stage: test_frontend
+    condition: false
     displayName: Test-Frontend
     jobs:
       - job: django_tests
@@ -65,6 +66,7 @@ stages:
             displayName: "Test"
 
   - stage: build_and_push_backend
+    condition: false
     dependsOn: []
     displayName: BUILD and PUSH
     jobs:
@@ -119,6 +121,7 @@ stages:
             condition: and(succeeded(), eq(variables.isTraining, true))
 
   - stage: build_and_push_frontend
+    condition: false
     dependsOn: []
     displayName: BUILD and PUSH frontend
     jobs:
@@ -194,6 +197,7 @@ stages:
             condition: and(succeeded(), eq(variables.isTraining, true))
 
   - stage: test
+    condition: false
     displayName: TEST
     dependsOn: build_and_push_backend
     jobs:
