@@ -38,6 +38,7 @@ variables:
   isDev: $[eq(variables['Build.SourceBranchName'], 'develop')]
   tag: $(Build.SourceVersion)
   additionalTag: $(Build.SourceBranchName)
+  skipTests: ${{ if contains(variables['Build.SourceVersionMessage'], 'skip-tests') }}true${{ else }}false${{ endif }}
 
 stages:
   - stage: publish_artifacts
@@ -60,4 +61,4 @@ stages:
               artifact: $(Build.SourceBranchName)
               publishLocation: 'pipeline'
             displayName: "Publish tag"
-            condition: ${{ not(contains(variables['Build.SourceVersionMessage'], 'skip-tests')) }}
+            condition: and(succeeded(), ne(variables['skipTests'], 'true'))
