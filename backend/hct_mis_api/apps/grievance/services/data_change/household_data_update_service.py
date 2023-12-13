@@ -54,6 +54,16 @@ class HouseholdDataUpdateService(DataChangeService):
             if isinstance(current_value, geo_models.Country):
                 current_value = current_value.iso_code3
             household_data_with_approve_status[field]["previous_value"] = current_value
+
+        if admin_area_title := household_data_with_approve_status.get("admin_area_title", None):
+            area = getattr(household, "admin_area", None)
+            current_value = getattr(area, "p_code", None)
+
+            if value := admin_area_title.get("value", None):
+                admin_area_title["value"] = value.split("-")[1].strip()
+            admin_area_title["previous_value"] = current_value
+            household_data_with_approve_status["admin_area_title"] = admin_area_title
+
         flex_fields_with_approve_status = {
             field: {"value": value, "approve_status": False, "previous_value": household.flex_fields.get(field)}
             for field, value in flex_fields.items()
@@ -92,6 +102,16 @@ class HouseholdDataUpdateService(DataChangeService):
             if isinstance(current_value, geo_models.Country):
                 current_value = current_value.iso_code3
             household_data_with_approve_status[field]["previous_value"] = current_value
+
+        if admin_area_title := household_data_with_approve_status.get("admin_area_title", None):
+            area = getattr(household, "admin_area", None)
+            current_value = getattr(area, "p_code", None)
+
+            if value := admin_area_title.get("value", None):
+                admin_area_title["value"] = value.split("-")[1].strip()
+            admin_area_title["previous_value"] = current_value
+            household_data_with_approve_status["admin_area_title"] = admin_area_title
+
         flex_fields_with_approve_status = {
             field: {"value": value, "approve_status": False, "previous_value": household.flex_fields.get(field)}
             for field, value in flex_fields.items()
