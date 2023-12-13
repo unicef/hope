@@ -120,10 +120,8 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
                 "individual": self.id_to_base64(individual.id, "IndividualNode"),
             },
         }
-
         reassign_roles_on_disable_individual_service(
             self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
         )
-
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
         self.assertEqual(role, ROLE_ALTERNATE)

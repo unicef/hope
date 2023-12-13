@@ -119,6 +119,5 @@ class TestReassignRolesOnUpdate(APITestCase):
         reassign_roles_on_update_service(
             self.alternate_collector_individual, role_reassign_data, UserFactory(), self.program_one
         )
-
         role = IndividualRoleInHousehold.objects.get(household=self.household, individual=individual).role
         self.assertEqual(role, ROLE_ALTERNATE)
