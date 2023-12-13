@@ -118,7 +118,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   useEffect(() => {
     // If the programId is not in a valid format or not one of the available programs, redirect to the access denied page
     if (
-      programId &&
+      programId && !loading &&
       (!isProgramNodeUuidFormat(programId) || !isOneOfAvailableProgramsId(programId)) &&
       programId !== 'all'
     ) {
