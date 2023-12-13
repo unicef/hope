@@ -2,6 +2,7 @@
 import hashlib
 import logging
 import sys
+import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,10 +21,10 @@ from django.http import HttpRequest
 from django.utils import timezone
 
 from concurrency.fields import IntegerVersionField
-from model_utils.managers import SoftDeletableManager
+from model_utils.managers import SoftDeletableManager, SoftDeletableQuerySet
 from model_utils.models import UUIDModel
 
-from hct_mis_api.apps.core.utils import SoftDeletableIsOriginalManager, nested_getattr
+from hct_mis_api.apps.core.utils import nested_getattr
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
@@ -31,6 +32,96 @@ if TYPE_CHECKING:
     from django.db.models.query import QuerySet
 
 logger = logging.getLogger(__name__)
+
+
+class RepresentationManager(models.Manager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(is_original=False)
+
+
+class SoftDeletableRepresentationManager(SoftDeletableManager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(is_original=False)
+
+
+# remove after data migration
+class IsOriginalManager(models.Manager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(is_original=True)
+
+
+class SoftDeletableIsVisibleManager(SoftDeletableManager):
+    def get_queryset(self) -> "QuerySet":
+        return super().get_queryset().filter(is_visible=True)
+
+
+class SoftDeletableIsOriginalManagerMixin:
+    """
+    Manager that limits the queryset by default to show only not removed
+    instances of model.
+    """
+
+    _queryset_class = SoftDeletableQuerySet
+
+    def __init__(self, *args: Any, _emit_deprecation_warnings: bool = False, **kwargs: Any) -> None:
+        self.emit_deprecation_warnings = _emit_deprecation_warnings
+        super().__init__(*args, **kwargs)
+
+    def get_queryset(self) -> "QuerySet":
+        """
+        Return queryset limited to not removed entries.
+        """
+
+        if self.emit_deprecation_warnings:
+            warning_message = (
+                "{0}.objects model manager will include soft-deleted objects in an "
+                "upcoming release; please use {0}.available_objects to continue "
+                "excluding soft-deleted objects. See "
+                "https://django-model-utils.readthedocs.io/en/stable/models.html"
+                "#softdeletablemodel for more information."
+            ).format(self.model.__class__.__name__)
+            warnings.warn(warning_message, DeprecationWarning)
+
+        kwargs = {"model": self.model, "using": self._db}
+        if hasattr(self, "_hints"):
+            kwargs["hints"] = self._hints
+
+        return self._queryset_class(**kwargs).filter(is_removed=False, is_original=True)
+
+
+class SoftDeletableIsOriginalManager(SoftDeletableIsOriginalManagerMixin, models.Manager):
+    pass
+
+
+class SoftDeletableIsOriginalModel(models.Model):
+    """
+    An abstract base class model with a ``is_removed`` field that
+    marks entries that are not going to be used anymore, but are
+    kept in db for any reason.
+    Default manager returns only not-removed entries.
+    """
+
+    is_removed = models.BooleanField(default=False)
+    is_original = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+    objects = SoftDeletableRepresentationManager(_emit_deprecation_warnings=True)
+    available_objects = SoftDeletableRepresentationManager()
+    all_objects = models.Manager()
+    original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
+
+    def delete(self, using: bool = None, soft: bool = True, *args: Any, **kwargs: Any) -> Any:  # type: ignore
+        """
+        Soft delete object (set its ``is_removed`` field to True).
+        Actually delete object if setting ``soft`` to False.
+        """
+        if soft:
+            self.is_removed = True
+            self.save(using=using)  # type: ignore
+        else:
+            return super().delete(using=using, *args, **kwargs)
 
 
 class TimeStampedUUIDModel(UUIDModel):
@@ -55,7 +146,7 @@ class SoftDeletableModelWithDate(models.Model):
     class Meta:
         abstract = True
 
-    objects = SoftDeletableIsOriginalManager()  # SoftDeletableManager update after data migrations last step
+    objects = SoftDeletableRepresentationManager()  # SoftDeletableManager update after data migrations last step
     all_objects = models.Manager()
     original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
 

@@ -64,10 +64,6 @@ snapshots['TestProgramChoices::test_report_types_choices 1'] = {
                 'name': 'Payments',
                 'value': '4'
             },
-            {
-                'name': 'Programme',
-                'value': '7'
-            }
         ]
     }
 }

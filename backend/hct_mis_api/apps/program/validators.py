@@ -1,10 +1,13 @@
 import logging
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.program.models import Program
+
+if TYPE_CHECKING:
+    from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 
 logger = logging.getLogger(__name__)
 
@@ -41,3 +44,16 @@ class ProgramDeletionValidator(BaseValidator):
 
 class CashPlanValidator(BaseValidator):
     pass
+
+
+def validate_data_collecting_type(
+    business_area: "BusinessArea",
+    original_program_data_collecting_type: Optional["DataCollectingType"] = None,
+    data_collecting_type: Optional["DataCollectingType"] = None,
+) -> None:
+    if business_area not in data_collecting_type.limit_to.all():
+        raise ValidationError("This Data Collection Type is not assigned to the Program's Business Area")
+    if not original_program_data_collecting_type:
+        raise ValidationError("The original Programme must have a Data Collection Type.")
+    elif data_collecting_type not in original_program_data_collecting_type.compatible_types.all():
+        raise ValidationError("The Data Collection Type must be compatible with the original Programme.")

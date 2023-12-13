@@ -1,13 +1,13 @@
 import React from 'react';
 import { TargetPopulationHouseholdTable } from '../../containers/tables/targeting/TargetPopulationHouseholdTable';
 import { useTargetPopulationHouseholdsQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 export function TargetingHouseholds({
   id,
   canViewDetails,
 }): React.ReactElement {
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
 
   return (
     <TargetPopulationHouseholdTable

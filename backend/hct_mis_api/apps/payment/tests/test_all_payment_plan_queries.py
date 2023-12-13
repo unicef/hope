@@ -15,6 +15,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import (
+    FinancialServiceProviderFactory,
     PaymentFactory,
     PaymentPlanFactory,
     RealProgramFactory,
@@ -106,8 +107,8 @@ class TestPaymentPlanQueries(APITestCase):
     """
 
     ALL_PAYMENT_PLANS_FILTER_QUERY = """
-    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date) {
-        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, orderBy: "unicef_id") {
+    query AllPaymentPlans($businessArea: String!, $search: String, $status: [String], $totalEntitledQuantityFrom: Float, $totalEntitledQuantityTo: Float, $dispersionStartDate: Date, $dispersionEndDate: Date, $program: String) {
+        allPaymentPlans(businessArea: $businessArea, search: $search, status: $status, totalEntitledQuantityFrom: $totalEntitledQuantityFrom, totalEntitledQuantityTo: $totalEntitledQuantityTo, dispersionStartDate: $dispersionStartDate, dispersionEndDate: $dispersionEndDate, program: $program, orderBy: "unicef_id") {
         edges {
           node {
             dispersionEndDate
@@ -270,6 +271,7 @@ class TestPaymentPlanQueries(APITestCase):
                 entitlement_quantity_usd=200.00,
                 delivered_quantity=50.00,
                 delivered_quantity_usd=100.00,
+                financial_service_provider=FinancialServiceProviderFactory(name="xxx"),
                 currency="PLN",
             )
             PaymentFactory(
@@ -279,6 +281,7 @@ class TestPaymentPlanQueries(APITestCase):
                 entitlement_quantity_usd=00.00,
                 delivered_quantity=00.00,
                 delivered_quantity_usd=00.00,
+                financial_service_provider=FinancialServiceProviderFactory(name="yyy"),
                 currency="PLN",
             )
 
@@ -341,7 +344,11 @@ class TestPaymentPlanQueries(APITestCase):
             self.snapshot_graphql_request(
                 request_string=self.ALL_PAYMENT_PLANS_FILTER_QUERY,
                 context={"user": self.user},
-                variables={"businessArea": "afghanistan", **filter_data},
+                variables={
+                    "businessArea": "afghanistan",
+                    "program": encode_id_base64(self.pp.program.pk, "Program"),
+                    **filter_data,
+                },
             )
 
     @freeze_time("2020-10-10")

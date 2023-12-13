@@ -7,7 +7,6 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useFinalizeTpMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
@@ -15,6 +14,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export interface FinalizeTargetPopulationPaymentPlanProps {
   open: boolean;
@@ -31,7 +31,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
 }: FinalizeTargetPopulationPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const [mutate, { loading }] = useFinalizeTpMutation();
   const onSubmit = (id: string): void => {
     mutate({
@@ -41,7 +41,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
     }).then(() => {
       setOpen(false);
       showMessage(t('Target Population Finalized'), {
-        pathname: `/${businessArea}/target-population/${id}`,
+        pathname: `/${baseUrl}/target-population/${id}`,
       });
     });
   };

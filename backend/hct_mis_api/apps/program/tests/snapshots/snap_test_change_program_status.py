@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
 snapshots['TestChangeProgramStatus::test_status_change_0_draft_to_active_with_permission 1'] = {
@@ -16,7 +17,7 @@ snapshots['TestChangeProgramStatus::test_status_change_0_draft_to_active_with_pe
     }
 }
 
-snapshots['TestChangeProgramStatus::test_status_change_1_draft_to_acive_without_permission 1'] = {
+snapshots['TestChangeProgramStatus::test_status_change_1_draft_to_active_without_permission 1'] = {
     'data': {
         'updateProgram': None
     },

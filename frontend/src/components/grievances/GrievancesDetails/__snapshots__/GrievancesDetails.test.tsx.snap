@@ -171,8 +171,8 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 <span>
                   <a
-                    class="sc-bwzfXH kVuoVk"
-                    href="/afghanistan/population/household/SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE="
+                    class="sc-VigVT ceFHvb"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/household/SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE="
                   >
                     HH-20-0000.0001
                   </a>
@@ -195,8 +195,8 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
               >
                 <span>
                   <a
-                    class="sc-bwzfXH kVuoVk"
-                    href="/afghanistan/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
+                    class="sc-VigVT ceFHvb"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
                   >
                     IND-88-0000.0005
                   </a>
@@ -224,7 +224,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-9"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
           >
             <div>
               <span
@@ -279,7 +279,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
           >
             <div>
               <span

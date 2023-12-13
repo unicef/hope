@@ -1,14 +1,14 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { dateToIsoString, decodeIdString } from '../../../../utils/utils';
 import {
   AllTargetPopulationsQueryVariables,
   TargetPopulationNode,
   useAllTargetPopulationsQuery,
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { dateToIsoString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
@@ -40,32 +40,22 @@ export const TargetPopulationTable = ({
   noTitle,
 }: TargetPopulationProps): ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
-    totalHouseholdsCountMin: filter.totalHouseholdsCountMin,
-    totalHouseholdsCountMax: filter.totalHouseholdsCountMax,
+    totalHouseholdsCountMin: filter.totalHouseholdsCountMin || 0,
+    totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
+    program: [programId],
     createdAtRange: JSON.stringify({
       min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
       max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
     }),
   };
-
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
-
-  if (filter.program) {
-    if (Array.isArray(filter.program)) {
-      initialVariables.program = filter.program.map((programId) =>
-        decodeIdString(programId),
-      );
-    } else {
-      initialVariables.program = [decodeIdString(filter.program)];
-    }
-  }
 
   const renderTable = (): React.ReactElement => {
     return (

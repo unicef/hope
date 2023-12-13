@@ -23,7 +23,7 @@ from hct_mis_api.one_time_scripts.move_tickets_to_feedback import (
 )
 
 
-class TestMigrationFosterChild(TestCase):
+class TestMigrationTicketsToFeedback(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
@@ -43,17 +43,19 @@ class TestMigrationFosterChild(TestCase):
         cls.individual_2 = IndividualFactory(household=None)
         cls.household_2 = HouseholdFactory(head_of_household=cls.individual_2)
 
-        cls.ticket_1 = GrievanceTicketFactory(description="grievance_ticket_1_description", programme=cls.program_1)
+        cls.ticket_1 = GrievanceTicketFactory(description="grievance_ticket_1_description")
+        cls.ticket_1.programs.add(cls.program_1)
         cls.ticket_positive_1 = PositiveFeedbackTicketWithoutExtrasFactory(ticket=cls.ticket_1)
 
         cls.ticket_note_1 = TicketNoteFactory(ticket=cls.ticket_1, description="test ticket note")
 
         cls.ticket_2 = GrievanceTicketFactory(language="grievance_ticket_2_language")
+        cls.ticket_2.programs.add(cls.program_2)
         cls.ticket_positive_2 = PositiveFeedbackTicketWithoutExtrasFactory(
             ticket=cls.ticket_2, household=cls.household_1
         )
-
-        cls.ticket_3 = GrievanceTicketFactory(programme=cls.program_2, consent=False)
+        cls.ticket_3 = GrievanceTicketFactory(consent=False)
+        cls.ticket_3.programs.add(cls.program_2)
         cls.ticket_positive_3 = PositiveFeedbackTicketWithoutExtrasFactory(
             ticket=cls.ticket_3, household=cls.household_1, individual=cls.individual_1
         )

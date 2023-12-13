@@ -1,18 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { targetPopulationBuildStatusToColor } from '../../../utils/utils';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
   TargetPopulationStatus,
   useBusinessAreaDataQuery,
 } from '../../../__generated__/graphql';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { StatusBox } from '../../../components/core/StatusBox';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { targetPopulationBuildStatusToColor } from '../../../utils/utils';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
@@ -51,7 +51,7 @@ export const TargetPopulationPageHeader = ({
   canSend,
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const {
     data: businessAreaData,
     loading: businessAreaDataLoading,
@@ -61,7 +61,7 @@ export const TargetPopulationPageHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Targeting',
-      to: `/${businessArea}/target-population/`,
+      to: `/${baseUrl}/target-population/`,
     },
   ];
 

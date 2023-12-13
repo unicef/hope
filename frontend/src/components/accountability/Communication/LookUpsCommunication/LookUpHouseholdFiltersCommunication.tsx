@@ -1,43 +1,34 @@
 import { Grid, MenuItem } from '@material-ui/core';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  ProgramNode,
-  HouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
 import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
 import { householdTableOrderOptions } from '../../../../utils/constants';
+import { FiltersSection } from '../../../core/FiltersSection';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;
-  programs: ProgramNode[];
   choicesData: HouseholdChoiceDataQuery;
   setFilter: (filter) => void;
   initialFilter;
   appliedFilter;
   setAppliedFilter: (filter) => void;
-  isOnPaper?: boolean;
 }
 
 export const LookUpHouseholdFiltersCommunication = ({
   filter,
-  programs,
   choicesData,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-  isOnPaper = true,
 }: LookUpHouseholdFiltersCommunicationProps): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
@@ -65,8 +56,12 @@ export const LookUpHouseholdFiltersCommunication = ({
     clearFilter();
   };
 
-  const filtersComponent = (
-    <>
+  return (
+    <FiltersSection
+      applyHandler={handleApplyFilter}
+      clearHandler={handleClearFilter}
+      isOnPaper={false}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -76,22 +71,6 @@ export const LookUpHouseholdFiltersCommunication = ({
             onChange={(e) => handleFilterChange('search', e.target.value)}
             data-cy='hh-filters-search'
           />
-        </Grid>
-        <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('program', e.target.value)}
-            label={t('Programme')}
-            value={filter.program}
-            icon={<FlashOnIcon />}
-            fullWidth
-            data-cy='hh-filters-program'
-          >
-            {programs.map((program) => (
-              <MenuItem key={program.id} value={program.id}>
-                {program.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
@@ -120,7 +99,7 @@ export const LookUpHouseholdFiltersCommunication = ({
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            data-cy='hh-filters-admin2'
+            dataCy='hh-filters-admin2'
           />
         </Grid>
         <Grid item xs={3}>
@@ -181,16 +160,6 @@ export const LookUpHouseholdFiltersCommunication = ({
           </SelectFilter>
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </>
-  );
-
-  return isOnPaper ? (
-    <ContainerWithBorder>{filtersComponent}</ContainerWithBorder>
-  ) : (
-    filtersComponent
+    </FiltersSection>
   );
 };

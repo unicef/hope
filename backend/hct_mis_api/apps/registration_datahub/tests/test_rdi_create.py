@@ -28,6 +28,8 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_TAX_ID,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.fixtures import (
@@ -95,6 +97,9 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             number_of_households=3,
             number_of_individuals=6,
         )
+
+        cls.program = ProgramFactory(status=Program.ACTIVE)
+
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=business_area.slug, hct_id=None
         )
@@ -102,6 +107,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             datahub_id=cls.registration_data_import.id,
             name=cls.registration_data_import.name,
             business_area=business_area,
+            program=cls.program,
         )
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
@@ -114,11 +120,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     def test_execute(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(
-            self.registration_data_import.id,
-            self.import_data.id,
-            self.business_area.id,
-        )
+        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
         households_count = ImportedHousehold.objects.count()
         individuals_count = ImportedIndividual.objects.count()
@@ -165,6 +167,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
             self.registration_data_import.id,
             self.import_data.id,
             self.business_area.id,
+            self.program.id,
         )
         self.assertEqual(ImportedIndividualIdentity.objects.count(), 2)
         self.assertEqual(
@@ -363,11 +366,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     def test_store_row_id(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(
-            self.registration_data_import.id,
-            self.import_data.id,
-            self.business_area.id,
-        )
+        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
         households = ImportedHousehold.objects.all()
         for household in households:
@@ -379,11 +378,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     def test_create_bank_account(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(
-            self.registration_data_import.id,
-            self.import_data.id,
-            self.business_area.id,
-        )
+        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
         bank_account_info = ImportedBankAccountInfo.objects.get(individual__row_id=7)
         self.assertEqual(bank_account_info.bank_name, "Bank testowy")
@@ -392,11 +387,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     def test_create_tax_id_document(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(
-            self.registration_data_import.id,
-            self.import_data.id,
-            self.business_area.id,
-        )
+        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
         document = ImportedDocument.objects.filter(individual__row_id=5).first()
         self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
@@ -404,11 +395,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
     def test_import_empty_cell_as_blank_cell(self) -> None:
         task = self.RdiXlsxCreateTask()
-        task.execute(
-            self.registration_data_import.id,
-            self.import_data.id,
-            self.business_area.id,
-        )
+        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
         individual = ImportedIndividual.objects.get(row_id=3)
         self.assertEqual(individual.seeing_disability, "")
@@ -479,10 +466,12 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug
         )
+        cls.program = ProgramFactory(status="ACTIVE")
         hct_rdi = RegistrationDataImportFactory(
             datahub_id=cls.registration_data_import.id,
             name=cls.registration_data_import.name,
             business_area=cls.business_area,
+            program=cls.program,
         )
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
@@ -494,11 +483,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     )
     def test_execute(self) -> None:
         task = self.RdiKoboCreateTask()
-        task.execute(
-            self.registration_data_import.id,
-            self.import_data.id,
-            self.business_area.id,
-        )
+        task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()
@@ -538,9 +523,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
     def test_execute_multiple_collectors(self) -> None:
         task = self.RdiKoboCreateTask()
         task.execute(
-            self.registration_data_import.id,
-            self.import_data_collectors.id,
-            self.business_area.id,
+            self.registration_data_import.id, self.import_data_collectors.id, self.business_area.id, self.program.id
         )
         households = ImportedHousehold.objects.all()
         individuals = ImportedIndividual.objects.all()

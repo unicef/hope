@@ -3,7 +3,7 @@ import React from 'react';
 import wait from 'waait';
 import { render } from '../../../../testUtils/testUtils';
 import { SetUpFspButtonActions } from './SetUpFspButtonActions';
-
+import { fakeBaseUrl } from '../../../../../fixtures/core/fakeBaseUrl';
 
 describe('components/paymentmodule/CreateSetUpFsp/SetUpFspButtonActions', () => {
   it('should render', async () => {
@@ -15,9 +15,10 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspButtonActions', () => 
       <SetUpFspButtonActions
         step={step}
         submitForm={submitForm}
-        businessArea='afghanistan'
+        baseUrl={fakeBaseUrl}
         paymentPlanId='asdjkfhsakdjfsd76asdf0sdf=='
-        handleBackStep={setStep} />,
+        handleBackStep={setStep}
+      />,
     );
     await act(() => wait(0)); // wait for response
     expect(container).toMatchSnapshot();

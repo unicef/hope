@@ -1,8 +1,8 @@
 import { HeadCell } from '../../../core/Table/EnhancedTableHead';
-import { AllHouseholdsQuery } from '../../../../__generated__/graphql';
+import { AllHouseholdsForPopulationTableQuery } from '../../../../__generated__/graphql';
 
 export const headCells: HeadCell<
-  AllHouseholdsQuery['allHouseholds']['edges'][number]['node']
+  AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,
@@ -38,13 +38,6 @@ export const headCells: HeadCell<
     id: 'admin_area__name',
     numeric: false,
     dataCy: 'household-admin-level-2',
-  },
-  {
-    disablePadding: false,
-    label: 'Programme',
-    id: 'program__id',
-    numeric: false,
-    dataCy: 'household-programme-id',
   },
   {
     disablePadding: false,

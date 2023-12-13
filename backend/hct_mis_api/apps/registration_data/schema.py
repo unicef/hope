@@ -14,15 +14,8 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import get_count_and_percentage, to_choice_object
-from hct_mis_api.apps.household.models import (
-    DUPLICATE,
-    DUPLICATE_IN_BATCH,
-    NEEDS_ADJUDICATION,
-    UNIQUE,
-)
 from hct_mis_api.apps.registration_data.filters import RegistrationDataImportFilter
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import UNIQUE_IN_BATCH
 
 
 class CountAndPercentageNode(graphene.ObjectType):
@@ -34,10 +27,10 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.RDI_VIEW_DETAILS),)
 
     batch_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    golden_record_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
     batch_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
-    golden_record_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
     batch_unique_count_and_percentage = graphene.Field(CountAndPercentageNode)
+    golden_record_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
+    golden_record_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
     golden_record_unique_count_and_percentage = graphene.Field(CountAndPercentageNode)
     total_households_count_with_valid_phone_no = graphene.Int()
 
@@ -47,31 +40,41 @@ class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_batch_duplicates_count_and_percentage(root, info: Any, **kwargs: Any) -> Dict[str, Union[int, float]]:
-        batch_duplicates = root.all_imported_individuals.filter(deduplication_batch_status=DUPLICATE_IN_BATCH)
-        return get_count_and_percentage(batch_duplicates, root.all_imported_individuals)
+    @staticmethod
+    def resolve_batch_duplicates_count_and_percentage(
+        parent: RegistrationDataImport, info: Any, **kwargs: Any
+    ) -> Dict[str, Union[int, float]]:
+        return get_count_and_percentage(parent.batch_duplicates, parent.number_of_individuals)
 
+    @staticmethod
+    def resolve_batch_possible_duplicates_count_and_percentage(
+        parent: RegistrationDataImport, info: Any, **kwargs: Any
+    ) -> Dict[str, Union[int, float]]:
+        return get_count_and_percentage(parent.batch_possible_duplicates, parent.number_of_individuals)
+
+    @staticmethod
+    def resolve_batch_unique_count_and_percentage(
+        parent: RegistrationDataImport, info: Any, **kwargs: Any
+    ) -> Dict[str, Union[int, float]]:
+        return get_count_and_percentage(parent.batch_unique, parent.number_of_individuals)
+
+    @staticmethod
     def resolve_golden_record_duplicates_count_and_percentage(
-        root, info: Any, **kwargs: Any
+        parent: RegistrationDataImport, info: Any, **kwargs: Any
     ) -> Dict[str, Union[int, float]]:
-        gr_duplicates = root.all_imported_individuals.filter(deduplication_golden_record_status=DUPLICATE)
-        return get_count_and_percentage(gr_duplicates, root.all_imported_individuals)
+        return get_count_and_percentage(parent.golden_record_duplicates, parent.number_of_individuals)
 
+    @staticmethod
     def resolve_golden_record_possible_duplicates_count_and_percentage(
-        root, info: Any, **kwargs: Any
+        parent: RegistrationDataImport, info: Any, **kwargs: Any
     ) -> Dict[str, Union[int, float]]:
-        gr_similar = root.all_imported_individuals.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
-        return get_count_and_percentage(gr_similar, root.all_imported_individuals)
+        return get_count_and_percentage(parent.golden_record_possible_duplicates, parent.number_of_individuals)
 
-    def resolve_batch_unique_count_and_percentage(root, info: Any, **kwargs: Any) -> Dict[str, Union[int, float]]:
-        unique = root.all_imported_individuals.filter(deduplication_batch_status=UNIQUE_IN_BATCH)
-        return get_count_and_percentage(unique, root.all_imported_individuals)
-
+    @staticmethod
     def resolve_golden_record_unique_count_and_percentage(
-        root, info: Any, **kwargs: Any
+        parent: RegistrationDataImport, info: Any, **kwargs: Any
     ) -> Dict[str, Union[int, float]]:
-        unique = root.all_imported_individuals.filter(deduplication_golden_record_status=UNIQUE)
-        return get_count_and_percentage(unique, root.all_imported_individuals)
+        return get_count_and_percentage(parent.golden_record_unique, parent.number_of_individuals)
 
     def resolve_total_households_count_with_valid_phone_no(self, info: Any) -> int:
         return self.households.exclude(

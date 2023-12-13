@@ -14,14 +14,25 @@ from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import (
     check_concurrency_version_in_mutation,
     decode_id_string,
+    decode_id_string_required,
 )
 from hct_mis_api.apps.core.validators import (
     CommonValidator,
     DataCollectingTypeValidator,
 )
-from hct_mis_api.apps.program.inputs import CreateProgramInput, UpdateProgramInput
+from hct_mis_api.apps.program.celery_tasks import copy_program_task
+from hct_mis_api.apps.program.inputs import (
+    CopyProgramInput,
+    CreateProgramInput,
+    UpdateProgramInput,
+)
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.schema import ProgramNode
+from hct_mis_api.apps.program.utils import (
+    copy_program_object,
+    remove_program_permissions_for_exists_partners,
+    update_partner_permissions_for_program,
+)
 from hct_mis_api.apps.program.validators import (
     ProgramDeletionValidator,
     ProgramValidator,
@@ -46,6 +57,12 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
         if not (data_collecting_type_code := program_data.pop("data_collecting_type_code", None)):
             raise ValidationError("DataCollectingType is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
+        partners_data = program_data.pop("partners", [])
+
+        partners_ids = [int(partner["id"]) for partner in partners_data]
+        partner = info.context.user.partner
+        if not partner.is_unicef and partner.id not in partners_ids:
+            raise ValidationError("User is not allowed to create program for partner different than his partner.")
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
@@ -65,8 +82,10 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             end_date=program.end_date,
             status=ProgramCycle.ACTIVE,
         )
+        for partner in partners_data:
+            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, program)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
         return CreateProgram(program=program)
 
 
@@ -82,11 +101,13 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict, **kwargs: Any) -> "UpdateProgram":
         program_id = decode_id_string(program_data.pop("id", None))
-
         program = Program.objects.select_for_update().get(id=program_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
         old_program = Program.objects.get(id=program_id)
         business_area = program.business_area
+        partners_data = program_data.pop("partners", [])
+        partners_ids = [int(partner["id"]) for partner in partners_data]
+        partner = info.context.user.partner
 
         # status update permissions if status is passed
         status_to_set = program_data.get("status")
@@ -95,6 +116,10 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
                 cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
             elif status_to_set == Program.FINISHED:
                 cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
+
+        if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
+            if not partner.is_unicef and partner.id not in partners_ids:
+                raise ValidationError("User is not allowed to create program for partner different than his partner.")
 
         data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
         data_collecting_type = old_program.data_collecting_type
@@ -111,6 +136,13 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
             end_date=program_data.get("end_date"),
             data_collecting_type=data_collecting_type,
         )
+
+        if program.status == Program.FINISHED:
+            # Only reactivation is possible
+            status = program_data.get("status")
+            if status != Program.ACTIVE or len(program_data) > 1:
+                raise ValidationError("You cannot change finished program")
+
         if data_collecting_type_code:
             program.data_collecting_type = data_collecting_type
 
@@ -121,7 +153,13 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
         program.full_clean()
         program.save()
 
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_program, program)
+        # no need to update partners for Activation or Finish action
+        if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
+            for partner in partners_data:
+                update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
+            remove_program_permissions_for_exists_partners(partners_ids, str(business_area.pk), str(program.pk))
+
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return UpdateProgram(program=program)
 
 
@@ -141,13 +179,44 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         cls.has_permission(info, Permissions.PROGRAMME_REMOVE, program.business_area)
 
         cls.validate(program=program)
+        remove_program_permissions_for_exists_partners([], str(program.business_area.pk), str(program.pk))
 
         program.delete()
-        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_program, program)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, old_program, program)
         return cls(ok=True)
+
+
+class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMixin):
+    program = graphene.Field(ProgramNode)
+
+    class Arguments:
+        program_data = CopyProgramInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
+        program_id = decode_id_string_required(program_data.pop("id"))
+        partners_data = program_data.pop("partners", [])
+        business_area = Program.objects.get(id=program_id).business_area
+        cls.has_permission(info, Permissions.PROGRAMME_DUPLICATE, business_area)
+
+        cls.validate(
+            start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
+            end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
+        )
+        program = copy_program_object(program_id, program_data)
+
+        for partner in partners_data:
+            update_partner_permissions_for_program(partner, str(business_area.pk), str(program.pk))
+
+        copy_program_task.delay(copy_from_program_id=program_id, new_program_id=program.id)
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, program.pk, None, program)
+
+        return CopyProgram(program=program)
 
 
 class Mutations(graphene.ObjectType):
     create_program = CreateProgram.Field()
     update_program = UpdateProgram.Field()
     delete_program = DeleteProgram.Field()
+    copy_program = CopyProgram.Field()

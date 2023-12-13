@@ -9,7 +9,6 @@ export const AllHouseholdsForPopulationTable = gql`
     $businessArea: String
     $orderBy: String
     $familySize: String
-    $programs: [ID]
     $headOfHouseholdFullNameIcontains: String
     $adminArea: ID
     $search: String
@@ -19,6 +18,8 @@ export const AllHouseholdsForPopulationTable = gql`
     $admin2: ID
     $withdrawn: Boolean
     $headOfHouseholdPhoneNoValid: Boolean
+    $program: ID
+    $isActiveProgram: Boolean
   ) {
     allHouseholds(
       after: $after
@@ -28,7 +29,6 @@ export const AllHouseholdsForPopulationTable = gql`
       businessArea: $businessArea
       size: $familySize
       orderBy: $orderBy
-      programs: $programs
       headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
       adminArea: $adminArea
       search: $search
@@ -38,6 +38,8 @@ export const AllHouseholdsForPopulationTable = gql`
       admin2: $admin2
       withdrawn: $withdrawn
       headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
+      program: $program
+      isActiveProgram: $isActiveProgram
     ) {
       pageInfo {
         hasNextPage
@@ -68,6 +70,18 @@ export const AllHouseholdsForPopulationTable = gql`
           totalCashReceived
           currency
           lastRegistrationDate
+          programs {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
+          program {
+            id
+            name
+          }
         }
       }
     }

@@ -7,6 +7,8 @@ from hct_mis_api.apps.accountability.fixtures import SurveyFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
@@ -29,6 +31,8 @@ mutation ExportSurveySample($surveyId: ID!) {
         cls.business_area = create_afghanistan()
         cls.user = UserFactory(first_name="John", last_name="Wick")
         cls.target_population = TargetPopulationFactory(business_area=cls.business_area, name="Test Target Population")
+        cls.program = ProgramFactory(status=Program.ACTIVE, business_area=cls.business_area)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
         households = [create_household()[0] for _ in range(14)]
         cls.target_population.households.set(households)
@@ -40,7 +44,13 @@ mutation ExportSurveySample($surveyId: ID!) {
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "surveyId": self.id_to_base64(self.survey.id, "SurveyNode"),
             },
@@ -57,7 +67,13 @@ mutation ExportSurveySample($surveyId: ID!) {
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "surveyId": self.id_to_base64(self.survey.id, "SurveyNode"),
             },
@@ -74,7 +90,13 @@ mutation ExportSurveySample($surveyId: ID!) {
 
         self.snapshot_graphql_request(
             request_string=self.MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "surveyId": self.id_to_base64(str(uuid4()), "SurveyNode"),
             },

@@ -192,3 +192,43 @@ class CreateTargetPopulationTextForm(forms.Form):
             )
         except Exception as e:
             raise ValidationError(str(e))
+
+
+class MassEnrolForm(forms.Form):
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.business_area_id = kwargs.pop("business_area_id")
+        self.households = kwargs.pop("households")
+        super().__init__(*args, **kwargs)
+        self.fields["program_for_enrol"] = forms.ModelChoiceField(
+            queryset=Program.objects.filter(business_area_id=self.business_area_id, status=Program.ACTIVE),
+            label="Select a program to enrol households to",
+        )
+
+    def clean(self) -> Optional[Dict[str, Any]]:
+        cleaned_data = super().clean()
+        if "apply" in self.data:
+            program_for_enrol = cleaned_data.get("program_for_enrol")
+            warning_message = None  # Initialize the warning message
+
+            # Check each household in the queryset
+            for household in self.households:
+                if not (
+                    household.program
+                    and household.program.data_collecting_type
+                    and program_for_enrol.data_collecting_type
+                    and program_for_enrol.data_collecting_type
+                    in household.program.data_collecting_type.compatible_types.all()
+                ):
+                    # Set the warning message
+                    warning_message = (
+                        "Not all households have data collecting type compatible with the selected program"
+                    )
+                    break  # Exit the loop after the first incompatible household
+
+            if warning_message:
+                # Add the warning message as a non-field error
+                self.add_error(None, warning_message)
+
+        return cleaned_data

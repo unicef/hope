@@ -19,7 +19,6 @@ import { StatusBox } from '../../../components/core/StatusBox';
 import { Title } from '../../../components/core/Title';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { REPORTING_STATES } from '../../../utils/constants';
@@ -29,6 +28,7 @@ import {
   useReportQuery,
   useRestartCreateReportMutation,
 } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const IconContainer = styled.div`
   color: #d1d1d1;
@@ -51,7 +51,7 @@ const IconsContainer = styled.div`
 export const ReportingDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
@@ -79,7 +79,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Reporting'),
-      to: `/${businessArea}/reporting/`,
+      to: `/${baseUrl}/reporting/`,
     },
   ];
 

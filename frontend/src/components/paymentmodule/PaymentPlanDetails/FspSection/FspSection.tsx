@@ -9,19 +9,23 @@ import {
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { DividerLine } from '../../../core/DividerLine';
 import { LabelizedField } from '../../../core/LabelizedField';
+import { useProgramContext } from "../../../../programContext";
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
 
+
 interface FspSectionProps {
-  businessArea: string;
+  baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const FspSection = ({
-  businessArea,
+  baseUrl,
   paymentPlan,
 }: FspSectionProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const { isActiveProgram } = useProgramContext();
+
   const { deliveryMechanisms, isFollowUp } = paymentPlan;
   const showFspDisplay = deliveryMechanisms.length;
   const shouldDisableSetUpFsp = (): boolean => {
@@ -29,6 +33,9 @@ export const FspSection = ({
       return false;
     }
     if (!paymentPlan.totalEntitledQuantityUsd) {
+      return true;
+    }
+    if (!isActiveProgram) {
       return true;
     }
     return false;
@@ -49,9 +56,10 @@ export const FspSection = ({
               color='primary'
               variant='contained'
               component={Link}
-              to={`/${businessArea}/payment-module/${
+              to={`/${baseUrl}/payment-module/${
                 isFollowUp ? 'followup-payment-plans' : 'payment-plans'
               }/${id}/setup-fsp/edit`}
+              disabled={!isActiveProgram}
             >
               {t('Edit FSP')}
             </Button>
@@ -84,7 +92,7 @@ export const FspSection = ({
             disabled={shouldDisableSetUpFsp()}
             data-cy='button-set-up-fsp'
             component={Link}
-            to={`/${businessArea}/payment-module/${
+            to={`/${baseUrl}/payment-module/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
             }/${id}/setup-fsp/create`}
           >

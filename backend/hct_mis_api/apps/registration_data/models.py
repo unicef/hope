@@ -102,6 +102,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     )
     number_of_individuals = models.PositiveIntegerField(db_index=True)
     number_of_households = models.PositiveIntegerField(db_index=True)
+
+    batch_duplicates = models.PositiveIntegerField(default=0)
+    batch_possible_duplicates = models.PositiveIntegerField(default=0)
+    batch_unique = models.PositiveIntegerField(default=0)
+    golden_record_duplicates = models.PositiveIntegerField(default=0)
+    golden_record_possible_duplicates = models.PositiveIntegerField(default=0)
+    golden_record_unique = models.PositiveIntegerField(default=0)
+
     datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
     error_message = models.TextField(blank=True)
     sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
@@ -110,8 +118,6 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     business_area = models.ForeignKey(BusinessArea, null=True, on_delete=models.CASCADE)
     screen_beneficiary = models.BooleanField(default=False)
     excluded = models.BooleanField(default=False, help_text="Exclude RDI in UI")
-    erased = models.BooleanField(default=False, help_text="Abort RDI")
-    refuse_reason = models.CharField(max_length=100, blank=True, null=True)
     # TODO: in future will use one program per RDI after migration
     program = models.ForeignKey(
         "program.Program",
@@ -121,10 +127,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="registration_imports",
         on_delete=models.SET_NULL,
     )
-    programs = models.ManyToManyField(
-        "program.Program",
-        related_name="registration_data_imports",
-    )
+    erased = models.BooleanField(default=False, help_text="Abort RDI")
+    refuse_reason = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.name
@@ -141,10 +145,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         return self.screen_beneficiary
 
     @classmethod
-    def get_choices(cls, business_area_slug: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_choices(
+        cls, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         query = ~Q(status__in=[cls.DEDUPLICATION_FAILED, cls.MERGE_ERROR, cls.IMPORT_ERROR, cls.REFUSED_IMPORT])
         if business_area_slug:
             query &= Q(business_area__slug=business_area_slug)
+        if program_id:
+            query &= Q(program_id=program_id)
         queryset = cls.objects.filter(query)
         return [
             {
@@ -155,4 +163,4 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         ]
 
     def can_be_merged(self) -> bool:
-        return self.status in [self.IN_REVIEW, self.MERGE_ERROR]
+        return self.status in (self.IN_REVIEW, self.MERGE_ERROR)

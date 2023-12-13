@@ -41,10 +41,10 @@ class TargetingCriteriaQueryingBase:
             self._excluded_household_ids = excluded_household_ids
 
     def get_household_queryset(self) -> QuerySet:
-        return Household.objects  # type: ignore
+        return Household.objects
 
     def get_individual_queryset(self) -> QuerySet:
-        return Individual.objects  # type: ignore
+        return Individual.objects
 
     def get_rules(self) -> Any:
         return self.rules

@@ -29,13 +29,13 @@ export interface FormValues {
 }
 
 interface SetUpFspCoreProps {
-  businessArea: string;
+  baseUrl: string;
   permissions: string[];
   initialValues: FormValues;
 }
 
 export const SetUpFspCore = ({
-  businessArea,
+  baseUrl,
   permissions,
   initialValues,
 }: SetUpFspCoreProps): React.ReactElement => {
@@ -153,7 +153,7 @@ export const SetUpFspCore = ({
         },
       });
       showMessage(t('FSPs have been assigned to the delivery mechanisms'), {
-        pathname: `/${businessArea}/payment-module/${
+        pathname: `/${baseUrl}/payment-module/${
           isFollowUp ? 'followup-payment-plans' : 'payment-plans'
         }/${id}`,
         historyMethod: 'push',
@@ -266,7 +266,7 @@ export const SetUpFspCore = ({
                 <SetUpFspButtonActions
                   step={activeStep}
                   submitForm={submitForm}
-                  businessArea={businessArea}
+                  baseUrl={baseUrl}
                   paymentPlanId={id}
                   handleBackStep={handleBackStep}
                 />
