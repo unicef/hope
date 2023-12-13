@@ -4575,6 +4575,8 @@ export type PaymentNode = Node & {
   verification?: Maybe<PaymentVerificationNode>,
   distributionModality?: Maybe<Scalars['String']>,
   serviceProvider?: Maybe<FinancialServiceProviderNode>,
+  debitCardNumber?: Maybe<Scalars['String']>,
+  debitCardIssuer?: Maybe<Scalars['String']>,
   totalPersonsCovered?: Maybe<Scalars['Int']>,
   snapshotCollectorFullName?: Maybe<Scalars['String']>,
   snapshotCollectorDeliveryPhoneNo?: Maybe<Scalars['String']>,
@@ -12307,7 +12309,7 @@ export type PaymentQuery = (
   { __typename?: 'Query' }
   & { payment: Maybe<(
     { __typename?: 'PaymentNode' }
-    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'snapshotCollectorBankName' | 'snapshotCollectorBankAccountNumber' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'additionalCollectorName' | 'additionalDocumentType' | 'additionalDocumentNumber' | 'reasonForUnsuccessfulPayment' | 'snapshotCollectorFullName'>
+    & Pick<PaymentNode, 'id' | 'unicefId' | 'distributionModality' | 'status' | 'statusDate' | 'snapshotCollectorBankName' | 'snapshotCollectorBankAccountNumber' | 'debitCardNumber' | 'debitCardIssuer' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId' | 'additionalCollectorName' | 'additionalDocumentType' | 'additionalDocumentNumber' | 'reasonForUnsuccessfulPayment' | 'snapshotCollectorFullName'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'name'>
@@ -22869,6 +22871,8 @@ export const PaymentDocument = gql`
     statusDate
     snapshotCollectorBankName
     snapshotCollectorBankAccountNumber
+    debitCardNumber
+    debitCardIssuer
     targetPopulation {
       id
       name
@@ -31426,6 +31430,8 @@ export type PaymentNodeResolvers<ContextType = any, ParentType extends Resolvers
   verification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
   distributionModality?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   serviceProvider?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
+  debitCardNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  debitCardIssuer?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   totalPersonsCovered?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   snapshotCollectorFullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   snapshotCollectorDeliveryPhoneNo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
