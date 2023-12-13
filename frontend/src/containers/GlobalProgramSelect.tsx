@@ -116,19 +116,10 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   }, [programId, selectedProgram, setSelectedProgram, getCurrentProgram]);
 
   useEffect(() => {
-    // If the programId is not in a valid format, redirect to the 404 page
+    // If the programId is not in a valid format or not one of the available programs, redirect to the access denied page
     if (
-      programId &&
-      !isProgramNodeUuidFormat(programId) &&
-      programId !== 'all'
-    ) {
-      history.push(`/404/${businessArea}`);
-    }
-    // If the programId is valid but not one of the available programs, redirect to the access denied page
-    else if (
-      !loading &&
-      programId &&
-      !isOneOfAvailableProgramsId(programId) &&
+      programId && !loading &&
+      (!isProgramNodeUuidFormat(programId) || !isOneOfAvailableProgramsId(programId)) &&
       programId !== 'all'
     ) {
       history.push(`/access-denied/${businessArea}`);

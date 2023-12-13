@@ -65,7 +65,7 @@ class GrievanceTicketManager(models.Manager):
 
     # remove 'is_original' after data migration
     def get_queryset(self) -> "QuerySet":
-        return super().get_queryset().filter(is_original=True)
+        return super().get_queryset().filter(is_original=False)
 
 
 class OriginalAndRepresentationsManager(models.Manager):
@@ -378,7 +378,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel, UnicefIdentifiedMo
     programs = models.ManyToManyField("program.Program", related_name="grievance_tickets", blank=True)
     comments = models.TextField(blank=True, null=True)
 
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(

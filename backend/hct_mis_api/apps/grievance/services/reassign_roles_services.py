@@ -59,7 +59,6 @@ def reassign_roles_on_disable_individual_service(
 
         if role_name == ROLE_ALTERNATE and new_individual.role == ROLE_PRIMARY:
             raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
-
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
                 IndividualRoleInHousehold,
