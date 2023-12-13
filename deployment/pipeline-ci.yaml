@@ -242,7 +242,6 @@ stages:
 
   - stage: publish_artifacts
     displayName: PUBLISH_ARTIFACTS
-    dependsOn: [test]
     jobs:
       - job: publish_artifacts
         pool:
