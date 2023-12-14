@@ -73,13 +73,12 @@ from hct_mis_api.one_time_scripts.tests.test_migrate_data_to_representations_per
 )
 
 
-@skip(reason="Skip this test for GPF")
-class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
+class BaseGrievanceTestCase:
     def setUp(self) -> None:
         self.PAYMENT_RECORD_CT_ID = ContentType.objects.get_for_model(PaymentRecord).id
         self.PAYMENT_CT_ID = ContentType.objects.get_for_model(Payment).id
 
-        self.business_area = BusinessAreaFactory()
+        self.business_area = getattr(self, "business_area", None) or BusinessAreaFactory()
         self.program1 = ProgramFactory(name="program1", business_area=self.business_area, status=Program.ACTIVE)
         self.program2 = ProgramFactory(name="program2", business_area=self.business_area, status=Program.ACTIVE)
         self.program3 = ProgramFactory(name="program3", business_area=self.business_area, status=Program.ACTIVE)
@@ -221,10 +220,16 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         )
 
         for program in representations_programs:
-            individual = IndividualFactory(household=None, business_area=self.business_area, program=program)
+            individual_representation = IndividualFactory(
+                household=None,
+                business_area=self.business_area,
+                program=program,
+                copied_from=individual,
+                is_original=False,
+            )
             HouseholdFactory(
                 business_area=self.business_area,
-                head_of_household=individual,
+                head_of_household=individual_representation,
                 copied_from=original_household,
                 origin_unicef_id=original_household.unicef_id,
                 program=program,
@@ -1327,6 +1332,9 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         [GrievanceDocumentFactory(grievance_ticket=linked_grievance) for _ in range(2)]
         linked_grievance.linked_tickets.add(self.sensitive_ticket_no_payment_not_closed_gt.ticket)
 
+
+@skip(reason="Skip this test for GPF")
+class TestMigrateGrievanceTicketsAndFeedbacks(BaseGrievanceTestCase, TestCase):
     def perform_test_on_hh_only_tickets(self, objects: tuple, related_name: str) -> None:
         for obj in objects:
             obj.refresh_from_db()

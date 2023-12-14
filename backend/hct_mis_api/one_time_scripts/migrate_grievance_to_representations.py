@@ -915,7 +915,7 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
                 possible_duplicates = [
                     get_individual_representation_per_program_by_old_individual_id(
                         program=program,
-                        old_individual_id=individual,
+                        old_individual_id=individual.id,
                     )
                     for individual in individuals
                     if individual
