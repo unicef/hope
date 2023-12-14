@@ -1287,7 +1287,7 @@ def migrate_linked_tickets(business_area: Optional[BusinessArea] = None) -> None
                         ),
                     ]
                 )
-            # Link all representation with current representation
+            # Link all representations of the same ticket with current representation
             for ticket_other_representation in original_ticket.copied_to(manager="default_for_migrations_fix").all():
                 if ticket_other_representation.pk != ticket_representation.pk:
                     linked_tickets_to_create.extend(
