@@ -252,7 +252,7 @@ stages:
           - script: |
               pipelineId=$(pipelineId)
               if [ "$pipelineId" = "null" ]; then
-                echo "Skipping pipeline run"
+                echo "Skipping triggering deploy because the branch is ${{ variables['Build.SourceBranchName'] }}"
                 exit 0
               fi
 
@@ -265,5 +265,5 @@ stages:
                 -H "Content-Type: application/json" \
                 -H "Content-Length: $contentLength" \
                 -d "$jsonBody" \
-                https://dev.azure.com/$organization/$project/_apis/pipelines/$pipelineId/runs?api-version=7.1-preview.1&variables
+                https://dev.azure.com/$organization/$project/_apis/pipelines/$pipelineId/runs?api-version=7.1-preview.1
             displayName: "Trigger deploy"
