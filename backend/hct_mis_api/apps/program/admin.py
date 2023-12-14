@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
 
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.utils.admin import (
@@ -29,9 +30,10 @@ class ProgramCycleAdminInline(admin.TabularInline):
 
 
 @admin.register(Program)
-class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
+class ProgramAdmin(SoftDeletableAdminMixin, AdminAutoCompleteSearchMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "start_date", "end_date", "business_area", "data_collecting_type")
     date_hierarchy = "start_date"
+    search_fields = ("name",)
     list_filter = (
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),

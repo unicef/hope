@@ -11,6 +11,7 @@ from admin_extra_buttons.api import button, confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, MaxMinFilter, ValueFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from adminfilters.querystring import QueryStringFilter
 from smart_admin.mixins import LinkedObjectsMixin
 
@@ -31,6 +32,7 @@ class TargetPopulationAdmin(
     SoftDeletableAdminMixin,
     SteficonExecutorMixin,
     TargetPopulationFromListMixin,
+    AdminAutoCompleteSearchMixin,
     LinkedObjectsMixin,
     HOPEModelAdminBase,
 ):
@@ -49,8 +51,8 @@ class TargetPopulationAdmin(
         QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
-        ("steficon_rule__rule", AutoCompleteFilter),
         ("program", AutoCompleteFilter),
+        ("steficon_rule__rule", AutoCompleteFilter),
         "sent_to_datahub",
     )
     raw_id_fields = (
@@ -61,6 +63,7 @@ class TargetPopulationAdmin(
         "program",
         "targeting_criteria",
     )
+    ordering = ("name",)
 
     @button()
     def selection(self, request: "HttpRequest", pk: "UUID") -> "HttpResponse":

@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db.models import Q, QuerySet
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
@@ -12,9 +12,10 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, ValueFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
 from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 from smart_admin.mixins import LinkedObjectsMixin
@@ -40,7 +41,8 @@ from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation impo
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableModelAdmin
+from hct_mis_api.apps.utils.security import is_root
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -256,19 +258,39 @@ class CashPlanAdmin(HOPEModelAdminBase):
 
 
 @admin.register(PaymentPlan)
-class PaymentPlanAdmin(HOPEModelAdminBase):
+class PaymentPlanAdmin(AdminAutoCompleteSearchMixin, SoftDeletableModelAdmin, HOPEModelAdminBase):
     list_display = ("unicef_id", "program", "status", "target_population")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        ("business_area", AutoCompleteFilter),
-        ("program__id", ValueFilter),
-        ("target_population", AutoCompleteFilter),
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("target_population", LinkedAutoCompleteFilter.factory(parent="program")),
     )
-    raw_id_fields = ("business_area", "program", "target_population", "created_by", "program_cycle")
-    search_fields = ("id", "unicef_id")
+    raw_id_fields = (
+        "business_area",
+        "program",
+        "target_population",
+        "created_by",
+        "program_cycle",
+        "export_file_entitlement",
+        "export_pdf_file_summary",
+        "source_payment_plan",
+        "imported_file",
+        "export_file_per_fsp",
+    )
+    search_fields = ("target_population__name",)
 
     def has_delete_permission(self, request: HttpRequest, obj: Optional[Any] = None) -> bool:
-        return False
+        return is_root(request)
+
+    @button()
+    def payments(self, request: HttpRequest, pk: str) -> HttpResponse:
+        base = reverse("admin:payment_payment_changelist")
+        obj: PaymentPlan = self.get_object(request, pk)
+        url = (
+            f"{base}?business_area__exact={obj.business_area_id}&program__exact={obj.program_id}&parent__exact={obj.id}"
+        )
+        return HttpResponseRedirect(url)
 
 
 class PaymentHouseholdSnapshotInline(admin.StackedInline):
@@ -281,8 +303,9 @@ class PaymentAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase):
     list_display = ("unicef_id", "household", "status", "parent")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        ("business_area", AutoCompleteFilter),
-        ("parent", AutoCompleteFilter),
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("parent", LinkedAutoCompleteFilter.factory(parent="program", title="Payment Plan")),
         ("financial_service_provider", AutoCompleteFilter),
     )
     advanced_filter_fields = (
