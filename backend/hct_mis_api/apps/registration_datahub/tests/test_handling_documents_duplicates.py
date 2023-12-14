@@ -126,9 +126,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ],
         )
         country = geo_models.Country.objects.get(iso_code2="PL")
-        dt = DocumentTypeFactory(label="national_id", key="national_id")
-        dt_tax_id = DocumentTypeFactory(label="tax_id", key="tax_id")
-        dt.save()
+        dt = DocumentTypeFactory(label="national_id", key="national_id", valid_for_deduplication=False)
+        dt_tax_id = DocumentTypeFactory(label="tax_id", key="tax_id", valid_for_deduplication=False)
+
         cls.document1 = Document(
             country=country,
             type=dt,
