@@ -261,25 +261,16 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             # 8. Bulk Create PossibleDuplicateThrough
             # 9. Transaction savepoint release
             # 10 - 12. Queries for `is_cross_area` update
-            self.assertEqual(first_dedup_query_count, 13, "Should only use 12 queries")
+            self.assertEqual(first_dedup_query_count, 12, "Should only use 12 queries")
 
     def test_ticket_created_correctly(self) -> None:
-        print("\nStart == test_ticket_created_correctly")
-        print("\n#2 Doc ID, Ind ID", str(self.document2.pk), str(self.document2.individual.pk))
-        print("#3 Doc ID, Ind ID", str(self.document3.pk), str(self.document3.individual.pk))
-        print("#4 Doc ID, Ind ID", str(self.document4.pk), str(self.document4.individual.pk))
-        print("#5 Doc ID, Ind ID", str(self.document5.pk), str(self.document5.individual.pk))
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
         )
         self.refresh_all_documents()
 
         self.assertEqual(GrievanceTicket.objects.all().count(), 1)
-        print("grievance list: ", GrievanceTicket.objects.all().values_list("unicef_id", flat=True))
-        print("\n#7 Doc ID, Ind ID", str(self.document7.pk), str(self.document7.individual.pk))
-        print("\n##2 Doc ID, Ind ID", str(self.document2.pk), str(self.document2.individual.pk))
 
-        print("Check individuals... ", str(self.document7.individual.pk), str())
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query(
                 [
@@ -288,9 +279,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ),
             self.registration_data_import,
         )
-        print("grievance list: ", GrievanceTicket.objects.all().values_list("unicef_id", flat=True))
-        print("End == test_ticket_created_correctly\n")
-        self.assertEqual(GrievanceTicket.objects.all().count(), 1)  # 2 por que?? XD
+        # failed probably because of all_matching_number_documents qs ordering
+        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
 
     def test_valid_for_deduplication_doc_type(self) -> None:
         pl = geo_models.Country.objects.get(iso_code2="PL")
