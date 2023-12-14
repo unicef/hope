@@ -95,6 +95,7 @@ def migrate_grievance_to_representations() -> None:
         migrate_grievance_tickets()
         migrate_messages()
         migrate_feedback()
+        migrate_linked_tickets()
     finally:
         for model in model_list:
             model._meta.get_field("created_at").auto_now_add = True
@@ -131,6 +132,7 @@ def migrate_grievance_to_representations_per_business_area(business_area: Option
         migrate_grievance_tickets(business_area)
         migrate_messages(business_area)
         migrate_feedback(business_area)
+        migrate_linked_tickets(business_area)
     finally:
         for model in model_list:
             model._meta.get_field("created_at").auto_now_add = True
@@ -1225,29 +1227,9 @@ def copy_grievance_ticket(
     grievance_ticket.is_original = False
     grievance_ticket.copied_from_id = original_grievance_ticket_id
 
-    linked_tickets_ids = list(
-        getattr(original_ticket, related_grievance_field)
-        .linked_tickets(manager="default_for_migrations_fix")
-        .distinct()
-        .values_list("pk", flat=True)
-    )
-    linked_tickets = [
-        GrievanceTicketThrough(main_ticket=grievance_ticket, linked_ticket_id=lt) for lt in linked_tickets_ids
-    ]
-    linked_tickets.extend(
-        [GrievanceTicketThrough(linked_ticket=grievance_ticket, main_ticket_id=lt) for lt in linked_tickets_ids]
-    )
-    linked_tickets.extend(
-        [
-            GrievanceTicketThrough(main_ticket=grievance_ticket, linked_ticket_id=original_grievance_ticket_id),
-            GrievanceTicketThrough(linked_ticket=grievance_ticket, main_ticket_id=original_grievance_ticket_id),
-        ]
-    )
-
     grievance_ticket_data = {
         "grievance_ticket": grievance_ticket,
         "program": program,
-        "linked_tickets": linked_tickets,
     }
     notes_to_create = []
     for note in getattr(original_ticket, related_grievance_field).ticket_notes.all():
@@ -1266,20 +1248,74 @@ def copy_grievance_ticket(
     return grievance_ticket_data, notes_to_create, documents_to_create
 
 
+def migrate_linked_tickets(business_area: Optional[BusinessArea] = None) -> None:
+    logger.info(f"Handling linked tickets for business area: {business_area}")
+
+    filter_params = {}
+    if business_area:
+        filter_params["business_area"] = business_area
+
+    tickets_representations_ids = list(
+        GrievanceTicket.default_for_migrations_fix.filter(**filter_params, is_original=False).values_list(
+            "id", flat=True
+        )
+    )
+    tickets_representations_count = len(tickets_representations_ids)
+    logger.info(f"Tickets representations to handle: {tickets_representations_count}")
+    for batch_start in range(0, tickets_representations_count, BATCH_SIZE):
+        batched_ids = tickets_representations_ids[batch_start : batch_start + BATCH_SIZE]
+        tickets_representations = GrievanceTicket.default_for_migrations_fix.filter(id__in=batched_ids).select_related(
+            "copied_from"
+        )
+        # Link all linked_tickets representations with current ticket_representation
+        linked_tickets_to_create = []
+        for ticket_representation in tickets_representations:
+            original_ticket = ticket_representation.copied_from
+            linked_tickets_representations = GrievanceTicket.default_for_migrations_fix.filter(
+                copied_from__linked_tickets__in=[original_ticket]
+            ).distinct()
+            for linked_ticket_representation in linked_tickets_representations:
+                linked_tickets_to_create.extend(
+                    [
+                        GrievanceTicketThrough(
+                            main_ticket=ticket_representation,
+                            linked_ticket=linked_ticket_representation,
+                        ),
+                        GrievanceTicketThrough(
+                            main_ticket=linked_ticket_representation,
+                            linked_ticket=ticket_representation,
+                        ),
+                    ]
+                )
+            # Link all representation with current representation
+            for ticket_other_representation in original_ticket.copied_to(manager="default_for_migrations_fix").all():
+                if ticket_other_representation.pk != ticket_representation.pk:
+                    linked_tickets_to_create.extend(
+                        [
+                            GrievanceTicketThrough(
+                                main_ticket=ticket_representation,
+                                linked_ticket=ticket_other_representation,
+                            ),
+                            GrievanceTicketThrough(
+                                main_ticket=ticket_other_representation,
+                                linked_ticket=ticket_representation,
+                            ),
+                        ]
+                    )
+
+        GrievanceTicketThrough.objects.bulk_create(linked_tickets_to_create, ignore_conflicts=True)
+
+
 def handle_grievance_ticket_data_creation(grievance_ticket_data: list) -> None:
     """
     Function that bulk creates grievance tickets, add their linked tickets and programs relation.
     grievance_ticket_data consists of 3 keys:
     - grievance_ticket: GrievanceTicket object list
-    - linked_tickets: linked GrievanceTickets object list where main_ticket is the grievance_ticket
     - program: Program for which GrievanceTicket is created ( in many-to-many relation "programs")
     """
     GrievanceTicketProgram = GrievanceTicket.programs.through
 
     grievance_tickets = [gt["grievance_ticket"] for gt in grievance_ticket_data]
-    linked_tickets = []
-    for grievance_ticket in grievance_ticket_data:
-        linked_tickets.extend(grievance_ticket["linked_tickets"])
     grievance_tickets_program = []
     for grievance_ticket in grievance_ticket_data:
         program_id = (
@@ -1292,7 +1328,6 @@ def handle_grievance_ticket_data_creation(grievance_ticket_data: list) -> None:
         )
 
     GrievanceTicket.objects.bulk_create(grievance_tickets)
-    GrievanceTicketThrough.objects.bulk_create(linked_tickets, ignore_conflicts=True)
     GrievanceTicketProgram.objects.bulk_create(grievance_tickets_program, ignore_conflicts=True)
 
 
