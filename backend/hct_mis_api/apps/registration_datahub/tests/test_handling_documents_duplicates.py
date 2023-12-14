@@ -262,6 +262,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             self.assertEqual(first_dedup_query_count, 12, "Should only use 12 queries")
 
     def test_ticket_created_correctly(self) -> None:
+        print("\nStart == test_ticket_created_correctly")
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
         )
@@ -277,6 +278,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             self.registration_data_import,
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)  # 2 por que?? XD
+        print("End == test_ticket_created_correctly\n")
 
     def test_valid_for_deduplication_doc_type(self) -> None:
         pl = geo_models.Country.objects.get(iso_code2="PL")
