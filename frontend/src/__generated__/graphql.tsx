@@ -13112,7 +13112,8 @@ export type AllHouseholdsQueryVariables = {
   residenceStatus?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   admin2?: Maybe<Scalars['ID']>,
-  withdrawn?: Maybe<Scalars['Boolean']>
+  withdrawn?: Maybe<Scalars['Boolean']>,
+  program?: Maybe<Scalars['ID']>
 };
 
 
@@ -13787,7 +13788,9 @@ export type AllRegistrationDataImportsQueryVariables = {
   businessArea?: Maybe<Scalars['String']>,
   importDateRange?: Maybe<Scalars['String']>,
   size?: Maybe<Scalars['String']>,
-  program?: Maybe<Scalars['String']>
+  program?: Maybe<Scalars['String']>,
+  totalHouseholdsCountWithValidPhoneNoMin?: Maybe<Scalars['Int']>,
+  totalHouseholdsCountWithValidPhoneNoMax?: Maybe<Scalars['Int']>
 };
 
 
@@ -24828,8 +24831,8 @@ export type CashPlanVerificationSamplingChoicesQueryHookResult = ReturnType<type
 export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesLazyQuery>;
 export type CashPlanVerificationSamplingChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
 export const AllHouseholdsDocument = gql`
-    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid, adminArea: $adminArea, search: $search, searchType: $searchType, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $headOfHouseholdFullNameIcontains: String, $headOfHouseholdPhoneNoValid: Boolean, $adminArea: ID, $search: String, $searchType: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: ID, $withdrawn: Boolean, $program: ID) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid, adminArea: $adminArea, search: $search, searchType: $searchType, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn, program: $program) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -24931,6 +24934,7 @@ export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: A
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      admin2: // value for 'admin2'
  *      withdrawn: // value for 'withdrawn'
+ *      program: // value for 'program'
  *   },
  * });
  */
@@ -26432,8 +26436,8 @@ export type AllMergedIndividualsQueryHookResult = ReturnType<typeof useAllMerged
 export type AllMergedIndividualsLazyQueryHookResult = ReturnType<typeof useAllMergedIndividualsLazyQuery>;
 export type AllMergedIndividualsQueryResult = ApolloReactCommon.QueryResult<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
-    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String, $importDateRange: String, $size: String, $program: String) {
-  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $search, importedBy_Id: $importedBy, status: $status, importDate: $importDate, businessArea: $businessArea, importDateRange: $importDateRange, size: $size, program: $program) {
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $importedBy: UUID, $status: String, $importDate: Date, $businessArea: String, $importDateRange: String, $size: String, $program: String, $totalHouseholdsCountWithValidPhoneNoMin: Int, $totalHouseholdsCountWithValidPhoneNoMax: Int) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $search, importedBy_Id: $importedBy, status: $status, importDate: $importDate, businessArea: $businessArea, importDateRange: $importDateRange, size: $size, program: $program, totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin, totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -26493,6 +26497,8 @@ export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operati
  *      importDateRange: // value for 'importDateRange'
  *      size: // value for 'size'
  *      program: // value for 'program'
+ *      totalHouseholdsCountWithValidPhoneNoMin: // value for 'totalHouseholdsCountWithValidPhoneNoMin'
+ *      totalHouseholdsCountWithValidPhoneNoMax: // value for 'totalHouseholdsCountWithValidPhoneNoMax'
  *   },
  * });
  */
