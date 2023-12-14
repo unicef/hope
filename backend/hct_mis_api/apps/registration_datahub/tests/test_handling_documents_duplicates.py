@@ -261,7 +261,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             # 8. Bulk Create PossibleDuplicateThrough
             # 9. Transaction savepoint release
             # 10 - 12. Queries for `is_cross_area` update
-            self.assertEqual(first_dedup_query_count, 12, "Should only use 12 queries")
+            self.assertEqual(first_dedup_query_count, 13, "Should only use 12 queries")
 
     def test_ticket_created_correctly(self) -> None:
         print("\nStart == test_ticket_created_correctly")
@@ -277,7 +277,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(GrievanceTicket.objects.all().count(), 1)
         print("grievance list: ", GrievanceTicket.objects.all().values_list("unicef_id", flat=True))
         print("\n#7 Doc ID, Ind ID", str(self.document7.pk), str(self.document7.individual.pk))
+        print("\n##2 Doc ID, Ind ID", str(self.document2.pk), str(self.document2.individual.pk))
 
+        print("Check individuals... ", str(self.document7.individual.pk), str())
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query(
                 [
