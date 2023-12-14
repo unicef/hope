@@ -34,10 +34,10 @@ class TestFinishVerificationPlan(TestCase):
         payment_record_amount = 10
         user = UserFactory()
 
-        ###
+        afghanistan_areas_qs = Area.objects.filter(area_type__area_level=2, area_type__country__iso_code3="AFG")
 
         program = ProgramFactory(business_area=business_area)
-        program.admin_areas.set(Area.objects.order_by("?")[:3])
+        program.admin_areas.set(afghanistan_areas_qs.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
 
         target_population = TargetPopulationFactory(
@@ -60,7 +60,7 @@ class TestFinishVerificationPlan(TestCase):
             household, _ = create_household(
                 {
                     "registration_data_import": registration_data_import,
-                    "admin_area": Area.objects.order_by("?").first(),
+                    "admin_area": afghanistan_areas_qs.order_by("?").first(),
                 },
                 {
                     "registration_data_import": registration_data_import,
@@ -69,6 +69,7 @@ class TestFinishVerificationPlan(TestCase):
             )
             household.set_admin_areas()
             household.programs.add(program)
+            household.refresh_from_db()
 
             payment_record = PaymentRecordFactory(
                 parent=cash_plan,
@@ -92,6 +93,6 @@ class TestFinishVerificationPlan(TestCase):
 
         ticket = GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION).first()
         household = Household.objects.get(unicef_id=ticket.household_unicef_id)
-        self.assertIsNotNone(household.admin2_id)
         self.assertIsNotNone(ticket.admin2_id)
+        self.assertIsNotNone(household.admin2_id)
         self.assertEqual(ticket.admin2_id, household.admin2_id)
