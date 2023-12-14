@@ -263,12 +263,17 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_ticket_created_correctly(self) -> None:
         print("\nStart == test_ticket_created_correctly")
+        print("\n#2 Doc ID, Ind ID", str(self.document2.pk), str(self.document2.individual.pk))
+        print("#3 Doc ID, Ind ID", str(self.document3.pk), str(self.document3.individual.pk))
+        print("#4 Doc ID, Ind ID", str(self.document4.pk), str(self.document4.individual.pk))
+        print("#5 Doc ID, Ind ID", str(self.document5.pk), str(self.document5.individual.pk))
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
         )
         self.refresh_all_documents()
 
         self.assertEqual(GrievanceTicket.objects.count(), 1)
+        print("\n#7 Doc ID, Ind ID", str(self.document7.pk), str(self.document7.individual.pk))
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query(
                 [
