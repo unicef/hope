@@ -10,6 +10,7 @@ import { TableWrapper } from '../../../../components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
@@ -45,6 +46,7 @@ export const LookUpHouseholdTableCommunication = ({
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableCommunicationProps): React.ReactElement => {
+  const {programId} = useBaseUrl()
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -67,6 +69,7 @@ export const LookUpHouseholdTableCommunication = ({
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
     headOfHouseholdPhoneNoValid: true,
+    program: programId
   };
 
   const [selected, setSelected] = useState<string[]>(
