@@ -1,4 +1,7 @@
+from typing import Any, List
 from unittest.mock import patch
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -39,27 +42,27 @@ class TestCrossAreaFilterAvailable(APITestCase):
         partner_unicef = PartnerFactory(name="UNICEF")
         cls.user = UserFactory(partner=partner_unicef)
 
-        admin_area1 = AreaFactory()
-        admin_area2 = AreaFactory()
+        cls.admin_area1 = AreaFactory(name="Admin Area 1", level=2)
+        cls.admin_area2 = AreaFactory(name="Admin Area 2", level=2)
         cls.business_area = create_afghanistan()
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
 
         individual1_from_area1 = IndividualFactory(business_area=cls.business_area, household=None)
         individual2_from_area1 = IndividualFactory(business_area=cls.business_area, household=None)
         household1_from_area1 = HouseholdFactory(
-            business_area=cls.business_area, admin2=admin_area1, head_of_household=individual1_from_area1
+            business_area=cls.business_area, admin2=cls.admin_area1, head_of_household=individual1_from_area1
         )
         individual1_from_area1.household = household1_from_area1
         individual1_from_area1.save()
         household2_from_area1 = HouseholdFactory(
-            business_area=cls.business_area, admin2=admin_area1, head_of_household=individual2_from_area1
+            business_area=cls.business_area, admin2=cls.admin_area1, head_of_household=individual2_from_area1
         )
         individual2_from_area1.household = household2_from_area1
         individual2_from_area1.save()
 
         individual_from_area2 = IndividualFactory(business_area=cls.business_area, household=None)
         household_from_area2 = HouseholdFactory(
-            business_area=cls.business_area, admin2=admin_area2, head_of_household=individual_from_area2
+            business_area=cls.business_area, admin2=cls.admin_area2, head_of_household=individual_from_area2
         )
         individual_from_area2.household = household_from_area2
         individual_from_area2.save()
@@ -73,7 +76,7 @@ class TestCrossAreaFilterAvailable(APITestCase):
             status=GrievanceTicket.STATUS_NEW,
             created_by=cls.user,
             assigned_to=cls.user,
-            admin2=None,
+            admin2=cls.admin_area2,
         )
         grievance_ticket_cross_area.programs.set([cls.program])
         cls.needs_adjudication_ticket_cross_area = TicketNeedsAdjudicationDetailsFactory(
@@ -92,7 +95,7 @@ class TestCrossAreaFilterAvailable(APITestCase):
             status=GrievanceTicket.STATUS_NEW,
             created_by=cls.user,
             assigned_to=cls.user,
-            admin2=None,
+            admin2=cls.admin_area2,
         )
         grievance_ticket_same_area.programs.set([cls.program])
         cls.needs_adjudication_ticket_same_area = TicketNeedsAdjudicationDetailsFactory(
@@ -101,6 +104,54 @@ class TestCrossAreaFilterAvailable(APITestCase):
         )
         cls.needs_adjudication_ticket_same_area.possible_duplicates.set([individual2_from_area1])
         cls.needs_adjudication_ticket_same_area.populate_cross_area_flag()
+
+        # testing different access requirements
+        cls.partner_without_area_restrictions = PartnerFactory(name="Partner without area restrictions")
+        cls.partner_without_area_restrictions.permissions = {
+            str(cls.business_area.id): {"programs": {str(cls.program.id): []}}
+        }
+        cls.partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
+        cls.partner_with_area_restrictions.permissions = {
+            str(cls.business_area.id): {
+                "programs": {str(cls.program.id): [str(cls.admin_area1.id), str(cls.admin_area2.id)]}
+            }
+        }
+
+    @parameterized.expand(
+        [
+            (
+                "without_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
+            (
+                "with_permission",
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                    Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                    Permissions.GRIEVANCES_CROSS_AREA_FILTER,
+                ],
+            ),
+        ]
+    )
+    def test1_cross_area_filter_true_full_area_access(self, _: Any, permissions: List[Permissions]) -> None:
+        user_without_permission = UserFactory(partner=self.partner_without_area_restrictions)
+        self.create_user_role_with_permissions(
+            user_without_permission,
+            permissions,
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=FILTER_GRIEVANCE_BY_CROSS_AREA,
+            context={
+                "user": user_without_permission,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"isCrossArea": True},
+        )
 
     def test_cross_area_filter_true(self) -> None:
         self.create_user_role_with_permissions(
@@ -143,4 +194,28 @@ class TestCrossAreaFilterAvailable(APITestCase):
                 },
             },
             variables={"isCrossArea": None},
+        )
+
+    def test_cross_area_filter_true_but_area_restrictions(self) -> None:
+        user_with_area_restrictions = UserFactory(partner=self.partner_with_area_restrictions)
+        self.create_user_role_with_permissions(
+            user_with_area_restrictions,
+            [
+                Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+                Permissions.GRIEVANCES_CROSS_AREA_FILTER,
+            ],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=FILTER_GRIEVANCE_BY_CROSS_AREA,
+            context={
+                "user": user_with_area_restrictions,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"isCrossArea": True},
         )
