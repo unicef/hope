@@ -800,6 +800,7 @@ class HardDocumentDeduplication:
 
         new_duplicates_set = {str(main_individual.id), *[str(x.id) for x in possible_duplicates_individuals]}
         for duplicates_set in possible_duplicates_through_dict.values():
+            print("== duplicates_set", duplicates_set, new_duplicates_set)
             if new_duplicates_set.issubset(duplicates_set):
                 return None
         household = main_individual.household
