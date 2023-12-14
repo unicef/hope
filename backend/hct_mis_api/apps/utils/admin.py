@@ -30,12 +30,12 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
             qs = qs.order_by(*ordering)
         return qs
 
-    def get_list_filter(self, request: HttpRequest) -> Sequence[_ListFilterT]:
+    def get_list_filter(self, request: HttpRequest) -> "Sequence[_ListFilterT]":
         return tuple(list(super().get_list_filter(request)) + ["is_removed"])
 
 
 class IsOriginalAdminMixin(admin.ModelAdmin):
-    def get_list_filter(self, request: HttpRequest) -> Sequence[_ListFilterT]:
+    def get_list_filter(self, request: HttpRequest) -> "Sequence[_ListFilterT]":
         return tuple(list(super().get_list_filter(request)) + ["is_original"])
 
 
