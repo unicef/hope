@@ -699,6 +699,7 @@ class HardDocumentDeduplication:
             new_document_signature = self._generate_signature(new_document)
 
             if new_document_signature in all_matching_number_documents_signatures:
+                print("=> if 1 new_document_signature in all_matching_number_documents_signatures")
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
                 ticket_data = ticket_data_dict.get(
                     new_document_signature,
@@ -713,6 +714,9 @@ class HardDocumentDeduplication:
                 new_document_signature in new_document_signatures_duplicated_in_batch
                 and new_document_signature in already_processed_signatures
             ):
+                print(
+                    "=> if 2 new_document_signature in new_document_signatures_duplicated_in_batch and new_document_signature in already_processed_signatures"
+                )
                 new_document.status = Document.STATUS_NEED_INVESTIGATION
                 ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
                 possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
@@ -722,6 +726,7 @@ class HardDocumentDeduplication:
             already_processed_signatures.append(new_document_signature)
 
             if new_document_signature in new_document_signatures_duplicated_in_batch:
+                print("=> if 3 new_document_signature in new_document_signatures_duplicated_in_batch")
                 ticket_data_dict[new_document_signature] = {
                     "original": new_document,
                     "possible_duplicates": [],
@@ -756,6 +761,7 @@ class HardDocumentDeduplication:
 
         ticket_data_collected = []
         for ticket_data in ticket_data_dict.values():
+            print("==> ticket_data", ticket_data)
             prepared_ticket = self._prepare_grievance_ticket_documents_deduplication(
                 main_individual=ticket_data["original"].individual,
                 business_area=ticket_data["original"].individual.business_area,
@@ -800,8 +806,13 @@ class HardDocumentDeduplication:
         )
 
         new_duplicates_set = {str(main_individual.id), *[str(x.id) for x in possible_duplicates_individuals]}
+        print(
+            "main_individual ",
+            str(main_individual.pk),
+        )
+        # == duplicates_set  {'7eaa3eb7-089c-4a70-a763-07cf0d211839', '66ce94ea-9a69-4a85-9b4a-78a94b746612'}
+        #                    {'0cc85223-c81f-498e-bccd-ca394de07913', '66ce94ea-9a69-4a85-9b4a-78a94b746612'}
         for duplicates_set in possible_duplicates_through_dict.values():
-            print("=> possible_duplicates_through_dict", possible_duplicates_through_dict)
             print("== duplicates_set ", duplicates_set, new_duplicates_set)
             if new_duplicates_set.issubset(duplicates_set):
                 print("going to return None.. NO TICKET ....", "*** " * 5)
