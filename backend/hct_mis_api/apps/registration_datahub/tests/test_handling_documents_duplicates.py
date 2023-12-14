@@ -276,7 +276,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ),
             self.registration_data_import,
         )
-        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        self.assertEqual(GrievanceTicket.objects.count(), 1) # 2 por que?? XD
 
     def test_valid_for_deduplication_doc_type(self) -> None:
         pl = geo_models.Country.objects.get(iso_code2="PL")
