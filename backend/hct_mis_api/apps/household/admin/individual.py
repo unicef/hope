@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable, Optional, Tuple
+from typing import Any, Iterable, Optional, Sequence, Tuple
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -9,11 +9,11 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
@@ -64,6 +64,7 @@ class IndividualAdmin(
 
     list_display = (
         "unicef_id",
+        "business_area",
         "given_name",
         "family_name",
         "household",
@@ -81,19 +82,38 @@ class IndividualAdmin(
     )
 
     search_fields = ("family_name", "unicef_id")
-    readonly_fields = ("created_at", "updated_at", "registration_data_import")
+    readonly_fields = ("created_at", "updated_at", "registration_data_import", "vector_column")
     exclude = ("created_at", "updated_at")
     list_filter = (
         DepotManager,
         QueryStringFilter,
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
-        ("business_area", AutoCompleteFilter),
         "updated_at",
         "last_sync_at",
     )
-    raw_id_fields = ("household", "registration_data_import", "business_area", "copied_from", "program")
+    raw_id_fields = (
+        "household",
+        "registration_data_import",
+        "business_area",
+        "copied_from",
+        "program",
+        "individual_collection",
+    )
     fieldsets = [
+        (
+            None,
+            {
+                "fields": (
+                    (
+                        "business_area",
+                        "program",
+                    ),
+                )
+            },
+        ),
         (
             None,
             {
@@ -101,7 +121,6 @@ class IndividualAdmin(
                     (
                         "full_name",
                         "withdrawn",
-                        "duplicate",
                         "is_removed",
                     ),
                     ("sex", "birth_date", "marital_status"),
@@ -119,7 +138,6 @@ class IndividualAdmin(
                     "last_sync_at",
                     "removed_date",
                     "withdrawn_date",
-                    "duplicate_date",
                 ),
             },
         ),
@@ -131,12 +149,31 @@ class IndividualAdmin(
                     "registration_data_import",
                     "first_registration_date",
                     "last_registration_date",
+                    "kobo_asset_id",
+                    "row_id",
+                    "registration_id",
                 ),
             },
         ),
+        (
+            "Deduplication",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "deduplication_golden_record_status",
+                    "deduplication_golden_record_results",
+                    "deduplication_batch_status",
+                    "deduplication_batch_results",
+                    "duplicate",
+                    "duplicate_date",
+                ),
+            },
+        ),
+        ("GPF", {"classes": ("collapse",), "fields": ("is_original", "copied_from", "is_migration_handled")}),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
     actions = ["count_queryset", "revalidate_phone_number_sync", "revalidate_phone_number_async"]
+    change_form_template = None
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
@@ -144,9 +181,18 @@ class IndividualAdmin(
             .get_queryset(request)
             .select_related(
                 "household",
+                "business_area",
                 "registration_data_import",
             )
         )
+
+    def get_list_display(self, request: HttpRequest) -> Sequence[str]:
+        base = list(super().get_list_display(request))
+        if "program__exact" in request.GET:
+            base.remove("business_area")
+        elif "business_area__exact" in request.GET:
+            base[base.index("business_area")] = "program"
+        return base
 
     def formfield_for_dbfield(self, db_field: Any, request: HttpRequest, **kwargs: Any) -> Any:
         if isinstance(db_field, JSONField):

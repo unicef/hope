@@ -1,6 +1,6 @@
 import logging
 from itertools import chain
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Sequence
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -179,12 +179,29 @@ class HouseholdAdmin(
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
-            "head_of_household", "country", "country_origin", "admin_area", "admin1", "admin2", "admin3", "admin4"
+            "head_of_household",
+            "country",
+            "country_origin",
+            "admin_area",
+            "admin1",
+            "admin2",
+            "admin3",
+            "admin4",
+            "household_collection",
+            "program",
         )
         ordering = self.get_ordering(request)
         if ordering:
             qs = qs.order_by(*ordering)
         return qs
+
+    def get_list_display(self, request: HttpRequest) -> Sequence[str]:
+        base = list(super().get_list_display(request))
+        if "program__exact" in request.GET:
+            base.remove("business_area")
+        elif "business_area__exact" in request.GET:
+            base[base.index("business_area")] = "program"
+        return base
 
     def get_ignored_linked_objects(self, request: HttpRequest) -> List:
         return []

@@ -1,0 +1,17 @@
+{% extends "admin_extra_buttons/change_form.html" %}
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% if original %}
+        <ul class="messagelist">
+            {% if original.is_original %}
+                <li class="warning">ORIGINAL RECORD</li>
+            {% elif original.withdrawn %}
+                <li class="error">
+                    {% if original.withdrawn %}withdrawn{% if original.duplicate %}duplicated{% endif %}{% endif %}
+                </li>
+                <p class="errornote">
+                </p>
+            {% endif %}
+        </ul>
+    {% endif %}
+{% endblock %}
