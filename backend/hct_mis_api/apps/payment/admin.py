@@ -41,7 +41,7 @@ from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation impo
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableModelAdmin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SoftDeletableAdminMixin
 from hct_mis_api.apps.utils.security import is_root
 
 if TYPE_CHECKING:
@@ -258,7 +258,7 @@ class CashPlanAdmin(HOPEModelAdminBase):
 
 
 @admin.register(PaymentPlan)
-class PaymentPlanAdmin(AdminAutoCompleteSearchMixin, SoftDeletableModelAdmin, HOPEModelAdminBase):
+class PaymentPlanAdmin(AdminAutoCompleteSearchMixin, SoftDeletableAdminMixin, HOPEModelAdminBase):
     list_display = ("unicef_id", "program", "status", "target_population")
     list_filter = (
         ("status", ChoicesFieldComboFilter),

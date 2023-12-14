@@ -16,7 +16,7 @@ from django.utils.safestring import mark_safe
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from power_query.mixin import PowerQueryMixin
@@ -86,7 +86,8 @@ class HouseholdAdmin(
     )
     list_filter = (
         DepotManager,
-        ("business_area", AutoCompleteFilter),
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
         QueryStringFilter,
         "withdrawn",
     )
@@ -105,9 +106,12 @@ class HouseholdAdmin(
         "country",
         "country_origin",
         "head_of_household",
+        "household_collection",
         "registration_data_import",
     )
     fieldsets = [
+        (None, {"fields": (("business_area", "program", "household_collection"),)}),
+        (None, {"fields": (("withdrawn", "is_removed"),)}),
         (None, {"fields": (("unicef_id", "head_of_household"),)}),
         (
             "Registration",
@@ -121,6 +125,9 @@ class HouseholdAdmin(
                     "org_enumerator",
                     "org_name_enumerator",
                     "name_enumerator",
+                    "kobo_asset_id",
+                    "row_id",
+                    "registration_id",
                 ),
             },
         ),
@@ -136,6 +143,27 @@ class HouseholdAdmin(
                 ),
             },
         ),
+        (
+            "Geo",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "country",
+                    "admin_area",
+                    "admin1",
+                    "admin2",
+                    "admin3",
+                    "admin4",
+                    "geopoint",
+                    "village",
+                    "zip_code",
+                    "address",
+                ),
+            },
+        ),
+        ("Consent", {"classes": ("collapse",), "fields": ("consent_sign", "consent", "consent_sharing")}),
+        ("GPF", {"classes": ("collapse",), "fields": ("is_original", "copied_from", "is_migration_handled")}),
+        ("Deprecated", {"classes": ("collapse",), "fields": ("programs", "collect_individual_data")}),
         ("Others", {"classes": ("collapse",), "fields": ("__others__",)}),
     ]
     actions = [

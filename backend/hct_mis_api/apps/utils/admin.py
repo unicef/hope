@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Union
 from uuid import UUID
 
 from django.conf import settings
@@ -11,7 +11,6 @@ from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
 from adminfilters.mixin import AdminFiltersMixin
-from django_filters import ChoiceFilter
 from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
@@ -20,7 +19,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.security import is_root
 
 if TYPE_CHECKING:
-    from django.contrib.admin.options import _ListFilterT, _ListOrTuple
+    from django.contrib.admin.options import _ListFilterT
 
 
 class SoftDeletableAdminMixin(admin.ModelAdmin):
@@ -31,12 +30,12 @@ class SoftDeletableAdminMixin(admin.ModelAdmin):
             qs = qs.order_by(*ordering)
         return qs
 
-    def get_list_filter(self, request: HttpRequest) -> Tuple:
+    def get_list_filter(self, request: HttpRequest) -> Sequence[_ListFilterT]:
         return tuple(list(super().get_list_filter(request)) + ["is_removed"])
 
 
 class IsOriginalAdminMixin(admin.ModelAdmin):
-    def get_list_filter(self, request: HttpRequest) -> Tuple:
+    def get_list_filter(self, request: HttpRequest) -> Sequence[_ListFilterT]:
         return tuple(list(super().get_list_filter(request)) + ["is_original"])
 
 
@@ -103,23 +102,6 @@ class HOPEModelAdminBase(HopeModelAdminMixin, JSONWidgetMixin, admin.ModelAdmin)
     def count_queryset(self, request: HttpRequest, queryset: QuerySet) -> None:
         count = queryset.count()
         self.message_user(request, f"Selection contains {count} records")
-
-
-class SoftDeletableModelAdmin(admin.ModelAdmin):
-    list_filter: "_ListOrTuple[_ListFilterT]" = [
-        ("is_removed", ChoiceFilter),
-    ]
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet:
-        """
-        Return a QuerySet of all model instances that can be edited by the
-        admin site. This is used by changelist_view.
-        """
-        qs = self.model.all_objects.get_queryset()
-        ordering = self.get_ordering(request)
-        if ordering:
-            qs = qs.order_by(*ordering)
-        return qs
 
 
 class HUBBusinessAreaFilter(SimpleListFilter):
