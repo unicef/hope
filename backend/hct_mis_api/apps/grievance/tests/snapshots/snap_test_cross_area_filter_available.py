@@ -19,7 +19,19 @@ snapshots['TestCrossAreaFilterAvailable::test_cross_area_filter_available_for_un
     }
 }
 
-snapshots['TestCrossAreaFilterAvailable::test_cross_area_filter_not_available 1'] = {
+snapshots['TestCrossAreaFilterAvailable::test_cross_area_filter_not_available_area_restrictions 1'] = {
+    'data': {
+        'crossAreaFilterAvailable': False
+    }
+}
+
+snapshots['TestCrossAreaFilterAvailable::test_cross_area_filter_not_available_no_permission 1'] = {
+    'data': {
+        'crossAreaFilterAvailable': False
+    }
+}
+
+snapshots['TestCrossAreaFilterAvailable::test_cross_area_filter_not_available_no_permission_and_area_restrictions 1'] = {
     'data': {
         'crossAreaFilterAvailable': False
     }

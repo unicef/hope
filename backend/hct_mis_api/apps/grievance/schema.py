@@ -554,7 +554,11 @@ class Query(graphene.ObjectType):
         business_area = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area"))
         program_id = get_program_id_from_headers(info.context.headers)
 
-        return user.partner.has_complete_access_in_program(program_id, str(business_area.id))
+        perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
+
+        return user.has_permission(perm, business_area, program_id) and user.partner.has_complete_access_in_program(
+            program_id, str(business_area.id)
+        )
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
