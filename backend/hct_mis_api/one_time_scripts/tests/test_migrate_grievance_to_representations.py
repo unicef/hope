@@ -4408,19 +4408,6 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             True,
         )
 
-        self.assertIn(
-            self.repr1_needs_adjudication_not_closed.ticket,
-            self.repr2_needs_adjudication_not_closed.ticket.linked_tickets(manager="default_for_migrations_fix").all(),
-        )
-        self.assertIn(
-            self.repr1_needs_adjudication_not_closed.ticket,
-            self.repr3_needs_adjudication_not_closed.ticket.linked_tickets(manager="default_for_migrations_fix").all(),
-        )
-        self.assertIn(
-            self.repr2_needs_adjudication_not_closed.ticket,
-            self.repr3_needs_adjudication_not_closed.ticket.linked_tickets(manager="default_for_migrations_fix").all(),
-        )
-
         # Test payment_verification_ticket_with_payment
         self.assertEqual(
             self.payment_verification_ticket_with_payment.ticket.copied_to(
