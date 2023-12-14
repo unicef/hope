@@ -764,6 +764,7 @@ class HardDocumentDeduplication:
                 possible_duplicates_through_dict=possible_duplicates_through_dict,
             )
             if prepared_ticket is None:
+                print("============================ prepared_ticket", prepared_ticket)
                 continue
             ticket_data_collected.append(prepared_ticket)
 
@@ -803,6 +804,7 @@ class HardDocumentDeduplication:
             print("=> possible_duplicates_through_dict", possible_duplicates_through_dict)
             print("== duplicates_set ", duplicates_set, new_duplicates_set)
             if new_duplicates_set.issubset(duplicates_set):
+                print("going to return None.. NO TICKET ....", "*** " * 5)
                 return None
         household = main_individual.household
         admin_level_2 = household.admin2 if household else None
