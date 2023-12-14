@@ -58,3 +58,6 @@ cashassistdatahubpostgresql:
   username: devcashubusr
   password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
   database: dev_cashassist_datahubdb
+
+pgadmin:
+  storage: 250Gi
