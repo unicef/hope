@@ -20,7 +20,8 @@ from django_filters import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.es_filters import ElasticSearchFilterSet
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
-from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
 from hct_mis_api.apps.geo.models import ValidityQuerySet
 from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOICES
 from hct_mis_api.apps.grievance.es_query import create_es_query, execute_es_query
@@ -354,7 +355,17 @@ class GrievanceTicketFilter(GrievanceTicketElasticSearchFilterSet):
             return qs
 
     def filter_is_cross_area(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
-        if value is True:
+        user = self.request.user
+        business_area = BusinessArea.objects.get(slug=self.request.headers.get("Business-Area"))
+        program_id = get_program_id_from_headers(self.request.headers)
+
+        perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
+
+        if (
+            user.has_permission(perm, business_area, program_id)
+            and user.partner.has_complete_access_in_program(program_id, str(business_area.id))
+            and value is True
+        ):
             return qs.filter(needs_adjudication_ticket_details__is_cross_area=True)
         else:
             return qs
