@@ -270,6 +270,6 @@ stages:
                 -u ":$(AZURE_PAT)" \
                 -H "Content-Type: application/json" \
                 -H "Content-Length: $contentLength" \
-                -d "$jsonBody" \ 
+                -d "$jsonBody" \
                 https://dev.azure.com/$organization/$project/_apis/pipelines/$pipelineId/runs?api-version=7.1-preview.1
             displayName: "Trigger deploy"
