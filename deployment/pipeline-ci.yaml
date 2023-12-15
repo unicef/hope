@@ -258,7 +258,7 @@ stages:
                 exit 0
               fi
 
-              jsonBody='{"variables": {"tag": {"isSecret": false, "value": "$(tag)"}}'
+              jsonBody='{"variables": {"tag": {"isSecret": false, "value": "$(tag)"}}}'
               contentLength=$(echo -n $jsonBody | wc -c)
               project=ICTD-HCT-MIS
               organization=unicef
