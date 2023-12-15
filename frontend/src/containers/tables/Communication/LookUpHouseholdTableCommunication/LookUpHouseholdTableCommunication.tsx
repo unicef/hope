@@ -7,10 +7,10 @@ import {
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpHouseholdTableCommunicationProps {
   businessArea: string;
