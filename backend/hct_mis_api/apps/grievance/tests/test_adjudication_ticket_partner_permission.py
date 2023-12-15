@@ -81,12 +81,12 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         cls.burka = AreaFactory(name="Burka", area_type=cls.area_type_level_2, p_code="area3", parent=cls.ghazni)
 
         _, cls.individuals_1 = create_household(
-            {"size": 1, "business_area": cls.business_area, "admin2": cls.doshi},
+            {"size": 1, "business_area": cls.business_area, "admin2": cls.doshi, "program": cls.program},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
 
-        cls.household_2, cls.individuals_2 = create_household(
-            {"size": 1, "business_area": cls.business_area, "admin2": cls.burka},
+        _, cls.individuals_2 = create_household(
+            {"size": 1, "business_area": cls.business_area, "admin2": cls.burka, "program": cls.program},
             {"given_name": "John", "family_name": "Doe", "middle_name": "", "full_name": "John Doe"},
         )
 
@@ -171,6 +171,9 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
         self.user.partner = partner
         self.user.save()
 
+        self.individuals_1[0].program = self.program
+        self.individuals_1[0].save()
+
         self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
 
         self.create_user_role_with_permissions(
@@ -189,6 +192,45 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 "user": self.user,
                 "headers": {
                     "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={
+                "grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"),
+                "selectedIndividualIds": [
+                    encode_id_base64(self.individuals_1[0].id, "IndividualNode")  # guy from doshi admin2
+                ],
+            },
+        )
+
+    def test_select_individual_when_partner_with_permission_and_no_selected_program(self) -> None:
+        partner = PartnerFactory(name="NOT_UNICEF")
+        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.doshi.id)]}}}
+
+        self.user.partner = partner
+        self.user.save()
+
+        self.individuals_1[0].program = self.program
+        self.individuals_1[0].save()
+
+        self.ticket_details.selected_individuals.add(self.individuals_1[0])  # doshi guy
+
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            ],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
                     "Business-Area": self.business_area.slug,
                 },
             },
@@ -223,6 +265,35 @@ class TestAdjudicationTicketPartnerPermission(APITestCase):
                 "user": self.user,
                 "headers": {
                     "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"grievanceTicketId": encode_id_base64(self.grievance.id, "GrievanceTicketNode"), "status": 6},
+        )
+
+    def test_close_ticket_when_partner_with_permission_and_no_selected_program(self) -> None:
+        partner = PartnerFactory()
+        partner.permissions = {str(self.business_area.id): {"programs": {str(self.program.id): [str(self.doshi.id)]}}}
+
+        self.user.partner = partner
+        self.user.save()
+
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+            ],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=GRIEVANCE_TICKET_STATUS_CHANGE,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
                     "Business-Area": self.business_area.slug,
                 },
             },
