@@ -171,8 +171,6 @@ export const CreateProgramPage = (): ReactElement => {
               {step === 0 && (
                 <DetailsStep
                   values={values}
-                  step={step}
-                  setStep={setStep}
                   handleNext={handleNext}
                 />
               )}

@@ -6,15 +6,11 @@ import { BaseSection } from '../../core/BaseSection';
 
 interface DetailsStepProps {
   values;
-  step: number;
-  setStep: (step: number) => void;
   handleNext?: () => Promise<void>;
 }
 
 export const DetailsStep: React.FC<DetailsStepProps> = ({
   values,
-  step,
-  setStep,
   handleNext,
 }) => {
   const { t } = useTranslation();
