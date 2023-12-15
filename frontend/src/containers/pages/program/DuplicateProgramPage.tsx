@@ -190,8 +190,6 @@ export const DuplicateProgramPage = (): ReactElement => {
               {step === 0 && (
                 <DetailsStep
                   values={values}
-                  step={step}
-                  setStep={setStep}
                   handleNext={handleNext}
                 />
               )}
