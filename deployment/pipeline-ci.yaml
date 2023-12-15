@@ -38,6 +38,13 @@ variables:
   tag: $(Build.SourceVersion)
   additionalTag: $(Build.SourceBranchName)
 
+  ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
+    pipelineId: 1159
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'staging') }}:
+    pipelineId: 1160
+  ${{ else }}:
+    pipelineId: null
+
 stages:
   - stage: test_frontend
     displayName: Test-Frontend
@@ -235,22 +242,34 @@ stages:
               artifact: BackendLineCoverage
               publishLocation: 'pipeline'
 
-  - stage: publish_artifacts
-    displayName: PUBLISH_ARTIFACTS
+  - stage: trigger_deploy
+    displayName: Trigger deploy
     dependsOn: [test]
     jobs:
-      - job: publish_artifacts
+      - job: trigger_deploy
         pool:
           vmImage: ubuntu-latest
-        displayName: "[PUBLISH_ARTIFACTS]"
+        displayName: "[TRIGGER_DEPLOY]"
         steps:
           - script: |
-              mkdir -p $(Build.ArtifactStagingDirectory)/tag
-              echo $(tag) > $(Build.ArtifactStagingDirectory)/tag/hope.txt
-            displayName: "Save tag to file"
-          - task: PublishPipelineArtifact@1
-            inputs:
-              pathToPublish: "$(Build.ArtifactStagingDirectory)/tag"
-              artifact: 'hope'
-              publishLocation: 'pipeline'
-            displayName: "Publish tag"
+              pipelineId=$(pipelineId)
+              if [ "$pipelineId" = "null" ]; then
+                echo "Skipping triggering deploy because the branch is ${{ variables['Build.SourceBranchName'] }}"
+                exit 0
+              fi
+
+              jsonBody='{"variables": {"tag": {"isSecret": false, "value": "$(tag)"}}}'
+              contentLength=$(echo -n $jsonBody | wc -c)
+              project=ICTD-HCT-MIS
+              organization=unicef
+
+              echo Triggering deploy for pipeline $pipelineId
+              echo JSON body: $jsonBody
+
+              curl -v -L \
+                -u ":$(AZURE_PAT)" \
+                -H "Content-Type: application/json" \
+                -H "Content-Length: $contentLength" \
+                -d "$jsonBody" \
+                https://dev.azure.com/$organization/$project/_apis/pipelines/$pipelineId/runs?api-version=7.1-preview.1
+            displayName: "Trigger deploy"
