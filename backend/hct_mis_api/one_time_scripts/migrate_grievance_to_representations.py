@@ -487,6 +487,119 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
     )
 
 
+def handle_tickets_delete_household_details(business_area: Optional[BusinessArea] = None) -> None:
+    if business_area:
+        filter_kwargs = {"ticket__business_area": business_area}
+    else:
+        filter_kwargs = {}
+    tickets_with_hh = TicketDeleteHouseholdDetails.objects.select_related(
+        "ticket",
+        "household",
+    ).filter(household__isnull=False, ticket__is_original=True, ticket__is_migration_handled=False, **filter_kwargs)
+    logger.info(f"Tickets to handle: {tickets_with_hh.count()}")
+
+    # Handle closed tickets - copy only for 1 random representation
+    closed_tickets = tickets_with_hh.filter(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
+    closed_tickets_ids = list(closed_tickets.values_list("pk", flat=True))
+    closed_count = len(closed_tickets_ids)
+    logger.info(f"Tickets to handle: {closed_count}")
+    for batch_start in range(0, closed_count, BATCH_SIZE):
+        closed_batched_ids = closed_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        closed_tickets_batch = TicketDeleteHouseholdDetails.objects.filter(id__in=closed_batched_ids).select_related(
+            "ticket", "household", "reason_household"
+        )
+        logger.info(f"Handling closed tickets with household and individuals: {batch_start} of {closed_count}")
+        objects_to_create_dict = {
+            "notes": [],
+            "documents": [],
+            "grievance_tickets": [],
+            "tickets": [],
+        }
+        old_grievance_tickets_to_update = []
+        for closed_ticket in closed_tickets_batch:
+            if household_representation := closed_ticket.household.copied_to(
+                manager="original_and_repr_objects"
+            ).first():
+                program = household_representation.program
+                ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(
+                    closed_ticket, program, household_representation=household_representation
+                )
+                ticket_copy.reason_household = get_household_representation_per_program_by_old_household_id(
+                    program=program,
+                    old_household_id=closed_ticket.reason_household,
+                )
+                objects_to_create_dict["tickets"].append(ticket_copy)
+                objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
+                objects_to_create_dict["documents"].extend(documents_to_create)
+                objects_to_create_dict["notes"].extend(notes_to_create)
+                grievance_ticket = closed_ticket.ticket
+                grievance_ticket.is_migration_handled = True
+                grievance_ticket.migrated_at = timezone.now()
+                old_grievance_tickets_to_update.append(grievance_ticket)
+
+        handle_bulk_create_paginated_data(
+            old_grievance_tickets_to_update, objects_to_create_dict, TicketDeleteHouseholdDetails
+        )
+
+    # Handle active tickets - copy for all representations
+    active_tickets = tickets_with_hh.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).order_by("pk")
+    active_tickets_ids = list(active_tickets.values_list("pk", flat=True))
+    active_count = len(active_tickets_ids)
+    logger.info(f"Tickets to handle: {active_count}")
+    for batch_start in range(0, active_count, BATCH_SIZE):
+        active_batched_ids = active_tickets_ids[batch_start : batch_start + BATCH_SIZE]
+        active_tickets_batch = TicketDeleteHouseholdDetails.objects.filter(id__in=active_batched_ids).select_related(
+            "ticket", "household", "reason_household"
+        )
+        logger.info(f"Handling closed tickets with household and individuals: {batch_start} of {active_count}")
+        objects_to_create_dict = {
+            "notes": [],
+            "documents": [],
+            "grievance_tickets": [],
+            "tickets": [],
+        }
+        old_grievance_tickets_to_update = []
+        for active_ticket in active_tickets_batch:
+            household_representations = active_ticket.household.copied_to(manager="original_and_repr_objects").all()
+            household_programs = household_representations.values_list("program", flat=True).distinct()
+
+            for program in household_programs.iterator():
+                ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(
+                    active_ticket, program
+                )
+                ticket_copy.reason_household = get_household_representation_per_program_by_old_household_id(
+                    program=program,
+                    old_household_id=active_ticket.reason_household,
+                )
+                objects_to_create_dict["tickets"].append(ticket_copy)
+                objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
+                objects_to_create_dict["documents"].extend(documents_to_create)
+                objects_to_create_dict["notes"].extend(notes_to_create)
+
+            grievance_ticket = active_ticket.ticket
+            grievance_ticket.is_migration_handled = True
+            old_grievance_tickets_to_update.append(grievance_ticket)
+
+        handle_bulk_create_paginated_data(
+            old_grievance_tickets_to_update, objects_to_create_dict, TicketDeleteHouseholdDetails
+        )
+
+    tickets_with_hh_representation = (
+        TicketDeleteHouseholdDetails.objects.select_related(
+            "ticket",
+            "household",
+        )
+        .prefetch_related(
+            "household__copied_to",
+        )
+        .filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
+    )
+    handle_bulk_update_representations_household_unicef_id(
+        tickets_with_hh_representation,
+        TicketDeleteHouseholdDetails,
+    )
+
+
 def copy_ticket_with_household(
     active_ticket: Any, program: Program, household_representation: Optional[Household] = None
 ) -> tuple:
@@ -636,7 +749,7 @@ def handle_delete_individual_tickets(business_area: Optional[BusinessArea] = Non
 
 
 def handle_delete_household_tickets(business_area: Optional[BusinessArea] = None) -> None:
-    handle_tickets_with_household(TicketDeleteHouseholdDetails, business_area=business_area)
+    handle_tickets_delete_household_details(business_area=business_area)
 
 
 def handle_system_flagging_details_tickets(business_area: Optional[BusinessArea] = None) -> None:

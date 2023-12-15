@@ -4196,7 +4196,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
     def test_migrate_grievance_to_representations(self) -> None:
         with self.assertNumQueries(
-            1067,
+            1072,
         ):
             migrate_grievance_to_representations()
         self.refresh_objects()
