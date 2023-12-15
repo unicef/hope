@@ -670,6 +670,7 @@ class HardDocumentDeduplication:
         new_document_signatures_duplicated_in_batch = [
             d for d in new_document_signatures if new_document_signatures.count(d) > 1
         ]
+        # added order_by because test was failed randomly
         all_matching_number_documents = (
             Document.objects.select_related("individual", "individual__household", "individual__business_area")
             .filter(document_number__in=documents_numbers, status=Document.STATUS_VALID)
@@ -688,6 +689,7 @@ class HardDocumentDeduplication:
                     output_field=CharField(),
                 )
             )
+            .order_by("individual_id")
         )
         all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
         all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
