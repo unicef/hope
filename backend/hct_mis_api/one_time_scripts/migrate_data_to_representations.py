@@ -2,7 +2,6 @@ import csv
 import logging
 import os
 from collections import defaultdict
-from itertools import chain
 from typing import Any, Dict, List, Optional
 
 from django.db import transaction
@@ -24,6 +23,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.models import Payment, PaymentRecord
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
@@ -32,11 +32,6 @@ logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 100
 BATCH_SIZE_SMALL = 20
-
-# 1. migrate_data_to_representations()/migrate_data_to_representations_per_business_area(ba) - handles if new household was created and/or added to TP of program/if new RDI was created and any of its households was added to TP of program
-# 2. copy_individual_sync - if new individual was added to household/external collector was added ()
-# 3. copy_roles_sync - if new role was created - new repr has to be created, also need sto be checked if representation for individual needs to be created; if role for hh repr has been assigned to external individual, it is possible that this ind representation does not exist yet in this program
-# 4 - Documents: copy_document_per_individual_fast, Identity: copy_individual_identity_per_individual_fast, BankAccountInfo: copy_bank_account_info_per_individual_fast
 
 
 def migrate_data_to_representations() -> None:
@@ -65,6 +60,11 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     unknown_unassigned_dict = get_unknown_unassigned_dict()
     unknown_unassigned_program = unknown_unassigned_dict.get(business_area)
 
+    if business_area.name == "Democratic Republic of Congo":
+        apply_congo_rules()
+    elif business_area.name == "Sudan":
+        apply_sudan_rules()
+
     hhs_to_ignore = get_ignored_hhs() if business_area.name == "Afghanistan" else None
 
     for program in Program.objects.filter(
@@ -92,9 +92,9 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         )
         household_ids = household_selections.distinct("household").values_list("household_id", flat=True)
 
-        households = Household.original_and_repr_objects.filter(id__in=household_ids, is_original=True).order_by(
-            "id"
-        )  # without is_migration_handled filter because there can be handled household but assigned to new TP; so filter for nothandled HHselection is only needed now
+        households = Household.original_and_repr_objects.filter(
+            id__in=household_ids, is_migration_handled=False, is_original=True
+        ).order_by("id")
         households_filtered = households.exclude(copied_to__program=program)
         households_filtered_ids = list(households_filtered.values_list("id", flat=True))
         households_count = len(households_filtered_ids)
@@ -107,7 +107,9 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             individuals_per_household_dict = defaultdict(list)
             batched_household_ids = households_filtered_ids[batch_start:batch_end]
             batched_households = Household.original_and_repr_objects.filter(id__in=batched_household_ids)
-            for individual in Individual.original_and_repr_objects.filter(household__in=batched_households):
+            for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
+                "documents", "identities", "bank_account_info"
+            ):
                 individuals_per_household_dict[individual.household_id].append(individual)
 
             with transaction.atomic():
@@ -134,7 +136,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     # mark programs households as migrated and exclude in rerun
     Household.original_and_repr_objects.filter(
         business_area=business_area, copied_to__isnull=False, is_original=True, is_migration_handled=False
-    ).update(is_migration_handled=True)
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
     logger.info("Handling objects without any representations yet - enrolling to storage programs")
     handle_non_program_objects(business_area, hhs_to_ignore, unknown_unassigned_program)
 
@@ -144,19 +146,17 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         copied_to__isnull=False,
         is_original=True,
         is_migration_handled=False,
-    ).update(
-        is_migration_handled=True
-    )  # Don't need to update migrated_at for sync I think
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     logger.info("Updating Individuals with migration date")
     Individual.original_and_repr_objects.filter(
         business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
-    ).update(is_migration_handled=True)
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     logger.info("Updating IndividualRoleInHouseholds with migration date")
     IndividualRoleInHousehold.original_and_repr_objects.filter(
         household__business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
-    ).update(is_migration_handled=True)
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     if business_area.name == "Democratic Republic of Congo":
         apply_congo_withdrawal()
@@ -360,9 +360,9 @@ def copy_individual(individual: Individual, program: Program) -> Individual:
 
 
 def copy_individual_fast(individual: Individual, program: Program) -> tuple:
-    documents = list(individual.documents(manager="original_and_repr_objects").all())
-    identities = list(individual.identities(manager="original_and_repr_objects").all())
-    bank_accounts_info = list(individual.bank_account_info(manager="original_and_repr_objects").all())
+    documents = list(individual.documents.all())
+    identities = list(individual.identities.all())
+    bank_accounts_info = list(individual.bank_account_info.all())
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.origin_unicef_id = individual.unicef_id
@@ -387,7 +387,8 @@ def copy_roles(households: QuerySet, program: Program) -> None:
             is_original=True,
         )
         .exclude(copied_to__household__program=program)
-        .select_related("individual", "household")  # can't prefetch because custom manager
+        .select_related("individual", "household")
+        .prefetch_related("individual__documents", "individual__identities", "individual__bank_account_info")
         .distinct("individual", "household")
         .order_by("individual", "household")
     )
@@ -575,9 +576,104 @@ def copy_household_selections(household_selections: QuerySet, program: Program) 
 
         with transaction.atomic():
             HouseholdSelection.original_and_repr_objects.bulk_create(household_selections_to_create)
-            HouseholdSelection.original_and_repr_objects.filter(
-                id__in=batched_household_selections.values_list("id", flat=True)
-            ).update(is_migration_handled=True)
+            HouseholdSelection.objects.filter(id__in=batched_household_selections.values_list("id", flat=True)).update(
+                is_migration_handled=True
+            )
+
+
+def adjust_payment_objects(business_area: Optional[BusinessArea] = None) -> None:
+    business_areas = [business_area] if business_area else BusinessArea.objects.all().iterator()
+    for business_area in business_areas:
+        logger.info(f"Adjusting payments for business area {business_area.name}")
+        adjust_payments(business_area)  # type: ignore
+        logger.info(f"Adjusting payment records for business area {business_area.name}")
+        adjust_payment_records(business_area)  # type: ignore
+
+
+def adjust_payments(business_area: BusinessArea) -> None:
+    """
+    Adjust payment individuals and households to their representations.
+    Payment is already related to program through PaymentPlan (parent), and then TargetPopulation.
+    """
+
+    payments = Payment.objects.filter(
+        parent__target_population__program__business_area=business_area, household__is_original=True
+    ).order_by("pk")
+    payments_count = payments.count()
+
+    for batch_start in range(0, payments_count, BATCH_SIZE):
+        batch_end = batch_start + BATCH_SIZE
+        logger.info(f"Adjusting payments {batch_start} - {batch_end}/{payments_count}")
+        payment_updates = []
+
+        for payment in payments[0:BATCH_SIZE]:
+            payment_program = payment.parent.target_population.program
+            representation_collector = get_individual_representation_per_program_by_old_individual_id(
+                program=payment_program,
+                old_individual_id=payment.collector_id,
+            )
+            if not representation_collector:
+                representation_collector = copy_individual_representation(
+                    program=payment_program, individual=payment.collector
+                )
+            # payment.head_of_household can be None
+            if payment.head_of_household:
+                representation_head_of_household = get_individual_representation_per_program_by_old_individual_id(
+                    program=payment_program,
+                    old_individual_id=payment.head_of_household_id,
+                )
+            else:
+                representation_head_of_household = None
+            representation_household = get_household_representation_per_program_by_old_household_id(
+                program=payment_program,
+                old_household_id=payment.household_id,
+            )
+            payment.refresh_from_db()
+            if representation_collector and representation_household:
+                payment.collector = representation_collector
+                payment.head_of_household = representation_head_of_household
+                payment.household = representation_household
+                payment_updates.append(payment)
+
+        Payment.objects.bulk_update(payment_updates, fields=["collector_id", "head_of_household_id", "household_id"])
+        del payment_updates
+
+
+def adjust_payment_records(business_area: BusinessArea) -> None:
+    """
+    Adjust PaymentRecord individuals and households to their representations.
+    PaymentRecord is already related to program through TargetPopulation.
+    """
+    payment_records = PaymentRecord.objects.filter(
+        target_population__program__business_area=business_area, household__is_original=True
+    ).order_by("pk")
+    payment_records_count = payment_records.count()
+    for batch_start in range(0, payment_records_count, BATCH_SIZE):
+        batch_end = batch_start + BATCH_SIZE
+        logger.info(f"Adjusting payment records {batch_start} - {batch_end}/{payment_records_count}")
+        payment_record_updates = []
+
+        for payment_record in payment_records[0:BATCH_SIZE]:
+            payment_record_program = payment_record.target_population.program
+            if payment_record.head_of_household:
+                representation_head_of_household = get_individual_representation_per_program_by_old_individual_id(
+                    program=payment_record_program,
+                    old_individual_id=payment_record.head_of_household_id,
+                )
+            else:
+                representation_head_of_household = None
+            representation_household = get_household_representation_per_program_by_old_household_id(
+                program=payment_record_program,
+                old_household_id=payment_record.household_id,
+            )
+            payment_record.refresh_from_db()
+            if representation_household:
+                payment_record.head_of_household = representation_head_of_household
+                payment_record.household = representation_household
+                payment_record_updates.append(payment_record)
+
+        PaymentRecord.objects.bulk_update(payment_record_updates, fields=["head_of_household_id", "household_id"])
+        del payment_record_updates
 
 
 def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QuerySet] = None) -> None:
@@ -585,11 +681,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
     for i, rdi in enumerate(rdis):
         if i % 100 == 0:
             logger.info(f"Handling {i} - {i + 99}/{rdis_count} RDIs")
-        rdi_households = (
-            rdi.households(manager="original_and_repr_objects")
-            .filter(is_original=True, withdrawn=False)
-            .exclude(copied_to__program=program)
-        )
+        rdi_households = rdi.households.filter(is_original=True, withdrawn=False).exclude(copied_to__program=program)
         if hhs_to_ignore:
             rdi_households = rdi_households.exclude(id__in=hhs_to_ignore)
         rdi_households_ids = list(rdi_households.values_list("id", flat=True))
@@ -602,7 +694,7 @@ def handle_rdis(rdis: QuerySet, program: Program, hhs_to_ignore: Optional[QueryS
             batched_households = Household.original_and_repr_objects.filter(id__in=batched_household_ids)
             with transaction.atomic():
                 individuals_per_household_dict = defaultdict(list)
-                for individual in Individual.original_and_repr_objects.filter(household__in=batched_households):
+                for individual in Individual.objects.filter(household__in=batched_households):
                     individuals_per_household_dict[individual.household_id].append(individual)
                 for household in batched_households:
                     household_original_id = household.pk
@@ -659,7 +751,9 @@ def handle_non_program_objects(
                 individuals_per_household_dict = defaultdict(list)
                 households_ids_batch = households_with_collecting_type_ids[batch_start:batch_end]
                 batched_households = Household.original_and_repr_objects.filter(id__in=households_ids_batch)
-                for individual in Individual.original_and_repr_objects.filter(household_id__in=households_ids_batch):
+                for individual in Individual.objects.filter(household_id__in=households_ids_batch).prefetch_related(
+                    "documents", "identities", "bank_account_info"
+                ):
                     individuals_per_household_dict[individual.household_id].append(individual)
                 for household in batched_households:
                     household_original_id = household.pk
@@ -754,6 +848,78 @@ def create_storage_program_for_collecting_type(
     )[0]
 
 
+def apply_country_specific_rules() -> None:
+    apply_congo_rules()
+    apply_sudan_rules()
+
+
+def apply_congo_rules() -> None:
+    logger.info("Applying Congo custom rules")
+
+    business_area_congo = BusinessArea.objects.get(name="Democratic Republic of Congo")
+    csv_congo_programs = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "files",
+        "data_migration_gpf",
+        "congo_rdi_program_untargetted.csv",
+    )
+    congo_dict = prepare_program_rdi_dict(csv_congo_programs, business_area_congo)
+
+    for program in congo_dict:
+        rdis = congo_dict[program]
+        untargetted_hhs = Household.objects.filter(
+            selections__isnull=True,
+            registration_data_import__in=rdis,
+        ).distinct()
+
+        individuals_per_household_dict = defaultdict(list)
+        for individual in Individual.objects.filter(household__in=untargetted_hhs):
+            individuals_per_household_dict[individual.household_id].append(individual)
+        for household in untargetted_hhs:
+            with transaction.atomic():
+                copy_household_representation(household, program, individuals_per_household_dict[household.id])
+
+        RegistrationDataImport.objects.filter(id__in=[rdi.id for rdi in rdis]).update(program=program)
+
+        copy_roles(untargetted_hhs, program=program)
+
+    logger.info("Finished applying Congo custom rules")
+
+
+def apply_sudan_rules() -> None:
+    logger.info("Applying Sudan custom rules")
+
+    business_area_sudan = BusinessArea.objects.get(name="Sudan")
+    csv_sudan_programs = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "files",
+        "data_migration_gpf",
+        "sudan_rdi_program.csv",
+    )
+    sudan_dict = prepare_program_rdi_dict(csv_sudan_programs, business_area_sudan)
+    for program in sudan_dict:
+        rdis = RegistrationDataImport.objects.filter(
+            id__in=[rdi.id for rdi in sudan_dict[program]],
+        )
+        handle_rdis(rdis, program)
+
+
+def prepare_program_rdi_dict(csv_rdi_program: str, business_area: BusinessArea) -> Dict:
+    program_rdi_dict = {}
+    with open(csv_rdi_program, mode="r", newline="") as csvfile:
+        reader = csv.reader(csvfile, delimiter=";")
+        next(reader)  # skip header
+        for row in reader:
+            program = Program.objects.filter(name=row[1], business_area=business_area).first()
+            rdi = RegistrationDataImport.objects.filter(name=row[0], business_area=business_area).first()
+            if rdi and program:
+                if program in program_rdi_dict:
+                    program_rdi_dict[program].append(rdi)
+                else:
+                    program_rdi_dict[program] = [rdi]
+    return program_rdi_dict
+
+
 def apply_congo_withdrawal() -> None:
     logger.info("Applying Congo custom withdrawal rules")
     business_area_congo = BusinessArea.objects.get(name="Democratic Republic of Congo")
@@ -769,8 +935,7 @@ def apply_congo_withdrawal() -> None:
         for row in reader:
             rdis_names.append(row[0])
     untargetted_hhs = (
-        Household.original_and_repr_objects.filter(
-            is_original=True,
+        Household.objects.filter(
             selections__isnull=True,
             registration_data_import__name__in=rdis_names,
             registration_data_import__business_area=business_area_congo,
@@ -795,8 +960,7 @@ def get_ignored_hhs() -> QuerySet:
         for row in reader:
             rdis_names.append(row[0])
 
-    return Household.original_and_repr_objects.filter(
-        is_original=True,
+    return Household.objects.filter(
         selections__isnull=True,
         registration_data_import__name__in=rdis_names,
         registration_data_import__business_area=business_area_afg,
@@ -820,59 +984,3 @@ def get_unknown_unassigned_dict() -> Dict:
             if program:
                 unknown_unassigned_dict[business_area] = program
     return unknown_unassigned_dict
-
-
-def copy_individual_sync(individuals_ids: List) -> None:
-    individuals_to_create = []
-    documents_to_create = []
-    identities_to_create = []
-    bank_account_info_to_create = []
-    for individual in Individual.objects.filter(id__in=individuals_ids):
-        programs = chain(
-            individual.household.copied_to.all().values_list("program", flat=True),
-            individual.represented_households(manager="original_and_repr_objects")
-            .all()
-            .values_list("program", flat=True),
-        )
-        household = individual.household
-        for program in programs:
-            (
-                individual_to_create,
-                documents_to_create_batch,
-                identities_to_create_batch,
-                bank_account_info_to_create_batch,
-            ) = copy_individual_fast(program, individual)
-            if household:
-                individual_to_create.household = household.copied_to.filter(program=program).first()
-            documents_to_create.extend(documents_to_create_batch)
-            identities_to_create.extend(identities_to_create_batch)
-            bank_account_info_to_create.extend(bank_account_info_to_create_batch)
-            individuals_to_create.append(individual_to_create)
-        Individual.objects.bulk_create(individuals_to_create)
-        Document.objects.bulk_create(documents_to_create)
-        IndividualIdentity.objects.bulk_create(identities_to_create)
-        BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
-
-
-def copy_roles_sync(roles_ids: List) -> None:
-    roles_to_create = []
-    for role in IndividualRoleInHousehold.original_and_repr_objects.filter(id__in=roles_ids):
-        programs = role.household.copied_to().values_list("program", flat=True)
-        for program in programs:
-            household_representation = role.household.copied_to
-            individual_representation = get_individual_representation_per_program_by_old_individual_id(
-                program=program,
-                old_individual_id=role.individual_id,
-            )
-            if not individual_representation:
-                individual_representation = copy_individual(program=program, individual=role.individual)
-
-            original_role_id = role.id
-            role.copied_from_id = original_role_id
-            role.pk = None
-            role.household = household_representation
-            role.individual = individual_representation
-            role.is_original = False
-            roles_to_create.append(role)
-
-    IndividualRoleInHousehold.original_and_repr_objects.bulk_create(roles_to_create)
