@@ -150,6 +150,10 @@ def get_unhcr_id_issuer_query(_: Any, args: Any) -> Q:
     return Q(identities__partner__name=UNHCR, identities__country__iso_code3=args[0])
 
 
+def get_receiver_poi_number_query(_: Any, args: Any) -> Q:
+    return get_documents_number_query("receiver_poi", args[0])
+
+
 def get_has_phone_number_query(_: Any, args: Any) -> Q:
     has_phone_no = args[0] in [True, "True"]
     return ~Q(phone_no="") if has_phone_no else Q(phone_no="")

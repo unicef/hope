@@ -366,7 +366,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _create_documents(self) -> None:
         docs_to_create = []
         for document_data in self.documents.values():
-            issuing_country = document_data.get("issuing_country")
+            if document_data["key"] == "receiver_poi":
+                # default for receiver_poi
+                country_iso_code = (
+                    self.business_area.countries.first().iso_code2 if self.business_area.countries.first() else "U"
+                )
+                issuing_country = Country(str(country_iso_code))
+            else:
+                issuing_country = document_data.get("issuing_country")
             doc_type = ImportedDocumentType.objects.get(key=document_data["key"])
             photo = document_data.get("photo")
             individual = document_data.get("individual")

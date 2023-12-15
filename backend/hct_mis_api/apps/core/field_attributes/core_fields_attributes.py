@@ -20,6 +20,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_national_passport_issuer_query,
     get_other_document_number_query,
     get_other_issuer_query,
+    get_receiver_poi_number_query,
     get_role_query,
     get_scope_id_issuer_query,
     get_scope_id_number_query,
@@ -49,6 +50,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 from hct_mis_api.apps.core.field_attributes.lookup_functions import (
     get_birth_certificate_issuer,
     get_birth_certificate_no,
+    get_document_no,
     get_drivers_license_issuer,
     get_drivers_license_no,
     get_electoral_card_issuer,
@@ -1752,6 +1754,21 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "age_at_registration",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+    },
+    {
+        "id": "f641c132-ae9b-4269-830a-55a82d15f154",
+        "type": TYPE_STRING,
+        "name": "receiver_poi_no",
+        "lookup": "receiver_poi_no",
+        "required": False,
+        "label": {"English(EN)": "Receiver POI number"},
+        "hint": "",
+        "choices": [],
+        "get_query": get_receiver_poi_number_query,
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "receiver_poi_no_i_c",
+        "scope": [Scope.XLSX],
+        "lookup_function": get_document_no,
     },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
