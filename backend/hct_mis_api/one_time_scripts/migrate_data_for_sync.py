@@ -848,10 +848,10 @@ def copy_individual_sync(individuals_ids: List) -> None:
             identities_to_create.extend(identities_to_create_batch)
             bank_account_info_to_create.extend(bank_account_info_to_create_batch)
             individuals_to_create.append(individual_to_create)
-        Individual.objects.bulk_create(individuals_to_create)
-        Document.objects.bulk_create(documents_to_create)
-        IndividualIdentity.objects.bulk_create(identities_to_create)
-        BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
+    Individual.objects.bulk_create(individuals_to_create)
+    Document.objects.bulk_create(documents_to_create)
+    IndividualIdentity.objects.bulk_create(identities_to_create)
+    BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
 
 
 def copy_roles_sync(roles_ids: List) -> None:
