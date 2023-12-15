@@ -688,6 +688,7 @@ class HardDocumentDeduplication:
                     output_field=CharField(),
                 )
             )
+            .order_by("individual_id")
         )
         all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
         all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
