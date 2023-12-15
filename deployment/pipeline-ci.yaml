@@ -40,6 +40,8 @@ variables:
 
   ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
     pipelineId: 1159
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'staging') }}:
+    pipelineId: 1160
   ${{ else }}:
     pipelineId: null
 
