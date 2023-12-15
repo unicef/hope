@@ -53,6 +53,19 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partn
     }
 }
 
+snapshots['TestAdjudicationTicketPartnerPermission::test_close_ticket_when_partner_with_permission_and_no_selected_program 1'] = {
+    'data': {
+        'grievanceStatusChange': {
+            '__typename': 'GrievanceStatusChangeMutation',
+            'grievanceTicket': {
+                '__typename': 'GrievanceTicketNode',
+                'description': 'GrievanceTicket',
+                'status': 6
+            }
+        }
+    }
+}
+
 snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_does_not_have_permission 1'] = {
     'data': {
         'approveNeedsAdjudication': None
@@ -87,6 +100,19 @@ snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_
 }
 
 snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission 1'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            '__typename': 'NeedsAdjudicationApproveMutation',
+            'grievanceTicket': {
+                '__typename': 'GrievanceTicketNode',
+                'description': 'GrievanceTicket',
+                'status': 5
+            }
+        }
+    }
+}
+
+snapshots['TestAdjudicationTicketPartnerPermission::test_select_individual_when_partner_with_permission_and_no_selected_program 1'] = {
     'data': {
         'approveNeedsAdjudication': {
             '__typename': 'NeedsAdjudicationApproveMutation',
