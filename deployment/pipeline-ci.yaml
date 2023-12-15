@@ -262,6 +262,10 @@ stages:
               contentLength=$(echo -n $jsonBody | wc -c)
               project=ICTD-HCT-MIS
               organization=unicef
+
+              echo Triggering deploy for pipeline $pipelineId
+              echo JSON body: $jsonBody
+
               curl -v -L \
                 -u ":$(AZURE_PAT)" \
                 -H "Content-Type: application/json" \
