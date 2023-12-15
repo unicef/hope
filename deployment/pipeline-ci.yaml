@@ -42,6 +42,9 @@ variables:
     pipelineId: 1159
   ${{ elseif eq(variables['Build.SourceBranchName'], 'staging') }}:
     pipelineId: 1160
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}:
+    # TODO: handle triggering multiple pipelines (master triggers trn and prd)
+    pipelineId: 1161
   ${{ else }}:
     pipelineId: null
 
