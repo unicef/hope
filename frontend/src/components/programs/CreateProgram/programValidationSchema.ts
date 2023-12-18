@@ -30,13 +30,13 @@ export const programValidationSchema = (t): Yup.ObjectSchema =>
     ),
     description: Yup.string()
       .min(3, t('Too short'))
-      .max(255, t('Too long')),
+      .max(255, t('Too long')).nullable(),
     budget: Yup.number()
       .min(0)
       .max(99999999, t('Number is too big')),
     administrativeAreasOfImplementation: Yup.string()
       .min(2, t('Too short'))
-      .max(255, t('Too long')),
+      .max(255, t('Too long')).nullable(),
     populationGoal: Yup.number()
       .min(0)
       .max(99999999, t('Number is too big')),
