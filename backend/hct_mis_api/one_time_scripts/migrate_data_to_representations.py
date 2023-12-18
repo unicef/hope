@@ -724,9 +724,10 @@ def handle_non_program_objects(
     if hhs_to_ignore:
         households = households.exclude(id__in=hhs_to_ignore)
     collecting_types_from_charfield = (
-        households.values_list("collect_individual_data", flat=True).distinct().order_by("pk")
+        households.values_list("collect_individual_data", flat=True)
+        .distinct("collect_individual_data")
+        .order_by("collect_individual_data")
     )
-
     for collecting_type in collecting_types_from_charfield:
         program = create_program_with_matching_collecting_type(
             business_area, collecting_type, unknown_unassigned_program
