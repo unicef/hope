@@ -226,7 +226,6 @@ def copy_household(household: Household, program: Program, individuals: list[Ind
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
     household.pk = None
-    household.unicef_id = None
     household.program = program
     household.is_original = False
 
@@ -256,7 +255,6 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
     household.pk = None
-    household.unicef_id = None
     household.program = program
     household.is_original = False
     external_collectors_id_to_update = []
@@ -367,7 +365,6 @@ def copy_individual_fast(individual: Individual, program: Program) -> tuple:
     individual.copied_from_id = original_individual_id
     individual.origin_unicef_id = individual.unicef_id
     individual.pk = None
-    individual.unicef_id = None
     individual.program = program
     individual.household = None
     individual.is_original = False
