@@ -286,7 +286,7 @@ class PaymentPlanAdmin(AdminAutoCompleteSearchMixin, SoftDeletableAdminMixin, HO
     @button()
     def payments(self, request: HttpRequest, pk: str) -> HttpResponse:
         base = reverse("admin:payment_payment_changelist")
-        obj: PaymentPlan = self.get_object(request, pk)
+        obj: PaymentPlan | None = self.get_object(request, pk)
         url = (
             f"{base}?business_area__exact={obj.business_area_id}&program__exact={obj.program_id}&parent__exact={obj.id}"
         )

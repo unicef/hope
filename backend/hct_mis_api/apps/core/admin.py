@@ -184,7 +184,7 @@ AcceptanceProcessThresholdInlineFormSet = inlineformset_factory(
 class AcceptanceProcessThresholdInline(TabularInline):
     model = AcceptanceProcessThreshold
     extra = 0
-    formset = AcceptanceProcessThresholdInlineFormSet
+    formset = AcceptanceProcessThresholdInlineFormSet  # type: ignore[assignment]
     ordering = [
         "payments_range_usd",
     ]
@@ -581,7 +581,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
         upload_new_kobo_template_and_update_flex_fields_task.run(
             xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
         )
-        return redirect(".")
+        return redirect(".", permanent=False)
 
     def add_view(
         self, request: HttpRequest, form_url: str = "", extra_context: Optional[Dict] = None
@@ -639,7 +639,7 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
                 upload_new_kobo_template_and_update_flex_fields_task.run(
                     xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
                 )
-                return redirect("..")
+                return redirect("..", permanent=False)
         else:
             payload["form"] = form_class()
 
@@ -696,7 +696,7 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         if request.method == "GET":
             if TargetPopulation.objects.filter(storage_file=storage_obj).exists():
                 self.message_user(request, "TargetPopulation for this storageFile have been created", messages.ERROR)
-                return redirect("..")
+                return redirect("..", permanent=False)
 
             form = ProgramForm(business_area_id=storage_obj.business_area_id)
             context["form"] = form
@@ -708,7 +708,7 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             create_target_population_task.delay(storage_obj.pk, program_id, tp_name)
 
             self.message_user(request, "Creation of TargetPopulation started")
-            return redirect("..")
+            return redirect("..", permanent=False)
 
 
 @admin.register(MigrationStatus)
