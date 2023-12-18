@@ -19,6 +19,7 @@ export default class ProgramManagement extends BaseComponent {
   inputPopulationGoal = 'div[data-cy="input-population-goal"]';
   inputDataCollectingType = 'div[data-cy="input-data-collecting-type"]';
   buttonSave = 'button[data-cy="button-save"]';
+  buttonNext = 'button[data-cy="button-next"]'
   statusFilter = 'div[data-cy="filters-status"]';
   option = ' li[role = "option"]';
   buttonApply = 'button[data-cy="button-filters-apply"]';
@@ -49,6 +50,7 @@ export default class ProgramManagement extends BaseComponent {
   getInputAdminArea = () => cy.get(this.inputAdminArea);
   getInputPopulationGoal = () => cy.get(this.inputPopulationGoal);
   getButtonSave = () => cy.get(this.buttonSave);
+  getButtonNext = () => cy.get(this.buttonNext)
   getStatusFilter = () => cy.get(this.statusFilter);
   getOption = () => cy.get(this.option);
   getButtonApply = () => cy.get(this.buttonApply);
