@@ -26,6 +26,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
 )
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.utils.language import weak_lru
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
@@ -316,6 +317,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             Q(user_roles__user=self) | Q(id__in=self.partner.business_area_ids)
         ).distinct()
 
+    @weak_lru()
     def has_permission(
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
     ) -> bool:
@@ -355,18 +357,21 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
         return partner_areas_ids_per_program
 
+    @weak_lru()
     def can_download_storage_files(self) -> bool:
         return any(
             self.has_permission(Permissions.DOWNLOAD_STORAGE_FILE.name, role.business_area)
             for role in self.user_roles.all()
         )
 
+    @weak_lru()
     def can_change_fsp(self) -> bool:
         return any(
             self.has_permission(Permissions.PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE.name, role.business_area)
             for role in self.user_roles.all()
         )
 
+    @weak_lru()
     def can_add_business_area_to_partner(self) -> bool:
         return any(
             self.has_permission(Permissions.CAN_ADD_BUSINESS_AREA_TO_PARTNER.name, role.business_area)

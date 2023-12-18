@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Iterable, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Iterable, Optional, Tuple
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -16,6 +16,7 @@ from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
+from adminfilters.mixin import AdminFiltersMixin
 from adminfilters.querystring import QueryStringFilter
 from adminfilters.value import ValueFilter
 from jsoneditor.forms import JSONEditor
@@ -23,7 +24,6 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.celery_tasks import (
     revalidate_phone_number_task,
     update_individuals_iban_from_xlsx_task,
@@ -37,13 +37,15 @@ from hct_mis_api.apps.household.models import (
     XlsxUpdateFile,
 )
 from hct_mis_api.apps.utils.admin import (
-    BusinessAreaForIndividualCollectionListFilter,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
+
+if TYPE_CHECKING:
+    from django.contrib.admin.options import _DisplayT
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +188,7 @@ class IndividualAdmin(
             )
         )
 
-    def get_list_display(self, request: HttpRequest) -> Sequence[str]:
+    def get_list_display(self, request: HttpRequest) -> "_DisplayT":
         base = list(super().get_list_display(request))
         if "program__exact" in request.GET:
             base.remove("business_area")
@@ -339,18 +341,10 @@ class IndividualRepresentationInline(admin.TabularInline):
 
 
 @admin.register(IndividualCollection)
-class IndividualCollectionAdmin(admin.ModelAdmin):
-    list_display = (
-        "unicef_id",
-        "business_area",
-        "number_of_representations",
-    )
-    search_fields = ("unicef_id",)
-    list_filter = [BusinessAreaForIndividualCollectionListFilter]
-    inlines = [IndividualRepresentationInline]
-
-    def number_of_representations(self, obj: IndividualCollection) -> int:
-        return obj.individuals(manager="all_objects").count()
-
-    def business_area(self, obj: IndividualCollection) -> Optional[BusinessArea]:
-        return obj.business_area
+class IndividualCollectionAdmin(AdminFiltersMixin, admin.ModelAdmin):
+    list_display = ("unicef_id",)
+    # search_fields = ("unicef_id",)
+    # list_filter = [BusinessAreaForIndividualCollectionListFilter]
+    list_filter = [
+        ("individuals__business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+    ]

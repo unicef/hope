@@ -1,6 +1,6 @@
 import logging
 from itertools import chain
-from typing import Any, List, Optional, Sequence
+from typing import TYPE_CHECKING, Any, List, Optional
 from uuid import UUID
 
 from django.contrib import admin, messages
@@ -18,12 +18,12 @@ from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
+from adminfilters.mixin import AdminFiltersMixin
 from adminfilters.querystring import QueryStringFilter
 from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.admin.mixins import (
     CustomTargetPopulationMixin,
     HouseholdWithDrawnMixin,
@@ -39,13 +39,15 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.utils import enrol_household_to_program
 from hct_mis_api.apps.utils.admin import (
-    BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
     IsOriginalAdminMixin,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
+
+if TYPE_CHECKING:
+    from django.contrib.admin.options import _DisplayT
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +181,7 @@ class HouseholdAdmin(
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
+            "business_area",
             "head_of_household",
             "country",
             "country_origin",
@@ -195,7 +198,7 @@ class HouseholdAdmin(
             qs = qs.order_by(*ordering)
         return qs
 
-    def get_list_display(self, request: HttpRequest) -> Sequence[str]:
+    def get_list_display(self, request: HttpRequest) -> "_DisplayT":
         base = list(super().get_list_display(request))
         if "program__exact" in request.GET:
             base.remove("business_area")
@@ -371,18 +374,10 @@ class HouseholdAdmin(
 
 
 @admin.register(HouseholdCollection)
-class HouseholdCollectionAdmin(admin.ModelAdmin):
-    list_display = (
-        "unicef_id",
-        "business_area",
-        "number_of_representations",
-    )
+class HouseholdCollectionAdmin(AdminFiltersMixin, admin.ModelAdmin):
+    list_display = ("unicef_id",)
     search_fields = ("unicef_id",)
-    list_filter = [BusinessAreaForHouseholdCollectionListFilter]
+    list_filter = [
+        ("households__business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+    ]
     inlines = [HouseholdRepresentationInline]
-
-    def number_of_representations(self, obj: HouseholdCollection) -> int:
-        return obj.households(manager="all_objects").count()
-
-    def business_area(self, obj: HouseholdCollection) -> Optional[BusinessArea]:
-        return obj.business_area

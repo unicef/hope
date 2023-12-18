@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.autocomplete import AutoCompleteFilter, LinkedAutoCompleteFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.accountability.models import Message
@@ -49,6 +49,7 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
         "random_sampling_arguments",
         "households",
     )
+    list_display = ("title", "business_area", "program", "created_at", "created_by")
     inlines = [MessageRecipientMapInline, MessageCopiedToInline]
     list_select_related: Union[bool, Sequence[str]] = ("created_by",)
     list_prefetch_related: Union[bool, Sequence[str]] = ("recipients",)
@@ -61,8 +62,9 @@ class MessageAdmin(AdminAdvancedFiltersMixin, HOPEModelAdminBase, IsOriginalAdmi
         "sample_size",
     )
     list_filter = (
-        ("created_by", AutoCompleteFilter),
-        "created_at",
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("created_at", AutoCompleteFilter),
     )
     raw_id_fields = ["created_by", "target_population", "program"]
     filter_horizontal = ["households"]

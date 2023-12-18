@@ -15,7 +15,6 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.security import is_root
 
 if TYPE_CHECKING:
@@ -118,26 +117,3 @@ class HUBBusinessAreaFilter(SimpleListFilter):
         if self.value():
             return queryset.filter(session__business_area=self.value()).distinct()
         return queryset
-
-
-class BusinessAreaForCollectionsListFilter(admin.SimpleListFilter):
-    model_filter_field = "households__business_area__id"
-    title = "business area"
-    parameter_name = "business_area__exact"
-    template = "adminfilters/combobox.html"
-
-    def lookups(self, request: HttpRequest, model_admin: ModelAdmin) -> QuerySet:
-        return BusinessArea.objects.all().values_list("id", "name")
-
-    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet:
-        if self.value():
-            return queryset.filter(**{self.model_filter_field: self.value()}).distinct()
-        return queryset
-
-
-class BusinessAreaForHouseholdCollectionListFilter(BusinessAreaForCollectionsListFilter):
-    model_filter_field = "households__business_area__id"
-
-
-class BusinessAreaForIndividualCollectionListFilter(BusinessAreaForCollectionsListFilter):
-    model_filter_field = "individuals__business_area__id"
