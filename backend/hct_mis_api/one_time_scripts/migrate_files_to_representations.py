@@ -43,7 +43,9 @@ def migrate_grievance_document_files(business_area: BusinessArea) -> None:
         GrievanceDocument.objects.filter(
             grievance_ticket__is_original=False,
             grievance_ticket__business_area=business_area,
-        ).values_list("id", flat=True)
+        )
+        .exclude(file="")
+        .values_list("id", flat=True)
     )
     for batch_start in range(0, len(grievance_document_ids), BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
@@ -53,8 +55,7 @@ def migrate_grievance_document_files(business_area: BusinessArea) -> None:
         batched_ids = grievance_document_ids[batch_start:batch_end]
         grievance_documents = list(GrievanceDocument.objects.filter(id__in=batched_ids))
         for grievance_document in grievance_documents:
-            if grievance_document.file:
-                copy_file(grievance_document, "file")
+            copy_file(grievance_document, "file")
 
 
 def migrate_document_files(business_area: BusinessArea) -> None:
@@ -63,7 +64,9 @@ def migrate_document_files(business_area: BusinessArea) -> None:
         Document.original_and_repr_objects.filter(
             individual__business_area=business_area,
             copied_from__isnull=False,
-        ).values_list("id", flat=True)
+        )
+        .exclude(photo="")
+        .values_list("id", flat=True)
     )
     for batch_start in range(0, len(document_ids), BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
@@ -71,8 +74,7 @@ def migrate_document_files(business_area: BusinessArea) -> None:
         batched_ids = document_ids[batch_start:batch_end]
         documents = list(Document.original_and_repr_objects.filter(id__in=batched_ids))
         for document in documents:
-            if document.photo:
-                copy_file(document, "photo")
+            copy_file(document, "photo")
 
 
 def migrate_individual_files(business_area: BusinessArea) -> None:
@@ -81,7 +83,9 @@ def migrate_individual_files(business_area: BusinessArea) -> None:
         Individual.original_and_repr_objects.filter(
             is_original=False,
             business_area=business_area,
-        ).values_list("id", flat=True)
+        )
+        .exclude(photo="", disability_certificate_picture="")
+        .values_list("id", flat=True)
     )
     for batch_start in range(0, len(individual_ids), BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
@@ -101,7 +105,9 @@ def migrate_household_files(business_area: BusinessArea) -> None:
         Household.original_and_repr_objects.filter(
             is_original=False,
             business_area=business_area,
-        ).values_list("id", flat=True)
+        )
+        .exclude(consent_sign="")
+        .values_list("id", flat=True)
     )
     for batch_start in range(0, len(household_ids), BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
@@ -109,5 +115,4 @@ def migrate_household_files(business_area: BusinessArea) -> None:
         batched_ids = household_ids[batch_start:batch_end]
         households = list(Household.original_and_repr_objects.filter(id__in=batched_ids))
         for household in households:
-            if household.consent_sign:
-                copy_file(household, "consent_sign")
+            copy_file(household, "consent_sign")
