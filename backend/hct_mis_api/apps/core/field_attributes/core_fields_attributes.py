@@ -20,6 +20,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_national_passport_issuer_query,
     get_other_document_number_query,
     get_other_issuer_query,
+    get_receiver_poi_issuer_query,
     get_receiver_poi_number_query,
     get_role_query,
     get_scope_id_issuer_query,
@@ -50,6 +51,7 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 from hct_mis_api.apps.core.field_attributes.lookup_functions import (
     get_birth_certificate_issuer,
     get_birth_certificate_no,
+    get_document_issuer,
     get_document_no,
     get_drivers_license_issuer,
     get_drivers_license_no,
@@ -1769,6 +1771,21 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "receiver_poi_no_i_c",
         "scope": [Scope.XLSX],
         "lookup_function": get_document_no,
+    },
+    {
+        "id": "81c713ed-a44b-4439-bfb4-77af15927db8",
+        "type": TYPE_STRING,
+        "name": "receiver_poi_issuer",
+        "lookup": "receiver_poi_issuer",
+        "required": False,
+        "label": {"English(EN)": "Issuing country of Receiver POI"},
+        "hint": "",
+        "choices": [],
+        "get_query": get_receiver_poi_issuer_query,
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "receiver_poi_issuer_i_c",
+        "scope": [Scope.XLSX],
+        "lookup_function": get_document_issuer,
     },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
