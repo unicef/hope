@@ -12,17 +12,15 @@ from django.forms import modelform_factory
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    process_flex_records_task,
-    rdi_deduplication_task,
-)
+from hct_mis_api.apps.registration_datahub.celery_tasks import rdi_deduplication_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedHousehold,
     ImportedIndividual,
-    Record,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.utils import get_record_model
+from hct_mis_api.aurora.celery_tasks import process_flex_records_task
 from hct_mis_api.aurora.models import Registration
 from hct_mis_api.aurora.rdi import AuroraProcessor
 
@@ -86,7 +84,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         return rdi
 
     @abc.abstractmethod
-    def create_household_for_rdi_household(self, record: Record, rdi_datahub: RegistrationDataImportDatahub) -> None:
+    def create_household_for_rdi_household(self, record: Any, rdi_datahub: RegistrationDataImportDatahub) -> None:
         raise NotImplementedError
 
     def validate_data_collection_type(self) -> None:
@@ -115,6 +113,7 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
         import_data = rdi_datahub.import_data
 
+        Record = get_record_model()
         records_ids_to_import = (
             Record.objects.filter(id__in=records_ids)
             .exclude(status=Record.STATUS_IMPORTED)
@@ -162,9 +161,13 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
                         "number_of_households",
                     )
                 )
-                Record.objects.filter(id__in=imported_records_ids).update(
-                    status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
-                )
+                if hasattr(Record, "registration_data_import"):
+                    Record.objects.filter(id__in=imported_records_ids).update(
+                        status=Record.STATUS_IMPORTED, registration_data_import=rdi_datahub
+                    )
+                else:
+                    Record.objects.filter(id__in=imported_records_ids).update(status=Record.STATUS_IMPORTED)
+
                 if not rdi.business_area.postpone_deduplication:
                     transaction.on_commit(lambda: rdi_deduplication_task.delay(rdi_datahub.id))
                 else:
