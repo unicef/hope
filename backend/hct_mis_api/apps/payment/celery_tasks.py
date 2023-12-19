@@ -255,10 +255,13 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str, file_pk: str) -> None:
+def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_id: str, file_pk: str) -> bool:
     try:
         from hct_mis_api.apps.core.models import FileTemp
         from hct_mis_api.apps.payment.models import PaymentPlan
+        from hct_mis_api.apps.payment.services.payment_plan_services import (
+            PaymentPlanService,
+        )
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
         try:
@@ -278,6 +281,11 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
 
                     payment_plan.save()
 
+                    logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
+
+                    # started update signature for payments sync because we want to be sure that this is atomic
+                    PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
+
         except Exception as e:
             logger.exception("Unexpected error during xlsx per fsp import")
             payment_plan.background_action_status_xlsx_import_error()
@@ -287,6 +295,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
+    return True
 
 
 @app.task
