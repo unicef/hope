@@ -2204,36 +2204,6 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             ]
         )
 
-        for sensitive_ticket in [
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket,
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket.copied_to(manager="default_for_migrations_fix")
-            .filter(programs__in=[self.program1])
-            .first(),
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket.copied_to(manager="default_for_migrations_fix")
-            .filter(programs__in=[self.program2])
-            .first(),
-        ]:
-            self.assertIn(
-                self.complaint_ticket_no_payment_not_closed_gt.ticket,
-                sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
-            )
-            self.assertIn(
-                repr1_complaint_ticket_no_payment_not_closed_gt.ticket,
-                sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
-            )
-            self.assertIn(
-                repr2_complaint_ticket_no_payment_not_closed_gt.ticket,
-                sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
-            )
-            self.assertIn(
-                repr3_complaint_ticket_no_payment_not_closed_gt.ticket,
-                sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
-            )
-            self.assertIn(
-                self.payment_verification_ticket_with_payment_record.ticket,
-                sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
-            )
-
         # Test TicketComplaintDetails complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind
         self.assertEqual(
             self.complaint_ticket_no_payment_not_closed_gt_no_hh_no_ind.ticket.copied_to(
@@ -2427,57 +2397,118 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         )
 
         # Test linked tickets
+        repr1_complaint_ticket_no_payment_not_closed_gt_ticket = (
+            self.complaint_ticket_no_payment_not_closed_gt.ticket.copied_to(manager="default_for_migrations_fix")
+            .filter(programs__in=[self.program1])
+            .first()
+        )
+        repr2_complaint_ticket_no_payment_not_closed_gt_ticket = (
+            self.complaint_ticket_no_payment_not_closed_gt.ticket.copied_to(manager="default_for_migrations_fix")
+            .filter(programs__in=[self.program2])
+            .first()
+        )
+        repr3_complaint_ticket_no_payment_not_closed_gt_ticket = (
+            self.complaint_ticket_no_payment_not_closed_gt.ticket.copied_to(manager="default_for_migrations_fix")
+            .filter(programs__in=[self.program3])
+            .first()
+        )
+        repr1_feedback_active_gt_no_program_3hh_2ind_ticket = (
+            self.feedback_active_gt_no_program_3hh_2ind.linked_grievance.copied_to(manager="default_for_migrations_fix")
+            .filter(programs__in=[self.program1])
+            .first()
+        )
+        repr2_feedback_active_gt_no_program_3hh_2ind_ticket = (
+            self.feedback_active_gt_no_program_3hh_2ind.linked_grievance.copied_to(manager="default_for_migrations_fix")
+            .filter(programs__in=[self.program2])
+            .first()
+        )
+        repr3_feedback_active_gt_no_program_3hh_2ind_ticket = (
+            self.feedback_active_gt_no_program_3hh_2ind.linked_grievance.copied_to(manager="default_for_migrations_fix")
+            .filter(programs__in=[self.program3])
+            .first()
+        )
         self.assertIn(
             repr1_sensitive_ticket_no_payment_not_closed_gt.ticket,
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket.linked_tickets(
+            repr2_sensitive_ticket_no_payment_not_closed_gt.ticket.linked_tickets(
                 manager="default_for_migrations_fix"
             ).all(),
         )
         self.assertIn(
             repr2_sensitive_ticket_no_payment_not_closed_gt.ticket,
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket.linked_tickets(
-                manager="default_for_migrations_fix"
-            ).all(),
-        )
-        self.assertIn(
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket,
             repr1_sensitive_ticket_no_payment_not_closed_gt.ticket.linked_tickets(
                 manager="default_for_migrations_fix"
             ).all(),
         )
-        self.assertIn(
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket,
-            repr2_sensitive_ticket_no_payment_not_closed_gt.ticket.linked_tickets(
-                manager="default_for_migrations_fix"
-            ).all(),
-        )
+
         for sensitive_ticket in [
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket,
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket.copied_to(manager="default_for_migrations_fix")
-            .filter(programs__in=[self.program1])
-            .first(),
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket.copied_to(manager="default_for_migrations_fix")
-            .filter(programs__in=[self.program2])
-            .first(),
+            repr1_sensitive_ticket_no_payment_not_closed_gt.ticket,
+            repr2_sensitive_ticket_no_payment_not_closed_gt.ticket,
         ]:
             self.assertIn(
-                self.feedback_active_gt_no_program_3hh_2ind.linked_grievance,
+                repr1_feedback_active_gt_no_program_3hh_2ind_ticket,
                 sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
             )
             self.assertIn(
-                self.complaint_ticket_no_payment_not_closed_gt.ticket,
+                sensitive_ticket,
+                repr1_feedback_active_gt_no_program_3hh_2ind_ticket.linked_tickets(
+                    manager="default_for_migrations_fix"
+                ).all(),
+            )
+            self.assertIn(
+                repr2_feedback_active_gt_no_program_3hh_2ind_ticket,
                 sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
             )
             self.assertIn(
-                self.payment_verification_ticket_with_payment_record.ticket,
+                sensitive_ticket,
+                repr2_feedback_active_gt_no_program_3hh_2ind_ticket.linked_tickets(
+                    manager="default_for_migrations_fix"
+                ).all(),
+            )
+            self.assertIn(
+                repr3_feedback_active_gt_no_program_3hh_2ind_ticket,
                 sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
             )
             self.assertIn(
-                self.needs_adjudication_not_closed.ticket,
+                sensitive_ticket,
+                repr3_feedback_active_gt_no_program_3hh_2ind_ticket.linked_tickets(
+                    manager="default_for_migrations_fix"
+                ).all(),
+            )
+            self.assertIn(
+                repr1_complaint_ticket_no_payment_not_closed_gt_ticket,
                 sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
             )
+            self.assertIn(
+                sensitive_ticket,
+                repr1_complaint_ticket_no_payment_not_closed_gt_ticket.linked_tickets(
+                    manager="default_for_migrations_fix"
+                ).all(),
+            )
+            self.assertIn(
+                repr2_complaint_ticket_no_payment_not_closed_gt_ticket,
+                sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
+            )
+            self.assertIn(
+                sensitive_ticket,
+                repr2_complaint_ticket_no_payment_not_closed_gt_ticket.linked_tickets(
+                    manager="default_for_migrations_fix"
+                ).all(),
+            )
+            self.assertIn(
+                repr3_complaint_ticket_no_payment_not_closed_gt_ticket,
+                sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
+            )
+            self.assertIn(
+                sensitive_ticket,
+                repr3_complaint_ticket_no_payment_not_closed_gt_ticket.linked_tickets(
+                    manager="default_for_migrations_fix"
+                ).all(),
+            )
+            self.assertEqual(
+                sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").count(),
+                10,
+            )  # 1x other repr of sensitive_ticket_no_payment_not_closed_gt, 3x repr of feedback_active_gt_no_program_3hh_2ind, 3x repr of complaint_ticket_no_payment_not_closed_gt, 3x needs_adjudication_not_closed
             for needs_adjudication_linked in [
-                self.needs_adjudication_not_closed.ticket,
                 self.needs_adjudication_not_closed.ticket.copied_to(manager="default_for_migrations_fix")
                 .filter(programs__in=[self.program1])
                 .first(),
@@ -2492,18 +2523,50 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
                     needs_adjudication_linked,
                     sensitive_ticket.linked_tickets(manager="default_for_migrations_fix").all(),
                 )
+                self.assertIn(
+                    sensitive_ticket,
+                    needs_adjudication_linked.linked_tickets(manager="default_for_migrations_fix").all(),
+                )
+                self.assertEqual(
+                    needs_adjudication_linked.linked_tickets(manager="default_for_migrations_fix").count(), 4
+                )  # 2x other repr of needs_adjudication_not_closed, 2x repr of sensitive_ticket_no_payment_not_closed_gt
 
         self.assertEqual(
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket.linked_tickets.count(),
-            4,
-        )
-        self.assertEqual(
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket.linked_tickets(
+            repr1_feedback_active_gt_no_program_3hh_2ind_ticket.linked_tickets(
                 manager="default_for_migrations_fix"
             ).count(),
-            15,
-        )
-
+            4,
+        )  # 2x other repr of feedback_active_gt_no_program_3hh_2ind, 2x repr of sensitive_ticket_no_payment_not_closed_gt
+        self.assertEqual(
+            repr2_feedback_active_gt_no_program_3hh_2ind_ticket.linked_tickets(
+                manager="default_for_migrations_fix"
+            ).count(),
+            4,
+        )  # 2x other repr of feedback_active_gt_no_program_3hh_2ind, 2x repr of sensitive_ticket_no_payment_not_closed_gt
+        self.assertEqual(
+            repr3_feedback_active_gt_no_program_3hh_2ind_ticket.linked_tickets(
+                manager="default_for_migrations_fix"
+            ).count(),
+            4,
+        )  # 2x other repr of feedback_active_gt_no_program_3hh_2ind, 2x repr of sensitive_ticket_no_payment_not_closed_gt
+        self.assertEqual(
+            repr1_complaint_ticket_no_payment_not_closed_gt_ticket.linked_tickets(
+                manager="default_for_migrations_fix"
+            ).count(),
+            4,
+        )  # 2x other repr of complaint_ticket_no_payment_not_closed_gt, 2x repr of sensitive_ticket_no_payment_not_closed_gt
+        self.assertEqual(
+            repr2_complaint_ticket_no_payment_not_closed_gt_ticket.linked_tickets(
+                manager="default_for_migrations_fix"
+            ).count(),
+            4,
+        )  # 2x other repr of complaint_ticket_no_payment_not_closed_gt, 2x repr of sensitive_ticket_no_payment_not_closed_gt
+        self.assertEqual(
+            repr3_complaint_ticket_no_payment_not_closed_gt_ticket.linked_tickets(
+                manager="default_for_migrations_fix"
+            ).count(),
+            4,
+        )  # 2x other repr of complaint_ticket_no_payment_not_closed_gt, 2x repr of sensitive_ticket_no_payment_not_closed_gt
         # Test sensitive_ticket_no_payment_not_closed_3hh_2ind
         self.check_original_ticket(self.sensitive_ticket_no_payment_not_closed_3hh_2ind)
         repr1_sensitive_ticket_no_payment_not_closed_3hh_2ind = (
@@ -4133,7 +4196,7 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
 
     def test_migrate_grievance_to_representations(self) -> None:
         with self.assertNumQueries(
-            1007,
+            1072,
         ):
             migrate_grievance_to_representations()
         self.refresh_objects()
@@ -4343,25 +4406,6 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
         self.assertEqual(
             self.payment_verification_ticket_with_payment_record.ticket.is_migration_handled,
             True,
-        )
-
-        for needs_adjudication_linked in [
-            self.needs_adjudication_not_closed,
-            self.repr1_needs_adjudication_not_closed,
-            self.repr2_needs_adjudication_not_closed,
-            self.repr3_needs_adjudication_not_closed,
-        ]:
-            self.assertIn(
-                needs_adjudication_linked.ticket,
-                self.payment_verification_ticket_with_payment_record.ticket.linked_tickets(
-                    manager="default_for_migrations_fix"
-                ).all(),
-            )
-        self.assertIn(
-            self.sensitive_ticket_no_payment_not_closed_gt.ticket,
-            self.payment_verification_ticket_with_payment_record.ticket.linked_tickets(
-                manager="default_for_migrations_fix"
-            ).all(),
         )
 
         # Test payment_verification_ticket_with_payment
