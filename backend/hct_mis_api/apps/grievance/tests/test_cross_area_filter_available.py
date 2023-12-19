@@ -3,6 +3,7 @@ from hct_mis_api.apps.account.fixtures import (
     PartnerFactory,
     UserFactory,
 )
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.geo.fixtures import AreaFactory
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -22,10 +23,23 @@ class TestCrossAreaFilterAvailable(APITestCase):
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
         cls.area = AreaFactory()
 
+        cls.partner_without_area_restrictions = PartnerFactory(name="Partner without area restrictions")
+        cls.partner_without_area_restrictions.permissions = {
+            str(cls.business_area.id): {"programs": {str(cls.program.id): []}}
+        }
+        cls.partner_without_area_restrictions.save()
+
+        cls.partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
+        cls.partner_with_area_restrictions.permissions = {
+            str(cls.business_area.id): {"programs": {str(cls.program.id): [str(cls.area.id)]}}
+        }
+        cls.partner_with_area_restrictions.save()
+
+        cls.partner_unicef = PartnerFactory(name="UNICEF")
+        cls.partner_unicef.permissions = {}
+
     def test_cross_area_filter_available_for_unicef_partner(self) -> None:
-        partner_unicef = PartnerFactory(name="UNICEF")
-        partner_unicef.permissions = {}
-        user = UserFactory(partner=partner_unicef)
+        user = UserFactory(partner=self.partner_unicef)
 
         self.snapshot_graphql_request(
             request_string=CROSS_AREA_FILTER_AVAILABLE_QUERY,
@@ -39,11 +53,14 @@ class TestCrossAreaFilterAvailable(APITestCase):
         )
 
     def test_cross_area_filter_available(self) -> None:
-        partner_without_area_restrictions = PartnerFactory(name="Partner without area restrictions")
-        partner_without_area_restrictions.permissions = {
-            str(self.business_area.id): {"programs": {str(self.program.id): []}}
-        }
-        user = UserFactory(partner=partner_without_area_restrictions)
+        user = UserFactory(partner=self.partner_without_area_restrictions)
+        self.create_user_role_with_permissions(
+            user,
+            [
+                Permissions.GRIEVANCES_CROSS_AREA_FILTER,
+            ],
+            self.business_area,
+        )
 
         self.snapshot_graphql_request(
             request_string=CROSS_AREA_FILTER_AVAILABLE_QUERY,
@@ -56,12 +73,43 @@ class TestCrossAreaFilterAvailable(APITestCase):
             },
         )
 
-    def test_cross_area_filter_not_available(self) -> None:
-        partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
-        partner_with_area_restrictions.permissions = {
-            str(self.business_area.id): {"programs": {str(self.program.id): [str(self.area.id)]}}
-        }
-        user = UserFactory(partner=partner_with_area_restrictions)
+    def test_cross_area_filter_not_available_no_permission(self) -> None:
+        user = UserFactory(partner=self.partner_without_area_restrictions)
+
+        self.snapshot_graphql_request(
+            request_string=CROSS_AREA_FILTER_AVAILABLE_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_cross_area_filter_not_available_area_restrictions(self) -> None:
+        user = UserFactory(partner=self.partner_with_area_restrictions)
+        self.create_user_role_with_permissions(
+            user,
+            [
+                Permissions.GRIEVANCES_CROSS_AREA_FILTER,
+            ],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=CROSS_AREA_FILTER_AVAILABLE_QUERY,
+            context={
+                "user": user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+        )
+
+    def test_cross_area_filter_not_available_no_permission_and_area_restrictions(self) -> None:
+        user = UserFactory(partner=self.partner_with_area_restrictions)
 
         self.snapshot_graphql_request(
             request_string=CROSS_AREA_FILTER_AVAILABLE_QUERY,

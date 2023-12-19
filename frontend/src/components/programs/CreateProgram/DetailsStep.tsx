@@ -6,15 +6,11 @@ import { BaseSection } from '../../core/BaseSection';
 
 interface DetailsStepProps {
   values;
-  step: number;
-  setStep: (step: number) => void;
   handleNext?: () => Promise<void>;
 }
 
 export const DetailsStep: React.FC<DetailsStepProps> = ({
   values,
-  step,
-  setStep,
   handleNext,
 }) => {
   const { t } = useTranslation();
@@ -34,16 +30,6 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({
       <>
         <ProgramForm values={values} />
         <Box display='flex' justifyContent='flex-end'>
-          <Box mr={2}>
-            <Button
-              variant='outlined'
-              data-cy='button-back'
-              onClick={() => setStep(step - 1)}
-              disabled={step === 0}
-            >
-              {t('Back')}
-            </Button>
-          </Box>
           <Button
             variant='contained'
             color='primary'

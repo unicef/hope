@@ -20,7 +20,7 @@ ALL_HOUSEHOLD_QUERY = """
     allHouseholds(
         search: $search,
         searchType: $searchType,
-        orderBy: "address",
+        orderBy: "size",
         program: $program,
         businessArea: "afghanistan"
     ) {
@@ -67,11 +67,11 @@ class TestHouseholdAreaQuery(APITestCase):
         cls.program_2 = ProgramFactory(name="program_2", business_area=cls.business_area_ukraine, status=Program.ACTIVE)
 
         cls.household_1, _ = create_household({"size": 1, "business_area": cls.business_area_afghanistan})
-        cls.household_2, _ = create_household({"size": 1, "business_area": cls.business_area_afghanistan})
-        cls.household_3, _ = create_household({"size": 1, "business_area": cls.business_area_afghanistan})
-        cls.household_4, _ = create_household({"size": 1, "business_area": cls.business_area_afghanistan})
-        cls.household_5, _ = create_household({"size": 1, "business_area": cls.business_area_afghanistan})
-        cls.household_6, _ = create_household({"size": 1, "business_area": cls.business_area_afghanistan})
+        cls.household_2, _ = create_household({"size": 2, "business_area": cls.business_area_afghanistan})
+        cls.household_3, _ = create_household({"size": 3, "business_area": cls.business_area_afghanistan})
+        cls.household_4, _ = create_household({"size": 4, "business_area": cls.business_area_afghanistan})
+        cls.household_5, _ = create_household({"size": 5, "business_area": cls.business_area_afghanistan})
+        cls.household_6, _ = create_household({"size": 6, "business_area": cls.business_area_afghanistan})
 
         # Admin 2
         cls.household_1.admin_area = cls.ghazni
@@ -351,7 +351,6 @@ class TestHouseholdAreaQuery(APITestCase):
     def test_households_area_filtered_when_partner_is_unicef(self, _: Any) -> None:
         partner = PartnerFactory(name="UNICEF")
         user = UserFactory(partner=partner)
-        # self.create_user_role_with_permissions(user, permissions, self.business_area_afghanistan, self.program)
 
         self.snapshot_graphql_request(
             request_string=ALL_HOUSEHOLD_QUERY,

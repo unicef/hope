@@ -79,6 +79,21 @@ export const CreateProgramPage = (): ReactElement => {
     partners: [],
   };
 
+  const stepFields =[ [
+    'name',
+    'startDate',
+    'endDate',
+    'sector',
+    'dataCollectingTypeCode',
+    'description',
+    'budget',
+    'administrativeAreasOfImplementation',
+    'populationGoal',
+    'cashPlus',
+    'frequencyOfPayments',
+  ], ['partners']];
+
+
   if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
   if (!treeData || !userPartnerChoicesData) return null;
 
@@ -102,10 +117,13 @@ export const CreateProgramPage = (): ReactElement => {
 
         const handleNext = async (): Promise<void> => {
           const errors = await validateForm();
-          if (Object.keys(errors).length === 0 && step === 0) {
+          const step0Errors = stepFields[0].some(field => errors[field]);
+
+          if (step === 0 && !step0Errors) {
             setStep(1);
-          } else {
-            Object.keys(values).forEach((field) => setFieldTouched(field));
+          }
+           else {
+            stepFields[step].forEach((field) => setFieldTouched(field));
           }
         };
 
@@ -125,6 +143,7 @@ export const CreateProgramPage = (): ReactElement => {
                   variant='contained'
                   color='primary'
                   onClick={submitForm}
+                  disabled={step === 0}
                 >
                   {t('Save')}
                 </Button>
@@ -152,8 +171,6 @@ export const CreateProgramPage = (): ReactElement => {
               {step === 0 && (
                 <DetailsStep
                   values={values}
-                  step={step}
-                  setStep={setStep}
                   handleNext={handleNext}
                 />
               )}

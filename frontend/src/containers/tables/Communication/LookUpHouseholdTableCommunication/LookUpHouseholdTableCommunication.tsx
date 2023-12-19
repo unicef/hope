@@ -7,6 +7,7 @@ import {
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';
@@ -45,6 +46,7 @@ export const LookUpHouseholdTableCommunication = ({
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableCommunicationProps): React.ReactElement => {
+  const {programId} = useBaseUrl()
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -67,6 +69,7 @@ export const LookUpHouseholdTableCommunication = ({
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
     headOfHouseholdPhoneNoValid: true,
+    program: programId
   };
 
   const [selected, setSelected] = useState<string[]>(
