@@ -189,7 +189,7 @@ snapshots['TestHouseholdQuery::test_household_query_single_0_with_permission 1']
             'adminArea': {
                 'pCode': 'area2'
             },
-            'adminAreaTitle': 'City Test2',
+            'adminAreaTitle': 'City Test2 - area2',
             'countryOrigin': 'Poland',
             'size': 2
         }
