@@ -16,6 +16,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Individual,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
@@ -46,6 +47,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
             region_name="SAR",
             has_data_sharing_agreement=True,
         )
+        cls.program = ProgramFactory(business_area=cls.business_area)
         cls.registration_data_import = RegistrationDataImportFactory(
             business_area=cls.business_area,
         )
@@ -59,6 +61,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Won Ho",
                     "birth_date": "1964-07-17",
+                    "program": cls.program,
                 },
                 {
                     "given_name": "Choo",
@@ -66,6 +69,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Ryong",
                     "birth_date": "1960-04-04",
+                    "program": cls.program,
                 },
                 {
                     "given_name": "Tescik",
@@ -73,6 +77,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Testowski",
                     "birth_date": "1996-12-12",
+                    "program": cls.program,
                 },
                 {
                     # DUPLICATE
@@ -81,6 +86,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Testowski",
                     "birth_date": "1997-07-07",
+                    "program": cls.program,
                 },
                 {
                     # DUPLICATE
@@ -89,6 +95,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Testowski",
                     "birth_date": "1955-09-04",
+                    "program": cls.program,
                 },
                 {
                     "given_name": "Test",
@@ -96,6 +103,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Example",
                     "birth_date": "1997-08-08",
+                    "program": cls.program,
                 },
                 {
                     # DUPLICATE
@@ -104,6 +112,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Testowski",
                     "birth_date": "1997-07-07",
+                    "program": cls.program,
                 },
                 {
                     "given_name": "Abdul",
@@ -111,6 +120,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Afghanistan",
                     "birth_date": "1997-07-07",
+                    "program": cls.program,
                 },
             ],
         )
@@ -144,6 +154,9 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
     def test_create_system_flag_tickets(self) -> None:
         CheckAgainstSanctionListPreMergeTask.execute()
         self.assertEqual(GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING).count(), 3)
+        for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
+            self.assertEqual(grievance_ticket.programs.count(), 1)
+            self.assertEqual(grievance_ticket.programs.first(), self.program)
 
         self.household.refresh_from_db()
         for grievance_ticket in GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING):
