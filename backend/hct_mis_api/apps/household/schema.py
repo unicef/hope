@@ -411,7 +411,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_admin_area_title(parent: Household, info: Any) -> str:
-        return getattr(parent.admin_area, "name", "")
+        if parent.admin_area:
+            return f"{parent.admin_area.name} - {parent.admin_area.p_code}"
+        return ""
 
     @staticmethod
     def resolve_programs_with_delivered_quantity(parent: Household, info: Any) -> List[Dict[str, Any]]:
