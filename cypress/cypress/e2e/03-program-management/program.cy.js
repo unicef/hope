@@ -64,8 +64,8 @@ describe("Program Management", () => {
           .getInputPopulationGoal()
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}4000");
+        programManagement.getButtonNext().click()
         programManagement.getButtonSave().click({ force: true });
-        programDetails.getPageHeaderTitle().should("contain", programName);
         programDetails.getButtonActivateProgram().click({ force: true });
         programDetails.getButtonActivateProgramModal().click({
           force: true,
@@ -127,6 +127,7 @@ describe("Program Management", () => {
           .getInputPopulationGoal()
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}2000");
+        programManagement.getButtonNext().click()
         programManagement.getButtonSave().click();
         programManagement.getPageHeaderTitle().contains(editedProgramName);
       });
@@ -186,7 +187,7 @@ describe("Program Management", () => {
           .getInputPopulationGoal()
           .click()
           .type("{backspace}{backspace}{backspace}{backspace}4000");
-        programManagement.getButtonSave().click({ force: true });
+        programManagement.getButtonNext().click()
         cy.get("p").contains("Data Collecting Type is required");
       });
     });

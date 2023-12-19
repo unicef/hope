@@ -358,6 +358,21 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    @staticmethod
+    def resolve_household_data(parent: TicketHouseholdDataUpdateDetails, info: Any) -> Dict:
+        household_data = parent.household_data
+        if admin_area_title := household_data.get("admin_area_title"):
+            if value := admin_area_title.get("value"):
+                area = Area.objects.get(p_code=value)
+                admin_area_title["value"] = f"{area.name} - {area.p_code}"
+
+            if previous_value := admin_area_title.get("previous_value"):
+                area = Area.objects.get(p_code=previous_value)
+                admin_area_title["previous_value"] = f"{area.name} - {area.p_code}"
+
+            household_data["admin_area_title"] = admin_area_title
+        return household_data
+
 
 class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
     golden_records = graphene.List(DeduplicationResultNode)
@@ -554,7 +569,11 @@ class Query(graphene.ObjectType):
         business_area = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area"))
         program_id = get_program_id_from_headers(info.context.headers)
 
-        return user.partner.has_complete_access_in_program(program_id, str(business_area.id))
+        perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
+
+        return user.has_permission(perm, business_area, program_id) and user.partner.has_complete_access_in_program(
+            program_id, str(business_area.id)
+        )
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)
