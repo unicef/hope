@@ -17,8 +17,8 @@ import { DialogActions } from '../../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
-import { ButtonTooltip } from "../../core/ButtonTooltip";
-import { useProgramContext } from "../../../programContext";
+import { ButtonTooltip } from '../../core/ButtonTooltip';
+import { useProgramContext } from '../../../programContext';
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
 import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
 
@@ -61,7 +61,9 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
       startIcon={<ExitToAppRoundedIcon />}
       onClick={() => setOpen(true)}
       data-cy='button-import'
-      title={t('Program has to be active to create a new RegistrationDataImport')}
+      title={t(
+        'Program has to be active to create a new RegistrationDataImport',
+      )}
       disabled={!isActiveProgram}
     >
       {t('IMPORT')}
