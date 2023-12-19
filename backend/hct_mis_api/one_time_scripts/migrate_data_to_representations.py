@@ -226,7 +226,6 @@ def copy_household(household: Household, program: Program, individuals: list[Ind
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
     household.pk = None
-    household.unicef_id = None
     household.program = program
     household.is_original = False
 
@@ -256,7 +255,6 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
     household.pk = None
-    household.unicef_id = None
     household.program = program
     household.is_original = False
     external_collectors_id_to_update = []
@@ -367,7 +365,6 @@ def copy_individual_fast(individual: Individual, program: Program) -> tuple:
     individual.copied_from_id = original_individual_id
     individual.origin_unicef_id = individual.unicef_id
     individual.pk = None
-    individual.unicef_id = None
     individual.program = program
     individual.household = None
     individual.is_original = False
@@ -724,9 +721,10 @@ def handle_non_program_objects(
     if hhs_to_ignore:
         households = households.exclude(id__in=hhs_to_ignore)
     collecting_types_from_charfield = (
-        households.values_list("collect_individual_data", flat=True).distinct().order_by("pk")
+        households.values_list("collect_individual_data", flat=True)
+        .distinct("collect_individual_data")
+        .order_by("collect_individual_data")
     )
-
     for collecting_type in collecting_types_from_charfield:
         program = create_program_with_matching_collecting_type(
             business_area, collecting_type, unknown_unassigned_program
