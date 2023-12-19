@@ -54,6 +54,16 @@ class HouseholdDataUpdateService(DataChangeService):
             if isinstance(current_value, geo_models.Country):
                 current_value = current_value.iso_code3
             household_data_with_approve_status[field]["previous_value"] = current_value
+
+        if admin_area_title := household_data_with_approve_status.get("admin_area_title", None):
+            area = getattr(household, "admin_area", None)
+            current_value = getattr(area, "p_code", None)
+
+            if value := admin_area_title.get("value", None):
+                admin_area_title["value"] = value.split("-")[1].strip()
+            admin_area_title["previous_value"] = current_value
+            household_data_with_approve_status["admin_area_title"] = admin_area_title
+
         flex_fields_with_approve_status = {
             field: {"value": value, "approve_status": False, "previous_value": household.flex_fields.get(field)}
             for field, value in flex_fields.items()
@@ -92,6 +102,16 @@ class HouseholdDataUpdateService(DataChangeService):
             if isinstance(current_value, geo_models.Country):
                 current_value = current_value.iso_code3
             household_data_with_approve_status[field]["previous_value"] = current_value
+
+        if admin_area_title := household_data_with_approve_status.get("admin_area_title", None):
+            area = getattr(household, "admin_area", None)
+            current_value = getattr(area, "p_code", None)
+
+            if value := admin_area_title.get("value", None):
+                admin_area_title["value"] = value.split("-")[1].strip()
+            admin_area_title["previous_value"] = current_value
+            household_data_with_approve_status["admin_area_title"] = admin_area_title
+
         flex_fields_with_approve_status = {
             field: {"value": value, "approve_status": False, "previous_value": household.flex_fields.get(field)}
             for field, value in flex_fields.items()
@@ -148,4 +168,11 @@ class HouseholdDataUpdateService(DataChangeService):
         new_household = Household.objects.select_for_update().get(id=household.id)
         recalculate_data(new_household)
         updated_household = Household.objects.get(id=household.id)  # refresh_from_db() doesn't work here
-        log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", user, old_household, updated_household)
+        log_create(
+            Household.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            user,
+            self.grievance_ticket.programs.all(),
+            old_household,
+            updated_household,
+        )

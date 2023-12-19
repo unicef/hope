@@ -12,6 +12,7 @@ import { useDeletePaymentVerificationPlanMutation } from '../../__generated__/gr
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
+import { useProgramContext } from "../../programContext";
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -26,6 +27,7 @@ export function DeleteVerificationPlan({
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
   const [mutate] = useDeletePaymentVerificationPlanMutation();
 
   const handleDeleteVerificationPlan = async (): Promise<void> => {
@@ -47,6 +49,7 @@ export function DeleteVerificationPlan({
           startIcon={<ClearIcon />}
           onClick={() => setDeleteDialogOpen(true)}
           data-cy='button-delete-plan'
+          disabled={!isActiveProgram}
         >
           DELETE
         </ErrorButton>

@@ -72,7 +72,9 @@ export const BulkSetPriorityModal = ({
           label={t('Priority')}
         >
           {priorityChoices.map((choice) => (
-            <MenuItem value={choice.value}>{choice.name}</MenuItem>
+            <MenuItem key={choice.value} value={choice.value}>
+              {choice.name}
+            </MenuItem>
           ))}
         </Select>
       </BulkBaseModal>

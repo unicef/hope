@@ -11,7 +11,6 @@ describe('containers/tables/population/HouseholdTable', () => {
   const initialFilter = {
     search: '',
     searchType: 'household_id',
-    program: '',
     residenceStatus: '',
     admin2: '',
     householdSizeMin: '',

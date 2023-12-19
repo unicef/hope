@@ -2,7 +2,7 @@ from typing import Callable, Sequence, Union
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.accountability.fixtures import CommunicationMessageFactory
@@ -57,7 +57,8 @@ class TestListQueryMessage(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.user = UserFactory(first_name="John", last_name="Wick")
+        cls.partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory(first_name="John", last_name="Wick", partner=cls.partner)
         cls.business_area = create_afghanistan()
 
         cls.tp = TargetPopulationFactory(business_area=cls.business_area)

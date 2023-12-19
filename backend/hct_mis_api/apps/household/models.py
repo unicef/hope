@@ -26,12 +26,13 @@ from sorl.thumbnail import ImageField
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
-from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.core.utils import IsOriginalManager, SoftDeletableIsOriginalModel
+from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
+    RepresentationManager,
+    SoftDeletableIsOriginalModel,
     SoftDeletableModelWithDate,
     TimeStampedUUIDModel,
     UnicefIdentifiedModel,
@@ -309,6 +310,13 @@ class HouseholdCollection(UnicefIdentifiedModel):
     Collection of household representations.
     """
 
+    def __str__(self) -> str:
+        return self.unicef_id or ""
+
+    @property
+    def business_area(self) -> Optional[BusinessArea]:
+        return self.households.first().business_area if self.households.first() else None
+
 
 class Household(
     SoftDeletableModelWithDate,
@@ -507,8 +515,9 @@ class Household(
         "this field will contain the household it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
 
     class Meta:
@@ -567,11 +576,11 @@ class Household(
         for admin in admins:
             setattr(self, admin, None)
 
-        new_admin_area_level = new_admin_area.area_type.area_level
+        new_admin_area_level = new_admin_area.area_type.area_level if new_admin_area else 4  # lowest possible level
 
         for admin_level in reversed(range(1, new_admin_area_level + 1)):
             setattr(self, f"admin{admin_level}", new_admin_area)
-            new_admin_area = new_admin_area.parent
+            new_admin_area = getattr(new_admin_area, "parent", None)
 
         if save:
             self.save(update_fields=["admin_area"] + admins)
@@ -683,8 +692,11 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
 
     class Meta:
         constraints = [
+            # if document_type.unique_for_individual=True then document of this type must be unique for an individual
+            # is_original = True -> 1 original instance of document
+            # is_original = False -> 1 representation of document per program
             UniqueConstraint(
-                fields=["type", "country"],  # TODO: after GPF merge will add "program"
+                fields=["individual", "type", "country", "program"],
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
@@ -697,19 +709,11 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
                 ),
                 name="unique_for_individual_if_not_removed_and_valid",
             ),
+            # document_number must be unique across all documents of the same type
             UniqueConstraint(
-                fields=["document_number", "type", "country"],  # TODO: after GPF merge will add "program"
-                condition=Q(
-                    Q(is_removed=False)
-                    & Q(status="VALID")
-                    & Func(
-                        F("type_id"),
-                        Value(False),
-                        function="check_unique_document_for_individual",
-                        output_field=BooleanField(),
-                    )
-                ),
-                name="unique_if_not_removed_and_valid",
+                fields=["document_number", "type", "country", "program", "is_original"],
+                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                name="unique_if_not_removed_and_valid_for_representations",
             ),
         ]
 
@@ -742,7 +746,7 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
         on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
@@ -776,8 +780,9 @@ class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDMod
         blank=True,
         choices=ROLE_CHOICE,
     )
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
         "self",
         null=True,
@@ -798,6 +803,13 @@ class IndividualCollection(UnicefIdentifiedModel):
     """
     Collection of individual representations.
     """
+
+    def __str__(self) -> str:
+        return self.unicef_id or ""
+
+    @property
+    def business_area(self) -> Optional[BusinessArea]:
+        return self.individuals.first().business_area if self.individuals.first() else None
 
 
 class Individual(
@@ -976,8 +988,9 @@ class Individual(
         "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
+    migrated_at = models.DateTimeField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
 
@@ -1184,9 +1197,9 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
 
-    objects = IsOriginalManager()
+    objects = RepresentationManager()
     original_and_repr_objects = models.Manager()
 
 
@@ -1207,7 +1220,7 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",

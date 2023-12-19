@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -69,7 +69,8 @@ class TestCashPlanQueries(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        cls.user = UserFactory()
+        cls.partner = PartnerFactory(name="Test1")
+        cls.user = UserFactory(partner=cls.partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         program = ProgramFactory.create(business_area=cls.business_area)
         cls.CASH_PLANS_TO_CREATE = [

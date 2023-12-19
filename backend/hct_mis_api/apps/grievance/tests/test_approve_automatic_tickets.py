@@ -101,8 +101,10 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
         )
         partner = PartnerFactory()
         household_one = HouseholdFactory.build(
-            id="07a901ed-d2a5-422a-b962-3570da1d5d07", registration_data_import__imported_by__partner=partner
+            id="07a901ed-d2a5-422a-b962-3570da1d5d07",
+            registration_data_import__imported_by__partner=partner,
         )
+        household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)

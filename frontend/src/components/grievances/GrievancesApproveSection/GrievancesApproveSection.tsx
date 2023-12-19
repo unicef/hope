@@ -17,7 +17,7 @@ import { RequestedIndividualDataChange } from '../RequestedIndividualDataChange'
 
 interface GrievancesApproveSectionProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-  businessArea: string;
+  baseUrl: string;
   canApproveFlagAndAdjudication: boolean;
   canApproveDataChange: boolean;
   canApprovePaymentVerification: boolean;

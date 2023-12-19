@@ -8,7 +8,7 @@ from django.contrib.messages import DEFAULT_TAGS
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Q, QuerySet
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -23,25 +23,44 @@ from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
 
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.admin.mixins import (
     CustomTargetPopulationMixin,
     HouseholdWithDrawnMixin,
 )
+from hct_mis_api.apps.household.forms import MassEnrolForm
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
     Household,
+    HouseholdCollection,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.program.utils import enrol_household_to_program
 from hct_mis_api.apps.utils.admin import (
+    BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
+    IsOriginalAdminMixin,
     LastSyncDateResetMixin,
     SoftDeletableAdminMixin,
 )
 from hct_mis_api.apps.utils.security import is_root
 
 logger = logging.getLogger(__name__)
+
+
+class HouseholdRepresentationInline(admin.TabularInline):
+    model = Household
+    extra = 0
+    fields = ("unicef_id", "program", "is_original")
+    readonly_fields = ("unicef_id", "program", "is_original")
+    show_change_link = True
+    can_delete = False
+    verbose_name_plural = "Household representations"
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return Household.all_objects.all()
 
 
 @admin.register(Household)
@@ -55,6 +74,7 @@ class HouseholdAdmin(
     HouseholdWithDrawnMixin,
     CustomTargetPopulationMixin,
     HOPEModelAdminBase,
+    IsOriginalAdminMixin,
 ):
     list_display = (
         "unicef_id",
@@ -84,7 +104,6 @@ class HouseholdAdmin(
         "business_area",
         "country",
         "country_origin",
-        "currency",
         "head_of_household",
         "registration_data_import",
     )
@@ -125,8 +144,10 @@ class HouseholdAdmin(
         "count_queryset",
         "create_target_population",
         "add_to_target_population",
+        "mass_enrol_to_another_program",
     ]
     cursor_ordering_field = "unicef_id"
+    inlines = [HouseholdRepresentationInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         qs = self.model.all_objects.get_queryset().select_related(
@@ -269,3 +290,54 @@ class HouseholdAdmin(
             ),
             "Successfully executed",
         )
+
+    def mass_enrol_to_another_program(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
+        context = self.get_common_context(request, title="Mass enrol households to another program")
+        business_area_id = qs.first().business_area_id
+        if "apply" in request.POST or "acknowledge" in request.POST:
+            form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+            if form.is_valid():
+                enrolled_hh_count = 0
+                program_for_enrol = form.cleaned_data["program_for_enrol"]
+                for household in qs:
+                    _, created = enrol_household_to_program(household, program_for_enrol)
+                    enrolled_hh_count += created
+                self.message_user(
+                    request,
+                    f"Successfully enrolled {enrolled_hh_count} households to {program_for_enrol}",
+                    level=messages.SUCCESS,
+                )
+                return None
+        else:
+            # Check if all selected objects have the same business_area
+            if not all(obj.business_area_id == business_area_id for obj in qs):
+                self.message_user(
+                    request,
+                    "Selected households need to belong to the same business area",
+                    level=messages.ERROR,
+                )
+                return None
+        form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+        context["form"] = form
+        context["action"] = "mass_enrol_to_another_program"
+        return TemplateResponse(request, "admin/household/household/enrol_households_to_program.html", context)
+
+    mass_enrol_to_another_program.short_description = "Mass enrol households to another program"
+
+
+@admin.register(HouseholdCollection)
+class HouseholdCollectionAdmin(admin.ModelAdmin):
+    list_display = (
+        "unicef_id",
+        "business_area",
+        "number_of_representations",
+    )
+    search_fields = ("unicef_id",)
+    list_filter = [BusinessAreaForHouseholdCollectionListFilter]
+    inlines = [HouseholdRepresentationInline]
+
+    def number_of_representations(self, obj: HouseholdCollection) -> int:
+        return obj.households(manager="all_objects").count()
+
+    def business_area(self, obj: HouseholdCollection) -> Optional[BusinessArea]:
+        return obj.business_area

@@ -18,7 +18,6 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogContainer } from '../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
@@ -38,6 +37,8 @@ import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { FormikEffect } from '../core/FormikEffect';
 import { LoadingButton } from '../core/LoadingButton';
 import { TabPanel } from '../core/TabPanel';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useProgramContext } from "../../programContext";
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -115,7 +116,8 @@ export function EditVerificationPlan({
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
+  const { isActiveProgram } = useProgramContext();
 
   useEffect(() => {
     if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
@@ -238,6 +240,7 @@ export function EditVerificationPlan({
             onClick={() => setOpen(true)}
             startIcon={<EditIcon />}
             data-cy='button-new-plan'
+            disabled={!isActiveProgram}
           >
             {t('Edit')}
           </Button>

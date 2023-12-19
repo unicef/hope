@@ -37,6 +37,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
 )
+from hct_mis_api.apps.core.utils import decode_id_string
 
 if TYPE_CHECKING:
     from django.db.models.query import QuerySet
@@ -52,6 +53,12 @@ class ChoiceObject(graphene.ObjectType):
 class ChoiceObjectInt(graphene.ObjectType):
     name = String()
     value = Int()
+
+
+class DataCollectingTypeChoiceObject(graphene.ObjectType):
+    name = String()
+    value = String()
+    description = String()
 
 
 class BusinessAreaNode(DjangoObjectType):
@@ -255,13 +262,13 @@ class LanguageObjectConnection(ObjectConnection):
 
 
 def get_fields_attr_generators(
-    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None
+    flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None, program_id: Optional[str] = None
 ) -> Generator:
     if flex_field is not False:
         yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         yield from FieldFactory.from_scope(Scope.TARGETING).filtered_by_types(FILTERABLE_TYPES).apply_business_area(
-            business_area_slug
+            business_area_slug=business_area_slug, program_id=program_id
         )
 
 
@@ -332,7 +339,7 @@ class Query(graphene.ObjectType):
         LanguageObjectConnection, code=graphene.String(required=False), description="All available languages"
     )
     data_collecting_type = relay.Node.Field(DataCollectingTypeNode)
-    data_collection_type_choices = graphene.List(ChoiceObject)
+    data_collection_type_choices = graphene.List(DataCollectingTypeChoiceObject)
 
     def resolve_business_area(parent, info: Any, business_area_slug: str) -> BusinessArea:
         return BusinessArea.objects.get(slug=business_area_slug)
@@ -341,7 +348,10 @@ class Query(graphene.ObjectType):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(
-        parent, info: Any, flex_field: Optional[bool] = None, business_area_slug: Optional[str] = None
+        parent,
+        info: Any,
+        flex_field: Optional[bool] = None,
+        business_area_slug: Optional[str] = None,
     ) -> List[Any]:
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):
@@ -367,10 +377,11 @@ class Query(graphene.ObjectType):
                 ],
             }.get(associated_with, [])
 
+        program_id = decode_id_string(info.context.headers.get("Program"))
         return sort_by_attr(
             (
                 attr
-                for attr in get_fields_attr_generators(flex_field, business_area_slug)
+                for attr in get_fields_attr_generators(flex_field, business_area_slug, program_id)
                 if not is_a_killer_filter(attr)
             ),
             "label.English(EN)",
@@ -398,11 +409,17 @@ class Query(graphene.ObjectType):
                 deprecated=False,
                 limit_to__slug=info.context.headers.get("Business-Area").lower(),
             )
-            .only("code", "label")
-            .values("code", "label")
-            .order_by("label")
+            .exclude(code__iexact="unknown")
+            .only("code", "label", "description")
+            .values("code", "label", "description")
         )
         result = []
         for data_collection_type in data_collecting_types:
-            result.append({"name": data_collection_type["label"], "value": data_collection_type["code"]})
+            result.append(
+                {
+                    "name": data_collection_type["label"],
+                    "value": data_collection_type["code"],
+                    "description": data_collection_type["description"],
+                }
+            )
         return result

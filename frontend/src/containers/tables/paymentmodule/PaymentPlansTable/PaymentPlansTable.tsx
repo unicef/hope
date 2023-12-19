@@ -1,35 +1,36 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  PaymentPlanNode,
   AllPaymentPlansForTableQueryVariables,
+  PaymentPlanNode,
   useAllPaymentPlansForTableQuery,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
-import { headCells } from './PaymentPlansHeadCells';
 import { PaymentPlanTableRow } from './PaymentPlanTableRow';
+import { headCells } from './PaymentPlansHeadCells';
 
 interface PaymentPlansTableProps {
   filter;
-  businessArea: string;
   canViewDetails: boolean;
 }
 
-export function PaymentPlansTable({
+export const PaymentPlansTable = ({
   filter,
   canViewDetails,
-  businessArea,
-}: PaymentPlansTableProps): ReactElement {
+}: PaymentPlansTableProps): ReactElement => {
   const { t } = useTranslation();
+  const { programId, businessArea } = useBaseUrl();
   const initialVariables: AllPaymentPlansForTableQueryVariables = {
     businessArea,
     search: filter.search,
     status: filter.status,
-    totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom,
-    totalEntitledQuantityTo: filter.totalEntitledQuantityTo,
+    totalEntitledQuantityFrom: filter.totalEntitledQuantityFrom || null,
+    totalEntitledQuantityTo: filter.totalEntitledQuantityTo || null,
     dispersionStartDate: filter.dispersionStartDate || null,
     dispersionEndDate: filter.dispersionEndDate || null,
     isFollowUp: filter.isFollowUp ? true : null,
+    program: programId,
   };
 
   return (
@@ -49,4 +50,4 @@ export function PaymentPlansTable({
       )}
     />
   );
-}
+};

@@ -22,12 +22,12 @@ const Overview = styled.div`
 interface HouseholdDetailsProps {
   household: ImportedHouseholdDetailedFragment;
   choicesData: HouseholdChoiceDataQuery;
-  businessArea: string;
+  baseUrl: string;
 }
 export function HouseholdDetails({
   household,
   choicesData,
-  businessArea,
+  baseUrl,
 }: HouseholdDetailsProps): React.ReactElement {
   const { t } = useTranslation();
 
@@ -64,7 +64,7 @@ export function HouseholdDetails({
           <Grid item xs={3}>
             <LabelizedField label={t('Head of Household')}>
               <ContentLink
-                href={`/${businessArea}/registration-data-import/individual/${household.headOfHousehold.id}`}
+                href={`/${baseUrl}/registration-data-import/individual/${household.headOfHousehold.id}`}
               >
                 {household.headOfHousehold.fullName}
               </ContentLink>

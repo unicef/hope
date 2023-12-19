@@ -5,6 +5,7 @@ export const DataCollectionTypeChoiceData = gql`
     dataCollectionTypeChoices {
       name
       value
+      description
     }
   }
 `;

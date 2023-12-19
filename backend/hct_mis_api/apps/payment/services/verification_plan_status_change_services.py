@@ -138,13 +138,15 @@ class VerificationPlanStatusChangeServices:
             return
 
         business_area = payment_verification_plan.payment_plan_obj.business_area
-        grievance_ticket_list = [
-            GrievanceTicket(
+        grievance_ticket_list = []
+        for verification in verifications:
+            grievance_ticket = GrievanceTicket(
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
                 business_area=business_area,
+                household_unicef_id=verification.payment_obj.household.unicef_id,
+                admin2_id=verification.payment_obj.household.admin2_id,
             )
-            for _ in list(range(verifications.count()))
-        ]
+            grievance_ticket_list.append(grievance_ticket)
         grievance_ticket_objs = GrievanceTicket.objects.bulk_create(grievance_ticket_list)
 
         ticket_payment_verification_details_list = []

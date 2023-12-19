@@ -80,7 +80,9 @@ class Query(graphene.ObjectType):
     dashboard_years_choices = graphene.List(graphene.String, business_area_slug=graphene.String(required=True))
 
     def resolve_report_types_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(Report.REPORT_TYPES)
+        return to_choice_object(
+            [report_type for report_type in Report.REPORT_TYPES if report_type[0] != Report.PROGRAM]
+        )
 
     def resolve_report_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Report.STATUSES)

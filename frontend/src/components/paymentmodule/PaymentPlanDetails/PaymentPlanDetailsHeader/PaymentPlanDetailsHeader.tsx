@@ -20,17 +20,17 @@ import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPla
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
 
 const StatusWrapper = styled(Box)`
-  width: 300px;
+  width: 150px;
 `;
 
 interface PaymentPlanDetailsHeaderProps {
-  businessArea: string;
+  baseUrl: string;
   permissions: string[];
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const PaymentPlanDetailsHeader = ({
-  businessArea,
+  baseUrl,
   permissions,
   paymentPlan,
 }: PaymentPlanDetailsHeaderProps): React.ReactElement => {
@@ -38,7 +38,7 @@ export const PaymentPlanDetailsHeader = ({
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Payment Module'),
-      to: `/${businessArea}/payment-module/`,
+      to: `/${baseUrl}/payment-module/`,
     },
   ];
 
@@ -177,7 +177,7 @@ export const PaymentPlanDetailsHeader = ({
           <Box ml={1}>
             <span data-cy='pp-unicef-id'>{paymentPlan.unicefId}</span>
           </Box>
-          <StatusWrapper ml={6}>
+          <StatusWrapper ml={2}>
             <StatusBox
               status={paymentPlan.status}
               statusToColor={paymentPlanStatusToColor}

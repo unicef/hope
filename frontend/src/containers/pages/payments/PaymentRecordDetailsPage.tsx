@@ -9,30 +9,40 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { PaymentRecordDetails } from '../../../components/payments/PaymentRecordDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   PaymentRecordNode,
   PaymentRecordStatus,
+  useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
   usePaymentRecordQuery,
 } from '../../../__generated__/graphql';
 import { ForceFailedButton } from '../../../components/payments/ForceFailedButton';
 import { RevertForceFailedButton } from '../../../components/payments/RevertForceFailedButton';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const PaymentRecordDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const { businessArea } = useBaseUrl();
+  const {
+    data: businessAreaData,
+    loading: businessAreaDataLoading,
+  } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
+
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
-  if (loading || caLoading) return <LoadingComponent />;
+  const { baseUrl, isAllPrograms } = useBaseUrl();
+  if (loading || caLoading || businessAreaDataLoading)
+    return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissions(
@@ -42,22 +52,24 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
   )
     return <PermissionDenied />;
 
-  if (!data || !caData) return null;
+  if (!data || !caData || !businessAreaData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: t('Programme Management'),
-      to: `/${businessArea}/programs/`,
-    },
-    {
       title: data.paymentRecord.parent.program.name,
-      to: `/${businessArea}/programs/${data.paymentRecord.parent.program.id}/`,
+      to: `/${baseUrl}/details/${data.paymentRecord.parent.program.id}/`,
     },
     {
       title: `Payment Plan #${data.paymentRecord.parent.caId}`,
-      to: `/${businessArea}/cashplans/${data.paymentRecord.parent.id}`,
+      to: `/${baseUrl}/cashplans/${data.paymentRecord.parent.id}`,
     },
   ];
+  if (isAllPrograms) {
+    breadCrumbsItems.unshift({
+      title: t('Programme Management'),
+      to: `/${baseUrl}/list/`,
+    });
+  }
   const paymentRecord = data.paymentRecord as PaymentRecordNode;
 
   const renderButtons = (): Array<React.ReactElement> => {
@@ -76,20 +88,21 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
       buttons.push(<ButtonComponent paymentRecordId={paymentRecord.id} />);
     }
 
-    buttons.push(
-      <Button
-        variant='contained'
-        color='primary'
-        component='a'
-        disabled={!paymentRecord.caHashId || !caData?.cashAssistUrlPrefix}
-        target='_blank'
-        href={`${caData?.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
-        startIcon={<OpenInNewRoundedIcon />}
-      >
-        {t('Open in CashAssist')}
-      </Button>,
-    );
-
+    if (!businessAreaData.businessArea.isPaymentPlanApplicable) {
+      buttons.push(
+        <Button
+          variant='contained'
+          color='primary'
+          component='a'
+          disabled={!paymentRecord.caHashId || !caData?.cashAssistUrlPrefix}
+          target='_blank'
+          href={`${caData?.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
+          startIcon={<OpenInNewRoundedIcon />}
+        >
+          {t('Open in CashAssist')}
+        </Button>,
+      );
+    }
     return buttons;
   };
 

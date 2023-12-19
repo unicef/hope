@@ -3,6 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
+  PaymentDeliveryType,
   PaymentQuery,
   PaymentStatus,
   PaymentVerificationStatus,
@@ -23,6 +24,7 @@ import { LabelizedField } from '../../core/LabelizedField';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import {useBaseUrl} from "../../../hooks/useBaseUrl";
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -43,6 +45,8 @@ export const PaymentDetails = ({
 }: PaymentDetailsProps): React.ReactElement => {
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
+  const { programId } = useBaseUrl();
+
   let paymentVerification: PaymentQuery['payment']['verification'] = null;
   if (
     payment.verification &&
@@ -97,7 +101,7 @@ export const PaymentDetails = ({
           <Grid item xs={3}>
             <LabelizedField label={t('TARGET POPULATION')}>
               <BlackLink
-                to={`/${businessArea}/target-population/${payment.targetPopulation.id}`}
+                to={`/${businessArea}/programs/${programId}/target-population/${payment.targetPopulation.id}`}
               >
                 {payment.targetPopulation?.name}
               </BlackLink>
@@ -155,7 +159,7 @@ export const PaymentDetails = ({
                 <BlackLink
                   to={
                     canViewHouseholdDetails
-                      ? `/${businessArea}/population/household/${payment.household.id}`
+                      ? `/${businessArea}/programs/${programId}/population/household/${payment.household.id}`
                       : undefined
                   }
                 >
@@ -242,6 +246,22 @@ export const PaymentDetails = ({
               value={payment.snapshotCollectorBankAccountNumber}
             />
           </Grid>
+          {payment.deliveryType === PaymentDeliveryType.DepositToCard && (
+            <>
+              <Grid item xs={3}>
+                <LabelizedField
+                  label={t('Debit Card Issuer')}
+                  value={payment.debitCardIssuer}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <LabelizedField
+                  label={t('Debit Card Number')}
+                  value={payment.debitCardNumber}
+                />
+              </Grid>
+            </>
+          )}
         </Grid>
       </Overview>
       <Overview>

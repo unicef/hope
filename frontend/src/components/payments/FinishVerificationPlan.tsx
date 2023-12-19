@@ -18,6 +18,7 @@ import {
   PaymentPlanQuery,
   useFinishPaymentVerificationPlanMutation,
 } from '../../__generated__/graphql';
+import { useProgramContext } from "../../programContext";
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
@@ -29,6 +30,7 @@ export function FinishVerificationPlan({
   const { t } = useTranslation();
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
   const [mutate] = useFinishPaymentVerificationPlanMutation();
 
   const finish = async (): Promise<void> => {
@@ -81,6 +83,7 @@ export function FinishVerificationPlan({
           variant='contained'
           onClick={() => setFinishDialogOpen(true)}
           data-cy='button-ed-plan'
+          disabled={!isActiveProgram}
         >
           {t('Finish')}
         </Button>

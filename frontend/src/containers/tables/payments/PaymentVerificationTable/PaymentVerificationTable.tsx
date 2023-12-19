@@ -2,9 +2,11 @@ import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllCashPlansAndPaymentPlansQueryVariables,
-  useAllCashPlansAndPaymentPlansQuery,
   CashPlanAndPaymentPlanNode,
+  useAllCashPlansAndPaymentPlansQuery,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { dateToIsoString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
@@ -14,21 +16,23 @@ interface PaymentVerificationTableProps {
   businessArea: string;
   canViewDetails: boolean;
 }
-export function PaymentVerificationTable({
+export const PaymentVerificationTable = ({
   filter,
   canViewDetails,
   businessArea,
-}: PaymentVerificationTableProps): ReactElement {
+}: PaymentVerificationTableProps): ReactElement => {
   const { t } = useTranslation();
+  const { programId } = useBaseUrl();
   const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
     businessArea,
-    program: filter.program,
     search: filter.search,
+    verificationStatus: filter.verificationStatus,
     serviceProvider: filter.serviceProvider,
     deliveryType: filter.deliveryType,
-    verificationStatus: filter.verificationStatus,
-    startDateGte: filter.startDate,
-    endDateLte: filter.endDate,
+    startDateGte: dateToIsoString(filter.startDate, 'startOfDay'),
+    endDateLte: dateToIsoString(filter.endDate, 'endOfDay'),
+    program: programId,
+    isPaymentVerificationPage: true,
   };
   return (
     <UniversalTable<
@@ -49,4 +53,4 @@ export function PaymentVerificationTable({
       )}
     />
   );
-}
+};

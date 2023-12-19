@@ -14,12 +14,14 @@ from pytz import utc
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.core.utils import CaIdIterator
 from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.fixtures import (
     EntitlementCardFactory,
+    HouseholdCollectionFactory,
     HouseholdFactory,
+    IndividualCollectionFactory,
     IndividualFactory,
     IndividualRoleInHouseholdFactory,
     create_household,
@@ -728,7 +730,7 @@ def create_payment_verification_plan_with_status(
 def generate_real_cash_plans() -> None:
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3)
-    program = RealProgramFactory(status=Program.ACTIVE)
+    program = Program.objects.filter(name="Test Program").first() or RealProgramFactory(status=Program.ACTIVE)
     cash_plans = RealCashPlanFactory.create_batch(3, program=program)
     for cash_plan in cash_plans:
         generate_payment_verification_plan_with_status = choice([True, False, False])
@@ -810,6 +812,7 @@ def generate_reconciled_payment_plan() -> None:
         program=tp.program,
         program_cycle=tp.program.cycles.first(),
         total_delivered_quantity=999,
+        total_entitled_quantity=2999,
         is_follow_up=False,
     )[0]
     # update status
@@ -845,65 +848,6 @@ def generate_payment_plan() -> None:
     now = timezone.now()
     address = "Ohio"
 
-    rdi_pk = UUID("4d100000-0000-0000-0000-000000000000")
-    rdi = RegistrationDataImportFactory(
-        pk=rdi_pk,
-        name="Test Import",
-        number_of_individuals=3,
-        number_of_households=1,
-        business_area=afghanistan,
-    )
-
-    individual_1_pk = UUID("cc000000-0000-0000-0000-000000000001")
-    individual_1 = Individual.objects.update_or_create(
-        pk=individual_1_pk,
-        birth_date=now - timedelta(days=365 * 30),
-        first_registration_date=now - timedelta(days=365),
-        last_registration_date=now,
-        business_area=afghanistan,
-        full_name="Jan Kowalski",
-        sex=MALE,
-    )[0]
-
-    individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
-    individual_2 = Individual.objects.update_or_create(
-        pk=individual_2_pk,
-        birth_date=now - timedelta(days=365 * 30),
-        first_registration_date=now - timedelta(days=365),
-        last_registration_date=now,
-        business_area=afghanistan,
-        full_name="Adam Nowak",
-        sex=MALE,
-    )[0]
-
-    household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
-    household_1 = Household.objects.update_or_create(
-        pk=household_1_pk,
-        size=4,
-        head_of_household=individual_1,
-        business_area=afghanistan,
-        registration_data_import=rdi,
-        first_registration_date=now - timedelta(days=365),
-        last_registration_date=now,
-        address=address,
-    )[0]
-    individual_1.household = household_1
-    individual_1.save()
-
-    household_2_pk = UUID("aa000000-0000-0000-0000-000000000002")
-    household_2 = Household.objects.update_or_create(
-        pk=household_2_pk,
-        size=4,
-        head_of_household=individual_2,
-        business_area=afghanistan,
-        registration_data_import=rdi,
-        first_registration_date=now - timedelta(days=365),
-        last_registration_date=now,
-        address=address,
-    )[0]
-    individual_2.household = household_2
-    individual_2.save()
-
     program_pk = UUID("00000000-0000-0000-0000-faceb00c0000")
     program = Program.objects.update_or_create(
         pk=program_pk,
@@ -918,10 +862,79 @@ def generate_payment_plan() -> None:
         frequency_of_payments=Program.ONE_OFF,
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
+        data_collecting_type=DataCollectingType.objects.get(code="full"),
     )[0]
     program_cycle = ProgramCycleFactory(
         program=program,
     )
+
+    rdi_pk = UUID("4d100000-0000-0000-0000-000000000000")
+    rdi = RegistrationDataImportFactory(
+        pk=rdi_pk,
+        name="Test Import",
+        number_of_individuals=3,
+        number_of_households=1,
+        business_area=afghanistan,
+        program=program,
+    )
+
+    individual_1_pk = UUID("cc000000-0000-0000-0000-000000000001")
+    individual_1 = Individual.objects.update_or_create(
+        pk=individual_1_pk,
+        birth_date=now - timedelta(days=365 * 30),
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        business_area=afghanistan,
+        full_name="Jan Kowalski",
+        sex=MALE,
+        program=program,
+        defaults={"individual_collection": IndividualCollectionFactory()},
+    )[0]
+
+    individual_2_pk = UUID("cc000000-0000-0000-0000-000000000002")
+    individual_2 = Individual.objects.update_or_create(
+        pk=individual_2_pk,
+        birth_date=now - timedelta(days=365 * 30),
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        business_area=afghanistan,
+        full_name="Adam Nowak",
+        sex=MALE,
+        program=program,
+        defaults={"individual_collection": IndividualCollectionFactory()},
+    )[0]
+
+    household_1_pk = UUID("aa000000-0000-0000-0000-000000000001")
+    household_1 = Household.objects.update_or_create(
+        pk=household_1_pk,
+        size=4,
+        head_of_household=individual_1,
+        business_area=afghanistan,
+        registration_data_import=rdi,
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        address=address,
+        program=program,
+        defaults={"household_collection": HouseholdCollectionFactory()},
+    )[0]
+    individual_1.household = household_1
+    individual_1.save()
+
+    household_2_pk = UUID("aa000000-0000-0000-0000-000000000002")
+    household_2 = Household.objects.update_or_create(
+        pk=household_2_pk,
+        size=4,
+        head_of_household=individual_2,
+        business_area=afghanistan,
+        registration_data_import=rdi,
+        first_registration_date=now - timedelta(days=365),
+        last_registration_date=now,
+        address=address,
+        program=program,
+        defaults={"household_collection": HouseholdCollectionFactory()},
+    )[0]
+    individual_2.household = household_2
+    individual_2.save()
 
     targeting_criteria_pk = UUID("00000000-0000-0000-0000-feedb00c0000")
     targeting_criteria = TargetingCriteria.objects.update_or_create(

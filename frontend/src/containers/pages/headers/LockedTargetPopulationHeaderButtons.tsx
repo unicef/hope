@@ -14,6 +14,7 @@ import {
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
+import { useProgramContext } from "../../../programContext";
 
 const IconContainer = styled.span`
   button {
@@ -46,6 +47,7 @@ export const LockedTargetPopulationHeaderButtons = ({
   const [openFinalize, setOpenFinalize] = useState(false);
   const [openFinalizePaymentPlan, setOpenFinalizePaymentPlan] = useState(false);
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
   const [mutate, { loading }] = useUnlockTpMutation();
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
 
@@ -53,7 +55,10 @@ export const LockedTargetPopulationHeaderButtons = ({
     <Box display='flex' alignItems='center'>
       {canDuplicate && (
         <IconContainer>
-          <Button onClick={() => setOpenDuplicate(true)}>
+         <Button
+              onClick={() => setOpenDuplicate(true)}
+              disabled={!isActiveProgram}
+          >
             <FileCopy />
           </Button>
         </IconContainer>
@@ -75,6 +80,7 @@ export const LockedTargetPopulationHeaderButtons = ({
               }
             }}
             data-cy='button-target-population-unlocked'
+            disabled={!isActiveProgram}
           >
             Unlock
           </LoadingButton>
@@ -94,9 +100,7 @@ export const LockedTargetPopulationHeaderButtons = ({
                 <Button
                   variant='contained'
                   color='primary'
-                  disabled={
-                    targetPopulation.program.status !== ProgramStatus.Active
-                  }
+                  disabled={!isActiveProgram}
                   onClick={() => setOpenFinalizePaymentPlan(true)}
                   data-cy='button-target-population-send-to-hope'
                 >

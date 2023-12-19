@@ -302,7 +302,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                   
                 </td>
                 <td
-                  class="MuiTableCell-root MuiTableCell-body sc-gqjmRU jlajgV MuiTableCell-alignLeft"
+                  class="MuiTableCell-root MuiTableCell-body sc-gqjmRU dqNdpb MuiTableCell-alignLeft"
                 />
               </tr>
               <tr

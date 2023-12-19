@@ -16,7 +16,7 @@ import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
 import { FormikAutocomplete } from '../../../shared/Formik/FormikAutocomplete';
 import { FormikAsyncAutocomplete } from '../../../shared/Formik/FormikAsyncAutocomplete';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export interface EditHouseholdDataChangeField {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
@@ -26,7 +26,7 @@ export const EditHouseholdDataChangeField = ({
   name,
   field,
 }: EditHouseholdDataChangeField): React.ReactElement => {
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;

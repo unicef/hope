@@ -70,6 +70,7 @@ if TYPE_CHECKING:
     from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
     from hct_mis_api.apps.geo.models import Area
+    from hct_mis_api.apps.program.models import Program
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +152,7 @@ class GenericPaymentPlan(TimeStampedUUIDModel):
 
     @property
     def get_unicef_id(self) -> str:
-        # TODO: MB 'ca_id' rename to 'unicef_id'?
+        # TODO: maybe 'ca_id' rename to 'unicef_id'?
         return self.ca_id if isinstance(self, CashPlan) else self.unicef_id
 
     def get_exchange_rate(self, exchange_rates_client: Optional["ExchangeRateClient"] = None) -> float:
@@ -904,6 +905,11 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     def payments_used_in_follow_payment_plans(self) -> "QuerySet":
         return Payment.objects.filter(parent__source_payment_plan_id=self.id, excluded=False)
 
+    @property
+    def get_program(self) -> "Program":
+        # TODO will update after add feature with 'program_cycle' and migrate all data
+        return self.program_cycle.program if self.program_cycle else self.program
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (
@@ -930,6 +936,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("additional_collector_name", _("Additional Collector Name")),
         ("additional_document_type", _("Additional Document Type")),
         ("additional_document_number", _("Additional Document Number")),
+        ("registration_token", _("Registration Token")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -944,7 +951,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     )
     name = models.CharField(max_length=120, verbose_name=_("Name"))
     columns = MultiSelectField(
-        max_length=500,
+        max_length=1000,
         choices=COLUMNS_CHOICES,
         default=DEFAULT_COLUMNS,
         verbose_name=_("Columns"),
@@ -1024,6 +1031,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
         }
+        additional_columns = {"registration_token": cls.get_registration_token_doc_number}
+        if column_name in additional_columns:
+            method = additional_columns[column_name]
+            return method(payment)
+
         if column_name not in map_obj_name_column:
             return "wrong_column_name"
         if column_name == "delivered_quantity" and payment.status == Payment.STATUS_ERROR:  # Unsuccessful Payment
@@ -1041,6 +1053,11 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             )
         obj, nested_field = map_obj_name_column[column_name]
         return getattr(obj, nested_field, None) or ""
+
+    @staticmethod
+    def get_registration_token_doc_number(payment: "Payment") -> str:
+        doc = Document.objects.filter(individual=payment.collector, type__key="registration_token").first()
+        return doc.document_number if doc else ""
 
     def __str__(self) -> str:
         return f"{self.name} ({len(self.columns) + len(self.core_fields)})"
@@ -1683,9 +1700,21 @@ class PaymentVerificationPlan(TimeStampedUUIDModel, ConcurrencyModel, UnicefIden
     @property
     def get_payment_plan(self) -> Union["PaymentPlan", "CashPlan", None]:
         try:
-            return self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
+            # use GFK instead of self.payment_plan_content_type.model_class().objects.get(pk=self.payment_plan_object_id)
+            return self.payment_plan_obj
         except ObjectDoesNotExist:
             return None
+
+    @property
+    def get_program(self) -> Optional["Program"]:
+        if payment_plan := self.get_payment_plan:
+            program = (
+                payment_plan.program_cycle.program
+                if isinstance(payment_plan, PaymentPlan) and payment_plan.program_cycle
+                else payment_plan.program
+            )
+            return program
+        return None
 
 
 def build_summary(payment_plan: Optional[Any]) -> None:

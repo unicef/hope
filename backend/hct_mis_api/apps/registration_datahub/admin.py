@@ -246,6 +246,15 @@ class ImportedDocumentAdmin(HOPEModelAdminBase):
     date_hierarchy = "created_at"
 
 
+@admin.register(ImportedBankAccountInfo)
+class ImportedBankAccountInfoAdmin(HOPEModelAdminBase):
+    list_display = ("individual", "bank_name", "bank_account_number", "debit_card_number")
+    raw_id_fields = ("individual",)
+    search_fields = ("bank_name", "bank_account_number")
+    list_filter = (QueryStringFilter,)
+    date_hierarchy = "created_at"
+
+
 @admin.register(ImportedIndividualRoleInHousehold)
 class ImportedIndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
     raw_id_fields = ("individual", "household")
@@ -544,6 +553,7 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                 filters, exclude = form.cleaned_data["filters"]
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
+
                 if service := registration.rdi_parser:
                     qs = (
                         Record.objects.defer("storage", "counters", "files", "fields")
@@ -557,6 +567,7 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                             rdi_name = name or {timezone.now()}
                             rdi = service.create_rdi(
                                 imported_by=request.user,
+                                program=project.program,
                                 rdi_name=f"{organization.slug} rdi {rdi_name}",
                                 is_open=is_open,
                             )
@@ -564,7 +575,7 @@ class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
                             url = reverse("admin:registration_data_registrationdataimport_change", args=[rdi.pk])
                             self.message_user(
                                 request,
-                                mark_safe(f"Started RDI Import with name: <a href='{url}'>{rdi.name}</a>"),
+                                mark_safe("Started RDI Import with name: <a href='{}'>{}</a>").format(url, rdi.name),
                                 messages.SUCCESS,
                             )
                         except Exception as e:

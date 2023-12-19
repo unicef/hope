@@ -33,8 +33,20 @@ variables:
     sentryEnvironment: "production"
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
   isStaging: $[eq(variables['Build.SourceBranchName'], 'staging')]
+  isEphemeral: $[eq(variables['Build.SourceBranchName'], 'global-program-filter')]
+  isDev: $[eq(variables['Build.SourceBranchName'], 'develop')]
   tag: $(Build.SourceVersion)
   additionalTag: $(Build.SourceBranchName)
+
+  ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
+    pipelineId: 1159
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'staging') }}:
+    pipelineId: 1160
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}:
+    # TODO: handle triggering multiple pipelines (master triggers trn and prd)
+    pipelineId: 1161
+  ${{ else }}:
+    pipelineId: null
 
 stages:
   - stage: test_frontend
@@ -147,6 +159,7 @@ stages:
               --push \
               ./frontend
             displayName: Docker build dev
+            condition: and(succeeded(), eq(variables.isDev, true))
           - script: |
               docker buildx create --use
               docker buildx build \
@@ -162,6 +175,19 @@ stages:
               ./frontend
             displayName: Docker build staging
             condition: and(succeeded(), eq(variables.isStaging, true))
+          - script: |
+              docker buildx create --use
+              docker buildx build \
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
+              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
+              -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
+              -t $(Docker.url)/$(Docker.frontend.repository):latest \
+              --build-arg SENTRY_DSN=$(SENTRY_DSN) \
+              --build-arg SENTRY_ENVIRONMENT=ephemeral \
+              --push \
+              ./frontend
+            displayName: Docker build ephemeral
+            condition: and(succeeded(), eq(variables.isEphemeral, true))
           - script: |
               docker buildx create --use
               docker buildx build \
@@ -218,3 +244,35 @@ stages:
               targetPath: backend/coverage.xml
               artifact: BackendLineCoverage
               publishLocation: 'pipeline'
+
+  - stage: trigger_deploy
+    displayName: Trigger deploy
+    dependsOn: [test]
+    jobs:
+      - job: trigger_deploy
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[TRIGGER_DEPLOY]"
+        steps:
+          - script: |
+              pipelineId=$(pipelineId)
+              if [ "$pipelineId" = "null" ]; then
+                echo "Skipping triggering deploy because the branch is ${{ variables['Build.SourceBranchName'] }}"
+                exit 0
+              fi
+
+              jsonBody='{"variables": {"tag": {"isSecret": false, "value": "$(tag)"}}}'
+              contentLength=$(echo -n $jsonBody | wc -c)
+              project=ICTD-HCT-MIS
+              organization=unicef
+
+              echo Triggering deploy for pipeline $pipelineId
+              echo JSON body: $jsonBody
+
+              curl -v -L \
+                -u ":$(AZURE_PAT)" \
+                -H "Content-Type: application/json" \
+                -H "Content-Length: $contentLength" \
+                -d "$jsonBody" \
+                https://dev.azure.com/$organization/$project/_apis/pipelines/$pipelineId/runs?api-version=7.1-preview.1
+            displayName: "Trigger deploy"

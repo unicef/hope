@@ -1,12 +1,12 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   AllUsersQueryVariables,
   useAllUsersQuery,
   UserNode,
 } from '../../../__generated__/graphql';
+import { TableWrapper } from '../../../components/core/TableWrapper';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './UsersTableHeadCells';
 import { UsersTableRow } from './UsersTableRow';
@@ -17,7 +17,7 @@ interface UsersTableProps {
 
 export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
 
   const initialVariables = {
     search: filter.search,

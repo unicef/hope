@@ -126,20 +126,26 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ],
         )
         country = geo_models.Country.objects.get(iso_code2="PL")
-        dt = DocumentTypeFactory(label="national_id", key="national_id")
-        dt_tax_id = DocumentTypeFactory(label="tax_id", key="tax_id")
-        dt.save()
-        cls.document1 = Document(
+        dt = DocumentTypeFactory(label="national_id", key="national_id", valid_for_deduplication=False)
+        dt_tax_id = DocumentTypeFactory(label="tax_id", key="tax_id", valid_for_deduplication=False)
+
+        cls.document1 = Document.objects.create(
             country=country,
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[0],
             status=Document.STATUS_VALID,
         )
-        cls.document2 = Document(type=dt, document_number="ASD123", individual=cls.individuals[1], country=country)
-        cls.document3 = Document(type=dt, document_number="BBC999", individual=cls.individuals[2], country=country)
-        cls.document4 = Document(type=dt, document_number="ASD123", individual=cls.individuals[3], country=country)
-        cls.document5 = Document(
+        cls.document2 = Document.objects.create(
+            type=dt, document_number="ASD123", individual=cls.individuals[1], country=country
+        )
+        cls.document3 = Document.objects.create(
+            type=dt, document_number="BBC999", individual=cls.individuals[2], country=country
+        )
+        cls.document4 = Document.objects.create(
+            type=dt, document_number="ASD123", individual=cls.individuals[3], country=country
+        )
+        cls.document5 = Document.objects.create(
             country=country,
             type=dt,
             document_number="TOTALY UNIQ",
@@ -171,12 +177,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="UNIQ",
             individual=cls.individuals[5],
         )
-
-        cls.document1.save()
-        cls.document2.save()
-        cls.document3.save()
-        cls.document4.save()
-        cls.document5.save()
         cls.all_documents = [
             cls.document1,
             cls.document2,
@@ -185,6 +185,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             cls.document5,
             cls.document6,
             cls.document7,
+            cls.document8,
+            cls.document9,
         ]
         super().setUpTestData()
 
@@ -208,6 +210,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         ticket_details = GrievanceTicket.objects.first().needs_adjudication_ticket_details
         self.assertEqual(ticket_details.possible_duplicates.count(), 2)
         self.assertEqual(ticket_details.is_multiple_duplicates_version, True)
+
+        self.household.refresh_from_db()
+        self.assertEqual(GrievanceTicket.objects.first().household_unicef_id, self.household.unicef_id)
 
     def test_hard_documents_deduplication_for_initially_valid(self) -> None:
         HardDocumentDeduplication().deduplicate(
@@ -255,7 +260,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             # 7. Bulk Create TicketNeedsAdjudicationDetails
             # 8. Bulk Create PossibleDuplicateThrough
             # 9. Transaction savepoint release
-            self.assertEqual(first_dedup_query_count, 9, "Should only use 9 queries")
+            # 10 - 12. Queries for `is_cross_area` update
+            self.assertEqual(first_dedup_query_count, 12, "Should only use 12 queries")
 
     def test_ticket_created_correctly(self) -> None:
         HardDocumentDeduplication().deduplicate(
@@ -263,7 +269,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         )
         self.refresh_all_documents()
 
-        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
+
         HardDocumentDeduplication().deduplicate(
             self.get_documents_query(
                 [
@@ -272,7 +279,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             ),
             self.registration_data_import,
         )
-        self.assertEqual(GrievanceTicket.objects.count(), 1)
+        # failed probably because of all_matching_number_documents qs ordering
+        self.assertEqual(GrievanceTicket.objects.all().count(), 1)
 
     def test_valid_for_deduplication_doc_type(self) -> None:
         pl = geo_models.Country.objects.get(iso_code2="PL")

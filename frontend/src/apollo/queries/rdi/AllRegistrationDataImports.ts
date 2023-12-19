@@ -14,6 +14,9 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
     $businessArea: String
     $importDateRange: String
     $size: String
+    $program: String
+    $totalHouseholdsCountWithValidPhoneNoMin: Int
+    $totalHouseholdsCountWithValidPhoneNoMax: Int
   ) {
     allRegistrationDataImports(
       after: $after
@@ -28,6 +31,9 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
       businessArea: $businessArea
       importDateRange: $importDateRange
       size: $size
+      program: $program
+      totalHouseholdsCountWithValidPhoneNoMin: $totalHouseholdsCountWithValidPhoneNoMin
+      totalHouseholdsCountWithValidPhoneNoMax: $totalHouseholdsCountWithValidPhoneNoMax
     ) {
       pageInfo {
         hasNextPage

@@ -1,5 +1,61 @@
 [
 {
+  "model": "household.householdcollection",
+  "pk": 1,
+  "fields": {
+    "unicef_id": null
+  }
+},
+{
+  "model": "household.householdcollection",
+  "pk": 2,
+  "fields": {
+    "unicef_id": null
+  }
+},
+{
+  "model": "household.individualcollection",
+  "pk": 1,
+  "fields": {
+    "unicef_id": null
+  }
+},
+{
+  "model": "household.individualcollection",
+  "pk": 2,
+  "fields": {
+    "unicef_id": null
+  }
+},
+{
+  "model": "household.individualcollection",
+  "pk": 3,
+  "fields": {
+    "unicef_id": null
+  }
+},
+{
+  "model": "household.individualcollection",
+  "pk": 4,
+  "fields": {
+    "unicef_id": null
+  }
+},
+{
+  "model": "household.individualcollection",
+  "pk": 5,
+  "fields": {
+    "unicef_id": null
+  }
+},
+{
+  "model": "household.individualcollection",
+  "pk": 6,
+  "fields": {
+    "unicef_id": null
+  }
+},
+{
   "model": "household.household",
   "pk": "20077498-80f0-462a-82e6-866cef92d06a",
   "fields": {
@@ -9,6 +65,7 @@
     "removed_date": null,
     "last_sync_at": null,
     "version": 1665481605689759,
+    "household_collection": 1,
     "withdrawn": false,
     "withdrawn_date": null,
     "consent_sign": "D4-2022-08-10_140204.3283380000.jpg",
@@ -73,7 +130,8 @@
     "row_id": 4,
     "total_cash_received_usd": null,
     "total_cash_received": null,
-    "programs": []
+    "programs": [],
+    "copied_from": null
   }
 },
 {
@@ -86,6 +144,7 @@
     "removed_date": null,
     "last_sync_at": null,
     "version": 1665481605718438,
+    "household_collection": 2,
     "withdrawn": false,
     "withdrawn_date": null,
     "consent_sign": "D3-2022-08-10_140204.3238310000.jpg",
@@ -150,7 +209,8 @@
     "row_id": 3,
     "total_cash_received_usd": null,
     "total_cash_received": null,
-    "programs": []
+    "programs": [],
+    "copied_from": null
   }
 },
 {
@@ -316,6 +376,19 @@
     }
 },
 {
+    "model": "household.documenttype",
+    "pk": "10cceec6-8371-48ec-b05e-767bbbc983a3",
+    "fields": {
+        "created_at": "2023-05-25T12:39:46.671Z",
+        "updated_at": "2023-05-25T12:39:46.671Z",
+        "label": "Registration Token",
+        "key": "registration_token",
+        "is_identity_document": true,
+        "unique_for_individual": false,
+        "valid_for_deduplication": false
+    }
+},
+{
   "model": "household.document",
   "pk": "0040cb2a-4b86-41b2-82b1-d5ac4d11471d",
   "fields": {
@@ -428,6 +501,22 @@
   }
 },
 {
+  "model": "household.document",
+  "pk": "43575a6d-5238-4006-8cbb-a848fd3df5b4",
+  "fields": {
+      "is_removed": false,
+      "created_at": "2022-08-10T14:30:11.116Z",
+      "updated_at": "2022-08-10T14:30:11.116Z",
+      "document_number": "reg_token_test_123123",
+      "photo": "",
+      "individual": "bc5a5b20-74a4-4d48-ab63-99a0c913850d",
+      "type": "10cceec6-8371-48ec-b05e-767bbbc983a3",
+      "country": "d1eb1574-8146-4c70-a804-caf163d451a6",
+      "status": "VALID",
+      "cleared_date": "2022-08-10T14:30:11.116Z"
+    }
+},
+{
   "model": "household.individualidentity",
   "pk": 7,
   "fields": {
@@ -495,6 +584,7 @@
     "removed_date": null,
     "last_sync_at": null,
     "version": 1665481609882155,
+    "individual_collection": 1,
     "duplicate": false,
     "duplicate_date": null,
     "withdrawn": false,
@@ -576,7 +666,8 @@
     "kobo_asset_id": "",
     "row_id": 3,
     "disability_certificate_picture": "",
-    "vector_column": "'jan':1 'romaniak':2"
+    "vector_column": "'jan':1 'romaniak':2",
+    "copied_from": null
   }
 },
 {
@@ -589,6 +680,7 @@
     "removed_date": null,
     "last_sync_at": null,
     "version": 1665481609897237,
+    "individual_collection": 2,
     "duplicate": false,
     "duplicate_date": null,
     "withdrawn": false,
@@ -652,7 +744,8 @@
     "kobo_asset_id": "",
     "row_id": 7,
     "disability_certificate_picture": "",
-    "vector_column": "'angela':1 'kowalska':2"
+    "vector_column": "'angela':1 'kowalska':2",
+    "copied_from": null
   }
 },
 {
@@ -665,6 +758,7 @@
     "removed_date": null,
     "last_sync_at": null,
     "version": 1665481609901131,
+    "individual_collection": 3,
     "duplicate": false,
     "duplicate_date": null,
     "withdrawn": false,
@@ -728,7 +822,8 @@
     "kobo_asset_id": "",
     "row_id": 8,
     "disability_certificate_picture": "",
-    "vector_column": "'alicja':1 'kowalska':2"
+    "vector_column": "'alicja':1 'kowalska':2",
+    "copied_from": null
   }
 },
 {
@@ -741,6 +836,7 @@
     "removed_date": null,
     "last_sync_at": null,
     "version": 1665481609904484,
+    "individual_collection": 4,
     "duplicate": false,
     "duplicate_date": null,
     "withdrawn": false,
@@ -804,7 +900,8 @@
     "kobo_asset_id": "",
     "row_id": 4,
     "disability_certificate_picture": "",
-    "vector_column": "'alicja':1 'romaniak':2"
+    "vector_column": "'alicja':1 'romaniak':2",
+    "copied_from": null
   }
 },
 {
@@ -817,6 +914,7 @@
     "removed_date": null,
     "last_sync_at": null,
     "version": 1665481609908054,
+    "individual_collection": 5,
     "duplicate": false,
     "duplicate_date": null,
     "withdrawn": false,
@@ -880,7 +978,8 @@
     "kobo_asset_id": "",
     "row_id": 6,
     "disability_certificate_picture": "",
-    "vector_column": "'agata':1 'kowalska':2"
+    "vector_column": "'agata':1 'kowalska':2",
+    "copied_from": null
   }
 },
 {
@@ -893,6 +992,7 @@
     "removed_date": null,
     "last_sync_at": null,
     "version": 1665481609912221,
+    "individual_collection": 6,
     "duplicate": false,
     "duplicate_date": null,
     "withdrawn": false,
@@ -974,7 +1074,8 @@
     "kobo_asset_id": "",
     "row_id": 5,
     "disability_certificate_picture": "",
-    "vector_column": "'jan':1 'romaniak':2"
+    "vector_column": "'jan':1 'romaniak':2",
+    "copied_from": null
   }
 }
 ]

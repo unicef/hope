@@ -10,6 +10,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import JSONField, Q
+from django.db.models.constraints import UniqueConstraint
 from django.utils.text import Truncator
 from django.utils.translation import gettext_lazy as _
 
@@ -19,10 +20,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import StorageFile
-from hct_mis_api.apps.core.utils import (
-    IsOriginalManager,
-    map_unicef_ids_to_households_unicef_ids,
-)
+from hct_mis_api.apps.core.utils import map_unicef_ids_to_households_unicef_ids
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 from hct_mis_api.apps.targeting.services.targeting_service import (
@@ -31,7 +29,11 @@ from hct_mis_api.apps.targeting.services.targeting_service import (
     TargetingCriteriaRuleQueryingBase,
     TargetingIndividualRuleFilterBlockBase,
 )
-from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import (
+    ConcurrencyModel,
+    RepresentationManager,
+    TimeStampedUUIDModel,
+)
 from hct_mis_api.apps.utils.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
@@ -123,7 +125,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     )
 
     name = CICharField(
-        unique=True,
         db_index=True,
         max_length=255,
         validators=[
@@ -311,7 +312,13 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return self.name
 
     class Meta:
-        unique_together = ("name", "business_area")
+        constraints = [
+            UniqueConstraint(
+                fields=["name", "business_area", "program", "is_removed"],
+                condition=Q(is_removed=False),
+                name="target_population_unique_if_not_removed",
+            )
+        ]
         verbose_name = "Target Population"
 
 
@@ -329,10 +336,10 @@ class HouseholdSelection(TimeStampedUUIDModel):
     vulnerability_score = models.DecimalField(
         blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by Steficon", db_index=True
     )
-    is_original = models.BooleanField(default=True)
+    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
 
-    objects = IsOriginalManager()
+    objects = RepresentationManager()
     original_and_repr_objects = models.Manager()
 
     class Meta:

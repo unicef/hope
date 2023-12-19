@@ -11,17 +11,18 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
+import { useProgramContext } from "../../programContext";
 import {
   ApproveBox,
   StyledTable,
@@ -35,9 +36,11 @@ export function NeedsAdjudicationDetailsOld({
   canApprove: boolean;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const confirm = useConfirmation();
+  const { isActiveProgram } = useProgramContext();
+
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {
@@ -109,7 +112,7 @@ export function NeedsAdjudicationDetailsOld({
             <Button
               onClick={() =>
                 history.push({
-                  pathname: `/${businessArea}/grievance/new-ticket`,
+                  pathname: `/${baseUrl}/grievance/new-ticket`,
                   state: { linkedTicketId: ticket.id },
                 })
               }
@@ -134,7 +137,7 @@ export function NeedsAdjudicationDetailsOld({
             )}
             {isEditable && canApprove && (
               <Button
-                disabled={isApproveDisabled()}
+                disabled={isApproveDisabled() || !isActiveProgram}
                 data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({
@@ -205,12 +208,13 @@ export function NeedsAdjudicationDetailsOld({
                 data-cy='checkbox-individual'
                 disabled={
                   !isEditable ||
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+                  !isActiveProgram
                 }
                 checked={
                   selectedDuplicate === details.goldenRecordsIndividual?.id
                 }
-                onChange={(event, checked) =>
+                onChange={(_event, checked) =>
                   setSelectedDuplicate(
                     checked ? details.goldenRecordsIndividual?.id : null,
                   )
@@ -219,18 +223,28 @@ export function NeedsAdjudicationDetailsOld({
             </TableCell>
 
             <TableCell align='left'>
-              <BlackLink
-                to={`/${businessArea}/population/individuals/${details.goldenRecordsIndividual?.id}`}
-              >
-                {details.goldenRecordsIndividual?.unicefId}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/individuals/${details.goldenRecordsIndividual?.id}`}
+                >
+                  {details.goldenRecordsIndividual?.unicefId}
+                </BlackLink>
+              ) : (
+                <span>{details.goldenRecordsIndividual?.unicefId}</span>
+              )}
             </TableCell>
             <TableCell align='left'>
-              <BlackLink
-                to={`/${businessArea}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
-              >
-                {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
+                >
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </BlackLink>
+              ) : (
+                <span>
+                  {details.goldenRecordsIndividual?.household?.unicefId || '-'}
+                </span>
+              )}
             </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.fullName}
@@ -274,7 +288,8 @@ export function NeedsAdjudicationDetailsOld({
                 color='primary'
                 disabled={
                   !isEditable ||
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+                  !isActiveProgram
                 }
                 checked={selectedDuplicate === details.possibleDuplicate?.id}
                 onChange={(event, checked) =>
@@ -285,18 +300,28 @@ export function NeedsAdjudicationDetailsOld({
               />
             </TableCell>
             <TableCell align='left'>
-              <BlackLink
-                to={`/${businessArea}/population/individuals/${details.possibleDuplicate?.id}`}
-              >
-                {details.possibleDuplicate?.unicefId}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/individuals/${details.possibleDuplicate?.id}`}
+                >
+                  {details.possibleDuplicate?.unicefId}
+                </BlackLink>
+              ) : (
+                <span>{details.possibleDuplicate?.unicefId}</span>
+              )}
             </TableCell>
             <TableCell align='left'>
-              <BlackLink
-                to={`/${businessArea}/population/household/${details.possibleDuplicate?.household?.id}`}
-              >
-                {details.possibleDuplicate?.household?.unicefId || '-'}
-              </BlackLink>
+              {!isAllPrograms ? (
+                <BlackLink
+                  to={`/${baseUrl}/population/household/${details.possibleDuplicate?.household?.id}`}
+                >
+                  {details.possibleDuplicate?.household?.unicefId || '-'}
+                </BlackLink>
+              ) : (
+                <span>
+                  {details.possibleDuplicate?.household?.unicefId || '-'}
+                </span>
+              )}
             </TableCell>
             <TableCell align='left'>
               {details.possibleDuplicate?.fullName}

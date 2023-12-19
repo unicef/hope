@@ -1,18 +1,18 @@
 import { Assessment } from '@material-ui/icons';
 import Assignment from '@material-ui/icons/Assignment';
+import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import AttachMoney from '@material-ui/icons/AttachMoney';
 import AutorenewIcon from '@material-ui/icons/AutorenewRounded';
 import BallotIcon from '@material-ui/icons/Ballot';
-import DashboardIcon from '@material-ui/icons/DashboardRounded';
 import FaceIcon from '@material-ui/icons/Face';
 import Feedback from '@material-ui/icons/Feedback';
 import ForumIcon from '@material-ui/icons/Forum';
 import InfoIcon from '@material-ui/icons/Info';
 import ListIcon from '@material-ui/icons/List';
-import NewReleases from '@material-ui/icons/NewReleases';
 import ListAltRounded from '@material-ui/icons/ListAltRounded';
 import LocalLibrary from '@material-ui/icons/LocalLibrary';
 import MessageIcon from '@material-ui/icons/Message';
+import NewReleases from '@material-ui/icons/NewReleases';
 import PaymentIcon from '@material-ui/icons/Payment';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import PeopleIcon from '@material-ui/icons/PeopleRounded';
@@ -24,10 +24,22 @@ import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
 import React from 'react';
 import { PERMISSIONS } from '../../../config/permissions';
 
-export const menuItems = [
+export type MenuItem = {
+  name: string;
+  href?: string;
+  selectedRegexp: RegExp;
+  icon: JSX.Element;
+  permissions?: string[];
+  collapsable?: boolean;
+  permissionModule?: string;
+  secondaryActions?: MenuItem[];
+  flag?: string;
+  external?: boolean;
+};
+export const menuItems: MenuItem[] = [
   {
     name: 'Country Dashboard',
-    href: '/#',
+    href: '/country-dashboard',
     selectedRegexp: /^\/$/,
     icon: <DashboardIcon />,
     permissions: [PERMISSIONS.DASHBOARD_VIEW_COUNTRY],
@@ -40,7 +52,7 @@ export const menuItems = [
     permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
   },
   {
-    name: 'Population',
+    name: 'Programme Population',
     href: '/population/household',
     selectedRegexp: /^\/population.*$/,
     icon: <PeopleIcon />,
@@ -65,11 +77,22 @@ export const menuItems = [
   },
   {
     name: 'Programme Management',
+    href: '/list',
+    selectedRegexp: /^\/programs.*$/,
+    icon: <Assignment />,
+    permissions: [
+      PERMISSIONS.PROGRAMME_MANAGEMENT_VIEW,
+      PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
+      PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+    ],
+  },
+  {
+    name: 'Programme Details',
     href: '/programs',
     selectedRegexp: /^\/programs.*$/,
     icon: <Assignment />,
     permissions: [
-      PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+      PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
       PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
     ],
   },
@@ -111,7 +134,7 @@ export const menuItems = [
   {
     name: 'Grievance',
     href: '/grievance/tickets',
-    selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
+    selectedRegexp: /^\/grievance\/tickets.*$/,
     icon: <Feedback />,
     collapsable: true,
     permissionModule: 'GRIEVANCES',
@@ -119,21 +142,21 @@ export const menuItems = [
       {
         name: 'Grievance Tickets',
         href: '/grievance/tickets/user-generated',
-        selectedRegexp: /^\/grievance-and-feedback\/tickets.*$/,
+        selectedRegexp: /^\/grievance\/tickets.*$/,
         icon: <ListIcon />,
         permissionModule: 'GRIEVANCES',
       },
       {
         name: 'Grievance Dashboard',
         href: '/grievance/dashboard',
-        selectedRegexp: /^\/grievance-and-feedback\/dashboard.*$/,
+        selectedRegexp: /^\/grievance\/dashboard.*$/,
         icon: <Assessment />,
         permissionModule: 'GRIEVANCES',
       },
       {
         name: 'Feedback',
         href: '/grievance/feedback',
-        selectedRegexp: /^\/accountability\/feedback.*$/,
+        selectedRegexp: /^\/grievance\/feedback.*$/,
         icon: <RateReviewIcon />,
         permissionModule: 'GRIEVANCES',
       },
@@ -172,7 +195,7 @@ export const menuItems = [
     permissions: [PERMISSIONS.REPORTING_EXPORT],
   },
   {
-    name: 'Users',
+    name: 'Programme Users',
     href: '/users-list',
     selectedRegexp: /^\/users-list.*$/,
     icon: <SupervisedUserCircle />,

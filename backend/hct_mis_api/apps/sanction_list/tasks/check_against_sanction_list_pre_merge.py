@@ -116,8 +116,8 @@ class CheckAgainstSanctionListPreMergeTask:
                         if marked_individual:
                             possible_matches.add(marked_individual.id)
                             household = marked_individual.household
-                            admin_level_2 = household.admin2 if household else ""
-                            area = household.village if household else ""
+                            admin_level_2 = getattr(household, "admin2", None)
+                            area = getattr(household, "village", "")
 
                             ticket = GrievanceTicket(
                                 category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
@@ -125,6 +125,7 @@ class CheckAgainstSanctionListPreMergeTask:
                                 admin2=admin_level_2,
                                 area=area,
                                 registration_data_import=registration_data_import,
+                                household_unicef_id=household.unicef_id if household else "",
                             )
                             ticket_details = TicketSystemFlaggingDetails(
                                 ticket=ticket,

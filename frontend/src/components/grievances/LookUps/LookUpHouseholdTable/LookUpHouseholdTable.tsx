@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
-  AllHouseholdsQuery,
-  AllHouseholdsQueryVariables,
+  AllHouseholdsForPopulationTableQuery,
+  AllHouseholdsForPopulationTableQueryVariables,
   HouseholdChoiceDataQuery,
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpHouseholdTableHeadCells';
 import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
@@ -45,6 +46,7 @@ export const LookUpHouseholdTable = ({
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
 }: LookUpHouseholdTableProps): React.ReactElement => {
+  const { isAllPrograms, programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -54,7 +56,7 @@ export const LookUpHouseholdTable = ({
     }
     return undefined;
   };
-  const initialVariables: AllHouseholdsQueryVariables = {
+  const initialVariables: AllHouseholdsForPopulationTableQueryVariables = {
     businessArea,
     familySize: JSON.stringify({
       min: filter.householdSizeMin,
@@ -66,10 +68,10 @@ export const LookUpHouseholdTable = ({
     residenceStatus: filter.residenceStatus,
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
+    program: isAllPrograms ? filter.program : programId,
+    isActiveProgram: filter.programState === 'active' ? true : null,
   };
-  if (filter.program) {
-    initialVariables.programs = [filter.program];
-  }
+
   const [selected, setSelected] = useState<string[]>(
     householdMultiSelect ? [...selectedHousehold] : [selectedHousehold],
   );
@@ -110,7 +112,7 @@ export const LookUpHouseholdTable = ({
   };
 
   const handleRadioChange = (
-    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
+    household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
   ): void => {
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);
@@ -121,17 +123,35 @@ export const LookUpHouseholdTable = ({
     setFieldValue('identityVerified', false);
   };
 
+  const headCellsWithProgramColumn = [
+    ...headCells,
+    {
+      disablePadding: false,
+      label: 'Programme',
+      id: 'programs',
+      numeric: false,
+      dataCy: 'programs',
+    },
+  ];
+
+  const preparedHeadcells = isAllPrograms
+    ? headCellsWithProgramColumn
+    : headCells;
+
   const renderTable = (): React.ReactElement => {
     return (
       <UniversalTable<
-        AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-        AllHouseholdsQueryVariables
+        AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
+        AllHouseholdsForPopulationTableQueryVariables
       >
-        headCells={householdMultiSelect ? headCells.slice(1) : headCells}
+        headCells={
+          householdMultiSelect ? preparedHeadcells.slice(1) : preparedHeadcells
+        }
         rowsPerPageOptions={[5, 10, 15, 20]}
         query={useAllHouseholdsForPopulationTableQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
+        allowSort={false}
         filterOrderBy={filter.orderBy}
         onSelectAllClick={
           householdMultiSelect && handleSelectAllCheckboxesClick

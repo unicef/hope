@@ -21,7 +21,7 @@ describe("404 Page", () => {
   describe("E2E tests 404 Page", () => {
     afterEach(function () {
       Cypress.session.clearCurrentSessionData();
-      cy.adminLogin();
+      cy.checkIfLoggedIn();
       cy.navigateToHomePage();
       grievancePage.clickMenuButtonGrievance();
     });
@@ -39,7 +39,7 @@ describe("404 Page", () => {
       cy.url().then((url) => {
         let newUrl = url.slice(0, -10);
         cy.visit(newUrl);
-        cy.intercept("/404/**").as("error404");
+        cy.intercept("/access-denied/**").as("error404");
         error404Page.getPageNoFound();
         error404Page.getButtonRefresh().click();
         cy.wait("@error404").its("response.statusCode").should("eq", 200);
@@ -60,11 +60,11 @@ describe("404 Page", () => {
       cy.url().then((url) => {
         let newUrl = url.slice(0, -10);
         cy.visit(newUrl);
-        cy.intercept("/404/**").as("error404");
+        cy.intercept("/access-denied/**").as("error404");
         error404Page.getPageNoFound();
-        error404Page.getGoToCountryDashboard().click();
         cy.wait("@error404").its("response.statusCode").should("eq", 200);
-        cy.get("h5").contains("Dashboard");
+        error404Page.getGoToCountryDashboard().click();
+        cy.get("h5").contains("Programme Management");
       });
     });
   });

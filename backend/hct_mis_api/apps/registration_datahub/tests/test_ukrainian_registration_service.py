@@ -189,8 +189,7 @@ class TestUkrainianRegistrationService(TestCase):
         # Checking only first is enough, because they all in one RDI
         registration_datahub_import = ImportedHousehold.objects.all()[0].registration_data_import
         registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
-        self.assertEqual(registration_data_import.programs.count(), 1)
-        self.assertEqual(registration_data_import.programs.all()[0], self.program)
+        self.assertEqual(registration_data_import.program, self.program)
 
     def test_import_data_to_datahub_retry(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
