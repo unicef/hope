@@ -461,13 +461,10 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
 
-    tickets_with_hh_representation = (
-        model.objects.select_related(
-            "ticket",
-            "household",
-        )
-        .filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
-    )
+    tickets_with_hh_representation = model.objects.select_related(
+        "ticket",
+        "household",
+    ).filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
     handle_bulk_update_representations_household_unicef_id(
         tickets_with_hh_representation,
         model,
@@ -568,13 +565,10 @@ def handle_tickets_delete_household_details(business_area: Optional[BusinessArea
             old_grievance_tickets_to_update, objects_to_create_dict, TicketDeleteHouseholdDetails
         )
 
-    tickets_with_hh_representation = (
-        TicketDeleteHouseholdDetails.objects.select_related(
-            "ticket",
-            "household",
-        )
-        .filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
-    )
+    tickets_with_hh_representation = TicketDeleteHouseholdDetails.objects.select_related(
+        "ticket",
+        "household",
+    ).filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
     handle_bulk_update_representations_household_unicef_id(
         tickets_with_hh_representation,
         TicketDeleteHouseholdDetails,
@@ -829,12 +823,11 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
     logger.info(f"Tickets to handle: {tickets_count}")
     for batch_start in range(0, tickets_count, BATCH_SIZE):
         batched_ids = needs_adjudication_tickets_ids[batch_start : batch_start + BATCH_SIZE]
-        needs_adjudication_tickets_batch = (
-            TicketNeedsAdjudicationDetails.objects.filter(id__in=batched_ids)
-            .select_related(
-                "ticket",
-                "golden_records_individual",
-            )
+        needs_adjudication_tickets_batch = TicketNeedsAdjudicationDetails.objects.filter(
+            id__in=batched_ids
+        ).select_related(
+            "ticket",
+            "golden_records_individual",
         )
         logger.info(f"Handling needs adjudication tickets: {batch_start} of {tickets_count}")
         objects_to_create_dict = {
@@ -951,7 +944,8 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
             "target_population",
             "target_population__program",
         )
-        .filter(is_original=True, is_migration_handled=False, **filter_kwargs).distinct()
+        .filter(is_original=True, is_migration_handled=False, **filter_kwargs)
+        .distinct()
     )
 
     message_objects_ids = list(message_objects.values_list("pk", flat=True))
