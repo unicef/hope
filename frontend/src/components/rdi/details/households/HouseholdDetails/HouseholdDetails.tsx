@@ -11,7 +11,7 @@ import {
   ImportedHouseholdDetailedFragment,
 } from '../../../../../__generated__/graphql';
 import { Title } from '../../../../core/Title';
-import { COLLECT_TYPES_MAPPING } from '../../../../../utils/constants';
+import { useProgramContext } from '../../../../../programContext';
 
 const Overview = styled.div`
   display: flex;
@@ -30,7 +30,7 @@ export function HouseholdDetails({
   baseUrl,
 }: HouseholdDetailsProps): React.ReactElement {
   const { t } = useTranslation();
-
+  const { selectedProgram } = useProgramContext();
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
@@ -91,8 +91,8 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label={t('COLLECT TYPE')}>
-              {COLLECT_TYPES_MAPPING[household.collectIndividualData]}
+            <LabelizedField label={t('Data Collecting Type')}>
+              {selectedProgram?.dataCollectingType?.label}
             </LabelizedField>
           </Grid>
         </Grid>
