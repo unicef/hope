@@ -158,7 +158,6 @@ stages:
               --push \
               ./frontend
             displayName: Docker build dev
-            condition: and(succeeded(), eq(variables.isDev, true))
           - script: |
               docker buildx create --use
               docker buildx build \
