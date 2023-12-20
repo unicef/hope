@@ -53,6 +53,7 @@ stages:
                 kpi.ravenDsn=$(KPI_SENTRY_DSN),\
                 kpi.subdomain=kf-hope,\
                 kpi.resources.requests.cpu=250m,\
+                kpi.microsoftTenant=$(MICROSOFT_TENANT),\
                 enketo.subdomain=ek-hope,\
                 ingress.annotations.appgw\\.ingress\\.kubernetes\\.io/appgw-ssl-certificate=kv-cert-unitst,\
                 ingress.scheme=https"
