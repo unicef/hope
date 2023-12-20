@@ -619,8 +619,8 @@ class DeduplicateTask:
         query_dict["query"]["bool"]["filter"] = {
             "bool": {
                 "must": [
-                    {"term": {"business_area": self.business_area.slug}},
-                    {"term": {"program_id": self.program.id}},
+                    {"term": {"business_area.keyword": self.business_area.slug}},
+                    {"term": {"program_id.keyword": self.program.id}},
                 ]
             }
         }
@@ -757,10 +757,13 @@ class HardDocumentDeduplication:
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
 
         ticket_data_collected = []
+        tickets_programs = []
+        GrievanceTicketProgramThrough = GrievanceTicket.programs.through
         for ticket_data in ticket_data_dict.values():
+            main_individual = ticket_data["original"].individual
             prepared_ticket = self._prepare_grievance_ticket_documents_deduplication(
-                main_individual=ticket_data["original"].individual,
-                business_area=ticket_data["original"].individual.business_area,
+                main_individual=main_individual,
+                business_area=main_individual.business_area,
                 registration_data_import=registration_data_import,
                 possible_duplicates_individuals=[d.individual for d in ticket_data["possible_duplicates"]],
                 possible_duplicates_through_dict=possible_duplicates_through_dict,
@@ -768,8 +771,15 @@ class HardDocumentDeduplication:
             if prepared_ticket is None:
                 continue
             ticket_data_collected.append(prepared_ticket)
+            tickets_programs.append(
+                GrievanceTicketProgramThrough(
+                    grievanceticket=prepared_ticket.ticket, program_id=main_individual.program_id
+                )
+            )
 
         GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
+        GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
+
         created_tickets = TicketNeedsAdjudicationDetails.objects.bulk_create(
             [x.ticket_details for x in ticket_data_collected]
         )
