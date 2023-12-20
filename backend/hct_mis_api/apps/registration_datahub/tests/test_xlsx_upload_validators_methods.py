@@ -8,7 +8,9 @@ from django.core.management import call_command
 import openpyxl
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.utils import SheetImageLoader
+from hct_mis_api.apps.geo.fixtures import CountryFactory
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 
@@ -21,6 +23,10 @@ class TestXLSXValidatorsMethods(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
+
+        cls.business_area = create_afghanistan()
+        cls.country = CountryFactory()
+        cls.business_area.countries.add(cls.country)
 
     def test_geolocation_validator(self) -> None:
         # test correct values:
@@ -424,7 +430,7 @@ class TestXLSXValidatorsMethods(APITestCase):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             for sheet, expected_values in file:
                 upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
-                result = upload_xlsx_instance_validator.rows_validator(sheet)
+                result = upload_xlsx_instance_validator.rows_validator(sheet, self.business_area.slug)
                 self.assertEqual(result, expected_values)
 
     def test_validate_file_extension(self) -> None:
