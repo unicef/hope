@@ -106,7 +106,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
             logger.info(f"Handling {batch_start} - {batch_end}/{households_count} households")
             individuals_per_household_dict = defaultdict(list)
             batched_household_ids = households_filtered_ids[batch_start:batch_end]
-            batched_households = Household.original_and_repr_objects.filter(id__in=batched_household_ids)
+            batched_households = list(Household.all_objects.filter(id__in=batched_household_ids))
             for individual in Individual.objects.filter(household__in=batched_households).prefetch_related(
                 "documents", "identities", "bank_account_info"
             ):
@@ -226,7 +226,6 @@ def copy_household(household: Household, program: Program, individuals: list[Ind
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
     household.pk = None
-    household.unicef_id = None
     household.program = program
     household.is_original = False
 
@@ -256,7 +255,6 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
     household.copied_from_id = original_household_id
     household.origin_unicef_id = household.unicef_id
     household.pk = None
-    household.unicef_id = None
     household.program = program
     household.is_original = False
     external_collectors_id_to_update = []
@@ -266,9 +264,9 @@ def copy_household_fast(household: Household, program: Program, individuals: lis
     bank_account_info_to_create = []
     individuals_to_exclude_dict = {
         str(x["copied_from_id"]): str(x["pk"])
-        for x in Individual.original_and_repr_objects.filter(
-            copied_from_id__in=individuals, is_original=False, program=program
-        ).values("copied_from_id", "pk")
+        for x in Individual.all_objects.filter(copied_from__in=individuals, is_original=False, program=program).values(
+            "copied_from_id", "pk"
+        )
     }
 
     for individual in individuals:
@@ -367,7 +365,6 @@ def copy_individual_fast(individual: Individual, program: Program) -> tuple:
     individual.copied_from_id = original_individual_id
     individual.origin_unicef_id = individual.unicef_id
     individual.pk = None
-    individual.unicef_id = None
     individual.program = program
     individual.household = None
     individual.is_original = False
@@ -379,7 +376,7 @@ def copy_individual_fast(individual: Individual, program: Program) -> tuple:
 
 def copy_roles(households: QuerySet, program: Program) -> None:
     # filter only original roles
-    roles = (
+    roles_ids = list(
         IndividualRoleInHousehold.original_and_repr_objects.filter(
             household__in=households,
             individual__is_removed=False,
@@ -387,18 +384,22 @@ def copy_roles(households: QuerySet, program: Program) -> None:
             is_original=True,
         )
         .exclude(copied_to__household__program=program)
-        .select_related("individual", "household")
-        .prefetch_related("individual__documents", "individual__identities", "individual__bank_account_info")
         .distinct("individual", "household")
         .order_by("individual", "household")
+        .values_list("id", flat=True)
     )
 
-    roles_count = roles.count()
+    roles_count = len(roles_ids)
     for batch_start in range(0, roles_count, BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
         logger.info(f"Handling {batch_start} - {batch_end}/{roles_count} roles")
         roles_list = []
-        roles_batch = roles[0:BATCH_SIZE]
+        roles_batch = (
+            IndividualRoleInHousehold.original_and_repr_objects.filter(id__in=roles_ids[batch_start:batch_end])
+            .select_related("individual", "household")
+            .prefetch_related("individual__documents", "individual__identities", "individual__bank_account_info")
+        )
+
         original_individual_ids = [role.individual_id for role in roles_batch]
         original_household_ids = [role.household_id for role in roles_batch]
         household_representations = Household.original_and_repr_objects.filter(
@@ -720,9 +721,10 @@ def handle_non_program_objects(
     if hhs_to_ignore:
         households = households.exclude(id__in=hhs_to_ignore)
     collecting_types_from_charfield = (
-        households.values_list("collect_individual_data", flat=True).distinct().order_by("pk")
+        households.values_list("collect_individual_data", flat=True)
+        .distinct("collect_individual_data")
+        .order_by("collect_individual_data")
     )
-
     for collecting_type in collecting_types_from_charfield:
         program = create_program_with_matching_collecting_type(
             business_area, collecting_type, unknown_unassigned_program

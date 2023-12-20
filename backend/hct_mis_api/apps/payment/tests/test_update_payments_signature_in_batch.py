@@ -5,12 +5,12 @@ from django.test import TestCase
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.payment.celery_tasks import update_payments_signature
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.models import Payment
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 
 
-class TestUpdatePaymentsSignatureTask(TestCase):
+class TestUpdatePaymentsSignatureInBatch(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
@@ -58,9 +58,7 @@ class TestUpdatePaymentsSignatureTask(TestCase):
         Payment.objects.all().update(signature_hash="")
         self.assertEqual(Payment.objects.filter(signature_hash="").count(), 3)
         self.assertEqual(Payment.objects.exclude(signature_hash="").count(), 0)
-        with self.assertNumQueries(6):
-            result = update_payments_signature.run(self.payment_plan.id, 2)
-
-        self.assertTrue(result)
+        with self.assertNumQueries(5):
+            PaymentPlanService(self.payment_plan).recalculate_signatures_in_batch(2)
         self.assertEqual(Payment.objects.filter(signature_hash="").count(), 0)
         self.assertEqual(Payment.objects.exclude(signature_hash="").count(), 3)

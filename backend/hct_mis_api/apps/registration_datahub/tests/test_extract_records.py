@@ -6,8 +6,8 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
-from hct_mis_api.apps.registration_datahub.celery_tasks import extract_records_task
-from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.apps.registration_datahub.utils import get_record_model
+from hct_mis_api.aurora.celery_tasks import extract_records_task
 
 
 class TestExtractRecords(TestCase):
@@ -66,6 +66,7 @@ class TestExtractRecords(TestCase):
                 }
             ],
         }
+        Record = get_record_model()
         Record.objects.create(
             registration=1,
             timestamp=timezone.now(),
@@ -76,12 +77,14 @@ class TestExtractRecords(TestCase):
         )
 
     def test_extract_to_data_field(self) -> None:
+        Record = get_record_model()
         extract_records_task()
 
         record = Record.objects.first()
         self.assertTrue(record.data)
 
     def test_extract_without_image(self) -> None:
+        Record = get_record_model()
         extract_records_task()
 
         record = Record.objects.first()
@@ -121,6 +124,7 @@ class TestExtractRecords(TestCase):
         )
 
     def test_extract_counters(self) -> None:
+        Record = get_record_model()
         extract_records_task()
 
         record = Record.objects.first()
