@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -36,6 +36,7 @@ from hct_mis_api.apps.core.utils import (
     serialize_flex_attributes,
 )
 from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
@@ -465,7 +466,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def rows_validator(self, sheet: Worksheet) -> List:
+    def rows_validator(self, sheet: Worksheet, business_area_slug: Optional[str] = None) -> List:
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -558,6 +559,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     return cell.value.strip() != ""
                 return True
 
+            admin_area_code_tuples = []
+
             for row in sheet.iter_rows(min_row=3):
                 # openpyxl keeps iterating on empty rows so need to omit empty rows
                 if not any(has_value(cell) for cell in row):
@@ -585,6 +588,18 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
                         self.head_of_household_count[current_household_id] += 1
+
+                    if header.value in ("admin1_h_c", "admin2_h_c"):
+                        if cell.value:
+                            admin_area_code_tuples.append((row_number, header.value, cell.value))
+                        else:
+                            invalid_rows.append(
+                                {
+                                    "row_number": row_number,
+                                    "header": header.value,
+                                    "message": f"{header.value.capitalize()} field cannot be null",
+                                }
+                            )
 
                     field_type = current_field["type"]
                     fn: Callable = switch_dict[field_type]
@@ -638,6 +653,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
                         invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
+            if sheet.title == "Households":
+                admin_area_invalid_rows = self.validate_admin_areas(admin_area_code_tuples, business_area_slug)
+                if admin_area_invalid_rows:
+                    invalid_rows.extend(admin_area_invalid_rows)
+
             invalid_doc_rows = []
             invalid_ident_rows = []
             if sheet.title == "Individuals":
@@ -648,6 +668,26 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:
             logger.exception(e)
             raise
+
+    def validate_admin_areas(
+        self, admin_area_code_tuples: List[Tuple[int, str, str]], business_area_slug: Optional[str]
+    ) -> List[Dict[str, Any]]:
+        invalid_rows = []
+        if admin_area_code_tuples:
+            business_area_countries = BusinessArea.objects.get(slug=business_area_slug).countries.all()
+            queryset = Area.objects.select_related("area_type")
+
+            for code_tuple in admin_area_code_tuples:
+                message = None
+                row_number, header_name, p_code = code_tuple
+                area = queryset.filter(p_code=p_code).first()
+                if not area:
+                    message = f"Sheet Households: Area with code: {p_code} does not exist"
+                if area.area_type.country not in business_area_countries:
+                    message = f"Sheet Households: Country for p_code: {p_code} does not belong to {business_area_slug}"
+                if message:
+                    invalid_rows.append({"row_number": row_number, "header": header_name, "message": message})
+        return invalid_rows
 
     def validate_file_with_template(self, wb: Workbook) -> List:
         try:
@@ -718,8 +758,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             errors.extend(self.validate_collectors(wb))
             individuals_sheet = wb["Individuals"]
             household_sheet = wb["Households"]
+
             self.image_loader = SheetImageLoader(household_sheet)
-            errors.extend(self.rows_validator(household_sheet))
+            errors.extend(self.rows_validator(household_sheet, business_area_slug))
             self.image_loader = SheetImageLoader(individuals_sheet)
             errors.extend(self.rows_validator(individuals_sheet))
             return errors
