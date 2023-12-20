@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Union
 from zipfile import BadZipfile
 
 from django.core import validators as django_core_validators
@@ -36,7 +36,6 @@ from hct_mis_api.apps.core.utils import (
     serialize_flex_attributes,
 )
 from hct_mis_api.apps.core.validators import BaseValidator
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
@@ -466,13 +465,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def rows_validator(
-        self,
-        sheet: Worksheet,
-        business_area_slug: Optional[str] = None,
-        program_id: Optional[str] = None,
-        created_by_id: Optional[str] = None,
-    ) -> List:
+    def rows_validator(self, sheet: Worksheet) -> List:
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -565,8 +558,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     return cell.value.strip() != ""
                 return True
 
-            admin2_area_code_tuples = []
-
             for row in sheet.iter_rows(min_row=3):
                 # openpyxl keeps iterating on empty rows so need to omit empty rows
                 if not any(has_value(cell) for cell in row):
@@ -594,18 +585,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
                         self.head_of_household_count[current_household_id] += 1
-
-                    if header.value == "admin2_h_c":
-                        if value:
-                            admin2_area_code_tuples.append((row_number, value))
-                        else:
-                            invalid_rows.append(
-                                {
-                                    "row_number": cell.row,
-                                    "header": header.value,
-                                    "message": "Sheet: Household does not contain admin2",
-                                }
-                            )
 
                     field_type = current_field["type"]
                     fn: Callable = switch_dict[field_type]
@@ -659,13 +638,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
                         invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
-            if sheet.title == "Households":
-                admin_area_invalid_rows = self.validate_admin_areas(
-                    admin2_area_code_tuples, business_area_slug, program_id, created_by_id
-                )
-                if admin_area_invalid_rows:
-                    invalid_rows.extend(admin_area_invalid_rows)
-
             invalid_doc_rows = []
             invalid_ident_rows = []
             if sheet.title == "Individuals":
@@ -676,35 +648,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         except Exception as e:
             logger.exception(e)
             raise
-
-    def validate_admin_areas(
-        self,
-        admin2_area_code_tuples: List[Tuple[Any, str]],
-        business_area_slug: Optional[str] = None,
-        program_id: Optional[str] = None,
-        created_by_id: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
-        from hct_mis_api.apps.account.models import User
-
-        invalid_rows = []
-        user = User.objects.get(id=created_by_id)
-        if admin2_area_code_tuples and not user.partner.is_unicef:
-            business_area = BusinessArea.objects.get(slug=business_area_slug)
-            areas_ids = user.partner.get_permissions().areas_for(str(business_area.id), str(program_id))
-
-            queryset = Area.objects.select_related("area_type")
-            for area_code_tuple in admin2_area_code_tuples:
-                row_number, p_code = area_code_tuple
-                area = queryset.filter(p_code=p_code).first()
-
-                message = None
-                if not area:
-                    message = f"Sheet Households: Area with code: {p_code} does not exist"
-                if areas_ids is None or str(area.id) not in areas_ids:
-                    message = f"Sheet Households: User does not have permission to area2: {p_code}"
-                if message:
-                    invalid_rows.append({"row_number": row_number, "header": "admin2_h_c", "message": message})
-        return invalid_rows
 
     def validate_file_with_template(self, wb: Workbook) -> List:
         try:
@@ -758,9 +701,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(
-        self, xlsx_file: Any, business_area_slug: str, program_id: str, created_by_id: str
-    ) -> List[Dict[str, Any]]:
+    def validate_everything(self, xlsx_file: Any, business_area_slug: str) -> List[Dict[str, Any]]:
         try:
             errors = self.validate_file_extension(xlsx_file)
             if errors:
@@ -777,9 +718,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             errors.extend(self.validate_collectors(wb))
             individuals_sheet = wb["Individuals"]
             household_sheet = wb["Households"]
-
             self.image_loader = SheetImageLoader(household_sheet)
-            errors.extend(self.rows_validator(household_sheet, business_area_slug, program_id, created_by_id))
+            errors.extend(self.rows_validator(household_sheet))
             self.image_loader = SheetImageLoader(individuals_sheet)
             errors.extend(self.rows_validator(individuals_sheet))
             return errors
