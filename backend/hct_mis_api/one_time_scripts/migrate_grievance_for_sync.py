@@ -466,9 +466,6 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
             "ticket",
             "household",
         )
-        .prefetch_related(
-            "household__copied_to",
-        )
         .filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
     )
     handle_bulk_update_representations_household_unicef_id(
@@ -575,9 +572,6 @@ def handle_tickets_delete_household_details(business_area: Optional[BusinessArea
         TicketDeleteHouseholdDetails.objects.select_related(
             "ticket",
             "household",
-        )
-        .prefetch_related(
-            "household__copied_to",
         )
         .filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
     )
@@ -841,7 +835,6 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
                 "ticket",
                 "golden_records_individual",
             )
-            .prefetch_related("possible_duplicates", "selected_individuals")
         )
         logger.info(f"Handling needs adjudication tickets: {batch_start} of {tickets_count}")
         objects_to_create_dict = {
@@ -958,10 +951,6 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
             "target_population",
             "target_population__program",
         )
-        # .prefetch_related(
-        #     "households",
-        #     "households__copied_to",
-        # )
         .filter(is_original=True, is_migration_handled=False, **filter_kwargs).distinct()
     )
 
