@@ -36,17 +36,18 @@ class TestFinishVerificationPlan(TestCase):
 
         afghanistan_areas_qs = Area.objects.filter(area_type__area_level=2, area_type__country__iso_code3="AFG")
 
-        program = ProgramFactory(business_area=business_area)
-        program.admin_areas.set(afghanistan_areas_qs.order_by("?")[:3])
+        cls.program = ProgramFactory(business_area=business_area)
+        cls.program.admin_areas.set(afghanistan_areas_qs.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
 
         target_population = TargetPopulationFactory(
             created_by=user,
             targeting_criteria=targeting_criteria,
             business_area=business_area,
+            program=cls.program,
         )
         cash_plan = CashPlanFactory(
-            program=program,
+            program=cls.program,
             business_area=business_area,
         )
         cash_plan.save()
@@ -68,7 +69,7 @@ class TestFinishVerificationPlan(TestCase):
                 },
             )
             household.set_admin_areas()
-            household.programs.add(program)
+            household.program = cls.program
             household.refresh_from_db()
 
             payment_record = PaymentRecordFactory(
@@ -92,6 +93,8 @@ class TestFinishVerificationPlan(TestCase):
         VerificationPlanStatusChangeServices(self.verification).finish()
 
         ticket = GrievanceTicket.objects.filter(category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION).first()
+        self.assertEqual(ticket.programs.count(), 1)
+        self.assertEqual(ticket.programs.first().id, self.program.id)
         household = Household.objects.get(unicef_id=ticket.household_unicef_id)
         self.assertIsNotNone(ticket.admin2_id)
         self.assertIsNotNone(household.admin2_id)
