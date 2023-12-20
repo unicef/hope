@@ -85,27 +85,14 @@ export const PageHeader = ({
   isErased,
   handleBack,
 }: Props): React.ReactElement => {
-  const handleArrowBackClick = (): void => {
-    if (handleBack) {
-      handleBack();
-    }
-    //move to previous previous page if the previous page is the same as the current page
-    else if (
-      window.history.length > 2 &&
-      document.referrer === window.location.href
-    ) {
-      window.history.go(-2);
-    } else {
-      window.history.back();
-    }
-  };
-
   return (
     <Wrapper data-cy='page-header-container'>
       <Container>
         {breadCrumbs && breadCrumbs.length !== 0 ? (
           // Leaving breadcrumbs for permissions, but BackButton goes back to the previous page
-          <BackButton onClick={handleArrowBackClick}>
+          <BackButton
+            onClick={() => (handleBack ? handleBack() : window.history.back())}
+          >
             <ArrowBackRoundedIcon fontSize='large' />
           </BackButton>
         ) : null}
