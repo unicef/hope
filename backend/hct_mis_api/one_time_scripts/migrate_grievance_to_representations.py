@@ -2051,7 +2051,7 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
 
     # Update household_unicef_id for all related GrievanceTickets
     # Fetch the GrievanceTickets related to the updated objects
-    grievance_tickets = GrievanceTicket.objects.filter(
+    grievance_tickets = GrievanceTicket.default_for_migrations_fix.filter(
         Q(complaint_ticket_details__in=complaint_tickets_with_payments)
         | Q(sensitive_ticket_details__in=sensitive_tickets_with_payments)
     ).distinct()
@@ -2090,11 +2090,11 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
         if program:
             payment_verification_ticket.ticket.programs.set([program])
 
-    GrievanceTicket.objects.filter(
+    GrievanceTicket.default_for_migrations_fix.filter(
         Q(complaint_ticket_details__in=complaint_tickets_with_payments)
         | Q(sensitive_ticket_details__in=sensitive_tickets_with_payments)
         | Q(payment_verification_ticket_details__in=payment_verification_tickets)
-    ).update(is_original=False, is_migration_handled=True, migrated_at=timezone.now())
+    ).update(is_original=False, is_migration_handled=True)
 
 
 def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDetails, TicketSensitiveDetails]) -> tuple:
