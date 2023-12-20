@@ -343,6 +343,7 @@ class DataCollectingTypeValidator(BaseValidator):
             elif (
                 program
                 and program.data_collecting_type.code != data_collecting_type.code
+                and program.status != Program.DRAFT
                 and Household.objects.filter(program=program).exists()
             ):
                 raise ValidationError("DataCollectingType can be updated only for Program without any households")
