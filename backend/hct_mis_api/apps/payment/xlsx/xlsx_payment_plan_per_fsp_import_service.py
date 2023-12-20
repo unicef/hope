@@ -218,6 +218,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 "additional_document_type",
                 "additional_document_number",
             ),
+            batch_size=500,
         )
         self.logger.info("Update total cash in households")
         handle_total_cash_in_specific_households([payment.household_id for payment in self.payments_to_save])
