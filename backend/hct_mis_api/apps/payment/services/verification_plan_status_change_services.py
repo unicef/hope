@@ -152,7 +152,7 @@ class VerificationPlanStatusChangeServices:
             # program taken from verification.payment_obj.target_population if payment_obj is PaymentRecord instance;
             # and from verification.payment_obj.parent.target_population if payment_obj is Payment instance
             program = (
-                verification.payment_obj.target_population.program
+                getattr(verification.payment_obj.target_population, "program")
                 or verification.payment_obj.parent.target_population.program
             )
             tickets_programs.append(
