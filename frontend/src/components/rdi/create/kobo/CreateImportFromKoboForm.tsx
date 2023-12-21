@@ -24,6 +24,7 @@ const CircularProgressContainer = styled.div`
   justify-content: center;
   align-content: center;
   width: 100%;
+  height: 50px;
 `;
 
 const validationSchema = Yup.object().shape({
@@ -127,13 +128,16 @@ export function CreateImportFromKoboForm({
           component={FormikTextField}
         />
         <ScreenBeneficiaryField />
-        <CircularProgressContainer>
-          {saveKoboLoading && <CircularProgress />}
-        </CircularProgressContainer>
-        <KoboImportDataRepresentation
-          koboImportData={koboImportData}
-          loading={saveKoboLoading}
-        />
+        {saveKoboLoading ? (
+          <CircularProgressContainer>
+            <CircularProgress />
+          </CircularProgressContainer>
+        ) : (
+          <KoboImportDataRepresentation
+            koboImportData={koboImportData}
+            loading={saveKoboLoading}
+          />
+        )}
       </FormikProvider>
     </div>
   );

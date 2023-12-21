@@ -7,8 +7,14 @@ from django.core.management import call_command
 
 import openpyxl
 
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.utils import SheetImageLoader
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_datahub.validators import UploadXLSXInstanceValidator
 
 
@@ -21,6 +27,11 @@ class TestXLSXValidatorsMethods(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadflexfieldsattributes")
+
+        cls.business_area = BusinessAreaFactory()
+        cls.program = ProgramFactory()
+        cls.partner = PartnerFactory()
+        cls.user = UserFactory(partner=cls.partner)
 
     def test_geolocation_validator(self) -> None:
         # test correct values:
@@ -150,7 +161,9 @@ class TestXLSXValidatorsMethods(APITestCase):
             data_only=True,
         )
         upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-        upload_xlsx_instance_validator.rows_validator(wb["Households"])
+        upload_xlsx_instance_validator.rows_validator(
+            wb["Households"], self.business_area.slug, self.program.id, self.user.id
+        )
         result = upload_xlsx_instance_validator.rows_validator(wb["Individuals"])
         expected = [
             {
@@ -424,7 +437,9 @@ class TestXLSXValidatorsMethods(APITestCase):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             for sheet, expected_values in file:
                 upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
-                result = upload_xlsx_instance_validator.rows_validator(sheet)
+                result = upload_xlsx_instance_validator.rows_validator(
+                    sheet, self.business_area.slug, self.program.id, self.user.id
+                )
                 self.assertEqual(result, expected_values)
 
     def test_validate_file_extension(self) -> None:
@@ -445,7 +460,9 @@ class TestXLSXValidatorsMethods(APITestCase):
         )
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result = upload_xlsx_instance_validator.validate_everything(
+                file, "afghanistan", str(self.program.id), str(self.user.id)
+            )
             self.assertEqual(result[0]["row_number"], expected_values[0]["row_number"])
             self.assertEqual(result[0]["message"], expected_values[0]["message"])
 
@@ -525,5 +542,31 @@ class TestXLSXValidatorsMethods(APITestCase):
 
         with open(file_path, "rb") as file:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+            result = upload_xlsx_instance_validator.validate_everything(
+                file, "afghanistan", str(self.program.id), str(self.user.id)
+            )
+        self.assertEqual(result, expected_result)
+
+    def test_validate_admin2(self) -> None:
+        file_path = f"{self.FILES_DIR_PATH}/admin2.xlsx"
+
+        expected_result = [
+            {
+                "header": "admin2_h_c",
+                "message": "Sheet Households: User does not have permission to area2: AF1115",
+                "row_number": 3,
+            }
+        ]
+
+        partner = PartnerFactory(name="NOT_UNICEF")
+        partner.permissions = []
+        partner.save()
+
+        user2 = UserFactory(partner=partner)
+
+        with open(file_path, "rb") as file:
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            result = upload_xlsx_instance_validator.validate_everything(
+                file, self.business_area.slug, str(self.program.id), str(user2.id)
+            )
         self.assertEqual(result, expected_result)

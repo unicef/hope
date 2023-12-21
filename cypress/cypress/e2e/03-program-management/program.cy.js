@@ -39,7 +39,7 @@ describe("Program Management", () => {
       programManagement.getButtonNewProgram().click({ force: true });
       programManagement
         .getDialogTitle()
-        .should("contain", "Create Programme");
+        .should("contain", "New Programme");
       cy.uniqueSeed().then((seed) => {
         const programName = `Test Program ${seed}`;
         programManagement.getInputProgrammeName().type(programName);
@@ -164,7 +164,7 @@ describe("Program Management", () => {
       programManagement.getButtonNewProgram().click({ force: true });
       programManagement
         .getDialogTitle()
-        .should("contain", "Create Programme");
+        .should("contain", "New Programme");
       cy.uniqueSeed().then((seed) => {
         const programName = `Test Program ${seed}`;
         programManagement.getInputProgrammeName().type(programName);
