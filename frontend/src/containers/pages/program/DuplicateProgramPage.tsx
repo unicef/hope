@@ -1,8 +1,8 @@
-import { Box, Button, Step, StepButton, Stepper } from '@material-ui/core';
+import { Box, Step, StepButton, Stepper } from '@material-ui/core';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
@@ -17,10 +17,14 @@ import { PartnersStep } from '../../../components/programs/CreateProgram/Partner
 import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { hasPermissionInModule } from '../../../config/permissions';
+import { usePermissions } from '../../../hooks/usePermissions';
 
 export const DuplicateProgramPage = (): ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const permissions = usePermissions();
   const [mutate] = useCopyProgramMutation();
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
@@ -102,19 +106,22 @@ export const DuplicateProgramPage = (): ReactElement => {
     })),
   };
 
-  const stepFields =[ [
-    'name',
-    'startDate',
-    'endDate',
-    'sector',
-    'dataCollectingTypeCode',
-    'description',
-    'budget',
-    'administrativeAreasOfImplementation',
-    'populationGoal',
-    'cashPlus',
-    'frequencyOfPayments',
-  ], ['partners']];
+  const stepFields = [
+    [
+      'name',
+      'startDate',
+      'endDate',
+      'sector',
+      'dataCollectingTypeCode',
+      'description',
+      'budget',
+      'administrativeAreasOfImplementation',
+      'populationGoal',
+      'cashPlus',
+      'frequencyOfPayments',
+    ],
+    ['partners'],
+  ];
 
   const { allAreasTree } = treeData;
   const { userPartnerChoices } = userPartnerChoicesData;
@@ -128,46 +135,45 @@ export const DuplicateProgramPage = (): ReactElement => {
       validationSchema={programValidationSchema(t)}
     >
       {({ submitForm, values, validateForm, setFieldTouched }) => {
-        const mappedPartnerChoices = userPartnerChoices.filter(partner => partner.name !== "UNICEF").map((partner) => ({
-          value: partner.value,
-          label: partner.name,
-          disabled: values.partners.some((p) => p.id === partner.value),
-        }));
+        const mappedPartnerChoices = userPartnerChoices
+          .filter((partner) => partner.name !== 'UNICEF')
+          .map((partner) => ({
+            value: partner.value,
+            label: partner.name,
+            disabled: values.partners.some((p) => p.id === partner.value),
+          }));
 
         const handleNext = async (): Promise<void> => {
           const errors = await validateForm();
-          const step0Errors = stepFields[0].some(field => errors[field]);
+          const step0Errors = stepFields[0].some((field) => errors[field]);
 
           if (step === 0 && !step0Errors) {
             setStep(1);
-          }
-           else {
+          } else {
             stepFields[step].forEach((field) => setFieldTouched(field));
           }
         };
 
+        const breadCrumbsItems: BreadCrumbsItem[] = [
+          {
+            title: t('Programme'),
+            to: `/${baseUrl}/details/${id}`,
+          },
+        ];
+
         return (
           <>
-            <PageHeader title={`${t('Copy of Programme')}: (${name})`}>
-              <Box display='flex' alignItems='center'>
-                <Button
-                  data-cy='button-cancel'
-                  component={Link}
-                  to={`/${baseUrl}/details/${id}`}
-                >
-                  {t('Cancel')}
-                </Button>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  onClick={submitForm}
-                  data-cy='button-save'
-                  disabled={step === 0}
-                >
-                  {t('Save')}
-                </Button>
-              </Box>
-            </PageHeader>
+            <PageHeader
+              title={`${t('Copy of Programme')}: (${name})`}
+              breadCrumbs={
+                hasPermissionInModule(
+                  'PROGRAMME_VIEW_LIST_AND_DETAILS',
+                  permissions,
+                )
+                  ? breadCrumbsItems
+                  : null
+              }
+            />
             <Box p={6}>
               <Stepper activeStep={step}>
                 <Step>
@@ -188,10 +194,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                 </Step>
               </Stepper>
               {step === 0 && (
-                <DetailsStep
-                  values={values}
-                  handleNext={handleNext}
-                />
+                <DetailsStep values={values} handleNext={handleNext} />
               )}
               {step === 1 && (
                 <PartnersStep
@@ -200,6 +203,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                   partnerChoices={mappedPartnerChoices}
                   step={step}
                   setStep={setStep}
+                  submitForm={submitForm}
                 />
               )}
             </Box>

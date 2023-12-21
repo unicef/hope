@@ -1,8 +1,10 @@
 import { Box, Button } from '@material-ui/core';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ProgramForm } from '../../../containers/forms/ProgramForm';
 import { BaseSection } from '../../core/BaseSection';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 interface DetailsStepProps {
   values;
@@ -14,6 +16,7 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({
   handleNext,
 }) => {
   const { t } = useTranslation();
+  const { baseUrl } = useBaseUrl();
   const title = t('Details');
   const description = t(
     'To create a new Programme, please complete all required fields on the form below and save.',
@@ -29,7 +32,14 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({
     <BaseSection title={title} description={description}>
       <>
         <ProgramForm values={values} />
-        <Box display='flex' justifyContent='flex-end'>
+        <Box display='flex' justifyContent='space-between'>
+          <Button
+            data-cy='button-cancel'
+            component={Link}
+            to={`/${baseUrl}/list`}
+          >
+            {t('Cancel')}
+          </Button>
           <Button
             variant='contained'
             color='primary'

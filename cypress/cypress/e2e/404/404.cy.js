@@ -64,7 +64,7 @@ describe("404 Page", () => {
         error404Page.getPageNoFound();
         cy.wait("@error404").its("response.statusCode").should("eq", 200);
         error404Page.getGoToCountryDashboard().click();
-        cy.get("h5").contains("Programme Management");
+        cy.get("h5").contains("Dashboard");
       });
     });
   });

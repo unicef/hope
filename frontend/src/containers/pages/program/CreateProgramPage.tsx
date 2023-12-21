@@ -1,8 +1,7 @@
-import { Box, Button, Step, StepButton, Stepper } from '@material-ui/core';
+import { Box, Step, StepButton, Stepper } from '@material-ui/core';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
@@ -17,13 +16,17 @@ import { PartnersStep } from '../../../components/programs/CreateProgram/Partner
 import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
+import { hasPermissionInModule } from '../../../config/permissions';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 
 export const CreateProgramPage = (): ReactElement => {
   const { t } = useTranslation();
-
+  const permissions = usePermissions();
   const [step, setStep] = useState(0);
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
+
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
@@ -79,26 +82,35 @@ export const CreateProgramPage = (): ReactElement => {
     partners: [],
   };
 
-  const stepFields =[ [
-    'name',
-    'startDate',
-    'endDate',
-    'sector',
-    'dataCollectingTypeCode',
-    'description',
-    'budget',
-    'administrativeAreasOfImplementation',
-    'populationGoal',
-    'cashPlus',
-    'frequencyOfPayments',
-  ], ['partners']];
-
+  const stepFields = [
+    [
+      'name',
+      'startDate',
+      'endDate',
+      'sector',
+      'dataCollectingTypeCode',
+      'description',
+      'budget',
+      'administrativeAreasOfImplementation',
+      'populationGoal',
+      'cashPlus',
+      'frequencyOfPayments',
+    ],
+    ['partners'],
+  ];
 
   if (treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
   if (!treeData || !userPartnerChoicesData) return null;
 
   const { allAreasTree } = treeData;
   const { userPartnerChoices } = userPartnerChoicesData;
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: t('Programme Management'),
+      to: `/${baseUrl}/list/`,
+    },
+  ];
 
   return (
     <Formik
@@ -109,46 +121,38 @@ export const CreateProgramPage = (): ReactElement => {
       validationSchema={programValidationSchema(t)}
     >
       {({ submitForm, values, validateForm, setFieldTouched }) => {
-        const mappedPartnerChoices = userPartnerChoices.filter(partner => partner.name !== "UNICEF").map((partner) => ({
-          value: partner.value,
-          label: partner.name,
-          disabled: values.partners.some((p) => p.id === partner.value),
-        }));
+        const mappedPartnerChoices = userPartnerChoices
+          .filter((partner) => partner.name !== 'UNICEF')
+          .map((partner) => ({
+            value: partner.value,
+            label: partner.name,
+            disabled: values.partners.some((p) => p.id === partner.value),
+          }));
 
         const handleNext = async (): Promise<void> => {
           const errors = await validateForm();
-          const step0Errors = stepFields[0].some(field => errors[field]);
+          const step0Errors = stepFields[0].some((field) => errors[field]);
 
           if (step === 0 && !step0Errors) {
             setStep(1);
-          }
-           else {
+          } else {
             stepFields[step].forEach((field) => setFieldTouched(field));
           }
         };
 
         return (
           <>
-            <PageHeader title={t('Create Programme')}>
-              <Box display='flex' alignItems='center'>
-                <Button
-                  data-cy='button-cancel'
-                  component={Link}
-                  to={`/${baseUrl}/list`}
-                >
-                  {t('Cancel')}
-                </Button>
-                <Button
-                  data-cy='button-save'
-                  variant='contained'
-                  color='primary'
-                  onClick={submitForm}
-                  disabled={step === 0}
-                >
-                  {t('Save')}
-                </Button>
-              </Box>
-            </PageHeader>
+            <PageHeader
+              title={t('New Programme')}
+              breadCrumbs={
+                hasPermissionInModule(
+                  'PROGRAMME_VIEW_LIST_AND_DETAILS',
+                  permissions,
+                )
+                  ? breadCrumbsItems
+                  : null
+              }
+            />
             <Box p={6}>
               <Stepper activeStep={step}>
                 <Step>
@@ -169,10 +173,7 @@ export const CreateProgramPage = (): ReactElement => {
                 </Step>
               </Stepper>
               {step === 0 && (
-                <DetailsStep
-                  values={values}
-                  handleNext={handleNext}
-                />
+                <DetailsStep values={values} handleNext={handleNext} />
               )}
               {step === 1 && (
                 <PartnersStep
@@ -181,6 +182,7 @@ export const CreateProgramPage = (): ReactElement => {
                   partnerChoices={mappedPartnerChoices}
                   step={step}
                   setStep={setStep}
+                  submitForm={submitForm}
                 />
               )}
             </Box>

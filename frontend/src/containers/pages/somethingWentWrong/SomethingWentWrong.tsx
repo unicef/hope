@@ -60,8 +60,6 @@ export const SomethingWentWrong: React.FC = () => {
   const businessArea = pathSegments[2];
   const errorMessage = history.location.state?.errorMessage;
 
-
-
   return (
     <Container>
       <LogoContainer>
@@ -81,8 +79,8 @@ export const SomethingWentWrong: React.FC = () => {
           <Paragraph>{errorMessage}</Paragraph>
         ) : (
           <Paragraph>
-            Don&apos;t worry! Our team is on it, working to fix the issue. Please
-            try again later. Thank you for your patience.
+            Don&apos;t worry! Our team is on it, working to fix the issue.
+            Please try again later. Thank you for your patience.
           </Paragraph>
         )}
       </TextContainer>
@@ -97,15 +95,18 @@ export const SomethingWentWrong: React.FC = () => {
             REFRESH PAGE
           </Button>
         </Box>
-        <Button
-          endIcon={<DashboardIcon />}
-          color='primary'
-          variant='contained'
-          component={Link}
-          to={`/${businessArea}/programs/all/list`}
-        >
-          GO TO PROGRAMME MANAGEMENT
-        </Button>
+        {businessArea && (
+          <Button
+            endIcon={<DashboardIcon />}
+            color='primary'
+            variant='contained'
+            component={Link}
+            data-cy='button-go-to-country-dashboard'
+            to={`/${businessArea}/programs/all/country-dashboard`}
+          >
+            GO TO COUNTRY DASHBOARD
+          </Button>
+        )}
       </Box>
     </Container>
   );

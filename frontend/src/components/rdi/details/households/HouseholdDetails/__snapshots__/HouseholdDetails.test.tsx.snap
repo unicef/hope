@@ -186,10 +186,10 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               class="sc-htpNat hcDmtB"
               color="textSecondary"
             >
-              COLLECT TYPE
+              Data Collecting Type
             </span>
             <div
-              data-cy="label-COLLECT TYPE"
+              data-cy="label-Data Collecting Type"
             >
               -
             </div>

@@ -22,6 +22,7 @@ const CircularProgressContainer = styled.div`
   display: flex;
   justify-content: center;
   align-content: center;
+  height: 50px;
   width: 100%;
 `;
 
@@ -114,13 +115,16 @@ export function CreateImportFromXlsxForm({
           component={FormikTextField}
         />
         <ScreenBeneficiaryField />
-        <CircularProgressContainer>
-          {saveXlsxLoading && <CircularProgress />}
-        </CircularProgressContainer>
-        <XlsxImportDataRepresentation
-          xlsxImportData={xlsxImportData}
-          loading={saveXlsxLoading}
-        />
+        {saveXlsxLoading ? (
+          <CircularProgressContainer>
+            <CircularProgress />
+          </CircularProgressContainer>
+        ) : (
+          <XlsxImportDataRepresentation
+            xlsxImportData={xlsxImportData}
+            loading={saveXlsxLoading}
+          />
+        )}
       </FormikProvider>
     </div>
   );
