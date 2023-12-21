@@ -24,7 +24,7 @@ import { LabelizedField } from '../../core/LabelizedField';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
-import {useBaseUrl} from "../../../hooks/useBaseUrl";
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
   margin: 20px;
@@ -155,18 +155,16 @@ export const PaymentDetails = ({
         <Grid container spacing={3}>
           <Grid item xs={3}>
             <LabelizedField label={t('HOUSEHOLD ID')}>
-              {payment.household?.id ? (
+              {payment.household?.id && canViewHouseholdDetails ? (
                 <BlackLink
-                  to={
-                    canViewHouseholdDetails
-                      ? `/${businessArea}/programs/${programId}/population/household/${payment.household.id}`
-                      : undefined
-                  }
+                  to={`/${businessArea}/programs/${programId}/population/household/${payment.household.id}`}
                 >
                   {payment.household.unicefId}
                 </BlackLink>
               ) : (
-                '-'
+                <div>
+                  {payment.household?.id ? payment.household.unicefId : '-'}
+                </div>
               )}
             </LabelizedField>
           </Grid>
