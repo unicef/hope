@@ -22,6 +22,7 @@ from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
@@ -44,11 +45,13 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             region_name="SAR",
             has_data_sharing_agreement=True,
         )
+        cls.program = ProgramFactory(business_area=cls.business_area)
         cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
                 "business_area": cls.business_area,
+                "program": cls.program,
             },
             individuals_data=[
                 {
@@ -62,6 +65,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -74,6 +78,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
                     "birth_date": "1955-09-05",
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -86,6 +91,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -98,6 +104,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -110,6 +117,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
+                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -122,6 +130,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
+                    "program": cls.program,
                 },
             ],
         )
@@ -207,6 +216,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         self.assertEqual(self.document3.status, Document.STATUS_VALID)
         self.assertEqual(self.document4.status, Document.STATUS_NEED_INVESTIGATION)
         self.assertEqual(GrievanceTicket.objects.count(), 1)
+        grievance_ticket = GrievanceTicket.objects.first()
+        self.assertEqual(grievance_ticket.programs.count(), 1)
+        self.assertEqual(grievance_ticket.programs.first().id, self.program.id)
         ticket_details = GrievanceTicket.objects.first().needs_adjudication_ticket_details
         self.assertEqual(ticket_details.possible_duplicates.count(), 2)
         self.assertEqual(ticket_details.is_multiple_duplicates_version, True)
@@ -257,11 +269,12 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             # 4. Update Documents.status
             # 5. Filter PossibleDuplicateThrough
             # 6. Bulk Create GrievanceTicket
-            # 7. Bulk Create TicketNeedsAdjudicationDetails
-            # 8. Bulk Create PossibleDuplicateThrough
-            # 9. Transaction savepoint release
-            # 10 - 12. Queries for `is_cross_area` update
-            self.assertEqual(first_dedup_query_count, 12, "Should only use 12 queries")
+            # 7. Bulk Create GrievanceTicketProgramThrough
+            # 8. Bulk Create TicketNeedsAdjudicationDetails
+            # 9. Bulk Create PossibleDuplicateThrough
+            # 10. Transaction savepoint release
+            # 11 - 13. Queries for `is_cross_area` update
+            self.assertEqual(first_dedup_query_count, 13, "Should only use 13 queries")
 
     def test_ticket_created_correctly(self) -> None:
         HardDocumentDeduplication().deduplicate(
@@ -281,6 +294,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         )
         # failed probably because of all_matching_number_documents qs ordering
         self.assertEqual(GrievanceTicket.objects.all().count(), 1)
+        grievance_ticket = GrievanceTicket.objects.first()
+        self.assertEqual(grievance_ticket.programs.count(), 1)
+        self.assertEqual(grievance_ticket.programs.first().id, self.program.id)
 
     def test_valid_for_deduplication_doc_type(self) -> None:
         pl = geo_models.Country.objects.get(iso_code2="PL")

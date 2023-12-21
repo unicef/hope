@@ -54,9 +54,9 @@ export const LookUpRegistrationDataImportTableCommunication = ({
       max: filter.importDateRangeMax || null,
     }),
     totalHouseholdsCountWithValidPhoneNoMin:
-      filter.totalHouseholdsCountWithValidPhoneNoMin,
+      filter.totalHouseholdsCountWithValidPhoneNoMin || null,
     totalHouseholdsCountWithValidPhoneNoMax:
-      filter.totalHouseholdsCountWithValidPhoneNoMax,
+      filter.totalHouseholdsCountWithValidPhoneNoMax || null,
   };
 
   const handleRadioChange = (id: string): void => {

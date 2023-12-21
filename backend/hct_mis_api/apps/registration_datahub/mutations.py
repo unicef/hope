@@ -436,12 +436,14 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
     @is_authenticated
     def mutate(cls, root: Any, info: Any, file: IO, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
+        program_id = decode_id_string(info.context.headers.get("Program"))
         import_data = ImportData.objects.create(
             file=file,
             data_type=ImportData.XLSX,
             status=ImportData.STATUS_PENDING,
             created_by_id=info.context.user.id,
             business_area_slug=business_area_slug,
+            program_id=program_id,
         )
         transaction.on_commit(partial(validate_xlsx_import_task.delay, import_data.id))
         return UploadImportDataXLSXFileAsync(import_data, [])

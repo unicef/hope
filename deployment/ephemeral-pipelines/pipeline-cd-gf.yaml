@@ -1,13 +1,17 @@
 trigger: none
 pr: none
 resources:
+  repositories:
+  - repository: hct-mis-helm
+    type: github
+    endpoint: "unicef (2)"
+    name: unicef/hct-mis-helm
   pipelines:
   - pipeline: ci-hope
     source: '[CI] HOPE'
     trigger: 
       branches:
-      - global-program-filter
-
+      - master
 
 variables:
   # ========================================================================
@@ -28,14 +32,13 @@ stages:
           vmImage: 'ubuntu-latest'
         displayName: "[HOPE] Deployment"
         steps:
-          - task: HelmDeploy@0
-            displayName: "Update Chart dependencies"
+          - checkout: self
+          - checkout: hct-mis-helm
+          - task: Kubernetes@1
             inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
-              command: package
-              updatedependency: true
-              chartPath: '**/deployment/charts/hope'
+              connectionType: 'Kubernetes Service Connection' 
+              kubernetesServiceEndpoint: $(Kubernetes.serviceConnection)
+              command: 'login'
           - task: HelmDeploy@0
             displayName: "DEPLOY"
             inputs:
@@ -44,21 +47,41 @@ stages:
               namespace: $(Kubernetes.namespace)
               command: 'upgrade'
               chartType: 'FilePath'
-              chartPath: '**/deployment/charts/hope'
-              releaseName: 'hope-gf'
+              chartPath: 'hct-mis-helm/pkg/hope-$(CHART_VERSION).tgz'
+              releaseName: 'hope'
               install: true
               waitForExecution: false
               failOnStderr: false
-              valueFile: '**/deployment/ephemeral-pipelines/gf-values.yaml'
+              force: $[not(empty(variables['REDEPLOY']))]
+              valueFile: 'hct-mis/deployment/ephemeral-pipelines/pipeline-cd-eph.values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
+                git.sha=$(Build.SourceVersion),\
                 backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
                 celery.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
-                frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
                 backend.secret.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
+                backend.secret.SECRET_KEY=$(SECRET_KEY),\
+                backend.config.SENTRY_DSN=$(SENTRY_DSN),\
+                backend.config.SENTRY_ENVIRONMENT=$(SENTRY_ENVIRONMENT),\
                 backend.secret.STORAGE_AZURE_ACCOUNT_KEY=$(STORAGE_AZURE_ACCOUNT_KEY),\
                 backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
                 backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
-                backend.secret.KOBO_MASTER_API_TOKEN=$(KOBO_MASTER_API_TOKEN),\
-                backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY)"
-
+                backend.secret.EXCHANGE_RATES_API_KEY=$(EXCHANGE_RATES_API_KEY),\
+                backend.secret.ROOT_ACCESS_TOKEN=$(ROOT_ACCESS_TOKEN),\
+                backend.secret.KOBO_APP_API_TOKEN=$(KOBO_APP_API_TOKEN),\
+                frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
+                postgresql.password=$(POSTGRES_PASSWORD),\
+                registrationdatahubpostgresql.password=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                pgadmin.password=$(PGADMIN_PASSWORD),\
+                celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH)"
+          - script: |
+              timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/job=upgrade \
+              --tail=-1 --prefix | awk '/Upgrade succeeded/{print $0;exit} /.*/{print $0;}'
+            displayName: "TAIL UPGRADE JOB"
+            condition: always()
+          - script: |
+              timeout 120 kubectl -n $(Kubernetes.namespace) logs -l git/sha=$(Build.SourceVersion) -l hope/service=backend \
+              --tail=-1 --prefix | awk '/Worker spawned/{print $0;exit} /.*/{print $0;}'
+            displayName: "TAIL BACKEND"
+            condition: succeeded()

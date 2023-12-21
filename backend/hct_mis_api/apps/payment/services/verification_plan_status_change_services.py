@@ -139,6 +139,8 @@ class VerificationPlanStatusChangeServices:
 
         business_area = payment_verification_plan.payment_plan_obj.business_area
         grievance_ticket_list = []
+        tickets_programs = []
+        GrievanceTicketProgramThrough = GrievanceTicket.programs.through
         for verification in verifications:
             grievance_ticket = GrievanceTicket(
                 category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
@@ -147,7 +149,17 @@ class VerificationPlanStatusChangeServices:
                 admin2_id=verification.payment_obj.household.admin2_id,
             )
             grievance_ticket_list.append(grievance_ticket)
+            # program taken from verification.payment_obj.target_population if payment_obj is PaymentRecord instance;
+            # and from verification.payment_obj.parent.target_population if payment_obj is Payment instance
+            program = (
+                getattr(verification.payment_obj.target_population, "program", None)
+                or verification.payment_obj.parent.target_population.program
+            )
+            tickets_programs.append(
+                GrievanceTicketProgramThrough(grievanceticket=grievance_ticket, program_id=program.id)
+            )
         grievance_ticket_objs = GrievanceTicket.objects.bulk_create(grievance_ticket_list)
+        GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
 
         ticket_payment_verification_details_list = []
         for verification, grievance_ticket in zip(verifications, grievance_ticket_objs):
