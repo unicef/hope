@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.9.12-slim-bullseye as base
+FROM python:3.9.18-slim-bullseye as base
 
 ARG UID=82
 
@@ -24,8 +24,7 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   libpangocairo-1.0-0 \
   shared-mime-info \
   wkhtmltopdf \
-  curl \
-  vim &&\
+  curl &&\
   addgroup --system --gid "${UID}" hope &&\
   adduser --system --uid "${UID}" --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
   mkdir -p /code /tmp /data &&\
