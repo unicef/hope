@@ -100,6 +100,7 @@ export const SomethingWentWrong: React.FC = () => {
             endIcon={<Refresh />}
             variant='outlined'
             color='primary'
+            data-cy='button-refresh-page'
             onClick={goBackAndClearCache}
           >
             REFRESH PAGE
@@ -111,6 +112,7 @@ export const SomethingWentWrong: React.FC = () => {
             color='primary'
             variant='contained'
             onClick={handleGoBack}
+            data-cy='button-go-back'
           >
             GO BACK
           </Button>
