@@ -24,13 +24,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    Record,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
+from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
+from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
-from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 
 
 class SriLankaRegistrationService(BaseRegistrationService):
@@ -61,7 +60,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     ]
 
     def _prepare_household_data(
-        self, localization_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, localization_dict: Dict, record: Any, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
         household_data = {
             **build_arg_dict_from_dict(localization_dict, SriLankaRegistrationService.HOUSEHOLD_MAPPING_DICT),
@@ -177,7 +176,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
 
     def create_household_for_rdi_household(
-        self, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, record: Any, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
         record_data_dict = record.get_data()
         localization_dict = record_data_dict.get("localization-info", [])[0]
