@@ -13,7 +13,7 @@ variables:
   # ========================================================================
   Kubernetes.serviceConnection: "ICTD-HOPE-TRN-uni-apps-aks-hope-dev-ictd-hope-trn-1616938354772"
   Kubernetes.namespace: "ictd-hope-trn"
-  Chart.version: "0.1.5"
+  Chart.version: "0.1.6"
 
 stages:
   - stage: deploy
