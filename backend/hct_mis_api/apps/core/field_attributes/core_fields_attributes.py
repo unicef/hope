@@ -49,8 +49,6 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
 from hct_mis_api.apps.core.field_attributes.lookup_functions import (
     get_birth_certificate_issuer,
     get_birth_certificate_no,
-    get_document_issuer,
-    get_document_no,
     get_drivers_license_issuer,
     get_drivers_license_no,
     get_electoral_card_issuer,
