@@ -37,7 +37,7 @@ graph LR
 
 ### Continuous Deployment Details
 
-- The CD process involves deploying the built images to the appropriate servers based on the branch, providing such services as a relational database (postgres), cache (redis), broker (celery), elasticserach, and the backend and frontend services built in the CI process.
+- The CD process involves deploying the built images to the appropriate servers based on the branch, providing such services as a relational database (postgres), cache (redis), broker (celery), elasticsearch, and the backend and frontend services built in the CI process.
 - Develop branch deployments go to the development server, staging to the staging server, and master to the training and production servers.
 - As the project is evolving, "ephemeral" environments may be created for testing purposes. These environments are created by creating a new branch from the develop branch, and deploying the branch to the new server. The branch is then deleted after testing is complete and the deployment is removed.
 
