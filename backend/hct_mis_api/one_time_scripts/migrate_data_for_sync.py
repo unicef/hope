@@ -379,7 +379,7 @@ def copy_individual_fast(individual: Individual, program: Program) -> tuple:
 
 def copy_roles(households: QuerySet, program: Program) -> None:
     # filter only original roles
-    roles = (
+    roles_ids = list(
         IndividualRoleInHousehold.original_and_repr_objects.filter(
             household__in=households,
             individual__is_removed=False,
@@ -387,17 +387,19 @@ def copy_roles(households: QuerySet, program: Program) -> None:
             is_original=True,
         )
         .exclude(copied_to__household__program=program)
-        .select_related("individual", "household")  # can't prefetch because custom manager
         .distinct("individual", "household")
         .order_by("individual", "household")
+        .values_list("id", flat=True)
     )
 
-    roles_count = roles.count()
+    roles_count = len(roles_ids)
     for batch_start in range(0, roles_count, BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
         logger.info(f"Handling {batch_start} - {batch_end}/{roles_count} roles")
         roles_list = []
-        roles_batch = roles[0:BATCH_SIZE]
+        roles_batch = IndividualRoleInHousehold.original_and_repr_objects.filter(
+            id__in=roles_ids[batch_start:batch_end]
+        ).select_related("individual", "household")
         original_individual_ids = [role.individual_id for role in roles_batch]
         original_household_ids = [role.household_id for role in roles_batch]
         household_representations = Household.original_and_repr_objects.filter(

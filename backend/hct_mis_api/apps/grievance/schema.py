@@ -358,6 +358,21 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    @staticmethod
+    def resolve_household_data(parent: TicketHouseholdDataUpdateDetails, info: Any) -> Dict:
+        household_data = parent.household_data
+        if admin_area_title := household_data.get("admin_area_title"):
+            if value := admin_area_title.get("value"):
+                area = Area.objects.get(p_code=value)
+                admin_area_title["value"] = f"{area.name} - {area.p_code}"
+
+            if previous_value := admin_area_title.get("previous_value"):
+                area = Area.objects.get(p_code=previous_value)
+                admin_area_title["previous_value"] = f"{area.name} - {area.p_code}"
+
+            household_data["admin_area_title"] = admin_area_title
+        return household_data
+
 
 class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
     golden_records = graphene.List(DeduplicationResultNode)
