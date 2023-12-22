@@ -78,7 +78,9 @@ class PaymentRecordFilter(FilterSet):
             "distribution_modality",
             "household__unicef_id",
             "household__size",
+            "household__admin2__name",
             "entitlement_quantity",
+            "delivered_quantity",
             "delivered_quantity_usd",
             "delivery_date",
         )
