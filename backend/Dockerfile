@@ -10,7 +10,6 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   apt-get install -y --no-install-recommends \
   build-essential \
   libjpeg-dev \
-  zlib1g-dev \
   postgresql-client \
   libpq-dev \
   python3-psycopg2 \
