@@ -57,7 +57,7 @@ When running a backend image, the following environment variables must be set:
     - SENTRY_DSN
     - SENTRY_ENVIRONMENT
 - Exchange Rates API:
-    - EXCHANGE_RATSE_API_KEY
+    - EXCHANGE_RATES_API_KEY
 - Kobo:
     - KOBO_APP_API_TOKEN
 - Other
