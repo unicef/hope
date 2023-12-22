@@ -57,18 +57,20 @@ export const FeedbackDetails = ({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {feedback.householdLookup?.id && !isAllPrograms ? (
+                    {feedback.householdLookup?.id &&
+                    canViewHouseholdDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
-                        to={
-                          canViewHouseholdDetails
-                            ? `/${baseUrl}/population/household/${feedback.householdLookup?.id}`
-                            : undefined
-                        }
+                        to={`/${baseUrl}/population/household/${feedback.householdLookup?.id}`}
                       >
                         {feedback.householdLookup?.unicefId}
                       </BlackLink>
                     ) : (
-                      feedback.householdLookup?.unicefId || '-'
+                      <div>
+                        {feedback.householdLookup?.id
+                          ? feedback.householdLookup?.unicefId
+                          : '-'}
+                      </div>
                     )}
                   </span>
                 ),
@@ -78,18 +80,20 @@ export const FeedbackDetails = ({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {feedback.individualLookup?.id && !isAllPrograms ? (
+                    {feedback.individualLookup?.id &&
+                    canViewIndividualDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
-                        to={
-                          canViewIndividualDetails
-                            ? `/${baseUrl}/population/individuals/${feedback.individualLookup?.id}`
-                            : undefined
-                        }
+                        to={`/${baseUrl}/population/individuals/${feedback.individualLookup?.id}`}
                       >
                         {feedback.individualLookup?.unicefId}
                       </BlackLink>
                     ) : (
-                      feedback.individualLookup?.unicefId || '-'
+                      <div>
+                        {feedback.individualLookup?.id
+                          ? feedback.individualLookup?.unicefId
+                          : '-'}
+                      </div>
                     )}
                   </span>
                 ),
