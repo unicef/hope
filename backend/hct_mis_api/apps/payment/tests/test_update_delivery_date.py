@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from django.conf import settings
 
+import pytz
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -17,7 +18,6 @@ from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
-import pytz
 
 
 def file_without_delivery_dates() -> BytesIO:
@@ -95,8 +95,8 @@ class TestDeliveryDate(APITestCase):
     def test_uploading_delivery_date_with_xlsx(self, mock_time_zone: Any, mock_exchange_rate: Any) -> None:
         self.payment_1.delivery_date = None
         self.payment_1.save()
-        old_delivery_date2 =self.payment_2.delivery_date
-        old_delivery_date3 =self.payment_3.delivery_date
+        old_delivery_date2 = self.payment_2.delivery_date
+        old_delivery_date3 = self.payment_3.delivery_date
         file_no_delivery_date = file_without_delivery_dates()
         import_service = XlsxPaymentPlanImportPerFspService(self.payment_plan, file_no_delivery_date)
         import_service.open_workbook()
