@@ -1713,6 +1713,7 @@ type ImportDataNode implements Node {
   updatedAt: DateTime!
   status: ImportDataStatus!
   businessAreaSlug: String!
+  programId: UUID
   file: String
   dataType: ImportDataDataType!
   numberOfHouseholds: Int
@@ -2539,6 +2540,7 @@ type KoboImportDataNode implements Node {
   updatedAt: DateTime!
   status: ImportDataStatus!
   businessAreaSlug: String!
+  programId: UUID
   file: String
   dataType: ImportDataDataType!
   numberOfHouseholds: Int
