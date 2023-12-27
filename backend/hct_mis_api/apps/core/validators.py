@@ -334,15 +334,18 @@ class DataCollectingTypeValidator(BaseValidator):
 
         # user can update the program and don't update data collecting type
         if data_collecting_type:
+            # can't update for draft program
             if (
                 program
                 and program.data_collecting_type.code != data_collecting_type.code
                 and program.status != Program.DRAFT
             ):
                 raise ValidationError("DataCollectingType can be updated only for Program within status draft")
+            # can update for draft program and without population
             elif (
                 program
                 and program.data_collecting_type.code != data_collecting_type.code
+                and program.status == Program.DRAFT
                 and Household.objects.filter(program=program).exists()
             ):
                 raise ValidationError("DataCollectingType can be updated only for Program without any households")
