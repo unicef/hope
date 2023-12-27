@@ -427,7 +427,6 @@ class ImportData(TimeStampedUUIDModel):
     )
     status = models.CharField(max_length=20, default=STATUS_FINISHED, choices=STATUS_CHOICES)
     business_area_slug = models.CharField(max_length=200, blank=True)
-    program_id = models.UUIDField(null=True, blank=True)
     file = models.FileField(null=True)
     data_type = models.CharField(max_length=4, choices=DATA_TYPE_CHOICES, default=XLSX)
     number_of_households = models.PositiveIntegerField(null=True)
