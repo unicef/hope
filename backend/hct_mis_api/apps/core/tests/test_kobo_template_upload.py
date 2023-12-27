@@ -80,6 +80,7 @@ class TestKoboTemplateUpload(APITestCase):
         form = response.context_data["form"]
         expected_errors = {
             "__all__": [
+                "Field: residence_status_h_c - Choice: RETURNEE is not present in the file",
                 "Field: size_h_c - Field must be required",
                 "Field: fchild_hoh_i_c - Field is missing",
                 "Field: child_hoh_i_c - Field is missing",
