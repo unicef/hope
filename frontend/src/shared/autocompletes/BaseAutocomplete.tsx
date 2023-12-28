@@ -66,14 +66,10 @@ export const BaseAutocomplete = ({
 
   if (!data) return null;
 
-  const validValue = allEdges.some((edge) => edge.node.id === value)
-    ? value
-    : null;
-
   return (
     <StyledAutocomplete
       key={prevValueRef.current}
-      value={validValue}
+      value={value}
       data-cy={dataCy}
       open={open}
       filterOptions={(options1) => options1}
