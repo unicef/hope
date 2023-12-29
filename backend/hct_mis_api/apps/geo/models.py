@@ -72,6 +72,8 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             for country in queryset
         ]
 
+    _natural_key = ("iso_code2", )
+
 
 class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     name = CICharField(max_length=255, db_index=True)

@@ -27,6 +27,7 @@ from adminfilters.filters import NumberFilter
 from smart_admin.mixins import FieldsetMixin
 
 from hct_mis_api.apps.geo.models import Area, AreaType, Country
+from hct_mis_api.apps.geo.protocols import MPTTProtocol
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 if TYPE_CHECKING:
@@ -147,6 +148,7 @@ class AreaTypeAdmin(ValidityManagerMixin, FieldsetMixin, SyncMixin, HOPEModelAdm
         # ("GIS", {"classes": ["collapse"], "fields": ("geom", "point")}),
         ("Others", {"classes": ["collapse"], "fields": ("__others__",)}),
     )
+    protocol_class = MPTTProtocol
 
 
 class AreaTypeFilter(RelatedFieldListFilter):
