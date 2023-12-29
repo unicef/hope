@@ -170,7 +170,6 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           />
         </Grid>
         <DeleteProgramPartner
-          partner={partner}
           //TODO: add permission
           canDeleteProgramPartner
           handleDeleteProgramPartner={handleDeleteProgramPartner}
