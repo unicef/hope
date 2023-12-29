@@ -195,7 +195,7 @@ export function TargetingCriteria({
           />
           <ContentWrapper>
             <Box display='flex' flexDirection='column'>
-              <Box display='flex'>
+              <Box display='flex' flexWrap='wrap'>
                 {rules.length ? (
                   rules.map((criteria, index) => {
                     return (
