@@ -139,7 +139,38 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         check_assignee = object_instance.assigned_to == user and user.has_permission(
             owner_perm, business_area, program_id
         )
-        if user.has_permission(perm, business_area, program_id) or check_creator or check_assignee:
+        partner = user.partner
+        has_partner_area_access = True if partner.is_unicef else False
+        if not partner.is_unicef:
+            if not object_instance.admin2:
+                # admin2 is empty
+                has_partner_area_access = True
+            else:
+                if program_id:
+                    partner_permission = partner.get_permissions()
+                    partner_areas_list: Optional[List] = partner_permission.areas_for(
+                        str(business_area.id), str(program_id)
+                    )
+                    if partner_areas_list is not None:
+                        # partner_areas_list is []
+                        if len(partner_areas_list) > 0:
+                            has_partner_area_access = (
+                                True if str(object_instance.admin2.id) in partner_areas_list else False
+                            )
+                        else:
+                            # has access to the whole BA
+                            has_partner_area_access = True
+                    else:
+                        # partner_areas_list is None
+                        # don't have access to this area
+                        has_partner_area_access = False
+                else:
+                    log_and_raise("Can't check permission for All Programmes")
+
+        # check object_instance.areas with user.partner.program.areas
+        if (
+            user.has_permission(perm, business_area, program_id) or check_creator or check_assignee
+        ) and has_partner_area_access:
             return None
 
         log_and_raise(f"User is not active creator/assignee and does not have '{perm}' permission")
