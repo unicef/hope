@@ -1,7 +1,7 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
@@ -14,7 +14,7 @@ import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { useConfirmation } from '../../core/ConfirmationDialog';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
@@ -41,6 +41,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
+  const history = useHistory();
   const { isActiveProgram } = useProgramContext();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
@@ -113,14 +114,14 @@ export const RegistrationDataImportDetailsPageHeader = ({
     case RegistrationDataImportStatus.Merged:
       buttons = (
         <MergeButtonContainer>
-            <Button
-              variant='contained'
-              color='primary'
-              component={Link}
-              to={`/${baseUrl}/grievance/rdi/${registration.id}`}
-            >
-              {t('View Tickets')}
-            </Button>
+          <Button
+            variant='contained'
+            color='primary'
+            component={Link}
+            to={`/${baseUrl}/grievance/rdi/${registration.id}`}
+          >
+            {t('View Tickets')}
+          </Button>
         </MergeButtonContainer>
       );
       break;
@@ -138,6 +139,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
       <PageHeader
         title={registration.name}
         breadCrumbs={canViewList ? breadCrumbsItems : null}
+        handleBack={() => history.push(`/${baseUrl}/registration-data-import/`)}
       >
         {registration.erased ? null : buttons}
       </PageHeader>

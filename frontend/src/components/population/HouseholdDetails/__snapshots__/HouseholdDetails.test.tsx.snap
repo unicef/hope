@@ -381,10 +381,10 @@ Jameschester, SC 24934
               class="sc-bwzfXH eoWrid"
               color="textSecondary"
             >
-              COLLECT TYPE
+              Data Collecting Type
             </span>
             <div
-              data-cy="label-COLLECT TYPE"
+              data-cy="label-Data Collecting Type"
             >
               -
             </div>

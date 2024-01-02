@@ -22,6 +22,7 @@ const CircularProgressContainer = styled.div`
   display: flex;
   justify-content: center;
   align-content: center;
+  height: 50px;
   width: 100%;
 `;
 
@@ -48,6 +49,7 @@ export function CreateImportFromXlsxForm({
   const [createImport] = useCreateRegistrationXlsxImportMutation();
 
   const onSubmit = async (values): Promise<void> => {
+    setSubmitDisabled(true);
     try {
       const data = await createImport({
         variables: {
@@ -64,6 +66,7 @@ export function CreateImportFromXlsxForm({
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
+      setSubmitDisabled(false);
     }
   };
 
@@ -114,13 +117,16 @@ export function CreateImportFromXlsxForm({
           component={FormikTextField}
         />
         <ScreenBeneficiaryField />
-        <CircularProgressContainer>
-          {saveXlsxLoading && <CircularProgress />}
-        </CircularProgressContainer>
-        <XlsxImportDataRepresentation
-          xlsxImportData={xlsxImportData}
-          loading={saveXlsxLoading}
-        />
+        {saveXlsxLoading ? (
+          <CircularProgressContainer>
+            <CircularProgress />
+          </CircularProgressContainer>
+        ) : (
+          <XlsxImportDataRepresentation
+            xlsxImportData={xlsxImportData}
+            loading={saveXlsxLoading}
+          />
+        )}
       </FormikProvider>
     </div>
   );

@@ -62,7 +62,7 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
         partners_ids = [int(partner["id"]) for partner in partners_data]
         partner = info.context.user.partner
         if not partner.is_unicef and partner.id not in partners_ids:
-            raise ValidationError("User is not allowed to create program for partner different than his partner.")
+            raise ValidationError("Please assign access to your partner before saving the programme.")
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
@@ -119,7 +119,7 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
 
         if status_to_set not in [Program.ACTIVE, Program.FINISHED]:
             if not partner.is_unicef and partner.id not in partners_ids:
-                raise ValidationError("User is not allowed to create program for partner different than his partner.")
+                raise ValidationError("Please assign access to your partner before saving the programme.")
 
         data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
         data_collecting_type = old_program.data_collecting_type

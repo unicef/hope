@@ -11,7 +11,7 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { useDiscardPaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
-import { useProgramContext } from "../../programContext";
+import { useProgramContext } from '../../programContext';
 
 export interface DiscardVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -64,7 +64,7 @@ export function DiscardVerificationPlan({
             <Box p={5}>
               <div>
                 {t(
-                  'Are you sure you would like to delete payment verification records',
+                  'Are you sure you would like to remove payment verification records',
                 )}
                 <br /> {t('and restart the verification process?')}
               </div>
