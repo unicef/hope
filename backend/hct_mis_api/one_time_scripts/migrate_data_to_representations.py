@@ -74,6 +74,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         logger.info(f"Creating representations for program: {program}")
 
         # migrate households to program if RDI is assigned to program by user
+        logger.info(f"Creating representations for assigned RDIs")
         rdis = RegistrationDataImport.objects.filter(program=program).exclude(households__program=program)
         handle_rdis(rdis, program)
 
