@@ -101,6 +101,7 @@ export const GlobalProgramSelect = (): React.ReactElement => {
             dataCollectingType: {
               id: dataCollectingType?.id,
               code: dataCollectingType?.code,
+              type: dataCollectingType?.type,
               label: dataCollectingType?.label,
               householdFiltersAvailable:
                 dataCollectingType?.householdFiltersAvailable,
@@ -118,8 +119,10 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   useEffect(() => {
     // If the programId is not in a valid format or not one of the available programs, redirect to the access denied page
     if (
-      programId && !loading &&
-      (!isProgramNodeUuidFormat(programId) || !isOneOfAvailableProgramsId(programId)) &&
+      programId &&
+      !loading &&
+      (!isProgramNodeUuidFormat(programId) ||
+        !isOneOfAvailableProgramsId(programId)) &&
       programId !== 'all'
     ) {
       history.push(`/access-denied/${businessArea}`);

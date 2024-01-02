@@ -49,6 +49,7 @@ export const AllProgramsForChoices = gql`
           dataCollectingType {
             id
             code
+            type
             label
             active
             individualFiltersAvailable

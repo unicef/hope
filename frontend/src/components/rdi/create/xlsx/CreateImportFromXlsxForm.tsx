@@ -49,6 +49,7 @@ export function CreateImportFromXlsxForm({
   const [createImport] = useCreateRegistrationXlsxImportMutation();
 
   const onSubmit = async (values): Promise<void> => {
+    setSubmitDisabled(true);
     try {
       const data = await createImport({
         variables: {
@@ -65,6 +66,7 @@ export function CreateImportFromXlsxForm({
       );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
+      setSubmitDisabled(false);
     }
   };
 
