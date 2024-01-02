@@ -70,7 +70,6 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
     startPolling,
   } = useRegistrationDataImportQuery({
     variables: { id },
-    pollInterval: 30000,
     fetchPolicy: 'cache-and-network',
   });
   const {
@@ -92,7 +91,7 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
         RegistrationDataImportStatus.Merging,
       ].includes(status)
     ) {
-      startPolling(5000);
+      startPolling(30000);
     } else {
       stopPolling();
     }

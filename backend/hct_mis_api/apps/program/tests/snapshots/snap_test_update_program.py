@@ -134,7 +134,7 @@ snapshots['TestUpdateProgram::test_update_program_of_other_partner_raise_error 1
                     'line': 3
                 }
             ],
-            'message': "['User is not allowed to create program for partner different than his partner.']",
+            'message': "['Please assign access to your partner before saving the programme.']",
             'path': [
                 'updateProgram'
             ]
