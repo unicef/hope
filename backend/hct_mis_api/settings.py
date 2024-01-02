@@ -761,6 +761,8 @@ Clear Cache,clear-cache/
         "The schedule (in days) which is applied to task clean_old_record_files_task",
         "positive_integers",
     ),
+    "GATEWAY_SERVER": ("http://localhost:9000", "Payment Gateway URL", str),
+    "GATEWAY_TOKEN": ("uuid-token-0000", "HOPE's UUID Payment Token", str),
 }
 
 CONSTANCE_DBS = ("default",)
@@ -1091,3 +1093,10 @@ logger_azure.setLevel(logging.WARNING)
 
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ]
+}
