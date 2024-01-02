@@ -16,6 +16,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
 import pytz
+from freezegun import freeze_time
 from openpyxl import load_workbook
 from parameterized import parameterized
 from pytz import utc
@@ -928,6 +929,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             )
         )
 
+    @freeze_time("2023-12-12")
     def test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule(self) -> None:
         pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED, unicef_id="unicef_id_12345_2023")
         rule = RuleFactory(name="SomeRule")
