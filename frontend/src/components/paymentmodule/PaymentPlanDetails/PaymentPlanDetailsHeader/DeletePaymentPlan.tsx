@@ -20,7 +20,7 @@ import {
 import { LoadingButton } from '../../../core/LoadingButton';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { useProgramContext } from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -76,7 +76,7 @@ export const DeletePaymentPlan = ({
         <DialogContent>
           <DialogContainer>
             <Box p={5}>
-              {t('Are you sure you want to delete this Payment Plan?')}
+              {t('Are you sure you want to remove this Payment Plan?')}
             </Box>
           </DialogContainer>
         </DialogContent>

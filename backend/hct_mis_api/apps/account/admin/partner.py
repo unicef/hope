@@ -80,13 +80,11 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         form.base_fields["parent"].queryset = queryset
         return form
 
-    @button(
-        permission=can_add_business_area_to_partner,
-        enabled=lambda obj: obj.original.is_editable,
-    )
+    @button(enabled=lambda obj: obj.original.is_editable)
     def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
         partner: account_models.Partner = context["original"]
+        context["can_add_business_area_to_partner"] = request.user.can_add_business_area_to_partner()
 
         BusinessAreaRoleFormSet = formset_factory(BusinessAreaRoleForm, extra=0, can_delete=True)
         ProgramAreaFormSet = formset_factory(ProgramAreaForm, extra=0, can_delete=True)

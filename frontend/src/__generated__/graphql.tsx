@@ -2608,6 +2608,7 @@ export type ImportDataNode = Node & {
   updatedAt: Scalars['DateTime'],
   status: ImportDataStatus,
   businessAreaSlug: Scalars['String'],
+  programId?: Maybe<Scalars['UUID']>,
   file?: Maybe<Scalars['String']>,
   dataType: ImportDataDataType,
   numberOfHouseholds?: Maybe<Scalars['Int']>,
@@ -3680,6 +3681,7 @@ export type KoboImportDataNode = Node & {
   updatedAt: Scalars['DateTime'],
   status: ImportDataStatus,
   businessAreaSlug: Scalars['String'],
+  programId?: Maybe<Scalars['UUID']>,
   file?: Maybe<Scalars['String']>,
   dataType: ImportDataDataType,
   numberOfHouseholds?: Maybe<Scalars['Int']>,
@@ -13565,7 +13567,7 @@ export type AllProgramsForChoicesQuery = (
         & Pick<ProgramNode, 'id' | 'name' | 'status' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
-          & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable' | 'description'>
+          & Pick<DataCollectingTypeNode, 'id' | 'code' | 'type' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable' | 'description'>
         )> }
       )> }
     )>> }
@@ -25831,6 +25833,7 @@ export const AllProgramsForChoicesDocument = gql`
         dataCollectingType {
           id
           code
+          type
           label
           active
           individualFiltersAvailable
@@ -30691,6 +30694,7 @@ export type ImportDataNodeResolvers<ContextType = any, ParentType extends Resolv
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['ImportDataStatus'], ParentType, ContextType>,
   businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>,
   numberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -31141,6 +31145,7 @@ export type KoboImportDataNodeResolvers<ContextType = any, ParentType extends Re
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['ImportDataStatus'], ParentType, ContextType>,
   businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>,
   numberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
