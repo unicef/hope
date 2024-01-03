@@ -7,8 +7,8 @@ import { FeedbackQuery } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { PageHeader } from '../../core/PageHeader';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { ButtonTooltip } from "../../core/ButtonTooltip";
-import { useProgramContext } from "../../../programContext";
+import { ButtonTooltip } from '../../core/ButtonTooltip';
+import { useProgramContext } from '../../../programContext';
 
 interface FeedbackDetailsToolbarProps {
   feedback: FeedbackQuery['feedback'];
@@ -76,7 +76,9 @@ export const FeedbackDetailsToolbar = ({
               variant='contained'
               color='primary'
               data-cy='button-create-linked-ticket'
-              title={t('Program has to be active to create a Linked Ticket to Feedback')}
+              title={t(
+                'Program has to be active to create a Linked Ticket to Feedback',
+              )}
               disabled={!isActiveProgram}
             >
               {t('Create Linked Ticket')}
