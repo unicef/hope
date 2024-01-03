@@ -7,6 +7,7 @@ from django.forms import CheckboxSelectMultiple, ModelForm, formset_factory
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.html import format_html
 
 from admin_extra_buttons.decorators import button
 
@@ -38,11 +39,25 @@ class ProgramAreaForm(forms.Form):
 class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     list_filter = ("is_un",)
     search_fields = ("name",)
-    readonly_fields = ("permissions",)
+    readonly_fields = ("permissions", "sub_partners")
     list_display = (
         "name",
         "is_un",
     )
+
+    def sub_partners(self, obj: Any) -> Optional[str]:
+        return self.links_to_objects(obj.get_children()) if obj else None
+
+    sub_partners.short_description = "Sub-Partners"
+
+    @classmethod
+    def links_to_objects(cls, objects: Any) -> str:
+        rel_list = "<ul>"
+        for obj in objects:
+            link = reverse("admin:account_partner_change", args=[obj.id])
+            rel_list += "<li><a href='%s'>%s</a></li>" % (link, obj.name)
+        rel_list += "</ul>"
+        return format_html(rel_list)
 
     def get_readonly_fields(self, request: HttpRequest, obj: Optional[account_models.Partner] = None) -> Sequence[str]:
         additional_fields = []
@@ -54,7 +69,15 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         self, request: HttpRequest, obj: Optional[account_models.Partner] = None, change: bool = False, **kwargs: Any
     ) -> Type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields["parent"].queryset = account_models.Partner.objects.filter(level=0)
+
+        queryset = account_models.Partner.objects.filter(level=0)
+        if obj:
+            if obj.is_parent:
+                queryset = account_models.Partner.objects.none()
+            else:
+                queryset = queryset.exclude(id=obj.id)
+
+        form.base_fields["parent"].queryset = queryset
         return form
 
     @button(enabled=lambda obj: obj.original.is_editable)
