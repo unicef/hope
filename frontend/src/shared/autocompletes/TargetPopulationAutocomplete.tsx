@@ -1,5 +1,5 @@
 import get from 'lodash/get';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllTargetPopulationForChoicesLazyQuery } from '../../__generated__/graphql';
@@ -58,16 +58,25 @@ export const TargetPopulationAutocomplete = ({
     fetchPolicy: 'cache-and-network',
   });
 
-  useEffect(() => {
-    if (open) {
-      loadData();
-    }
-  }, [open, debouncedInputText, loadData]);
+  const isMounted = useRef(true);
 
-  // load all TPs on mount to match the value from the url
+  const loadDataCallback = useCallback(() => {
+    if (businessArea) {
+      loadData({ variables: { businessArea, name: debouncedInputText } });
+    }
+  }, [loadData, businessArea, debouncedInputText]);
+
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (open && isMounted.current) {
+      loadDataCallback();
+    }
+  }, [open, debouncedInputText, loadDataCallback]);
+
+  useEffect(() => {
+    if (isMounted.current) {
+      loadDataCallback();
+    }
+  }, [loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
