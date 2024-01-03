@@ -999,8 +999,13 @@ def get_unknown_unassigned_dict() -> Dict:
 
 
 def migrate_data_for_assigned_RDIs_per_business_area(business_area: BusinessArea) -> None:
+    hhs_before = Household.original_and_repr_objects.count()
     for program in Program.objects.filter(business_area=business_area):
+        logger.info(f"Creating representations for assigned RDIs for program {program}")
         rdis = RegistrationDataImport.objects.filter(
             program=program, created_at__gte=timezone.make_aware(timezone.datetime(2023, 9, 21))
         )
         handle_rdis(rdis, program)
+    logger.info(
+        f"Created {Household.original_and_repr_objects.count() - hhs_before} new representations in {business_area}"
+    )
