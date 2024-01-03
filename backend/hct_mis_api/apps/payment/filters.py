@@ -78,7 +78,9 @@ class PaymentRecordFilter(FilterSet):
             "distribution_modality",
             "household__unicef_id",
             "household__size",
+            "household__admin2__name",
             "entitlement_quantity",
+            "delivered_quantity",
             "delivered_quantity_usd",
             "delivery_date",
         )
@@ -385,8 +387,10 @@ class PaymentFilter(FilterSet):
             "unicef_id",
             "status",
             "household_id",
+            "household__unicef_id",
             "household__size",
             "household__admin2",
+            "household__admin2__name",
             "collector_id",
             "entitlement_quantity_usd",
             "delivered_quantity",
@@ -471,6 +475,8 @@ def cash_plan_and_payment_plan_ordering(queryset: ExtendedQuerySetSequence, orde
     elif order_by == "dispersion_date":
         # TODO this field is empty at the moment
         qs = queryset
+    elif order_by == "timeframe":
+        qs = queryset.order_by(reverse + "start_date", reverse + "end_date")
     else:
         qs = queryset.order_by(reverse + order_by)
 
