@@ -308,6 +308,107 @@ class TestGrievanceQuery(APITestCase):
             variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
 
+    def test_grievance_ticket_query_access(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR],
+            self.business_area,
+            self.program,
+        )
+
+        gt = GrievanceTicket.objects.get(status=GrievanceTicket.STATUS_IN_PROGRESS)
+        gt_id = gt.id
+        gt.admin2 = None
+        gt.save()
+        assert gt.admin2 is None
+        assert self.partner.is_unicef is False
+        # has access because gt.admin2 is empty
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
+        # add admin2 for Grievance
+        gt.admin2 = self.admin_area_1
+        gt.save()
+        # no access because no program id in header like All Programmes
+        assert gt.admin2 is self.admin_area_1
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
+        # access to whole BA
+        self.partner.permissions = {
+            str(self.business_area.pk): {
+                "programs": {str(self.program.id): []},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        self.partner.save()
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
+
+        # no access because Partner has only admin_area_2
+        self.partner.permissions = {
+            str(self.business_area.pk): {
+                "programs": {str(self.program.id): [str(self.admin_area_2.pk)]},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        self.partner.save()
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
+        # add admin_area_1 for for Partner
+        self.partner.permissions = {
+            str(self.business_area.pk): {
+                "programs": {str(self.program.id): [str(self.admin_area_1.pk)]},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        self.partner.save()
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
+
     def test_grievance_list_filtered_by_admin2(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
