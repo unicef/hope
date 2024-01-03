@@ -176,6 +176,14 @@ class Partner(MPTTModel, models.Model):
     def __str__(self) -> str:
         return self.name
 
+    @property
+    def is_child(self) -> bool:
+        return self.parent is None
+
+    @property
+    def is_parent(self) -> bool:
+        return self.id in Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)
+
     def get_permissions(self) -> PartnerPermission:
         return PartnerPermission.from_dict(self.permissions)
 
