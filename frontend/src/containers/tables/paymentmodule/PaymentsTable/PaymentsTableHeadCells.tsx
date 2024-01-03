@@ -19,7 +19,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Household Id',
-    id: 'household_id',
+    id: 'household__unicef_id',
     numeric: false,
   },
   {
