@@ -33,7 +33,7 @@ class UpgradeModel(models.Model):
         abstract = True
 
 
-class Country(MPTTModel, UpgradeModel, TimeStampedUUIDModel):
+class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
     name = CICharField(max_length=255, db_index=True)
     short_name = CICharField(max_length=255, db_index=True)
     iso_code2 = models.CharField(max_length=2, unique=True)

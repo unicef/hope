@@ -1,6 +1,7 @@
 import { Box, Button } from '@material-ui/core';
 import { Refresh } from '@material-ui/icons';
 import DashboardIcon from '@material-ui/icons/Dashboard';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -59,8 +60,15 @@ export const SomethingWentWrong: React.FC = () => {
   const pathSegments = history.location.pathname.split('/');
   const businessArea = pathSegments[2];
   const errorMessage = history.location.state?.errorMessage;
+  const shouldGoBack = history.location.state?.shouldGoBack;
 
-
+  const handleGoBack = (): void => {
+    if (window.history.length > 2) {
+      window.history.go(-2);
+    } else {
+      window.history.back();
+    }
+  };
 
   return (
     <Container>
@@ -81,8 +89,8 @@ export const SomethingWentWrong: React.FC = () => {
           <Paragraph>{errorMessage}</Paragraph>
         ) : (
           <Paragraph>
-            Don&apos;t worry! Our team is on it, working to fix the issue. Please
-            try again later. Thank you for your patience.
+            Don&apos;t worry! Our team is on it, working to fix the issue.
+            Please try again later. Thank you for your patience.
           </Paragraph>
         )}
       </TextContainer>
@@ -92,20 +100,36 @@ export const SomethingWentWrong: React.FC = () => {
             endIcon={<Refresh />}
             variant='outlined'
             color='primary'
+            data-cy='button-refresh-page'
             onClick={goBackAndClearCache}
           >
             REFRESH PAGE
           </Button>
         </Box>
-        <Button
-          endIcon={<DashboardIcon />}
-          color='primary'
-          variant='contained'
-          component={Link}
-          to={`/${businessArea}/programs/all/list`}
-        >
-          GO TO PROGRAMME MANAGEMENT
-        </Button>
+        {shouldGoBack === 'true' ? (
+          <Button
+            endIcon={<ArrowBackIcon />}
+            color='primary'
+            variant='contained'
+            onClick={handleGoBack}
+            data-cy='button-go-back'
+          >
+            GO BACK
+          </Button>
+        ) : (
+          businessArea && (
+            <Button
+              endIcon={<DashboardIcon />}
+              color='primary'
+              variant='contained'
+              component={Link}
+              data-cy='button-go-to-country-dashboard'
+              to={`/${businessArea}/programs/all/country-dashboard`}
+            >
+              GO TO COUNTRY DASHBOARD
+            </Button>
+          )
+        )}
       </Box>
     </Container>
   );

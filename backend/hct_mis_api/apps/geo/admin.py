@@ -87,7 +87,7 @@ class ValidityManagerMixin:
 
 
 @admin.register(Country)
-class CountryAdmin(ValidityManagerMixin, FieldsetMixin, HOPEModelAdminBase):
+class CountryAdmin(ValidityManagerMixin, SyncMixin, FieldsetMixin, HOPEModelAdminBase):
     list_display = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     search_fields = ("name", "short_name", "iso_code2", "iso_code3", "iso_num")
     raw_id_fields = ("parent",)

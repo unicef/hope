@@ -152,7 +152,7 @@ export function TargetingCriteria({
 
     // Disable household filters for social programs
     if (
-      selectedProgram?.dataCollectingType.code.toUpperCase() ===
+      selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
       DataCollectingTypeType.Social
     ) {
       householdFiltersAvailable = false;

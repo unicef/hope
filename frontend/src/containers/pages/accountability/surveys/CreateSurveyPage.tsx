@@ -202,10 +202,17 @@ export const CreateSurveyPage = (): React.ReactElement => {
     return Yup.object().shape(datum);
   }, [activeStep, t, category]);
 
-
   //Redirect to error page if no flows available
-  if(!flowsData?.surveyAvailableFlows?.length && category === SurveyCategory.RapidPro){
-   history.push(`/error/${businessArea}`, { errorMessage: t("RapidPro is not set up in your country, please contact your Roll Out Focal Point") })
+  if (
+    !flowsData?.surveyAvailableFlows?.length &&
+    category === SurveyCategory.RapidPro
+  ) {
+    history.push(`/error/${businessArea}`, {
+      errorMessage: t(
+        'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
+      ),
+      shouldGoBack: 'true',
+    });
   }
 
   if (permissions === null || !adminAreasData) return null;

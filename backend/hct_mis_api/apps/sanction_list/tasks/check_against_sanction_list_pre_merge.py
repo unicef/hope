@@ -101,6 +101,8 @@ class CheckAgainstSanctionListPreMergeTask:
 
         tickets_to_create = []
         ticket_details_to_create = []
+        tickets_programs = []
+        GrievanceTicketProgramThrough = GrievanceTicket.programs.through
         possible_matches = set()
         for individual in individuals:
             for document in documents:
@@ -138,6 +140,11 @@ class CheckAgainstSanctionListPreMergeTask:
                             ).exists()
                             if details_already_exists is False:
                                 tickets_to_create.append(ticket)
+                                tickets_programs.append(
+                                    GrievanceTicketProgramThrough(
+                                        grievanceticket=ticket, program_id=marked_individual.program_id
+                                    )
+                                )
                                 ticket_details_to_create.append(ticket_details)
 
                 log.debug(
@@ -163,6 +170,7 @@ class CheckAgainstSanctionListPreMergeTask:
         not_possible_matches_individuals.update(sanction_list_possible_match=False)
 
         GrievanceTicket.objects.bulk_create(tickets_to_create)
+        GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
         for ticket in tickets_to_create:
             GrievanceNotification.send_all_notifications(
                 GrievanceNotification.prepare_notification_for_ticket_creation(ticket)

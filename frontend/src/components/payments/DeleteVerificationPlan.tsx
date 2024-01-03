@@ -12,7 +12,7 @@ import { useDeletePaymentVerificationPlanMutation } from '../../__generated__/gr
 import { ErrorButton } from '../core/ErrorButton';
 import { ErrorButtonContained } from '../core/ErrorButtonContained';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
-import { useProgramContext } from "../../programContext";
+import { useProgramContext } from '../../programContext';
 
 export interface DeleteVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -69,7 +69,7 @@ export function DeleteVerificationPlan({
             <Box p={5}>
               <div>
                 {t(
-                  'Are you sure you would like to delete this verification plan?',
+                  'Are you sure you would like to remove this verification plan?',
                 )}
               </div>
             </Box>
