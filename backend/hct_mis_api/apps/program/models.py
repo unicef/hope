@@ -155,6 +155,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
     )
     is_visible = models.BooleanField(default=True)
+    is_copied = models.BooleanField(default=False)
 
     objects = SoftDeletableIsVisibleManager()
 
