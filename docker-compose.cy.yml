@@ -77,7 +77,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: "cy"
+    command: ./dev.sh cy
     volumes:
       - backend-data:/data
 
