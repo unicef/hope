@@ -20,7 +20,6 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
     admin_areas = program.admin_areas.all()
     program.pk = None
     program.status = Program.DRAFT
-    program.is_copied = True
 
     data_collecting_type_code = program_data.pop("data_collecting_type_code", None)
     if data_collecting_type_code:
