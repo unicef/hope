@@ -146,7 +146,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
                 # admin2 is empty
                 has_partner_area_access = True
             else:
-                if program_id:
+                if not program_id:
+                    log_and_raise("Can't check permission for All Programmes")
+                else:
                     partner_permission = partner.get_permissions()
                     partner_areas_list: Optional[List] = partner_permission.areas_for(
                         str(business_area.id), str(program_id)
@@ -162,12 +164,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
                             has_partner_area_access = True
                     else:
                         # partner_areas_list is None
-                        # don't have access to this area
+                        # don't have access to BA
                         has_partner_area_access = False
-                else:
-                    log_and_raise("Can't check permission for All Programmes")
 
-        # check object_instance.areas with user.partner.program.areas
         if (
             user.has_permission(perm, business_area, program_id) or check_creator or check_assignee
         ) and has_partner_area_access:
