@@ -140,7 +140,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
             owner_perm, business_area, program_id
         )
         partner = user.partner
-        has_partner_area_access = True if partner.is_unicef else False
+        has_partner_area_access = partner.is_unicef
         if not partner.is_unicef:
             if not object_instance.admin2:
                 # admin2 is empty
@@ -156,9 +156,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
                     if partner_areas_list is not None:
                         # partner_areas_list is []
                         if len(partner_areas_list) > 0:
-                            has_partner_area_access = (
-                                True if str(object_instance.admin2.id) in partner_areas_list else False
-                            )
+                            has_partner_area_access = str(object_instance.admin2.id) in partner_areas_list
                         else:
                             # has access to the whole BA
                             has_partner_area_access = True
