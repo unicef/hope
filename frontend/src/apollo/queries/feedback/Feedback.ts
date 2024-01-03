@@ -9,6 +9,11 @@ export const Feedback = gql`
       householdLookup {
         id
         unicefId
+        admin2 {
+          id
+          name
+          pCode
+        }
         headOfHousehold {
           id
           fullName
