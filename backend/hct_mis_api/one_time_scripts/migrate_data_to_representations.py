@@ -75,7 +75,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
 
         # migrate households to program if RDI is assigned to program by user
         logger.info("Creating representations for assigned RDIs")
-        rdis = RegistrationDataImport.objects.filter(program=program).exclude(households__program=program)
+        rdis = RegistrationDataImport.objects.filter(program=program, created_at__gte="2023-09-21")
         handle_rdis(rdis, program)
 
         # migrate households based on criteria
@@ -997,5 +997,5 @@ def get_unknown_unassigned_dict() -> Dict:
 
 def migrate_data_for_assigned_RDIs_per_business_area(business_area: BusinessArea) -> None:
     for program in Program.objects.filter(business_area=business_area):
-        rdis = RegistrationDataImport.objects.filter(program=program).exclude(households__program=program)
+        rdis = RegistrationDataImport.objects.filter(program=program, created_at__gte="2023-09-21")
         handle_rdis(rdis, program)
