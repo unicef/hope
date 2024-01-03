@@ -60,6 +60,14 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     unknown_unassigned_dict = get_unknown_unassigned_dict()
     unknown_unassigned_program = unknown_unassigned_dict.get(business_area)
 
+    # migrate households to program if RDI is assigned to program by user
+    for program in Program.objects.filter(business_area=business_area).order_by("id"):
+        logger.info(f"Creating representations for assigned RDIs for program {program}")
+        rdis = RegistrationDataImport.objects.filter(
+            program=program, created_at__gte=timezone.make_aware(timezone.datetime(2023, 9, 21))
+        )
+        handle_rdis(rdis, program)
+
     if business_area.name == "Democratic Republic of Congo":
         apply_congo_rules()
     elif business_area.name == "Sudan":
@@ -72,11 +80,6 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     ).order_by("status"):
         logger.info("----- NEW PROGRAM -----")
         logger.info(f"Creating representations for program: {program}")
-
-        # migrate households to program if RDI is assigned to program by user
-        logger.info("Creating representations for assigned RDIs")
-        rdis = RegistrationDataImport.objects.filter(program=program, created_at__gte="2023-09-21")
-        handle_rdis(rdis, program)
 
         # migrate households based on criteria
         target_populations_ids = TargetPopulation.objects.filter(
@@ -997,5 +1000,7 @@ def get_unknown_unassigned_dict() -> Dict:
 
 def migrate_data_for_assigned_RDIs_per_business_area(business_area: BusinessArea) -> None:
     for program in Program.objects.filter(business_area=business_area):
-        rdis = RegistrationDataImport.objects.filter(program=program, created_at__gte="2023-09-21")
+        rdis = RegistrationDataImport.objects.filter(
+            program=program, created_at__gte=timezone.make_aware(timezone.datetime(2023, 9, 21))
+        )
         handle_rdis(rdis, program)
