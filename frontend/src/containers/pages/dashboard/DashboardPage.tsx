@@ -53,7 +53,7 @@ export const DashboardPage = (): React.ReactElement => {
   const tabs = (
     <Tabs
       value={selectedTab}
-      onChange={(event: React.ChangeEvent<{}>, newValue: number) => {
+      onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
         setSelectedTab(newValue);
       }}
       indicatorColor='primary'

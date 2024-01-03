@@ -11914,7 +11914,10 @@ export type FeedbackQuery = (
     & { householdLookup: Maybe<(
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'unicefId'>
-      & { headOfHousehold: (
+      & { admin2: Maybe<(
+        { __typename?: 'AreaNode' }
+        & Pick<AreaNode, 'id' | 'name' | 'pCode'>
+      )>, headOfHousehold: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'fullName'>
       ) }
@@ -21866,6 +21869,11 @@ export const FeedbackDocument = gql`
     householdLookup {
       id
       unicefId
+      admin2 {
+        id
+        name
+        pCode
+      }
       headOfHousehold {
         id
         fullName

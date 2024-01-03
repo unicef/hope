@@ -57,7 +57,7 @@ export const SelectFilter = ({
   return (
     <div className={classes.selectWrapper}>
       <StyledFormControl
-        borderRadius={borderRadius}
+        theme={{ borderRadius }}
         fullWidth={fullWidth}
         variant='outlined'
         margin='dense'
