@@ -116,13 +116,11 @@ export const Description = ({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {values.selectedHousehold?.id && !isAllPrograms ? (
+                    {values.selectedHousehold?.id &&
+                    canViewHouseholdDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
-                        to={
-                          canViewHouseholdDetails
-                            ? `/${baseUrl}/population/household/${values.selectedHousehold.id}`
-                            : undefined
-                        }
+                        to={`/${baseUrl}/population/household/${values.selectedHousehold.id}`}
                       >
                         {values.selectedHousehold.unicefId}
                       </BlackLink>
@@ -141,13 +139,11 @@ export const Description = ({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {values.selectedIndividual?.id && !isAllPrograms ? (
+                    {values.selectedIndividual?.id &&
+                    canViewIndividualDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
-                        to={
-                          canViewIndividualDetails
-                            ? `/${baseUrl}/population/individuals/${values.selectedIndividual.id}`
-                            : undefined
-                        }
+                        to={`/${baseUrl}/population/individuals/${values.selectedIndividual.id}`}
                       >
                         {values.selectedIndividual.unicefId}
                       </BlackLink>

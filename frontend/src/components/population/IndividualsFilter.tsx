@@ -72,7 +72,7 @@ export const IndividualsFilter = ({
 
   //Show admin area filter only for social programs
   const showAdminAreaFilter =
-    selectedProgram?.dataCollectingType.code.toUpperCase() ===
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Social;
 
   return (

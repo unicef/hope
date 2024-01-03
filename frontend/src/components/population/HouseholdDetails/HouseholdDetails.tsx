@@ -7,7 +7,7 @@ import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../__generated__/graphql';
-import { COLLECT_TYPES_MAPPING } from '../../../utils/constants';
+import { useProgramContext } from '../../../programContext';
 import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
@@ -64,6 +64,7 @@ export const HouseholdDetails = ({
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
+  const { selectedProgram } = useProgramContext();
   return (
     <>
       <Container>
@@ -185,8 +186,8 @@ export const HouseholdDetails = ({
               )}
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label={t('COLLECT TYPE')}>
-                {COLLECT_TYPES_MAPPING[household?.collectIndividualData]}
+              <LabelizedField label={t('Data Collecting Type')}>
+                {selectedProgram?.dataCollectingType?.label}
               </LabelizedField>
             </Grid>
           </Grid>

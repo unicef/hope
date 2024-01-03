@@ -43,8 +43,7 @@ variables:
   ${{ elseif eq(variables['Build.SourceBranchName'], 'staging') }}:
     pipelineId: 1160
   ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}:
-    # TODO: handle triggering multiple pipelines (master triggers trn and prd)
-    pipelineId: 1161
+    pipelineId: 1161,1164,1165
   ${{ else }}:
     pipelineId: null
 
@@ -159,7 +158,6 @@ stages:
               --push \
               ./frontend
             displayName: Docker build dev
-            condition: and(succeeded(), eq(variables.isDev, true))
           - script: |
               docker buildx create --use
               docker buildx build \
@@ -261,18 +259,25 @@ stages:
                 exit 0
               fi
 
-              jsonBody='{"variables": {"tag": {"isSecret": false, "value": "$(tag)"}}}'
-              contentLength=$(echo -n $jsonBody | wc -c)
-              project=ICTD-HCT-MIS
-              organization=unicef
+              IFS=',' read -ra pipelines <<< "$pipelineId"
+              for pipeline in "${pipelines[@]}"; do
+                jsonBody='{"variables": {"tag": {"isSecret": false, "value": "$(tag)"}}}'
+                contentLength=$(echo -n $jsonBody | wc -c)
+                project=ICTD-HCT-MIS
+                organization=unicef
 
-              echo Triggering deploy for pipeline $pipelineId
-              echo JSON body: $jsonBody
+                echo Triggering deploy for pipeline $pipeline
+                echo JSON body: $jsonBody
 
-              curl -v -L \
-                -u ":$(AZURE_PAT)" \
-                -H "Content-Type: application/json" \
-                -H "Content-Length: $contentLength" \
-                -d "$jsonBody" \
-                https://dev.azure.com/$organization/$project/_apis/pipelines/$pipelineId/runs?api-version=7.1-preview.1
+                curl -v -L \
+                  -u ":$(AZURE_PAT)" \
+                  -H "Content-Type: application/json" \
+                  -H "Content-Length: $contentLength" \
+                  -d "$jsonBody" \
+                  https://dev.azure.com/$organization/$project/_apis/pipelines/$pipeline/runs?api-version=7.1-preview.1
+                if [ $? -ne 0 ]; then
+                  echo "Failed to trigger deploy for pipeline $pipeline"
+                  exit 1
+                fi
+              done
             displayName: "Trigger deploy"
