@@ -492,12 +492,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     try:
                         header = header_cell.value
                         combined_fields = self.COMBINED_FIELDS
-                        current_field = combined_fields.get(header)
+                        current_field = combined_fields.get(header, {})
 
-                        if not current_field:
+                        if not current_field and header not in complex_fields[sheet_title]:
                             continue
 
-                        is_not_image = current_field["type"] != "IMAGE"
+                        is_not_image = current_field.get("type") != "IMAGE"
 
                         cell_value = cell.value
                         if isinstance(cell_value, str):
