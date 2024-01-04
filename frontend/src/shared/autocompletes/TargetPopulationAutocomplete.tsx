@@ -67,15 +67,23 @@ export const TargetPopulationAutocomplete = ({
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {
+    isMounted.current = true;
     if (open && isMounted.current) {
       loadDataCallback();
     }
+    return () => {
+      isMounted.current = false;
+    };
   }, [open, debouncedInputText, loadDataCallback]);
 
   useEffect(() => {
+    isMounted.current = true;
     if (isMounted.current) {
       loadDataCallback();
     }
+    return () => {
+      isMounted.current = false;
+    };
   }, [loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
@@ -87,7 +95,6 @@ export const TargetPopulationAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
-  if (!data) return null;
 
   const allEdges = get(data, 'allTargetPopulations.edges', []);
 

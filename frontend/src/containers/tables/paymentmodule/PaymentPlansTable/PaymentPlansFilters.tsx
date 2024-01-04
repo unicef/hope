@@ -129,11 +129,12 @@ export const PaymentPlansFilters = ({
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityTo', e.target.value)
             }
-            error={
+            error={Boolean(
               filter.totalEntitledQuantityFrom &&
-              filter.totalEntitledQuantityTo &&
-              filter.totalEntitledQuantityFrom > filter.totalEntitledQuantityTo
-            }
+                filter.totalEntitledQuantityTo &&
+                filter.totalEntitledQuantityFrom >
+                  filter.totalEntitledQuantityTo,
+            )}
             data-cy='filters-total-entitled-quantity-to'
           />
         </Grid>

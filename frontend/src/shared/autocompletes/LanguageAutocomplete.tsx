@@ -51,20 +51,19 @@ export const LanguageAutocomplete = ({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    loadData({ variables: { code: debouncedInputText } });
+    if (isMounted.current) {
+      loadData({ variables: { code: debouncedInputText } });
+    }
   }, [loadData, debouncedInputText]);
 
   useEffect(() => {
-    if (open && isMounted.current) {
+    if (open) {
       loadDataCallback();
     }
+    return () => {
+      isMounted.current = false;
+    };
   }, [open, debouncedInputText, loadDataCallback]);
-
-  useEffect(() => {
-    if (isMounted.current) {
-      loadDataCallback();
-    }
-  }, [loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -75,8 +74,6 @@ export const LanguageAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
-
-  if (!data) return null;
 
   const allEdges = get(data, 'allLanguages.edges', []);
 
