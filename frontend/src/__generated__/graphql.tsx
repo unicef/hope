@@ -11914,7 +11914,10 @@ export type FeedbackQuery = (
     & { householdLookup: Maybe<(
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'unicefId'>
-      & { headOfHousehold: (
+      & { admin2: Maybe<(
+        { __typename?: 'AreaNode' }
+        & Pick<AreaNode, 'id' | 'name' | 'pCode'>
+      )>, headOfHousehold: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'fullName'>
       ) }
@@ -13565,7 +13568,7 @@ export type AllProgramsForChoicesQuery = (
         & Pick<ProgramNode, 'id' | 'name' | 'status' | 'individualDataNeeded'>
         & { dataCollectingType: Maybe<(
           { __typename?: 'DataCollectingTypeNode' }
-          & Pick<DataCollectingTypeNode, 'id' | 'code' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable' | 'description'>
+          & Pick<DataCollectingTypeNode, 'id' | 'code' | 'type' | 'label' | 'active' | 'individualFiltersAvailable' | 'householdFiltersAvailable' | 'description'>
         )> }
       )> }
     )>> }
@@ -21866,6 +21869,11 @@ export const FeedbackDocument = gql`
     householdLookup {
       id
       unicefId
+      admin2 {
+        id
+        name
+        pCode
+      }
       headOfHousehold {
         id
         fullName
@@ -25831,6 +25839,7 @@ export const AllProgramsForChoicesDocument = gql`
         dataCollectingType {
           id
           code
+          type
           label
           active
           individualFiltersAvailable

@@ -17,7 +17,7 @@ import {
   useMergeRdiMutation,
 } from '../../../__generated__/graphql';
 import { LoadingButton } from '../../core/LoadingButton';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;

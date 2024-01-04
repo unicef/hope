@@ -20,6 +20,7 @@ import {
   XlsxErrorNode,
 } from '../../__generated__/graphql';
 import { DropzoneField } from '../core/DropzoneField';
+import { LoadingButton } from '../core/LoadingButton';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -142,7 +143,8 @@ export function ImportXlsx({
             >
               CANCEL
             </Button>
-            <Button
+            <LoadingButton
+              loading={fileLoading}
               disabled={!fileToImport}
               type='submit'
               color='primary'
@@ -151,7 +153,7 @@ export function ImportXlsx({
               data-cy='button-import-entitlement'
             >
               {t('IMPORT')}
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </DialogTitleWrapper>
       </Dialog>

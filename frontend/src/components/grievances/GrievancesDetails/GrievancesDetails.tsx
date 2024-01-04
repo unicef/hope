@@ -209,13 +209,11 @@ export const GrievancesDetails = ({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {ticket.household?.id && !isAllPrograms ? (
+                    {ticket.household?.id &&
+                    canViewHouseholdDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
-                        to={
-                          canViewHouseholdDetails
-                            ? `/${baseUrl}/population/household/${ticket.household.id}`
-                            : undefined
-                        }
+                        to={`/${baseUrl}/population/household/${ticket.household.id}`}
                       >
                         {ticket.household.unicefId}
                       </BlackLink>
@@ -232,13 +230,11 @@ export const GrievancesDetails = ({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {ticket.individual?.id && !isAllPrograms ? (
+                    {ticket.individual?.id &&
+                    canViewIndividualDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
-                        to={
-                          canViewIndividualDetails
-                            ? `/${baseUrl}/population/individuals/${ticket.individual.id}`
-                            : undefined
-                        }
+                        to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
                       >
                         {ticket.individual.unicefId}
                       </BlackLink>

@@ -92,6 +92,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
         label={
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <Checkbox
+              id={node.id}
               color='primary'
               checked={Boolean(node.checked)}
               indeterminate={node.checked === 'indeterminate'}
@@ -170,7 +171,6 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           />
         </Grid>
         <DeleteProgramPartner
-          partner={partner}
           //TODO: add permission
           canDeleteProgramPartner
           handleDeleteProgramPartner={handleDeleteProgramPartner}

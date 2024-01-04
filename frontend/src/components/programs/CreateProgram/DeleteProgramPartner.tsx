@@ -23,18 +23,14 @@ const WhiteDeleteIcon = styled(Delete)`
 interface DeleteProgramPartnerProps {
   canDeleteProgramPartner: boolean;
   handleDeleteProgramPartner;
-  partner;
 }
 
 export const DeleteProgramPartner = ({
   canDeleteProgramPartner,
   handleDeleteProgramPartner,
-  partner,
 }: DeleteProgramPartnerProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-
-  const partnerId = partner.id ? `#${partner.id}` : '';
 
   return (
     <>
@@ -48,7 +44,9 @@ export const DeleteProgramPartner = ({
       <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
         <DialogTitleWrapper>
           <DialogTitle>
-            {`Are you sure you want to delete the Program Partner ${partnerId}`}
+            {t(
+              'Are you sure you want to remove the partner from this program?',
+            )}
           </DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
