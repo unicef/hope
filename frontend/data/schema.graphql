@@ -1614,6 +1614,7 @@ type HouseholdNode implements Node {
   adminAreaTitle: String
   status: String
   programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
+  deliveredQuantities: [DeliveredQuantityNode]
   activeIndividualsCount: Int
 }
 
