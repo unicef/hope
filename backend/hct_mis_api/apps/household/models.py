@@ -44,6 +44,7 @@ REFUGEE = "REFUGEE"
 OTHERS_OF_CONCERN = "OTHERS_OF_CONCERN"
 HOST = "HOST"
 NON_HOST = "NON_HOST"
+RETURNEE = "RETURNEE"
 RESIDENCE_STATUS_CHOICE = (
     (BLANK, _("None")),
     (IDP, _("Displaced  |  Internally Displaced People")),
@@ -51,6 +52,7 @@ RESIDENCE_STATUS_CHOICE = (
     (OTHERS_OF_CONCERN, _("Displaced  |  Others of Concern")),
     (HOST, _("Non-displaced  |   Host")),
     (NON_HOST, _("Non-displaced  |   Non-host")),
+    (RETURNEE, _("Displaced  |   Returnee")),
 )
 # INDIVIDUALS
 MALE = "MALE"
