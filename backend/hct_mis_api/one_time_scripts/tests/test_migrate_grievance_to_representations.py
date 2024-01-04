@@ -64,6 +64,7 @@ from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.sanction_list.fixtures import SanctionListIndividualFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.one_time_scripts.migrate_grievance_to_representations import (
+    delete_representations_from_ba,
     handle_payment_related_tickets,
     migrate_grievance_to_representations,
 )
@@ -4199,6 +4200,10 @@ class TestMigrateGrievanceTicketsAndFeedbacks(TestCase):
             1072,
         ):
             migrate_grievance_to_representations()
+        self.refresh_objects()
+        # test with deleting and rerunning
+        delete_representations_from_ba(self.business_area)
+        migrate_grievance_to_representations()
         self.refresh_objects()
 
         self._test_ticket_complaint_details()
