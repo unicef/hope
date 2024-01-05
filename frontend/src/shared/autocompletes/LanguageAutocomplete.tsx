@@ -1,5 +1,5 @@
 import get from 'lodash/get';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useLanguageAutocompleteLazyQuery } from '../../__generated__/graphql';
@@ -48,16 +48,23 @@ export const LanguageAutocomplete = ({
     fetchPolicy: 'cache-and-network',
   });
 
-  useEffect(() => {
-    if (open) {
-      loadData();
-    }
-  }, [open, debouncedInputText, loadData]);
+  const isMounted = useRef(true);
 
-  // load all languages on mount to match the value from the url
+  const loadDataCallback = useCallback(() => {
+    loadData({ variables: { code: debouncedInputText } });
+  }, [loadData, debouncedInputText]);
+
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (open && isMounted.current) {
+      loadDataCallback();
+    }
+  }, [open, debouncedInputText, loadDataCallback]);
+
+  useEffect(() => {
+    if (isMounted.current) {
+      loadDataCallback();
+    }
+  }, [loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,

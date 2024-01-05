@@ -38,7 +38,7 @@ class ProgramFilter(FilterSet):
         model = Program
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_number_of_households", "budget")
+        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "number_of_households", "budget")
     )
 
     def filter_number_of_households(self, queryset: QuerySet, name: str, value: Dict) -> QuerySet:

@@ -19,7 +19,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Household Id',
-    id: 'household_id',
+    id: 'household__unicef_id',
     numeric: false,
   },
   {
@@ -31,7 +31,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Administrative Level 2',
-    id: 'admin2',
+    id: 'household__admin2__name',
     numeric: false,
   },
   {
