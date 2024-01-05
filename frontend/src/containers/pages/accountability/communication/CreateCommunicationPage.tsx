@@ -15,7 +15,7 @@ import { Field, Form, Formik } from 'formik';
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import * as Yup from 'yup';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { LoadingButton } from '../../../../components/core/LoadingButton';
@@ -34,9 +34,12 @@ import {
   AccountabilityCommunicationMessageSampleSizeQueryVariables,
   CreateAccountabilityCommunicationMessageMutationVariables,
   SamplingChoices,
+  SurveyCategory,
   useAccountabilityCommunicationMessageSampleSizeLazyQuery,
   useAllAdminAreasQuery,
   useCreateAccountabilityCommunicationMessageMutation,
+  useSurveyAvailableFlowsLazyQuery,
+  useSurveyAvailableFlowsQuery,
 } from '../../../../__generated__/graphql';
 import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { TabPanel } from '../../../../components/core/TabPanel';
@@ -119,6 +122,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     { loading },
   ] = useCreateAccountabilityCommunicationMessageMutation();
   const { showMessage } = useSnackbar();
+  const history = useHistory();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
@@ -151,6 +155,29 @@ export const CreateCommunicationPage = (): React.ReactElement => {
       loadSampleSize();
     }
   }, [activeStep, formValues, loadSampleSize]);
+
+  const [
+    loadAvailableFlows,
+    { data: flowsData, loading: flowsLoading },
+  ] = useSurveyAvailableFlowsLazyQuery({
+    fetchPolicy: 'network-only',
+  });
+
+  useEffect(() => {
+    loadAvailableFlows();
+  }, [loadAvailableFlows]);
+
+  useEffect(() => {
+    //Redirect to error page if RapidPro unavailable available
+    if (!flowsData?.surveyAvailableFlows?.length) {
+      history.push(`/error/${businessArea}`, {
+        errorMessage: t(
+          'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
+        ),
+        shouldGoBack: 'true',
+      });
+    }
+  }, [flowsData, businessArea, history, t]);
 
   const validationSchema = useCallback(() => {
     const datum = {
