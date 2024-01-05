@@ -383,6 +383,8 @@ export type BankAccountInfoNode = Node & {
   individual: IndividualNode,
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
+  bankBranchName: Scalars['String'],
+  accountHolderName: Scalars['String'],
   isOriginal: Scalars['Boolean'],
   isMigrationHandled: Scalars['Boolean'],
   copiedFrom?: Maybe<BankAccountInfoNode>,
@@ -9482,7 +9484,7 @@ export type IndividualDetailedFragment = (
     ) }
   )>, bankAccountInfo: Maybe<(
     { __typename?: 'BankAccountInfoNode' }
-    & Pick<BankAccountInfoNode, 'bankName' | 'bankAccountNumber'>
+    & Pick<BankAccountInfoNode, 'bankName' | 'bankAccountNumber' | 'accountHolderName' | 'bankBranchName'>
   )> }
   & IndividualMinimalFragment
 );
@@ -14658,6 +14660,8 @@ export const IndividualDetailedFragmentDoc = gql`
   bankAccountInfo {
     bankName
     bankAccountNumber
+    accountHolderName
+    bankBranchName
   }
   preferredLanguage
   paymentDeliveryPhoneNo
@@ -29619,6 +29623,8 @@ export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends R
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   bankName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   bankAccountNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  bankBranchName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  accountHolderName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>,

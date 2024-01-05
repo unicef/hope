@@ -157,6 +157,8 @@ export const individualDetailed = gql`
     bankAccountInfo {
       bankName
       bankAccountNumber
+      accountHolderName
+      bankBranchName
     }
     preferredLanguage
     paymentDeliveryPhoneNo

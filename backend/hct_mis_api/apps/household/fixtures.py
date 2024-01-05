@@ -205,6 +205,8 @@ class BankAccountInfoFactory(DjangoModelFactory):
     individual = factory.SubFactory(IndividualFactory)
     bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
     bank_account_number = factory.LazyAttribute(lambda x: random.randint(10**26, 10**27 - 1))
+    bank_branch_name = random.choice(["BranchCityBank", "BranchSantander", "BranchJPMorgan"])
+    account_holder_name = factory.Faker("full_name")
 
 
 class DocumentTypeFactory(DjangoModelFactory):
