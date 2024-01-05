@@ -1753,6 +1753,32 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "age_at_registration",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
     },
+    {
+        "id": "22085a8d-205d-42a9-b5b3-951b51f11915",
+        "type": TYPE_STRING,
+        "name": "account_holder_name",
+        "lookup": "account_holder_name",
+        "label": {"English(EN)": "Account holder name"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "account_holder_name_i_c",
+        "scope": [Scope.GLOBAL, Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.KOBO_IMPORT],
+    },
+    {
+        "id": "e9d964b9-aa85-4a0f-b1eb-4755bdad7592",
+        "type": TYPE_STRING,
+        "name": "bank_branch_name",
+        "lookup": "bank_branch_name",
+        "label": {"English(EN)": "Bank branch name"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "bank_branch_name_i_c",
+        "scope": [Scope.GLOBAL, Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.KOBO_IMPORT],
+    },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
