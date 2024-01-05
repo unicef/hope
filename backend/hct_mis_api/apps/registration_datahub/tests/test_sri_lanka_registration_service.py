@@ -3,6 +3,8 @@ import datetime
 from django.test import TestCase
 from django.utils import timezone
 
+from freezegun import freeze_time
+
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
@@ -148,6 +150,7 @@ class TestSriLankaRegistrationService(TestCase):
         cls.records = Record.objects.bulk_create(records)
         cls.user = UserFactory.create()
 
+    @freeze_time("2023-12-12")
     def test_import_data_to_datahub(self) -> None:
         Record = get_record_model()
         service = SriLankaRegistrationService(self.registration)
