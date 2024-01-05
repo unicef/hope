@@ -126,6 +126,7 @@ class TestSyncRepresentations(BaseMigrateDataTestCase, BaseGrievanceTestCase, Te
             ).count(),
             14,
         )
+
     @skip("XXX")
     def test_remove_objects(self) -> None:
         self.prepare_data()
