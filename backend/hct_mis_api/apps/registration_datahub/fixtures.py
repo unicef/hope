@@ -190,4 +190,4 @@ class ImportedBankAccountInfoFactory(DjangoModelFactory):
     bank_name = random.choice(["CityBank", "Santander", "JPMorgan"])
     bank_account_number = random.randint(10**26, 10**27 - 1)
     bank_branch_name = random.choice(["BranchCityBank", "BranchSantander", "BranchJPMorgan"])
-    account_holder_name = factory.Faker("full_name")
+    account_holder_name = factory.Faker("last_name")
