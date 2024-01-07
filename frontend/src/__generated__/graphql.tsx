@@ -419,6 +419,8 @@ export type BankTransferObjectType = {
   type: Scalars['String'],
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
+  bankBranchName?: Maybe<Scalars['String']>,
+  accountHolderName: Scalars['String'],
 };
 
 
@@ -1584,6 +1586,8 @@ export type EditBankTransferObjectType = {
   type: Scalars['String'],
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
+  bankBranchName?: Maybe<Scalars['String']>,
+  accountHolderName: Scalars['String'],
 };
 
 export type EditIndividualDocumentObjectType = {
@@ -13298,7 +13302,7 @@ export type AllIndividualsQuery = (
           )>> }
         ), paymentChannels: Maybe<Array<Maybe<(
           { __typename?: 'BankAccountInfoNode' }
-          & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
+          & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber' | 'accountHolderName' | 'bankBranchName'>
         )>>> }
       )> }
     )>> }
@@ -25138,6 +25142,8 @@ export const AllIndividualsDocument = gql`
           id
           bankName
           bankAccountNumber
+          accountHolderName
+          bankBranchName
         }
       }
     }

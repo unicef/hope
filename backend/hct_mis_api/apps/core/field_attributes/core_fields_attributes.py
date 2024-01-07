@@ -1764,7 +1764,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "account_holder_name_i_c",
-        "scope": [Scope.GLOBAL, Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.KOBO_IMPORT],
+        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT],
     },
     {
         "id": "e9d964b9-aa85-4a0f-b1eb-4755bdad7592",
@@ -1777,7 +1777,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "bank_branch_name_i_c",
-        "scope": [Scope.GLOBAL, Scope.XLSX, Scope.INDIVIDUAL_UPDATE, Scope.KOBO_IMPORT],
+        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT],
     },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 

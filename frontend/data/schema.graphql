@@ -274,6 +274,8 @@ input BankTransferObjectType {
   type: String!
   bankName: String!
   bankAccountNumber: String!
+  bankBranchName: String
+  accountHolderName: String!
 }
 
 scalar BigInt
@@ -1044,6 +1046,8 @@ input EditBankTransferObjectType {
   type: String!
   bankName: String!
   bankAccountNumber: String!
+  bankBranchName: String
+  accountHolderName: String!
 }
 
 input EditIndividualDocumentObjectType {
