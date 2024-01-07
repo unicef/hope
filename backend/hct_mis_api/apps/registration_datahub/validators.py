@@ -693,7 +693,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             errors = []
             combined_fields = self.combined_fields
-            # print("==>>> ", combined_fields["individual"])
 
             for name, fields in combined_fields.items():
                 if name.capitalize() not in wb.sheetnames:
@@ -712,7 +711,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 column_names = {cell.value for cell in first_row}
 
                 columns_difference = required_fields.difference(column_names)
-                # print("columns_difference === ", columns_difference)
 
                 if columns_difference:
                     errors.extend(
