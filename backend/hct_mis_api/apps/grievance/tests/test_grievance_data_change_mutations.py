@@ -432,6 +432,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
             bank_name="privatbank",
             bank_account_number=2356789789789789,
             account_holder_name="Old Holder Name",
+            bank_branch_name="BranchSantander",
         )
 
         variables = {
