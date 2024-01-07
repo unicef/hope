@@ -123,7 +123,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
                                     'previous_value': {
                                         'account_holder_name': 'Old Holder Name',
                                         'bank_account_number': '2356789789789789',
-                                        'bank_branch_name': 'BranchJPMorgan',
+                                        'bank_branch_name': 'BranchSantander',
                                         'bank_name': 'privatbank',
                                         'id': 'QmFua0FjY291bnRJbmZvTm9kZTo0MTNiMmEwNy00YmMxLTQzYTctODBlNi05MWFiYjQ4NmFhOWQ=',
                                         'individual': 'SW5kaXZpZHVhbE5vZGU6YjZmZmIyMjctYTJkZC00MTAzLWJlNDYtMGM5ZWJlOWYwMDFh',
