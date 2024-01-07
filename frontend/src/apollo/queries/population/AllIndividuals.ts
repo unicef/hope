@@ -112,6 +112,8 @@ export const AllIndividuals = gql`
             id
             bankName
             bankAccountNumber
+            accountHolderName
+            bankBranchName
           }
         }
       }
