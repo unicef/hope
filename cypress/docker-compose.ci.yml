@@ -77,7 +77,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - backend-data:/data
-    command: "./dev.sh cy"
+    command: cy
     depends_on:
       - db
       - redis
