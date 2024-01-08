@@ -9451,7 +9451,7 @@ export type IndividualDetailedFragment = (
   & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage' | 'paymentDeliveryPhoneNo'>
   & { paymentChannels: Maybe<Array<Maybe<(
     { __typename?: 'BankAccountInfoNode' }
-    & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
+    & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber' | 'accountHolderName' | 'bankBranchName'>
   )>>>, documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -14615,6 +14615,8 @@ export const IndividualDetailedFragmentDoc = gql`
     id
     bankName
     bankAccountNumber
+    accountHolderName
+    bankBranchName
   }
   documents {
     edges {
