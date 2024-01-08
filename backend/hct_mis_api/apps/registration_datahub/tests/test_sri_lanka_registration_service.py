@@ -2,6 +2,7 @@ import datetime
 
 from django.test import TestCase
 from django.utils import timezone
+from freezegun import freeze_time
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 from hct_mis_api.apps.core.models import DataCollectingType
@@ -148,6 +149,7 @@ class TestSriLankaRegistrationService(TestCase):
         cls.records = Record.objects.bulk_create(records)
         cls.user = UserFactory.create()
 
+
     def test_import_data_to_datahub(self) -> None:
         service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
@@ -197,6 +199,7 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
         self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
 
+    @freeze_time("2023-12-12")
     def test_import_record_twice(self) -> None:
         service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
