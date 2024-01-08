@@ -181,6 +181,8 @@ def handle_add_payment_channel(payment_channel: Dict, individual: Individual) ->
             individual=individual,
             bank_name=bank_name,
             bank_account_number=bank_account_number,
+            account_holder_name=payment_channel.get("account_holder_name", ""),
+            bank_branch_name=payment_channel.get("bank_branch_name", ""),
         )
     return None
 
@@ -193,6 +195,8 @@ def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccount
         bank_account_info = get_object_or_404(BankAccountInfo, id=payment_channel_id)
         bank_account_info.bank_name = payment_channel.get("bank_name")
         bank_account_info.bank_account_number = payment_channel.get("bank_account_number")
+        bank_account_info.account_holder_name = payment_channel.get("account_holder_name", "")
+        bank_account_info.bank_branch_name = payment_channel.get("bank_branch_name", "")
         return bank_account_info
 
     return None
@@ -319,6 +323,8 @@ def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_st
             "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
             "bank_name": bank_account_info.bank_name,
             "bank_account_number": bank_account_info.bank_account_number,
+            "account_holder_name": bank_account_info.account_holder_name,
+            "bank_branch_name": bank_account_info.bank_branch_name,
             "type": "BANK_TRANSFER",
         }
 
@@ -386,6 +392,8 @@ def handle_bank_transfer_payment_method(pc: Dict) -> Dict:
             "bank_account_number": bank_account_number,
             "bank_name": bank_name,
             "type": payment_channel_type,
+            "account_holder_name": pc.get("account_holder_name", ""),
+            "bank_branch_name": pc.get("bank_branch_name", ""),
         },
         "previous_value": {
             "id": encoded_id,
@@ -393,6 +401,8 @@ def handle_bank_transfer_payment_method(pc: Dict) -> Dict:
             "bank_account_number": bank_account_info.bank_account_number,
             "bank_name": bank_account_info.bank_name,
             "type": payment_channel_type,
+            "account_holder_name": bank_account_info.account_holder_name,
+            "bank_branch_name": bank_account_info.bank_branch_name,
         },
     }
 
