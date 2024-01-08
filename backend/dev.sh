@@ -22,13 +22,6 @@ else
       coverage combine
       coverage xml
       ;;
-    "cy")
-      wait_for_db db
-      python manage.py collectstatic --no-input
-      python manage.py migratealldb
-      python manage.py initcypress --skip-drop
-      python manage.py runserver 0.0.0.0:8000
-      ;;
     "lint")
       mkdir -p ./lint-results
       flake8 --format=junit-xml . > ./lint-results/flake8.xml
