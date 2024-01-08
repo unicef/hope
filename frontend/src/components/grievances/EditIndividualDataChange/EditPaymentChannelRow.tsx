@@ -106,6 +106,8 @@ export function EditPaymentChannelRow({
                   id: paymentChannel.id,
                   bankName: paymentChannel.bankName,
                   bankAccountNumber: paymentChannel.bankAccountNumber,
+                  accountHolderName: paymentChannel.accountHolderName,
+                  bankBranchName: paymentChannel.bankBranchName,
                   type: 'BANK_TRANSFER',
                 });
                 setEdit(true);
