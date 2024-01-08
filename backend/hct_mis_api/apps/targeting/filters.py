@@ -159,6 +159,7 @@ class TargetPopulationFilter(GlobalProgramFilterMixin, FilterSet):
             "updated_at",
             "status",
             "total_family_size",
+            "total_households_count",
             "program__id",
         )
     )

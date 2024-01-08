@@ -7,10 +7,10 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from "@material-ui/core";
+import { Button, Tooltip } from '@material-ui/core';
 import { SurveyCategory } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 const StyledMenu = withStyles({
   paper: {
@@ -66,18 +66,41 @@ export const CreateSurveyMenu = (): React.ReactElement => {
 
   return (
     <>
-      <Button
-        aria-controls='customized-menu'
-        aria-haspopup='true'
-        variant='contained'
-        color='primary'
-        onClick={handleClick}
-        endIcon={anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-        data-cy='button-new-survey'
-        disabled={!isActiveProgram}
-      >
-        {t('New Survey')}
-      </Button>
+      {!isActiveProgram ? (
+        <Tooltip title={t('Program has to be active to create a Survey')}>
+          <span>
+            <Button
+              aria-controls='customized-menu'
+              aria-haspopup='true'
+              variant='contained'
+              color='primary'
+              onClick={handleClick}
+              endIcon={
+                anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />
+              }
+              data-cy='button-new-survey'
+              disabled={!isActiveProgram}
+            >
+              {t('New Survey')}
+            </Button>
+          </span>
+        </Tooltip>
+      ) : (
+        <Button
+          aria-controls='customized-menu'
+          aria-haspopup='true'
+          variant='contained'
+          color='primary'
+          onClick={handleClick}
+          endIcon={
+            anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />
+          }
+          data-cy='button-new-survey'
+        >
+          {t('New Survey')}
+        </Button>
+      )}
+
       <StyledMenu
         id='customized-menu'
         anchorEl={anchorEl}

@@ -23,7 +23,7 @@ export const SearchTextField = ({
     <StyledTextField
       {...props}
       fullWidth={fullWidth}
-      borderRadius={borderRadius}
+      theme={{ borderRadius }}
       variant='outlined'
       margin='dense'
       inputProps={{ maxLength: 200 }}

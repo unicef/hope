@@ -63,7 +63,7 @@ export const DeleteTargetPopulation = ({
             </DialogTitleWrapper>
             <DialogContent>
               <DialogDescription>
-                {t('Are you sure you want to delete this Target Population?')}
+                {t('Are you sure you want to remove this Target Population?')}
               </DialogDescription>
             </DialogContent>
             <DialogFooter>

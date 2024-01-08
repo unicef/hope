@@ -611,7 +611,6 @@ class Query(graphene.ObjectType):
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
         business_area_slug = info.context.headers.get("Business-Area")
-        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
         if program_id:
             program = Program.objects.filter(id=program_id).first()
@@ -622,10 +621,13 @@ class Query(graphene.ObjectType):
         if does_path_exist_in_query("edges.node.household", info):
             queryset = queryset.select_related("household")
         if does_path_exist_in_query("edges.node.household.admin2", info):
-            queryset = queryset.select_related("household__admin_area")
-            queryset = queryset.select_related("household__admin_area__area_type")
+            queryset = queryset.select_related("household__admin2")
+            queryset = queryset.select_related("household__admin2__area_type")
+        if does_path_exist_in_query("edges.node.program", info):
+            queryset = queryset.select_related("program")
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
             partner_permission = user.partner.get_permissions()
 
             if program_id:
@@ -671,7 +673,6 @@ class Query(graphene.ObjectType):
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
         business_area_slug = info.context.headers.get("Business-Area")
-        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
         if program_id:
             program = Program.objects.filter(id=program_id).first()
@@ -681,6 +682,7 @@ class Query(graphene.ObjectType):
         queryset = Household.objects.all()
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
             partner_permission = user.partner.get_permissions()
 
             if program_id:
@@ -717,6 +719,8 @@ class Query(graphene.ObjectType):
 
         if does_path_exist_in_query("edges.node.headOfHousehold", info):
             queryset = queryset.select_related("head_of_household")
+        if does_path_exist_in_query("edges.node.program", info):
+            queryset = queryset.select_related("program")
         if does_path_exist_in_query("edges.node.hasDuplicates", info):
             subquery = Subquery(
                 Individual.objects.filter(household_id=OuterRef("pk"), deduplication_golden_record_status="DUPLICATE")

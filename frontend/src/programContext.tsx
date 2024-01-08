@@ -17,6 +17,7 @@ export interface ProgramInterface {
     individualFiltersAvailable: boolean;
     label: string;
     code: string;
+    type: string;
   };
 }
 

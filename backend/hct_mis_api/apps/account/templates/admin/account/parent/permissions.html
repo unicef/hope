@@ -23,69 +23,70 @@
 {% block action-content %}
     <form method="POST" id="save_permissions" enctype="multipart/form-data">
         {% csrf_token %}
-        <input type="hidden" name="refresh-areas" value="false"/>
-        <div class="js-inline-admin-formset inline-group">
-            <div class="tabular inline-related last-related">
-                {{ business_area_role_formset.management_form }}
-                <fieldset class="module">
-                    <h2>Business Area Roles</h2>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th class="column-business_area required">Business area</th>
-                            <th class="column-roles required">Roles</th>
-                            <th>Delete?</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% if business_area_role_formset.non_field_errors %}
-                            <tr class="row-form-errors">
-                                <td colspan="3">{{ business_area_role_formset.non_field_errors }}</td>
+        {% if can_add_business_area_to_partner %}
+            <input type="hidden" name="refresh-areas" value="false"/>
+            <div class="js-inline-admin-formset inline-group">
+                <div class="tabular inline-related last-related">
+                    {{ business_area_role_formset.management_form }}
+                    <fieldset class="module">
+                        <h2>Business Area Roles</h2>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th class="column-business_area required">Business area</th>
+                                <th class="column-roles required">Roles</th>
+                                <th>Delete?</th>
                             </tr>
-                        {% endif %}
-                        {% for form in business_area_role_formset %}
-                            {{ form.management_form }}
-                            <tr class="form-row dynamic-business_area_roles"
-                                id="business_area_roles-{{ forloop.counter0 }}">
+                            </thead>
+                            <tbody>
+                            {% if business_area_role_formset.non_field_errors %}
+                                <tr class="row-form-errors">
+                                    <td colspan="3">{{ business_area_role_formset.non_field_errors }}</td>
+                                </tr>
+                            {% endif %}
+                            {% for form in business_area_role_formset %}
+                                {{ form.management_form }}
+                                <tr class="form-row dynamic-business_area_roles"
+                                    id="business_area_roles-{{ forloop.counter0 }}">
+                                    <td class="field-business_area">
+                                        {{ form.business_area.errors.as_ul }}
+                                        {{ form.business_area }}
+                                    </td>
+                                    <td class="field-roles">
+                                        {{ form.roles.errors.as_ul }}
+                                        {{ form.roles }}
+                                    </td>
+                                    <td>
+                                        {{ form.DELETE }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            <tr class="form-row empty-form" id="business_area_roles-empty">
                                 <td class="field-business_area">
-                                    {{ form.business_area.errors.as_ul }}
-                                    {{ form.business_area }}
+                                    {{ business_area_role_formset.empty_form.business_area.errors.as_ul }}
+                                    {{ business_area_role_formset.empty_form.business_area }}
                                 </td>
                                 <td class="field-roles">
-                                    {{ form.roles.errors.as_ul }}
-                                    {{ form.roles }}
+                                    {{ business_area_role_formset.empty_form.roles.errors.as_ul }}
+                                    {{ business_area_role_formset.empty_form.roles }}
                                 </td>
                                 <td>
-                                    {{ form.DELETE }}
+                                    {{ business_area_role_formset.empty_form.DELETE }}
                                 </td>
                             </tr>
-                        {% endfor %}
-                        <tr class="form-row empty-form" id="business_area_roles-empty">
-                            <td class="field-business_area">
-                                {{ business_area_role_formset.empty_form.business_area.errors.as_ul }}
-                                {{ business_area_role_formset.empty_form.business_area }}
-                            </td>
-                            <td class="field-roles">
-                                {{ business_area_role_formset.empty_form.roles.errors.as_ul }}
-                                {{ business_area_role_formset.empty_form.roles }}
-                            </td>
-                            <td>
-                                {{ business_area_role_formset.empty_form.DELETE }}
-                            </td>
-                        </tr>
-                        </tbody>
-                        <tfoot>
-                        <tr class="add-row add-business_area_role-row">
-                            <td colspan="3">
-                                <a href="#">Add another Business area role</a>
-                            </td>
-                        </tr>
-                        </tfoot>
-                    </table>
-                </fieldset>
+                            </tbody>
+                            <tfoot>
+                            <tr class="add-row add-business_area_role-row">
+                                <td colspan="3">
+                                    <a href="#">Add another Business area role</a>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </fieldset>
+                </div>
             </div>
-        </div>
-
+        {% endif %}
         <div class="js-inline-admin-formset inline-group">
             <div class="tabular inline-related last-related">
                 {{ program_area_formset.management_form }}
