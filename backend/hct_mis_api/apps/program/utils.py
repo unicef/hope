@@ -1,14 +1,18 @@
-from typing import Dict, Sequence, Tuple, Union
+from typing import Dict, List, Sequence, Tuple, Union
 
 from django.db import transaction
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.household.models import (
+    BankAccountInfo,
+    Document,
+    EntitlementCard,
     Household,
     HouseholdCollection,
     Individual,
     IndividualCollection,
+    IndividualIdentity,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
@@ -58,6 +62,7 @@ def create_program_cycle(program: Program) -> None:
 
 
 def copy_individuals_from_whole_program(copy_from_program_id: str, program: Program) -> None:
+    individuals_to_create = []
     copied_from_individuals = Individual.objects.filter(
         program_id=copy_from_program_id, withdrawn=False, duplicate=False
     )
@@ -69,10 +74,12 @@ def copy_individuals_from_whole_program(copy_from_program_id: str, program: Prog
         individual.pk = None
         individual.program = program
         individual.copied_from_id = copied_from_pk
-        individual.save()
+        individuals_to_create.append(individual)
+    Individual.objects.bulk_create(individuals_to_create)
 
 
 def copy_households_from_whole_program(copy_from_program_id: str, program: Program) -> None:
+    households_to_create = []
     copy_from_households = Household.objects.filter(
         program_id=copy_from_program_id,
         withdrawn=False,
@@ -91,20 +98,25 @@ def copy_households_from_whole_program(copy_from_program_id: str, program: Progr
             program=program,
             copied_from=household.head_of_household,
         )
-        household.save()
-        return household
+        households_to_create.append(household)
+    Household.objects.bulk_create(households_to_create)
 
 
 def copy_household_related_data(program: Program) -> None:
     new_households = Household.objects.filter(program=program).select_related("copied_from")
+    roles_to_create = []
+    entitlement_cards_to_create = []
     for new_household in new_households:
-        copy_roles_per_household(new_household, program)
-        copy_entitlement_cards_per_household(new_household)
+        roles_to_create.extend(copy_roles_per_household(new_household, program))
+        entitlement_cards_to_create.extend(copy_entitlement_cards_per_household(new_household))
+    IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
+    EntitlementCard.objects.bulk_create(entitlement_cards_to_create)
 
 
-def copy_roles_per_household(new_household: Household, program: Program) -> None:
+def copy_roles_per_household(new_household: Household, program: Program) -> List[IndividualRoleInHousehold]:
     copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from)
 
+    roles_in_household = []
     for role in copied_from_roles:
         role.pk = None
         role.household = new_household
@@ -112,57 +124,75 @@ def copy_roles_per_household(new_household: Household, program: Program) -> None
             program=program,
             copied_from=role.individual,
         )
-        role.save()
+        roles_in_household.append(role)
+    return roles_in_household
 
 
-def copy_entitlement_cards_per_household(new_household: Household) -> None:
+def copy_entitlement_cards_per_household(new_household: Household) -> List[EntitlementCard]:
+    entitlement_cards_in_household = []
+
     old_entitlement_cards = new_household.copied_from.entitlement_cards.all()
     for entitlement_card in old_entitlement_cards:
         entitlement_card.pk = None
         entitlement_card.household = new_household
-        entitlement_card.save()
+        entitlement_cards_in_household.append(entitlement_card)
+    return entitlement_cards_in_household
 
 
 def copy_individual_related_data(program: Program) -> None:
     new_individuals = Individual.objects.filter(program=program)
+    individuals_to_update = []
+    documents_to_create = []
+    individual_identities_to_create = []
+    bank_account_infos_to_create = []
     for new_individual in new_individuals:
-        set_household_per_individual(new_individual, program)
-        copy_documents_per_individual(new_individual)
-        copy_individual_identities_per_individual(new_individual)
-        copy_bank_account_info_per_individual(new_individual)
+        individuals_to_update.append(set_household_per_individual(new_individual, program))
+        documents_to_create.extend(copy_documents_per_individual(new_individual))
+        individual_identities_to_create.extend(copy_individual_identities_per_individual(new_individual))
+        bank_account_infos_to_create.extend(copy_bank_account_info_per_individual(new_individual))
+    Individual.objects.bulk_update(individuals_to_update, ["household"])
+    Document.objects.bulk_create(documents_to_create)
+    IndividualIdentity.objects.bulk_create(individual_identities_to_create)
+    BankAccountInfo.objects.bulk_create(bank_account_infos_to_create)
 
 
-def set_household_per_individual(new_individual: Individual, program: Program) -> None:
-    new_individual.household = Household.objects.get(
+def set_household_per_individual(new_individual: Individual, program: Program) -> Individual:
+    new_individual.household = Household.objects.filter(
         program=program,
         copied_from_id=new_individual.household_id,
-    )
-    new_individual.save()
+    ).first()
+    return new_individual
 
 
-def copy_documents_per_individual(new_individual: Individual) -> None:
+def copy_documents_per_individual(new_individual: Individual) -> List[Document]:
+    documents_for_individual = []
     old_documents = new_individual.copied_from.documents.all()
     for document in old_documents:
         document.pk = None
         document.program = new_individual.program
         document.individual = new_individual
-        document.save()
+        documents_for_individual.append(document)
+    return documents_for_individual
 
 
-def copy_individual_identities_per_individual(new_individual: Individual) -> None:
+def copy_individual_identities_per_individual(new_individual: Individual) -> List[IndividualIdentity]:
+    identities_for_individual = []
     old_individual_identities = new_individual.copied_from.identities.all()
     for individual_identity in old_individual_identities:
         individual_identity.pk = None
         individual_identity.individual = new_individual
-        individual_identity.save()
+        identities_for_individual.append(individual_identity)
+    return identities_for_individual
 
 
-def copy_bank_account_info_per_individual(new_individual: Individual) -> None:
+def copy_bank_account_info_per_individual(new_individual: Individual) -> List[BankAccountInfo]:
+    bank_accounts_for_individual = []
     old_bank_account_info = new_individual.copied_from.bank_account_info.all()
     for bank_account_info in old_bank_account_info:
         bank_account_info.pk = None
         bank_account_info.individual = new_individual
-        bank_account_info.save()
+        bank_accounts_for_individual.append(bank_account_info)
+    return bank_accounts_for_individual
 
 
 def enrol_household_to_program(household: Household, program: Program) -> Tuple[Household, int]:
@@ -243,9 +273,9 @@ def create_new_individual_representation(
     individual.save()
     individual.refresh_from_db()
     # create individual related data
-    copy_documents_per_individual(individual)
-    copy_individual_identities_per_individual(individual)
-    copy_bank_account_info_per_individual(individual)
+    Document.objects.bulk_create(copy_documents_per_individual(individual))
+    IndividualIdentity.objects.bulk_create(copy_individual_identities_per_individual(individual))
+    BankAccountInfo.objects.bulk_create(copy_bank_account_info_per_individual(individual))
 
     return individual
 
