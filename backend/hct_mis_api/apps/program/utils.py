@@ -103,9 +103,9 @@ def copy_households_from_whole_program(copy_from_program_id: str, program: Progr
 
 
 def copy_household_related_data(program: Program) -> None:
-    new_households = Household.objects.filter(program=program).select_related("copied_from")
     roles_to_create = []
     entitlement_cards_to_create = []
+    new_households = Household.objects.filter(program=program).select_related("copied_from")
     for new_household in new_households:
         roles_to_create.extend(copy_roles_per_household(new_household, program))
         entitlement_cards_to_create.extend(copy_entitlement_cards_per_household(new_household))
@@ -114,9 +114,8 @@ def copy_household_related_data(program: Program) -> None:
 
 
 def copy_roles_per_household(new_household: Household, program: Program) -> List[IndividualRoleInHousehold]:
-    copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from)
-
     roles_in_household = []
+    copied_from_roles = IndividualRoleInHousehold.objects.filter(household=new_household.copied_from)
     for role in copied_from_roles:
         role.pk = None
         role.household = new_household
@@ -130,7 +129,6 @@ def copy_roles_per_household(new_household: Household, program: Program) -> List
 
 def copy_entitlement_cards_per_household(new_household: Household) -> List[EntitlementCard]:
     entitlement_cards_in_household = []
-
     old_entitlement_cards = new_household.copied_from.entitlement_cards.all()
     for entitlement_card in old_entitlement_cards:
         entitlement_card.pk = None
@@ -140,11 +138,11 @@ def copy_entitlement_cards_per_household(new_household: Household) -> List[Entit
 
 
 def copy_individual_related_data(program: Program) -> None:
-    new_individuals = Individual.objects.filter(program=program)
     individuals_to_update = []
     documents_to_create = []
     individual_identities_to_create = []
     bank_account_infos_to_create = []
+    new_individuals = Individual.objects.filter(program=program)
     for new_individual in new_individuals:
         individuals_to_update.append(set_household_per_individual(new_individual, program))
         documents_to_create.extend(copy_documents_per_individual(new_individual))

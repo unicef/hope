@@ -153,7 +153,7 @@ class TestCopyProgram(APITestCase):
     def test_copy_with_permissions(self) -> None:
         user = UserFactory.create()
         self.assertEqual(Household.objects.count(), 3)
-        assert Individual.objects.count() == 4
+        self.assertEqual(Individual.objects.count(), 4)
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
 
         self.snapshot_graphql_request(
