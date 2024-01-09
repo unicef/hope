@@ -56,10 +56,16 @@ export const PaymentChannelsTable = ({
       <TableRow>
         <TableCell align='left' />
         <TableCell data-cy='table-cell-bank-name' align='left'>
-          {t('Bank name')}
+          {t('Bank Name')}
         </TableCell>
         <TableCell data-cy='table-cell-bank-account-number' align='left'>
-          {t('Bank account number')}
+          {t('Bank Account Number')}
+        </TableCell>
+        <TableCell data-cy='table-cell-bank-account-holder-name' align='left'>
+          {t('Bank Account Holder Name')}
+        </TableCell>
+        <TableCell data-cy='table-cell-bank-branch-name' align='left'>
+          {t('Bank Branch Name')}
         </TableCell>
       </TableRow>
     </TableHead>
@@ -108,6 +114,10 @@ export const PaymentChannelsTable = ({
                 <TableCell align='left'>
                   {row.value.bank_account_number}
                 </TableCell>
+                <TableCell align='left'>
+                  {row.value.account_holder_name}
+                </TableCell>
+                <TableCell align='left'>{row.value.bank_branch_name}</TableCell>
               </TableRow>
             );
           })}
