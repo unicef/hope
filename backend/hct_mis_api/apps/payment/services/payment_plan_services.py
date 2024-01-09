@@ -23,10 +23,12 @@ from hct_mis_api.apps.payment.celery_tasks import (
     import_payment_plan_payment_list_per_fsp_from_xlsx,
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
+    send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
+    FinancialServiceProvider,
     Payment,
     PaymentPlan,
 )
@@ -62,6 +64,7 @@ class PaymentPlanService:
             PaymentPlan.Action.AUTHORIZE.value: self.acceptance_process,
             PaymentPlan.Action.REVIEW.value: self.acceptance_process,
             PaymentPlan.Action.REJECT.value: self.acceptance_process,
+            PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway,
         }
 
     def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> Optional[int]:
@@ -119,6 +122,15 @@ class PaymentPlanService:
             authorization_number_required=self.payment_plan.authorization_number_required,
             finance_release_number_required=self.payment_plan.finance_release_number_required,
         )
+        return self.payment_plan
+
+    def send_to_payment_gateway(self) -> PaymentPlan:
+        if self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
+            msg = "Sending in progress"
+            raise GraphQLError(msg)
+
+        send_to_payment_gateway.delay(self.payment_plan.pk)
+
         return self.payment_plan
 
     def lock(self) -> PaymentPlan:
@@ -270,6 +282,14 @@ class PaymentPlanService:
 
             if approval_type == Approval.FINANCE_RELEASE:
                 self.payment_plan.status_mark_as_reviewed()
+                # send to payment gateway if applicable
+                not_sent_pg_delivery_mechanisms = self.payment_plan.delivery_mechanisms.filter(
+                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                    sent_to_payment_gateway=False,
+                )
+                if not_sent_pg_delivery_mechanisms.exists():
+                    # TODO show message in UI
+                    self.send_to_payment_gateway()
                 # remove imported and export files
 
             if approval_type == Approval.REJECT:

@@ -392,12 +392,15 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
         EXCLUDE_BENEFICIARIES = "EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"
         EXCLUDE_BENEFICIARIES_ERROR = "EXCLUDE_BENEFICIARIES_ERROR", "Exclude Beneficiaries Error"
+        SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Sending to Payment Gateway"
+        SEND_TO_PAYMENT_GATEWAY_ERROR = "SEND_TO_PAYMENT_GATEWAY_ERROR", "Send to Payment Gateway Error"
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
         BackgroundActionStatus.RULE_ENGINE_ERROR,
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
+        BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -411,6 +414,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         REVIEW = "REVIEW", "Review"
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
+        SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
 
     program_cycle = models.ForeignKey("program.ProgramCycle", null=True, blank=True, on_delete=models.CASCADE)
     created_by = models.ForeignKey(
@@ -597,6 +601,24 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
     )
     def background_action_status_exclude_beneficiaries_error(self) -> None:
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[None, BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR],
+        target=BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_send_to_payment_gateway(self) -> None:
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY, BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR],
+        target=BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_send_to_payment_gateway_error(self) -> None:
         pass
 
     @transition(
@@ -1173,6 +1195,10 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
 
         return volume <= self.distribution_limit
 
+    @property
+    def is_payment_gateway(self) -> bool:
+        return self.communication_channel == self.COMMUNICATION_CHANNEL_API
+
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
     # TODO: remove? do we using this one?
@@ -1234,6 +1260,8 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, db_index=True, null=True
     )
     delivery_mechanism_order = models.PositiveIntegerField()
+
+    sent_to_payment_gateway = models.BooleanField(default=False)
 
     class Meta:
         constraints = [

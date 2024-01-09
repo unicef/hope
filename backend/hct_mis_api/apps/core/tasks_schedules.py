@@ -49,4 +49,12 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.registration_datahub.celery_tasks.clean_old_record_files_task",
         "schedule": crontab(month_of_year="2-12/2"),
     },
+    "periodic_sync_payment_gateway_fsp": {
+        "task": "hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_gateway_fsp",
+        "schedule": crontab(minute="*/5"),  # TODO 5 minutes?
+    },
+    "periodic_sync_payment_gateway_records": {
+        "task": "hct_mis_api.apps.payment.celery_tasks.periodic_sync_payment_gateway_records",
+        "schedule": crontab(minute="*/5"),  # TODO 5 minutes?
+    },
 }
