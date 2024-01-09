@@ -1,5 +1,5 @@
 from django.core.management import call_command
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -14,6 +14,11 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_TAX_ID,
     Document,
     DocumentType,
+    Individual,
+)
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
+    copy_individual_fast,
 )
 
 
@@ -105,6 +110,7 @@ class TestDocument(TestCase):
 
         cls.country = afghanistan
         cls.individual = individual
+        cls.program = ProgramFactory()
 
     def test_raise_error_on_creating_duplicated_documents_with_the_same_number_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
@@ -121,6 +127,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         with self.assertRaises(IntegrityError):
@@ -130,7 +137,90 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
+
+    def test_create_representation_with_the_same_number(self) -> None:
+        document_type, _ = DocumentType.objects.update_or_create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_OTHER],
+            defaults=dict(
+                label="Other",
+                unique_for_individual=False,
+            ),
+        )
+
+        original_document = Document.objects.create(
+            document_number="213123",
+            individual=self.individual,
+            country=self.country,
+            type=document_type,
+            status=Document.STATUS_VALID,
+            program=self.program,
+            is_original=True,
+        )
+
+        # allow to create representations with the same document number within different programs
+        self.individual.is_original = True
+        self.individual.save()
+
+        program_1 = self.individual.program
+        program_2 = ProgramFactory()
+        program_3 = ProgramFactory()
+        program_4 = ProgramFactory()
+
+        for _program in [program_1, program_2]:
+            (individual_to_create, documents_to_create, _, _) = copy_individual_fast(self.individual, _program)
+            Individual.objects.bulk_create([individual_to_create])
+            Document.objects.bulk_create(documents_to_create)
+
+        # test regular create
+        for _program in [program_3, program_4]:
+            (individual_to_create, _, _, _) = copy_individual_fast(self.individual, _program)
+            (created_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
+            Document.objects.create(
+                document_number="213123",
+                individual=created_individual_representation,
+                country=self.country,
+                type=document_type,
+                status=Document.STATUS_VALID,
+                program=created_individual_representation.program,
+                is_original=False,
+                copied_from=original_document,
+            )
+
+        # don't allow to create representations with the same document number and programs
+        (individual_to_create, _, _, _) = copy_individual_fast(self.individual, _program)
+        (created_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                # bulk create
+                Document.objects.bulk_create(
+                    [
+                        Document(
+                            document_number="213123",
+                            individual=created_individual_representation,
+                            country=self.country,
+                            type=document_type,
+                            status=Document.STATUS_VALID,
+                            program=self.individual.program,
+                            is_original=False,
+                            copied_from=original_document,
+                        ),
+                    ]
+                )
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                # regular create
+                Document.objects.create(
+                    document_number="213123",
+                    individual=created_individual_representation,
+                    country=self.country,
+                    type=document_type,
+                    status=Document.STATUS_VALID,
+                    program=self.individual.program,
+                    is_original=False,
+                    copied_from=original_document,
+                ),
 
     def test_create_duplicated_documents_with_different_numbers_and_not_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
@@ -147,6 +237,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         try:
@@ -156,6 +247,7 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
@@ -175,6 +267,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         with self.assertRaises(IntegrityError):
@@ -184,6 +277,7 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
 
     def test_raise_error_on_creating_duplicated_documents_with_different_numbers_and_unique_for_individual(
@@ -203,6 +297,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         with self.assertRaises(IntegrityError):
@@ -212,7 +307,74 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
+
+    def test_create_representations_duplicated_documents_with_different_numbers_and_unique_for_individual(
+        self,
+    ) -> None:
+        document_type, _ = DocumentType.objects.update_or_create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_PASSPORT],
+            defaults=dict(
+                label="National Passport",
+                unique_for_individual=True,
+            ),
+        )
+
+        original_document = Document.objects.create(
+            document_number="123",
+            individual=self.individual,
+            country=self.country,
+            type=document_type,
+            status=Document.STATUS_VALID,
+            program=self.program,
+            is_original=True,
+        )
+
+        # allow to create representations with the same document number within different programs
+        self.individual.is_original = True
+        self.individual.save()
+
+        program_1 = self.individual.program
+        program_2 = ProgramFactory()
+        program_3 = ProgramFactory()
+
+        # make representations with the same number
+        for _program in [program_1, program_2]:
+            (individual_to_create, documents_to_create, _, _) = copy_individual_fast(self.individual, _program)
+            Individual.objects.bulk_create([individual_to_create])
+            Document.objects.bulk_create(documents_to_create)
+
+        # make representation with different number
+        program_3_individual_representation = (individual_to_create, _, _, _) = copy_individual_fast(
+            self.individual, program_3
+        )
+        (program_3_individual_representation,) = Individual.objects.bulk_create([individual_to_create])
+        Document.objects.create(
+            document_number="456",
+            individual=program_3_individual_representation,
+            country=self.country,
+            type=document_type,
+            status=Document.STATUS_VALID,
+            program=program_3,
+            is_original=False,
+            copied_from=original_document,
+        ),
+
+        # don't allow to create more than 1 representation within the same program and individual
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                # regular create
+                Document.objects.create(
+                    document_number="789",
+                    individual=program_3_individual_representation,
+                    country=self.country,
+                    type=document_type,
+                    status=Document.STATUS_VALID,
+                    program=program_3,
+                    is_original=False,
+                    copied_from=original_document,
+                ),
 
     def test_create_duplicated_documents_with_different_numbers_and_types_and_unique_for_individual(self) -> None:
         document_type, _ = DocumentType.objects.update_or_create(
@@ -236,6 +398,7 @@ class TestDocument(TestCase):
             country=self.country,
             type=document_type,
             status=Document.STATUS_VALID,
+            program=self.program,
         )
 
         try:
@@ -245,6 +408,7 @@ class TestDocument(TestCase):
                 country=self.country,
                 type=document_type2,
                 status=Document.STATUS_VALID,
+                program=self.program,
             )
         except IntegrityError:
             self.fail("Shouldn't raise any errors!")
