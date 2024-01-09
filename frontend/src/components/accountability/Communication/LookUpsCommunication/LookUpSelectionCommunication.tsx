@@ -79,7 +79,7 @@ export const LookUpSelectionCommunication = ({
     householdSizeMin: '',
     householdSizeMax: '',
     orderBy: 'unicef_id',
-    withdrawn: null,
+    withdrawn: '',
   };
 
   const [filterHH, setFilterHH] = useState(
