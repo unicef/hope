@@ -142,8 +142,8 @@ def migrate_grievance_tickets(business_area: Optional[BusinessArea] = None) -> N
     """
     Migrate grievance tickets into representations.
     """
-    # print("Handle payment related tickets")
-    # handle_payment_related_tickets()
+    logger.info("Handle payment related tickets")
+    handle_payment_related_tickets()
     logger.info("Handle non payment related tickets")
     handle_non_payment_related_tickets(business_area)
     logger.info("Handle tickets not connected to any program")
@@ -253,10 +253,9 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
         for closed_ticket in closed_tickets_batch:
             household_representation = None
             individual_representation = None
+            program = None
             if closed_ticket.household:
-                if household_representation := closed_ticket.household.copied_to(
-                    manager="original_and_repr_objects"
-                ).first():
+                if household_representation := closed_ticket.household.copied_to.first():
                     program = household_representation.program
                     if closed_ticket.individual:
                         individual_representation = get_individual_representation_per_program_by_old_individual_id(
@@ -264,13 +263,8 @@ def handle_closed_tickets_with_household_and_individual(tickets: QuerySet, ticke
                             old_individual_id=closed_ticket.individual,
                         )
             elif closed_ticket.individual:
-                if individual_representation := closed_ticket.individual.copied_to(
-                    manager="original_and_repr_objects"
-                ).first():
+                if individual_representation := closed_ticket.individual.copied_to.first():
                     program = individual_representation.program
-            else:
-                program = None
-
             if program:
                 (
                     ticket_copy,
@@ -331,15 +325,13 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet, ticke
         old_grievance_tickets_to_update = []
         for active_ticket in active_tickets_batch:
             if active_ticket.individual:
-                individual_representations = active_ticket.individual.copied_to(
-                    manager="original_and_repr_objects"
-                ).all()
+                individual_representations = active_ticket.individual.copied_to.all()
             else:
-                individual_representations = Individual.objects.none()
+                individual_representations = Individual.original_and_repr_objects.none()
             if active_ticket.household:
                 household_representations = active_ticket.household.copied_to(manager="original_and_repr_objects").all()
             else:
-                household_representations = Household.objects.none()
+                household_representations = Household.original_and_repr_objects.none()
 
             if individual_representations or household_representations:
                 individual_programs = individual_representations.values_list("program", flat=True).distinct()
@@ -361,7 +353,6 @@ def handle_active_tickets_with_household_and_individual(tickets: QuerySet, ticke
 
                 grievance_ticket = active_ticket.ticket
                 grievance_ticket.is_migration_handled = True
-                grievance_ticket.migrated_at = timezone.now()
                 old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, ticket_class)
@@ -418,9 +409,7 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
         }
         old_grievance_tickets_to_update = []
         for closed_ticket in closed_tickets_batch:
-            if household_representation := closed_ticket.household.copied_to(
-                manager="original_and_repr_objects"
-            ).first():
+            if household_representation := closed_ticket.household.copied_to.first():
                 program = household_representation.program
                 ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(
                     closed_ticket, program, household_representation=household_representation
@@ -431,7 +420,6 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
                 objects_to_create_dict["notes"].extend(notes_to_create)
                 grievance_ticket = closed_ticket.ticket
                 grievance_ticket.is_migration_handled = True
-                grievance_ticket.migrated_at = timezone.now()
                 old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
@@ -453,7 +441,7 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
         }
         old_grievance_tickets_to_update = []
         for active_ticket in active_tickets_batch:
-            household_representations = active_ticket.household.copied_to(manager="original_and_repr_objects").all()
+            household_representations = active_ticket.household.copied_to.all()
             household_programs = household_representations.values_list("program", flat=True).distinct()
 
             for program in household_programs.iterator():
@@ -471,16 +459,10 @@ def handle_tickets_with_household(model: Any, business_area: Optional[BusinessAr
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
 
-    tickets_with_hh_representation = (
-        model.objects.select_related(
-            "ticket",
-            "household",
-        )
-        .prefetch_related(
-            "household__copied_to",
-        )
-        .filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
-    )
+    tickets_with_hh_representation = model.objects.select_related(
+        "ticket",
+        "household",
+    ).filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
     handle_bulk_update_representations_household_unicef_id(
         tickets_with_hh_representation,
         model,
@@ -517,9 +499,7 @@ def handle_tickets_delete_household_details(business_area: Optional[BusinessArea
         }
         old_grievance_tickets_to_update = []
         for closed_ticket in closed_tickets_batch:
-            if household_representation := closed_ticket.household.copied_to(
-                manager="original_and_repr_objects"
-            ).first():
+            if household_representation := closed_ticket.household.copied_to.first():
                 program = household_representation.program
                 ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_household(
                     closed_ticket, program, household_representation=household_representation
@@ -534,7 +514,6 @@ def handle_tickets_delete_household_details(business_area: Optional[BusinessArea
                 objects_to_create_dict["notes"].extend(notes_to_create)
                 grievance_ticket = closed_ticket.ticket
                 grievance_ticket.is_migration_handled = True
-                grievance_ticket.migrated_at = timezone.now()
                 old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(
@@ -560,7 +539,7 @@ def handle_tickets_delete_household_details(business_area: Optional[BusinessArea
         }
         old_grievance_tickets_to_update = []
         for active_ticket in active_tickets_batch:
-            household_representations = active_ticket.household.copied_to(manager="original_and_repr_objects").all()
+            household_representations = active_ticket.household.copied_to.all()
             household_programs = household_representations.values_list("program", flat=True).distinct()
 
             for program in household_programs.iterator():
@@ -584,16 +563,10 @@ def handle_tickets_delete_household_details(business_area: Optional[BusinessArea
             old_grievance_tickets_to_update, objects_to_create_dict, TicketDeleteHouseholdDetails
         )
 
-    tickets_with_hh_representation = (
-        TicketDeleteHouseholdDetails.objects.select_related(
-            "ticket",
-            "household",
-        )
-        .prefetch_related(
-            "household__copied_to",
-        )
-        .filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
-    )
+    tickets_with_hh_representation = TicketDeleteHouseholdDetails.objects.select_related(
+        "ticket",
+        "household",
+    ).filter(household__isnull=False, ticket__is_original=False, ticket__is_migration_handled=False, **filter_kwargs)
     handle_bulk_update_representations_household_unicef_id(
         tickets_with_hh_representation,
         TicketDeleteHouseholdDetails,
@@ -652,9 +625,7 @@ def handle_tickets_with_individual(
         }
         old_grievance_tickets_to_update = []
         for closed_ticket in closed_tickets_batch:
-            if individual_representation := (
-                getattr(closed_ticket, individual_field_name).copied_to(manager="original_and_repr_objects").first()
-            ):
+            if individual_representation := (getattr(closed_ticket, individual_field_name).copied_to.first()):
                 program = individual_representation.program
                 ticket_copy, grievance_ticket_data, notes_to_create, documents_to_create = copy_ticket_with_individual(
                     closed_ticket,
@@ -689,9 +660,7 @@ def handle_tickets_with_individual(
         }
         old_grievance_tickets_to_update = []
         for active_ticket in active_tickets_batch:
-            individual_representations = (
-                getattr(active_ticket, individual_field_name).copied_to(manager="original_and_repr_objects").all()
-            )
+            individual_representations = getattr(active_ticket, individual_field_name).copied_to.all()
             individual_programs = individual_representations.values_list("program", flat=True).distinct()
 
             for program in individual_programs.iterator():
@@ -852,13 +821,11 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
     logger.info(f"Tickets to handle: {tickets_count}")
     for batch_start in range(0, tickets_count, BATCH_SIZE):
         batched_ids = needs_adjudication_tickets_ids[batch_start : batch_start + BATCH_SIZE]
-        needs_adjudication_tickets_batch = (
-            TicketNeedsAdjudicationDetails.objects.filter(id__in=batched_ids)
-            .select_related(
-                "ticket",
-                "golden_records_individual",
-            )
-            .prefetch_related("possible_duplicates", "selected_individuals")
+        needs_adjudication_tickets_batch = TicketNeedsAdjudicationDetails.objects.filter(
+            id__in=batched_ids
+        ).select_related(
+            "ticket",
+            "golden_records_individual",
         )
         logger.info(f"Handling needs adjudication tickets: {batch_start} of {tickets_count}")
         objects_to_create_dict = {
@@ -875,10 +842,10 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
         for needs_adjudication_ticket in needs_adjudication_tickets_batch:
             individuals = [
                 needs_adjudication_ticket.golden_records_individual,
-                *needs_adjudication_ticket.possible_duplicates.all(),
+                *needs_adjudication_ticket.possible_duplicates(manager="original_and_repr_objects").all(),
             ]
             program_ids = (
-                Individual.objects.filter(id__in=[individual.id for individual in individuals])
+                Individual.original_and_repr_objects.filter(id__in=[individual.id for individual in individuals])
                 .values(
                     "copied_to__program",
                 )
@@ -890,7 +857,6 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
             if not programs:
                 grievance_ticket = needs_adjudication_ticket.ticket
                 grievance_ticket.is_migration_handled = True
-                grievance_ticket.migrated_at = timezone.now()
                 old_grievance_tickets_to_update.append(grievance_ticket)
                 continue
 
@@ -921,7 +887,8 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
                     if individual
                 ]
                 possible_duplicates = [individual for individual in possible_duplicates if individual]
-                needs_adjudication_ticket_copy.golden_records_individual = possible_duplicates.pop()
+                if possible_duplicates:
+                    needs_adjudication_ticket_copy.golden_records_individual = possible_duplicates.pop()
 
                 # Handle selected_individuals
                 old_selected_individuals = needs_adjudication_ticket.selected_individuals.all()
@@ -955,7 +922,6 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
 
             grievance_ticket = needs_adjudication_ticket.ticket
             grievance_ticket.is_migration_handled = True
-            grievance_ticket.migrated_at = timezone.now()
             old_grievance_tickets_to_update.append(grievance_ticket)
 
         handle_bulk_create_paginated_data(
@@ -973,15 +939,12 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
     else:
         filter_kwargs = {}
     message_objects = (
-        Message.objects.select_related(
+        Message.original_and_repr_objects.select_related(
             "target_population",
             "target_population__program",
         )
-        # .prefetch_related(
-        #     "households",
-        #     "households__copied_to",
-        # )
-        .filter(is_original=True, is_migration_handled=False, **filter_kwargs).distinct()
+        .filter(is_original=True, is_migration_handled=False, **filter_kwargs)
+        .distinct()
     )
 
     message_objects_ids = list(message_objects.values_list("pk", flat=True))
@@ -989,7 +952,9 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
     logger.info(f"Messages to handle: {message_objects_count}")
     for batch_start in range(0, message_objects_count, BATCH_SIZE):
         message_objects_batched_ids = message_objects_ids[batch_start : batch_start + BATCH_SIZE]
-        message_objects_batch = Message.objects.filter(id__in=message_objects_batched_ids).select_related(
+        message_objects_batch = Message.original_and_repr_objects.filter(
+            id__in=message_objects_batched_ids
+        ).select_related(
             "target_population",
             "target_population__program",
         )
@@ -998,7 +963,7 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
         message_household_to_create = []
         old_messages_to_update = []
         for message in message_objects_batch:
-            if message.households.exists():
+            if message.households(manager="original_and_repr_objects").exists():
                 if message.target_population:
                     program = message.target_population.program
                     message_copy, message_household = copy_message(message, program)
@@ -1006,21 +971,23 @@ def migrate_messages(business_area: Optional[BusinessArea] = None) -> None:
                     message_household_to_create.extend(message_household)
 
                     message.is_migration_handled = True
-                    message.migrated_at = timezone.now()
                     old_messages_to_update.append(message)
                 else:
-                    programs = list(message.households.values_list("copied_to__program", flat=True).distinct())
+                    programs = list(
+                        message.households(manager="original_and_repr_objects")
+                        .values_list("copied_to__program", flat=True)
+                        .distinct()
+                    )
                     for program in programs:
                         message_copy, message_household = copy_message(message, program)
                         new_messages_to_create.append(message_copy)
                         message_household_to_create.extend(message_household)
                     message.is_migration_handled = True
-                    message.migrated_at = timezone.now()
                     old_messages_to_update.append(message)
-        Message.objects.bulk_create(new_messages_to_create)
+        Message.original_and_repr_objects.bulk_create(new_messages_to_create)
         MessageHouseholdRelation = Message.households.through
         MessageHouseholdRelation.objects.bulk_create(message_household_to_create)
-        Message.objects.bulk_update(old_messages_to_update, ["is_migration_handled", "migrated_at"])
+        Message.original_and_repr_objects.bulk_update(old_messages_to_update, ["is_migration_handled", "migrated_at"])
     logger.info("Handle Messages not connected to any program")
     handle_non_program_messages(business_area)
 
@@ -1041,7 +1008,7 @@ def copy_message(active_message: Message, program: Program) -> tuple:
             program=program,
             old_household_id=household.id,
         )
-        for household in active_message.households.all().only("id")
+        for household in active_message.households(manager="original_and_repr_objects").all().only("id")
     ]
     households_representations = [household for household in households_representations if household]
     MessageHouseholdRelation = Message.households.through
@@ -1068,7 +1035,7 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
     else:
         filter_kwargs = {}
     feedback_objects_for_specific_program = (
-        Feedback.objects.select_related(
+        Feedback.original_and_repr_objects.select_related(
             "program",
             "household_lookup",
             "individual_lookup",
@@ -1093,7 +1060,7 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
         feedback_objects_for_specific_program_batched_ids = feedback_objects_for_specific_program_ids[
             batch_start : batch_start + BATCH_SIZE
         ]
-        feedback_objects_for_specific_program_batch = Feedback.objects.filter(
+        feedback_objects_for_specific_program_batch = Feedback.original_and_repr_objects.filter(
             id__in=feedback_objects_for_specific_program_batched_ids
         ).select_related(
             "program",
@@ -1119,6 +1086,8 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
         for feedback_obj in feedback_objects_for_specific_program_batch:
             household_representation = None
             individual_representation = None
+            program = None
+
             if feedback_obj.program:
                 program = feedback_obj.program
                 if feedback_obj.household_lookup:
@@ -1132,9 +1101,7 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
                         old_individual_id=feedback_obj.individual_lookup,
                     )
             elif feedback_obj.household_lookup:
-                if household_representation := feedback_obj.household_lookup.copied_to(
-                    manager="original_and_repr_objects"
-                ).first():
+                if household_representation := feedback_obj.household_lookup.copied_to.first():
                     program = household_representation.program
                     if feedback_obj.individual_lookup:
                         individual_representation = get_individual_representation_per_program_by_old_individual_id(
@@ -1142,13 +1109,8 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
                             old_individual_id=feedback_obj.individual_lookup,
                         )
             elif feedback_obj.individual_lookup:
-                if individual_representation := feedback_obj.individual_lookup.copied_to(
-                    manager="original_and_repr_objects"
-                ).first():
+                if individual_representation := feedback_obj.individual_lookup.copied_to.first():
                     program = individual_representation.program
-            else:
-                program = None
-
             if program:
                 (
                     feedback_copy,
@@ -1165,16 +1127,14 @@ def copy_feedback_to_specific_program(business_area: Optional[BusinessArea] = No
                 new_feedback_messages_to_create.extend(messages_to_create)
 
                 feedback_obj.is_migration_handled = True
-                feedback_obj.migrated_at = timezone.now()
                 old_feedbacks_to_update.append(feedback_obj)
                 if linked_grievance := feedback_obj.linked_grievance:
                     linked_grievance.is_migration_handled = True
-                    linked_grievance.migrated_at = timezone.now()
                     old_grievance_tickets_to_update.append(linked_grievance)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, Feedback)
         FeedbackMessage.objects.bulk_create(new_feedback_messages_to_create)
-        Feedback.objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled", "migrated_at"])
+        Feedback.original_and_repr_objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled", "migrated_at"])
 
 
 def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None:
@@ -1183,7 +1143,7 @@ def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None
     else:
         filter_kwargs = {}
     active_feedback_objects = (
-        Feedback.objects.select_related(
+        Feedback.original_and_repr_objects.select_related(
             "linked_grievance",
             "program",
             "household_lookup",
@@ -1210,7 +1170,7 @@ def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None
     logger.info(f"Active Feedback objects to handle: {active_feedback_objects_count}")
     for batch_start in range(0, active_feedback_objects_count, BATCH_SIZE):
         active_feedback_objects_batched_ids = active_feedback_objects_ids[batch_start : batch_start + BATCH_SIZE]
-        active_feedback_objects_batch = Feedback.objects.filter(
+        active_feedback_objects_batch = Feedback.original_and_repr_objects.filter(
             id__in=active_feedback_objects_batched_ids
         ).select_related(
             "linked_grievance",
@@ -1233,17 +1193,13 @@ def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None
 
         for feedback_obj in active_feedback_objects_batch:
             if feedback_obj.individual_lookup:
-                individual_representations = feedback_obj.individual_lookup.copied_to(
-                    manager="original_and_repr_objects"
-                ).all()
+                individual_representations = feedback_obj.individual_lookup.copied_to.all()
             else:
-                individual_representations = Individual.objects.none()
+                individual_representations = Individual.original_and_repr_objects.none()
             if feedback_obj.household_lookup:
-                household_representations = feedback_obj.household_lookup.copied_to(
-                    manager="original_and_repr_objects"
-                ).all()
+                household_representations = feedback_obj.household_lookup.copied_to.all()
             else:
-                household_representations = Household.objects.none()
+                household_representations = Household.original_and_repr_objects.none()
             if individual_representations or household_representations:
                 household_programs = household_representations.values_list("program", flat=True).distinct()
                 individual_programs = individual_representations.values_list("program", flat=True).distinct()
@@ -1271,17 +1227,15 @@ def handle_active_feedback(business_area: Optional[BusinessArea] = None) -> None
                     new_feedback_messages_to_create.extend(messages_to_create)
 
                 feedback_obj.is_migration_handled = True
-                feedback_obj.migrated_at = timezone.now()
                 old_feedbacks_to_update.append(feedback_obj)
 
                 if linked_grievance := feedback_obj.linked_grievance:
                     linked_grievance.is_migration_handled = True
-                    linked_grievance.migrated_at = timezone.now()
                     old_grievance_tickets_to_update.append(linked_grievance)
 
         handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, Feedback)
         FeedbackMessage.objects.bulk_create(new_feedback_messages_to_create)
-        Feedback.objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled", "migrated_at"])
+        Feedback.original_and_repr_objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled", "migrated_at"])
 
 
 def copy_feedback(
@@ -1401,20 +1355,23 @@ def migrate_linked_tickets(business_area: Optional[BusinessArea] = None) -> None
                     ]
                 )
             # Link all representations of the same ticket with current representation
-            for ticket_other_representation in original_ticket.copied_to(manager="default_for_migrations_fix").all():
-                if ticket_other_representation.pk != ticket_representation.pk:
-                    linked_tickets_to_create.extend(
-                        [
-                            GrievanceTicketThrough(
-                                main_ticket=ticket_representation,
-                                linked_ticket=ticket_other_representation,
-                            ),
-                            GrievanceTicketThrough(
-                                main_ticket=ticket_other_representation,
-                                linked_ticket=ticket_representation,
-                            ),
-                        ]
-                    )
+            if original_ticket:
+                for ticket_other_representation in original_ticket.copied_to(
+                    manager="default_for_migrations_fix"
+                ).all():
+                    if ticket_other_representation.pk != ticket_representation.pk:
+                        linked_tickets_to_create.extend(
+                            [
+                                GrievanceTicketThrough(
+                                    main_ticket=ticket_representation,
+                                    linked_ticket=ticket_other_representation,
+                                ),
+                                GrievanceTicketThrough(
+                                    main_ticket=ticket_other_representation,
+                                    linked_ticket=ticket_representation,
+                                ),
+                            ]
+                        )
 
         GrievanceTicketThrough.objects.bulk_create(linked_tickets_to_create, ignore_conflicts=True)
 
@@ -1440,7 +1397,7 @@ def handle_grievance_ticket_data_creation(grievance_ticket_data: list) -> None:
             GrievanceTicketProgram(grievanceticket=grievance_ticket["grievance_ticket"], program_id=program_id)
         )
 
-    GrievanceTicket.objects.bulk_create(grievance_tickets)
+    GrievanceTicket.default_for_migrations_fix.bulk_create(grievance_tickets)
     GrievanceTicketProgram.objects.bulk_create(grievance_tickets_program, ignore_conflicts=True)
 
 
@@ -1450,7 +1407,9 @@ def handle_bulk_create_paginated_data(
     handle_grievance_ticket_data_creation(objects_to_create_dict["grievance_tickets"])
     TicketNote.objects.bulk_create(objects_to_create_dict["notes"])
     GrievanceDocument.objects.bulk_create(objects_to_create_dict["documents"])
-    GrievanceTicket.objects.bulk_update(old_grievance_tickets_to_update, ["is_migration_handled", "migrated_at"])
+    GrievanceTicket.default_for_migrations_fix.bulk_update(
+        old_grievance_tickets_to_update, ["is_migration_handled", "migrated_at"]
+    )
     model.objects.bulk_create(objects_to_create_dict["tickets"])
 
 
@@ -1560,7 +1519,6 @@ def handle_non_program_tickets(business_area: Optional[BusinessArea] = None) -> 
 
                     grievance_ticket = non_program_ticket.ticket
                     grievance_ticket.is_migration_handled = True
-                    grievance_ticket.migrated_at = timezone.now()
                     old_grievance_tickets_to_update.append(grievance_ticket)
 
                 handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, model)
@@ -1572,7 +1530,7 @@ def handle_non_program_feedback(business_area: Optional[BusinessArea] = None) ->
     """
     business_areas = [business_area] if business_area else BusinessArea.objects.all().iterator()
     for business_area in business_areas:
-        non_program_feedback_objects = Feedback.objects.filter(
+        non_program_feedback_objects = Feedback.original_and_repr_objects.filter(
             is_original=True, is_migration_handled=False, business_area=business_area
         )
         if non_program_feedback_objects:
@@ -1585,7 +1543,7 @@ def handle_non_program_feedback(business_area: Optional[BusinessArea] = None) ->
                 non_program_feedback_objects_batched_ids = non_program_feedback_objects_ids[
                     batch_start : batch_start + BATCH_SIZE
                 ]
-                non_program_feedback_objects_batch = Feedback.objects.filter(
+                non_program_feedback_objects_batch = Feedback.original_and_repr_objects.filter(
                     id__in=non_program_feedback_objects_batched_ids
                 ).select_related("linked_grievance")
                 logger.info(
@@ -1617,18 +1575,19 @@ def handle_non_program_feedback(business_area: Optional[BusinessArea] = None) ->
                     new_feedback_messages_to_create.extend(messages_to_create)
 
                     feedback.is_migration_handled = True
-                    feedback.migrated_at = timezone.now()
                     old_feedbacks_to_update.append(feedback)
 
                 handle_bulk_create_paginated_data(old_grievance_tickets_to_update, objects_to_create_dict, Feedback)
                 FeedbackMessage.objects.bulk_create(new_feedback_messages_to_create)
-                Feedback.objects.bulk_update(old_feedbacks_to_update, ["is_migration_handled", "migrated_at"])
+                Feedback.original_and_repr_objects.bulk_update(
+                    old_feedbacks_to_update, ["is_migration_handled", "migrated_at"]
+                )
 
 
 def handle_non_program_messages(business_area: Optional[BusinessArea] = None) -> None:
     business_areas = [business_area] if business_area else BusinessArea.objects.all().iterator()
     for business_area in business_areas:
-        non_program_messages = Message.objects.filter(
+        non_program_messages = Message.original_and_repr_objects.filter(
             is_original=True, business_area=business_area, is_migration_handled=False
         )
         if non_program_messages:
@@ -1641,7 +1600,7 @@ def handle_non_program_messages(business_area: Optional[BusinessArea] = None) ->
                 non_program_message_objects_batched_ids = non_program_message_objects_ids[
                     batch_start : batch_start + BATCH_SIZE
                 ]
-                non_program_message_objects_batch = Message.objects.filter(
+                non_program_message_objects_batch = Message.original_and_repr_objects.filter(
                     id__in=non_program_message_objects_batched_ids
                 )
                 logger.info(
@@ -1655,12 +1614,13 @@ def handle_non_program_messages(business_area: Optional[BusinessArea] = None) ->
                     new_messages_to_create.append(message_copy)
                     message_household_to_create.extend(message_household)
                     message.is_migration_handled = True
-                    message.migrated_at = timezone.now()
                     old_messages_to_update.append(message)
-                Message.objects.bulk_create(new_messages_to_create)
+                Message.original_and_repr_objects.bulk_create(new_messages_to_create)
                 MessageHouseholdRelation = Message.households.through
                 MessageHouseholdRelation.objects.bulk_create(message_household_to_create)
-                Message.objects.bulk_update(old_messages_to_update, ["is_migration_handled", "migrated_at"])
+                Message.original_and_repr_objects.bulk_update(
+                    old_messages_to_update, ["is_migration_handled", "migrated_at"]
+                )
 
 
 def handle_role_reassign_data(ticket: Any, program: Program) -> Any:
@@ -1677,32 +1637,20 @@ def handle_role_reassign_data(ticket: Any, program: Program) -> Any:
     """
 
     def retrieve_household_representation(household_from_json: Household, program: Program) -> Optional[Household]:
-        if (
-            household_from_json_in_program := household_from_json.copied_to(manager="original_and_repr_objects")
-            .filter(program=program)
-            .first()
-        ):
+        if household_from_json_in_program := household_from_json.copied_to.filter(program=program).first():
             encoded_id = encode_id_base64(household_from_json_in_program.id, "Household")
             role_data["household"] = encoded_id
         return household_from_json_in_program
 
     def retrieve_individual_representation(individual_from_json: Individual, program: Program) -> Optional[Individual]:
-        if (
-            individual_from_json_in_program := individual_from_json.copied_to(manager="original_and_repr_objects")
-            .filter(program=program)
-            .first()
-        ):
+        if individual_from_json_in_program := individual_from_json.copied_to.filter(program=program).first():
             encoded_id = encode_id_base64(individual_from_json_in_program.id, "Individual")
             role_data["individual"] = encoded_id
         return individual_from_json_in_program
 
     def retrieve_role_from_program(role_from_json: IndividualRoleInHousehold, program: Program) -> Optional[Individual]:
-        role_household_in_program = (
-            role_from_json.household.copied_to(manager="original_and_repr_objects").filter(program=program).first()
-        )
-        role_individual_in_program = (
-            role_from_json.individual.copied_to(manager="original_and_repr_objects").filter(program=program).first()
-        )
+        role_household_in_program = role_from_json.household.copied_to.filter(program=program).first()
+        role_individual_in_program = role_from_json.individual.copied_to.filter(program=program).first()
 
         role_from_json_in_program = IndividualRoleInHousehold.original_and_repr_objects.filter(
             household=role_household_in_program, individual=role_individual_in_program
@@ -1716,13 +1664,17 @@ def handle_role_reassign_data(ticket: Any, program: Program) -> Any:
     for role_uuid, role_data in ticket.role_reassign_data.items():
         role_data_to_extend = {}
 
-        household_from_json = Household.objects.filter(id=decode_id_string(role_data.get("household"))).first()
+        household_from_json = Household.original_and_repr_objects.filter(
+            id=decode_id_string(role_data.get("household"))
+        ).first()
         # Fetch correct household representation from JSON
         household_from_json_in_program = (
             retrieve_household_representation(household_from_json, program) if household_from_json else None
         )
 
-        individual_from_json = Individual.objects.filter(id=decode_id_string(role_data.get("individual"))).first()
+        individual_from_json = Individual.original_and_repr_objects.filter(
+            id=decode_id_string(role_data.get("individual"))
+        ).first()
         # Fetch correct individual representation from JSON
         individual_from_json_in_program = (
             retrieve_individual_representation(individual_from_json, program) if individual_from_json else None
@@ -1732,7 +1684,7 @@ def handle_role_reassign_data(ticket: Any, program: Program) -> Any:
             if role_uuid == "HEAD":
                 role_data_to_extend["HEAD"] = role_data
             else:
-                role_from_json = IndividualRoleInHousehold.objects.filter(id=role_uuid).first()
+                role_from_json = IndividualRoleInHousehold.original_and_repr_objects.filter(id=role_uuid).first()
                 # Fetch correct role representation from JSON
                 role_from_json_in_program = (
                     retrieve_role_from_program(role_from_json, program) if role_from_json else None
@@ -1782,12 +1734,10 @@ def handle_extra_data(ticket: Any, program: Program) -> Any:
     for list_data in ticket.extra_data.values():
         for ind_data in list_data:
             id_found = False
-            hit_from_json = Individual.objects.filter(id=ind_data.get("hit_id")).first()
+            hit_from_json = Individual.original_and_repr_objects.filter(id=ind_data.get("hit_id")).first()
             # Fetch correct individual representation from JSON
             if hit_from_json:
-                hit_from_json_in_program = (
-                    hit_from_json.copied_to(manager="original_and_repr_objects").filter(program=program).first()
-                )
+                hit_from_json_in_program = hit_from_json.copied_to.filter(program=program).first()
                 if hit_from_json_in_program:
                     id_found = True
                     ind_data["hit_id"] = str(hit_from_json_in_program.id)
@@ -1840,7 +1790,7 @@ def handle_individual_data(
     }
     """
     individual = ticket.individual
-    individual_in_program = individual.copied_to(manager="original_and_repr_objects").filter(program=program).first()
+    individual_in_program = individual.copied_to.filter(program=program).first()
     if not individual_in_program:
         return ticket
 
@@ -1932,7 +1882,7 @@ class IndividualDataObjectsToRemoveHandler:
             previous_object = self.individual_data.get(self.previous_objects_string, {}).get(object_to_remove_id, {})
             if not previous_object:
                 continue
-            object_in_program = self.model.original_and_repr_objects.filter(
+            object_in_program = self.model.objects.filter(
                 individual=self.individual_in_program,
                 **self.object_specific_get_fields(previous_object),
             ).first()
@@ -1987,12 +1937,12 @@ class IndividualDataObjectsToEditHandler:
 
     def handle_objects_to_edit(self) -> None:
         for index, object_to_edit in enumerate(self.individual_data.get(self.objects_to_edit_string, [])):
-            object_in_program = self.model.original_and_repr_objects.filter(
+            object_in_program = self.model.objects.filter(
                 individual=self.individual_in_program,
                 **self.get_object_specific_fields(object_to_edit.get("previous_value", {})),
             ).first()
             if not object_in_program:
-                object_in_program = self.model.original_and_repr_objects.filter(
+                object_in_program = self.model.objects.filter(
                     individual=self.individual_in_program,
                     **self.get_object_specific_fields(object_to_edit.get("value", {})),
                 ).first()
@@ -2051,7 +2001,7 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
 
     # Update household_unicef_id for all related GrievanceTickets
     # Fetch the GrievanceTickets related to the updated objects
-    grievance_tickets = GrievanceTicket.objects.filter(
+    grievance_tickets = GrievanceTicket.default_for_migrations_fix.filter(
         Q(complaint_ticket_details__in=complaint_tickets_with_payments)
         | Q(sensitive_ticket_details__in=sensitive_tickets_with_payments)
     ).distinct()
@@ -2090,11 +2040,11 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
         if program:
             payment_verification_ticket.ticket.programs.set([program])
 
-    GrievanceTicket.objects.filter(
+    GrievanceTicket.default_for_migrations_fix.filter(
         Q(complaint_ticket_details__in=complaint_tickets_with_payments)
         | Q(sensitive_ticket_details__in=sensitive_tickets_with_payments)
         | Q(payment_verification_ticket_details__in=payment_verification_tickets)
-    ).update(is_original=False, is_migration_handled=True, migrated_at=timezone.now())
+    ).update(is_original=False, is_migration_handled=True)
 
 
 def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDetails, TicketSensitiveDetails]) -> tuple:
@@ -2118,12 +2068,3 @@ def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDet
         else None
     )
     return household_representation, individual_representation, program
-
-
-def delete_representations_from_ba(business_area: BusinessArea) -> None:
-    GrievanceTicket.default_for_migrations_fix.filter(business_area=business_area, is_original=False).delete()
-    GrievanceTicket.objects.filter(business_area=business_area).update(is_migration_handled=False, migrated_at=None)
-    Feedback.original_and_repr_objects.filter(business_area=business_area, is_original=False).delete()
-    Feedback.objects.filter(business_area=business_area).update(is_migration_handled=False, migrated_at=None)
-    Message.original_and_repr_objects.filter(business_area=business_area, is_original=False).delete()
-    Message.objects.filter(business_area=business_area).update(is_migration_handled=False, migrated_at=None)
