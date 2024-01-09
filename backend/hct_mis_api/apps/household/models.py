@@ -417,7 +417,7 @@ class Household(
     admin4 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
     geopoint = PointField(blank=True, null=True)
 
-    size = models.PositiveIntegerField(db_index=True, null=True)
+    size = models.PositiveIntegerField(db_index=True, null=True, blank=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
