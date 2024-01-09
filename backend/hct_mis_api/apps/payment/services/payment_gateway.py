@@ -67,9 +67,12 @@ class PaymentGatewayPaymentInstructionSerializer(ReadOnlyModelSerializer):
 
 class PaymentGatewayPaymentSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
-    record_code = serializers.CharField(source="id")  # TODO models.CharField(max_length=64) ?
+    record_code = serializers.SerializerMethodField()
     payload = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
+
+    def get_record_code(self, obj: Payment) -> Dict:
+        return obj.unicef_id
 
     def get_extra_data(self, obj: Payment) -> Dict:
         """
@@ -196,16 +199,20 @@ class PaymentGatewayAPI:
         response_data = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
         return PaymentInstructionData(**response_data)
 
-    def change_payment_instruction_status(
-        self, status: PaymentInstructionStatus, remote_id: str
-    ) -> PaymentInstructionData:
+    def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
             raise self.PaymentGatewayAPIException(f"Can't set invalid Payment Instruction status: {status}")
 
-        endpoint = getattr(self.Endpoints, f"{status.value}_PAYMENT_INSTRUCTION_STATUS")
-        response_data = self._post(endpoint.format(remote_id=remote_id))
+        action_endpoint_map = {
+            PaymentInstructionStatus.ABORTED: self.Endpoints.ABORT_PAYMENT_INSTRUCTION_STATUS,
+            PaymentInstructionStatus.CLOSED: self.Endpoints.CLOSE_PAYMENT_INSTRUCTION_STATUS,
+            PaymentInstructionStatus.OPEN: self.Endpoints.OPEN_PAYMENT_INSTRUCTION_STATUS,
+            PaymentInstructionStatus.PROCESSED: self.Endpoints.PROCESS_PAYMENT_INSTRUCTION_STATUS,
+            PaymentInstructionStatus.READY: self.Endpoints.READY_PAYMENT_INSTRUCTION_STATUS,
+        }
+        response_data = self._post(action_endpoint_map[status].format(remote_id=remote_id))
 
-        return PaymentInstructionData(**response_data)
+        return response_data["status"]
 
     def add_records_to_payment_instruction(
         self, payment_records: QuerySet[Payment], remote_id: str
@@ -236,13 +243,18 @@ class PaymentGatewayService:
                 assert response.remote_id == str(
                     delivery_mechanism.id
                 ), f"{response}, delivery_mechanism_id: {delivery_mechanism.id}"
+                status = self.api.change_payment_instruction_status(
+                    status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
+                )
+                assert status == PaymentInstructionStatus.OPEN.value, status
 
     def change_payment_instruction_status(
-        self, status: PaymentInstructionStatus, delivery_mechanism: DeliveryMechanismPerPaymentPlan
-    ) -> None:
+        self, new_status: PaymentInstructionStatus, delivery_mechanism: DeliveryMechanismPerPaymentPlan
+    ) -> str:
         if delivery_mechanism.financial_service_provider.is_payment_gateway:
-            response = self.api.change_payment_instruction_status(status, delivery_mechanism.id)
-            assert response.status == PaymentInstructionStatus.DRAFT.value, response
+            response_status = self.api.change_payment_instruction_status(new_status, delivery_mechanism.id)
+            assert new_status.value == response_status, f"{new_status} != {response_status}"
+            return response_status
 
     def add_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
         for delivery_mechanism in payment_plan.delivery_mechanisms.all():
@@ -256,7 +268,10 @@ class PaymentGatewayService:
                 ), f"{response}, delivery_mechanism_id: {delivery_mechanism.id}"
                 assert len(response.records) == payments.count(), f"{len(response.records)} != {payments.count()}"
 
-                self.change_payment_instruction_status(PaymentInstructionStatus.READY, delivery_mechanism)
+                status = self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, delivery_mechanism)
+                assert status == PaymentInstructionStatus.CLOSED.value, status
+                status = self.change_payment_instruction_status(PaymentInstructionStatus.READY, delivery_mechanism)
+                assert status == PaymentInstructionStatus.READY.value, status
                 delivery_mechanism.sent_to_payment_gateway = True
                 delivery_mechanism.save(update_fields=["sent_to_payment_gateway"])
 
@@ -294,7 +309,7 @@ class PaymentGatewayService:
 
                     for payment in pending_payments:
                         try:
-                            matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == payment.id)
+                            matching_pg_payment = next(p for p in pg_payment_records if p.remote_id == str(payment.id))
                         except StopIteration:
                             logger.error(
                                 f"Payment {payment.id} for Payment Instruction {delivery_mechanism.id} not found in Payment Gateway"
