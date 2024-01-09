@@ -417,7 +417,6 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         "vision_vendor_number",
         "distribution_limit",
         "communication_channel",
-        "is_payment_provider",
     )
     search_fields = ("name",)
     # filter_horizontal = ("delivery_mechanisms",)
