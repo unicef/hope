@@ -50104,7 +50104,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'size',
-                'required': True,
+                'required': False,
                 'type': 'INTEGER'
             },
             {
