@@ -249,6 +249,8 @@ type BankAccountInfoNode implements Node {
   individual: IndividualNode!
   bankName: String!
   bankAccountNumber: String!
+  bankBranchName: String!
+  accountHolderName: String!
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
   copiedFrom: BankAccountInfoNode
@@ -272,6 +274,8 @@ input BankTransferObjectType {
   type: String!
   bankName: String!
   bankAccountNumber: String!
+  bankBranchName: String
+  accountHolderName: String!
 }
 
 scalar BigInt
@@ -1042,6 +1046,8 @@ input EditBankTransferObjectType {
   type: String!
   bankName: String!
   bankAccountNumber: String!
+  bankBranchName: String
+  accountHolderName: String!
 }
 
 input EditIndividualDocumentObjectType {

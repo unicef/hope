@@ -108,6 +108,8 @@ export const individualDetailed = gql`
       id
       bankName
       bankAccountNumber
+      accountHolderName
+      bankBranchName
     }
     documents {
       edges {
@@ -157,6 +159,8 @@ export const individualDetailed = gql`
     bankAccountInfo {
       bankName
       bankAccountNumber
+      accountHolderName
+      bankBranchName
     }
     preferredLanguage
     paymentDeliveryPhoneNo
