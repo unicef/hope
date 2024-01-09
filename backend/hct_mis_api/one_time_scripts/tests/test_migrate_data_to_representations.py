@@ -58,7 +58,7 @@ from hct_mis_api.one_time_scripts.soft_delete_original_objects import (
 )
 
 
-class TestMigrateDataToRepresentations(TestCase):
+class BaseMigrateDataTestCase:
     def create_hh_with_ind(
         self,
         ind_data: dict,
@@ -646,6 +646,13 @@ class TestMigrateDataToRepresentations(TestCase):
                 "registration_data_import": self.rdi_with_program,
             },
         )
+        Household.objects.update(is_original=True)
+        Individual.objects.update(is_original=True)
+        Document.objects.update(is_original=True)
+        IndividualIdentity.objects.update(is_original=True)
+        BankAccountInfo.objects.update(is_original=True)
+        IndividualRoleInHousehold.objects.update(is_original=True)
+        HouseholdSelection.objects.update(is_original=True)
 
     def refresh_objects(self) -> None:
         self.household1.refresh_from_db()
@@ -700,6 +707,8 @@ class TestMigrateDataToRepresentations(TestCase):
         self.household_with_assigned_rdi.refresh_from_db()
         self.individual_with_assigned_rdi.refresh_from_db()
 
+
+class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
     def test_migrate_data_to_representations_per_business_area_running_two_times(self) -> None:
         self.refresh_objects()
         self.assertEqual(Household.original_and_repr_objects.count(), 24)
