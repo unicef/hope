@@ -1,9 +1,11 @@
 import logging
 import typing
+from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.core.exceptions import ValidationError
 
+import xlrd
 from graphql.execution.base import ResolveInfo
 
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
@@ -86,16 +88,16 @@ class CommonValidator(BaseValidator):
 
 
 def prepare_choices_for_validation(choices_sheet: "Worksheet") -> Dict[str, List[str]]:
-    from collections import defaultdict
-
-    import xlrd
-
     choices_mapping = defaultdict(list)
     first_row = choices_sheet.row(0)
     choices_headers_map = [col.value for col in first_row]
-    if {"list_name", "name", "label::English (en)"}.issubset(set(choices_headers_map)) is False:
-        logger.error("Choices sheet does not contain all required columns")
-        raise ValueError("Choices sheet does not contain all required columns")
+    required_columns = {"list_name", "name"}
+    if required_columns.issubset(set(choices_headers_map)) is False:
+        missing_columns = required_columns - set(choices_headers_map)
+        str_missing_columns = ", ".join(missing_columns)
+        msg = f"Choices sheet does not contain all required columns, missing columns: {str_missing_columns}"
+        logger.warning(msg)
+        raise ValidationError(msg)
 
     for row_number in range(1, choices_sheet.nrows):
         row = choices_sheet.row(row_number)
@@ -177,8 +179,8 @@ class KoboTemplateValidator:
                 columns_names_and_numbers_mapping[column_name] = index
 
         if None in columns_names_and_numbers_mapping.values():
-            logger.error("Survey sheet does not contain all required columns")
-            raise ValueError("Survey sheet does not contain all required columns")
+            logger.warning("Survey sheet does not contain all required columns")
+            raise ValidationError("Survey sheet does not contain all required columns")
 
         return columns_names_and_numbers_mapping
 
