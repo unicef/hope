@@ -5613,6 +5613,7 @@ export type Query = {
   programSectorChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   programScopeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   cashPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  dataCollectingTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allActivePrograms?: Maybe<ProgramNodeConnection>,
   targetPopulation?: Maybe<TargetPopulationNode>,
   allTargetPopulation?: Maybe<TargetPopulationNodeConnection>,
@@ -13484,7 +13485,8 @@ export type AllActiveProgramsQueryVariables = {
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
   orderBy?: Maybe<Scalars['String']>,
-  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>
+  numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>,
+  dataCollectingType?: Maybe<Scalars['String']>
 };
 
 
@@ -13621,9 +13623,9 @@ export type ProgrammeChoiceDataQuery = (
   )>>>, programStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
-  )>>>, dataCollectionTypeChoices: Maybe<Array<Maybe<(
-    { __typename?: 'DataCollectingTypeChoiceObject' }
-    & Pick<DataCollectingTypeChoiceObject, 'name' | 'value'>
+  )>>>, dataCollectingTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -25666,8 +25668,8 @@ export type IndividualFlexFieldsQueryHookResult = ReturnType<typeof useIndividua
 export type IndividualFlexFieldsLazyQueryHookResult = ReturnType<typeof useIndividualFlexFieldsLazyQuery>;
 export type IndividualFlexFieldsQueryResult = ApolloReactCommon.QueryResult<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>;
 export const AllActiveProgramsDocument = gql`
-    query AllActivePrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $numberOfHouseholdsWithTpInProgram: String) {
-  allActivePrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate, numberOfHouseholdsWithTpInProgram: $numberOfHouseholdsWithTpInProgram) {
+    query AllActivePrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $numberOfHouseholdsWithTpInProgram: String, $dataCollectingType: String) {
+  allActivePrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate, numberOfHouseholdsWithTpInProgram: $numberOfHouseholdsWithTpInProgram, dataCollectingType: $dataCollectingType) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -25736,6 +25738,7 @@ export function withAllActivePrograms<TProps, TChildProps = {}>(operationOptions
  *      endDate: // value for 'endDate'
  *      orderBy: // value for 'orderBy'
  *      numberOfHouseholdsWithTpInProgram: // value for 'numberOfHouseholdsWithTpInProgram'
+ *      dataCollectingType: // value for 'dataCollectingType'
  *   },
  * });
  */
@@ -26026,7 +26029,7 @@ export const ProgrammeChoiceDataDocument = gql`
     name
     value
   }
-  dataCollectionTypeChoices {
+  dataCollectingTypeChoices {
     name
     value
   }
@@ -31936,6 +31939,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   programSectorChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   programScopeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  dataCollectingTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allActivePrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllActiveProgramsArgs, 'businessArea'>>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,

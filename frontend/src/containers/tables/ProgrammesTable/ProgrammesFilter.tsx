@@ -172,7 +172,7 @@ export const ProgrammesFilters = ({
             value={filter.dataCollectingType}
             data-cy='filters-data-collecting-type'
           >
-            {choicesData.dataCollectionTypeChoices.map((item) => {
+            {choicesData.dataCollectingTypeChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
                   {item.name}
