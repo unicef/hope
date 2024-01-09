@@ -57,7 +57,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     householdSizeMin: '',
     householdSizeMax: '',
     orderBy: 'unicef_id',
-    withdrawn: null,
+    withdrawn: '',
     programState: 'active',
   };
   const initialFilterIND = {

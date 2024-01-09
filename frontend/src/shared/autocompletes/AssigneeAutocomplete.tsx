@@ -56,22 +56,19 @@ export const AssigneeAutocomplete = ({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (businessArea) {
+    if (isMounted.current && businessArea) {
       loadData({ variables: { businessArea, search: debouncedInputText } });
     }
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {
-    if (open && isMounted.current) {
+    if (open) {
       loadDataCallback();
     }
+    return () => {
+      isMounted.current = false;
+    };
   }, [open, debouncedInputText, loadDataCallback]);
-
-  useEffect(() => {
-    if (isMounted.current) {
-      loadDataCallback();
-    }
-  }, [loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
