@@ -340,7 +340,7 @@ class DataCollectingTypeValidator(BaseValidator):
                 and program.data_collecting_type.code != data_collecting_type.code
                 and program.status != Program.DRAFT
             ):
-                raise ValidationError("DataCollectingType can be updated only for Program within status draft")
+                raise ValidationError("The Data Collection Type for this programme cannot be edited.")
             # can update for draft program and without population
             elif (
                 program

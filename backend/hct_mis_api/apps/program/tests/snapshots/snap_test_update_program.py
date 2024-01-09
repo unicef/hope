@@ -19,7 +19,7 @@ snapshots['TestUpdateProgram::test_update_active_program_with_dct 1'] = {
                     'line': 3
                 }
             ],
-            'message': 'DataCollectingType can be updated only for Program within status draft',
+            'message': 'The Data Collection Type for this programme cannot be edited.',
             'path': [
                 'updateProgram'
             ]
