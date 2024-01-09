@@ -165,6 +165,22 @@ export const ProgrammesFilters = ({
             onChange={(e) => handleFilterChange('budgetMax', e.target.value)}
           />
         </Grid>
+        <Grid item xs={3}>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('dataCollectingType', e.target.value)}
+            label='Data Collecting Type'
+            value={filter.dataCollectingType}
+            data-cy='filters-data-collecting-type'
+          >
+            {choicesData.dataCollectionTypeChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
       </Grid>
     </FiltersSection>
   );

@@ -5442,6 +5442,16 @@
                 "defaultValue": null
               },
               {
+                "name": "dataCollectingType",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -6068,6 +6078,16 @@
               },
               {
                 "name": "numberOfHouseholdsWithTpInProgram",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "dataCollectingType",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",

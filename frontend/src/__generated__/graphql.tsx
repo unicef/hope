@@ -6311,6 +6311,7 @@ export type QueryAllProgramsArgs = {
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
   numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>,
+  dataCollectingType?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6376,6 +6377,7 @@ export type QueryAllActiveProgramsArgs = {
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
   numberOfHouseholdsWithTpInProgram?: Maybe<Scalars['String']>,
+  dataCollectingType?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -13518,7 +13520,8 @@ export type AllProgramsQueryVariables = {
   budget?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['Date']>,
   endDate?: Maybe<Scalars['Date']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  dataCollectingType?: Maybe<Scalars['String']>
 };
 
 
@@ -13618,6 +13621,9 @@ export type ProgrammeChoiceDataQuery = (
   )>>>, programStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, dataCollectionTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'DataCollectingTypeChoiceObject' }
+    & Pick<DataCollectingTypeChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -25743,8 +25749,8 @@ export type AllActiveProgramsQueryHookResult = ReturnType<typeof useAllActivePro
 export type AllActiveProgramsLazyQueryHookResult = ReturnType<typeof useAllActiveProgramsLazyQuery>;
 export type AllActiveProgramsQueryResult = ApolloReactCommon.QueryResult<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>;
 export const AllProgramsDocument = gql`
-    query AllPrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String) {
-  allPrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, numberOfHouseholds: $numberOfHouseholds, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate) {
+    query AllPrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String, $dataCollectingType: String) {
+  allPrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, numberOfHouseholds: $numberOfHouseholds, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate, dataCollectingType: $dataCollectingType) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -25818,6 +25824,7 @@ export function withAllPrograms<TProps, TChildProps = {}>(operationOptions?: Apo
  *      startDate: // value for 'startDate'
  *      endDate: // value for 'endDate'
  *      orderBy: // value for 'orderBy'
+ *      dataCollectingType: // value for 'dataCollectingType'
  *   },
  * });
  */
@@ -26016,6 +26023,10 @@ export const ProgrammeChoiceDataDocument = gql`
     value
   }
   programStatusChoices {
+    name
+    value
+  }
+  dataCollectionTypeChoices {
     name
     value
   }

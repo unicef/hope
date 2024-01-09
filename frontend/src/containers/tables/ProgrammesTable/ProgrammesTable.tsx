@@ -35,6 +35,7 @@ export function ProgrammesTable({
       max: filter.numberOfHouseholdsMax,
     }),
     budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
+    dataCollectingType: filter.dataCollectingType || null
   };
   return (
     <TableWrapper>
