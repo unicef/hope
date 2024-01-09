@@ -1,18 +1,24 @@
+import pytest
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from page_object.programme_management import ProgrammeManagement
+from helpers.hope import HOPE
+
+from page_object.programme_management.programme_management import ProgrammeManagement
+from page_object.programme_details.programme_details import ProgrammeDetails
+from page_object.base_components import BaseLocators
 import pytest
 
 from time import sleep
+import random
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="class", autouse=True)
 def driver_init(request):
     ff_driver = webdriver.Firefox()
     request.cls.browser = ff_driver
-    request.cls.programmeManagement = ProgrammeManagement()
     yield
     ff_driver.close()
 
@@ -27,16 +33,46 @@ def log_in(request):
     assert "HOPE" in request.cls.browser.title
     yield
 
-@pytest.mark.usefixtures("driver_init", "log_in")
-class TestProgrammeManagement:
+@pytest.mark.usefixtures("log_in")
+class TestProgrammeManagement(HOPE):
 
-    def get(self, element_type=By.ID, locator=""):
-        return self.browser.find_element(element_type, locator)
-
-    def wait_for(self, element_type=By.ID, locator=""):
-        return WebDriverWait(self.browser, 10).until(EC.visibility_of_element_located((element_type, locator)))
-
-    def test_create_programme(self):
-        self.wait_for(By.XPATH, '//*[@id="root"]/div/div[1]/div/div[2]/ul/div/a[2]/div[2]/span').click()
-        self.wait_for(By.CSS_SELECTOR, 'a[data-cy="button-new-program"]').click()
-        sleep(1)
+    @pytest.mark.parametrize("program_name, selector, startDate, endDate, dataCollectingType",
+    [
+    ("New Programme - " + str(random.random()),
+    "Child Protection",
+    "2023-05-01",
+    "2033-12-12",
+    "Full"),
+    ("New Programme - " + str(random.random()),
+    "Child Protection",
+    "2023-05-01",
+    "2033-12-12",
+    "Full"),
+    ])
+    def test_create_programme(self, program_name, selector, startDate, endDate, dataCollectingType):
+        #Go to Programme Management
+        self.wait_for(BaseLocators.navProgrammeManagement).click()
+        #Create Programme
+        self.wait_for(ProgrammeManagement.buttonNewProgram).click()
+        self.wait_for(ProgrammeManagement.inputProgrammeName).send_keys(program_name)
+        self.get(ProgrammeManagement.inputStartDate).send_keys("2023-05-01")
+        self.get(ProgrammeManagement.inputEndDate).send_keys("2033-12-12")
+        self.get(ProgrammeManagement.selectSelector).click()
+        self.get(ProgrammeManagement.optionChildProtection(selector)).click()
+        self.wait_for_disappear(ProgrammeManagement.optionChildProtection(selector))
+        self.wait_for(ProgrammeManagement.inputDataCollectingType).click()
+        self.get(ProgrammeManagement.optionFull).click()
+        self.wait_for_disappear(ProgrammeManagement.optionFull)
+        self.get(ProgrammeManagement.buttonNext).click()
+        self.wait_for(ProgrammeManagement.buttonSave).click()
+        #Check Details
+        assert program_name in self.wait_for(ProgrammeDetails.headerTitle).text
+        assert "DRAFT" in self.wait_for(ProgrammeDetails.programStatus).text
+        assert "1 May 2023" in self.wait_for(ProgrammeDetails.labelStartDate).text
+        assert "12 Dec 2033" in self.wait_for(ProgrammeDetails.labelEndDate).text
+        assert "Child Protection" in self.wait_for(ProgrammeDetails.labelSelector).text
+        assert "Full" in self.wait_for(ProgrammeDetails.labelDataCollectingType).text
+        assert "Regular" in self.wait_for(ProgrammeDetails.labelFreqOfPayment).text
+        assert "-" in self.wait_for(ProgrammeDetails.labelAdministrativeAreas).text
+        assert "No" in self.wait_for(ProgrammeDetails.labelCashPlus).text
+        assert "0" in self.wait_for(ProgrammeDetails.labelTotalNumberOfHouseholds).text

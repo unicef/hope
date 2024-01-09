@@ -8,6 +8,8 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   --mount=type=cache,target=/var/lib/apt,sharing=private \
   apt-get update &&\
   apt-get install -y --no-install-recommends \
+  chromium-driver \
+  chromium \
   build-essential \
   libjpeg-dev \
   zlib1g-dev \
@@ -24,7 +26,8 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   libpangocairo-1.0-0 \
   shared-mime-info \
   wkhtmltopdf \
-  curl &&\
+  curl \
+  vim &&\
   addgroup --system --gid "${UID}" hope &&\
   adduser --system --uid "${UID}" --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
   mkdir -p /code /tmp /data &&\
