@@ -84,7 +84,7 @@ class TestGenericRegistrationService(TestCase):
                 "ff": "random",
             }
         ]
-        cls.individual_wit_bank_account_and_tax_and_disability = {
+        cls.individual_with_bank_account_and_tax_and_disability = {
             "id_type": "tax_id",
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
@@ -100,7 +100,7 @@ class TestGenericRegistrationService(TestCase):
             "disability_id_type_i_c": "disability_certificate",
             "disability_id_i_c": "xyz",
         }
-        cls.individual_wit_bank_account_and_tax = {
+        cls.individual_with_bank_account_and_tax = {
             "id_type": "tax_id",
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
@@ -174,14 +174,14 @@ class TestGenericRegistrationService(TestCase):
                 source_id=1,
                 fields={
                     "household": self.household,
-                    "individuals": [self.individual_wit_bank_account_and_tax_and_disability],
+                    "individuals": [self.individual_with_bank_account_and_tax_and_disability],
                 },
                 files=json.dumps(self.files).encode(),
             ),
             Record(
                 **self.defaults,
                 source_id=2,
-                fields={"household": self.household, "individuals": [self.individual_wit_bank_account_and_tax]},
+                fields={"household": self.household, "individuals": [self.individual_with_bank_account_and_tax]},
                 files=json.dumps({}).encode(),
             ),
             Record(
@@ -206,7 +206,7 @@ class TestGenericRegistrationService(TestCase):
             ),
         ]
         records = Record.objects.bulk_create(records)
-        bad_records = Record.objects.bulk_create(bad_records)
+        Record.objects.bulk_create(bad_records)
 
         service = GenericRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"generic rdi {datetime.datetime.now()}")
@@ -238,7 +238,7 @@ class TestGenericRegistrationService(TestCase):
                 source_id=1,
                 fields={
                     "household": self.household,
-                    "individuals": [self.individual_wit_bank_account_and_tax_and_disability],
+                    "individuals": [self.individual_with_bank_account_and_tax_and_disability],
                     "enumerators": "ABC",
                     "marketing": {"can_unicef_contact_you": "YES"},
                 },
