@@ -159,8 +159,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
             if (
                 refresh_areas == "false"
-                and business_area_role_form_set.is_valid()
                 and business_area_role_form_set_is_valid
+                and program_area_form_set.is_valid()
                 and not incompatible_roles
             ):
                 partner.set_permissions(partner_permissions)
