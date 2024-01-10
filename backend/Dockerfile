@@ -21,7 +21,6 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   libgdk-pixbuf2.0-0 \
   libpango-1.0-0 \
   libpangocairo-1.0-0 \
-  shared-mime-info \
   curl &&\
   addgroup --system --gid "${UID}" hope &&\
   adduser --system --uid "${UID}" --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
