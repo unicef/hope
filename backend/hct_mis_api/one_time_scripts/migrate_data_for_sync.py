@@ -146,18 +146,22 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
         is_original=True,
         is_migration_handled=False,
     ).update(
-        is_migration_handled=True
-    )  # Don't need to update migrated_at for sync I think
+        is_migration_handled=True,
+        migrated_at=timezone.now(),
+    )
 
     logger.info("Updating Individuals with migration date")
     Individual.original_and_repr_objects.filter(
         business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
-    ).update(is_migration_handled=True)
+    ).update(
+        is_migration_handled=True,
+        migrated_at=timezone.now(),
+    )
 
     logger.info("Updating IndividualRoleInHouseholds with migration date")
     IndividualRoleInHousehold.original_and_repr_objects.filter(
         household__business_area=business_area, is_original=True, copied_to__isnull=False, is_migration_handled=False
-    ).update(is_migration_handled=True)
+    ).update(is_migration_handled=True, migrated_at=timezone.now())
 
     if business_area.name == "Democratic Republic of Congo":
         apply_congo_withdrawal()
@@ -346,7 +350,7 @@ def copy_individual_representation_fast(
     """
     # copy representations only based on original individuals
     if individual.is_original:
-        return copy_individual_fast(individual, program)
+        return copy_individual_fast(individual, program.id)
     else:
         raise Exception("Cannot copy representation of representation")
 
@@ -357,7 +361,7 @@ def copy_individual(individual: Individual, program: Program) -> Individual:
         documents_to_create,
         identities_to_create,
         bank_account_info_to_create,
-    ) = copy_individual_fast(individual, program)
+    ) = copy_individual_fast(individual, program.id)
     (created_individual,) = Individual.objects.bulk_create([individual_to_create])
     Document.objects.bulk_create(documents_to_create)
     IndividualIdentity.objects.bulk_create(identities_to_create)
@@ -365,7 +369,7 @@ def copy_individual(individual: Individual, program: Program) -> Individual:
     return created_individual
 
 
-def copy_individual_fast(individual: Individual, program: Program) -> tuple:
+def copy_individual_fast(individual: Individual, program_id: str) -> tuple:
     documents = list(individual.documents(manager="original_and_repr_objects").all())
     identities = list(individual.identities(manager="original_and_repr_objects").all())
     bank_accounts_info = list(individual.bank_account_info(manager="original_and_repr_objects").all())
@@ -378,7 +382,7 @@ def copy_individual_fast(individual: Individual, program: Program) -> tuple:
     copy.origin_unicef_id = original_unicef_id
     copy.pk = None
     copy.unicef_id = original_unicef_id
-    copy.program = program
+    copy.program_id = program_id
     copy.household = None
     copy.is_original = False
     documents_to_create = copy_document_per_individual_fast(documents, copy)
@@ -843,7 +847,11 @@ def copy_individual_sync(individuals_ids: List) -> None:
     documents_to_create = []
     identities_to_create = []
     bank_account_info_to_create = []
-    for individual in Individual.original_and_repr_objects.filter(id__in=individuals_ids):
+    for individual in (
+        Individual.original_and_repr_objects.filter(id__in=individuals_ids)
+        .select_related("household")
+        .iterator(chunk_size=10000)
+    ):
         programs = (
             individual.represented_households(manager="original_and_repr_objects")
             .all()
@@ -857,17 +865,16 @@ def copy_individual_sync(individuals_ids: List) -> None:
                 programs,
             )
         household = individual.household
-        programs = Program.objects.filter(id__in=programs)
-        for program in programs:
+        for program_id in programs:
             (
                 individual_to_create,
                 documents_to_create_batch,
                 identities_to_create_batch,
                 bank_account_info_to_create_batch,
-            ) = copy_individual_fast(individual, program)
+            ) = copy_individual_fast(individual, program_id)
             if household:
                 household_representation = (
-                    household.copied_to(manager="original_and_repr_objects").filter(program=program).first()
+                    household.copied_to(manager="original_and_repr_objects").filter(program_id=program_id).first()
                 )
                 individual_to_create.household = household_representation
             documents_to_create.extend(documents_to_create_batch)
