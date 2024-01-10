@@ -45,7 +45,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Individual ID
@@ -56,7 +56,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Individual
@@ -67,7 +67,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Role
@@ -78,7 +78,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Relationship to HoH
@@ -89,7 +89,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Date of Birth
@@ -100,7 +100,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Gender
@@ -111,7 +111,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Dedupe within Batch
@@ -122,7 +122,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Dedupe against Population
@@ -134,14 +134,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb gOGApX"
+                  class="sc-htpNat hMQrxf"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
@@ -181,14 +181,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb gOGApX"
+                  class="sc-htpNat hMQrxf"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
@@ -228,14 +228,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb gOGApX"
+                  class="sc-htpNat hMQrxf"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>
@@ -394,7 +394,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Individual ID
@@ -405,7 +405,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Individual
@@ -416,7 +416,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Role
@@ -427,7 +427,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Relationship to HoH
@@ -438,7 +438,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Date of Birth
@@ -449,7 +449,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Gender
@@ -460,7 +460,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Dedupe within Batch
@@ -471,7 +471,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                 scope="col"
               >
                 <span
-                  class="sc-htpNat hFMTQJ"
+                  class="sc-bwzfXH liLTAP"
                   data-cy="table-label"
                 >
                   Dedupe against Population
@@ -483,14 +483,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb gOGApX"
+                  class="sc-htpNat hMQrxf"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
@@ -535,14 +535,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb gOGApX"
+                  class="sc-htpNat hMQrxf"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
@@ -587,14 +587,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-ifAKCX kDXhrk MuiTableRow-hover"
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <a
-                  class="sc-bxivhb gOGApX"
+                  class="sc-htpNat hMQrxf"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>

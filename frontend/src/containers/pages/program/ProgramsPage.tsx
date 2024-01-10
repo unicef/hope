@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import { useProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
@@ -37,16 +36,10 @@ export const ProgramsPage = (): React.ReactElement => {
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useProgrammeChoiceDataQuery();
+  const { data: choicesData } = useProgrammeChoiceDataQuery();
   const { t } = useTranslation();
 
-  if (choicesLoading) return <LoadingComponent />;
-
   if (permissions === null || !choicesData) return null;
-
   if (
     !hasPermissions(
       [

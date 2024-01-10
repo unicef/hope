@@ -72,7 +72,7 @@ export const RegistrationDataImportTable = ({
             noTitle
               ? null
               : `${t('List of Imports')} (${
-                  data.allRegistrationDataImports.totalCount
+                  data?.allRegistrationDataImports?.totalCount
                 })`
           }
           headCells={enableRadioButton ? headCells : headCells.slice(1)}
