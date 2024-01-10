@@ -163,10 +163,12 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         context["business_area_role_formset"] = business_area_role_form_set
         context["program_area_formset"] = program_area_form_set
         context["areas"] = {}
+        context["program"] = {}
 
         for business_area_id in business_areas:
             context["areas"][str(business_area_id)] = Area.objects.filter(
                 area_type__country__business_areas__id=business_area_id
             )
+            context["program"][str(business_area_id)] = Program.objects.filter(business_area_id=business_area_id)
 
         return TemplateResponse(request, "admin/account/parent/permissions.html", context)
