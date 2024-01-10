@@ -34,6 +34,8 @@ class UpgradeModel(models.Model):
 
 
 class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
+    _natural_key = ("iso_code2",)
+
     name = CICharField(max_length=255, db_index=True)
     short_name = CICharField(max_length=255, db_index=True)
     iso_code2 = models.CharField(max_length=2, unique=True)
@@ -71,8 +73,6 @@ class Country(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
             }
             for country in queryset
         ]
-
-    _natural_key = ("iso_code2", )
 
 
 class AreaType(NaturalKeyModel, MPTTModel, UpgradeModel, TimeStampedUUIDModel):
