@@ -383,6 +383,8 @@ export type BankAccountInfoNode = Node & {
   individual: IndividualNode,
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
+  bankBranchName: Scalars['String'],
+  accountHolderName: Scalars['String'],
   isOriginal: Scalars['Boolean'],
   isMigrationHandled: Scalars['Boolean'],
   copiedFrom?: Maybe<BankAccountInfoNode>,
@@ -417,6 +419,8 @@ export type BankTransferObjectType = {
   type: Scalars['String'],
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
+  bankBranchName?: Maybe<Scalars['String']>,
+  accountHolderName: Scalars['String'],
 };
 
 
@@ -1582,6 +1586,8 @@ export type EditBankTransferObjectType = {
   type: Scalars['String'],
   bankName: Scalars['String'],
   bankAccountNumber: Scalars['String'],
+  bankBranchName?: Maybe<Scalars['String']>,
+  accountHolderName: Scalars['String'],
 };
 
 export type EditIndividualDocumentObjectType = {
@@ -9445,7 +9451,7 @@ export type IndividualDetailedFragment = (
   & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'phoneNoAlternativeValid' | 'email' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'flexFields' | 'preferredLanguage' | 'paymentDeliveryPhoneNo'>
   & { paymentChannels: Maybe<Array<Maybe<(
     { __typename?: 'BankAccountInfoNode' }
-    & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
+    & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber' | 'accountHolderName' | 'bankBranchName'>
   )>>>, documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -9482,7 +9488,7 @@ export type IndividualDetailedFragment = (
     ) }
   )>, bankAccountInfo: Maybe<(
     { __typename?: 'BankAccountInfoNode' }
-    & Pick<BankAccountInfoNode, 'bankName' | 'bankAccountNumber'>
+    & Pick<BankAccountInfoNode, 'bankName' | 'bankAccountNumber' | 'accountHolderName' | 'bankBranchName'>
   )> }
   & IndividualMinimalFragment
 );
@@ -13296,7 +13302,7 @@ export type AllIndividualsQuery = (
           )>> }
         ), paymentChannels: Maybe<Array<Maybe<(
           { __typename?: 'BankAccountInfoNode' }
-          & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber'>
+          & Pick<BankAccountInfoNode, 'id' | 'bankName' | 'bankAccountNumber' | 'accountHolderName' | 'bankBranchName'>
         )>>> }
       )> }
     )>> }
@@ -14609,6 +14615,8 @@ export const IndividualDetailedFragmentDoc = gql`
     id
     bankName
     bankAccountNumber
+    accountHolderName
+    bankBranchName
   }
   documents {
     edges {
@@ -14658,6 +14666,8 @@ export const IndividualDetailedFragmentDoc = gql`
   bankAccountInfo {
     bankName
     bankAccountNumber
+    accountHolderName
+    bankBranchName
   }
   preferredLanguage
   paymentDeliveryPhoneNo
@@ -25134,6 +25144,8 @@ export const AllIndividualsDocument = gql`
           id
           bankName
           bankAccountNumber
+          accountHolderName
+          bankBranchName
         }
       }
     }
@@ -29619,6 +29631,8 @@ export type BankAccountInfoNodeResolvers<ContextType = any, ParentType extends R
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   bankName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   bankAccountNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  bankBranchName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  accountHolderName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   isOriginal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   isMigrationHandled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   copiedFrom?: Resolver<Maybe<ResolversTypes['BankAccountInfoNode']>, ParentType, ContextType>,

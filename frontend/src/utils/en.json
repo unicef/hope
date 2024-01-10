@@ -603,8 +603,10 @@
   "Delivered Value": "Delivered Value",
   "Received Value": "Received Value",
   "New Verified Value": "New Verified Value",
-  "Bank account number": "Bank account number",
-  "Bank name": "Bank name",
+  "Bank Account Number": "Bank Account Number",
+  "Bank Name": "Bank Name",
+  "Bank Branch Name": "Bank Branch Name",
+  "Bank Account Holder Name": "Bank Account Holder Name",
   "NEW FSP": "NEW FSP",
   "Set up FSP": "Set up FSP",
   "Mobile Money": "Mobile Money",
@@ -849,5 +851,7 @@
   "Select partner first": "Select partner first",
   "Ticket Type": "Ticket Type",
   "Debit Card Number": "Debit Card Number",
-  "Debit Card Issuer": "Debit Card Issuer"
+  "Debit Card Issuer": "Debit Card Issuer",
+  "Bank branch name": "Bank branch name",
+  "Account holder name": "Account holder name"
 }
