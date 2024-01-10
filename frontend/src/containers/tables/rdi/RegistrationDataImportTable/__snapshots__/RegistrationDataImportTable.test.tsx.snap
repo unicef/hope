@@ -24,7 +24,7 @@ exports[`containers/tables/rdi/RegistrationDataImportTable should render loading
                 class="MuiTypography-root makeStyles-title-22 MuiTypography-h6"
                 data-cy="table-title"
               >
-                List of Imports (undefined)
+                List of Imports (0)
               </h6>
             </div>
             <div
