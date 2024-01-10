@@ -4,6 +4,7 @@ from django.db import transaction
 
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     BankAccountInfo,
     Document,
@@ -17,6 +18,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 from hct_mis_api.apps.program.validators import validate_data_collecting_type
+from hct_mis_api.apps.utils.elasticsearch_utils import populate_index
 
 
 def copy_program_object(copy_from_program_id: str, program_data: dict) -> Program:
@@ -49,6 +51,12 @@ def copy_program_related_data(copy_from_program_id: str, new_program: Program) -
     copy_households_from_whole_program(copy_from_program_id, new_program)
     copy_household_related_data(new_program)
     copy_individual_related_data(new_program)
+    populate_index(
+        Individual.objects.filter(program=new_program),
+        get_individual_doc(new_program.business_area.slug),
+    )
+    populate_index(Household.objects.filter(program=new_program), HouseholdDocument)
+
     create_program_cycle(new_program)
 
 
