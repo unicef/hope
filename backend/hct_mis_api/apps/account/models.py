@@ -192,14 +192,14 @@ class Partner(MPTTModel, models.Model):
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
-        return [(role.id, role.name) for role in cls.objects.exclude(name="Default Empty Partner")]
+        return [(partner.id, partner.name) for partner in cls.objects.exclude(name="Default Empty Partner")]
 
     @classmethod
     def get_partners_for_ba_as_choices(cls, business_area_id: UUID) -> List:
         return [
-            (role.id, role.name)
-            for role in cls.objects.exclude(name="Default Empty Partner")
-            if str(business_area_id) in role.business_area_ids or role.is_unicef
+            (partner.id, partner.name)
+            for partner in cls.objects.exclude(name="Default Empty Partner")
+            if str(business_area_id) in partner.business_area_ids or partner.is_unicef
         ]
 
     @property
