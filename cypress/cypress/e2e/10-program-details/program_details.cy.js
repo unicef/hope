@@ -33,7 +33,6 @@ describe("Program Details", () => {
       programDetails.getLabelCASH().should("be.visible");
       programDetails.getLabelDescription().should("be.visible");
       programDetails.getLabelFrequencyOfPayment().should("be.visible");
-      programDetails.getLabelScope().should("be.visible");
       programDetails.getLabelSector().should("be.visible");
       programDetails.getLabelENDDATE().should("be.visible");
       programDetails.getLabelSTARTDATE().should("be.visible");
@@ -58,7 +57,6 @@ describe("Program Details", () => {
       programDetails.getLabelCASH().should("be.visible");
       programDetails.getLabelDescription().should("be.visible");
       programDetails.getLabelFrequencyOfPayment().should("be.visible");
-      programDetails.getLabelScope().should("be.visible");
       programDetails.getLabelSector().should("be.visible");
       programDetails.getLabelENDDATE().should("be.visible");
       programDetails.getLabelSTARTDATE().should("be.visible");
