@@ -18958,6 +18958,22 @@
             "deprecationReason": null
           },
           {
+            "name": "deliveredQuantities",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DeliveredQuantityNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "activeIndividualsCount",
             "description": null,
             "args": [],

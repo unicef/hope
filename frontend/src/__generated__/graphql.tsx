@@ -2306,6 +2306,7 @@ export type HouseholdNode = Node & {
   adminAreaTitle?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
   programsWithDeliveredQuantity?: Maybe<Array<Maybe<ProgramsWithDeliveredQuantityNode>>>,
+  deliveredQuantities?: Maybe<Array<Maybe<DeliveredQuantityNode>>>,
   activeIndividualsCount?: Maybe<Scalars['Int']>,
 };
 
@@ -9373,13 +9374,9 @@ export type HouseholdDetailedFragment = (
         )> }
       )> }
     )>> }
-  ), programsWithDeliveredQuantity: Maybe<Array<Maybe<(
-    { __typename?: 'ProgramsWithDeliveredQuantityNode' }
-    & Pick<ProgramsWithDeliveredQuantityNode, 'id' | 'name'>
-    & { quantity: Maybe<Array<Maybe<(
-      { __typename?: 'DeliveredQuantityNode' }
-      & Pick<DeliveredQuantityNode, 'totalDeliveredQuantity' | 'currency'>
-    )>>> }
+  ), deliveredQuantities: Maybe<Array<Maybe<(
+    { __typename?: 'DeliveredQuantityNode' }
+    & Pick<DeliveredQuantityNode, 'totalDeliveredQuantity' | 'currency'>
   )>>> }
   & HouseholdMinimalFragment
 );
@@ -14827,13 +14824,9 @@ export const HouseholdDetailedFragmentDoc = gql`
     }
   }
   flexFields
-  programsWithDeliveredQuantity {
-    id
-    name
-    quantity {
-      totalDeliveredQuantity
-      currency
-    }
+  deliveredQuantities {
+    totalDeliveredQuantity
+    currency
   }
 }
     ${HouseholdMinimalFragmentDoc}
@@ -30681,6 +30674,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   programsWithDeliveredQuantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProgramsWithDeliveredQuantityNode']>>>, ParentType, ContextType>,
+  deliveredQuantities?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveredQuantityNode']>>>, ParentType, ContextType>,
   activeIndividualsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
