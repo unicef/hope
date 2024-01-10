@@ -171,12 +171,10 @@ def filter_based_on_partner_areas_2(
         partner_permission = user_partner.get_permissions()
         filter_q = Q()
         if not program_id:
-            if business_area_permission := partner_permission.get_programs_for_business_area(
-                business_area_id_str
-            ):
+            if business_area_permission := partner_permission.get_programs_for_business_area(business_area_id_str):
                 programs_permissions = business_area_permission.programs.items()
             else:
-                programs_permissions = {}
+                programs_permissions = {}  # type: ignore
         else:
             areas = partner_permission.areas_for(business_area_id_str, program_id_str)
             if areas is None:
