@@ -109,7 +109,6 @@ class TestDeliveryDate(APITestCase):
         import_service.open_workbook()
         import_service.validate()
         import_service.import_payment_list()
-        print(self.payment_1.delivery_date)
         self.payment_1.refresh_from_db()
         self.payment_2.refresh_from_db()
         self.payment_3.refresh_from_db()
