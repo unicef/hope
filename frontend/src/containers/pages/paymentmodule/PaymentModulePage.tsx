@@ -11,7 +11,7 @@ import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable'
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 const initialFilter = {
   search: '',
@@ -20,8 +20,7 @@ const initialFilter = {
   status: [],
   totalEntitledQuantityFrom: '',
   totalEntitledQuantityTo: '',
-  isFollowUp: null,
-  program: null,
+  isFollowUp: '',
 };
 
 export const PaymentModulePage = (): React.ReactElement => {
@@ -38,7 +37,7 @@ export const PaymentModulePage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  if (permissions === null) return null
+  if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
     return <PermissionDenied />;
@@ -47,17 +46,17 @@ export const PaymentModulePage = (): React.ReactElement => {
     <>
       <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
-            <ButtonTooltip
-              variant='contained'
-              color='primary'
-              component={Link}
-              to={`/${baseUrl}/payment-module/new-plan`}
-              data-cy='button-new-payment-plan'
-              title={t('Program has to be active to create new Payment Program')}
-              disabled={!isActiveProgram}
-            >
-              {t('NEW PAYMENT PLAN')}
-            </ButtonTooltip>
+          <ButtonTooltip
+            variant='contained'
+            color='primary'
+            component={Link}
+            to={`/${baseUrl}/payment-module/new-plan`}
+            data-cy='button-new-payment-plan'
+            title={t('Program has to be active to create new Payment Program')}
+            disabled={!isActiveProgram}
+          >
+            {t('NEW PAYMENT PLAN')}
+          </ButtonTooltip>
         )}
       </PageHeader>
       <PaymentPlansFilters

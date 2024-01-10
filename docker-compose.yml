@@ -36,7 +36,7 @@ services:
 
   backend:
     stdin_open: true
-    entrypoint: docker-entrypoint.sh
+    entrypoint: entrypoint.sh
     image: unicef/hct-mis-backend
     env_file:
       - .env

@@ -59,28 +59,19 @@ export const CreatedByAutocomplete = ({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (businessArea) {
+    if (isMounted.current && businessArea) {
       loadData({ variables: { businessArea, search: debouncedInputText } });
     }
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {
-    if (open && isMounted.current) {
+    if (open) {
       loadDataCallback();
     }
+    return () => {
+      isMounted.current = false;
+    };
   }, [open, debouncedInputText, loadDataCallback]);
-
-  useEffect(() => {
-    if (isMounted.current) {
-      loadDataCallback();
-    }
-  }, [loadDataCallback]);
-
-  useEffect(() => {
-    if (!value) {
-      onInputTextChange('');
-    }
-  }, [value, onInputTextChange]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -91,7 +82,6 @@ export const CreatedByAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
-  if (!data) return null;
 
   const allEdges = get(data, 'allUsers.edges', []);
 

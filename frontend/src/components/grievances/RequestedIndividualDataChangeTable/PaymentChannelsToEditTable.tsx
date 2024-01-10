@@ -104,7 +104,7 @@ export const PaymentChannelsToEditTable = ({
         <TableBody>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Bank name')}</TableCell>
+            <TableCell align='left'>{t('Bank Name')}</TableCell>
             <TableCell align='left'>
               {paymentChannel.previous_value.bank_name}
             </TableCell>
@@ -117,7 +117,7 @@ export const PaymentChannelsToEditTable = ({
           </TableRow>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Bank account number')}</TableCell>
+            <TableCell align='left'>{t('Bank Account Number')}</TableCell>
             <TableCell align='left'>
               {paymentChannel.previous_value.bank_account_number}
             </TableCell>
@@ -125,6 +125,32 @@ export const PaymentChannelsToEditTable = ({
               {renderNewOrNotUpdated(
                 paymentChannel.previous_value?.bank_account_number,
                 paymentChannel.value?.bank_account_number,
+              )}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell />
+            <TableCell align='left'>{t('Bank Account Holder Name')}</TableCell>
+            <TableCell align='left'>
+              {paymentChannel.previous_value.account_holder_name}
+            </TableCell>
+            <TableCell align='left'>
+              {renderNewOrNotUpdated(
+                paymentChannel.previous_value?.account_holder_name,
+                paymentChannel.value?.account_holder_name,
+              )}
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell />
+            <TableCell align='left'>{t('Bank Branch Name')}</TableCell>
+            <TableCell align='left'>
+              {paymentChannel.previous_value.bank_branch_name}
+            </TableCell>
+            <TableCell align='left'>
+              {renderNewOrNotUpdated(
+                paymentChannel.previous_value?.bank_branch_name,
+                paymentChannel.value?.bank_branch_name,
               )}
             </TableCell>
           </TableRow>

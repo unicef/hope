@@ -86,6 +86,46 @@ export function PaymentChannelField({
           disabled={isEditTicket}
         />
       </Grid>
+      <Grid item xs={4}>
+        <LabelizedField label={t('Payment channel item')} value='Account holder name' />
+      </Grid>
+      <Grid item xs={4}>
+        <LabelizedField
+          label={t('Current Value')}
+          value={paymentChannel?.accountHolderName}
+        />
+      </Grid>
+      <Grid item xs={3}>
+        <Field
+          name={`${paymentChannelFieldName}.accountHolderName`}
+          fullWidth
+          variant='outlined'
+          label={t('New Value')}
+          component={FormikTextField}
+          required
+          disabled={isEditTicket}
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <LabelizedField label={t('Payment channel item')} value='Bank branch name' />
+      </Grid>
+      <Grid item xs={4}>
+        <LabelizedField
+          label={t('Current Value')}
+          value={paymentChannel?.bankBranchName}
+        />
+      </Grid>
+      <Grid item xs={3}>
+        <Field
+          name={`${paymentChannelFieldName}.bankBranchName`}
+          fullWidth
+          variant='outlined'
+          label={t('New Value')}
+          component={FormikTextField}
+          required
+          disabled={isEditTicket}
+        />
+      </Grid>
     </>
   );
 }

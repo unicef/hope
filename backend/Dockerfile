@@ -42,8 +42,8 @@ WORKDIR /code
 RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/$WAITFORIT_VERSION/waitforit-linux_amd64 &&\
   chmod +x /usr/local/bin/waitforit
 
-COPY ./docker-entrypoint.sh /bin/
-ENTRYPOINT ["docker-entrypoint.sh"]
+COPY ./docker/entrypoint.sh /bin/
+ENTRYPOINT ["entrypoint.sh"]
 
 RUN curl -o /code/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 

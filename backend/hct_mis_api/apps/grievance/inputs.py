@@ -132,6 +132,8 @@ class BankTransferObjectType(graphene.InputObjectType):
     type = graphene.String(required=True)
     bank_name = graphene.String(required=True)
     bank_account_number = graphene.String(required=True)
+    bank_branch_name = graphene.String(required=False)
+    account_holder_name = graphene.String(required=True)
 
 
 class EditBankTransferObjectType(graphene.InputObjectType):
@@ -139,6 +141,8 @@ class EditBankTransferObjectType(graphene.InputObjectType):
     type = graphene.String(required=True)
     bank_name = graphene.String(required=True)
     bank_account_number = graphene.String(required=True)
+    bank_branch_name = graphene.String(required=False)
+    account_holder_name = graphene.String(required=True)
 
 
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
