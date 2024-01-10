@@ -45,16 +45,11 @@ export const ProgramDetails = ({
   choices,
 }: ProgramDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const {
-    programFrequencyOfPaymentsChoices,
-    programSectorChoices,
-    programScopeChoices,
-  } = choices;
+  const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
   const programFrequencyOfPaymentsChoicesDict = choicesToDict(
     programFrequencyOfPaymentsChoices,
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
-  const programScopeChoicesDict = choicesToDict(programScopeChoices);
 
   return (
     <ContainerColumnWithBorder data-cy='program-details-container'>
@@ -88,12 +83,6 @@ export const ProgramDetails = ({
             <LabelizedField
               label={t('Sector')}
               value={programSectorChoicesDict[program.sector]}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t('Scope')}
-              value={programScopeChoicesDict[program.scope]}
             />
           </Grid>
           <Grid item xs={4}>
