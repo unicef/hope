@@ -43,6 +43,7 @@ export const LookUpSelectionSurveys = ({
     numberOfHouseholdsMax: '',
     budgetMin: '',
     budgetMax: '',
+    dataCollectingType: ''
   };
 
   const [filterP, setFilterP] = useState(

@@ -23,6 +23,7 @@ class ProgramFilter(FilterSet):
     budget = DecimalRangeFilter(field_name="budget")
     start_date = DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
+    data_collecting_type = CharFilter(field_name="data_collecting_type__code", lookup_expr="exact")
 
     class Meta:
         fields = (

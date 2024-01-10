@@ -15,6 +15,7 @@ export const ALL_PROGRAMS_QUERY = gql`
     $startDate: Date
     $endDate: Date
     $orderBy: String
+    $dataCollectingType: String
   ) {
     allPrograms(
       before: $before
@@ -30,6 +31,7 @@ export const ALL_PROGRAMS_QUERY = gql`
       orderBy: $orderBy
       startDate: $startDate
       endDate: $endDate
+      dataCollectingType: $dataCollectingType
     ) {
       pageInfo {
         hasNextPage
