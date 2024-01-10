@@ -282,7 +282,7 @@ class TestSyncRepresentations(BaseMigrateDataTestCase, BaseGrievanceTestCase, Te
         new_rdi = RegistrationDataImportFactory(business_area=self.business_area)
         new_target_population = TargetPopulationFactory(
             program=new_program,
-            status=TargetPopulation.STATUS_OPEN,
+            status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
             business_area=self.business_area,
         )
         new_target_population_2 = TargetPopulationFactory(
