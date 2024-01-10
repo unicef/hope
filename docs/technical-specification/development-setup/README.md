@@ -10,15 +10,16 @@
 Frontend running on Local Machine (use node 16)
 
 ```bash
-cd frontend
-yarn
-yarn start
-# in another terminal
-cd ..
+# terminal no. 1:
 docker-compose build
 docker-compose up
-# once everything is up, in yet another terminal
-docker exec -it <prefix>_backend_1 ./manage.py initdemo
+# terminal no. 2:
+cd frontend
+nvm use 13.12.0
+yarn
+yarn start
+# once everything is up use terminal no. 3:
+docker-compose run --rm backend ./manage.py initdemo
 ```
 
 There are some additional services that are not necessary for the app to run but may help a developer. If you want to e.g. turn on the kibana service, just run
@@ -45,17 +46,38 @@ Access the frontend in your browser at [`localhost:8082/login`](http://localhost
 
 Backend can be accessed at `/api/` i.e. [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/)
 
-When running locally, you don't neet to provide AD credentials - you can go straight to [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/) and log in with `root:root1234`. When you have the necessary cookies in your browser, you can also access the FE dashboard.
+When running locally, you don't neet to provide AD credentials - you can go straight to [`localhost:8082/api/unicorn/`](http://localhost:8082/api/unicorn/) and log in with `root:fKXRA1FRYTA1lKfdg`. When you have the necessary cookies in your browser, you can also access the FE dashboard.
 
 # Cypress Testing Service
-Go to cypress_testing_service catalog
-Create cypress.env.json file based on cypress.env.json.example file
-Run yarn install
-In separate terminal tab run docker-compose run --rm backend ./manage.py initcypress
-Run yarn cy:open
 
+Cypress running on Local Machine:
+Go to cypress_testing_service catalog (default path is <CHT-MIS>/cypress)
+```bash
+# terminal no. 1:
+cd cypress
+npm install cypress --save-dev 
+cd ..
+docker-compose build
+docker-compose up
+# terminal no. 2:
+cd frontend
+nvm use 13.12.0
+yarn
+yarn start
+# once everything is up use terminal no. 3:
+```bash
+docker-compose run --rm backend sh -c "until pg_isready -h db -p 5432; do echo 'waiting for database'; sleep 2; done;" &&docker-compose run --rm backend ./manage.py initcypress
+# once everything is up use terminal no. 1:
+npx cypress run
+```
 
-
+Cypress running on Docker:
+```bash
+cd cypress
+docker-compose -f docker-compose.ci.yml down -v
+docker-compose -f docker-compose.ci.yml build
+docker-compose -f docker-compose.ci.yml run cypress ci-test
+```
 
 ### **Commands**
 
@@ -97,13 +119,13 @@ We are keeping tests in &lt;app\_name&gt;/tests/ and creating separate files for
 to run all tests use:
 
 ```bash
-./manage.py test
+pytest hct_mis_api
 ```
 
 to overwrite existing snapshots:
 
 ```bash
-./manage.py test --snapshot-update
+pytest hct_mis_api --snapshot-update
 ```
 
 You can run single test in TestCase or overwrite snapshot for only one TestCase by providing a path.
@@ -111,7 +133,7 @@ You can run single test in TestCase or overwrite snapshot for only one TestCase 
 Example for running single test method in TestCase.
 
 ```bash
-./manage.py test core.tests.test_flexibles.TestFlexibles.test_load_invalid_file
+pytest hct_mis_api/core/tests/test_flexibles/
 ```
 
 More information can be found here:

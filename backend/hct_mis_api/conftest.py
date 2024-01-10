@@ -49,6 +49,8 @@ def pytest_configure(config: Config) -> None:
         }
     }
 
+    settings.CONSTANCE_CONFIG["REST_BANNER_MESSAGE"] = ("Default banner message", "Description", str)
+
     settings.LOGGING["loggers"].update(
         {
             "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
