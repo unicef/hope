@@ -114,7 +114,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
             partner_permissions = PartnerPermission()
             business_area_role_form_set = BusinessAreaRoleFormSet(request.POST or None, prefix="business_area_role")
             program_area_form_set = ProgramAreaFormSet(request.POST or None, prefix="program_areas")
-            refresh_areas = request.POST["refresh-areas"]
+            refresh_areas = request.POST.get("refresh-areas", "false")
             incompatible_roles = defaultdict(list)
 
             if business_area_role_form_set.is_valid():
