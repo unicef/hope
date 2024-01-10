@@ -116,6 +116,8 @@ class TestCzechRepublicRegistrationService(TestCase):
                 "bank_account_h_f": "y",
                 "bank_account_number": "CZ6003000000000306979952",
                 "bank_account_number_h_f": "CZ6003000000000306979952",
+                "account_holder_name_i_c": "Test Holder Name CZ",
+                "bank_branch_name_i_c": "Branch Name CZ",
                 "birth_date_i_c": "1995-08-01",
                 "confirm_phone_number": "+420774844183",
                 "country_origin_h_c": "ukr",
@@ -273,6 +275,8 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         bank_account_info = ImportedBankAccountInfo.objects.first()
         self.assertEqual(bank_account_info.bank_account_number, "CZ6003000000000306979952")
+        self.assertEqual(bank_account_info.bank_branch_name, "Branch Name CZ")
+        self.assertEqual(bank_account_info.account_holder_name, "Test Holder Name CZ")
         # self.assertEqual(ImportedDocument.objects.count(), 8)
 
         birth_certificate = ImportedDocument.objects.filter(type__key="birth_certificate").first()

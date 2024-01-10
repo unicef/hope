@@ -215,6 +215,8 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return {
             "bank_account_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
+            "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
+            "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
             "individual": imported_individual,
         }
 
