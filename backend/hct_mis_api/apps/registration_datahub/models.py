@@ -580,6 +580,8 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
+    bank_branch_name = models.CharField(max_length=255, blank=True, default="")
+    account_holder_name = models.CharField(max_length=255, blank=True, default="")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         if self.bank_account_number:

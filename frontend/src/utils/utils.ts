@@ -1038,13 +1038,13 @@ export const getAutocompleteOptionLabel = (
 };
 
 export const handleOptionSelected = (
-  optionValue: string,
+  option: string | undefined,
   value: string | null | undefined,
 ): boolean => {
-  if (value === '' || value === null) {
-    return false;
+  if (!value) {
+    return !option;
   }
-  return optionValue === value;
+  return option === value;
 };
 
 export const isProgramNodeUuidFormat = (id: string): boolean => {
