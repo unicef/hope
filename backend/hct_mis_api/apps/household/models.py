@@ -417,7 +417,7 @@ class Household(
     admin4 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
     geopoint = PointField(blank=True, null=True)
 
-    size = models.PositiveIntegerField(db_index=True, null=True)
+    size = models.PositiveIntegerField(db_index=True, null=True, blank=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",
@@ -693,8 +693,11 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
 
     class Meta:
         constraints = [
+            # if document_type.unique_for_individual=True then document of this type must be unique for an individual
+            # is_original = True -> 1 original instance of document
+            # is_original = False -> 1 representation of document per program
             UniqueConstraint(
-                fields=["type", "country"],  # TODO: after GPF merge will add "program"
+                fields=["individual", "type", "country", "program"],
                 condition=Q(
                     Q(is_removed=False)
                     & Q(status="VALID")
@@ -707,19 +710,11 @@ class Document(AbstractSyncable, SoftDeletableIsOriginalModel, TimeStampedUUIDMo
                 ),
                 name="unique_for_individual_if_not_removed_and_valid",
             ),
+            # document_number must be unique across all documents of the same type
             UniqueConstraint(
-                fields=["document_number", "type", "country"],  # TODO: after GPF merge will add "program"
-                condition=Q(
-                    Q(is_removed=False)
-                    & Q(status="VALID")
-                    & Func(
-                        F("type_id"),
-                        Value(False),
-                        function="check_unique_document_for_individual",
-                        output_field=BooleanField(),
-                    )
-                ),
-                name="unique_if_not_removed_and_valid",
+                fields=["document_number", "type", "country", "program", "is_original"],
+                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                name="unique_if_not_removed_and_valid_for_representations",
             ),
         ]
 
