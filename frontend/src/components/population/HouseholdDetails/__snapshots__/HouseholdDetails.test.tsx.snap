@@ -421,72 +421,7 @@ Jameschester, SC 24934
           <div
             data-cy="label-Cash received"
           >
-            <div
-              class="MuiBox-root MuiBox-root-1"
-            >
-              <div
-                class="MuiGrid-root MuiGrid-container"
-              >
-                <div
-                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
-                >
-                  <div
-                    class="MuiBox-root MuiBox-root-2"
-                  >
-                    <div
-                      class="MuiBox-root MuiBox-root-3"
-                    >
-                      USD 3,251.00
-                    </div>
-                    <div
-                      class="MuiBox-root MuiBox-root-4"
-                    >
-                      (BAM 3,048.00)
-                    </div>
-                    <div
-                      class="MuiBox-root MuiBox-root-5"
-                    >
-                      (BND 2,959.00)
-                    </div>
-                    <div
-                      class="MuiBox-root MuiBox-root-6"
-                    >
-                      (ISK 4,904)
-                    </div>
-                    <div
-                      class="MuiBox-root MuiBox-root-7"
-                    >
-                      (LSL 2,505.00)
-                    </div>
-                    <div
-                      class="MuiBox-root MuiBox-root-8"
-                    >
-                      (TMT 115.00)
-                    </div>
-                    <div
-                      class="MuiBox-root MuiBox-root-9"
-                    >
-                      (UAH 484.00)
-                    </div>
-                    <div
-                      class="MuiBox-root MuiBox-root-10"
-                    >
-                      (UGX 2,073)
-                    </div>
-                    <div
-                      class="MuiBox-root MuiBox-root-11"
-                    >
-                      (UZS 895.00)
-                    </div>
-                    <div
-                      class="MuiBox-root MuiBox-root-12"
-                    >
-                      (YER 2,335)
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            -
           </div>
         </div>
       </div>
