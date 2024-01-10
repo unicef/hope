@@ -5442,6 +5442,16 @@
                 "defaultValue": null
               },
               {
+                "name": "dataCollectingType",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -5921,6 +5931,22 @@
             "deprecationReason": null
           },
           {
+            "name": "dataCollectingTypeChoices",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChoiceObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "allActivePrograms",
             "description": null,
             "args": [
@@ -6068,6 +6094,16 @@
               },
               {
                 "name": "numberOfHouseholdsWithTpInProgram",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "dataCollectingType",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
