@@ -118,7 +118,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
             refresh_areas = request.POST["refresh-areas"]
             incompatible_roles = defaultdict(list)
 
-            if user_can_add_ba_to_partner and business_area_role_form_set.is_valid():
+            business_area_role_form_set_is_valid = business_area_role_form_set.is_valid()
+            if user_can_add_ba_to_partner and business_area_role_form_set_is_valid:
                 for form in business_area_role_form_set.cleaned_data:
                     if form and not form["DELETE"]:
                         business_area_id = str(form["business_area"].id)
@@ -133,6 +134,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                             partner_permissions.set_roles(business_area_id, role_ids)
             # save the same BA and roles for user without perm
             if not user_can_add_ba_to_partner:
+                business_area_role_form_set_is_valid = True
                 for permission in permissions_list:
                     if permission.roles:
                         partner_permissions.set_roles(permission.business_area_id, permission.roles)
@@ -157,7 +159,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
             if (
                 refresh_areas == "false"
-                and (business_area_role_form_set.is_valid() or program_area_form_set.is_valid())
+                and business_area_role_form_set.is_valid()
+                and business_area_role_form_set_is_valid
                 and not incompatible_roles
             ):
                 partner.set_permissions(partner_permissions)
