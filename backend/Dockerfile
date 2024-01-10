@@ -15,8 +15,6 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   python3-psycopg2 \
   python3-gdal \
   gdal-bin \
-  libcairo2 \
-  libcairo2-dev \
   libffi-dev \
   libgdk-pixbuf2.0-0 \
   libpango-1.0-0 \
