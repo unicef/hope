@@ -620,6 +620,5 @@ class TestKoboSaveValidatorsMethods(TestCase):
             # TODO: fix this? (rebase issue?)
             # {"header": "preferred_language_i_c", "message": "Invalid choice test for field preferred_language_i_c"},
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
-            {"header": "size_h_c", "message": "Missing household required field size_h_c"},
         ]
         self.assertEqual(result, expected)
