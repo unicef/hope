@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from django.db.models import Count
 from django.test import TestCase
+from django.utils import timezone
 
 from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
 from hct_mis_api.apps.core.fixtures import generate_data_collecting_types
@@ -42,6 +43,7 @@ from hct_mis_api.apps.payment.models import Payment, PaymentRecord, ServiceProvi
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.one_time_scripts.migrate_data_to_representations import (
@@ -56,18 +58,17 @@ from hct_mis_api.one_time_scripts.soft_delete_original_objects import (
 )
 
 
-class TestMigrateDataToRepresentations(TestCase):
+class BaseMigrateDataTestCase:
     def create_hh_with_ind(
         self,
         ind_data: dict,
         hh_data: dict,
-        is_rdi: bool = False,
         target_populations: Optional[List[TargetPopulation]] = None,
     ) -> tuple:
-        if is_rdi:
-            rdi = RegistrationDataImportFactory(business_area=self.business_area)
-        else:
-            rdi = None
+        if "registration_data_import" not in hh_data:
+            hh_data["registration_data_import"] = None
+        if "registration_data_import" not in ind_data:
+            ind_data["registration_data_import"] = None
         individual = IndividualFactory(
             business_area=self.business_area,
             household=None,
@@ -84,7 +85,7 @@ class TestMigrateDataToRepresentations(TestCase):
             household.target_populations.set([])
         individual.household = household
         individual.save()
-        return individual, household, rdi
+        return individual, household
 
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory(name="Other BA")
@@ -120,7 +121,7 @@ class TestMigrateDataToRepresentations(TestCase):
             data_collecting_type=self.full,
         )
         # RDIs
-        self.rdi1 = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi1 = RegistrationDataImportFactory(business_area=self.business_area, program=None)
 
         # TargetPopulations
         # TP with status open
@@ -149,7 +150,9 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         # Household1 and its data (no RDI, in 2 programs)
-        self.individual1_1 = IndividualFactory(business_area=self.business_area, household=None)
+        self.individual1_1 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=None
+        )
         self.document1_1_1 = DocumentFactory(individual=self.individual1_1, program=None)
         self.document1_1_2 = DocumentFactory(individual=self.individual1_1, program=None)
         self.identity1_1 = IndividualIdentityFactory(individual=self.individual1_1)
@@ -165,10 +168,14 @@ class TestMigrateDataToRepresentations(TestCase):
 
         self.individual1_1.household = self.household1
         self.individual1_1.save()
-        self.individual1_2 = IndividualFactory(business_area=self.business_area, household=self.household1)
+        self.individual1_2 = IndividualFactory(
+            business_area=self.business_area, household=self.household1, registration_data_import=None
+        )
         self.document1_2_1 = DocumentFactory(individual=self.individual1_2, program=None)
 
-        self.individual1_3 = IndividualFactory(business_area=self.business_area, household=self.household1)
+        self.individual1_3 = IndividualFactory(
+            business_area=self.business_area, household=self.household1, registration_data_import=None
+        )
 
         self.role1_1 = IndividualRoleInHouseholdFactory(
             individual=self.individual1_2,
@@ -210,7 +217,9 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         # Household2 and its data (no RDI, in 2 programs)
-        self.individual2_1 = IndividualFactory(business_area=self.business_area, household=None)
+        self.individual2_1 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=None
+        )
         self.document2_1_1 = DocumentFactory(individual=self.individual2_1, program=None)
         self.document2_1_2 = DocumentFactory(individual=self.individual2_1, program=None)
         self.identity2_1 = IndividualIdentityFactory(individual=self.individual2_1)
@@ -226,10 +235,14 @@ class TestMigrateDataToRepresentations(TestCase):
 
         self.individual2_1.household = self.household2
         self.individual2_1.save()
-        self.individual2_2 = IndividualFactory(business_area=self.business_area, household=self.household2)
+        self.individual2_2 = IndividualFactory(
+            business_area=self.business_area, household=self.household2, registration_data_import=None
+        )
         self.document2_2_1 = DocumentFactory(individual=self.individual2_2, program=None)
 
-        self.collector2_1 = IndividualFactory(business_area=self.business_area, household=None)
+        self.collector2_1 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=None
+        )
 
         # external collector
         IndividualRoleInHouseholdFactory(
@@ -270,7 +283,9 @@ class TestMigrateDataToRepresentations(TestCase):
         # Household3 and its data
         # Additional helper individual that will already be enrolled into a different program
         # and is representative in the household3
-        self.individual_helper3 = IndividualFactory(business_area=self.business_area, household=None)
+        self.individual_helper3 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=None
+        )
         self.household_helper = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual_helper3,
@@ -282,7 +297,9 @@ class TestMigrateDataToRepresentations(TestCase):
         self.document_helper = DocumentFactory(individual=self.individual_helper3, program=None)
         self.household_helper.target_populations.set([self.target_population3])
 
-        self.individual3_1 = IndividualFactory(business_area=self.business_area, household=None)
+        self.individual3_1 = IndividualFactory(
+            business_area=self.business_area, household=None, registration_data_import=None
+        )
         self.household3 = HouseholdFactory(
             business_area=self.business_area,
             head_of_household=self.individual3_1,
@@ -304,7 +321,7 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         # Household4 and its data (without target population)
-        self.rdi4_1 = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi4_1 = RegistrationDataImportFactory(business_area=self.business_area, program=None)
         self.individual4_1 = IndividualFactory(
             business_area=self.business_area, household=None, registration_data_import=self.rdi4_1
         )
@@ -324,7 +341,10 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         # Household 5, 6 and 7 and their data (has rdi with 3 households)
-        self.rdi_with_3_hhs = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi_with_3_hhs = RegistrationDataImportFactory(
+            business_area=self.business_area,
+            program=None,
+        )
         self.individual5_1 = IndividualFactory(
             business_area=self.business_area,
             household=None,
@@ -444,12 +464,14 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         # Households from mixed rdi
-        self.rdi_mixed = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi_mixed = RegistrationDataImportFactory(
+            business_area=self.business_area,
+            program=None,
+        )
 
         (
             self.individual_mixed_closed_tp_paid,
             self.household_mixed_closed_tp_paid,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -462,7 +484,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_closed_tp_withdrawn_paid,
             self.household_mixed_closed_tp_withdrawn_paid,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -476,7 +497,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_closed_tp_withdrawn_not_paid,
             self.household_mixed_closed_tp_withdrawn_not_paid,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -490,7 +510,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_no_tp,
             self.household_mixed_no_tp,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -500,12 +519,14 @@ class TestMigrateDataToRepresentations(TestCase):
         )
 
         # Households from mixed rdi in active program
-        self.rdi_mixed_active = RegistrationDataImportFactory(business_area=self.business_area)
+        self.rdi_mixed_active = RegistrationDataImportFactory(
+            business_area=self.business_area,
+            program=None,
+        )
 
         (
             self.individual_mixed_closed_tp_paid_active,
             self.household_mixed_closed_tp_paid_active,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -518,7 +539,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_closed_tp_withdrawn_paid_active,
             self.household_mixed_closed_tp_withdrawn_paid_active,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -532,7 +552,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_closed_tp_withdrawn_not_paid_active,
             self.household_mixed_closed_tp_withdrawn_not_paid_active,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -546,7 +565,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_no_tp_active,
             self.household_mixed_no_tp_active,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -558,7 +576,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_active,
             self.household_mixed_active,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -571,7 +588,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_active_partial,
             self.household_mixed_active_partial,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {"collect_individual_data": COLLECT_TYPE_PARTIAL},
@@ -579,7 +595,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_active_full,
             self.household_mixed_active_full,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {"collect_individual_data": COLLECT_TYPE_FULL},
@@ -587,7 +602,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_active_full_withdrawn,
             self.household_mixed_active_full_withdrawn,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {"collect_individual_data": COLLECT_TYPE_FULL, "withdrawn": True},
@@ -595,7 +609,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_active_size_only,
             self.household_mixed_active_size_only,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {"collect_individual_data": COLLECT_TYPE_SIZE_ONLY},
@@ -603,7 +616,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_mixed_active_no_ind_data,
             self.household_mixed_active_no_ind_data,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {"collect_individual_data": COLLECT_TYPE_NONE},
@@ -612,7 +624,6 @@ class TestMigrateDataToRepresentations(TestCase):
         (
             self.individual_full_closed,
             self.household_full_closed,
-            _,
         ) = self.create_hh_with_ind(
             {},
             {
@@ -620,6 +631,28 @@ class TestMigrateDataToRepresentations(TestCase):
             },
             target_populations=[self.target_population_paid],
         )
+
+        RegistrationDataImport.objects.update(created_at=timezone.make_aware(timezone.datetime(2023, 9, 20)))
+
+        self.rdi_with_program = RegistrationDataImportFactory(
+            business_area=self.business_area, program=self.program_active
+        )
+        (
+            self.individual_with_assigned_rdi,
+            self.household_with_assigned_rdi,
+        ) = self.create_hh_with_ind(
+            {},
+            {
+                "registration_data_import": self.rdi_with_program,
+            },
+        )
+        Household.objects.update(is_original=True)
+        Individual.objects.update(is_original=True)
+        Document.objects.update(is_original=True)
+        IndividualIdentity.objects.update(is_original=True)
+        BankAccountInfo.objects.update(is_original=True)
+        IndividualRoleInHousehold.objects.update(is_original=True)
+        HouseholdSelection.objects.update(is_original=True)
 
     def refresh_objects(self) -> None:
         self.household1.refresh_from_db()
@@ -670,22 +703,27 @@ class TestMigrateDataToRepresentations(TestCase):
         self.rdi_with_3_hhs.refresh_from_db()
         self.rdi_mixed.refresh_from_db()
         self.rdi_mixed_active.refresh_from_db()
+        self.rdi_with_program.refresh_from_db()
+        self.household_with_assigned_rdi.refresh_from_db()
+        self.individual_with_assigned_rdi.refresh_from_db()
 
+
+class TestMigrateDataToRepresentations(BaseMigrateDataTestCase, TestCase):
     def test_migrate_data_to_representations_per_business_area_running_two_times(self) -> None:
         self.refresh_objects()
-        self.assertEqual(Household.original_and_repr_objects.count(), 23)
+        self.assertEqual(Household.original_and_repr_objects.count(), 24)
         with patch("hct_mis_api.one_time_scripts.migrate_data_to_representations.copy_household_selections") as mock:
             mock.side_effect = lambda x, y: (_ for _ in ()).throw(ZeroDivisionError())
             try:
                 migrate_data_to_representations_per_business_area(business_area=self.business_area)
             except ZeroDivisionError:
                 pass
-            self.assertEqual(Household.original_and_repr_objects.count(), 31)
+            self.assertEqual(Household.original_and_repr_objects.count(), 33)
             try:
                 migrate_data_to_representations_per_business_area(business_area=self.business_area)
             except ZeroDivisionError:
                 pass
-            self.assertEqual(Household.original_and_repr_objects.count(), 31)
+            self.assertEqual(Household.original_and_repr_objects.count(), 33)
 
     def test_already_migrated_in_different_program(self) -> None:
         self.refresh_objects()
@@ -755,9 +793,10 @@ class TestMigrateDataToRepresentations(TestCase):
         self.refresh_objects()
 
         migrate_data_to_representations_per_business_area(business_area=self.business_area)
-        self.assertEqual(Household.original_and_repr_objects.count(), 51)
+
+        self.assertEqual(Household.original_and_repr_objects.count(), 53)
         migrate_data_to_representations_per_business_area(business_area=self.business_area)
-        self.assertEqual(Household.original_and_repr_objects.count(), 51)
+        self.assertEqual(Household.original_and_repr_objects.count(), 53)
 
         self.refresh_objects()
         # Test household1
@@ -1702,15 +1741,15 @@ class TestMigrateDataToRepresentations(TestCase):
         # 1x(household_mixed_closed_tp_paid, household_mixed_closed_tp_withdrawn_paid,
         # household_mixed_closed_tp_withdrawn_not_paid, household_mixed_no_tp,household_mixed_active_partial,
         # household_mixed_active_partial, household_mixed_active_full, household_mixed_active_size_only,
-        # household_mixed_active_no_ind_data, household_full_closed)
-        self.assertEqual(Household.original_and_repr_objects.count() - household_count, 28)
+        # household_mixed_active_no_ind_data, household_full_closed, household_with_assigned_rdi)
+        self.assertEqual(Household.original_and_repr_objects.count() - household_count, 29)
         # 2x individual1_1, 2x individual1_2, 2x individual1_3, 2x individual2_1, 2x individual2_2, 2x collector2_1,
         # 1x individual3_1, 2x individual_helper3, 1x individual4_1, 11 from rdi_with_3_hhs, 6x from mixed rdi, 1x from(
         # household_mixed_closed_tp_paid, household_mixed_closed_tp_withdrawn_paid,
         # household_mixed_closed_tp_withdrawn_not_paid, household_mixed_no_tp,household_mixed_active_partial,
         # household_mixed_active_partial, household_mixed_active_full, household_mixed_active_size_only,
-        # household_mixed_active_no_ind_data, household_full_closed)
-        self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 43)
+        # household_mixed_active_no_ind_data, household_full_closed, individual_with_assigned_rdi)
+        self.assertEqual(Individual.original_and_repr_objects.count() - individual_count, 44)
         # 6x for household1, 6x for household2, 1x for household3, 2x for household_helper, 1x for household4
         self.assertEqual(Document.original_and_repr_objects.count() - document_count, 16)
         # 2x for household1, 2x for household2, 1x for household_helper, 1x for household3, 6x mixed rdis
@@ -1750,6 +1789,19 @@ class TestMigrateDataToRepresentations(TestCase):
             BankAccountInfo.all_objects.filter(is_removed=True, is_original=True).count(), bank_account_info_count
         )
         self.assertEqual(BankAccountInfo.all_objects.filter(is_removed=True, is_original=False).count(), 0)
+
+        # test migrating for RDI with program assigned (update on prod since 21-09-2023)
+        self.assertEqual(self.rdi_with_program.program, self.program_active)
+        self.assertEqual(self.household_with_assigned_rdi.copied_to(manager="original_and_repr_objects").count(), 1)
+        self.assertEqual(
+            self.household_with_assigned_rdi.copied_to(manager="original_and_repr_objects").first().program,
+            self.program_active,
+        )
+        self.assertEqual(self.individual_with_assigned_rdi.copied_to(manager="original_and_repr_objects").count(), 1)
+        self.assertEqual(
+            self.individual_with_assigned_rdi.copied_to(manager="original_and_repr_objects").first().program,
+            self.program_active,
+        )
 
     def test_adjust_payments_and_payment_records(self) -> None:
         payment_count = Payment.objects.filter(business_area=self.business_area).count()
@@ -1861,6 +1913,10 @@ class TestCountrySpecificRules(TestCase):
         business_area: BusinessArea,
         target_populations: Optional[List[TargetPopulation]] = None,
     ) -> tuple:
+        if "registration_data_import" not in hh_data:
+            hh_data["registration_data_import"] = None
+        if "registration_data_import" not in ind_data:
+            ind_data["registration_data_import"] = None
         individual = IndividualFactory(
             business_area=business_area,
             household=None,
@@ -1901,6 +1957,7 @@ class TestCountrySpecificRules(TestCase):
         self.rdi_for_afghanistan_ignore = RegistrationDataImportFactory(
             business_area=self.business_area_afghanistan,
             name="PMU-REG-Social_Transfer-Zabul-AF2401-Qalat-SHAO-v2.1",
+            program=None,
         )
         # Afghanistan programs
         self.program_afg_finished = ProgramFactory(
@@ -1968,6 +2025,7 @@ class TestCountrySpecificRules(TestCase):
         self.rdi_for_sudan_ignore = RegistrationDataImportFactory(
             business_area=self.business_area_sudan,
             name="Health and Nutrition - FLWS Modification",
+            program=None,
         )
 
         self.program_sudan_active = ProgramFactory(
@@ -2017,6 +2075,7 @@ class TestCountrySpecificRules(TestCase):
         self.rdi_for_congo_ignore = RegistrationDataImportFactory(
             business_area=self.business_area_congo,
             name="Importation du 11 nov 2021",
+            program=None,
         )
 
         self.program_congo_active = ProgramFactory(
@@ -2066,6 +2125,7 @@ class TestCountrySpecificRules(TestCase):
         self.rdi_for_congo_to_withdraw = RegistrationDataImportFactory(
             business_area=self.business_area_congo,
             name="1er Cohorte DPS Manierma, 18 Mars 2022",
+            program=None,
         )
 
         (
@@ -2096,6 +2156,7 @@ class TestCountrySpecificRules(TestCase):
         self.rdi_for_congo_to_withdraw_no_tp = RegistrationDataImportFactory(
             business_area=self.business_area_congo,
             name="Prod_test_DRC_June142023",
+            program=None,
         )
         (
             _,
@@ -2156,6 +2217,8 @@ class TestCountrySpecificRules(TestCase):
             data_collecting_type=self.full,
             name="TEEN",
         )
+
+        RegistrationDataImport.objects.update(created_at=timezone.make_aware(timezone.datetime(2023, 9, 20)))
 
     def refresh_objects(self) -> None:
         self.household_afg_in_closed.refresh_from_db()
