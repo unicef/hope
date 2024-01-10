@@ -84,7 +84,9 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
     def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
         partner: account_models.Partner = context["original"]
-        context["can_add_business_area_to_partner"] = request.user.can_add_business_area_to_partner()
+        user_can_add_ba_to_partner = request.user.can_add_business_area_to_partner()
+        permissions_list = partner.get_permissions().to_list()
+        context["can_add_business_area_to_partner"] = user_can_add_ba_to_partner
 
         BusinessAreaRoleFormSet = formset_factory(BusinessAreaRoleForm, extra=0, can_delete=True)
         ProgramAreaFormSet = formset_factory(ProgramAreaForm, extra=0, can_delete=True)
@@ -92,7 +94,6 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         business_areas = set()
 
         if request.method == "GET":
-            permissions_list = partner.get_permissions().to_list()
             business_area_role_data = []
             program_area_data = []
             for permission in permissions_list:
@@ -114,10 +115,10 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
             partner_permissions = PartnerPermission()
             business_area_role_form_set = BusinessAreaRoleFormSet(request.POST or None, prefix="business_area_role")
             program_area_form_set = ProgramAreaFormSet(request.POST or None, prefix="program_areas")
-            refresh_areas = request.POST.get("refresh-areas", "false")
+            refresh_areas = request.POST["refresh-areas"]
             incompatible_roles = defaultdict(list)
 
-            if business_area_role_form_set.is_valid():
+            if user_can_add_ba_to_partner and business_area_role_form_set.is_valid():
                 for form in business_area_role_form_set.cleaned_data:
                     if form and not form["DELETE"]:
                         business_area_id = str(form["business_area"].id)
@@ -130,6 +131,11 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                             incompatible_roles[form["business_area"]].append(str(incompatible_role))
                         else:
                             partner_permissions.set_roles(business_area_id, role_ids)
+            # save the same BA and roles for user without perm
+            if not user_can_add_ba_to_partner:
+                for permission in permissions_list:
+                    if permission.roles:
+                        partner_permissions.set_roles(permission.business_area_id, permission.roles)
 
             if program_area_form_set.is_valid():
                 for form in program_area_form_set.cleaned_data:
@@ -151,8 +157,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
             if (
                 refresh_areas == "false"
-                and business_area_role_form_set.is_valid()
-                and program_area_form_set.is_valid()
+                and (business_area_role_form_set.is_valid() or program_area_form_set.is_valid())
                 and not incompatible_roles
             ):
                 partner.set_permissions(partner_permissions)

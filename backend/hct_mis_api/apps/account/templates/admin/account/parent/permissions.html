@@ -23,8 +23,8 @@
 {% block action-content %}
     <form method="POST" id="save_permissions" enctype="multipart/form-data">
         {% csrf_token %}
+        <input type="hidden" name="refresh-areas" value="false"/>
         {% if can_add_business_area_to_partner %}
-            <input type="hidden" name="refresh-areas" value="false"/>
             <div class="js-inline-admin-formset inline-group">
                 <div class="tabular inline-related last-related">
                     {{ business_area_role_formset.management_form }}
