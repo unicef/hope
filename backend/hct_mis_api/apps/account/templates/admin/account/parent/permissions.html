@@ -117,7 +117,16 @@
                                 </td>
                                 <td class="field-program">
                                     {{ form.program.errors.as_ul }}
-                                    {{ form.program }}
+                                    {% with program|get_item:form.business_area.value as programs %}
+                                        <select name="program_areas-{{  forloop.counter0 }}-program" id="id_program_areas-{{ forloop.counter0 }}-program">
+                                            <option value > --------- </option>
+                                            {%  for program in programs %}
+
+                                               <option value={{ program.id }} {% if program.id|stringformat:"s" in form.program.value %} selected {% endif %}> {{ program.name }}</option>
+
+                                            {% endfor %}
+                                        </select>
+                                    {% endwith %}
                                 </td>
                                 <td class="field-areas">
                                     {{ form.areas.errors.as_ul }}
