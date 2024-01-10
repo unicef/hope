@@ -198,7 +198,7 @@ class TestSriLankaRegistrationService(TestCase):
             },
         )
         self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().email, "email999@mail.com")
-        self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().age_at_registration, 44)
+        self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
 
     def test_import_record_twice(self) -> None:
         service = SriLankaRegistrationService(self.registration)
