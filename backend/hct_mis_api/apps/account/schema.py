@@ -197,7 +197,8 @@ class Query(graphene.ObjectType):
         return to_choice_object(USER_STATUS_CHOICES)
 
     def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(Partner.get_partners_as_choices())
+        business_area_id = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area")).id
+        return to_choice_object(Partner.get_partners_for_ba_as_choices(business_area_id))
 
     def resolve_has_available_users_to_export(self, info: Any, business_area_slug: str) -> bool:
         return (
