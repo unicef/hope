@@ -42,7 +42,7 @@ def delivery_date_fix() -> None:
 
 
 def delivery_date_fix_business_area(business_area: BusinessArea) -> None:
-    print(f"Fixing delivery dates for {business_area.name}")
+    logger.log(logging.INFO, f"Fixing delivery dates for {business_area.name}")
     delivered_q = ~Q(Q(delivered_quantity__isnull=True) | Q(delivered_quantity=0))
     queryset = Payment.objects.filter(delivered_q, business_area=business_area, delivery_date__isnull=True)
     payment_plans_ids = list(PaymentPlan.objects.filter(business_area=business_area).values_list("id", flat=True))
@@ -57,7 +57,7 @@ def delivery_date_fix_business_area(business_area: BusinessArea) -> None:
 
     for batch in generic_batching(queryset, batch_size=1000):
         for payment in batch:
-            payment_plan_id = payment.parent_id
+            payment_plan_id = str(payment.parent_id)
             created = object_id_to_created[payment_plan_id]
             # just in case of mistake
             if payment.delivery_date is not None:
