@@ -35,11 +35,7 @@ from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import (
-    ChoiceObject,
-    FieldAttributeNode,
-    _custom_dict_or_attr_resolver,
-)
+from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
@@ -83,7 +79,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
-    programs_with_delivered_quantity,
+    delivered_quantity_service,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
@@ -190,15 +186,6 @@ class HouseholdSelectionNode(DjangoObjectType):
 class DeliveredQuantityNode(graphene.ObjectType):
     total_delivered_quantity = graphene.Decimal()
     currency = graphene.String()
-
-
-class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
-    class Meta:
-        default_resolver = _custom_dict_or_attr_resolver
-
-    id = graphene.ID()
-    name = graphene.String()
-    quantity = graphene.List(DeliveredQuantityNode)
 
 
 class IndividualRoleInHouseholdNode(DjangoObjectType):
@@ -389,7 +376,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin1 = graphene.Field(AreaNode)
     admin2 = graphene.Field(AreaNode)
     status = graphene.String()
-    programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+    delivered_quantities = graphene.List(DeliveredQuantityNode)
     active_individuals_count = graphene.Int()
     individuals = DjangoFilterConnectionField(
         IndividualNode,
@@ -416,8 +403,8 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return ""
 
     @staticmethod
-    def resolve_programs_with_delivered_quantity(parent: Household, info: Any) -> List[Dict[str, Any]]:
-        return programs_with_delivered_quantity(parent)
+    def resolve_delivered_quantities(parent: Household, info: Any) -> List[Dict[str, Any]]:
+        return delivered_quantity_service(parent)
 
     @staticmethod
     def resolve_country(parent: Household, info: Any) -> str:
