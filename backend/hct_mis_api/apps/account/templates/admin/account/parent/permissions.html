@@ -117,7 +117,6 @@
                                 </td>
                                 <td class="field-program">
                                     {{ form.program.errors.as_ul }}
-
                                     {% with program|get_item:form.business_area.value as programss %}
                                         <select name="program_areas-{{  forloop.counter0 }}-program" id="id_program_areas-{{ forloop.counter0 }}-program">
                                             <option value > --------- </option>
