@@ -90,6 +90,7 @@ export const AccessDenied: React.FC = () => {
             variant='outlined'
             color='primary'
             onClick={refreshAndClearCache}
+            data-cy='button-refresh-page'
           >
             REFRESH PAGE
           </Button>
