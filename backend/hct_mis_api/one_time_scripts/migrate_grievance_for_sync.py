@@ -142,8 +142,8 @@ def migrate_grievance_tickets(business_area: Optional[BusinessArea] = None) -> N
     """
     Migrate grievance tickets into representations.
     """
-    logger.info("Handle payment related tickets")
-    handle_payment_related_tickets()
+    # logger.info("Handle payment related tickets")
+    # handle_payment_related_tickets()
     logger.info("Handle non payment related tickets")
     handle_non_payment_related_tickets(business_area)
     logger.info("Handle tickets not connected to any program")
