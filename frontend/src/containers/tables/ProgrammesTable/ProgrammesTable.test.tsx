@@ -18,6 +18,7 @@ describe('containers/tables/ProgrammesTable', () => {
     numberOfHouseholdsMax: '',
     budgetMin: '',
     budgetMax: '',
+    dataCollectingType: ''
   };
 
   it('should render with data', async () => {

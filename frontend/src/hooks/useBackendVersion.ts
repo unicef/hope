@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 const GET_BACKEND_VERSION = gql`
   {
-    backendVersion @client
+    backendVersion
   }
 `;
 

@@ -331,7 +331,9 @@ class IndividualDataUpdateService(DataChangeService):
         IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "partner"])
         IndividualIdentity.objects.filter(id__in=identities_to_remove).delete()
         BankAccountInfo.objects.bulk_create(payment_channels_to_create)
-        BankAccountInfo.objects.bulk_update(payment_channels_to_update, ["bank_name", "bank_account_number"])
+        BankAccountInfo.objects.bulk_update(
+            payment_channels_to_update, ["bank_name", "bank_account_number", "account_holder_name", "bank_branch_name"]
+        )
         BankAccountInfo.objects.filter(id__in=payment_channels_to_remove).delete()
         if new_individual.household:
             recalculate_data(new_individual.household)

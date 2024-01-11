@@ -24,7 +24,7 @@ export const FeedbackTableRow = ({
   const history = useHistory();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const feedbackDetailsPath = `/${baseUrl}/grievance/feedback/${feedback.id}`;
-  const householdDetailsPath = `/${baseUrl}/population/households/${feedback.householdLookup?.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/household/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = feedback.linkedGrievance
     ? getGrievanceDetailsPath(
         feedback.linkedGrievance?.id,

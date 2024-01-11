@@ -200,32 +200,30 @@ export const HouseholdDetails = ({
         <Grid container>
           <Grid item xs={3}>
             <LabelizedField label={t('Cash received')}>
-              {household?.programsWithDeliveredQuantity?.length ? (
-                household?.programsWithDeliveredQuantity?.map((item) => (
-                  <Box key={item.id} mb={2}>
-                    <Grid container key={item.id}>
-                      <Grid item xs={6}>
-                        <Box display='flex' flexDirection='column'>
-                          {item.quantity.map((qty) => (
-                            <Box
-                              key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
-                            >
-                              {qty.currency === 'USD'
-                                ? formatCurrencyWithSymbol(
-                                    qty.totalDeliveredQuantity,
-                                    qty.currency,
-                                  )
-                                : `(${formatCurrencyWithSymbol(
-                                    qty.totalDeliveredQuantity,
-                                    qty.currency,
-                                  )})`}
-                            </Box>
-                          ))}
-                        </Box>
-                      </Grid>
+              {household?.deliveredQuantities?.length ? (
+                <Box mb={2}>
+                  <Grid container>
+                    <Grid item xs={6}>
+                      <Box display='flex' flexDirection='column'>
+                        {household?.deliveredQuantities?.map((item) => (
+                          <Box
+                            key={`${item.currency}-${item.totalDeliveredQuantity}`}
+                          >
+                            {item.currency === 'USD'
+                              ? formatCurrencyWithSymbol(
+                                  item.totalDeliveredQuantity,
+                                  item.currency,
+                                )
+                              : `(${formatCurrencyWithSymbol(
+                                  item.totalDeliveredQuantity,
+                                  item.currency,
+                                )})`}
+                          </Box>
+                        ))}
+                      </Box>
                     </Grid>
-                  </Box>
-                ))
+                  </Grid>
+                </Box>
               ) : (
                 <>-</>
               )}

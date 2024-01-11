@@ -1,7 +1,7 @@
 import { InputAdornment } from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import get from 'lodash/get';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
@@ -48,16 +48,22 @@ export const ProgramAutocomplete = ({
     fetchPolicy: 'cache-and-network',
   });
 
+  const isMounted = useRef(true);
+
+  const loadDataCallback = useCallback(() => {
+    if (businessArea) {
+      loadData({ variables: { businessArea, search: debouncedInputText } });
+    }
+  }, [loadData, businessArea, debouncedInputText]);
+
   useEffect(() => {
     if (open) {
-      loadData();
+      loadDataCallback();
     }
-  }, [open, debouncedInputText, loadData]);
-
-  // load all languages on mount to match the value from the url
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, [open, debouncedInputText, loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -68,8 +74,6 @@ export const ProgramAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
-
-  if (!data) return null;
 
   const allEdges = get(data, 'allPrograms.edges', []);
 

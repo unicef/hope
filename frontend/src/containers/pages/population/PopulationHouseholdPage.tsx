@@ -24,7 +24,7 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
     householdSizeMin: '',
     householdSizeMax: '',
     orderBy: 'unicef_id',
-    withdrawn: null,
+    withdrawn: '',
   };
 
   const [filter, setFilter] = useState(

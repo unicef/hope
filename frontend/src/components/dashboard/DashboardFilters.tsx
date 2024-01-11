@@ -1,15 +1,11 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+import { Grid } from '@material-ui/core';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useAllProgramsForChoicesQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
 import { FiltersSection } from '../core/FiltersSection';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { SelectFilter } from '../core/SelectFilter';
+import { ProgramAutocomplete } from '../../shared/autocompletes/ProgramAutocomplete';
 
 interface DashboardFiltersProps {
   filter;
@@ -18,44 +14,6 @@ interface DashboardFiltersProps {
   appliedFilter;
   setAppliedFilter;
 }
-
-interface ProgramSelectProps {
-  onChange: CallableFunction;
-  value: string;
-}
-
-const ProgramSelect = ({
-  onChange,
-  value,
-}: ProgramSelectProps): React.ReactElement => {
-  const { t } = useTranslation();
-  const { businessArea } = useBaseUrl();
-  const { data, loading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-  if (loading) return <LoadingComponent />;
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
-
-  return (
-    <SelectFilter
-      onChange={onChange}
-      label={t('Programme')}
-      value={value}
-      icon={<FlashOnIcon />}
-      data-cy='filter-program'
-      fullWidth
-    >
-      {programs.map((program) => (
-        <MenuItem key={program.id} value={program.id}>
-          {program.name}
-        </MenuItem>
-      ))}
-    </SelectFilter>
-  );
-};
 
 export const DashboardFilters = ({
   filter,
@@ -68,11 +26,7 @@ export const DashboardFilters = ({
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
+  const { applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
     initialFilter,
     history,
     location,
@@ -97,9 +51,14 @@ export const DashboardFilters = ({
       <Grid container alignItems='flex-end' spacing={3}>
         {isAllPrograms && (
           <Grid item xs={5}>
-            <ProgramSelect
-              onChange={(e) => handleFilterChange('program', e.target.value)}
+            <ProgramAutocomplete
+              filter={filter}
+              name='program'
               value={filter.program}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
             />
           </Grid>
         )}

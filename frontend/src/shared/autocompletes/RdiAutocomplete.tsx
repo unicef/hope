@@ -1,5 +1,5 @@
 import get from 'lodash/get';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useRdiAutocompleteLazyQuery } from '../../__generated__/graphql';
@@ -49,16 +49,23 @@ export const RdiAutocomplete = ({
     },
     fetchPolicy: 'cache-and-network',
   });
+
+  const isMounted = useRef(true);
+
+  const loadDataCallback = useCallback(() => {
+    if (isMounted.current && businessArea) {
+      loadData({ variables: { businessArea, name: debouncedInputText } });
+    }
+  }, [loadData, businessArea, debouncedInputText]);
+
   useEffect(() => {
     if (open) {
-      loadData();
+      loadDataCallback();
     }
-  }, [open, debouncedInputText, loadData]);
-
-  // load all rdi on mount to match the value from the url
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, [open, debouncedInputText, loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -69,8 +76,6 @@ export const RdiAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
-
-  if (!data) return null;
 
   const allEdges = get(data, 'allRegistrationDataImports.edges', []);
 

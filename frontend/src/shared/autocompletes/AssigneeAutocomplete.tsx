@@ -1,5 +1,5 @@
 import get from 'lodash/get';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
@@ -52,6 +52,23 @@ export const AssigneeAutocomplete = ({
     },
     fetchPolicy: 'cache-and-network',
   });
+
+  const isMounted = useRef(true);
+
+  const loadDataCallback = useCallback(() => {
+    if (isMounted.current && businessArea) {
+      loadData({ variables: { businessArea, search: debouncedInputText } });
+    }
+  }, [loadData, businessArea, debouncedInputText]);
+
+  useEffect(() => {
+    if (open) {
+      loadDataCallback();
+    }
+    return () => {
+      isMounted.current = false;
+    };
+  }, [open, debouncedInputText, loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,

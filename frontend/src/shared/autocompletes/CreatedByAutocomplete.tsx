@@ -1,5 +1,5 @@
 import get from 'lodash/get';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
@@ -56,22 +56,22 @@ export const CreatedByAutocomplete = ({
     fetchPolicy: 'cache-and-network',
   });
 
+  const isMounted = useRef(true);
+
+  const loadDataCallback = useCallback(() => {
+    if (isMounted.current && businessArea) {
+      loadData({ variables: { businessArea, search: debouncedInputText } });
+    }
+  }, [loadData, businessArea, debouncedInputText]);
+
   useEffect(() => {
     if (open) {
-      loadData();
+      loadDataCallback();
     }
-  }, [open, debouncedInputText, loadData]);
-
-  // load all users on mount to match the value from the url
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  useEffect(() => {
-    if (!value) {
-      onInputTextChange('');
-    }
-  }, [value, onInputTextChange]);
+    return () => {
+      isMounted.current = false;
+    };
+  }, [open, debouncedInputText, loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -82,7 +82,6 @@ export const CreatedByAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
-  if (!data) return null;
 
   const allEdges = get(data, 'allUsers.edges', []);
 

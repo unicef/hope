@@ -1220,6 +1220,8 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
+    bank_branch_name = models.CharField(max_length=255, blank=True, default="")
+    account_holder_name = models.CharField(max_length=255, blank=True, default="")
     is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
