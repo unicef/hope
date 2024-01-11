@@ -174,7 +174,7 @@ class Partner(MPTTModel, models.Model):
     permissions = JSONField(default=dict, blank=True)
 
     def __str__(self) -> str:
-        return self.name
+        return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
 
     @property
     def is_child(self) -> bool:
