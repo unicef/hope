@@ -45,7 +45,7 @@ services:
       - PYTHONUNBUFFERED=1
     build:
       context: ./backend
-      dockerfile: ./Dockerfile
+      dockerfile: docker/Dockerfile
       target: dev
       args:
         APP_ENV: DEV
