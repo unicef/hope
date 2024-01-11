@@ -37,11 +37,12 @@ class ProgramAreaForm(forms.Form):
 
 @admin.register(account_models.Partner)
 class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
-    list_filter = ("is_un",)
+    list_filter = ("is_un", "parent")
     search_fields = ("name",)
     readonly_fields = ("permissions", "sub_partners")
     list_display = (
-        "name",
+        "__str__",
+        "sub_partners",
         "is_un",
     )
 
