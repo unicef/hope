@@ -38,7 +38,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.one_time_scripts.migrate_data_for_sync import (
     copy_bank_account_info_per_individual_fast,
     copy_document_per_individual_fast,
@@ -46,6 +46,7 @@ from hct_mis_api.one_time_scripts.migrate_data_for_sync import (
     copy_individual_representation,
     copy_individual_sync,
     copy_roles_sync,
+    get_ignored_hhs,
     get_individual_representation_per_program_by_old_individual_id,
     migrate_data_to_representations_per_business_area,
 )
@@ -998,10 +999,18 @@ def sync_removed_objects(business_area: BusinessArea, model: Any) -> None:
 def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
     logger.info(f"Handling new objects for model: {model}")
     originals_manager = "default_for_migrations_fix" if model == GrievanceTicket else "original_and_repr_objects"
+
+    q = Q()
     if model in ONE_TO_ONE_GREVIANCE_MODELS:
         return  # handled in new GrievanceTicket
 
-    if model == HouseholdSelection:
+    elif model == HouseholdSelection:
+        q = Q(
+            target_population__status__in=[
+                TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE,
+                TargetPopulation.STATUS_READY_FOR_CASH_ASSIST,
+            ]
+        ) | Q(household__withdrawn=False)
         filter_kwargs = dict(
             household__business_area=business_area,
             is_original=True,
@@ -1068,7 +1077,26 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
             is_migration_handled=False,
         )
 
-    new_objects = getattr(model, originals_manager).filter(**filter_kwargs).order_by("id")
+    new_objects = getattr(model, originals_manager).filter(q, **filter_kwargs).order_by("id")
+
+    if business_area.name == "Afghanistan":
+        hhs_to_ignore = get_ignored_hhs()
+        inds_to_ignore = Individual.objects.filter(
+            Q(household__in=hhs_to_ignore) | Q(households_and_roles__household__in=hhs_to_ignore)
+        ).values_list("id", flat=True)
+
+        logger.info(f"Households to ignore count: {len(hhs_to_ignore)}")
+        logger.info(f"Individuals to ignore count: {len(inds_to_ignore)}")
+
+        if model == Household and hhs_to_ignore:
+            new_objects = new_objects.exclude(id__in=hhs_to_ignore)
+        elif model == Individual and inds_to_ignore:
+            new_objects = new_objects.exclude(id__in=inds_to_ignore)
+        elif model == IndividualRoleInHousehold and hhs_to_ignore:
+            new_objects = new_objects.exclude(household__in=hhs_to_ignore)
+        elif model in [BankAccountInfo, Document, IndividualIdentity] and inds_to_ignore:
+            new_objects = new_objects.exclude(individual__in=inds_to_ignore)
+
     new_objects_count = new_objects.count()
     logger.info(f"New objects count: {new_objects_count}")
 
@@ -1077,8 +1105,7 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
             migrate_data_to_representations_per_business_area(business_area)
 
         elif model == Household:
-            # this should be handled in HouseholdSelection
-            return
+            migrate_data_to_representations_per_business_area(business_area)
 
         elif model == Individual:
             copy_individual_sync(list(new_objects.values_list("id", flat=True)))
