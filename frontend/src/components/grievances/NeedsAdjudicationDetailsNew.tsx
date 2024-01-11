@@ -17,13 +17,14 @@ import {
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useSnackbar } from '../../hooks/useSnackBar';
+import { useProgramContext } from '../../programContext';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { arraysHaveSameContent } from '../../utils/utils';
 import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-import { useSnackbar } from "../../hooks/useSnackBar";
-import { useProgramContext } from "../../programContext";
 import {
   ApproveBox,
   StyledTable,
@@ -244,7 +245,11 @@ export function NeedsAdjudicationDetailsNew({
             )}
             {isEditable && canApprove && (
               <Button
-                disabled={isApproveDisabled() || !isActiveProgram}
+                disabled={
+                  isApproveDisabled() ||
+                  !isActiveProgram ||
+                  arraysHaveSameContent(selectedDuplicates, initialIds)
+                }
                 data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({
@@ -258,7 +263,7 @@ export function NeedsAdjudicationDetailsNew({
                           selectedIndividualIds: selectedDuplicates,
                         },
                       });
-                    } catch(e) {
+                    } catch (e) {
                       e.graphQLErrors.map((x) => showMessage(x.message));
                     }
                     setIsEditMode(false);
