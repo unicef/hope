@@ -22,7 +22,7 @@ import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { UniversalMoment } from '../core/UniversalMoment';
-import { useProgramContext } from "../../programContext";
+import { useProgramContext } from '../../programContext';
 import {
   ApproveBox,
   StyledTable,
@@ -137,7 +137,11 @@ export function NeedsAdjudicationDetailsOld({
             )}
             {isEditable && canApprove && (
               <Button
-                disabled={isApproveDisabled() || !isActiveProgram}
+                disabled={
+                  isApproveDisabled() ||
+                  !isActiveProgram ||
+                  selectedDuplicate === details?.selectedIndividual?.id
+                }
                 data-cy='button-mark-duplicate'
                 onClick={() =>
                   confirm({
