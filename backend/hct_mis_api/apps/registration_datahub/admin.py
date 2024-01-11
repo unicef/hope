@@ -21,8 +21,6 @@ from adminfilters.querystring import QueryStringFilter
 from advanced_filters.admin import AdminAdvancedFiltersMixin
 
 from hct_mis_api.apps.registration_datahub.models import (
-    DiiaHousehold,
-    DiiaIndividual,
     ImportData,
     ImportedBankAccountInfo,
     ImportedDocument,
@@ -32,14 +30,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
     KoboImportedSubmission,
-    Record,
     RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.utils import (
     post_process_dedupe_results as _post_process_dedupe_results,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
-from hct_mis_api.aurora.admin import RecordMixinAdmin
 
 logger = logging.getLogger(__name__)
 
@@ -337,36 +333,3 @@ class AlexisFilter(SimpleListFilter):
                 "query_string": qs,
                 "display": title,
             }
-
-
-@admin.register(Record)
-class RecordDatahubAdmin(RecordMixinAdmin, HOPEModelAdminBase):
-    pass
-
-
-@admin.register(DiiaIndividual)
-class DiiaIndividualAdmin(HOPEModelAdminBase):
-    list_display = ("registration_data_import", "individual_id", "full_name", "sex", "disability")
-    list_filter = (
-        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
-        ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
-        "disability",
-    )
-    raw_id_fields = ("imported_individual", "registration_data_import")
-
-
-@admin.register(DiiaHousehold)
-class DiiaHouseholdAdmin(HOPEModelAdminBase):
-    search_fields = ("id", "registration_data_import", "rec_id")
-    list_display = ("registration_data_import", "status", "rec_id")
-    raw_id_fields = ("registration_data_import", "imported_household")
-    date_hierarchy = "registration_data_import__import_date"
-    list_filter = (
-        ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
-        (
-            "rec_id",
-            ValueFilter.factory(
-                lookup_name="istartswith",
-            ),
-        ),
-    )
