@@ -134,6 +134,7 @@ export function RequestedIndividualDataChangeTable({
         ? identitiesToEdit.map((identity, index) => {
             return (
               <IdentitiesToEditTable
+                key={identity.previous_value.number}
                 values={values}
                 isEdit={isEdit}
                 ticket={ticket}
@@ -158,6 +159,7 @@ export function RequestedIndividualDataChangeTable({
         ? paymentChannelsToEdit.map((paymentChannel, index) => {
             return (
               <PaymentChannelsToEditTable
+                key={paymentChannel.previous_value.bankAccountNumber}
                 values={values}
                 isEdit={isEdit}
                 ticket={ticket}

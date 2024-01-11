@@ -47,6 +47,7 @@ export const LookUpProgrammesTableSurveys = ({
       max: filter.numberOfHouseholdsMax,
     }),
     budget: JSON.stringify(filter.budget),
+    dataCollectingType: filter.dataCollectingType
   };
 
   const handleRadioChange = (id: string): void => {

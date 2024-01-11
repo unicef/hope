@@ -23,6 +23,7 @@ const initialFilter = {
   numberOfHouseholdsMax: '',
   budgetMin: '',
   budgetMax: '',
+  dataCollectingType: ''
 };
 
 export const ProgramsPage = (): React.ReactElement => {

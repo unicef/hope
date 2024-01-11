@@ -26,7 +26,7 @@ export const headCells: HeadCell<TargetPopulationNode>[] = [
   {
     disablePadding: false,
     label: 'Num. of Households',
-    id: 'final_list_total_households',
+    id: 'total_households_count',
     numeric: false,
     dataCy: 'num-of-households',
   },

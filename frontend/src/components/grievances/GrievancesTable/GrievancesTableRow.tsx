@@ -103,7 +103,7 @@ export const GrievancesTableRow = ({
   const getMappedPrograms = (): React.ReactElement => {
     if (ticket.programs?.length) {
       return (
-        <TableCell align='left'>
+        <div>
           {ticket.programs.map((program) => (
             <BlackLink
               key={program.id}
@@ -112,7 +112,7 @@ export const GrievancesTableRow = ({
               {program.name}
             </BlackLink>
           ))}
-        </TableCell>
+        </div>
       );
     }
     return <div>-</div>;

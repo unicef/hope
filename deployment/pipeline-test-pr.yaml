@@ -180,7 +180,7 @@ stages:
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run --no-deps backend lint'
+              dockerComposeCommand: 'run --no-deps backend ./dev.sh lint'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
 
@@ -217,7 +217,7 @@ stages:
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run --no-deps backend mypy'
+              dockerComposeCommand: 'run --no-deps backend ./dev.sh mypy'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
 
@@ -253,7 +253,7 @@ stages:
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run backend test'
+              dockerComposeCommand: 'run backend ./dev.sh test'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
           - task: PublishTestResults@2

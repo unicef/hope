@@ -13,6 +13,7 @@ from django_filters import (
     MultipleChoiceFilter,
     OrderingFilter,
 )
+from graphene_django.filter import GlobalIDMultipleChoiceFilter
 
 from hct_mis_api.apps.core.exceptions import SearchException
 from hct_mis_api.apps.core.filters import (
@@ -22,7 +23,6 @@ from hct_mis_api.apps.core.filters import (
     IntegerRangeFilter,
 )
 from hct_mis_api.apps.core.utils import CustomOrderingFilter, decode_id_string
-from hct_mis_api.apps.geo.models import Area
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     DUPLICATE,
@@ -239,9 +239,7 @@ class IndividualFilter(FilterSet):
     search = CharFilter(method="search_filter")
     search_type = CharFilter(method="search_type_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = ModelMultipleChoiceFilter(
-        field_name="household__admin_area", queryset=Area.objects.filter(area_type__area_level=2)
-    )
+    admin2 = GlobalIDMultipleChoiceFilter(field_name="household__admin_area")
     status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")

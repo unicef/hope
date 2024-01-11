@@ -272,7 +272,6 @@ export const GrievancesTable = ({
               {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
                 hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
                   <ButtonTooltip
-                    alignItems='center'
                     variant='contained'
                     color='primary'
                     component={Link}

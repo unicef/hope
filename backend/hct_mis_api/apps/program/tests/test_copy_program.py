@@ -1,10 +1,7 @@
-from unittest import skip
-
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import create_afghanistan
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
 from hct_mis_api.apps.household.fixtures import (
     BankAccountInfoFactory,
     DocumentFactory,
@@ -48,9 +45,17 @@ class TestCopyProgram(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        create_afghanistan()
-        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.program = ProgramFactory.create(name="initial name", status=Program.ACTIVE, business_area=cls.business_area)
+        cls.business_area = create_afghanistan()
+        data_collecting_type = DataCollectingTypeFactory(
+            label="Full", code="full", weight=1, business_areas=[cls.business_area]
+        )
+        DataCollectingTypeFactory(label="Partial", code="partial", weight=1, business_areas=[cls.business_area])
+        cls.program = ProgramFactory.create(
+            name="initial name",
+            status=Program.ACTIVE,
+            business_area=cls.business_area,
+            data_collecting_type=data_collecting_type,
+        )
         cls.copy_data = {
             "programData": {
                 "id": cls.id_to_base64(cls.program.id, "ProgramNode"),
@@ -123,7 +128,7 @@ class TestCopyProgram(APITestCase):
         cls.individuals3[1].duplicate = True
         cls.individuals3[1].save()
 
-    def test_update_program_not_authenticated(self) -> None:
+    def test_copy_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.COPY_PROGRAM_MUTATION,
             variables={
@@ -135,7 +140,7 @@ class TestCopyProgram(APITestCase):
             },
         )
 
-    def test_update_program_without_permissions(self) -> None:
+    def test_copy_program_without_permissions(self) -> None:
         user = UserFactory.create()
         self.create_user_role_with_permissions(user, [], self.business_area)
 
@@ -145,9 +150,10 @@ class TestCopyProgram(APITestCase):
             variables=self.copy_data,
         )
 
-    @skip(reason="Fix in other PR")
-    def test_update_with_permissions(self) -> None:
+    def test_copy_with_permissions(self) -> None:
         user = UserFactory.create()
+        self.assertEqual(Household.objects.count(), 3)
+        self.assertEqual(Individual.objects.count(), 4)
         self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
 
         self.snapshot_graphql_request(
@@ -155,75 +161,89 @@ class TestCopyProgram(APITestCase):
             context={"user": user},
             variables=self.copy_data,
         )
-        copied_program = Program.objects.exclude(id=self.program.id).first()
-        assert copied_program.status == Program.DRAFT
-        assert copied_program.name == "copied name"
-        assert copied_program.household_set.count() == 2
-        assert copied_program.individuals.count() == 2
-        assert self.household3 not in copied_program.household_set.all()
-        assert self.individuals3[0] not in copied_program.individuals.all()
-        assert self.individuals3[1] not in copied_program.individuals.all()
-        assert Household.objects.count() == 5
-        assert Individual.objects.count() == 6
-        assert EntitlementCard.objects.count() == 2
-        assert (
-            copied_program.household_set.filter(copied_from=self.household1).first().entitlement_cards.first().id
-            != self.entitlement_card1.id
+        copied_program = Program.objects.exclude(id=self.program.id).order_by("created_at").last()
+        self.assertEqual(copied_program.status, Program.DRAFT)
+        self.assertEqual(copied_program.name, "copied name")
+        self.assertEqual(copied_program.household_set.count(), 2)
+        self.assertEqual(copied_program.individuals.count(), 2)
+        self.assertNotIn(self.household3, copied_program.household_set.all())
+        self.assertNotIn(self.individuals3[0], copied_program.individuals.all())
+        self.assertNotIn(self.individuals3[1], copied_program.individuals.all())
+        self.assertEqual(Household.objects.count(), 5)
+        self.assertEqual(Individual.objects.count(), 6)
+        self.assertEqual(EntitlementCard.objects.count(), 2)
+        self.assertNotEqual(
+            copied_program.household_set.filter(copied_from=self.household1).first().entitlement_cards.first().id,
+            self.entitlement_card1.id,
         )
-        assert (
+        self.assertEqual(
             copied_program.household_set.filter(copied_from=self.household1)
             .first()
             .entitlement_cards.first()
-            .card_number
-            == self.entitlement_card1.card_number
+            .card_number,
+            self.entitlement_card1.card_number,
         )
 
-        assert Document.objects.count() == 2
-        assert (
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().id
-            != self.document1.id
+        self.assertEqual(Document.objects.count(), 2)
+        self.assertNotEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().documents.first().id,
+            self.document1.id,
         )
-        assert (
+        self.assertEqual(
             copied_program.individuals.filter(copied_from=self.individuals1[0])
             .first()
             .documents.first()
-            .document_number
-            == self.document1.document_number
+            .document_number,
+            self.document1.document_number,
         )
 
-        assert IndividualIdentity.objects.count() == 2
-        assert (
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().id
-            != self.individual_identity1.id
+        self.assertEqual(IndividualIdentity.objects.count(), 2)
+        self.assertNotEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().id,
+            self.individual_identity1.id,
         )
-        assert (
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().number
-            == self.individual_identity1.number
+        self.assertEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().identities.first().number,
+            self.individual_identity1.number,
         )
 
-        assert BankAccountInfo.objects.count() == 2
-        assert (
-            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().bank_account_info.first().id
-            != self.bank_account_info1.id
+        self.assertEqual(BankAccountInfo.objects.count(), 2)
+        self.assertNotEqual(
+            copied_program.individuals.filter(copied_from=self.individuals1[0]).first().bank_account_info.first().id,
+            self.bank_account_info1.id,
         )
-        assert (
+        self.assertEqual(
             copied_program.individuals.filter(copied_from=self.individuals1[0])
             .first()
             .bank_account_info.first()
-            .bank_account_number
-            == self.bank_account_info1.bank_account_number
+            .bank_account_number,
+            self.bank_account_info1.bank_account_number,
         )
 
-        assert IndividualRoleInHousehold.objects.count() == 2
-        assert (
-            copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().id
-            != self.individuals1[0].id
+        self.assertEqual(IndividualRoleInHousehold.objects.count(), 2)
+        self.assertNotEqual(
+            copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().id,
+            self.individuals1[0].id,
         )
-        assert (
-            copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().role
-            == self.individual_role_in_household1.role
+        self.assertEqual(
+            copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().role,
+            self.individual_role_in_household1.role,
         )
-        assert (
-            copied_program.household_set.filter(copied_from=self.household1).first().representatives.first().copied_from
-            == self.individual_role_in_household1.individual
+        self.assertEqual(
+            copied_program.household_set.filter(copied_from=self.household1)
+            .first()
+            .representatives.first()
+            .copied_from,
+            self.individual_role_in_household1.individual,
+        )
+
+    def test_copy_program_incompatible_collecting_type(self) -> None:
+        user = UserFactory.create()
+        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_DUPLICATE], self.business_area)
+        copy_data_incompatible = {**self.copy_data}
+        copy_data_incompatible["programData"]["dataCollectingTypeCode"] = "partial"
+        self.snapshot_graphql_request(
+            request_string=self.COPY_PROGRAM_MUTATION,
+            context={"user": user},
+            variables=copy_data_incompatible,
         )

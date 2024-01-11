@@ -270,6 +270,8 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
                                         "type": "BANK_TRANSFER",
                                         "bankName": "privatbank",
                                         "bankAccountNumber": 2356789789789789,
+                                        "accountHolderName": "Holder Name 132",
+                                        "bankBranchName": "newName 123",
                                     },
                                 ],
                             },
@@ -396,6 +398,8 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
                                         "type": "BANK_TRANSFER",
                                         "bankName": "privatbank",
                                         "bankAccountNumber": 2356789789789789,
+                                        "accountHolderName": "Holder Name 333",
+                                        "bankBranchName": "New Branch Name 333",
                                     },
                                 ],
                             },
@@ -427,6 +431,8 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
             individual=self.individuals[0],
             bank_name="privatbank",
             bank_account_number=2356789789789789,
+            account_holder_name="Old Holder Name",
+            bank_branch_name="BranchSantander",
         )
 
         variables = {
@@ -449,6 +455,8 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
                                         "type": "BANK_TRANSFER",
                                         "bankName": "privatbank",
                                         "bankAccountNumber": 1111222233334444,
+                                        "accountHolderName": "Holder Name NEW 2",
+                                        "bankBranchName": "New Name NEW 2",
                                     },
                                 ],
                             },

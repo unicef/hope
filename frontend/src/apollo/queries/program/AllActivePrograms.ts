@@ -15,6 +15,7 @@ export const ALL_ACTIVE_PROGRAMS_QUERY = gql`
     $endDate: Date
     $orderBy: String
     $numberOfHouseholdsWithTpInProgram: String
+    $dataCollectingType: String
   ) {
     allActivePrograms(
       before: $before
@@ -30,6 +31,7 @@ export const ALL_ACTIVE_PROGRAMS_QUERY = gql`
       startDate: $startDate
       endDate: $endDate
       numberOfHouseholdsWithTpInProgram: $numberOfHouseholdsWithTpInProgram
+      dataCollectingType: $dataCollectingType
     ) {
       pageInfo {
         hasNextPage
