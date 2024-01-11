@@ -1020,7 +1020,6 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
     elif model == Individual:
         filter_kwargs = dict(
             business_area=business_area,
-            copied_to__isnull=True,
             is_original=True,
             is_migration_handled=False,
         )
@@ -1030,7 +1029,6 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
             household__business_area=business_area,
             is_original=True,
             is_migration_handled=False,
-            copied_to__isnull=True,
         )
 
     elif model in [BankAccountInfo, Document, IndividualIdentity]:
@@ -1038,7 +1036,6 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
             individual__business_area=business_area,
             individual__is_original=True,
             individual__is_migration_handled=True,
-            copied_to__isnull=True,
             is_original=True,
         )
 
@@ -1079,11 +1076,20 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
 
     new_objects = getattr(model, originals_manager).filter(q, **filter_kwargs).order_by("id")
 
-    if business_area.name == "Afghanistan":
+    if business_area.name == "Afghanistan" and model in [
+        Household,
+        Individual,
+        IndividualRoleInHousehold,
+        BankAccountInfo,
+        Document,
+        IndividualIdentity,
+    ]:
         hhs_to_ignore = get_ignored_hhs()
-        inds_to_ignore = Individual.objects.filter(
-            Q(household__in=hhs_to_ignore) | Q(households_and_roles__household__in=hhs_to_ignore)
-        ).values_list("id", flat=True)
+        inds_to_ignore = list(
+            Individual.objects.filter(
+                Q(household__in=hhs_to_ignore) | Q(households_and_roles__household__in=hhs_to_ignore)
+            ).values_list("id", flat=True)
+        )
 
         logger.info(f"Households to ignore count: {len(hhs_to_ignore)}")
         logger.info(f"Individuals to ignore count: {len(inds_to_ignore)}")
