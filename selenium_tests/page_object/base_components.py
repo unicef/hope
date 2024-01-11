@@ -1,4 +1,4 @@
-from helper import Common
+from helpers.helper import Common
 from selenium.webdriver.common.by import By
 
 class BaseComponents(Common):

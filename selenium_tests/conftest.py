@@ -4,8 +4,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-from programme_management import ProgrammeManagement
-from programme_details import ProgrammeDetails
+from page_object.programme_management.programme_management import ProgrammeManagement
+from page_object.programme_details.programme_details import ProgrammeDetails
 
 @pytest.fixture(scope='class')
 def browser():

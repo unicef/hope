@@ -1,4 +1,4 @@
-from base_components import BaseComponents
+from page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 
 class ProgrammeDetails(BaseComponents):
@@ -13,6 +13,7 @@ class ProgrammeDetails(BaseComponents):
     labelAdministrativeAreas = 'div[data-cy="label-Administrative Areas of implementation"]'
     labelCashPlus = 'div[data-cy="label-CASH+"]'
     labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
+    labelDescription = 'div[data-cy="label-Description"]'
 
     def getProgramStatus(self):
         return self.wait_for(self.programStatus)
