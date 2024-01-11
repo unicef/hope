@@ -73,9 +73,9 @@ export const EditProgramPage = (): ReactElement => {
     sector,
     dataCollectingType,
     description,
-    budget = '0.00',
+    budget = '',
     administrativeAreasOfImplementation,
-    populationGoal = 0,
+    populationGoal = '',
     cashPlus = false,
     frequencyOfPayments = 'REGULAR',
     version,
@@ -83,13 +83,23 @@ export const EditProgramPage = (): ReactElement => {
   } = data.program;
 
   const handleSubmit = async (values): Promise<void> => {
+    const budgetValue = parseFloat(values.budget) ?? 0;
+    const budgetToFixed = !Number.isNaN(budgetValue)
+      ? budgetValue.toFixed(2)
+      : 0;
+    const populationGoalValue = parseInt(values.populationGoal, 10) ?? 0;
+    const populationGoalParsed = !Number.isNaN(populationGoalValue)
+      ? populationGoalValue
+      : 0;
+
     try {
       const response = await mutate({
         variables: {
           programData: {
             id,
             ...values,
-            budget: parseFloat(values.budget).toFixed(2),
+            budget: budgetToFixed,
+            populationGoal: populationGoalParsed,
           },
           version,
         },
@@ -120,6 +130,10 @@ export const EditProgramPage = (): ReactElement => {
       areaAccess: partner.areaAccess,
     })),
   };
+  initialValues.budget =
+    data.program.budget === '0.00' ? '' : data.program.budget;
+  initialValues.populationGoal =
+    data.program.populationGoal === 0 ? '' : data.program.populationGoal;
 
   const stepFields = [
     [
