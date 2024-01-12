@@ -46,12 +46,7 @@ class PaymentGatewayPaymentInstructionSerializer(ReadOnlyModelSerializer):
     payload = serializers.SerializerMethodField()
 
     def get_payload(self, obj: DeliveryMechanismPerPaymentPlan) -> Dict:
-        """
-        destination_country: str  # "US"
-        destination_currency: str  # "USD"
-        """
         return {
-            "destination_country": obj.payment_plan.business_area.code,  # TODO ?
             "destination_currency": obj.payment_plan.currency,
         }
 
