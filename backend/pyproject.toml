@@ -177,6 +177,7 @@ xlrd = "^1.2"  # update to 2 breaks
 weasyprint = "^59.0"
 pytest-cov = "^4.1.0"
 coverage = "^7.3.2"
+tomli = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "0.982"
