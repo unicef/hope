@@ -2,7 +2,7 @@ import pytest
 import random
 from time import sleep
 
-class TestTest():
+class TestProgrammeManagement():
 
     @pytest.mark.parametrize("test_data",[
     pytest.param(
@@ -27,7 +27,7 @@ class TestTest():
     "dataCollectingType":"size/age/gender disaggregated"
     }, id="WASH & size/age/gender disaggregated"),
     ])
-    def test_create_programme(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
+    def test_create_programme(self, pageProgrammeManagement: "pageProgrammeManagement", pageProgrammeDetails, test_data):
         #Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         #Create Programme
@@ -205,30 +205,68 @@ class TestTest():
         assert "DRAFT" in elements[1]
         assert "Health" in elements[2]
 
-    @pytest.mark.skip
+    @pytest.mark.parametrize("test_data",[
+    pytest.param(
+    {"program_name": "CheckParents - " + str(random.random()),
+    "selector": "Health",
+    "startDate": "2023-05-01",
+    "endDate": "2033-12-12",
+    "dataCollectingType":"Partial"
+    }, id="programme_management_page"),
+    ])
     def test_create_programme_add_partners_Business_Area(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
-        pass
+        #Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        #Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"])
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"])
+        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
+        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonAddPartner().click()
+        pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.getButtonSave().click()
+        #Check Details page
+#       ToDo: Waiting for frontend dataCY  assert "UNHCR" in pageProgrammeManagement.getLabelPartners().text
 
-    @pytest.mark.skip
+    @pytest.mark.skip(reason="ToDo")
     def test_create_programme_add_partners_Admin_Area(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
-        pass
+        #Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        #Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"])
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"])
+        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
+        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonAddPartner().click()
+#         pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.getButtonSave().click()
+        #Check Details page
+#       ToDo: Waiting for frontend dataCY  assert "UNHCR" in pageProgrammeManagement.getLabelPartners().text
 
-    @pytest.mark.skip
+    @pytest.mark.skip(reason="ToDo")
     def test_create_programme_check_empty_mandatory_fields(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
         pass
 
-    @pytest.mark.skip
+    @pytest.mark.skip(reason="ToDo")
     def test_create_programme_delete_partners(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
         pass
 
-    @pytest.mark.skip
-    def test_create_programme_back_scenario(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
+    @pytest.mark.skip(reason="ToDo")
+    def test_create_programme_back_scenarios(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
         pass
 
-    @pytest.mark.skip
+    @pytest.mark.skip(reason="ToDo")
     def test_create_programme_cancel_scenario(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
         pass
 
-    @pytest.mark.skip
+    @pytest.mark.skip(reason="ToDo")
     def test_create_programme_chose_dates_via_calendar(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
         pass

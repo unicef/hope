@@ -14,6 +14,10 @@ class ProgrammeDetails(BaseComponents):
     labelCashPlus = 'div[data-cy="label-CASH+"]'
     labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
     labelDescription = 'div[data-cy="label-Description"]'
+    labelAreaAccess = 'div[data-cy="label-Area Access"]'
+
+    def getLabelAreaAccess(self):
+        return self.wait_for(self.labelAreaAccess)
 
     def getProgramStatus(self):
         return self.wait_for(self.programStatus)

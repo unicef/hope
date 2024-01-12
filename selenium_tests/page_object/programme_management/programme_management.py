@@ -34,7 +34,7 @@ class ProgrammeManagement(BaseComponents):
         return self.get_elements(locator)[0].text.split("\n")
 
     def getButtonAddPartner(self):
-        return self.wait_for(self.inputProgrammeName)
+        return self.wait_for(self.buttonAddPartner)
 
     def choosePartnerOption(self, optionName):
         # Todo: Change undefined to name of Partner
