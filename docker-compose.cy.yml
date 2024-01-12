@@ -76,7 +76,7 @@ services:
     <<: *django_envs
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     command: cy
     volumes:
       - backend-data:/data
@@ -114,7 +114,7 @@ services:
     <<: *django_envs
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     volumes:
