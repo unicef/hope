@@ -50,14 +50,7 @@ class APITestCase(SnapshotTestTestCase):
         with open(f"{settings.PROJECT_ROOT}/../test_times.txt", "a") as f:
             f.write(f"{time.time() - self.start_time:.3f} {self.id()}" + os.linesep)
 
-        # https://stackoverflow.com/a/39606065
-        if hasattr(self._outcome, "errors"):
-            # Python 3.4 - 3.10  (These two methods have no side effects)
-            result = self.defaultTestResult()
-            self._feedErrorsToResult(result, self._outcome.errors)
-        else:
-            # Python 3.11+
-            result = self._outcome.result
+        result = self.defaultTestResult()
 
         for typ, errors in (("ERROR", result.errors), ("FAIL", result.failures)):
             for test, text in errors:
