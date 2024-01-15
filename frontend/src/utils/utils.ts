@@ -298,6 +298,10 @@ export function paymentPlanBackgroundActionStatusToColor(
       theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatus.XlsxImportError]:
       theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.SendToPaymentGateway]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.SendToPaymentGatewayError]:
+      theme.palette.error.main,
   };
   if (status in colorsMap) {
     return colorsMap[status];

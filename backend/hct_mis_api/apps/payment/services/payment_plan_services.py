@@ -126,10 +126,17 @@ class PaymentPlanService:
 
     def send_to_payment_gateway(self) -> PaymentPlan:
         if self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
-            msg = "Sending in progress"
-            raise GraphQLError(msg)
+            raise GraphQLError("Sending in progress")
 
-        send_to_payment_gateway.delay(self.payment_plan.pk)
+        # send to payment gateway if applicable
+        not_sent_pg_delivery_mechanisms = self.payment_plan.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            sent_to_payment_gateway=False,
+        )
+        if not_sent_pg_delivery_mechanisms.exists():
+            send_to_payment_gateway.delay(self.payment_plan.pk)
+        else:
+            raise GraphQLError("Already sent to Payment Gateway")
 
         return self.payment_plan
 
@@ -282,14 +289,6 @@ class PaymentPlanService:
 
             if approval_type == Approval.FINANCE_RELEASE:
                 self.payment_plan.status_mark_as_reviewed()
-                # send to payment gateway if applicable
-                not_sent_pg_delivery_mechanisms = self.payment_plan.delivery_mechanisms.filter(
-                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
-                    sent_to_payment_gateway=False,
-                )
-                if not_sent_pg_delivery_mechanisms.exists():
-                    # TODO show message in UI
-                    self.send_to_payment_gateway()
                 # remove imported and export files
 
             if approval_type == Approval.REJECT:

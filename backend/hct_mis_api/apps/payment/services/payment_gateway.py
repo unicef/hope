@@ -70,10 +70,6 @@ class PaymentGatewayPaymentSerializer(ReadOnlyModelSerializer):
         return obj.unicef_id
 
     def get_extra_data(self, obj: Payment) -> Dict:
-        """
-        extra_data
-        {"mtcn": "3460218434", "new_mtcn": "2336383460218434", "record_code": "TestDecemberCancel", "instant_notification": {"addl_service_block": null, "addl_service_charges": "010300002010030100103MSG02010030101103FEE1204150013041500961501010020100301099200101C0211UDI0000009299210417wufxspd0002046249                                                                                                                                                                               "}}
-        """
         return {}
 
     def get_payload(self, obj: Payment) -> Dict:
@@ -113,6 +109,7 @@ class PaymentRecordData:
     status: str
     hope_status: str
     success: bool
+    # delivered_amount: int # TODO wait for implementation on PG side
 
 
 @dataclass
@@ -128,9 +125,7 @@ class PaymentInstructionData:
 
 @dataclass
 class FspData:
-    # id: int
     remote_id: str
-    # unicef_id: str
     name: str
     vision_vendor_number: str
     configuration: dict
@@ -279,7 +274,7 @@ class PaymentGatewayService:
                     "name": fsp.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": fsp.configuration,
-                    "delivery_mechanisms": [Payment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT],  # TODO overwrite if exists?
+                    "delivery_mechanisms": [Payment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT],
                 },
             )
 
@@ -314,3 +309,7 @@ class PaymentGatewayService:
                         payment.status = matching_pg_payment.hope_status
                         payment.status_date = now()
                         payment.save(update_fields=["status", "status_date"])
+
+                        # TODO wait for implementation on PG side
+                        # payment.delivered_amount = matching_pg_payment.delivered_amount / 100
+                        # payment.save(update_fields=["status", "status_date", "delivered_amount"])
