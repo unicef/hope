@@ -128,28 +128,6 @@ exports[`components/ProgramDetails should render 1`] = `
               class="sc-bwzfXH eoWrid"
               color="textSecondary"
             >
-              Scope
-            </span>
-            <div
-              data-cy="label-Scope"
-            >
-              <span
-                class="sc-htpNat gXZdAP"
-                color="textSecondary"
-              >
-                Unicef
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
               Data Collecting Type
             </span>
             <div

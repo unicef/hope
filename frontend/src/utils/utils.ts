@@ -1042,13 +1042,13 @@ export const getAutocompleteOptionLabel = (
 };
 
 export const handleOptionSelected = (
-  optionValue: string,
+  option: string | undefined,
   value: string | null | undefined,
 ): boolean => {
-  if (value === '' || value === null) {
-    return false;
+  if (!value) {
+    return !option;
   }
-  return optionValue === value;
+  return option === value;
 };
 
 export const isProgramNodeUuidFormat = (id: string): boolean => {
@@ -1060,4 +1060,9 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
   } catch (e) {
     return false;
   }
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const arraysHaveSameContent = (a: any[], b: any[]): boolean => {
+  return a.length === b.length && a.every((val, index) => val === b[index]);
 };

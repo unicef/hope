@@ -684,7 +684,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 if not area:
                     message = f"Sheet Households: Area with code: {p_code} does not exist"
                 if area.area_type.country not in business_area_countries:
-                    message = f"Sheet Households: Country for p_code: {p_code} does not belong to {business_area_slug}"
+                    message = (
+                        f"Sheet Households: Admin Area: {p_code} unavailable in Business Area: {business_area_slug}"
+                    )
                 if message:
                     invalid_rows.append({"row_number": row_number, "header": header_name, "message": message})
         return invalid_rows

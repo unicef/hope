@@ -161,7 +161,7 @@ const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
   const programId = window.location.pathname.split('/')[3];
   const headers = {
     'Business-Area': businessAreaSlug,
-    Program: programId,
+    Program: programId || 'all',
   };
 
   operation.setContext({ headers });

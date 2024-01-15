@@ -60,7 +60,6 @@ export const DeleteProgramPartner = ({
             <LoadingButton
               //TODO: fix this
               loading={false}
-              error
               type='submit'
               variant='contained'
               onClick={() => handleDeleteProgramPartner()}

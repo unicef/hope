@@ -130,6 +130,16 @@ export const IndividualBioData = ({
             {individual?.bankAccountInfo?.bankAccountNumber}
           </LabelizedField>
         </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Account holder name')}>
+            {individual?.bankAccountInfo?.accountHolderName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Bank branch name')}>
+            {individual?.bankAccountInfo?.bankBranchName}
+          </LabelizedField>
+        </Grid>
       </>
     );
   };

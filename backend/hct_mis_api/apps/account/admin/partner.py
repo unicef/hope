@@ -7,6 +7,7 @@ from django.forms import CheckboxSelectMultiple, ModelForm, formset_factory
 from django.http import HttpRequest, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.html import format_html
 
 from admin_extra_buttons.decorators import button
 
@@ -36,13 +37,28 @@ class ProgramAreaForm(forms.Form):
 
 @admin.register(account_models.Partner)
 class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
-    list_filter = ("is_un",)
+    list_filter = ("is_un", "parent")
     search_fields = ("name",)
-    readonly_fields = ("permissions",)
+    readonly_fields = ("permissions", "sub_partners")
     list_display = (
-        "name",
+        "__str__",
+        "sub_partners",
         "is_un",
     )
+
+    def sub_partners(self, obj: Any) -> Optional[str]:
+        return self.links_to_objects(obj.get_children()) if obj else None
+
+    sub_partners.short_description = "Sub-Partners"
+
+    @classmethod
+    def links_to_objects(cls, objects: Any) -> str:
+        rel_list = "<ul>"
+        for obj in objects:
+            link = reverse("admin:account_partner_change", args=[obj.id])
+            rel_list += "<li><a href='%s'>%s</a></li>" % (link, obj.name)
+        rel_list += "</ul>"
+        return format_html(rel_list)
 
     def get_readonly_fields(self, request: HttpRequest, obj: Optional[account_models.Partner] = None) -> Sequence[str]:
         additional_fields = []
@@ -54,14 +70,24 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         self, request: HttpRequest, obj: Optional[account_models.Partner] = None, change: bool = False, **kwargs: Any
     ) -> Type[ModelForm]:
         form = super().get_form(request, obj, **kwargs)
-        form.base_fields["parent"].queryset = account_models.Partner.objects.filter(level=0)
+
+        queryset = account_models.Partner.objects.filter(level=0)
+        if obj:
+            if obj.is_parent:
+                queryset = account_models.Partner.objects.none()
+            else:
+                queryset = queryset.exclude(id=obj.id)
+
+        form.base_fields["parent"].queryset = queryset
         return form
 
     @button(enabled=lambda obj: obj.original.is_editable)
     def permissions(self, request: HttpRequest, pk: int) -> Union[TemplateResponse, HttpResponseRedirect]:
         context = self.get_common_context(request, pk, title="Partner permissions")
         partner: account_models.Partner = context["original"]
-        context["can_add_business_area_to_partner"] = request.user.can_add_business_area_to_partner()
+        user_can_add_ba_to_partner = request.user.can_add_business_area_to_partner()
+        permissions_list = partner.get_permissions().to_list()
+        context["can_add_business_area_to_partner"] = user_can_add_ba_to_partner
 
         BusinessAreaRoleFormSet = formset_factory(BusinessAreaRoleForm, extra=0, can_delete=True)
         ProgramAreaFormSet = formset_factory(ProgramAreaForm, extra=0, can_delete=True)
@@ -69,7 +95,6 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         business_areas = set()
 
         if request.method == "GET":
-            permissions_list = partner.get_permissions().to_list()
             business_area_role_data = []
             program_area_data = []
             for permission in permissions_list:
@@ -94,7 +119,8 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
             refresh_areas = request.POST["refresh-areas"]
             incompatible_roles = defaultdict(list)
 
-            if business_area_role_form_set.is_valid():
+            business_area_role_form_set_is_valid = business_area_role_form_set.is_valid()
+            if user_can_add_ba_to_partner and business_area_role_form_set_is_valid:
                 for form in business_area_role_form_set.cleaned_data:
                     if form and not form["DELETE"]:
                         business_area_id = str(form["business_area"].id)
@@ -107,6 +133,12 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
                             incompatible_roles[form["business_area"]].append(str(incompatible_role))
                         else:
                             partner_permissions.set_roles(business_area_id, role_ids)
+            # save the same BA and roles for user without perm
+            if not user_can_add_ba_to_partner:
+                business_area_role_form_set_is_valid = True
+                for permission in permissions_list:
+                    if permission.roles:
+                        partner_permissions.set_roles(permission.business_area_id, permission.roles)
 
             if program_area_form_set.is_valid():
                 for form in program_area_form_set.cleaned_data:
@@ -128,7 +160,7 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
 
             if (
                 refresh_areas == "false"
-                and business_area_role_form_set.is_valid()
+                and business_area_role_form_set_is_valid
                 and program_area_form_set.is_valid()
                 and not incompatible_roles
             ):
@@ -140,10 +172,12 @@ class PartnerAdmin(HopeModelAdminMixin, admin.ModelAdmin):
         context["business_area_role_formset"] = business_area_role_form_set
         context["program_area_formset"] = program_area_form_set
         context["areas"] = {}
+        context["program"] = {}
 
         for business_area_id in business_areas:
             context["areas"][str(business_area_id)] = Area.objects.filter(
                 area_type__country__business_areas__id=business_area_id
             )
+            context["program"][str(business_area_id)] = Program.objects.filter(business_area_id=business_area_id)
 
         return TemplateResponse(request, "admin/account/parent/permissions.html", context)

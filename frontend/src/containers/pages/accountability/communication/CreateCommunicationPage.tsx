@@ -13,23 +13,10 @@ import {
 } from '@material-ui/core';
 import { Field, Form, Formik } from 'formik';
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import * as Yup from 'yup';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { LoadingButton } from '../../../../components/core/LoadingButton';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { LookUpSelectionCommunication } from '../../../../components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
-import { PaperContainer } from '../../../../components/targeting/PaperContainer';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import {
-  CommunicationSteps,
-  CommunicationTabsValues,
-} from '../../../../utils/constants';
 import {
   AccountabilityCommunicationMessageSampleSizeQueryVariables,
   CreateAccountabilityCommunicationMessageMutationVariables,
@@ -37,17 +24,31 @@ import {
   useAccountabilityCommunicationMessageSampleSizeLazyQuery,
   useAllAdminAreasQuery,
   useCreateAccountabilityCommunicationMessageMutation,
+  useSurveyAvailableFlowsLazyQuery,
 } from '../../../../__generated__/graphql';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { TabPanel } from '../../../../components/core/TabPanel';
-import { FormikMultiSelectField } from '../../../../shared/Formik/FormikMultiSelectField';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { getPercentage } from '../../../../utils/utils';
-import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
+import { LookUpSelectionCommunication } from '../../../../components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
+import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
 import { FormikEffect } from '../../../../components/core/FormikEffect';
+import { LoadingButton } from '../../../../components/core/LoadingButton';
+import { PageHeader } from '../../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { TabPanel } from '../../../../components/core/TabPanel';
+import { PaperContainer } from '../../../../components/targeting/PaperContainer';
+import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { usePermissions } from '../../../../hooks/usePermissions';
+import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '../../../../shared/Formik/FormikMultiSelectField';
+import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
+import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
+import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import {
+  CommunicationSteps,
+  CommunicationTabsValues,
+} from '../../../../utils/constants';
+import { getPercentage } from '../../../../utils/utils';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -119,6 +120,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     { loading },
   ] = useCreateAccountabilityCommunicationMessageMutation();
   const { showMessage } = useSnackbar();
+  const history = useHistory();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
@@ -151,6 +153,28 @@ export const CreateCommunicationPage = (): React.ReactElement => {
       loadSampleSize();
     }
   }, [activeStep, formValues, loadSampleSize]);
+
+  const [
+    loadAvailableFlows,
+    { data: flowsData },
+  ] = useSurveyAvailableFlowsLazyQuery({
+    fetchPolicy: 'network-only',
+  });
+
+  useEffect(() => {
+    loadAvailableFlows();
+  }, [loadAvailableFlows]);
+
+  useEffect(() => {
+    //Redirect to error page if RapidPro unavailable available
+    if (!flowsData?.surveyAvailableFlows?.length) {
+      history.push(`/error/${businessArea}`, {
+        errorMessage: t(
+          'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
+        ),
+      });
+    }
+  }, [flowsData, businessArea, history, t]);
 
   const validationSchema = useCallback(() => {
     const datum = {

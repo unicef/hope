@@ -69,17 +69,29 @@ export const BaseAutocomplete = ({
   return (
     <StyledAutocomplete
       key={prevValueRef.current}
+      freeSolo={false}
       value={value}
       data-cy={dataCy}
       open={open}
-      filterOptions={(options1) => options1}
+      options={[{ value: '', label: '' }, ...allEdges]}
+      filterOptions={(options, params) => {
+        const filtered = options.filter(
+          (option) =>
+            option.value !== '' &&
+            (params.inputValue === '' ||
+              (option.label &&
+                option.label
+                  .toLowerCase()
+                  .includes(params.inputValue.toLowerCase()))),
+        );
+        return filtered;
+      }}
       onChange={handleChange}
       onOpen={handleOpen}
       onClose={handleClose}
       getOptionSelected={handleOptionSelected}
       getOptionLabel={handleOptionLabel}
       disabled={disabled}
-      options={allEdges}
       loading={loading}
       renderInput={(params) => (
         <TextField

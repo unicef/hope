@@ -35,11 +35,7 @@ from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import (
-    ChoiceObject,
-    FieldAttributeNode,
-    _custom_dict_or_attr_resolver,
-)
+from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
@@ -83,7 +79,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
-    programs_with_delivered_quantity,
+    delivered_quantity_service,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
@@ -190,15 +186,6 @@ class HouseholdSelectionNode(DjangoObjectType):
 class DeliveredQuantityNode(graphene.ObjectType):
     total_delivered_quantity = graphene.Decimal()
     currency = graphene.String()
-
-
-class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
-    class Meta:
-        default_resolver = _custom_dict_or_attr_resolver
-
-    id = graphene.ID()
-    name = graphene.String()
-    quantity = graphene.List(DeliveredQuantityNode)
 
 
 class IndividualRoleInHouseholdNode(DjangoObjectType):
@@ -389,7 +376,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin1 = graphene.Field(AreaNode)
     admin2 = graphene.Field(AreaNode)
     status = graphene.String()
-    programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+    delivered_quantities = graphene.List(DeliveredQuantityNode)
     active_individuals_count = graphene.Int()
     individuals = DjangoFilterConnectionField(
         IndividualNode,
@@ -416,8 +403,8 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return ""
 
     @staticmethod
-    def resolve_programs_with_delivered_quantity(parent: Household, info: Any) -> List[Dict[str, Any]]:
-        return programs_with_delivered_quantity(parent)
+    def resolve_delivered_quantities(parent: Household, info: Any) -> List[Dict[str, Any]]:
+        return delivered_quantity_service(parent)
 
     @staticmethod
     def resolve_country(parent: Household, info: Any) -> str:
@@ -611,7 +598,6 @@ class Query(graphene.ObjectType):
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
         business_area_slug = info.context.headers.get("Business-Area")
-        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
         if program_id:
             program = Program.objects.filter(id=program_id).first()
@@ -622,10 +608,13 @@ class Query(graphene.ObjectType):
         if does_path_exist_in_query("edges.node.household", info):
             queryset = queryset.select_related("household")
         if does_path_exist_in_query("edges.node.household.admin2", info):
-            queryset = queryset.select_related("household__admin_area")
-            queryset = queryset.select_related("household__admin_area__area_type")
+            queryset = queryset.select_related("household__admin2")
+            queryset = queryset.select_related("household__admin2__area_type")
+        if does_path_exist_in_query("edges.node.program", info):
+            queryset = queryset.select_related("program")
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
             partner_permission = user.partner.get_permissions()
 
             if program_id:
@@ -671,7 +660,6 @@ class Query(graphene.ObjectType):
         user = info.context.user
         program_id = get_program_id_from_headers(info.context.headers)
         business_area_slug = info.context.headers.get("Business-Area")
-        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
         if program_id:
             program = Program.objects.filter(id=program_id).first()
@@ -681,6 +669,7 @@ class Query(graphene.ObjectType):
         queryset = Household.objects.all()
 
         if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
             partner_permission = user.partner.get_permissions()
 
             if program_id:
@@ -717,6 +706,8 @@ class Query(graphene.ObjectType):
 
         if does_path_exist_in_query("edges.node.headOfHousehold", info):
             queryset = queryset.select_related("head_of_household")
+        if does_path_exist_in_query("edges.node.program", info):
+            queryset = queryset.select_related("program")
         if does_path_exist_in_query("edges.node.hasDuplicates", info):
             subquery = Subquery(
                 Individual.objects.filter(household_id=OuterRef("pk"), deduplication_golden_record_status="DUPLICATE")

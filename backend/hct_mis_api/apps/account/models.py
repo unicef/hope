@@ -174,7 +174,15 @@ class Partner(MPTTModel, models.Model):
     permissions = JSONField(default=dict, blank=True)
 
     def __str__(self) -> str:
-        return self.name
+        return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
+
+    @property
+    def is_child(self) -> bool:
+        return self.parent is None
+
+    @property
+    def is_parent(self) -> bool:
+        return self.id in Partner.objects.exclude(parent__isnull=True).values_list("parent", flat=True)
 
     def get_permissions(self) -> PartnerPermission:
         return PartnerPermission.from_dict(self.permissions)
@@ -184,7 +192,15 @@ class Partner(MPTTModel, models.Model):
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
-        return [(role.id, role.name) for role in cls.objects.exclude(name="Default Empty Partner")]
+        return [(partner.id, partner.name) for partner in cls.objects.exclude(name="Default Empty Partner")]
+
+    @classmethod
+    def get_partners_for_ba_as_choices(cls, business_area_id: UUID) -> List:
+        return [
+            (partner.id, partner.name)
+            for partner in cls.objects.exclude(name="Default Empty Partner")
+            if str(business_area_id) in partner.business_area_ids or partner.is_unicef
+        ]
 
     @property
     def is_unicef(self) -> bool:

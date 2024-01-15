@@ -13,6 +13,7 @@ export const fakeApolloAllPrograms = [
         sector: [],
         numberOfHouseholds: '{"min":"","max":""}',
         budget: '{"min":"","max":""}',
+        dataCollectingType: '',
         first: 5,
         orderBy: null,
       },

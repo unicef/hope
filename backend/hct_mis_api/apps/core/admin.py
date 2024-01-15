@@ -616,10 +616,10 @@ class XLSXKoboTemplateAdmin(SoftDeletableAdminMixin, HOPEModelAdminBase):
                     errors = [f"Field: {error['field']} - {error['message']}" for error in validation_errors]
                     form.add_error(field=None, error=errors)
             except ValidationError as validation_error:
-                logger.exception(validation_error)
+                logger.warning(validation_error)
                 form.add_error("xls_file", validation_error)
             except XLRDError as file_error:
-                logger.exception(file_error)
+                logger.warning(file_error)
                 form.add_error("xls_file", file_error)
 
             if form.is_valid():

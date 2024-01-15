@@ -32,6 +32,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.account.schema import PartnerNodeForProgram
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
@@ -180,6 +181,8 @@ class Query(graphene.ObjectType):
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
+    data_collecting_type_choices = graphene.List(ChoiceObject)
+
     all_active_programs = DjangoPermissionFilterConnectionField(
         ProgramNode,
         filterset_class=ProgramFilter,
@@ -226,6 +229,20 @@ class Query(graphene.ObjectType):
 
     def resolve_cash_plan_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
+
+    def resolve_data_collecting_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return list(
+            DataCollectingType.objects.filter(
+                active=True,
+                deprecated=False,
+                limit_to__slug=info.context.headers.get("Business-Area").lower(),
+            )
+            .exclude(code__iexact="unknown")
+            .annotate(name=F("label"))
+            .annotate(value=F("code"))
+            .values("name", "value")
+            .order_by("name")
+        )
 
     def resolve_all_cash_plans(self, info: Any, **kwargs: Any) -> QuerySet[CashPlan]:
         payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(

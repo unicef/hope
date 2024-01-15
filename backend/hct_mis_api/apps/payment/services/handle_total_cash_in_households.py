@@ -43,13 +43,3 @@ def handle_total_cash_in_specific_households(id_list: List[UUID]) -> None:
         total_cash_received_usd=F("total_cash_received_from_payment_records_usd")
         + F("total_cash_received_from_payments_usd"),
     )
-
-
-def handle_total_cash_in_households(only_new: bool = False) -> None:
-    base_queryset = Household.objects.all()
-    if only_new:
-        base_queryset = base_queryset.filter(total_cash_received_usd__isnull=True, total_cash_received__isnull=True)
-    id_list = list(base_queryset[:500].values_list("id", flat=True))
-    while len(id_list):
-        handle_total_cash_in_specific_households(id_list)
-        id_list = list(base_queryset[:500].values_list("id", flat=True))
