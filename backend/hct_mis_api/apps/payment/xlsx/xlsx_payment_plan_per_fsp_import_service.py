@@ -317,7 +317,12 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                     currency_exchange_date=self.payment_plan.currency_exchange_date,
                 )
                 payment.status = status
-                payment.delivery_date = delivery_date
+                if delivery_date:
+                    payment.delivery_date = delivery_date
+                elif payment.delivered_quantity and not payment.delivery_date:
+                    payment.delivery_date = timezone.now()
+                elif not payment.delivered_quantity:
+                    payment.delivery_date = None
                 payment.reason_for_unsuccessful_payment = reason_for_unsuccessful_payment
                 payment.additional_collector_name = additional_collector_name
                 payment.additional_document_type = additional_document_type
