@@ -230,9 +230,18 @@ class TestProgrammeManagement():
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getButtonSave().click()
         #Check Details page
-#       ToDo: Waiting for frontend dataCY  assert "UNHCR" in pageProgrammeManagement.getLabelPartners().text
+        assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
+        assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
-    @pytest.mark.skip(reason="ToDo")
+    @pytest.mark.parametrize("test_data",[
+    pytest.param(
+    {"program_name": "CheckParents - " + str(random.random()),
+    "selector": "Health",
+    "startDate": "2023-05-01",
+    "endDate": "2033-12-12",
+    "dataCollectingType":"Partial"
+    }, id="programme_management_page"),
+    ])
     def test_create_programme_add_partners_Admin_Area(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
         #Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -246,18 +255,60 @@ class TestProgrammeManagement():
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonAddPartner().click()
-#         pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.getLabelAdminArea().click()
+        pageProgrammeManagement.chooseAreaAdmin1ByName("Baghlan").click()
         pageProgrammeManagement.getButtonSave().click()
         #Check Details page
-#       ToDo: Waiting for frontend dataCY  assert "UNHCR" in pageProgrammeManagement.getLabelPartners().text
+        assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
+        assert "16" in pageProgrammeDetails.getLabelAreaAccess().text
 
-    @pytest.mark.skip(reason="ToDo")
-    def test_create_programme_check_empty_mandatory_fields(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
-        pass
+    def test_create_programme_check_empty_mandatory_fields(self, pageProgrammeManagement):
+        #Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        #Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getButtonNext().click()
+        #Cehck Mandatory fields texts
+        assert "Programme name is required" in pageProgrammeManagement.getLabelProgrammeName().text
+        assert "Start Date is required" in pageProgrammeManagement.getLabelStartDate().text
+        assert "End Date is required" in pageProgrammeManagement.getLabelEndDate().text
+        assert "Sector is required" in pageProgrammeManagement.getLabelSelector().text
+        assert "Data Collecting Type is required" in pageProgrammeManagement.getLabelDataCollectingType().text
 
-    @pytest.mark.skip(reason="ToDo")
+    @pytest.mark.parametrize("test_data",[
+    pytest.param(
+    {"program_name": "CheckParents - " + str(random.random()),
+    "selector": "Health",
+    "startDate": "2023-05-01",
+    "endDate": "2033-12-12",
+    "dataCollectingType":"Partial"
+    }, id="programme_management_page"),
+    ])
     def test_create_programme_delete_partners(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
-        pass
+        #Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        #Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"])
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"])
+        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
+        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonAddPartner().click()
+        pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.getButtonDelete().click()
+        pageProgrammeManagement.getButtonDeletePopup().click()
+        pageProgrammeManagement.getButtonSave().click()
+        #Check Details page
+        try:
+            pageProgrammeDetails.getLabelPartnerName().text
+        except:
+            assert True
+        else:
+            assert False
 
     @pytest.mark.skip(reason="ToDo")
     def test_create_programme_back_scenarios(self, pageProgrammeManagement, pageProgrammeDetails, test_data):

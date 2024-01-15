@@ -1,16 +1,20 @@
 from page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from time import sleep
 
 class ProgrammeManagement(BaseComponents):
 
     buttonNewProgram = 'a[data-cy="button-new-program"]'
     inputProgrammeName = 'input[data-cy="input-name"]'
+    labelProgrammeName = 'div[data-cy="input-programme-name"]'
     inputStartDate = 'input[data-cy="date-input-startDate"]'
+    labelStartDate = 'div[data-cy="input-start-date"]'
     inputEndDate = 'input[data-cy="date-input-endDate"]'
+    labelEndDate = 'div[data-cy="input-end-date"]'
     selectSelector = 'div[data-cy="select-sector"]'
+    labelSelector = 'div[data-cy="input-sector"]'
     inputDataCollectingType = 'div[data-cy="input-data-collecting-type"]'
+    labelDataCollectingType = 'div[data-cy="input-data-collecting-type"]'
     inputCashPlus = 'span[data-cy="input-cashPlus"]'
     inputDescription = 'textarea[data-cy="input-description"]'
     inputBudget = 'input[data-cy="input-budget"]'
@@ -23,11 +27,17 @@ class ProgrammeManagement(BaseComponents):
     buttonAddPartner = 'button[data-cy="button-add-partner"]'
     inputPartner = 'div[data-cy="select-partners[0].id"]'
     buttonDelete = 'button[data-cy="button-delete"]'
-    selectOption = 'li[data-cy="select-option-undefined"]'
+    labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span/span[1]'
 
     filtersSearch = '//*[@data-cy="filters-search"]/div/input'
     buttonApply = 'button[data-cy="button-filters-clear"]'
 
+
+    def chooseAreaAdmin1ByName(self, name):
+        # return self.wait_for(f"{self.labelAdminArea}/li{str(number)}", By.XPATH)
+        return self.wait_for(f"//*[contains(text(), '{name}')]/span", By.XPATH)
+    def getLabelAdminArea(self):
+        return self.wait_for(self.labelAdminArea, By.XPATH)
     def getRowByProgramName(self, programName):
         locator = f'tr[data-cy="table-row-{programName}"]'
         self.wait_for(locator)
@@ -36,15 +46,25 @@ class ProgrammeManagement(BaseComponents):
     def getButtonAddPartner(self):
         return self.wait_for(self.buttonAddPartner)
 
+    def getButtonDelete(self):
+        return self.wait_for(self.buttonDelete)
+
+    def getButtonDeletePopup(self):
+        # self.wait_for("//*[contains(text(), 'Are you sure you want to remove the partner from this program?')")
+        return self.wait_for("/html/body/div[2]/div[3]/div/div[3]/div/button[2]", By.XPATH)
+
     def choosePartnerOption(self, optionName):
         # Todo: Change undefined to name of Partner
-        selectOption = f'li[data-cy="select-option-undefined"]'
+        selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(self.inputPartner).click()
         self.wait_for(selectOption).click()
         self.wait_for_disappear(selectOption)
 
     def getInputProgrammeName(self):
         return self.wait_for(self.inputProgrammeName)
+
+    def getLabelProgrammeName(self):
+        return self.wait_for(self.labelProgrammeName)
 
     def getInputCashPlus(self):
         return self.wait_for(self.inputCashPlus)
@@ -58,8 +78,14 @@ class ProgrammeManagement(BaseComponents):
     def getInputStartDate(self):
         return self.wait_for(self.inputStartDate)
 
+    def getLabelStartDate(self):
+        return self.wait_for(self.labelStartDate)
+
     def getInputEndDate(self):
         return self.wait_for(self.inputEndDate)
+
+    def getLabelEndDate(self):
+        return self.wait_for(self.labelEndDate)
 
     def getButtonNext(self):
         return self.wait_for(self.buttonNext)
@@ -73,11 +99,17 @@ class ProgrammeManagement(BaseComponents):
         self.wait_for(selectOption).click()
         self.wait_for_disappear(selectOption)
 
+    def getLabelSelector(self):
+        return self.wait_for(self.labelSelector)
+
     def chooseOptionDataCollectingType(self, optionName):
         selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(self.inputDataCollectingType).click()
         self.wait_for(selectOption).click()
         self.wait_for_disappear(selectOption)
+
+    def getLabelDataCollectingType(self):
+        return self.wait_for(self.labelDataCollectingType)
 
     def getButtonNewProgram(self):
         return self.wait_for(self.buttonNewProgram)
@@ -102,4 +134,3 @@ class ProgrammeManagement(BaseComponents):
 
     def getInputPopulation(self):
         return self.wait_for(self.inputPopulation)
-

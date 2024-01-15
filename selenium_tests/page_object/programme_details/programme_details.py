@@ -1,5 +1,4 @@
 from page_object.base_components import BaseComponents
-from selenium.webdriver.common.by import By
 
 class ProgrammeDetails(BaseComponents):
 
@@ -15,6 +14,10 @@ class ProgrammeDetails(BaseComponents):
     labelTotalNumberOfHouseholds = 'div[data-cy="label-Total Number of Households"]'
     labelDescription = 'div[data-cy="label-Description"]'
     labelAreaAccess = 'div[data-cy="label-Area Access"]'
+    labelPartnerName = 'h6[data-cy="label-partner-name"]'
+
+    def getLabelPartnerName(self):
+        return self.wait_for(self.labelPartnerName)
 
     def getLabelAreaAccess(self):
         return self.wait_for(self.labelAreaAccess)
