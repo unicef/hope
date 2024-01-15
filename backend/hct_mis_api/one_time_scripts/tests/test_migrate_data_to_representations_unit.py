@@ -74,6 +74,8 @@ def create_origin_household_with_individual(
     if individual_kwargs is None:
         individual_kwargs = {}
 
+    household_kwargs["is_original"] = True
+    individual_kwargs["is_original"] = True
     individual = IndividualFactory(
         household=None,
         business_area=business_area,
@@ -456,7 +458,6 @@ class TestCopyHouseholdRepresentation(TestCase):
         self.assertEqual(BankAccountInfo.original_and_repr_objects.count() - bank_account_info_count, 4)
 
 
-@skip(reason="Skip this test for GPF")
 class TestAdjustPayments(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()
@@ -507,7 +508,6 @@ class TestAdjustPayments(TestCase):
         self.assertEqual(self.payment1.household, household_this_program)
 
 
-@skip(reason="Skip this test for GPF")
 class TestAdjustPaymentRecords(TestCase):
     def setUp(self) -> None:
         self.business_area = BusinessAreaFactory()

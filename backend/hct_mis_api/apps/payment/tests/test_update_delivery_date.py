@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from django.conf import settings
 
+import pytz
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -92,20 +93,29 @@ class TestDeliveryDate(APITestCase):
         return_value=datetime(2023, 10, 23),
     )
     def test_uploading_delivery_date_with_xlsx(self, mock_time_zone: Any, mock_exchange_rate: Any) -> None:
+        self.payment_1.delivery_date = None
+        self.payment_1.save()
+        old_delivery_date2 = self.payment_2.delivery_date
+        old_delivery_date3 = self.payment_3.delivery_date
         file_no_delivery_date = file_without_delivery_dates()
+        self.payment_1.unicef_id = "RCPT-0060-24-0.000.001"
+        self.payment_2.unicef_id = "RCPT-0060-24-0.000.002"
+        self.payment_3.unicef_id = "RCPT-0060-24-0.000.003"
+        self.payment_1.save()
+        self.payment_2.save()
+        self.payment_3.save()
 
         import_service = XlsxPaymentPlanImportPerFspService(self.payment_plan, file_no_delivery_date)
         import_service.open_workbook()
         import_service.validate()
         import_service.import_payment_list()
-
         self.payment_1.refresh_from_db()
         self.payment_2.refresh_from_db()
         self.payment_3.refresh_from_db()
-
-        self.assertIsNone(self.payment_1.delivery_date)
-        self.assertIsNone(self.payment_2.delivery_date)
-        self.assertIsNone(self.payment_3.delivery_date)
+        date_now = pytz.utc.localize(datetime(2023, 10, 23))
+        self.assertEqual(self.payment_1.delivery_date, date_now)
+        self.assertEqual(self.payment_2.delivery_date, old_delivery_date2)
+        self.assertEqual(self.payment_3.delivery_date, old_delivery_date3)
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_uploading_xlsx_file_with_existing_dates_throws_error(self, mock_exchange_rate: Any) -> None:
