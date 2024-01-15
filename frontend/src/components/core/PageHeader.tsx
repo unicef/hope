@@ -2,9 +2,7 @@ import { Box, Typography } from '@material-ui/core';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import React from 'react';
 import styled from 'styled-components';
-import { registrationDataImportErasedColor } from '../../utils/utils';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
-import { StatusBox } from './StatusBox';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
@@ -52,11 +50,6 @@ const TitleWrapper = styled.div`
   div:first-child {
     margin: 0;
   }
-`;
-
-const StatusErasedWrapper = styled.div`
-  margin-left: 15px;
-  text-transform: uppercase;
 `;
 
 const TitleContainer = styled.div`
