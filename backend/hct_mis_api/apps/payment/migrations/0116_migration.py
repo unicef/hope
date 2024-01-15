@@ -7,7 +7,7 @@ import django_fsm
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0114_migration'),
+        ('payment', '0115_migration'),
     ]
 
     operations = [
