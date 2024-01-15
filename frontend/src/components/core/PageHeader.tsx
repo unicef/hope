@@ -71,7 +71,6 @@ interface Props {
   tabs?: React.ReactElement;
   hasInputComponent?: boolean;
   flags?: React.ReactElement;
-  isErased?: boolean;
   handleBack?: () => void;
 }
 
@@ -82,7 +81,6 @@ export const PageHeader = ({
   tabs = null,
   hasInputComponent,
   flags,
-  isErased,
   handleBack,
 }: Props): React.ReactElement => {
   return (
@@ -109,14 +107,6 @@ export const PageHeader = ({
                       {title}
                     </Typography>
                   </TitleContainer>
-                  {isErased ? (
-                    <StatusErasedWrapper>
-                      <StatusBox
-                        status='erased'
-                        statusToColor={registrationDataImportErasedColor}
-                      />
-                    </StatusErasedWrapper>
-                  ) : null}
                   <Box display='flex' ml={2}>
                     {flags}
                   </Box>
