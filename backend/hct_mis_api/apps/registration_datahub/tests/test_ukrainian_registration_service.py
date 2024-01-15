@@ -16,15 +16,15 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
-    Record,
 )
-from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
-    UkraineBaseRegistrationService,
-)
+from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
+)
+from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
+    UkraineBaseRegistrationService,
 )
 
 
@@ -37,6 +37,7 @@ class TestUkrainianRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
+        Record = get_record_model()
         ImportedDocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
@@ -185,6 +186,7 @@ class TestUkrainianRegistrationService(TestCase):
         cls.user = UserFactory.create()
 
     def test_import_data_to_datahub(self) -> None:
+        Record = get_record_model()
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
@@ -209,6 +211,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(registration_data_import.program, self.program)
 
     def test_import_data_to_datahub_retry(self) -> None:
+        Record = get_record_model()
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids_all = [x.id for x in self.records]
@@ -224,6 +227,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(ImportedHousehold.objects.count(), 4)
 
     def test_import_document_validation(self) -> None:
+        Record = get_record_model()
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
 
