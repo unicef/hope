@@ -7,7 +7,6 @@ from unittest.mock import patch
 from django.conf import settings
 
 import pytz
-from freezegun import freeze_time
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
