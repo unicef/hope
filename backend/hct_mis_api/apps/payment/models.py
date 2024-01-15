@@ -349,6 +349,29 @@ class GenericPayment(TimeStampedUUIDModel):
     def get_unicef_id(self) -> str:
         return self.ca_id if isinstance(self, PaymentRecord) else self.unicef_id
 
+    @property
+    def payment_status(self) -> str:
+        status = "-"
+        if self.status == GenericPayment.STATUS_PENDING:
+            status = "Pending"
+
+        elif self.status in (GenericPayment.STATUS_DISTRIBUTION_SUCCESS, GenericPayment.STATUS_SUCCESS):
+            status = "Delivered Fully"
+
+        elif self.status == GenericPayment.STATUS_DISTRIBUTION_PARTIAL:
+            status = "Delivered Partially"
+
+        elif self.status == GenericPayment.STATUS_NOT_DISTRIBUTED:
+            status = "Not Delivered"
+
+        elif self.status == GenericPayment.STATUS_ERROR:
+            status = "Unsuccessful"
+
+        elif self.status == GenericPayment.STATUS_FORCE_FAILED:
+            status = "Force Failed"
+
+        return status
+
 
 class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -937,6 +960,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("additional_document_type", _("Additional Document Type")),
         ("additional_document_number", _("Additional Document Number")),
         ("registration_token", _("Registration Token")),
+        ("status", _("Status")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1030,6 +1054,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_collector_name": (payment, "additional_collector_name"),
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
+            "status": (payment, "payment_status"),
         }
         additional_columns = {"registration_token": cls.get_registration_token_doc_number}
         if column_name in additional_columns:
