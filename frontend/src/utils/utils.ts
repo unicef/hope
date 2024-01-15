@@ -1057,3 +1057,8 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
     return false;
   }
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const arraysHaveSameContent = (a: any[], b: any[]): boolean => {
+  return a.length === b.length && a.every((val, index) => val === b[index]);
+};
