@@ -18,10 +18,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    Record,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
+from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
 
@@ -172,7 +171,7 @@ class GenericRegistrationService(BaseRegistrationService):
 
     def create_household_data(
         self,
-        record: Record,
+        record: Any,
         registration_data_import: RegistrationDataImportDatahub,
         mapping: Dict,
     ) -> ImportedHousehold:
@@ -181,10 +180,10 @@ class GenericRegistrationService(BaseRegistrationService):
         flex_fields = household_payload.pop("flex_fields", dict())
 
         flex_fields.update(**self.get_extra_ff(mapping.get("flex_fields", list()), record_data_dict))
-
+        individuals_key = mapping["defaults"].get("individuals_key", "individuals")
         household_data = {
             **household_payload,
-            "flex_registrations_record": record,
+            # "flex_registrations_record": record,
             "registration_data_import": registration_data_import,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
@@ -192,15 +191,14 @@ class GenericRegistrationService(BaseRegistrationService):
             "country": Country(code=mapping["defaults"][COUNTRY]),
             "consent": True,
             "collect_individual_data": YES,
-            "size": len(record_data_dict["individuals"]),
+            "size": len(record_data_dict[individuals_key]),
             "flex_fields": flex_fields,
         }
-
         return self._create_object_and_validate(household_data, ImportedHousehold)
 
     def create_individuals(
         self,
-        record: Record,
+        record: Any,
         household: ImportedHousehold,
         mapping: Dict,
     ) -> Tuple:
@@ -212,7 +210,8 @@ class GenericRegistrationService(BaseRegistrationService):
         )
 
         record_data_dict = record.get_data()
-        individuals_data = self.create_individuals_dicts(record_data_dict["individuals"], mapping["individuals"])
+        individuals_key = mapping["defaults"].get("individuals_key", "individuals")
+        individuals_data = self.create_individuals_dicts(record_data_dict[individuals_key], mapping["individuals"])
 
         individuals = []
         head = None
@@ -266,7 +265,7 @@ class GenericRegistrationService(BaseRegistrationService):
         return individuals, head, pr_collector, sec_collector
 
     def create_household_for_rdi_household(
-        self, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, record: Any, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
         default_mapping = {
             "household": {
