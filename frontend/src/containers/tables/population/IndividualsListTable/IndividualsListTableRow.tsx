@@ -39,14 +39,36 @@ export function IndividualsListTableRow({
     history.push(individualDetailsPath);
   };
 
-  let duplicateTooltip = null;
-  if (individual.status === 'DUPLICATE') {
-    duplicateTooltip = (
-      <WarningTooltip confirmed message={t('Confirmed Duplicate')} />
-    );
-  } else if (individual.deduplicationGoldenRecordStatus !== 'UNIQUE') {
-    duplicateTooltip = <WarningTooltip message={t('Possible Duplicate')} />;
-  }
+  const getDuplicateTooltip = (individualObject): React.ReactElement => {
+    if (individualObject?.status === 'DUPLICATE') {
+      return <WarningTooltip confirmed message={t('Confirmed Duplicate')} />;
+    }
+    if (individualObject?.deduplicationGoldenRecordStatus !== 'UNIQUE') {
+      return <WarningTooltip message={t('Possible Duplicate')} />;
+    }
+    return null;
+  };
+
+  const getSanctionListPossibleMatchTooltip = (
+    individualObject,
+  ): React.ReactElement => {
+    if (individualObject?.sanctionListPossibleMatch) {
+      return <FlagTooltip message={t('Sanction List Possible Match')} />;
+    }
+    return null;
+  };
+
+  const getSanctionListConfirmedMatchTooltip = (
+    individualObject,
+  ): React.ReactElement => {
+    if (individualObject?.sanctionListConfirmedMatch) {
+      return (
+        <FlagTooltip message={t('Sanction List Confirmed Match')} confirmed />
+      );
+    }
+    return null;
+  };
+
   return (
     <ClickableTableRow
       hover
@@ -57,20 +79,9 @@ export function IndividualsListTableRow({
     >
       <TableCell align='left'>
         <>
-          <Box mr={2}>{duplicateTooltip}</Box>
-          <Box mr={2}>
-            {individual.sanctionListPossibleMatch && (
-              <FlagTooltip message={t('Sanction List Possible Match')} />
-            )}
-          </Box>
-          <Box mr={2}>
-            {individual.sanctionListConfirmedMatch && (
-              <FlagTooltip
-                message={t('Sanction List Confirmed Match')}
-                confirmed
-              />
-            )}
-          </Box>
+          <Box mr={2}>{getDuplicateTooltip(individual)}</Box>
+          <Box mr={2}>{getSanctionListPossibleMatchTooltip(individual)}</Box>
+          <Box mr={2}>{getSanctionListConfirmedMatchTooltip(individual)}</Box>
         </>
       </TableCell>
       <TableCell align='left'>
