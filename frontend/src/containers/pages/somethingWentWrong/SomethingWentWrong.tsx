@@ -1,9 +1,8 @@
 import { Box, Button } from '@material-ui/core';
 import { Refresh } from '@material-ui/icons';
-import DashboardIcon from '@material-ui/icons/Dashboard';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import { clearCache } from '../../../utils/utils';
@@ -51,16 +50,13 @@ const Paragraph = styled.p`
 `;
 
 export const SomethingWentWrong: React.FC = () => {
-  const goBackAndClearCache = async (): Promise<void> => {
+  const refreshAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);
     window.history.back();
   };
   const history = useHistory();
-  const pathSegments = history.location.pathname.split('/');
-  const businessArea = pathSegments[2];
   const errorMessage = history.location.state?.errorMessage;
-  const shouldGoBack = history.location.state?.shouldGoBack;
 
   const handleGoBack = (): void => {
     if (window.history.length > 2) {
@@ -101,35 +97,20 @@ export const SomethingWentWrong: React.FC = () => {
             variant='outlined'
             color='primary'
             data-cy='button-refresh-page'
-            onClick={goBackAndClearCache}
+            onClick={refreshAndClearCache}
           >
             REFRESH PAGE
           </Button>
         </Box>
-        {shouldGoBack === 'true' ? (
-          <Button
-            endIcon={<ArrowBackIcon />}
-            color='primary'
-            variant='contained'
-            onClick={handleGoBack}
-            data-cy='button-go-back'
-          >
-            GO BACK
-          </Button>
-        ) : (
-          businessArea && (
-            <Button
-              endIcon={<DashboardIcon />}
-              color='primary'
-              variant='contained'
-              component={Link}
-              data-cy='button-go-to-country-dashboard'
-              to={`/${businessArea}/programs/all/country-dashboard`}
-            >
-              GO TO COUNTRY DASHBOARD
-            </Button>
-          )
-        )}
+        <Button
+          endIcon={<ArrowBackIcon />}
+          color='primary'
+          variant='contained'
+          onClick={handleGoBack}
+          data-cy='button-go-back'
+        >
+          GO BACK
+        </Button>
       </Box>
     </Container>
   );

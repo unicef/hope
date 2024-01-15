@@ -240,7 +240,6 @@ export function EditVerificationPlan({
             errorMessage: t(
               'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
             ),
-            shouldGoBack: 'true',
           });
         }
         return (
