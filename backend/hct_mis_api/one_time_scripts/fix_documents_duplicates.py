@@ -64,6 +64,7 @@ def fix_documents_duplicates() -> None:
             score_min=0.0,
             score_max=0.0,
         )
+        logger.info(f"Created GrievanceTicket [{ticket.id}] TicketNeedsAdjudicationDetails [{ticket_details.id}]")
 
         ticket_details.possible_duplicates.add(*possible_duplicates)
         documents_to_update.append(document["document_number"])

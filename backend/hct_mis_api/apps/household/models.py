@@ -45,6 +45,7 @@ REFUGEE = "REFUGEE"
 OTHERS_OF_CONCERN = "OTHERS_OF_CONCERN"
 HOST = "HOST"
 NON_HOST = "NON_HOST"
+RETURNEE = "RETURNEE"
 RESIDENCE_STATUS_CHOICE = (
     (BLANK, _("None")),
     (IDP, _("Displaced  |  Internally Displaced People")),
@@ -52,6 +53,7 @@ RESIDENCE_STATUS_CHOICE = (
     (OTHERS_OF_CONCERN, _("Displaced  |  Others of Concern")),
     (HOST, _("Non-displaced  |   Host")),
     (NON_HOST, _("Non-displaced  |   Non-host")),
+    (RETURNEE, _("Displaced  |   Returnee")),
 )
 # INDIVIDUALS
 MALE = "MALE"
@@ -416,7 +418,7 @@ class Household(
     admin4 = models.ForeignKey("geo.Area", null=True, on_delete=models.SET_NULL, blank=True, related_name="+")
     geopoint = PointField(blank=True, null=True)
 
-    size = models.PositiveIntegerField(db_index=True, null=True)
+    size = models.PositiveIntegerField(db_index=True, null=True, blank=True)
     representatives = models.ManyToManyField(
         to="household.Individual",
         through="household.IndividualRoleInHousehold",

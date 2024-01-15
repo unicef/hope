@@ -915,7 +915,7 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
                 possible_duplicates = [
                     get_individual_representation_per_program_by_old_individual_id(
                         program=program,
-                        old_individual_id=individual,
+                        old_individual_id=individual.id,
                     )
                     for individual in individuals
                     if individual
@@ -2051,7 +2051,7 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
 
     # Update household_unicef_id for all related GrievanceTickets
     # Fetch the GrievanceTickets related to the updated objects
-    grievance_tickets = GrievanceTicket.objects.filter(
+    grievance_tickets = GrievanceTicket.default_for_migrations_fix.filter(
         Q(complaint_ticket_details__in=complaint_tickets_with_payments)
         | Q(sensitive_ticket_details__in=sensitive_tickets_with_payments)
     ).distinct()
@@ -2090,11 +2090,11 @@ def handle_payment_related_tickets(business_area: Optional[BusinessArea] = None)
         if program:
             payment_verification_ticket.ticket.programs.set([program])
 
-    GrievanceTicket.objects.filter(
+    GrievanceTicket.default_for_migrations_fix.filter(
         Q(complaint_ticket_details__in=complaint_tickets_with_payments)
         | Q(sensitive_ticket_details__in=sensitive_tickets_with_payments)
         | Q(payment_verification_ticket_details__in=payment_verification_tickets)
-    ).update(is_original=False, is_migration_handled=True, migrated_at=timezone.now())
+    ).update(is_original=False, is_migration_handled=True)
 
 
 def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDetails, TicketSensitiveDetails]) -> tuple:
@@ -2118,3 +2118,12 @@ def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDet
         else None
     )
     return household_representation, individual_representation, program
+
+
+def delete_representations_from_ba(business_area: BusinessArea) -> None:
+    GrievanceTicket.default_for_migrations_fix.filter(business_area=business_area, is_original=False).delete()
+    GrievanceTicket.objects.filter(business_area=business_area).update(is_migration_handled=False, migrated_at=None)
+    Feedback.original_and_repr_objects.filter(business_area=business_area, is_original=False).delete()
+    Feedback.objects.filter(business_area=business_area).update(is_migration_handled=False, migrated_at=None)
+    Message.original_and_repr_objects.filter(business_area=business_area, is_original=False).delete()
+    Message.objects.filter(business_area=business_area).update(is_migration_handled=False, migrated_at=None)
