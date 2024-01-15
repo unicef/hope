@@ -915,7 +915,7 @@ def handle_needs_adjudication_tickets(business_area: Optional[BusinessArea] = No
                 possible_duplicates = [
                     get_individual_representation_per_program_by_old_individual_id(
                         program=program,
-                        old_individual_id=individual,
+                        old_individual_id=individual.id,
                     )
                     for individual in individuals
                     if individual
@@ -2118,3 +2118,12 @@ def get_program_and_representations_for_payment(ticket: Union[TicketComplaintDet
         else None
     )
     return household_representation, individual_representation, program
+
+
+def delete_representations_from_ba(business_area: BusinessArea) -> None:
+    GrievanceTicket.default_for_migrations_fix.filter(business_area=business_area, is_original=False).delete()
+    GrievanceTicket.objects.filter(business_area=business_area).update(is_migration_handled=False, migrated_at=None)
+    Feedback.original_and_repr_objects.filter(business_area=business_area, is_original=False).delete()
+    Feedback.objects.filter(business_area=business_area).update(is_migration_handled=False, migrated_at=None)
+    Message.original_and_repr_objects.filter(business_area=business_area, is_original=False).delete()
+    Message.objects.filter(business_area=business_area).update(is_migration_handled=False, migrated_at=None)
