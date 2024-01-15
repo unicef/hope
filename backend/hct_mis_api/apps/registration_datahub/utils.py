@@ -5,6 +5,17 @@ from typing import Any, Dict, List, Optional
 from hct_mis_api.apps.core.kobo.common import get_field_name
 
 
+def get_record_model() -> Any:  # temp function
+    from flags.state import flag_state
+
+    if not bool(flag_state("NEW_RECORD_MODEL")):
+        from hct_mis_api.apps.registration_datahub.models import Record
+    else:
+        from hct_mis_api.aurora.models import Record  # type: ignore[no-redef]
+
+    return Record
+
+
 def post_process_dedupe_results(record: Any) -> None:
     # TODO: record: ImportedIndividual but circular import
     max_score = 0

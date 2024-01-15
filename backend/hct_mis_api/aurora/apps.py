@@ -5,20 +5,20 @@ class Config(AppConfig):
     name = "hct_mis_api.aurora"
 
     def ready(self) -> None:
-        from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
+        from hct_mis_api.aurora.rdi import registry
+        from hct_mis_api.aurora.services.czech_republic_flex_registration_service import (
             CzechRepublicFlexRegistration,
         )
-        from hct_mis_api.apps.registration_datahub.services.generic_registration_service import (
+        from hct_mis_api.aurora.services.generic_registration_service import (
             GenericRegistrationService,
         )
-        from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
+        from hct_mis_api.aurora.services.sri_lanka_flex_registration_service import (
             SriLankaRegistrationService,
         )
-        from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
+        from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
             UkraineBaseRegistrationService,
             UkraineRegistrationService,
         )
-        from hct_mis_api.aurora.rdi import registry
 
         from . import admin  # noqa
 

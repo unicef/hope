@@ -60,6 +60,14 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     unknown_unassigned_dict = get_unknown_unassigned_dict()
     unknown_unassigned_program = unknown_unassigned_dict.get(business_area)
 
+    # migrate households to program if RDI is assigned to program by user
+    for program in Program.objects.filter(business_area=business_area).order_by("id"):
+        logger.info(f"Creating representations for assigned RDIs for program {program}")
+        rdis = RegistrationDataImport.objects.filter(
+            program=program, created_at__gte=timezone.make_aware(timezone.datetime(2023, 9, 21))
+        )
+        handle_rdis(rdis, program)
+
     if business_area.name == "Democratic Republic of Congo":
         apply_congo_rules()
     elif business_area.name == "Sudan":
@@ -72,6 +80,8 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
     ).order_by("status"):
         logger.info("----- NEW PROGRAM -----")
         logger.info(f"Creating representations for program: {program}")
+
+        # migrate households based on criteria
         target_populations_ids = TargetPopulation.objects.filter(
             program=program,
         ).values_list("id", flat=True)
@@ -118,6 +128,7 @@ def migrate_data_to_representations_per_business_area(business_area: BusinessAre
                         household, program, individuals_per_household_dict[household.id]
                     )
 
+        # handle RDIs for handled households
         rdi_ids = households.values_list("registration_data_import_id", flat=True).distinct()
         rdis = RegistrationDataImport.objects.filter(id__in=rdi_ids)
         if program.status == Program.ACTIVE:
@@ -597,9 +608,11 @@ def adjust_payments(business_area: BusinessArea) -> None:
     Payment is already related to program through PaymentPlan (parent), and then TargetPopulation.
     """
 
-    payments_ids = list(Payment.objects.filter(
-        parent__target_population__program__business_area=business_area, household__is_original=True
-    ).values_list("pk", flat=True))
+    payments_ids = list(
+        Payment.objects.filter(
+            parent__target_population__program__business_area=business_area, household__is_original=True
+        ).values_list("pk", flat=True)
+    )
     payments_count = len(payments_ids)
 
     for batch_start in range(0, payments_count, BATCH_SIZE):
@@ -646,9 +659,11 @@ def adjust_payment_records(business_area: BusinessArea) -> None:
     Adjust PaymentRecord individuals and households to their representations.
     PaymentRecord is already related to program through TargetPopulation.
     """
-    payment_records_ids = list(PaymentRecord.objects.filter(
-        target_population__program__business_area=business_area, household__is_original=True
-    ).values_list("pk", flat=True))
+    payment_records_ids = list(
+        PaymentRecord.objects.filter(
+            target_population__program__business_area=business_area, household__is_original=True
+        ).values_list("pk", flat=True)
+    )
     payment_records_count = len(payment_records_ids)
     for batch_start in range(0, payment_records_count, BATCH_SIZE):
         batch_end = batch_start + BATCH_SIZE
@@ -988,3 +1003,16 @@ def get_unknown_unassigned_dict() -> Dict:
             if program:
                 unknown_unassigned_dict[business_area] = program
     return unknown_unassigned_dict
+
+
+def migrate_data_for_assigned_RDIs_per_business_area(business_area: BusinessArea) -> None:
+    hhs_before = Household.original_and_repr_objects.count()
+    for program in Program.objects.filter(business_area=business_area):
+        logger.info(f"Creating representations for assigned RDIs for program {program}")
+        rdis = RegistrationDataImport.objects.filter(
+            program=program, created_at__gte=timezone.make_aware(timezone.datetime(2023, 9, 21))
+        )
+        handle_rdis(rdis, program)
+    logger.info(
+        f"Created {Household.original_and_repr_objects.count() - hhs_before} new representations in {business_area}"
+    )
