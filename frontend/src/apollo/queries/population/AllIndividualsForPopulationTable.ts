@@ -62,6 +62,7 @@ export const AllIndividualsForPopulationTable = gql`
           sanctionListPossibleMatch
           sanctionListConfirmedMatch
           deduplicationGoldenRecordStatus
+          status
           sanctionListLastCheck
           fullName
           household {

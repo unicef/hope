@@ -88,19 +88,40 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
     },
   ];
 
+  const getDuplicateTooltip = (individualObject): React.ReactElement => {
+    if (individualObject?.status === 'DUPLICATE') {
+      return <WarningTooltip confirmed message={t('Confirmed Duplicate')} />;
+    }
+    if (individualObject?.deduplicationGoldenRecordStatus !== 'UNIQUE') {
+      return <WarningTooltip message={t('Possible Duplicate')} />;
+    }
+    return null;
+  };
+
+  const getSanctionListPossibleMatchTooltip = (
+    individualObject,
+  ): React.ReactElement => {
+    if (individualObject?.sanctionListPossibleMatch) {
+      return <FlagTooltip message={t('Sanction List Possible Match')} />;
+    }
+    return null;
+  };
+
+  const getSanctionListConfirmedMatchTooltip = (
+    individualObject,
+  ): React.ReactElement => {
+    if (individualObject?.sanctionListConfirmedMatch) {
+      return (
+        <FlagTooltip message={t('Sanction List Confirmed Match')} confirmed />
+      );
+    }
+    return null;
+  };
+
   const { individual } = data;
 
-  let duplicateTooltip = null;
-  if (individual?.status === 'DUPLICATE') {
-    duplicateTooltip = (
-      <WarningTooltip confirmed message={t('Confirmed Duplicate')} />
-    );
-  } else if (individual?.deduplicationGoldenRecordStatus !== 'UNIQUE') {
-    duplicateTooltip = <WarningTooltip message={t('Possible Duplicate')} />;
-  }
-
   return (
-    <div>
+    <>
       <PageHeader
         title={`${t('Individual ID')}: ${individual?.unicefId}`}
         breadCrumbs={
@@ -113,20 +134,9 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
         }
         flags={
           <>
-            <Box mr={2}>{duplicateTooltip}</Box>
-            <Box mr={2}>
-              {individual?.sanctionListPossibleMatch && (
-                <FlagTooltip message={t('Sanction List Possible Match')} />
-              )}
-            </Box>
-            <Box mr={2}>
-              {individual?.sanctionListConfirmedMatch && (
-                <FlagTooltip
-                  message={t('Sanction List Confirmed Match')}
-                  confirmed
-                />
-              )}
-            </Box>
+            <Box mr={2}>{getDuplicateTooltip(individual)}</Box>
+            <Box mr={2}>{getSanctionListPossibleMatchTooltip(individual)}</Box>
+            <Box mr={2}>{getSanctionListConfirmedMatchTooltip(individual)}</Box>
           </>
         }
       >
@@ -153,6 +163,6 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
           <UniversalActivityLogTable objectId={individual?.id} />
         )}
       </Container>
-    </div>
+    </>
   );
 };
