@@ -299,7 +299,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "type": TYPE_INTEGER,
         "name": "size",
         "lookup": "size",
-        "required": True,
+        "required": False,
         "label": {"English(EN)": "What is the household size?"},
         "hint": "",
         "choices": [],

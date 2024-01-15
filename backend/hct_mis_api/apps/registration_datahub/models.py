@@ -91,7 +91,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField()
-    size = models.PositiveIntegerField()
+    size = models.PositiveIntegerField(blank=True, null=True)
     address = models.CharField(max_length=1024, blank=True, default=BLANK)
     country = CountryField()
     zip_code = models.CharField(max_length=12, blank=True, null=True)

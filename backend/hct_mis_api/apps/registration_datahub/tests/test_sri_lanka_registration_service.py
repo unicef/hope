@@ -19,15 +19,15 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    Record,
 )
-from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
-    SriLankaRegistrationService,
-)
+from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
+)
+from hct_mis_api.aurora.services.sri_lanka_flex_registration_service import (
+    SriLankaRegistrationService,
 )
 
 
@@ -125,7 +125,7 @@ class TestSriLankaRegistrationService(TestCase):
                 "moh_center_of_reference": "MOH279",
             }
         ]
-
+        Record = get_record_model()
         records = [
             Record(
                 registration=17,
@@ -154,6 +154,7 @@ class TestSriLankaRegistrationService(TestCase):
 
     @freeze_time("2023-12-12")
     def test_import_data_to_datahub(self) -> None:
+        Record = get_record_model()
         service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
@@ -207,6 +208,7 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
 
     def test_import_record_twice(self) -> None:
+        Record = get_record_model()
         service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
 
