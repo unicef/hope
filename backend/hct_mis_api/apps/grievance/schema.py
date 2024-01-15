@@ -570,6 +570,7 @@ class Query(graphene.ObjectType):
         queryset = queryset.prefetch_related(*to_prefetch)
 
         if not user.partner.is_unicef:  # Full access to all AdminAreas if is_unicef
+            print("=== Filtering QS === " * 3, "\n\n")
             queryset = filter_grievance_tickets_based_on_partner_areas_2(
                 queryset, user.partner, business_area_id, program_id
             )
