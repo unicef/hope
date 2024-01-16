@@ -2305,7 +2305,6 @@ export type HouseholdNode = Node & {
   hasDuplicates?: Maybe<Scalars['Boolean']>,
   adminAreaTitle?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
-  programsWithDeliveredQuantity?: Maybe<Array<Maybe<ProgramsWithDeliveredQuantityNode>>>,
   deliveredQuantities?: Maybe<Array<Maybe<DeliveredQuantityNode>>>,
   activeIndividualsCount?: Maybe<Scalars['Int']>,
 };
@@ -2874,7 +2873,7 @@ export type ImportedHouseholdNode = Node & {
   consentSharing: ImportedHouseholdConsentSharing,
   residenceStatus: ImportedHouseholdResidenceStatus,
   countryOrigin?: Maybe<Scalars['String']>,
-  size: Scalars['Int'],
+  size?: Maybe<Scalars['Int']>,
   address: Scalars['String'],
   country?: Maybe<Scalars['String']>,
   zipCode?: Maybe<Scalars['String']>,
@@ -2982,7 +2981,8 @@ export enum ImportedHouseholdResidenceStatus {
   Refugee = 'REFUGEE',
   OthersOfConcern = 'OTHERS_OF_CONCERN',
   Host = 'HOST',
-  NonHost = 'NON_HOST'
+  NonHost = 'NON_HOST',
+  Returnee = 'RETURNEE'
 }
 
 export enum ImportedIndividualDeduplicationBatchStatus {
@@ -5498,13 +5498,6 @@ export enum ProgramStatus {
   Finished = 'FINISHED'
 }
 
-export type ProgramsWithDeliveredQuantityNode = {
-   __typename?: 'ProgramsWithDeliveredQuantityNode',
-  id?: Maybe<Scalars['ID']>,
-  name?: Maybe<Scalars['String']>,
-  quantity?: Maybe<Array<Maybe<DeliveredQuantityNode>>>,
-};
-
 export type Query = {
    __typename?: 'Query',
   accountabilityCommunicationMessage?: Maybe<CommunicationMessageNode>,
@@ -5653,6 +5646,7 @@ export type Query = {
   userRolesChoices?: Maybe<Array<Maybe<RoleChoiceObject>>>,
   userStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   userPartnerChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  partnerForGrievanceChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   hasAvailableUsersToExport?: Maybe<Scalars['Boolean']>,
   importedHousehold?: Maybe<ImportedHouseholdNode>,
   allImportedHouseholds?: Maybe<ImportedHouseholdNodeConnection>,
@@ -6615,6 +6609,12 @@ export type QueryAllUsersArgs = {
   isMessageCreator?: Maybe<Scalars['Boolean']>,
   isFeedbackCreator?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryPartnerForGrievanceChoicesArgs = {
+  householdId?: Maybe<Scalars['ID']>,
+  individualId?: Maybe<Scalars['ID']>
 };
 
 
@@ -28689,7 +28689,6 @@ export type ResolversTypes = {
   TicketNegativeFeedbackDetailsNodeEdge: ResolverTypeWrapper<TicketNegativeFeedbackDetailsNodeEdge>,
   TicketReferralDetailsNodeConnection: ResolverTypeWrapper<TicketReferralDetailsNodeConnection>,
   TicketReferralDetailsNodeEdge: ResolverTypeWrapper<TicketReferralDetailsNodeEdge>,
-  ProgramsWithDeliveredQuantityNode: ResolverTypeWrapper<ProgramsWithDeliveredQuantityNode>,
   DeliveredQuantityNode: ResolverTypeWrapper<DeliveredQuantityNode>,
   IndividualDisability: IndividualDisability,
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
@@ -29203,7 +29202,6 @@ export type ResolversParentTypes = {
   TicketNegativeFeedbackDetailsNodeEdge: TicketNegativeFeedbackDetailsNodeEdge,
   TicketReferralDetailsNodeConnection: TicketReferralDetailsNodeConnection,
   TicketReferralDetailsNodeEdge: TicketReferralDetailsNodeEdge,
-  ProgramsWithDeliveredQuantityNode: ProgramsWithDeliveredQuantityNode,
   DeliveredQuantityNode: DeliveredQuantityNode,
   IndividualDisability: IndividualDisability,
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
@@ -30687,7 +30685,6 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   adminAreaTitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  programsWithDeliveredQuantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['ProgramsWithDeliveredQuantityNode']>>>, ParentType, ContextType>,
   deliveredQuantities?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveredQuantityNode']>>>, ParentType, ContextType>,
   activeIndividualsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
@@ -30779,7 +30776,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   consentSharing?: Resolver<ResolversTypes['ImportedHouseholdConsentSharing'], ParentType, ContextType>,
   residenceStatus?: Resolver<ResolversTypes['ImportedHouseholdResidenceStatus'], ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   zipCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -31819,12 +31816,6 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
-export type ProgramsWithDeliveredQuantityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramsWithDeliveredQuantityNode'] = ResolversParentTypes['ProgramsWithDeliveredQuantityNode']> = {
-  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  quantity?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveredQuantityNode']>>>, ParentType, ContextType>,
-};
-
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   accountabilityCommunicationMessage?: Resolver<Maybe<ResolversTypes['CommunicationMessageNode']>, ParentType, ContextType, RequireFields<QueryAccountabilityCommunicationMessageArgs, 'id'>>,
   allAccountabilityCommunicationMessages?: Resolver<Maybe<ResolversTypes['CommunicationMessageNodeConnection']>, ParentType, ContextType, QueryAllAccountabilityCommunicationMessagesArgs>,
@@ -31972,6 +31963,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['RoleChoiceObject']>>>, ParentType, ContextType>,
   userStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   userPartnerChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  partnerForGrievanceChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType, QueryPartnerForGrievanceChoicesArgs>,
   hasAvailableUsersToExport?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryHasAvailableUsersToExportArgs, 'businessAreaSlug'>>,
   importedHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType, RequireFields<QueryImportedHouseholdArgs, 'id'>>,
   allImportedHouseholds?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNodeConnection']>, ParentType, ContextType, QueryAllImportedHouseholdsArgs>,
@@ -33358,7 +33350,6 @@ export type Resolvers<ContextType = any> = {
   ProgramNode?: ProgramNodeResolvers<ContextType>,
   ProgramNodeConnection?: ProgramNodeConnectionResolvers<ContextType>,
   ProgramNodeEdge?: ProgramNodeEdgeResolvers<ContextType>,
-  ProgramsWithDeliveredQuantityNode?: ProgramsWithDeliveredQuantityNodeResolvers<ContextType>,
   Query?: QueryResolvers<ContextType>,
   RapidProFlow?: RapidProFlowResolvers<ContextType>,
   RapidProFlowNode?: RapidProFlowNodeResolvers<ContextType>,
