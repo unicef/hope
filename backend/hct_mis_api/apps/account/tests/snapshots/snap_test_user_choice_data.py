@@ -11,10 +11,19 @@ snapshots['UserRolesTest::test_user_choice_data 1'] = {
     'data': {
         'userPartnerChoices': [
             {
+                'name': 'Partner Without Access'
+            },
+            {
                 'name': 'Partner with BA access'
             },
             {
+                'name': 'UNHCR'
+            },
+            {
                 'name': 'UNICEF'
+            },
+            {
+                'name': 'WFP'
             }
         ]
     }
