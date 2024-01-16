@@ -1,6 +1,5 @@
 import pytest
 import random
-from time import sleep
 
 class TestProgrammeManagement():
 
@@ -310,13 +309,56 @@ class TestProgrammeManagement():
         else:
             assert False
 
-    @pytest.mark.skip(reason="ToDo")
+    @pytest.mark.parametrize("test_data",[
+    pytest.param(
+    {"program_name": "New Programme - " + str(random.random()),
+    "selector": "Health",
+    "startDate": "2023-05-01",
+    "endDate": "2033-12-12",
+    "dataCollectingType":"Partial"
+    }, id="Name Change"),
+    ])
     def test_create_programme_back_scenarios(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
-        pass
+        #Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        #Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys("Test Name")
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"])
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"])
+        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
+        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonAddPartner().click()
+        pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.getButtonBack().click()
+        assert "Test Name" in pageProgrammeManagement.getInputProgrammeName().get_attribute("value")
+        pageProgrammeManagement.getInputProgrammeName().clear()
+        assert "Programme name is required" in pageProgrammeManagement.getLabelProgrammeName().text
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonSave().click()
+        #Check Details page
+        assert test_data["program_name"] in pageProgrammeDetails.getHeaderTitle().text
+        assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
+        assert "1 May 2023" in pageProgrammeDetails.getLabelStartDate().text
+        assert "12 Dec 2033" in pageProgrammeDetails.getLabelEndDate().text
+        assert test_data["selector"] in pageProgrammeDetails.getLabelSelector().text
+        assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
+        assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
+        assert "-" in pageProgrammeDetails.getLabelAdministrativeAreas().text
+        assert "Yes" in pageProgrammeDetails.getLabelCashPlus().text
+        assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
+        assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
-    @pytest.mark.skip(reason="ToDo")
-    def test_create_programme_cancel_scenario(self, pageProgrammeManagement, pageProgrammeDetails, test_data):
-        pass
+    def test_create_programme_cancel_scenario(self, pageProgrammeManagement, pageProgrammeDetails):
+        # Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        # Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getButtonCancel().click()
+        assert "Programme Management" in pageProgrammeManagement.getHeaderTitle().text
 
     @pytest.mark.skip(reason="ToDo")
     def test_create_programme_chose_dates_via_calendar(self, pageProgrammeManagement, pageProgrammeDetails, test_data):

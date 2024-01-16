@@ -1,9 +1,11 @@
 from page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from time import sleep
 
 class ProgrammeManagement(BaseComponents):
 
+    headerTitle = 'h5[data-cy="page-header-title"]'
     buttonNewProgram = 'a[data-cy="button-new-program"]'
     inputProgrammeName = 'input[data-cy="input-name"]'
     labelProgrammeName = 'div[data-cy="input-programme-name"]'
@@ -23,6 +25,8 @@ class ProgrammeManagement(BaseComponents):
     inputFreqOfPaymentOneOff = '//*[@data-cy="input-frequency-of-payment"]/div[1]/div/span/span[1]'
     inputFreqOfPaymentRegular = '//*[@data-cy="input-frequency-of-payment"]/div[2]/div/span/span[1]'
     buttonNext = 'button[data-cy="button-next"]'
+    buttonBack = 'button[data-cy="button-back"]'
+    buttonCancel = 'a[data-cy="button-cancel"]'
     buttonSave = 'button[data-cy="button-save"]'
     buttonAddPartner = 'button[data-cy="button-add-partner"]'
     inputPartner = 'div[data-cy="select-partners[0].id"]'
@@ -90,6 +94,12 @@ class ProgrammeManagement(BaseComponents):
     def getButtonNext(self):
         return self.wait_for(self.buttonNext)
 
+    def getButtonBack(self):
+        return self.wait_for(self.buttonBack)
+
+    def getButtonCancel(self):
+        return self.wait_for(self.buttonCancel)
+
     def getButtonSave(self):
         return self.wait_for(self.buttonSave)
 
@@ -110,6 +120,9 @@ class ProgrammeManagement(BaseComponents):
 
     def getLabelDataCollectingType(self):
         return self.wait_for(self.labelDataCollectingType)
+
+    def getHeaderTitle(self):
+        return self.wait_for(self.headerTitle)
 
     def getButtonNewProgram(self):
         return self.wait_for(self.buttonNewProgram)
