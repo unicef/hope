@@ -71,6 +71,22 @@ class TestGrievanceQuery(APITestCase):
         cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
         cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
 
+        # update partner perms
+        cls.partner.permissions = {
+            str(cls.business_area.pk): {
+                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        cls.partner_2.permissions = {
+            str(cls.business_area.pk): {
+                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        cls.partner.save()
+        cls.partner_2.save()
+
         household_1, _ = create_household({"size": 1})
         household_2, _ = create_household({"size": 1})
 
