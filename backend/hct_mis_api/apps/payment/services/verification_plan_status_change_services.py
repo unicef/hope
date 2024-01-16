@@ -9,7 +9,12 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
-from hct_mis_api.apps.payment.models import PaymentVerification, PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import (
+    Payment,
+    PaymentRecord,
+    PaymentVerification,
+    PaymentVerificationPlan,
+)
 
 
 class VerificationPlanStatusChangeServices:
@@ -151,10 +156,11 @@ class VerificationPlanStatusChangeServices:
             grievance_ticket_list.append(grievance_ticket)
             # program taken from verification.payment_obj.target_population if payment_obj is PaymentRecord instance;
             # and from verification.payment_obj.parent.target_population if payment_obj is Payment instance
-            program = (
-                getattr(verification.payment_obj, "program", None)
-                or verification.payment_obj.parent.program
-            )
+            if isinstance(verification.payment_obj, PaymentRecord):
+                program = verification.payment_obj.parent.program
+            elif isinstance(verification.payment_obj, Payment):
+                program = verification.payment_obj.program
+
             tickets_programs.append(
                 GrievanceTicketProgramThrough(grievanceticket=grievance_ticket, program_id=program.id)
             )
