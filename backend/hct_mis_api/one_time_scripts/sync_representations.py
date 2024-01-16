@@ -116,7 +116,6 @@ def update_representation_regular_fields(
     fields_to_update: List[str], original: models.Model, representation: models.Model
 ) -> None:
     for field in fields_to_update:
-        logger.info(f"Updating field {field} for {representation}")
         original_field = getattr(original, field)
         if isinstance(original_field, ImageFieldFile) and original_field and original_field.name:
             try:
@@ -912,8 +911,15 @@ def sync_removed_objects(business_area: BusinessArea, model: Any) -> None:
 
     related_objects_to_remove = None
 
-    if model in ONE_TO_ONE_GREVIANCE_MODELS + [FeedbackMessage, TicketNote]:
-        return  # CASCADE
+    if model in ONE_TO_ONE_GREVIANCE_MODELS + [
+        FeedbackMessage,
+        TicketNote,
+        GrievanceTicket,
+        GrievanceDocument,
+        Message,
+        Feedback,
+    ]:
+        return  # no soft delete
 
     elif model == HouseholdSelection:
         return  # handled in removed Household
@@ -933,50 +939,6 @@ def sync_removed_objects(business_area: BusinessArea, model: Any) -> None:
             is_original=False,
         )
         representations_of_removed_objects = model.original_and_repr_objects.filter(q, **filter_kwargs)
-
-    elif model in [Message, Feedback]:
-        q = Q(copied_from__isnull=True)
-        filter_kwargs = dict(
-            business_area=business_area,
-            is_original=False,
-        )
-        representations_of_removed_objects = model.original_and_repr_objects.filter(q, **filter_kwargs)
-
-    elif model == GrievanceTicket:
-        filter_kwargs = dict(
-            copied_from__isnull=True,
-            business_area=business_area,
-            is_original=False,
-        )
-        representations_of_removed_objects = model.default_for_migrations_fix.filter(**filter_kwargs)
-        related_objects_to_remove_ids = representations_of_removed_objects.values_list(
-            "support_documents__id", flat=True
-        )
-        related_objects_to_remove = GrievanceDocument.objects.filter(id__in=related_objects_to_remove_ids)
-
-    elif model == GrievanceDocument:
-        original_grievance_tickets_with_documents = GrievanceTicket.default_for_migrations_fix.filter(
-            business_area=business_area,
-            copied_to__isnull=False,
-            is_original=True,
-            is_migration_handled=True,
-            support_documents__isnull=False,
-        ).distinct()
-
-        orphan_documents_representation_ids = []
-        for original_grievance_ticket in original_grievance_tickets_with_documents:
-            original_documents = list(original_grievance_ticket.support_documents.all())
-            representations = original_grievance_ticket.copied_to(manager="default_for_migrations_fix").all()
-            for representation in representations:
-                if representation.support_documents.count() != len(original_documents):
-                    # delete the orphan representations by created_at
-                    orphan_documents = representation.support_documents.exclude(
-                        created_at__in=[d.created_at for d in original_documents]
-                    )
-                    if orphan_documents.exists():
-                        orphan_documents_representation_ids.extend(list(orphan_documents.values_list("id", flat=True)))
-
-        representations_of_removed_objects = model.objects.filter(id__in=orphan_documents_representation_ids)
 
     else:
         q = Q(copied_from__isnull=True) | Q(copied_from__is_removed=True)
@@ -1020,7 +982,6 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
     elif model == Individual:
         filter_kwargs = dict(
             business_area=business_area,
-            copied_to__isnull=True,
             is_original=True,
             is_migration_handled=False,
         )
@@ -1030,7 +991,6 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
             household__business_area=business_area,
             is_original=True,
             is_migration_handled=False,
-            copied_to__isnull=True,
         )
 
     elif model in [BankAccountInfo, Document, IndividualIdentity]:
@@ -1038,7 +998,6 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
             individual__business_area=business_area,
             individual__is_original=True,
             individual__is_migration_handled=True,
-            copied_to__isnull=True,
             is_original=True,
         )
 
@@ -1079,11 +1038,20 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
 
     new_objects = getattr(model, originals_manager).filter(q, **filter_kwargs).order_by("id")
 
-    if business_area.name == "Afghanistan":
+    if business_area.name == "Afghanistan" and model in [
+        Household,
+        Individual,
+        IndividualRoleInHousehold,
+        BankAccountInfo,
+        Document,
+        IndividualIdentity,
+    ]:
         hhs_to_ignore = get_ignored_hhs()
-        inds_to_ignore = Individual.objects.filter(
-            Q(household__in=hhs_to_ignore) | Q(households_and_roles__household__in=hhs_to_ignore)
-        ).values_list("id", flat=True)
+        inds_to_ignore = list(
+            Individual.objects.filter(
+                Q(household__in=hhs_to_ignore) | Q(households_and_roles__household__in=hhs_to_ignore)
+            ).values_list("id", flat=True)
+        )
 
         logger.info(f"Households to ignore count: {len(hhs_to_ignore)}")
         logger.info(f"Individuals to ignore count: {len(inds_to_ignore)}")
