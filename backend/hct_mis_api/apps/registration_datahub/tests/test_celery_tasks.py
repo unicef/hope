@@ -28,11 +28,7 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.celery_tasks import (
-    automate_rdi_creation_task,
-    process_flex_records_task,
-    remove_old_rdi_links_task,
-)
+from hct_mis_api.apps.registration_datahub.celery_tasks import remove_old_rdi_links_task
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedBankAccountInfoFactory,
     ImportedDocumentFactory,
@@ -47,25 +43,29 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedHousehold,
     ImportedIndividual,
-    Record,
 )
-from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
-    BaseRegistrationService,
-)
-from hct_mis_api.apps.registration_datahub.services.flex_registration_service import (
-    create_task_for_processing_records,
-)
-from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
-    SriLankaRegistrationService,
-)
-from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
-    UkraineBaseRegistrationService,
-    UkraineRegistrationService,
+from hct_mis_api.apps.registration_datahub.utils import get_record_model
+from hct_mis_api.aurora.celery_tasks import (
+    automate_rdi_creation_task,
+    process_flex_records_task,
 )
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
+)
+from hct_mis_api.aurora.services.base_flex_registration_service import (
+    BaseRegistrationService,
+)
+from hct_mis_api.aurora.services.flex_registration_service import (
+    create_task_for_processing_records,
+)
+from hct_mis_api.aurora.services.sri_lanka_flex_registration_service import (
+    SriLankaRegistrationService,
+)
+from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
+    UkraineBaseRegistrationService,
+    UkraineRegistrationService,
 )
 
 SRI_LANKA_FIELDS: Dict = {
@@ -211,7 +211,7 @@ UKRAINE_NEW_FORM_FILES: Dict = {
 }
 
 
-def create_record(fields: Dict, registration: int, status: str, files: Optional[Dict] = None) -> Record:
+def create_record(fields: Dict, registration: int, status: str, files: Optional[Dict] = None) -> Any:  # Record
     # based on backend/hct_mis_api/apps/registration_datahub/tests/test_extract_records.py
     content = Path(f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/image.jpeg").read_bytes()
 
@@ -224,7 +224,7 @@ def create_record(fields: Dict, registration: int, status: str, files: Optional[
             }
         ],
     }
-
+    Record = get_record_model()
     return Record.objects.create(
         registration=registration,
         status=status,
@@ -303,7 +303,7 @@ def run_automate_rdi_creation_task(*args: Any, **kwargs: Any) -> Any:
 
 
 @patch(
-    "hct_mis_api.apps.registration_datahub.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
+    "hct_mis_api.aurora.services.base_flex_registration_service.BaseRegistrationService.validate_data_collection_type"
 )
 class TestAutomatingRDICreationTask(TestCase):
     databases = {
@@ -330,6 +330,7 @@ class TestAutomatingRDICreationTask(TestCase):
     def test_not_running_with_record_status_not_to_import(self, mock_validate_data_collection_type: Any) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
+        Record = get_record_model()
         record = create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_ERROR)
 
         page_size = 1
@@ -346,7 +347,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
         amount_of_records = 10
         page_size = 3
-
+        Record = get_record_model()
         for _ in range(amount_of_records):
             create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
 
@@ -372,7 +373,7 @@ class TestAutomatingRDICreationTask(TestCase):
 
         amount_of_records = 10
         page_size = 3
-
+        Record = get_record_model()
         for _ in range(amount_of_records):
             create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
 
@@ -393,6 +394,7 @@ class TestAutomatingRDICreationTask(TestCase):
             assert merge_task_mock.called
 
     def test_successful_run_and_fix_task_id(self, mock_validate_data_collection_type: Any) -> None:
+        Record = get_record_model()
         create_ukraine_business_area()
         create_imported_document_types()
 
@@ -428,6 +430,7 @@ class TestAutomatingRDICreationTask(TestCase):
         Czech Republic - 18, 19 -> NotImplementedError for now
 
         """
+        Record = get_record_model()
         create_ukraine_business_area()
         create_imported_document_types()
         create_czech_republic_business_area()
@@ -500,6 +503,7 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[1][1] == page_size
 
     def test_atomic_rollback_if_record_invalid(self, mock_validate_data_collection_type: Any) -> None:
+        Record = get_record_model()
         for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
             ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
@@ -532,6 +536,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ImportedHousehold.objects.count() == 0
 
     def test_ukraine_new_registration_form(self, mock_validate_data_collection_type: Any) -> None:
+        Record = get_record_model()
         for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
             ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()

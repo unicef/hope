@@ -74,10 +74,10 @@ services:
     <<: *django_envs
     build:
       context: ../backend
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     volumes:
       - backend-data:/data
-    command: "cy"
+    command: cy
     depends_on:
       - db
       - redis
@@ -111,7 +111,7 @@ services:
     <<: *django_envs
     build:
       context: ../backend
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     volumes:
       - backend-data:/data
     restart: unless-stopped

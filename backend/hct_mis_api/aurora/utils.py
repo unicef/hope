@@ -11,7 +11,7 @@ from constance import config
 from coreapi import codecs
 from coreapi.exceptions import NoCodecAvailable
 
-from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.models import Organization, Project, Registration
 
 logger = logging.getLogger(__name__)
@@ -79,6 +79,7 @@ def get_metadata(auth_token: str) -> Dict:
 
 
 def fetch_records(auth_token: str, overwrite: bool = False, **filters: Any) -> Dict:
+    Record = get_record_model()
     decoders = [codecs.JSONCodec()]
     auth = coreapi.auth.TokenAuthentication(scheme="Token", token=auth_token)
 

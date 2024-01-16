@@ -329,6 +329,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                                     "type": "BANK_TRANSFER",
                                     "bankName": "privatbank",
                                     "bankAccountNumber": 2356789789789789,
+                                    "accountHolderName": "Holder Name Updated",
+                                    "bankBranchName": "Branch Name Updated",
                                 },
                             ],
                         }
@@ -362,6 +364,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                         "type": "BANK_TRANSFER",
                         "bank_name": "privatbank",
                         "bank_account_number": "2356789789789789",
+                        "account_holder_name": "Holder Name Updated",
+                        "bank_branch_name": "Branch Name Updated",
                     },
                 ],
                 "identities": [{"partner": "UNHCR", "country": "POL", "number": "2222"}],

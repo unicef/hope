@@ -85,12 +85,18 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
         paymentRecord.status === PaymentRecordStatus.ForceFailed
           ? RevertForceFailedButton
           : ForceFailedButton;
-      buttons.push(<ButtonComponent paymentRecordId={paymentRecord.id} />);
+      buttons.push(
+        <ButtonComponent
+          key={`${paymentRecord.id}-failed`}
+          paymentRecordId={paymentRecord.id}
+        />,
+      );
     }
 
     if (!businessAreaData.businessArea.isPaymentPlanApplicable) {
       buttons.push(
         <Button
+          key={`${paymentRecord.id}-cashAssist`}
           variant='contained'
           color='primary'
           component='a'

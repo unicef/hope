@@ -47398,6 +47398,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
+                        'labelEn': 'Displaced  |   Returnee',
+                        'labels': [
+                            {
+                                'label': 'Displaced  |   Returnee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RETURNEE'
+                    },
+                    {
                         'labelEn': 'Displaced  |  Internally Displaced People',
                         'labels': [
                             {
@@ -50094,7 +50104,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'size',
-                'required': True,
+                'required': False,
                 'type': 'INTEGER'
             },
             {

@@ -37,7 +37,7 @@ export function XlsxErrors({
       </ErrorsContainer>
       <Collapse in={expanded} timeout='auto' unmountOnExit>
         {errors.map((item) => (
-          <Error>
+          <Error key={item.message}>
             <strong>Row: {item.rowNumber}</strong> {item.message}
           </Error>
         ))}

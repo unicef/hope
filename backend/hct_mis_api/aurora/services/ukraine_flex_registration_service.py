@@ -31,10 +31,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    Record,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
+from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
 
@@ -91,7 +90,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     }
 
     def create_household_for_rdi_household(
-        self, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, record: Any, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
         individuals: List[ImportedIndividual] = []
         documents: List[ImportedDocument] = []
@@ -172,7 +171,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 raise ValidationError("There should be only two collectors!")
 
     def _prepare_household_data(
-        self, household_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, household_dict: Dict, record: Any, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, self.HOUSEHOLD_MAPPING_DICT),
@@ -288,6 +287,8 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             "bank_account_number": str(individual_dict.get("bank_account", "")).replace(" ", ""),
             "bank_name": bank_name,
             "debit_card_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
+            "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
+            "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
             "individual": individual,
         }
         return bank_account_info_data

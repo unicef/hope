@@ -429,6 +429,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "bank_name_i_c": self._handle_bank_account_fields,
                 "bank_account_number_i_c": self._handle_bank_account_fields,
                 "debit_card_number_i_c": self._handle_bank_account_fields,
+                "account_holder_name_i_c": self._handle_bank_account_fields,
+                "bank_branch_name_i_c": self._handle_bank_account_fields,
                 "first_registration_date_i_c": self._handle_datetime,
                 "unhcr_id_no_i_c": self._handle_identity_fields,
                 "unhcr_id_photo_i_c": self._handle_identity_photo,
@@ -494,12 +496,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     try:
                         header = header_cell.value
                         combined_fields = self.COMBINED_FIELDS
-                        current_field = combined_fields.get(header)
+                        current_field = combined_fields.get(header, {})
 
-                        if not current_field:
+                        if not current_field and header not in complex_fields[sheet_title]:
                             continue
 
-                        is_not_image = current_field["type"] != "IMAGE"
+                        is_not_image = current_field.get("type") != "IMAGE"
 
                         cell_value = cell.value
                         if isinstance(cell_value, str):

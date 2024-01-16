@@ -91,7 +91,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField()
-    size = models.PositiveIntegerField()
+    size = models.PositiveIntegerField(blank=True, null=True)
     address = models.CharField(max_length=1024, blank=True, default=BLANK)
     country = CountryField()
     zip_code = models.CharField(max_length=12, blank=True, null=True)
@@ -580,6 +580,8 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
     bank_name = models.CharField(max_length=255)
     bank_account_number = models.CharField(max_length=64)
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
+    bank_branch_name = models.CharField(max_length=255, blank=True, default="")
+    account_holder_name = models.CharField(max_length=255, blank=True, default="")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         if self.bank_account_number:

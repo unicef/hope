@@ -249,6 +249,8 @@ type BankAccountInfoNode implements Node {
   individual: IndividualNode!
   bankName: String!
   bankAccountNumber: String!
+  bankBranchName: String!
+  accountHolderName: String!
   isOriginal: Boolean!
   isMigrationHandled: Boolean!
   copiedFrom: BankAccountInfoNode
@@ -272,6 +274,8 @@ input BankTransferObjectType {
   type: String!
   bankName: String!
   bankAccountNumber: String!
+  bankBranchName: String
+  accountHolderName: String!
 }
 
 scalar BigInt
@@ -1042,6 +1046,8 @@ input EditBankTransferObjectType {
   type: String!
   bankName: String!
   bankAccountNumber: String!
+  bankBranchName: String
+  accountHolderName: String!
 }
 
 input EditIndividualDocumentObjectType {
@@ -1614,6 +1620,7 @@ type HouseholdNode implements Node {
   adminAreaTitle: String
   status: String
   programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
+  deliveredQuantities: [DeliveredQuantityNode]
   activeIndividualsCount: Int
 }
 
@@ -3624,7 +3631,7 @@ type Query {
   dataCollectingType(id: ID!): DataCollectingTypeNode
   dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
   program(id: ID!): ProgramNode
-  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
+  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   cashPlan(id: ID!): CashPlanNode
@@ -3634,7 +3641,8 @@ type Query {
   programSectorChoices: [ChoiceObject]
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
-  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
+  dataCollectingTypeChoices: [ChoiceObject]
+  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, orderBy: String): ProgramNodeConnection
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection

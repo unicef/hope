@@ -29,10 +29,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    Record,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
+from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
 
@@ -102,7 +101,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
     def _prepare_household_data(
         self,
-        record: Record,
+        record: Any,
         household_address: Dict,
         consent_data: Dict,
         needs_assessment: Dict,
@@ -215,6 +214,8 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
         return {
             "bank_account_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
+            "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
+            "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
             "individual": imported_individual,
         }
 
@@ -276,7 +277,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
             raise ValidationError("Household should has at least one Head of Household")
 
     def create_household_for_rdi_household(
-        self, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, record: Any, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
         record_data_dict = record.get_data()
         if isinstance(record_data_dict, str):

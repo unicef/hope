@@ -24,13 +24,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    Record,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.services.base_flex_registration_service import (
+from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
+from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
-from hct_mis_api.apps.utils.age_at_registration import calculate_age_at_registration
 
 
 class SriLankaRegistrationService(BaseRegistrationService):
@@ -61,7 +60,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     ]
 
     def _prepare_household_data(
-        self, localization_dict: Dict, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, localization_dict: Dict, record: Any, registration_data_import: RegistrationDataImportDatahub
     ) -> Dict:
         household_data = {
             **build_arg_dict_from_dict(localization_dict, SriLankaRegistrationService.HOUSEHOLD_MAPPING_DICT),
@@ -177,7 +176,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
 
     def create_household_for_rdi_household(
-        self, record: Record, registration_data_import: RegistrationDataImportDatahub
+        self, record: Any, registration_data_import: RegistrationDataImportDatahub
     ) -> None:
         record_data_dict = record.get_data()
         localization_dict = record_data_dict.get("localization-info", [])[0]
@@ -208,7 +207,8 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
         self._prepare_national_id(head_of_household_dict, head_of_household)
 
-        bank_name = f"{collector_dict.get('bank_description')} [{collector_dict.get('bank_name')} - {collector_dict.get('branch_or_branch_code')}]"  # TODO: check if this is correct
+        # TODO: check if this is correct
+        bank_name = f"{collector_dict.get('bank_description')} [{collector_dict.get('bank_name')} - {collector_dict.get('branch_or_branch_code')}]"
         bank_account_number = collector_dict.get("confirm_bank_account_number")
         if should_use_hoh_as_collector:
             primary_collector = head_of_household
@@ -224,7 +224,11 @@ class SriLankaRegistrationService(BaseRegistrationService):
         )
         if bank_name and bank_account_number:
             ImportedBankAccountInfo.objects.create(
-                bank_name=bank_name, bank_account_number=bank_account_number, individual=primary_collector
+                bank_name=bank_name,
+                bank_account_number=bank_account_number,
+                account_holder_name=collector_dict.get("account_holder_name_i_c", ""),
+                bank_branch_name=collector_dict.get("bank_branch_name_i_c", ""),
+                individual=primary_collector,
             )
         individuals_to_create = []
         for individual_data_dict in individuals_list:
