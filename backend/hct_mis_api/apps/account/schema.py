@@ -30,7 +30,8 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.household.models import Household, Individual
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +178,11 @@ class Query(graphene.ObjectType):
     user_roles_choices = graphene.List(RoleChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
+    partner_for_grievance_choices = graphene.Field(
+        graphene.List(ChoiceObject),
+        household_id=graphene.Argument(graphene.ID),
+        individual_id=graphene.Argument(graphene.ID),
+    )
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
 
     def resolve_all_users(self, info: Any, **kwargs: Any) -> "QuerySet[User]":
@@ -197,8 +203,22 @@ class Query(graphene.ObjectType):
         return to_choice_object(USER_STATUS_CHOICES)
 
     def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
-        business_area_id = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area")).id
-        return to_choice_object(Partner.get_partners_for_ba_as_choices(business_area_id))
+        return to_choice_object(Partner.get_partners_as_choices())
+
+    def resolve_partner_for_grievance_choices(
+        self, info: Any, household_id: Optional[str] = None, individual_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        business_area_id = str(BusinessArea.objects.get(slug=info.context.headers.get("Business-Area")).id)
+        encoded_program_id = info.context.headers.get("Program")
+        if encoded_program_id and encoded_program_id != "all":
+            program_id = decode_id_string(encoded_program_id)
+        elif household_id:
+            program_id = str(Household.objects.get(id=decode_id_string(household_id)).program_id)
+        elif individual_id:
+            program_id = str(Individual.objects.get(id=decode_id_string(individual_id)).program_id)
+        else:
+            program_id = None
+        return to_choice_object(Partner.get_partners_for_program_as_choices(business_area_id, program_id))
 
     def resolve_has_available_users_to_export(self, info: Any, business_area_slug: str) -> bool:
         return (
