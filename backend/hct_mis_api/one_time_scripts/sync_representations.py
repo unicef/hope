@@ -982,6 +982,7 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
     elif model == Individual:
         filter_kwargs = dict(
             business_area=business_area,
+            copied_to__isnull=True,
             is_original=True,
             is_migration_handled=False,
         )
@@ -991,6 +992,7 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
             household__business_area=business_area,
             is_original=True,
             is_migration_handled=False,
+            copied_to__isnull=True,
         )
 
     elif model in [BankAccountInfo, Document, IndividualIdentity]:
@@ -999,6 +1001,7 @@ def sync_new_objects(business_area: BusinessArea, model: Any) -> None:
             individual__is_original=True,
             individual__is_migration_handled=True,
             is_original=True,
+            copied_to__isnull=True,
         )
 
     elif model == FeedbackMessage:
