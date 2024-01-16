@@ -1,8 +1,8 @@
-import pytest
 from time import sleep
-from selenium.webdriver.common.by import By
 
+import pytest
 from helpers.hope import HOPE
+from selenium.webdriver.common.by import By
 
 
 class TestAdminPanel(HOPE):
