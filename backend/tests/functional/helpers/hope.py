@@ -4,8 +4,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from .live_server import CustomLiveServer
 
-class HOPE(CustomLiveServer):
 
+class HOPE(CustomLiveServer):
     def get(self, element_type=By.ID, locator=""):
         return self.browser.find_element(element_type, locator)
 
