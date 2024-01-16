@@ -1,5 +1,5 @@
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
-from hct_mis_api.apps.account.models import Role
+from hct_mis_api.apps.account.models import Partner, Role
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -9,7 +9,8 @@ from hct_mis_api.apps.program.models import Program
 class UserRolesTest(APITestCase):
     USER_CHOICE_DATA_QUERY = """
     query userChoiceData {
-      userPartnerChoices {
+      userPartnerChoices
+      {
         name
       }
     }
@@ -19,8 +20,11 @@ class UserRolesTest(APITestCase):
     def setUpTestData(cls) -> None:
         cls.business_area = create_afghanistan()
 
+        Partner.objects.get_or_create(name="UNHCR")
+        Partner.objects.get_or_create(name="WFP")
+
         # UNICEF partner
-        partner_unicef = PartnerFactory(name="UNICEF")
+        partner_unicef, _ = Partner.objects.get_or_create(name="UNICEF")
         cls.user = UserFactory(partner=partner_unicef, username="unicef_user")
 
         # partner with BA access
