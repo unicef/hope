@@ -110,12 +110,14 @@ class TestCrossAreaFilterAvailable(APITestCase):
         cls.partner_without_area_restrictions.permissions = {
             str(cls.business_area.id): {"programs": {str(cls.program.id): []}}
         }
+        cls.partner_without_area_restrictions.save()
         cls.partner_with_area_restrictions = PartnerFactory(name="Partner with area restrictions")
         cls.partner_with_area_restrictions.permissions = {
             str(cls.business_area.id): {
                 "programs": {str(cls.program.id): [str(cls.admin_area1.id), str(cls.admin_area2.id)]}
             }
         }
+        cls.partner_with_area_restrictions.save()
 
     @parameterized.expand(
         [
