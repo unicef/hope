@@ -153,7 +153,7 @@ class VerificationPlanStatusChangeServices:
             # and from verification.payment_obj.parent.target_population if payment_obj is Payment instance
             program = (
                 getattr(verification.payment_obj, "program", None)
-                or verification.payment_obj.parent.target_population.program
+                or verification.payment_obj.parent.program
             )
             tickets_programs.append(
                 GrievanceTicketProgramThrough(grievanceticket=grievance_ticket, program_id=program.id)
