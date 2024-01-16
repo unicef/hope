@@ -1,15 +1,15 @@
 import pytest
-import random
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_details.programme_details import ProgrammeDetails
 
+
 @pytest.fixture(scope='class')
 def browser():
     return webdriver.Firefox()
+
 
 @pytest.fixture(scope="class", autouse=True)
 def login(request, browser):
@@ -23,10 +23,12 @@ def login(request, browser):
     yield browser
     browser.close()
 
-@pytest.fixture
-def pageProgrammeManagement(request, browser):
-    yield ProgrammeManagement(browser)
 
 @pytest.fixture
-def pageProgrammeDetails(request, browser):
+def pageProgrammeManagement(request, browser) -> ProgrammeManagement:
+    yield ProgrammeManagement(browser)
+
+
+@pytest.fixture
+def pageProgrammeDetails(request, browser) -> ProgrammeDetails:
     yield ProgrammeDetails(browser)

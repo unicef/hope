@@ -1,7 +1,8 @@
 from page_object.base_components import BaseComponents
+from selenium.webdriver.remote.webelement import WebElement
+
 
 class ProgrammeDetails(BaseComponents):
-
     headerTitle = 'h5[data-cy="page-header-title"]'
     programStatus = 'div[data-cy="status-container"]'
     labelStartDate = 'div[data-cy="label-START DATE"]'
@@ -16,38 +17,38 @@ class ProgrammeDetails(BaseComponents):
     labelAreaAccess = 'div[data-cy="label-Area Access"]'
     labelPartnerName = 'h6[data-cy="label-partner-name"]'
 
-    def getLabelPartnerName(self):
+    def getLabelPartnerName(self) -> WebElement:
         return self.wait_for(self.labelPartnerName)
 
-    def getLabelAreaAccess(self):
+    def getLabelAreaAccess(self) -> WebElement:
         return self.wait_for(self.labelAreaAccess)
 
-    def getProgramStatus(self):
+    def getProgramStatus(self) -> WebElement:
         return self.wait_for(self.programStatus)
 
-    def getHeaderTitle(self):
+    def getHeaderTitle(self) -> WebElement:
         return self.wait_for(self.headerTitle)
 
-    def getLabelStartDate(self):
+    def getLabelStartDate(self) -> WebElement:
         return self.wait_for(self.labelStartDate)
 
-    def getLabelEndDate(self):
+    def getLabelEndDate(self) -> WebElement:
         return self.wait_for(self.labelEndDate)
 
-    def getLabelSelector(self):
+    def getLabelSelector(self) -> WebElement:
         return self.wait_for(self.labelSelector)
 
-    def getLabelDataCollectingType(self):
+    def getLabelDataCollectingType(self) -> WebElement:
         return self.wait_for(self.labelDataCollectingType)
 
-    def getLabelFreqOfPayment(self):
+    def getLabelFreqOfPayment(self) -> WebElement:
         return self.wait_for(self.labelFreqOfPayment)
 
-    def getLabelAdministrativeAreas(self):
+    def getLabelAdministrativeAreas(self) -> WebElement:
         return self.wait_for(self.labelAdministrativeAreas)
 
-    def getLabelCashPlus(self):
+    def getLabelCashPlus(self) -> WebElement:
         return self.wait_for(self.labelCashPlus)
 
-    def getLabelTotalNumberOfHouseholds(self):
+    def getLabelTotalNumberOfHouseholds(self) -> WebElement:
         return self.wait_for(self.labelTotalNumberOfHouseholds)
