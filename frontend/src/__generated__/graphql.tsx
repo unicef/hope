@@ -12209,8 +12209,8 @@ export type GrievancesChoiceDataQuery = (
 );
 
 export type PartnerForGrievanceChoicesQueryVariables = {
-  householdId: Scalars['ID'],
-  individualId: Scalars['ID']
+  householdId?: Maybe<Scalars['ID']>,
+  individualId?: Maybe<Scalars['ID']>
 };
 
 
@@ -22622,14 +22622,14 @@ export type GrievancesChoiceDataQueryHookResult = ReturnType<typeof useGrievance
 export type GrievancesChoiceDataLazyQueryHookResult = ReturnType<typeof useGrievancesChoiceDataLazyQuery>;
 export type GrievancesChoiceDataQueryResult = ApolloReactCommon.QueryResult<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>;
 export const PartnerForGrievanceChoicesDocument = gql`
-    query partnerForGrievanceChoices($householdId: ID!, $individualId: ID!) {
+    query partnerForGrievanceChoices($householdId: ID, $individualId: ID) {
   partnerForGrievanceChoices(householdId: $householdId, individualId: $individualId) {
     name
     value
   }
 }
     `;
-export type PartnerForGrievanceChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>, 'query'> & ({ variables: PartnerForGrievanceChoicesQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type PartnerForGrievanceChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>, 'query'>;
 
     export const PartnerForGrievanceChoicesComponent = (props: PartnerForGrievanceChoicesComponentProps) => (
       <ApolloReactComponents.Query<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables> query={PartnerForGrievanceChoicesDocument} {...props} />
