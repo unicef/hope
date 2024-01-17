@@ -1,0 +1,22 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% load hope i18n admin_urls static admin_modify %}
+{% block action-content %}
+<form method="post">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+    {% if form.non_field_errors %}
+        <div class="warning-message">
+            <input type="hidden" name="action" value={{ action }} />
+            <input type="submit" name="acknowledge" value="Acknowledge and Proceed" class="btn btn-default"/>
+        </div>
+
+    {% else %}
+        <input type="hidden" name="action" value={{ action }} />
+        <input type="submit" name="apply" value="Mass enrol to another program" class="btn btn-default"/>
+    {% endif %}
+
+
+
+</form>
+{% endblock action-content %}

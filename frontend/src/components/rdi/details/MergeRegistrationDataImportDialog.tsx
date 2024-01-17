@@ -17,6 +17,7 @@ import {
   useMergeRdiMutation,
 } from '../../../__generated__/graphql';
 import { LoadingButton } from '../../core/LoadingButton';
+import { useProgramContext } from '../../../programContext';
 
 interface MergeRegistrationDataImportDialogProps {
   registration: RegistrationDetailedFragment;
@@ -28,6 +29,8 @@ export function MergeRegistrationDataImportDialog({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
+
   const [mutate, { loading }] = useMergeRdiMutation({
     variables: { id: registration.id },
   });
@@ -46,6 +49,7 @@ export function MergeRegistrationDataImportDialog({
         color='primary'
         variant='contained'
         onClick={() => setOpen(true)}
+        disabled={!isActiveProgram}
       >
         {t('Merge')}
       </Button>

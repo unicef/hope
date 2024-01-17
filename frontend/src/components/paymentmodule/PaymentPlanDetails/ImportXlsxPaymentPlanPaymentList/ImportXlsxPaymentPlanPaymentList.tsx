@@ -22,6 +22,8 @@ import {
   useImportXlsxPpListMutation,
 } from '../../../../__generated__/graphql';
 import { DropzoneField } from '../../../core/DropzoneField';
+import { useProgramContext } from '../../../../programContext';
+import { LoadingButton } from '../../../core/LoadingButton';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -40,7 +42,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
-
+  const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
   const [
@@ -87,7 +89,8 @@ export const ImportXlsxPaymentPlanPaymentList = ({
 
   const shouldDisableUpload =
     paymentPlan.status !== PaymentPlanStatus.Locked ||
-    !canUploadFile;
+    !canUploadFile ||
+    !isActiveProgram;
 
   return (
     <>
@@ -151,7 +154,8 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             >
               CANCEL
             </Button>
-            <Button
+            <LoadingButton
+              loading={fileLoading}
               disabled={!fileToImport}
               type='submit'
               color='primary'
@@ -160,7 +164,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
               data-cy='button-import-entitlement'
             >
               {t('IMPORT')}
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </DialogTitleWrapper>
       </Dialog>

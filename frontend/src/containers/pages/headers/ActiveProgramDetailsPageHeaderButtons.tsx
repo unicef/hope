@@ -2,22 +2,27 @@ import { Box, Button } from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import {
-  ProgramNode,
+  ProgramQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
-import { FinishProgram } from '../../dialogs/programs/FinishProgram';
-import { EditProgram } from '../../dialogs/programs/EditProgram';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
+import { EditProgramButtonLink } from '../../dialogs/programs/EditProgramButtonLink';
+import { FinishProgram } from '../../dialogs/programs/FinishProgram';
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
   canFinish: boolean;
   canEdit: boolean;
+  canDuplicate: boolean;
+  isPaymentPlanApplicable: boolean;
 }
 export const ActiveProgramDetailsPageHeaderButtons = ({
   program,
   canFinish,
   canEdit,
+  canDuplicate,
+  isPaymentPlanApplicable,
 }: ActiveProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
@@ -33,22 +38,29 @@ export const ActiveProgramDetailsPageHeaderButtons = ({
       )}
       {canEdit && (
         <Box m={2}>
-          <EditProgram program={program} />
+          <EditProgramButtonLink program={program} />
         </Box>
       )}
-      <Box m={2}>
-        <Button
-          variant='contained'
-          color='primary'
-          component='a'
-          disabled={!program.caHashId}
-          target='_blank'
-          href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_program&id=${program.caHashId}`}
-          startIcon={<OpenInNewRoundedIcon />}
-        >
-          Open in CashAssist
-        </Button>
-      </Box>
+      {!isPaymentPlanApplicable && (
+        <Box m={2}>
+          <Button
+            variant='contained'
+            color='primary'
+            component='a'
+            disabled={!program.caHashId}
+            target='_blank'
+            href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_program&id=${program.caHashId}`}
+            startIcon={<OpenInNewRoundedIcon />}
+          >
+            Open in CashAssist
+          </Button>
+        </Box>
+      )}
+      {canDuplicate && (
+        <Box m={2}>
+          <DuplicateProgramButtonLink program={program} />
+        </Box>
+      )}
     </Box>
   );
 };

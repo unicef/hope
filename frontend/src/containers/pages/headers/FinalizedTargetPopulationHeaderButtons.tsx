@@ -1,15 +1,15 @@
+import { Box, Button } from '@material-ui/core';
+import { FileCopy } from '@material-ui/icons';
+import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Box, Button } from '@material-ui/core';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import { FileCopy } from '@material-ui/icons';
 import {
   BusinessAreaDataQuery,
   TargetPopulationQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
-import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 
 const IconContainer = styled.span`
   button {

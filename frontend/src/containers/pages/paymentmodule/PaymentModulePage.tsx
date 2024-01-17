@@ -1,4 +1,3 @@
-import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,27 +5,30 @@ import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { TableWrapper } from '../../../components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
+import { useProgramContext } from '../../../programContext';
 
 const initialFilter = {
   search: '',
   dispersionStartDate: '',
   dispersionEndDate: '',
   status: [],
-  totalEntitledQuantityFrom: null,
-  totalEntitledQuantityTo: null,
-  isFollowUp: null,
+  totalEntitledQuantityFrom: '',
+  totalEntitledQuantityTo: '',
+  isFollowUp: '',
 };
 
 export const PaymentModulePage = (): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
+  const { isActiveProgram } = useProgramContext();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -36,6 +38,7 @@ export const PaymentModulePage = (): React.ReactElement => {
   );
 
   if (permissions === null) return null;
+
   if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
@@ -43,15 +46,17 @@ export const PaymentModulePage = (): React.ReactElement => {
     <>
       <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
-          <Button
+          <ButtonTooltip
             variant='contained'
             color='primary'
             component={Link}
-            to={`/${businessArea}/payment-module/new-plan`}
+            to={`/${baseUrl}/payment-module/new-plan`}
             data-cy='button-new-payment-plan'
+            title={t('Program has to be active to create new Payment Program')}
+            disabled={!isActiveProgram}
           >
             {t('NEW PAYMENT PLAN')}
-          </Button>
+          </ButtonTooltip>
         )}
       </PageHeader>
       <PaymentPlansFilters
@@ -64,7 +69,6 @@ export const PaymentModulePage = (): React.ReactElement => {
       <TableWrapper>
         <PaymentPlansTable
           filter={appliedFilter}
-          businessArea={businessArea}
           canViewDetails={hasPermissions(
             PERMISSIONS.PM_VIEW_DETAILS,
             permissions,

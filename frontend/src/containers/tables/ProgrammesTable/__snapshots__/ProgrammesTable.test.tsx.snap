@@ -177,23 +177,10 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                   scope="col"
                 >
                   <span
-                    aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    class="sc-gzVnrw dYSoUE"
                     data-cy="table-label"
-                    role="button"
-                    tabindex="0"
                   >
                     Num. of Households
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                      />
-                    </svg>
                   </span>
                 </th>
                 <th
@@ -227,6 +214,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
             >
               <tr
                 class="MuiTableRow-root sc-gZMcBi Qfbta MuiTableRow-hover"
+                data-cy="table-row-Notice hair fall college enough perhaps."
                 role="checkbox"
               >
                 <td
@@ -234,7 +222,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 >
                   <a
                     class="sc-htoDjs clPmKI"
-                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
+                    href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/details/UHJvZ3JhbU5vZGU6ZDM4YWI4MTQtOTQyNy00ZmJkLTg4ODctOGUyYzlkMzcxYjg2"
                   >
                     Notice hair fall college enough perhaps.
                   </a>

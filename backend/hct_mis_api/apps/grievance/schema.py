@@ -26,7 +26,7 @@ from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import TYPE_IMAGE, Scope
-from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import (
     ChoiceObject,
     ChoiceObjectInt,
@@ -38,6 +38,7 @@ from hct_mis_api.apps.core.utils import (
     chart_get_filtered_qs,
     chart_permission_decorator,
     encode_ids,
+    get_program_id_from_headers,
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
@@ -65,6 +66,9 @@ from hct_mis_api.apps.grievance.models import (
     TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
+)
+from hct_mis_api.apps.grievance.utils import (
+    filter_grievance_tickets_based_on_partner_areas_2,
 )
 from hct_mis_api.apps.household.models import DocumentType
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -109,7 +113,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     urgency = graphene.Int()
     total_days = graphene.String()
     partner = graphene.Field(PartnerType)
-    programme = graphene.Field(ProgramNode)
+    programs = graphene.List(ProgramNode)
     documentation = graphene.List(GrievanceDocumentNode)
 
     @classmethod
@@ -117,6 +121,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         super().check_node_permission(info, object_instance)
         business_area = object_instance.business_area
         user = info.context.user
+        # TODO: grievances should be cross program ??? remove program_id
+        program_id = get_program_id_from_headers(info.context.headers)
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
@@ -127,9 +133,41 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
             creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value
             owner_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value
 
-        check_creator = object_instance.created_by == user and user.has_permission(creator_perm, business_area)
-        check_assignee = object_instance.assigned_to == user and user.has_permission(owner_perm, business_area)
-        if user.has_permission(perm, business_area) or check_creator or check_assignee:
+        check_creator = object_instance.created_by == user and user.has_permission(
+            creator_perm, business_area, program_id
+        )
+        check_assignee = object_instance.assigned_to == user and user.has_permission(
+            owner_perm, business_area, program_id
+        )
+        partner = user.partner
+        has_partner_area_access = partner.is_unicef
+        if not partner.is_unicef:
+            if not object_instance.admin2:
+                # admin2 is empty
+                has_partner_area_access = True
+            else:
+                if not program_id:
+                    log_and_raise("Can't check permission for All Programmes")
+                else:
+                    partner_permission = partner.get_permissions()
+                    partner_areas_list: Optional[List] = partner_permission.areas_for(
+                        str(business_area.id), str(program_id)
+                    )
+                    if partner_areas_list is not None:
+                        # partner_areas_list is []
+                        if len(partner_areas_list) > 0:
+                            has_partner_area_access = str(object_instance.admin2.id) in partner_areas_list
+                        else:
+                            # has access to the whole BA
+                            has_partner_area_access = True
+                    else:
+                        # partner_areas_list is None
+                        # don't have access to BA
+                        has_partner_area_access = False
+
+        if (
+            user.has_permission(perm, business_area, program_id) or check_creator or check_assignee
+        ) and has_partner_area_access:
             return None
 
         log_and_raise(f"User is not active creator/assignee and does not have '{perm}' permission")
@@ -185,8 +223,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         return grievance_ticket.partner
 
     @staticmethod
-    def resolve_programme(grievance_ticket: GrievanceTicket, info: Any) -> Program:
-        return grievance_ticket.programme
+    def resolve_programs(grievance_ticket: GrievanceTicket, info: Any) -> Program:
+        return grievance_ticket.programs.all()
 
     @staticmethod
     def resolve_documentation(grievance_ticket: GrievanceTicket, info: Any) -> "QuerySet[GrievanceDocument]":
@@ -348,6 +386,21 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    @staticmethod
+    def resolve_household_data(parent: TicketHouseholdDataUpdateDetails, info: Any) -> Dict:
+        household_data = parent.household_data
+        if admin_area_title := household_data.get("admin_area_title"):
+            if value := admin_area_title.get("value"):
+                area = Area.objects.get(p_code=value)
+                admin_area_title["value"] = f"{area.name} - {area.p_code}"
+
+            if previous_value := admin_area_title.get("previous_value"):
+                area = Area.objects.get(p_code=previous_value)
+                admin_area_title["previous_value"] = f"{area.name} - {area.p_code}"
+
+            household_data["admin_area_title"] = admin_area_title
+        return household_data
+
 
 class TicketNeedsAdjudicationDetailsExtraDataNode(graphene.ObjectType):
     golden_records = graphene.List(DeduplicationResultNode)
@@ -464,6 +517,7 @@ class Query(graphene.ObjectType):
             hopeOneOfPermissionClass(*POPULATION_DETAILS),
         ),
     )
+    cross_area_filter_available = graphene.Boolean()
     existing_grievance_tickets = DjangoPermissionFilterFastConnectionField(
         GrievanceTicketNode,
         filterset_class=ExistingGrievanceTicketFilter,
@@ -499,6 +553,11 @@ class Query(graphene.ObjectType):
     grievance_ticket_search_types_choices = graphene.List(ChoiceObject)
 
     def resolve_all_grievance_ticket(self, info: Any, **kwargs: Any) -> QuerySet:
+        user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
+        business_area_slug = info.context.headers.get("Business-Area")
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+
         queryset = GrievanceTicket.objects.filter(ignored=False).select_related("admin2", "assigned_to", "created_by")
         to_prefetch = []
         for key, value in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
@@ -510,6 +569,18 @@ class Query(graphene.ObjectType):
 
         queryset = queryset.prefetch_related(*to_prefetch)
 
+        if not user.partner.is_unicef:  # Full access to all AdminAreas if is_unicef
+            queryset = filter_grievance_tickets_based_on_partner_areas_2(
+                queryset, user.partner, business_area_id, program_id
+            )
+
+        if program_id is None:
+            queryset = queryset | (
+                GrievanceTicket.objects.select_related("admin2", "assigned_to", "created_by")
+                .prefetch_related(*to_prefetch)
+                .filter(business_area_id=business_area_id, programs=None, created_by__partner=user.partner)
+            )
+
         return queryset.annotate(
             total=Case(
                 When(
@@ -520,6 +591,17 @@ class Query(graphene.ObjectType):
                 output_field=DateField(),
             )
         ).annotate(total_days=F("total__day"))
+
+    def resolve_cross_area_filter_available(self, info: Any, **kwargs: Any) -> bool:
+        user = info.context.user
+        business_area = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area"))
+        program_id = get_program_id_from_headers(info.context.headers)
+
+        perm = Permissions.GRIEVANCES_CROSS_AREA_FILTER.value
+
+        return user.has_permission(perm, business_area, program_id) and user.partner.has_complete_access_in_program(
+            program_id, str(business_area.id)
+        )
 
     def resolve_grievance_ticket_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(GrievanceTicket.STATUS_CHOICES)

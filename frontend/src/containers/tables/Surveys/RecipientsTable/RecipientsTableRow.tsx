@@ -7,13 +7,13 @@ import { StatusBox } from '../../../../components/core/StatusBox';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { choicesToDict, householdStatusToColor } from '../../../../utils/utils';
 import {
   HouseholdNode,
   IndividualNode,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface RecipientsTableRowProps {
   household: HouseholdNode;
@@ -27,7 +27,7 @@ export function RecipientsTableRow({
   canViewDetails,
 }: RecipientsTableRowProps): React.ReactElement {
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -35,7 +35,7 @@ export function RecipientsTableRow({
     variables: { businessArea },
     fetchPolicy: 'cache-first',
   });
-  const householdDetailsPath = `/${businessArea}/population/household/${household.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
   const handleClick = (): void => {
     history.push(householdDetailsPath);
   };

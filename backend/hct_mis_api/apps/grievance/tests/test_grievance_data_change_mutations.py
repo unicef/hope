@@ -36,6 +36,7 @@ from hct_mis_api.apps.household.models import (
     DocumentType,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCase):
@@ -101,10 +102,18 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
             business_area=BusinessArea.objects.first(),
         )
 
+        cls.program = ProgramFactory(
+            status=Program.ACTIVE,
+            business_area=BusinessArea.objects.first(),
+        )
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
+
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country=country)
         household_two = HouseholdFactory.build(id="ac540aa1-5c7a-47d0-a013-32054e2af454")
+        household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
+        household_two.household_collection.save()
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.save()
         household_one.programs.add(program_one)
@@ -261,6 +270,8 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
                                         "type": "BANK_TRANSFER",
                                         "bankName": "privatbank",
                                         "bankAccountNumber": 2356789789789789,
+                                        "accountHolderName": "Holder Name 132",
+                                        "bankBranchName": "newName 123",
                                     },
                                 ],
                             },
@@ -271,7 +282,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -352,7 +363,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -387,6 +398,8 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
                                         "type": "BANK_TRANSFER",
                                         "bankName": "privatbank",
                                         "bankAccountNumber": 2356789789789789,
+                                        "accountHolderName": "Holder Name 333",
+                                        "bankBranchName": "New Branch Name 333",
                                     },
                                 ],
                             },
@@ -397,7 +410,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -418,6 +431,8 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
             individual=self.individuals[0],
             bank_name="privatbank",
             bank_account_number=2356789789789789,
+            account_holder_name="Old Holder Name",
+            bank_branch_name="BranchSantander",
         )
 
         variables = {
@@ -440,6 +455,8 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
                                         "type": "BANK_TRANSFER",
                                         "bankName": "privatbank",
                                         "bankAccountNumber": 1111222233334444,
+                                        "accountHolderName": "Holder Name NEW 2",
+                                        "bankBranchName": "New Name NEW 2",
                                     },
                                 ],
                             },
@@ -450,7 +467,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -486,7 +503,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -529,7 +546,7 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -565,6 +582,6 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )

@@ -52,14 +52,14 @@ interface ActivityLogTablePaymentVerificationProps {
   onChangePage: (event: unknown, newPage: number) => void;
   onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
-export function ActivityLogTablePaymentVerification({
+export const ActivityLogTablePaymentVerification = ({
   logEntries,
   totalCount,
   rowsPerPage,
   page,
   onChangePage,
   onChangeRowsPerPage,
-}: ActivityLogTablePaymentVerificationProps): ReactElement {
+}: ActivityLogTablePaymentVerificationProps): ReactElement => {
   const [expanded, setExpanded] = useState(false);
   const { t } = useTranslation();
 
@@ -104,4 +104,4 @@ export function ActivityLogTablePaymentVerification({
       </Collapse>
     </PaperContainer>
   );
-}
+};

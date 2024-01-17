@@ -107,6 +107,8 @@ class TestSriLankaRegistrationService(TestCase):
                 "confirm_nic_number": "123456789V",
                 "national_id_no_i_c": "123456789V",
                 "branch_or_branch_code": "7472_002",
+                "account_holder_name_i_c": "Test Holder Name 123",
+                "bank_branch_name_i_c": "Branch Name 123",
                 "confirm_bank_account_number": "0082785064",
                 "who_answers_this_phone": "alternate collector",
                 "confirm_alternate_collector_phone_number": "+94788908046",
@@ -168,6 +170,10 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
         self.assertEqual(ImportedDocument.objects.count(), 1)
 
+        bank_acc_info = ImportedBankAccountInfo.objects.first()
+        self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 123")
+        self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 123")
+
         imported_household = ImportedHousehold.objects.first()
         self.assertEqual(imported_household.admin1, "LK1")
         self.assertEqual(imported_household.admin1_title, "SriLanka admin1")
@@ -182,8 +188,7 @@ class TestSriLankaRegistrationService(TestCase):
 
         registration_datahub_import = imported_household.registration_data_import
         registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
-        self.assertEqual(registration_data_import.programs.count(), 1)
-        self.assertEqual(registration_data_import.programs.all()[0], self.program)
+        self.assertEqual(registration_data_import.program, self.program)
 
         self.assertEqual(
             ImportedIndividual.objects.filter(relationship="HEAD").first().flex_fields, {"has_nic_number_i_c": "n"}

@@ -7,7 +7,7 @@ import {
   useAllRegistrationDataImportsQuery,
 } from '../../../../__generated__/graphql';
 import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { decodeIdString } from '../../../../utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpRegistrationDataImportTableHeadCellsCommunication';
@@ -40,22 +40,23 @@ export const LookUpRegistrationDataImportTableCommunication = ({
   noTitle,
 }: LookUpRegistrationDataImportTableCommunicationProps): ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const {businessArea, programId} = useBaseUrl();
   const initialVariables = {
     search: filter.search,
+    program: programId,
     importedBy: filter.importedBy
       ? decodeIdString(filter.importedBy)
       : undefined,
     status: filter.status !== '' ? filter.status : undefined,
     businessArea,
     importDateRange: JSON.stringify({
-      min: filter.importDateRangeMin,
-      max: filter.importDateRangeMax,
+      min: filter.importDateRangeMin || null,
+      max: filter.importDateRangeMax || null,
     }),
     totalHouseholdsCountWithValidPhoneNoMin:
-      filter.totalHouseholdsCountWithValidPhoneNoMin,
+      filter.totalHouseholdsCountWithValidPhoneNoMin || null,
     totalHouseholdsCountWithValidPhoneNoMax:
-      filter.totalHouseholdsCountWithValidPhoneNoMax,
+      filter.totalHouseholdsCountWithValidPhoneNoMax || null,
   };
 
   const handleRadioChange = (id: string): void => {

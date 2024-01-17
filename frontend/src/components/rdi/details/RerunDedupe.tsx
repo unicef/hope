@@ -16,6 +16,7 @@ import {
   useRerunDedupeMutation,
 } from '../../../__generated__/graphql';
 import { LoadingButton } from '../../core/LoadingButton';
+import { useProgramContext } from "../../../programContext";
 
 interface RerunDedupeProps {
   registration: RegistrationDetailedFragment;
@@ -27,6 +28,7 @@ export function RerunDedupe({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
   const [mutate, { loading }] = useRerunDedupeMutation({
     variables: { registrationDataImportDatahubId: registration.datahubId },
   });
@@ -41,7 +43,12 @@ export function RerunDedupe({
   };
   return (
     <span>
-      <Button color='primary' variant='contained' onClick={() => setOpen(true)}>
+      <Button
+          color='primary'
+          variant='contained'
+          onClick={() => setOpen(true)}
+          disabled={!isActiveProgram}
+      >
         {t('Rerun Deduplication')}
       </Button>
       <Dialog

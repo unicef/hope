@@ -2,64 +2,60 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { CashPlanAndPaymentPlanNode } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { BlackLink } from '../../../../components/core/BlackLink';
 import { StatusBox } from '../../../../components/core/StatusBox';
+import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
-  cashPlanStatusToColor,
+  paymentPlanStatusToColor,
   renderSomethingOrDash,
 } from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
 
 interface CashPlanTableRowProps {
   cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
 }
 
-export function CashPlanTableRow({
+export const CashPlanTableRow = ({
   cashAndPaymentPlan,
-}: CashPlanTableRowProps): React.ReactElement {
+}: CashPlanTableRowProps): React.ReactElement => {
   const history = useHistory();
-  const businessArea = useBusinessArea();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
   const objectPath =
     cashAndPaymentPlan.objType === 'PaymentPlan'
-      ? `/${businessArea}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
-      : `/${businessArea}/cashplans/${cashAndPaymentPlan.id}`;
+      ? `/${baseUrl}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
+      : `/${baseUrl}/cashplans/${cashAndPaymentPlan.id}`;
 
   const handleClick = (): void => {
     history.push(objectPath);
   };
   return (
     <ClickableTableRow
-      hover
-      onClick={handleClick}
+      hover={!isAllPrograms}
+      onClick={!isAllPrograms ? handleClick : undefined}
       role='checkbox'
       key={cashAndPaymentPlan.id}
       data-cy='cash-plan-table-row'
     >
       <TableCell align='left'>
-        <BlackLink to={objectPath}>
-          <div
-            style={{
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {cashAndPaymentPlan.unicefId}
-          </div>
-        </BlackLink>
+        {!isAllPrograms ? (
+          <BlackLink to={objectPath}>
+            <div>{cashAndPaymentPlan.unicefId}</div>
+          </BlackLink>
+        ) : (
+          <div>{cashAndPaymentPlan.unicefId}</div>
+        )}
       </TableCell>
       <TableCell align='left'>
         <StatusBox
-          status={cashAndPaymentPlan.verificationStatus}
-          statusToColor={cashPlanStatusToColor}
+          status={cashAndPaymentPlan.status}
+          statusToColor={paymentPlanStatusToColor}
         />
       </TableCell>
       <TableCell align='right'>
         {cashAndPaymentPlan.totalNumberOfHouseholds}
       </TableCell>
-      <TableCell align='left'>
-        {cashAndPaymentPlan.assistanceMeasurement}
-      </TableCell>
+      <TableCell align='left'>{cashAndPaymentPlan.currency}</TableCell>
       <TableCell align='right'>
         {renderSomethingOrDash(
           cashAndPaymentPlan?.totalEntitledQuantity?.toLocaleString('en-US', {
@@ -92,4 +88,4 @@ export function CashPlanTableRow({
       </TableCell>
     </ClickableTableRow>
   );
-}
+};

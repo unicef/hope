@@ -2,14 +2,13 @@ import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { MiśTheme } from '../../../theme';
-import { COLLECT_TYPES_MAPPING } from '../../../utils/constants';
-import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
 import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../__generated__/graphql';
+import { useProgramContext } from '../../../programContext';
+import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
 import { Title } from '../../core/Title';
@@ -47,19 +46,17 @@ const OverviewPaper = styled(Paper)`
   padding: 20px ${({ theme }) => theme.spacing(11)}px;
 `;
 
-const Label = styled.span`
-  ${({ theme }: { theme: MiśTheme }) => theme.styledMixins.label}
-`;
-
 interface HouseholdDetailsProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
+  baseUrl: string;
   businessArea: string;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
 export const HouseholdDetails = ({
   household,
   choicesData,
+  baseUrl,
   businessArea,
   grievancesChoices,
 }: HouseholdDetailsProps): React.ReactElement => {
@@ -67,6 +64,7 @@ export const HouseholdDetails = ({
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
+  const { selectedProgram } = useProgramContext();
   return (
     <>
       <Container>
@@ -88,7 +86,7 @@ export const HouseholdDetails = ({
             <Grid item xs={6}>
               <LabelizedField label={t('Head of Household')}>
                 <ContentLink
-                  href={`/${businessArea}/population/individuals/${household?.headOfHousehold?.id}`}
+                  href={`/${baseUrl}/population/individuals/${household?.headOfHousehold?.id}`}
                 >
                   {household?.headOfHousehold?.fullName}
                 </ContentLink>
@@ -181,14 +179,15 @@ export const HouseholdDetails = ({
               {household?.unicefId && (
                 <LinkedGrievancesModal
                   household={household}
+                  baseUrl={baseUrl}
                   businessArea={businessArea}
                   grievancesChoices={grievancesChoices}
                 />
               )}
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label={t('COLLECT TYPE')}>
-                {COLLECT_TYPES_MAPPING[household?.collectIndividualData]}
+              <LabelizedField label={t('Data Collecting Type')}>
+                {selectedProgram?.dataCollectingType?.label}
               </LabelizedField>
             </Grid>
           </Grid>
@@ -199,42 +198,25 @@ export const HouseholdDetails = ({
           <Typography variant='h6'>{t('Benefits')}</Typography>
         </Title>
         <Grid container>
-          <Grid item xs={8}>
-            <Grid container>
-              <Grid item xs={6}>
-                <Label color='textSecondary'>
-                  {t('PrOgRAmmE(S) ENROLLED')}
-                </Label>
-              </Grid>
-              <Grid item xs={6}>
-                <Label color='textSecondary'>{t('Cash received')}</Label>
-              </Grid>
-            </Grid>
-            {household?.programsWithDeliveredQuantity?.length ? (
-              household?.programsWithDeliveredQuantity?.map((item) => (
-                <Box key={item.id} mb={2}>
-                  <Grid container key={item.id}>
-                    <Grid item xs={6}>
-                      <ContentLink
-                        href={`/${businessArea}/programs/${item.id}`}
-                      >
-                        {item.name}
-                      </ContentLink>
-                    </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label={t('Cash received')}>
+              {household?.deliveredQuantities?.length ? (
+                <Box mb={2}>
+                  <Grid container>
                     <Grid item xs={6}>
                       <Box display='flex' flexDirection='column'>
-                        {item.quantity.map((qty) => (
+                        {household?.deliveredQuantities?.map((item) => (
                           <Box
-                            key={`${item.id}-${qty.currency}-${qty.totalDeliveredQuantity}`}
+                            key={`${item.currency}-${item.totalDeliveredQuantity}`}
                           >
-                            {qty.currency === 'USD'
+                            {item.currency === 'USD'
                               ? formatCurrencyWithSymbol(
-                                  qty.totalDeliveredQuantity,
-                                  qty.currency,
+                                  item.totalDeliveredQuantity,
+                                  item.currency,
                                 )
                               : `(${formatCurrencyWithSymbol(
-                                  qty.totalDeliveredQuantity,
-                                  qty.currency,
+                                  item.totalDeliveredQuantity,
+                                  item.currency,
                                 )})`}
                           </Box>
                         ))}
@@ -242,19 +224,12 @@ export const HouseholdDetails = ({
                     </Grid>
                   </Grid>
                 </Box>
-              ))
-            ) : (
-              <Grid container>
-                <Grid item xs={6}>
-                  -
-                </Grid>
-                <Grid item xs={6}>
-                  -
-                </Grid>
-              </Grid>
-            )}
+              ) : (
+                <>-</>
+              )}
+            </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <BigValueContainer>
               <LabelizedField label={t('Total Cash Received')}>
                 <BigValue>

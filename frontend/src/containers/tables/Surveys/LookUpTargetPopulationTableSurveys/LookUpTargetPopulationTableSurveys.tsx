@@ -1,15 +1,14 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../../utils/utils';
 import {
   AllActiveTargetPopulationsQueryVariables,
   TargetPopulationNode,
   TargetPopulationStatus,
   useAllActiveTargetPopulationsQuery,
 } from '../../../../__generated__/graphql';
+import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
 import { LookUpTargetPopulationTableRowSurveys } from './LookUpTargetPopulationTableRowSurveys';
@@ -41,16 +40,17 @@ export const LookUpTargetPopulationTableSurveys = ({
   noTitle,
 }: LookUpTargetPopulationTableSurveysProps): ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllActiveTargetPopulationsQueryVariables = {
     name: filter.name,
-    totalHouseholdsCountMin: filter.totalHouseholdsCountMin,
-    totalHouseholdsCountMax: filter.totalHouseholdsCountMax,
+    totalHouseholdsCountMin: filter.totalHouseholdsCountMin || 0,
+    totalHouseholdsCountMax: filter.totalHouseholdsCountMax || null,
     status: filter.status,
     businessArea,
+    program: [programId],
     createdAtRange: JSON.stringify({
-      min: filter.createdAtRangeMin,
-      max: filter.createdAtRangeMax,
+      min: filter.createdAtRangeMin || null,
+      max: filter.createdAtRangeMax || null,
     }),
     statusNot: TargetPopulationStatus.Open,
   };
@@ -58,16 +58,6 @@ export const LookUpTargetPopulationTableSurveys = ({
   const handleRadioChange = (id: string): void => {
     handleChange(id);
   };
-
-  if (filter.program) {
-    if (Array.isArray(filter.program)) {
-      initialVariables.program = filter.program.map((programId) =>
-        decodeIdString(programId),
-      );
-    } else {
-      initialVariables.program = [decodeIdString(filter.program)];
-    }
-  }
 
   const renderTable = (): React.ReactElement => {
     return (

@@ -312,6 +312,8 @@ class GenericRegistrationService(BaseRegistrationService):
                 "bank_account_h_f": "bank.bank1-bank_account_number",
                 "bank_name_h_f": "bank.bank1-bank_name",
                 "bank_debit_card_h_f": "bank.bank1-debit_card_number",
+                "account_holder_name_i_c": "bank.bank1-account_holder_name",
+                "bank_branch_name_i_c": "bank.bank1-bank_branch_name",
                 "role_pr_i_c": "extra.primary_collector",
                 "role_sec_i_c": "extra.secondary_collector",
             },

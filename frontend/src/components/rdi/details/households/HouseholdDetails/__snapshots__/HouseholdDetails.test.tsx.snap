@@ -103,7 +103,7 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
             >
               <a
                 class="sc-bwzfXH kVuoVk"
-                href="/afghanistan/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
+                href="/undefined/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpmM2U0ODBiZC05MDYyLTRkMjktODljYy1kMWM3MGRhZDRmMjk="
               >
                 Agata Kowalska
               </a>
@@ -186,10 +186,10 @@ exports[`components/rdi/details/households/HouseholdDetails should render 1`] = 
               class="sc-htpNat hcDmtB"
               color="textSecondary"
             >
-              COLLECT TYPE
+              Data Collecting Type
             </span>
             <div
-              data-cy="label-COLLECT TYPE"
+              data-cy="label-Data Collecting Type"
             >
               -
             </div>

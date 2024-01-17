@@ -15,6 +15,8 @@ from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketNoteFactory,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 
 
 class TestTicketNotes(APITestCase):
@@ -65,6 +67,8 @@ class TestTicketNotes(APITestCase):
         cls.user = UserFactory.create(first_name="John", last_name="Doe")
         cls.ticket_1 = GrievanceTicketFactory(id="5d64ef51-5ed5-4891-b1a3-44a24acb7720")
         cls.ticket_2 = GrievanceTicketFactory(id="1dd2dc43-d418-45bd-b9f7-7545dd4c13a5")
+        cls.program = ProgramFactory(business_area=BusinessArea.objects.first(), status=Program.ACTIVE)
+        cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
     def test_ticket_notes_query_all(self) -> None:
         TicketNoteFactory(
@@ -75,7 +79,7 @@ class TestTicketNotes(APITestCase):
         variables = {"ticket": str(self.ticket_1.id)}
         self.snapshot_graphql_request(
             request_string=self.ALL_TICKET_NOTE_QUERY,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=variables,
         )
 
@@ -99,6 +103,6 @@ class TestTicketNotes(APITestCase):
         }
         self.snapshot_graphql_request(
             request_string=self.CREATE_TICKET_NOTE_MUTATION,
-            context={"user": self.user},
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
             variables=input_data,
         )

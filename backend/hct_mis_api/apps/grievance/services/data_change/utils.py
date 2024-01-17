@@ -3,7 +3,7 @@ import random
 import string
 import urllib.parse
 from collections import Counter
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -27,7 +27,6 @@ from hct_mis_api.apps.core.utils import (
     serialize_flex_attributes,
 )
 from hct_mis_api.apps.geo import models as geo_models
-from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.documents import HouseholdDocument, get_individual_doc
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -43,6 +42,9 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 logger = logging.getLogger(__name__)
 
@@ -179,6 +181,8 @@ def handle_add_payment_channel(payment_channel: Dict, individual: Individual) ->
             individual=individual,
             bank_name=bank_name,
             bank_account_number=bank_account_number,
+            account_holder_name=payment_channel.get("account_holder_name", ""),
+            bank_branch_name=payment_channel.get("bank_branch_name", ""),
         )
     return None
 
@@ -191,6 +195,8 @@ def handle_update_payment_channel(payment_channel: Dict) -> Optional[BankAccount
         bank_account_info = get_object_or_404(BankAccountInfo, id=payment_channel_id)
         bank_account_info.bank_name = payment_channel.get("bank_name")
         bank_account_info.bank_account_number = payment_channel.get("bank_account_number")
+        bank_account_info.account_holder_name = payment_channel.get("account_holder_name", "")
+        bank_account_info.bank_branch_name = payment_channel.get("bank_branch_name", "")
         return bank_account_info
 
     return None
@@ -317,6 +323,8 @@ def prepare_previous_payment_channels(payment_channels_to_remove_with_approve_st
             "individual": encode_id_base64(bank_account_info.individual.id, "Individual"),
             "bank_name": bank_account_info.bank_name,
             "bank_account_number": bank_account_info.bank_account_number,
+            "account_holder_name": bank_account_info.account_holder_name,
+            "bank_branch_name": bank_account_info.bank_branch_name,
             "type": "BANK_TRANSFER",
         }
 
@@ -384,6 +392,8 @@ def handle_bank_transfer_payment_method(pc: Dict) -> Dict:
             "bank_account_number": bank_account_number,
             "bank_name": bank_name,
             "type": payment_channel_type,
+            "account_holder_name": pc.get("account_holder_name", ""),
+            "bank_branch_name": pc.get("bank_branch_name", ""),
         },
         "previous_value": {
             "id": encoded_id,
@@ -391,6 +401,8 @@ def handle_bank_transfer_payment_method(pc: Dict) -> Dict:
             "bank_account_number": bank_account_info.bank_account_number,
             "bank_name": bank_account_info.bank_name,
             "type": payment_channel_type,
+            "account_holder_name": bank_account_info.account_holder_name,
+            "bank_branch_name": bank_account_info.bank_branch_name,
         },
     }
 
@@ -439,12 +451,15 @@ def remove_parsed_data_fields(data_dict: Dict, fields_list: Iterable[str]) -> No
         data_dict.pop(field, None)
 
 
-def withdraw_individual_and_reassign_roles(
-    ticket_details: List["GrievanceTicket"], individual_to_remove: Individual, info: Any
-) -> None:
+def withdraw_individual_and_reassign_roles(ticket_details: Any, individual_to_remove: Individual, info: Any) -> None:
     old_individual = Individual.objects.get(id=individual_to_remove.id)
-    household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
-    withdraw_individual(individual_to_remove, info, old_individual, household)
+    household = reassign_roles_on_disable_individual(
+        individual_to_remove,
+        ticket_details.role_reassign_data,
+        ticket_details.programs.all(),
+        info,
+    )
+    withdraw_individual(individual_to_remove, info, old_individual, household, ticket_details.ticket.programs.all())
 
 
 def mark_as_duplicate_individual_and_reassign_roles(
@@ -453,11 +468,27 @@ def mark_as_duplicate_individual_and_reassign_roles(
     old_individual = Individual.objects.get(id=individual_to_remove.id)
     if ticket_details.is_multiple_duplicates_version:
         household = reassign_roles_on_disable_individual(
-            individual_to_remove, ticket_details.role_reassign_data, info, is_new_ticket=True
+            individual_to_remove,
+            ticket_details.role_reassign_data,
+            info,
+            ticket_details.programs.all(),
+            is_new_ticket=True,
         )
     else:
-        household = reassign_roles_on_disable_individual(individual_to_remove, ticket_details.role_reassign_data, info)
-    mark_as_duplicate_individual(individual_to_remove, info, old_individual, household, unique_individual)
+        household = reassign_roles_on_disable_individual(
+            individual_to_remove,
+            ticket_details.role_reassign_data,
+            ticket_details.programs.all(),
+            info,
+        )
+    mark_as_duplicate_individual(
+        individual_to_remove,
+        info,
+        old_individual,
+        household,
+        unique_individual,
+        ticket_details.programs.all(),
+    )
 
 
 def get_data_from_role_data(role_data: Dict) -> Tuple[Optional[Any], Individual, Individual, Household]:
@@ -482,7 +513,11 @@ def get_data_from_role_data_new_ticket(role_data: Dict) -> Tuple[Optional[Any], 
 
 
 def reassign_roles_on_disable_individual(
-    individual_to_remove: Individual, role_reassign_data: Dict, info: Optional[Any] = None, is_new_ticket: bool = False
+    individual_to_remove: Individual,
+    role_reassign_data: Dict,
+    program_id: Optional["UUID"],
+    info: Optional[Any] = None,
+    is_new_ticket: bool = False,
 ) -> Household:
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
@@ -515,6 +550,7 @@ def reassign_roles_on_disable_individual(
                     Individual.ACTIVITY_LOG_MAPPING,
                     "business_area",
                     info.context.user,
+                    program_id,
                     old_new_individual,
                     new_individual,
                 )
@@ -553,7 +589,9 @@ def reassign_roles_on_disable_individual(
     return household_to_remove
 
 
-def reassign_roles_on_update(individual: Individual, role_reassign_data: Dict, info: Optional[Any] = None) -> None:
+def reassign_roles_on_update(
+    individual: Individual, role_reassign_data: Dict, program_id: "UUID", info: Optional[Any] = None
+) -> None:
     roles_to_bulk_update = []
     for role_data in role_reassign_data.values():
         (
@@ -573,6 +611,7 @@ def reassign_roles_on_update(individual: Individual, role_reassign_data: Dict, i
                     Individual.ACTIVITY_LOG_MAPPING,
                     "business_area",
                     info.context.user,
+                    program_id,
                     old_new_individual,
                     new_individual,
                 )
@@ -599,6 +638,7 @@ def withdraw_individual(
     info: Any,
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
+    program_id: Optional["UUID"],
 ) -> None:
     individual_to_remove.withdraw()
 
@@ -610,6 +650,7 @@ def withdraw_individual(
         info,
         old_individual_to_remove,
         removed_individual_household,
+        program_id,
     )
 
 
@@ -619,13 +660,11 @@ def mark_as_duplicate_individual(
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
     unique_individual: Individual,
+    program_id: Optional["UUID"],
 ) -> None:
     individual_to_remove.mark_as_duplicate(unique_individual)
     log_and_withdraw_household_if_needed(
-        individual_to_remove,
-        info,
-        old_individual_to_remove,
-        removed_individual_household,
+        individual_to_remove, info, old_individual_to_remove, removed_individual_household, program_id
     )
 
 
@@ -634,11 +673,13 @@ def log_and_withdraw_household_if_needed(
     info: Any,
     old_individual_to_remove: Individual,
     removed_individual_household: Household,
+    program_id: Optional["UUID"],
 ) -> None:
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
         "business_area",
         info.context.user,
+        program_id,
         old_individual_to_remove,
         individual_to_remove,
     )

@@ -1,11 +1,13 @@
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
+from django.core.exceptions import PermissionDenied
 from django.db.models import (
     Case,
     F,
     Func,
     OuterRef,
     Prefetch,
+    Q,
     QuerySet,
     Subquery,
     Sum,
@@ -23,6 +25,7 @@ from hct_mis_api.apps.account.permissions import (
     ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     BasePermission,
+    DjangoPermissionFilterConnectionField,
     DjangoPermissionFilterFastConnectionField,
     Permissions,
     hopeOneOfPermissionClass,
@@ -31,17 +34,14 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import FlexibleAttribute
-from hct_mis_api.apps.core.schema import (
-    ChoiceObject,
-    FieldAttributeNode,
-    _custom_dict_or_attr_resolver,
-)
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
+from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
     encode_ids,
     get_model_choices_fields,
+    get_program_id_from_headers,
     resolve_flex_fields_choices_to_string,
     sum_lists_with_values,
     to_choice_object,
@@ -79,9 +79,10 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
-    programs_with_delivered_quantity,
+    delivered_quantity_service,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.graphql import does_path_exist_in_query
@@ -187,15 +188,6 @@ class DeliveredQuantityNode(graphene.ObjectType):
     currency = graphene.String()
 
 
-class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
-    class Meta:
-        default_resolver = _custom_dict_or_attr_resolver
-
-    id = graphene.ID()
-    name = graphene.String()
-    quantity = graphene.List(DeliveredQuantityNode)
-
-
 class IndividualRoleInHouseholdNode(DjangoObjectType):
     class Meta:
         model = IndividualRoleInHousehold
@@ -298,9 +290,35 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     def check_node_permission(cls, info: Any, object_instance: Individual) -> None:
         super().check_node_permission(info, object_instance)
         user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
+        business_area_slug = info.context.headers.get("Business-Area")
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+
+        if not program_id:
+            raise PermissionDenied("Permission Denied")
+
+        if not user.partner.is_unicef:
+            partner_permission = user.partner.get_permissions()
+            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(program_id))
+            if areas_from_partner is None:
+                raise PermissionDenied("Permission Denied")
+
+            if str(object_instance.program_id) != program_id:
+                raise PermissionDenied("Permission Denied")
+
+            if len(areas_from_partner) > 0 and object_instance.household_id and object_instance.household.admin_area_id:
+                household = object_instance.household
+                areas_from_household = {
+                    str(household.admin1_id),
+                    str(household.admin2_id),
+                    str(household.admin3_id),
+                }
+                if not areas_from_household.intersection(areas_from_partner):
+                    raise PermissionDenied("Permission Denied")
+
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area, program_id
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
@@ -358,7 +376,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin1 = graphene.Field(AreaNode)
     admin2 = graphene.Field(AreaNode)
     status = graphene.String()
-    programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+    delivered_quantities = graphene.List(DeliveredQuantityNode)
     active_individuals_count = graphene.Int()
     individuals = DjangoFilterConnectionField(
         IndividualNode,
@@ -380,11 +398,13 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_admin_area_title(parent: Household, info: Any) -> str:
-        return getattr(parent.admin_area, "name", "")
+        if parent.admin_area:
+            return f"{parent.admin_area.name} - {parent.admin_area.p_code}"
+        return ""
 
     @staticmethod
-    def resolve_programs_with_delivered_quantity(parent: Household, info: Any) -> List[Dict[str, Any]]:
-        return programs_with_delivered_quantity(parent)
+    def resolve_delivered_quantities(parent: Household, info: Any) -> List[Dict[str, Any]]:
+        return delivered_quantity_service(parent)
 
     @staticmethod
     def resolve_country(parent: Household, info: Any) -> str:
@@ -428,9 +448,35 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def check_node_permission(cls, info: Any, object_instance: Household) -> None:
         super().check_node_permission(info, object_instance)
         user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
+        business_area_slug = info.context.headers.get("Business-Area")
+        business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+
+        if not program_id:
+            raise PermissionDenied("Permission Denied")
+
+        if not user.partner.is_unicef:
+            partner_permission = user.partner.get_permissions()
+            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(program_id))
+            if areas_from_partner is None:
+                raise PermissionDenied("Permission Denied")
+
+            if str(object_instance.program_id) != program_id:
+                raise PermissionDenied("Permission Denied")
+
+            if len(areas_from_partner) > 0 and object_instance.admin_area_id:
+                areas_from_household = {
+                    str(object_instance.admin1_id),
+                    str(object_instance.admin2_id),
+                    str(object_instance.admin3_id),
+                }
+                if not areas_from_household.intersection(areas_from_partner):
+                    raise PermissionDenied("Permission Denied")
 
         # if user doesn't have permission to view all households, we check based on their grievance tickets
-        if not user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area):
+        if not user.has_permission(
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area, program_id
+        ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
             )
@@ -463,7 +509,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoPermissionFilterFastConnectionField(
+    all_households = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
         permission_classes=(
@@ -471,7 +517,7 @@ class Query(graphene.ObjectType):
         ),
     )
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoPermissionFilterFastConnectionField(
+    all_individuals = DjangoPermissionFilterConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
         permission_classes=(
@@ -549,13 +595,56 @@ class Query(graphene.ObjectType):
     household_search_types_choices = graphene.List(ChoiceObject)
 
     def resolve_all_individuals(self, info: Any, **kwargs: Any) -> QuerySet[Individual]:
-        queryset = Individual.objects
+        user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
+        business_area_slug = info.context.headers.get("Business-Area")
+
+        if program_id:
+            program = Program.objects.filter(id=program_id).first()
+            if program and program.status == Program.DRAFT:
+                return Individual.objects.none()
+
+        queryset = Individual.objects.all()
         if does_path_exist_in_query("edges.node.household", info):
-            queryset = queryset.select_related("household")  # type: ignore
+            queryset = queryset.select_related("household")
         if does_path_exist_in_query("edges.node.household.admin2", info):
-            queryset = queryset.select_related("household__admin_area")  # type: ignore
-            queryset = queryset.select_related("household__admin_area__area_type")  # type: ignore
-        return queryset  # type: ignore
+            queryset = queryset.select_related("household__admin2")
+            queryset = queryset.select_related("household__admin2__area_type")
+        if does_path_exist_in_query("edges.node.program", info):
+            queryset = queryset.select_related("program")
+
+        if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+            partner_permission = user.partner.get_permissions()
+
+            if program_id:
+                areas = partner_permission.areas_for(str(business_area_id), str(program_id))
+                if areas is None:
+                    return Individual.objects.none()
+                programs_permissions = [
+                    (program_id, areas),
+                ]
+            else:
+                programs_for_business_area = partner_permission.get_programs_for_business_area(str(business_area_id))
+                if not programs_for_business_area:
+                    return Individual.objects.none()
+                programs_permissions = programs_for_business_area.programs.items()
+
+            filter_q = Q()
+            for program_id, areas_ids in programs_permissions:
+                if areas_ids:
+                    areas_query = Q(
+                        Q(household__admin1__in=areas_ids)
+                        | Q(household__admin2__in=areas_ids)
+                        | Q(household__admin3__in=areas_ids)
+                        | Q(household__admin_area__isnull=True)
+                    )
+                    filter_q |= Q(Q(program_id=program_id) & areas_query)
+                else:
+                    filter_q |= Q(program_id=program_id)
+
+            queryset = queryset.filter(filter_q)
+        return queryset
 
     def resolve_all_households_flex_fields_attributes(self, info: Any, **kwargs: Any) -> Iterable:
         yield from FlexibleAttribute.objects.filter(
@@ -568,13 +657,57 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info: Any, **kwargs: Any) -> QuerySet:
-        queryset = Household.objects.order_by("created_at")
+        user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
+        business_area_slug = info.context.headers.get("Business-Area")
+
+        if program_id:
+            program = Program.objects.filter(id=program_id).first()
+            if program and program.status == Program.DRAFT:
+                return Household.objects.none()
+
+        queryset = Household.objects.all()
+
+        if not user.partner.is_unicef:  # Unicef partner has full access to all AdminAreas
+            business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
+            partner_permission = user.partner.get_permissions()
+
+            if program_id:
+                areas = partner_permission.areas_for(str(business_area_id), str(program_id))
+                if areas is None:
+                    return Household.objects.none()
+                programs_permissions = [
+                    (program_id, areas),
+                ]
+            else:
+                programs_for_business_area = partner_permission.get_programs_for_business_area(str(business_area_id))
+                if not programs_for_business_area:
+                    return Household.objects.none()
+                programs_permissions = programs_for_business_area.programs.items()
+
+            filter_q = Q()
+            for program_id, areas_ids in programs_permissions:
+                if areas_ids:
+                    areas_query = Q(
+                        Q(admin1__in=areas_ids)
+                        | Q(admin2__in=areas_ids)
+                        | Q(admin3__in=areas_ids)
+                        | Q(admin_area__isnull=True)
+                    )
+                    filter_q |= Q(Q(program_id=program_id) & areas_query)
+                else:
+                    filter_q |= Q(program_id=program_id)
+
+            queryset = queryset.filter(filter_q)
+
         if does_path_exist_in_query("edges.node.admin2", info):
             queryset = queryset.select_related("admin_area")
             queryset = queryset.select_related("admin_area__area_type")
 
         if does_path_exist_in_query("edges.node.headOfHousehold", info):
             queryset = queryset.select_related("head_of_household")
+        if does_path_exist_in_query("edges.node.program", info):
+            queryset = queryset.select_related("program")
         if does_path_exist_in_query("edges.node.hasDuplicates", info):
             subquery = Subquery(
                 Individual.objects.filter(household_id=OuterRef("pk"), deduplication_golden_record_status="DUPLICATE")

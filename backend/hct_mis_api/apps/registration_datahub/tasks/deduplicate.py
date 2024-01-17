@@ -29,12 +29,14 @@ from hct_mis_api.apps.household.models import (
     Document,
     Individual,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import (
     ImportedIndividualDocument,
     get_imported_individual_doc,
 )
 from hct_mis_api.apps.registration_datahub.models import (
+    SIMILAR_IN_BATCH,
     ImportedIndividual,
     RegistrationDataImportDatahub,
 )
@@ -97,8 +99,10 @@ class DeduplicateTask:
 
     FUZZINESS = "AUTO:3,6"
 
-    def __init__(self, business_area_slug: str):
+    def __init__(self, business_area_slug: str, program_id: Optional[str]):
         self.business_area: BusinessArea = BusinessArea.objects.get(slug=business_area_slug)
+        if program_id:
+            self.program: Program = Program.objects.get(id=program_id)
         self.thresholds: Thresholds = Thresholds.from_business_area(self.business_area)
 
     def deduplicate_individuals_against_population(self, individuals: QuerySet[Individual]) -> None:
@@ -314,11 +318,39 @@ class DeduplicateTask:
             ).update(deduplication_golden_record_status=UNIQUE)
             old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
             registration_data_import.status = RegistrationDataImport.IN_REVIEW
+            registration_data_import.batch_duplicates = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_batch_status=DUPLICATE_IN_BATCH,
+            ).count()
+            registration_data_import.batch_possible_duplicates = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_batch_status=SIMILAR_IN_BATCH,
+            ).count()
+            registration_data_import.batch_unique = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_batch_status=UNIQUE_IN_BATCH,
+            ).count()
+            registration_data_import.golden_record_duplicates = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_golden_record_status=DUPLICATE,
+            ).count()
+            registration_data_import.golden_record_possible_duplicates = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_golden_record_status=NEEDS_ADJUDICATION,
+            ).count()
+            registration_data_import.golden_record_unique = ImportedIndividual.objects.filter(
+                registration_data_import_id=registration_data_import_datahub.id,
+                deduplication_golden_record_status=UNIQUE,
+            ).count()
             registration_data_import.error_message = ""
             registration_data_import.save()
-
             log_create(
-                RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+                RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                None,
+                registration_data_import.program_id,
+                old_rdi,
+                registration_data_import,
             )
 
         remove_elasticsearch_documents_by_matching_ids(
@@ -583,9 +615,15 @@ class DeduplicateTask:
             individual_fields,
             self.thresholds.DEDUPLICATION_POSSIBLE_DUPLICATE_SCORE,
         )
-        query_dict["query"]["bool"]["filter"] = [
-            {"term": {"business_area": self.business_area.slug}},
-        ]
+
+        query_dict["query"]["bool"]["filter"] = {
+            "bool": {
+                "must": [
+                    {"term": {"business_area": self.business_area.slug}},
+                    {"term": {"program_id": self.program.id}},
+                ]
+            }
+        }
 
         document = get_individual_doc(self.business_area.slug)
 
@@ -607,7 +645,12 @@ class DeduplicateTask:
             )
         )
         log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            None,
+            registration_data_import.program_id,
+            old_rdi,
+            registration_data_import,
         )
 
 
@@ -627,6 +670,7 @@ class HardDocumentDeduplication:
         new_document_signatures_duplicated_in_batch = [
             d for d in new_document_signatures if new_document_signatures.count(d) > 1
         ]
+        # added order_by because test was failed randomly
         all_matching_number_documents = (
             Document.objects.select_related("individual", "individual__household", "individual__business_area")
             .filter(document_number__in=documents_numbers, status=Document.STATUS_VALID)
@@ -645,6 +689,7 @@ class HardDocumentDeduplication:
                     output_field=CharField(),
                 )
             )
+            .order_by("individual_id")
         )
         all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
         all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
@@ -712,10 +757,13 @@ class HardDocumentDeduplication:
             possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
 
         ticket_data_collected = []
+        tickets_programs = []
+        GrievanceTicketProgramThrough = GrievanceTicket.programs.through
         for ticket_data in ticket_data_dict.values():
+            main_individual = ticket_data["original"].individual
             prepared_ticket = self._prepare_grievance_ticket_documents_deduplication(
-                main_individual=ticket_data["original"].individual,
-                business_area=ticket_data["original"].individual.business_area,
+                main_individual=main_individual,
+                business_area=main_individual.business_area,
                 registration_data_import=registration_data_import,
                 possible_duplicates_individuals=[d.individual for d in ticket_data["possible_duplicates"]],
                 possible_duplicates_through_dict=possible_duplicates_through_dict,
@@ -723,14 +771,25 @@ class HardDocumentDeduplication:
             if prepared_ticket is None:
                 continue
             ticket_data_collected.append(prepared_ticket)
+            tickets_programs.append(
+                GrievanceTicketProgramThrough(
+                    grievanceticket=prepared_ticket.ticket, program_id=main_individual.program_id
+                )
+            )
 
         GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
-        TicketNeedsAdjudicationDetails.objects.bulk_create([x.ticket_details for x in ticket_data_collected])
+        GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
+
+        created_tickets = TicketNeedsAdjudicationDetails.objects.bulk_create(
+            [x.ticket_details for x in ticket_data_collected]
+        )
         # makes flat list from list of lists models
         duplicates_models_to_create_flat = list(
             itertools.chain(*[x.possible_duplicates_throughs for x in ticket_data_collected])
         )
         PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
+        for created_ticket in created_tickets:
+            created_ticket.populate_cross_area_flag()
 
     def _generate_signature(self, document: Document) -> str:
         if document.type.valid_for_deduplication:

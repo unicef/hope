@@ -962,3 +962,98 @@ export const dateToIsoString = (date: Date, type: DateType): string => {
   }
   throw new Error('Invalid type specified');
 };
+
+//autocompletes utils
+export const handleAutocompleteChange = (
+  name,
+  value,
+  handleFilterChange,
+): void => {
+  if (value === null || value === undefined) {
+    handleFilterChange(name, '');
+  }
+  if (value) {
+    handleFilterChange(name, value);
+  }
+};
+
+export const handleAutocompleteClose = (
+  setOpen,
+  onInputTextChange,
+  reason,
+): void => {
+  setOpen(false);
+  if (reason === 'select-option') return;
+  onInputTextChange('');
+};
+
+export const getAutocompleteOptionLabel = (
+  option,
+  edges,
+  inputValue: string,
+  type: 'default' | 'individual' | 'language' = 'default',
+): string => {
+  const renderNameOrEmail = (node): string => {
+    if (!node) {
+      return '-';
+    }
+    if (node?.firstName && node?.lastName) {
+      return `${node.firstName} ${node.lastName}`;
+    }
+    if (node?.email) {
+      return `${node.email}`;
+    }
+    return '-';
+  };
+
+  let optionLabel;
+  if (option?.node) {
+    switch (type) {
+      case 'individual':
+        optionLabel = renderNameOrEmail(option.node);
+        break;
+      case 'language':
+        optionLabel = `${option.node.english}`;
+        break;
+      default:
+        optionLabel = `${option.node.name}`;
+    }
+  } else {
+    let foundNode;
+    switch (type) {
+      case 'individual':
+        foundNode = edges?.find((el) => el.node?.id === option)?.node;
+        optionLabel = foundNode ? renderNameOrEmail(foundNode) : inputValue;
+        break;
+      case 'language':
+        foundNode = edges?.find((el) => el.node?.code === option)?.node;
+        optionLabel = foundNode ? `${foundNode.english}` : inputValue;
+        break;
+      default:
+        foundNode = edges?.find((el) => el.node?.id === option)?.node;
+        optionLabel = foundNode ? `${foundNode?.name}` : inputValue;
+    }
+  }
+  return optionLabel;
+};
+
+export const handleOptionSelected = (
+  option: string | undefined,
+  value: string | null | undefined,
+): boolean => {
+  if (!value) {
+    return !option;
+  }
+  return option === value;
+};
+
+export const isProgramNodeUuidFormat = (id: string): boolean => {
+  const regex = /^ProgramNode:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+  try {
+    const base64 = id.replace(/-/g, '+').replace(/_/g, '/');
+    const decodedId = atob(base64);
+    return regex.test(decodedId);
+  } catch (e) {
+    return false;
+  }
+};

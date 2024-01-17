@@ -21,6 +21,7 @@ import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { ErrorButton } from '../../../core/ErrorButton';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
+import { useProgramContext } from "../../../../programContext";
 
 export interface RejectPaymentPlanProps {
   paymentPlanId: string;
@@ -32,6 +33,7 @@ export const RejectPaymentPlan = ({
   const { t } = useTranslation();
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
   const {
     mutatePaymentPlanAction: reject,
     loading: loadingReject,
@@ -48,7 +50,7 @@ export const RejectPaymentPlan = ({
 
   const validationSchema = Yup.object().shape({
     comment: Yup.string()
-      .min(2, 'Too short')
+      .min(4, 'Too short')
       .max(255, 'Too long'),
   });
 
@@ -116,6 +118,7 @@ export const RejectPaymentPlan = ({
                   variant='contained'
                   onClick={submitForm}
                   data-cy='button-submit'
+                  disabled={!isActiveProgram}
                 >
                   {t('Reject')}
                 </LoadingButton>

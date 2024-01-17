@@ -24,12 +24,14 @@ def close_system_flagging_ticket_service(grievance_ticket: GrievanceTicket, user
     else:
         individual.sanction_list_confirmed_match = True
         individual.save()
-        reassign_roles_on_disable_individual_service(individual, ticket_details.role_reassign_data, user)
-
+        reassign_roles_on_disable_individual_service(
+            individual, ticket_details.role_reassign_data, user, grievance_ticket.programs.all()
+        )
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
         "business_area",
         user,
+        grievance_ticket.programs.all(),
         old_individual,
         individual,
     )

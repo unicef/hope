@@ -50,14 +50,13 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         ("imported_by", AutoCompleteFilter),
     )
     date_hierarchy = "updated_at"
-    raw_id_fields = ("imported_by", "business_area")
+    raw_id_fields = ("imported_by", "business_area", "program")
     advanced_filter_fields = (
         "status",
         "updated_at",
         ("imported_by__username", "imported by"),
         ("business_area__name", "business area"),
     )
-    filter_horizontal = ["programs"]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).select_related("business_area")

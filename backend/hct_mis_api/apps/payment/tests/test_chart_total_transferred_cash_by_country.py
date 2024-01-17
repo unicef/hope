@@ -6,7 +6,7 @@ from django.utils import timezone
 from parameterized import parameterized
 from pytz import utc
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
@@ -31,7 +31,8 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
-        cls.user = UserFactory.create()
+        cls.partner = PartnerFactory(name="Test1")
+        cls.user = UserFactory(partner=cls.partner)
         (household, _) = create_household(household_args={"size": 1})
         cash_plan = CashPlanFactory(funds_commitment="123456", exchange_rate=None)
         chosen_business_areas = ("afghanistan", "botswana", "angola")

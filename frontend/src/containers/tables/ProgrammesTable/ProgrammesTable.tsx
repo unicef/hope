@@ -1,12 +1,12 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../components/core/TableWrapper';
 import {
+  AllProgramsQuery,
   AllProgramsQueryVariables,
   ProgrammeChoiceDataQuery,
-  ProgramNode,
   useAllProgramsQuery,
 } from '../../../__generated__/graphql';
+import { TableWrapper } from '../../../components/core/TableWrapper';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './ProgrammesHeadCells';
 import { ProgrammesTableRow } from './ProgrammesTableRow';
@@ -35,10 +35,14 @@ export function ProgrammesTable({
       max: filter.numberOfHouseholdsMax,
     }),
     budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
+    dataCollectingType: filter.dataCollectingType
   };
   return (
     <TableWrapper>
-      <UniversalTable<ProgramNode, AllProgramsQueryVariables>
+      <UniversalTable<
+        AllProgramsQuery['allPrograms']['edges'][number]['node'],
+        AllProgramsQueryVariables
+      >
         title={t('Programmes')}
         headCells={headCells}
         query={useAllProgramsQuery}

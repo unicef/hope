@@ -12,11 +12,11 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { VerificationPaymentRecordDetails } from '../../../components/payments/VerificationPaymentRecordDetails';
 import { VerifyManual } from '../../../components/payments/VerifyManual';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 
-export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
+export const VerificationPaymentRecordDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -28,7 +28,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = usePaymentVerificationChoicesQuery();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   const { paymentRecord } = data;
@@ -40,7 +40,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
       ? [
           {
             title: t('Payment Verification'),
-            to: `/${businessArea}/payment-verification`,
+            to: `/${baseUrl}/payment-verification`,
           },
         ]
       : []),
@@ -51,7 +51,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
       ? [
           {
             title: `${t('Payment Plan')} ${paymentRecord.parent.unicefId}`,
-            to: `/${businessArea}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
+            to: `/${baseUrl}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
           },
         ]
       : []),
@@ -84,4 +84,4 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
       />
     </div>
   );
-}
+};

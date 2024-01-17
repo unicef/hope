@@ -287,6 +287,8 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
             "bank_account_number": str(individual_dict.get("bank_account", "")).replace(" ", ""),
             "bank_name": bank_name,
             "debit_card_number": str(individual_dict.get("bank_account_number", "")).replace(" ", ""),
+            "account_holder_name": individual_dict.get("account_holder_name_i_c", ""),
+            "bank_branch_name": individual_dict.get("bank_branch_name_i_c", ""),
             "individual": individual,
         }
         return bank_account_info_data

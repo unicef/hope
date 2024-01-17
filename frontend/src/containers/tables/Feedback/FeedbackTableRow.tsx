@@ -5,11 +5,11 @@ import {
   FeedbackIssueType,
   FeedbackNode,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { renderSomethingOrDash, renderUserName } from '../../../utils/utils';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { getGrievanceDetailsPath } from '../../../components/grievances/utils/createGrievanceUtils';
 
 interface FeedbackTableRowProps {
@@ -22,20 +22,20 @@ export const FeedbackTableRow = ({
   canViewDetails,
 }: FeedbackTableRowProps): React.ReactElement => {
   const history = useHistory();
-  const businessArea = useBusinessArea();
-  const feedbackDetailsPath = `/${businessArea}/grievance/feedback/${feedback.id}`;
-  const householdDetailsPath = `/${businessArea}/population/household/${feedback.householdLookup?.id}`;
+  const { baseUrl, isAllPrograms } = useBaseUrl();
+  const feedbackDetailsPath = `/${baseUrl}/grievance/feedback/${feedback.id}`;
+  const householdDetailsPath = `/${baseUrl}/population/household/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = feedback.linkedGrievance
     ? getGrievanceDetailsPath(
         feedback.linkedGrievance?.id,
         feedback.linkedGrievance?.category,
-        businessArea,
+        baseUrl,
       )
     : null;
-
   const handleClick = (): void => {
     history.push(feedbackDetailsPath);
   };
+
   return (
     <ClickableTableRow
       hover
@@ -56,7 +56,7 @@ export const FeedbackTableRow = ({
           : 'Negative Feedback'}
       </TableCell>
       <TableCell align='left'>
-        {feedback.householdLookup?.id ? (
+        {feedback.householdLookup?.id && !isAllPrograms ? (
           <BlackLink to={householdDetailsPath}>
             {feedback.householdLookup?.unicefId}
           </BlackLink>
@@ -77,6 +77,20 @@ export const FeedbackTableRow = ({
       <TableCell align='left'>
         <UniversalMoment>{feedback.createdAt}</UniversalMoment>
       </TableCell>
+      {isAllPrograms && (
+        <TableCell align='left'>
+          {feedback.program?.id ? (
+            <BlackLink
+              key={feedback.program?.id}
+              to={`/${baseUrl}/details/${feedback.program?.id}`}
+            >
+              {feedback?.program.name}
+            </BlackLink>
+          ) : (
+            '-'
+          )}
+        </TableCell>
+      )}
     </ClickableTableRow>
   );
 };

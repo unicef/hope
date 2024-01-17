@@ -6,8 +6,9 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/De
     class="MuiBox-root MuiBox-root-1"
   >
     <button
-      class="MuiButtonBase-root MuiIconButton-root"
-      tabindex="0"
+      class="MuiButtonBase-root MuiIconButton-root Mui-disabled Mui-disabled"
+      disabled=""
+      tabindex="-1"
       type="button"
     >
       <span
@@ -24,9 +25,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/De
           />
         </svg>
       </span>
-      <span
-        class="MuiTouchRipple-root"
-      />
     </button>
   </div>
 </div>

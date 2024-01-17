@@ -33,12 +33,14 @@ const BorderBox = styled.div`
 
 interface IndividualBioDataProps {
   individual: IndividualNode;
+  baseUrl: string;
   businessArea: string;
   choicesData: HouseholdChoiceDataQuery;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
 export const IndividualBioData = ({
   individual,
+  baseUrl,
   businessArea,
   choicesData,
   grievancesChoices,
@@ -128,6 +130,16 @@ export const IndividualBioData = ({
             {individual?.bankAccountInfo?.bankAccountNumber}
           </LabelizedField>
         </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Account holder name')}>
+            {individual?.bankAccountInfo?.accountHolderName}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label={t('Bank branch name')}>
+            {individual?.bankAccountInfo?.bankBranchName}
+          </LabelizedField>
+        </Grid>
       </>
     );
   };
@@ -197,7 +209,7 @@ export const IndividualBioData = ({
           <LabelizedField label={t('Household ID')}>
             {individual?.household?.id ? (
               <ContentLink
-                href={`/${businessArea}/population/household/${individual?.household?.id}`}
+                href={`/${baseUrl}/population/household/${individual?.household?.id}`}
               >
                 {individual?.household?.unicefId}
               </ContentLink>
@@ -316,6 +328,7 @@ export const IndividualBioData = ({
           {individual?.household?.unicefId && (
             <LinkedGrievancesModal
               household={individual?.household}
+              baseUrl={baseUrl}
               businessArea={businessArea}
               grievancesChoices={grievancesChoices}
             />

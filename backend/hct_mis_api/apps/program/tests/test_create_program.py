@@ -2,11 +2,12 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.program.models import Program
 
 
 class TestCreateProgram(APITestCase):
@@ -22,12 +23,12 @@ class TestCreateProgram(APITestCase):
           description
           frequencyOfPayments
           sector
-          scope
           cashPlus
           populationGoal
           administrativeAreasOfImplementation
           dataCollectingType {
             code
+            label
             description
             active
             individualFiltersAvailable
@@ -41,10 +42,12 @@ class TestCreateProgram(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        cls.user = UserFactory.create()
+        cls.partner = PartnerFactory(name="WFP")
+        cls.user = UserFactory.create(partner=cls.partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.data_collecting_type = DataCollectingType.objects.create(
             code="partial_individuals",
+            label="Partial",
             description="Partial individuals collected",
             active=True,
             individual_filters_available=True,
@@ -59,12 +62,12 @@ class TestCreateProgram(APITestCase):
                 "description": "my description of program",
                 "frequencyOfPayments": "REGULAR",
                 "sector": "EDUCATION",
-                "scope": "UNICEF",
                 "cashPlus": True,
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
                 "businessAreaSlug": cls.business_area.slug,
                 "dataCollectingTypeCode": cls.data_collecting_type.code,
+                "partners": [{"id": str(cls.partner.id), "areaAccess": "BUSINESS_AREA"}],
             }
         }
 
@@ -140,3 +143,42 @@ class TestCreateProgram(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=program_data
         )
+
+    def test_program_unique_constraints(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+
+        self.assertEqual(Program.objects.count(), 0)
+
+        # First, response is ok and program is created
+        response_ok = self.graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
+        )
+        assert "errors" not in response_ok
+        self.assertEqual(Program.objects.count(), 1)
+
+        # Second, response has error due to unique constraints
+        response_error = self.graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
+        )
+        self.assertEqual(Program.objects.count(), 1)
+        self.assertEqual(
+            response_error["data"]["createProgram"]["validationErrors"]["__all__"][0],
+            f"Program for name: {self.program_data['programData']['name']} and business_area: {self.program_data['programData']['businessAreaSlug']} already exists.",
+        )
+
+        # Third, we remove program with given name and business area
+        Program.objects.first().delete()
+        self.assertEqual(Program.objects.count(), 0)
+
+        # Fourth, we can create program with the same name and business area like removed one
+        response_ok = self.graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables=self.program_data,
+        )
+        assert "errors" not in response_ok
+        self.assertEqual(Program.objects.count(), 1)

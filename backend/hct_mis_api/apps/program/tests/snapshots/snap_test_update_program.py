@@ -19,7 +19,27 @@ snapshots['TestUpdateProgram::test_update_active_program_with_dct 1'] = {
                     'line': 3
                 }
             ],
-            'message': 'DataCollectingType can be updated only for Program within status draft',
+            'message': 'The Data Collection Type for this programme cannot be edited.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_draft_not_empty_program_with_dct 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'DataCollectingType can be updated only for Program without any households',
             'path': [
                 'updateProgram'
             ]
@@ -95,6 +115,46 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
                 }
             ],
             'message': 'Permission Denied: User is not authenticated.',
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_of_other_partner_raise_error 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Please assign access to your partner before saving the programme.']",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestUpdateProgram::test_update_program_when_finished 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['You cannot change finished program']",
             'path': [
                 'updateProgram'
             ]

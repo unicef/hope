@@ -132,6 +132,8 @@ class BankTransferObjectType(graphene.InputObjectType):
     type = graphene.String(required=True)
     bank_name = graphene.String(required=True)
     bank_account_number = graphene.String(required=True)
+    bank_branch_name = graphene.String(required=False)
+    account_holder_name = graphene.String(required=True)
 
 
 class EditBankTransferObjectType(graphene.InputObjectType):
@@ -139,6 +141,8 @@ class EditBankTransferObjectType(graphene.InputObjectType):
     type = graphene.String(required=True)
     bank_name = graphene.String(required=True)
     bank_account_number = graphene.String(required=True)
+    bank_branch_name = graphene.String(required=False)
+    account_holder_name = graphene.String(required=True)
 
 
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
@@ -311,7 +315,7 @@ class CreateGrievanceTicketInput(graphene.InputObjectType):
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
     partner = graphene.Int(node=PartnerType, required=False)
-    programme = graphene.ID(node=ProgramNode)
+    program = graphene.ID(node=ProgramNode)
     comments = graphene.String()
     linked_feedback_id = graphene.ID()
     documentation = graphene.List(GrievanceDocumentInput)
@@ -332,7 +336,7 @@ class UpdateGrievanceTicketInput(graphene.InputObjectType):
     priority = graphene.Int(required=False)
     urgency = graphene.Int(required=False)
     partner = graphene.Int(node=PartnerType, required=False)
-    programme = graphene.ID(node=ProgramNode)
+    program = graphene.ID(node=ProgramNode)
     comments = graphene.String()
     documentation = graphene.List(GrievanceDocumentInput)
     documentation_to_update = graphene.List(GrievanceDocumentUpdateInput)

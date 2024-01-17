@@ -4,12 +4,49 @@ from django.db import connections
 
 
 def sql_drop_tables(connection: Any, connection_name: str = "") -> str:
-    if connection_name == "default":
-        # TODO: sometimes tables not dropped if using .django_table_names()
-        tables = connection.introspection.table_names(include_views=False)
-    else:
-        tables = connection.introspection.django_table_names(only_existing=True, include_views=False)
-    tables.append("django_migrations")
+    tables = connection.introspection.table_names(include_views=False)
+    if "django_migrations" not in tables:
+        tables.append("django_migrations")
+    # fix 'cannot drop table addr because extension postgis_tiger_geocoder requires it'
+    post_gis_tables = [
+        "addr",
+        "addrfeat",
+        "bg",
+        "county",
+        "county_lookup",
+        "countysub_lookup",
+        "cousub",
+        "direction_lookup",
+        "edges",
+        "faces",
+        "featnames",
+        "geocode_settings",
+        "geocode_settings_default",
+        "layer",
+        "loader_lookuptables",
+        "loader_platform",
+        "loader_variables",
+        "pagc_gaz",
+        "pagc_lex",
+        "pagc_rules",
+        "place",
+        "place_lookup",
+        "secondary_unit_lookup",
+        "state",
+        "state_lookup",
+        "street_type_lookup",
+        "tabblock",
+        "tabblock20",
+        "topology",
+        "tract",
+        "zcta5",
+        "zip_lookup",
+        "zip_lookup_all",
+        "zip_lookup_base",
+        "zip_state",
+        "zip_state_loc",
+    ]
+    tables = list(set(tables) - set(post_gis_tables))
     if not tables:
         return ""
     tables_sql = ", ".join(connection.ops.quote_name(table) for table in tables)
@@ -22,8 +59,10 @@ def drop_databases() -> None:
         if connection_name == "read_only":
             continue
         connection = connections[connection_name]
+        print(f"dropping tables for {connection_name}")
         with connection.cursor() as cursor:
             sql = sql_drop_tables(connection)
+            print(sql)
             if not sql:
                 continue
-            cursor.execute(sql)
+            return cursor.execute(sql)

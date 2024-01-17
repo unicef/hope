@@ -13,109 +13,96 @@ export const fakeApolloAllPaymentRecordsHousehold = [
       },
     },
     result: {
-      "data": {
-        "allPaymentRecordsAndPayments": {
-          "pageInfo": {
-            "hasNextPage": false,
-            "hasPreviousPage": false,
-            "startCursor": "YXJyYXljb25uZWN0aW9uOjA=",
-            "endCursor": "YXJyYXljb25uZWN0aW9uOjM=",
-            "__typename": "PageInfoNode"
+      data: {
+        allPaymentRecordsAndPayments: {
+          pageInfo: {
+            hasNextPage: false,
+            hasPreviousPage: false,
+            startCursor: 'YXJyYXljb25uZWN0aW9uOjA=',
+            endCursor: 'YXJyYXljb25uZWN0aW9uOjI=',
+            __typename: 'PageInfoNode',
           },
-          "edges": [
+          edges: [
             {
-              "cursor": "YXJyYXljb25uZWN0aW9uOjA=",
-              "node": {
-                "objType": "Payment",
-                "id": "UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk",
-                "fullName": "Jan Kowalski",
-                "status": "Pending",
-                "caId": "RCPT-0060-23-0.000.001",
-                "currency": "USD",
-                "entitlementQuantity": null,
-                "deliveredQuantity": null,
-                "deliveredQuantityUsd": null,
-                "deliveryDate": "1991-11-18 00:00:00+00:00",
-                "parent": {
-                  "id": "UGF5bWVudFBsYW5Ob2RlOjAwMDAwMDAwLWZlZWQtYmVlZi0wMDAwLTAwMDAwYmFkZjAwZA==",
-                  "programmeName": "Test Program",
-                  "__typename": "CashPlanAndPaymentPlanNode"
+              cursor: 'YXJyYXljb25uZWN0aW9uOjA=',
+              node: {
+                objType: 'PaymentRecord',
+                id:
+                  'UGF5bWVudFJlY29yZE5vZGU6OTljYTYxY2EtMzRmNS00OGFjLWIzMzItZTA4YzY4ZWU0NGNj',
+                fullName: 'Alyssa Davis',
+                status: 'TRANSACTION_ERRONEOUS',
+                caId: '123-21-PR-00009',
+                currency: 'GNF',
+                entitlementQuantity: 8581.3,
+                deliveredQuantity: 4659,
+                deliveredQuantityUsd: 2963,
+                deliveryDate: '2022-01-07 14:15:18+00:00',
+                parent: {
+                  id:
+                    'Q2FzaFBsYW5Ob2RlOmY1MTQyYzZiLWZjNzAtNGEzMC1hNjRlLTAyNzhkZTI5ZDMwMA==',
+                  programName: 'Test Program',
+                  __typename: 'CashPlanAndPaymentPlanNode',
                 },
-                "__typename": "PaymentRecordAndPaymentNode"
+                verification: null,
+                __typename: 'PaymentRecordAndPaymentNode',
               },
-              "__typename": "PaymentRecordsAndPaymentsEdges"
+              __typename: 'PaymentRecordsAndPaymentsEdges',
             },
             {
-              "cursor": "YXJyYXljb25uZWN0aW9uOjE=",
-              "node": {
-                "objType": "PaymentRecord",
-                "id": "UGF5bWVudFJlY29yZE5vZGU6ZWE4ZmU2OTktZGFhOS00NTE2LWE5NTktMzNkMzA3Y2M3ZWZm",
-                "fullName": "Lisa Lewis",
-                "status": "Pending",
-                "caId": "123-21-PR-00010",
-                "currency": "IRR",
-                "entitlementQuantity": 4468.49,
-                "deliveredQuantity": 1308,
-                "deliveredQuantityUsd": 1966,
-                "deliveryDate": "2021-12-04 22:43:09+00:00",
-                "parent": {
-                  "id": "Q2FzaFBsYW5Ob2RlOmViYzdiMTk2LWE1YzktNDI4Ni04ZTE0LWRmMmVhNjIzNTQ4Nw==",
-                  "programmeName": "Where production bill mean.",
-                  "__typename": "CashPlanAndPaymentPlanNode"
+              cursor: 'YXJyYXljb25uZWN0aW9uOjE=',
+              node: {
+                objType: 'PaymentRecord',
+                id:
+                  'UGF5bWVudFJlY29yZE5vZGU6NGRmMjhlZWEtMjhjMC00Mzk2LTk2Y2MtZDMzOGU4Yzk0ZDE5',
+                fullName: 'Jesse Reynolds',
+                status: 'TRANSACTION_SUCCESSFUL',
+                caId: '123-21-PR-00002',
+                currency: 'AED',
+                entitlementQuantity: 3562.5,
+                deliveredQuantity: 2833,
+                deliveredQuantityUsd: 2418,
+                deliveryDate: '2023-07-10 19:16:41+00:00',
+                parent: {
+                  id:
+                    'Q2FzaFBsYW5Ob2RlOmY2MzkxZDVhLTgyZmMtNGMyYi04ZTM0LWRmZDQ2NmRkZDhhMg==',
+                  programName: 'Test Program',
+                  __typename: 'CashPlanAndPaymentPlanNode',
                 },
-                "__typename": "PaymentRecordAndPaymentNode"
+                verification: null,
+                __typename: 'PaymentRecordAndPaymentNode',
               },
-              "__typename": "PaymentRecordsAndPaymentsEdges"
+              __typename: 'PaymentRecordsAndPaymentsEdges',
             },
             {
-              "cursor": "YXJyYXljb25uZWN0aW9uOjI=",
-              "node": {
-                "objType": "PaymentRecord",
-                "id": "UGF5bWVudFJlY29yZE5vZGU6MzE3ODUxYmYtNDU0YS00NDg4LWIyMzUtMjkzMDg5MTkyYzJj",
-                "fullName": "Mark Mills",
-                "status": "Distribution Successful",
-                "caId": "123-21-PR-00006",
-                "currency": "LBP",
-                "entitlementQuantity": 1786.52,
-                "deliveredQuantity": 372,
-                "deliveredQuantityUsd": 298,
-                "deliveryDate": "2021-06-16 01:11:34+00:00",
-                "parent": {
-                  "id": "Q2FzaFBsYW5Ob2RlOmViYzdiMTk2LWE1YzktNDI4Ni04ZTE0LWRmMmVhNjIzNTQ4Nw==",
-                  "programmeName": "Where production bill mean.",
-                  "__typename": "CashPlanAndPaymentPlanNode"
+              cursor: 'YXJyYXljb25uZWN0aW9uOjI=',
+              node: {
+                objType: 'Payment',
+                id:
+                  'UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk',
+                fullName: 'Jan Kowalski',
+                status: 'PENDING',
+                caId: 'RCPT-0060-23-0.000.043',
+                currency: 'USD',
+                entitlementQuantity: null,
+                deliveredQuantity: null,
+                deliveredQuantityUsd: null,
+                deliveryDate: null,
+                parent: {
+                  id:
+                    'UGF5bWVudFBsYW5Ob2RlOjAwMDAwMDAwLWZlZWQtYmVlZi0wMDAwLTAwMDAwYmFkZjAwZA==',
+                  programName: 'Test Program',
+                  __typename: 'CashPlanAndPaymentPlanNode',
                 },
-                "__typename": "PaymentRecordAndPaymentNode"
+                verification: null,
+                __typename: 'PaymentRecordAndPaymentNode',
               },
-              "__typename": "PaymentRecordsAndPaymentsEdges"
+              __typename: 'PaymentRecordsAndPaymentsEdges',
             },
-            {
-              "cursor": "YXJyYXljb25uZWN0aW9uOjM=",
-              "node": {
-                "objType": "PaymentRecord",
-                "id": "UGF5bWVudFJlY29yZE5vZGU6MGVlODMzNzQtZDU1Yi00MzgwLTg1ZGQtNzM3MzE5ZmFjMWM0",
-                "fullName": "Alisha Delacruz",
-                "status": "Transaction Successful",
-                "caId": "123-21-PR-00003",
-                "currency": "GBP",
-                "entitlementQuantity": 886.54,
-                "deliveredQuantity": 273,
-                "deliveredQuantityUsd": 583,
-                "deliveryDate": "2022-03-19 12:29:44+00:00",
-                "parent": {
-                  "id": "Q2FzaFBsYW5Ob2RlOjJlZmRmNGM3LTE3ZDMtNDg5Zi04NWZmLWMyNjUwOWIxNGNlZA==",
-                  "programmeName": "Where production bill mean.",
-                  "__typename": "CashPlanAndPaymentPlanNode"
-                },
-                "__typename": "PaymentRecordAndPaymentNode"
-              },
-              "__typename": "PaymentRecordsAndPaymentsEdges"
-            }
           ],
-          "totalCount": 4,
-          "__typename": "PaginatedPaymentRecordsAndPaymentsNode"
-        }
-      }
+          totalCount: 3,
+          __typename: 'PaginatedPaymentRecordsAndPaymentsNode',
+        },
+      },
     },
   },
 ];

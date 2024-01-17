@@ -2,7 +2,7 @@ import { Box, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
 import { ContentLink } from '../core/ContentLink';
@@ -17,7 +17,7 @@ import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 
 export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [show, setShow] = useState(false);
 
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -36,19 +36,20 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const existingTickets = data.existingGrievanceTickets.edges;
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
-      ? tickets.map((edge) => (
-          <Box key={edge.node.id} mb={1}>
-            <ContentLink
-              href={getGrievanceDetailsPath(
-                edge.node.id,
-                edge.node.category,
-                businessArea,
-              )}
-            >
-              {edge.node.unicefId}
-            </ContentLink>
-          </Box>
-        ))
+      ? tickets.map((edge) => {
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            edge.node.id,
+            edge.node.category,
+            baseUrl,
+          );
+          return (
+            <Box key={edge.node.id} mb={1}>
+              <ContentLink href={grievanceDetailsPath}>
+                {edge.node.unicefId}
+              </ContentLink>
+            </Box>
+          );
+        })
       : '-';
 
   const openExistingTickets = existingTickets.length

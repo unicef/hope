@@ -4,22 +4,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { FlagTooltip } from '../../../components/core/FlagTooltip';
-import { WarningTooltip } from '../../../components/core/WarningTooltip';
-import { LabelizedField } from '../../../components/core/LabelizedField';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { usePermissions } from '../../../hooks/usePermissions';
-import {
-  isPermissionDeniedError,
-  renderSomethingOrDash,
-} from '../../../utils/utils';
 import {
   HouseholdNode,
   useAllHouseholdsFlexFieldsAttributesQuery,
@@ -27,12 +11,28 @@ import {
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../../__generated__/graphql';
+import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { FlagTooltip } from '../../../components/core/FlagTooltip';
+import { LabelizedField } from '../../../components/core/LabelizedField';
+import { LoadingComponent } from '../../../components/core/LoadingComponent';
+import { PageHeader } from '../../../components/core/PageHeader';
+import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { Title } from '../../../components/core/Title';
+import { UniversalMoment } from '../../../components/core/UniversalMoment';
+import { WarningTooltip } from '../../../components/core/WarningTooltip';
+import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
+import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '../../../hooks/usePermissions';
+import {
+  isPermissionDeniedError,
+  renderSomethingOrDash,
+} from '../../../utils/utils';
+import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
+import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
 import { HouseholdIndividualsTable } from '../../tables/population/HouseholdIndividualsTable/HouseholdIndividualsTable';
-import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
-import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
-import { Title } from '../../../components/core/Title';
 
 const Container = styled.div`
   padding: 20px;
@@ -61,8 +61,8 @@ const SubTitle = styled(Typography)`
 export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const { baseUrl, businessArea } = useBaseUrl();
   const history = useHistory();
-  const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
   const { data, loading, error } = useHouseholdQuery({
@@ -104,7 +104,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Households'),
-      to: `/${businessArea}/population/household`,
+      to: `/${baseUrl}/population/household`,
     },
   ];
   const breadcrumbTitle = history.location?.state?.breadcrumbTitle;
@@ -164,6 +164,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}
+        baseUrl={baseUrl}
         businessArea={businessArea}
         grievancesChoices={grievancesChoices}
       />
@@ -176,7 +177,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
           />
         ) : null}
         {hasPermissions(
-          PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+          PERMISSIONS.PROGRAMME_VIEW_LIST_AND_DETAILS,
           permissions,
         ) && (
           <PaymentRecordHouseholdTable

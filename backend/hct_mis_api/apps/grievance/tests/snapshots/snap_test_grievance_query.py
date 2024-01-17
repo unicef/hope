@@ -308,3 +308,85 @@ snapshots['TestGrievanceQuery::test_grievance_query_single_1_without_permission 
         }
     ]
 }
+
+snapshots['TestGrievanceQuery::test_grievance_ticket_query_access 1'] = {
+    'data': {
+        'grievanceTicket': {
+            'admin': None,
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-22T00:00:00+00:00',
+            'description': 'Just random description 333',
+            'language': 'Polish, English',
+            'status': 3
+        }
+    }
+}
+
+snapshots['TestGrievanceQuery::test_grievance_ticket_query_access 2'] = {
+    'data': {
+        'grievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "Can't check permission for All Programmes",
+            'path': [
+                'grievanceTicket'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceQuery::test_grievance_ticket_query_access 3'] = {
+    'data': {
+        'grievanceTicket': {
+            'admin': 'City Test',
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-22T00:00:00+00:00',
+            'description': 'Just random description 333',
+            'language': 'Polish, English',
+            'status': 3
+        }
+    }
+}
+
+snapshots['TestGrievanceQuery::test_grievance_ticket_query_access 4'] = {
+    'data': {
+        'grievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "User is not active creator/assignee and does not have 'GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE' permission",
+            'path': [
+                'grievanceTicket'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceQuery::test_grievance_ticket_query_access 5'] = {
+    'data': {
+        'grievanceTicket': {
+            'admin': 'City Test',
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-22T00:00:00+00:00',
+            'description': 'Just random description 333',
+            'language': 'Polish, English',
+            'status': 3
+        }
+    }
+}

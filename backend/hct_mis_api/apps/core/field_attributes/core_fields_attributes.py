@@ -1753,6 +1753,32 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "age_at_registration",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
     },
+    {
+        "id": "22085a8d-205d-42a9-b5b3-951b51f11915",
+        "type": TYPE_STRING,
+        "name": "account_holder_name",
+        "lookup": "account_holder_name",
+        "label": {"English(EN)": "Account holder name"},
+        "hint": "",
+        "required": True,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "account_holder_name_i_c",
+        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT],
+    },
+    {
+        "id": "e9d964b9-aa85-4a0f-b1eb-4755bdad7592",
+        "type": TYPE_STRING,
+        "name": "bank_branch_name",
+        "lookup": "bank_branch_name",
+        "label": {"English(EN)": "Bank branch name"},
+        "hint": "",
+        "required": False,
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "bank_branch_name_i_c",
+        "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT],
+    },
 ] + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 
 
@@ -1818,10 +1844,14 @@ class FieldFactory(list):
     def to_choices(self) -> List[Any]:
         return [(x["name"], x["label"]["English(EN)"]) for x in self]
 
-    def apply_business_area(self, business_area_slug: Optional[str] = None) -> "FieldFactory":
+    def apply_business_area(
+        self,
+        business_area_slug: Optional[str] = None,
+        program_id: Optional[str] = None,
+    ) -> "FieldFactory":
         factory = FieldFactory(self, self.scopes)
         for field in factory:
             choices = field.get("_choices")
             if callable(choices):
-                field["choices"] = choices(business_area_slug=business_area_slug)
+                field["choices"] = choices(business_area_slug=business_area_slug, program_id=program_id)
         return factory

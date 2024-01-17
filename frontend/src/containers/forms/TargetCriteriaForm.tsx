@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
 import {
   chooseFieldType,
@@ -105,8 +105,8 @@ interface TargetCriteriaFormPropTypes {
   open: boolean;
   onClose: () => void;
   shouldShowWarningForIndividualFilter?: boolean;
-  individualFiltersAvailable: boolean
-  householdFiltersAvailable: boolean
+  individualFiltersAvailable: boolean;
+  householdFiltersAvailable: boolean;
 }
 
 const associatedWith = (type) => (item) => item.associatedWith === type;
@@ -119,10 +119,10 @@ export function TargetCriteriaForm({
   onClose,
   shouldShowWarningForIndividualFilter,
   individualFiltersAvailable,
-  householdFiltersAvailable
+  householdFiltersAvailable,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const { data, loading } = useCachedImportedIndividualFieldsQuery(
     businessArea,
   );
@@ -253,7 +253,7 @@ export function TargetCriteriaForm({
                     {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
                     // @ts-ignore
                     errors.nonFieldErrors.map((message) => (
-                      <li>{message}</li>
+                      <li key={message}>{message}</li>
                     ))}
                   </ul>
                 </DialogError>
@@ -314,60 +314,60 @@ export function TargetCriteriaForm({
                 </Box>
               ) : null}
               {individualFiltersAvailable ? (
-                  <>
-                    {householdFiltersAvailable ? (
-                      <AndDivider>
-                        <AndDividerLabel>And</AndDividerLabel>
-                      </AndDivider>
-                    ) : null}
-                    {values.individualsFiltersBlocks.length &&
-                    shouldShowWarningForIndividualFilter ? (
-                      <DialogDescription>
-                        In your programme, individual rules can only be applied to
-                        head of households.
-                      </DialogDescription>
-                    ) : null}
-                    <FieldArray
-                      name='individualsFiltersBlocks'
-                      render={(arrayHelpers) => (
-                        <ArrayFieldWrapper
-                          arrayHelpers={arrayHelpers}
-                          ref={individualsFiltersBlocksWrapperRef}
-                        >
-                          {values.individualsFiltersBlocks.map((each, index) => {
-                            return (
-                              <TargetCriteriaFilterBlocks
-                                //eslint-disable-next-line
-                                key={index}
-                                blockIndex={index}
-                                data={individualData}
-                                values={values}
-                                onDelete={() => arrayHelpers.remove(index)}
-                              />
-                            );
-                          })}
-                        </ArrayFieldWrapper>
-                      )}
-                    />
-                    <Box display='flex' flexDirection='column'>
-                      <ButtonBox>
-                        <Button
-                          data-cy='button-individual-rule'
-                          onClick={() =>
-                            individualsFiltersBlocksWrapperRef.current
-                              .getArrayHelpers()
-                              .push({
-                                individualBlockFilters: [{ fieldName: '' }],
-                              })
-                          }
-                          color='primary'
-                          startIcon={<AddCircleOutline />}
-                        >
-                          ADD INDIVIDUAL RULE GROUP
-                        </Button>
-                      </ButtonBox>
-                    </Box>
-                  </>
+                <>
+                  {householdFiltersAvailable ? (
+                    <AndDivider>
+                      <AndDividerLabel>And</AndDividerLabel>
+                    </AndDivider>
+                  ) : null}
+                  {values.individualsFiltersBlocks.length &&
+                  shouldShowWarningForIndividualFilter ? (
+                    <DialogDescription>
+                      In your programme, individual rules can only be applied to
+                      head of households.
+                    </DialogDescription>
+                  ) : null}
+                  <FieldArray
+                    name='individualsFiltersBlocks'
+                    render={(arrayHelpers) => (
+                      <ArrayFieldWrapper
+                        arrayHelpers={arrayHelpers}
+                        ref={individualsFiltersBlocksWrapperRef}
+                      >
+                        {values.individualsFiltersBlocks.map((each, index) => {
+                          return (
+                            <TargetCriteriaFilterBlocks
+                              //eslint-disable-next-line
+                              key={index}
+                              blockIndex={index}
+                              data={individualData}
+                              values={values}
+                              onDelete={() => arrayHelpers.remove(index)}
+                            />
+                          );
+                        })}
+                      </ArrayFieldWrapper>
+                    )}
+                  />
+                  <Box display='flex' flexDirection='column'>
+                    <ButtonBox>
+                      <Button
+                        data-cy='button-individual-rule'
+                        onClick={() =>
+                          individualsFiltersBlocksWrapperRef.current
+                            .getArrayHelpers()
+                            .push({
+                              individualBlockFilters: [{ fieldName: '' }],
+                            })
+                        }
+                        color='primary'
+                        startIcon={<AddCircleOutline />}
+                      >
+                        ADD INDIVIDUAL RULE GROUP
+                      </Button>
+                    </ButtonBox>
+                  </Box>
+                </>
               ) : null}
             </DialogContent>
             <DialogFooter>

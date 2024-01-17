@@ -17,6 +17,8 @@ import { DialogActions } from '../../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
+import { ButtonTooltip } from '../../core/ButtonTooltip';
+import { useProgramContext } from '../../../programContext';
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
 import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
 
@@ -38,12 +40,14 @@ const StyledDialogFooter = styled(DialogFooter)`
   }
 `;
 
-export function RegistrationDataImportCreateDialog(): React.ReactElement {
+export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState('');
   const [submitDisabled, setSubmitDisabled] = useState(true);
   const [submitForm, setSubmitForm] = usePassFunctionFromChild();
+  const { isActiveProgram } = useProgramContext();
+
   useEffect(() => {
     if (!open) {
       setImportType('');
@@ -51,18 +55,21 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
     }
   }, [open]);
   const openModalButton = (
-    <span>
-      <Button
-        variant='contained'
-        color='primary'
-        startIcon={<ExitToAppRoundedIcon />}
-        onClick={() => setOpen(true)}
-        data-cy='button-import'
-      >
-        {t('IMPORT')}
-      </Button>
-    </span>
+    <ButtonTooltip
+      variant='contained'
+      color='primary'
+      startIcon={<ExitToAppRoundedIcon />}
+      onClick={() => setOpen(true)}
+      data-cy='button-import'
+      title={t(
+        'Program has to be active to create a new RegistrationDataImport',
+      )}
+      disabled={!isActiveProgram}
+    >
+      {t('IMPORT')}
+    </ButtonTooltip>
   );
+
   let importTypeForm;
   switch (importType) {
     case 'kobo':
@@ -149,4 +156,4 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
       </Dialog>
     </span>
   );
-}
+};

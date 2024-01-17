@@ -128,28 +128,6 @@ exports[`components/ProgramDetails should render 1`] = `
               class="sc-bwzfXH eoWrid"
               color="textSecondary"
             >
-              Scope
-            </span>
-            <div
-              data-cy="label-Scope"
-            >
-              <span
-                class="sc-htpNat gXZdAP"
-                color="textSecondary"
-              >
-                Unicef
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
               Data Collecting Type
             </span>
             <div
@@ -247,31 +225,9 @@ exports[`components/ProgramDetails should render 1`] = `
             </div>
           </div>
         </div>
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bwzfXH eoWrid"
-              color="textSecondary"
-            >
-              Does this programme use individuals’ data for targeting or entitlement calculation?
-            </span>
-            <div
-              data-cy="label-Does this programme use individuals’ data for targeting or entitlement calculation?"
-            >
-              <span
-                class="sc-htpNat gXZdAP"
-                color="textSecondary"
-              >
-                No
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
       <div
-        class="sc-gzVnrw bCMxAI"
+        class="sc-dnqmqq gRhSyd"
       >
         <div>
           <span
@@ -284,9 +240,62 @@ exports[`components/ProgramDetails should render 1`] = `
             data-cy="label-Total Number of Households"
           >
             <div
-              class="sc-htoDjs psyrE"
+              class="sc-iwsKbI kRgjtW"
             >
               2
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="sc-gzVnrw bybGDk"
+    >
+      <div
+        class="sc-htoDjs ceIHRR"
+      />
+    </div>
+    <div
+      class="sc-bZQynM ghLfwz"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        Programme Partners
+      </h6>
+    </div>
+    <div
+      class="sc-bxivhb ehCvPb"
+    >
+      <div
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+      >
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        >
+          <div
+            class="MuiBox-root MuiBox-root-1 sc-gZMcBi fFLApy"
+          >
+            <h6
+              class="MuiTypography-root MuiTypography-h6"
+            />
+            <div>
+              <span
+                class="sc-bwzfXH eoWrid"
+                color="textSecondary"
+              >
+                Area Access
+              </span>
+              <div
+                data-cy="label-Area Access"
+              >
+                <span
+                  class="sc-htpNat gXZdAP"
+                  color="textSecondary"
+                >
+                  Business Area
+                </span>
+              </div>
             </div>
           </div>
         </div>

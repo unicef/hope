@@ -1,61 +1,46 @@
-from collections import defaultdict
 from decimal import Decimal
 from typing import Any, Dict, List
 
-from django.db.models import DecimalField, F, Sum
+from django.db.models import DecimalField, Sum
 from django.db.models.functions import Coalesce
 
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
-from hct_mis_api.apps.core.utils import encode_id_base64_required
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord
 
 
-def programs_with_delivered_quantity(household: Household) -> List[Dict[str, Any]]:
+def delivered_quantity_service(household: Household) -> List[Dict[str, Any]]:
     payment_items = ExtendedQuerySetSequence(household.paymentrecord_set.all(), household.payment_set.all())
-    programs = (
-        payment_items.select_related("parent__program")
-        .exclude(status=PaymentRecord.STATUS_FORCE_FAILED)
-        .values("parent__program")
-        .order_by("parent__program")
+    quantity_in_usd = payment_items.exclude(status=PaymentRecord.STATUS_FORCE_FAILED).aggregate(
+        total_delivered_quantity_usd=Coalesce(Sum("delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)),
+    )
+    quantities_per_currency = (
+        payment_items.exclude(status=PaymentRecord.STATUS_FORCE_FAILED)
+        .exclude(currency="USD")
+        .values("currency")
         .annotate(
-            total_delivered_quantity=Coalesce(Sum("delivered_quantity", output_field=DecimalField()), Decimal(0.0)),
-            total_delivered_quantity_usd=Coalesce(
-                Sum("delivered_quantity_usd", output_field=DecimalField()), Decimal(0.0)
-            ),
-            program_name=F("parent__program__name"),
-            currency=F("currency"),
-            program_id=F("parent__program__id"),
-            program_created_at=F("parent__program__created_at"),
+            total_delivered_quantity=Coalesce(Sum("delivered_quantity", output_field=DecimalField()), Decimal(0.0))
         )
-        .order_by("program_created_at")
         .merge_by(
-            "parent__program",
-            aggregated_fields=["total_delivered_quantity", "total_delivered_quantity_usd"],
-            regular_fields=["program_name", "program_id", "program_created_at", "currency"],
+            "currency",
+            aggregated_fields=["total_delivered_quantity"],
+            regular_fields=["currency"],
         )
     )
 
-    programs_dict: Dict[str, Dict] = defaultdict(dict)
+    result = [
+        {
+            "total_delivered_quantity": quantity_in_usd["total_delivered_quantity_usd"],
+            "currency": "USD",
+        }
+    ]
 
-    for program in programs:
-        programs_dict[program["program_id"]]["id"] = encode_id_base64_required(program["program_id"], "Program")
-        programs_dict[program["program_id"]]["name"] = program["program_name"]
-        programs_dict[program["program_id"]]["quantity"] = programs_dict[program["program_id"]].get("quantity", [])
-
-        programs_dict[program["program_id"]]["quantity"].append(
+    for quantity in quantities_per_currency:
+        result.append(
             {
-                "total_delivered_quantity": program["total_delivered_quantity_usd"],
-                "currency": "USD",
+                "total_delivered_quantity": quantity["total_delivered_quantity"],
+                "currency": quantity["currency"],
             }
         )
 
-        if program["currency"] != "USD":
-            programs_dict[program["program_id"]]["quantity"].append(
-                {
-                    "total_delivered_quantity": program["total_delivered_quantity"],
-                    "currency": program["currency"],
-                }
-            )
-
-    return list(programs_dict.values())
+    return result

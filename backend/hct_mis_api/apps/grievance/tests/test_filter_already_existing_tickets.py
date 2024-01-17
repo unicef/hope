@@ -4,7 +4,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -68,7 +68,8 @@ class TestAlreadyExistingFilterTickets(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
-        cls.user = UserFactory.create()
+        cls.partner = PartnerFactory(name="TestPartner")
+        cls.user = UserFactory(partner=cls.partner)
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
         country = geo_models.Country.objects.get(name="Afghanistan")

@@ -1,19 +1,20 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import {
+  ProgramQuery,
+  ProgrammeChoiceDataQuery,
+} from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
 import { choicesToDict, programStatusToColor } from '../../../utils/utils';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramNode,
-} from '../../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
 import { StatusBox } from '../../core/StatusBox';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
+import { DividerLine } from '../../core/DividerLine';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)}px;
@@ -30,26 +31,26 @@ const NumberOfHouseHoldsValue = styled.div`
   margin-top: ${({ theme }) => theme.spacing(2)}px;
 `;
 
+const StyledBox = styled(Box)`
+  border: 1px solid #e3e3e3;
+`;
+
 interface ProgramDetailsProps {
-  program: ProgramNode;
+  program: ProgramQuery['program'];
   choices: ProgrammeChoiceDataQuery;
 }
 
-export function ProgramDetails({
+export const ProgramDetails = ({
   program,
   choices,
-}: ProgramDetailsProps): React.ReactElement {
+}: ProgramDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const {
-    programFrequencyOfPaymentsChoices,
-    programSectorChoices,
-    programScopeChoices,
-  } = choices;
+  const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
   const programFrequencyOfPaymentsChoicesDict = choicesToDict(
     programFrequencyOfPaymentsChoices,
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
-  const programScopeChoicesDict = choicesToDict(programScopeChoices);
+
   return (
     <ContainerColumnWithBorder data-cy='program-details-container'>
       <Title>
@@ -86,14 +87,8 @@ export function ProgramDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              label={t('Scope')}
-              value={programScopeChoicesDict[program.scope]}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
               label={t('Data Collecting Type')}
-              value={program.dataCollectingType?.label}
+              value={program?.dataCollectingType?.label}
             />
           </Grid>
           <Grid item xs={4}>
@@ -125,14 +120,6 @@ export function ProgramDetails({
               value={program.cashPlus ? t('Yes') : t('No')}
             />
           </Grid>
-          <Grid item xs={4}>
-            <LabelizedField
-              label={t(
-                'Does this programme use individuals’ data for targeting or entitlement calculation?',
-              )}
-              value={program.individualDataNeeded ? t('Yes') : t('No')}
-            />
-          </Grid>
         </Grid>
         <NumberOfHouseHolds>
           <LabelizedField label={t('Total Number of Households')}>
@@ -142,6 +129,33 @@ export function ProgramDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
+      {program.partners.length > 0 && (
+        <>
+          <DividerLine />
+          <Title>
+            <Typography variant='h6'>{t('Programme Partners')}</Typography>
+          </Title>
+          <OverviewContainer>
+            <Grid container spacing={6}>
+              {program.partners.map((partner) => (
+                <Grid key={partner.id} item xs={3}>
+                  <StyledBox p={6} flexDirection='column'>
+                    <Typography variant='h6'>{partner.name}</Typography>
+                    <LabelizedField
+                      label={t('Area Access')}
+                      value={
+                        partner.areaAccess === 'BUSINESS_AREA'
+                          ? t('Business Area')
+                          : `Admin Areas: ${partner.adminAreas?.length || 0}`
+                      }
+                    />
+                  </StyledBox>
+                </Grid>
+              ))}
+            </Grid>
+          </OverviewContainer>
+        </>
+      )}
     </ContainerColumnWithBorder>
   );
-}
+};

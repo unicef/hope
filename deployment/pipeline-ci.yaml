@@ -221,7 +221,7 @@ stages:
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run backend test'
+              dockerComposeCommand: 'run backend ./dev.sh test'
               dockerComposeFileArgs: |
                 backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
           - task: PublishTestResults@2
@@ -275,5 +275,9 @@ stages:
                   -H "Content-Length: $contentLength" \
                   -d "$jsonBody" \
                   https://dev.azure.com/$organization/$project/_apis/pipelines/$pipeline/runs?api-version=7.1-preview.1
+                if [ $? -ne 0 ]; then
+                  echo "Failed to trigger deploy for pipeline $pipeline"
+                  exit 1
+                fi
               done
             displayName: "Trigger deploy"
