@@ -74,7 +74,6 @@ export const Description = ({
       householdId: values.selectedHousehold?.id,
       individualId: values.selectedIndividual?.id,
     },
-    skip: !values.selectedHousehold?.id && !values.selectedIndividual?.id,
   });
   const categoryChoices: {
     [id: number]: string;
