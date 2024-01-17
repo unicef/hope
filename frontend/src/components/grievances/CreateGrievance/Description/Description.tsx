@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import {
   AllProgramsForChoicesQuery,
   GrievancesChoiceDataQuery,
-  UserChoiceDataQuery,
+  usePartnerForGrievanceChoicesQuery,
 } from '../../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
@@ -50,7 +50,6 @@ export interface DescriptionProps {
   selectedIssueType: (values) => string;
   baseUrl: string;
   choicesData: GrievancesChoiceDataQuery;
-  userChoices: UserChoiceDataQuery;
   programsData: AllProgramsForChoicesQuery;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
@@ -63,7 +62,6 @@ export const Description = ({
   selectedIssueType,
   baseUrl,
   choicesData,
-  userChoices,
   programsData,
   setFieldValue,
   errors,
@@ -71,6 +69,13 @@ export const Description = ({
 }: DescriptionProps): React.ReactElement => {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { data: partnerChoicesData } = usePartnerForGrievanceChoicesQuery({
+    variables: {
+      householdId: values.selectedHousehold?.id,
+      individualId: values.selectedIndividual?.id,
+    },
+    skip: !values.selectedHousehold?.id && !values.selectedIndividual?.id,
+  });
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
@@ -177,7 +182,7 @@ export const Description = ({
                 fullWidth
                 variant='outlined'
                 label={t('Partner*')}
-                choices={userChoices.userPartnerChoices}
+                choices={partnerChoicesData?.partnerForGrievanceChoices || []}
                 component={FormikSelectField}
               />
             </Grid>
