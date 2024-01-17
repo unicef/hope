@@ -1,137 +1,94 @@
 import { HouseholdNode } from '../../src/__generated__/graphql';
 
 export const fakeHousehold = {
-  id: 'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
-  createdAt: '2022-02-07T11:46:27.904164',
+  id: 'SG91c2Vob2xkTm9kZTo0MmY5MGUzOS0zZGM4LTQ2MTctYjQ3Zi0xMGM1MWQ3MTk0Nzg=',
+  status: 'ACTIVE',
+  createdAt: '2023-12-19T20:53:28.638529+00:00',
   residenceStatus: 'REFUGEE',
   size: 4,
-  totalCashReceived: '19318.00',
-  totalCashReceivedUsd: '24697.00',
+  totalCashReceived: null,
+  totalCashReceivedUsd: null,
   currency: '',
-  firstRegistrationDate: '2020-08-22T00:00:00',
-  lastRegistrationDate: '2020-08-22T00:00:00',
-  status: 'ACTIVE',
+  firstRegistrationDate: '2020-08-22T00:00:00+00:00',
+  lastRegistrationDate: '2020-08-22T00:00:00+00:00',
   sanctionListPossibleMatch: false,
   sanctionListConfirmedMatch: false,
   hasDuplicates: false,
-  unicefId: 'HH-20-0000.0001',
-  flexFields: { months_displaced_h_f: 12, difficulty_breathing_h_f: '1' },
+  unicefId: 'HH-20-0000.2185',
+  flexFields: {
+    months_displaced_h_f: 10,
+  },
   unhcrId: '',
-  geopoint: { type: 'Point', coordinates: [70.210209, 172.085021] },
+  geopoint: {
+    type: 'Point',
+    coordinates: [70.210209, 172.085021],
+  },
   village: '',
-  adminAreaTitle: 'Achin',
+  adminAreaTitle: 'Abband - AF1115',
   admin1: {
-    id: 'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-    name: 'Nangarhar',
-    level: 1,
-    pCode: 'AF06',
+    id: 'QXJlYU5vZGU6NjYyMmM5MjgtYTI0MC00YzhjLWExMDgtODU5ZTk5MDBmNzIx',
+    name: 'Ghazni',
+    level: 0,
+    pCode: 'AF11',
     __typename: 'AreaNode',
   },
   admin2: {
-    id: 'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-    name: 'Achin',
-    level: 2,
-    pCode: 'AF0617',
+    id: 'QXJlYU5vZGU6NmExNWMzYTAtMmE2OS00M2Q5LWJlM2YtYThjMWQyY2FjN2Ji',
+    name: 'Abband',
+    level: 1,
+    pCode: 'AF1115',
     __typename: 'AreaNode',
   },
+  admin3: null,
+  admin4: null,
   headOfHousehold: {
-    id: 'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
-    fullName: 'Agata Kowalska',
-    givenName: 'Agata',
-    familyName: 'Kowalska',
+    id: 'SW5kaXZpZHVhbE5vZGU6YWNmYWUyZDItOWNjOS00NDI2LWE2N2YtYTA5Mjk5MDE1ODA3',
+    fullName: 'Milton Friedman',
+    givenName: 'Milton',
+    familyName: 'Friedman',
     __typename: 'IndividualNode',
   },
   address: '938 Luna Cliffs Apt. 551\nJameschester, SC 24934',
   individuals: {
-    totalCount: 3,
+    totalCount: 4,
     __typename: 'IndividualNodeConnection',
     edges: [
       {
         node: {
           id:
-            'SW5kaXZpZHVhbE5vZGU6YTI2ODYyMTAtYjBhNi00NTI1LWI4YTAtYTFmY2FlMWIwMjE5',
-          age: 80,
-          lastRegistrationDate: '1942-12-12',
-          createdAt: '2022-02-07T11:46:27.919328',
-          updatedAt: '2022-02-07T11:46:27.919378',
-          fullName: 'Alicja Kowalska',
-          sex: 'FEMALE',
-          unicefId: 'IND-42-0000.0001',
-          birthDate: '1941-08-26',
-          maritalStatus: 'MARRIED',
-          phoneNo: '+48503123555',
-          sanctionListPossibleMatch: false,
-          sanctionListConfirmedMatch: false,
-          deduplicationGoldenRecordStatus: 'UNIQUE',
-          sanctionListLastCheck: '2022-02-08T07:35:39.718645',
-          role: 'ALTERNATE',
-          relationship: 'NON_BENEFICIARY',
-          status: 'ACTIVE',
-          documents: {
-            edges: [
-              {
-                node: {
-                  id:
-                    'RG9jdW1lbnROb2RlOjYzYjM1NzA4LWZhNzYtNDExMy1iMmIyLWE5MGU1YWE2OTZiOA==',
-                  country: 'Poland',
-                  countryIso3: 'POL',
-                  documentNumber: 'BSH221315',
-                  photo: null,
-                  type: {
-                    label: 'National ID',
-                    key: 'NATIONAL_ID',
-                    __typename: 'DocumentTypeNode',
-                  },
-                  __typename: 'DocumentNode',
-                },
-                __typename: 'DocumentNodeEdge',
-              },
-            ],
-            __typename: 'DocumentNodeConnection',
-          },
-          identities: {
-            edges: [],
-            __typename: 'IndividualIdentityNodeConnection',
-          },
-          household: null,
-          __typename: 'IndividualNode',
-        },
-        __typename: 'IndividualNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3',
-          age: 58,
-          lastRegistrationDate: '1988-06-15',
-          createdAt: '2022-02-07T11:46:27.922172',
-          updatedAt: '2022-02-07T11:46:27.922194',
-          fullName: 'Agata Kowalska',
-          sex: 'FEMALE',
-          unicefId: 'IND-88-0000.0005',
-          birthDate: '1964-01-10',
+            'SW5kaXZpZHVhbE5vZGU6MDgyMTk0ZjctMWEwMS00MDIwLWEzNTgtOTI0ZDkyODM1N2Yz',
+          age: 57,
+          lastRegistrationDate: '1969-06-22',
+          createdAt: '2023-12-19T20:53:28.666751+00:00',
+          updatedAt: '2024-01-10T14:17:15.712262+00:00',
+          fullName: 'Friedrich Hayek',
+          sex: 'MALE',
+          unicefId: 'IND-69-0000.4236',
+          birthDate: '1966-04-05',
           maritalStatus: 'SINGLE',
-          phoneNo: '+48875012932',
+          phoneNo: '0048601123432',
+          phoneNoValid: false,
+          email: '',
           sanctionListPossibleMatch: false,
           sanctionListConfirmedMatch: false,
           deduplicationGoldenRecordStatus: 'UNIQUE',
-          sanctionListLastCheck: '2022-02-08T07:35:39.718645',
-          role: 'PRIMARY',
-          relationship: 'HEAD',
+          sanctionListLastCheck: '2024-01-12T00:00:28.326695+00:00',
+          role: 'ALTERNATE',
+          relationship: 'WIFE_HUSBAND',
           status: 'ACTIVE',
           documents: {
             edges: [
               {
                 node: {
                   id:
-                    'RG9jdW1lbnROb2RlOjg5ZTE2YzQ4LWYwOWMtNGVlMC1iYWYyLTZiOWFiYjZjMjVlNg==',
+                    'RG9jdW1lbnROb2RlOmU1YzI3NWM5LTgzZjktNGUwNi1iMjEzLWEzYzE1MWE1NzdlMg==',
                   country: 'Poland',
                   countryIso3: 'POL',
-                  documentNumber: 'TSH221375',
+                  documentNumber: 'ABC221345',
                   photo: null,
                   type: {
-                    label: 'National ID',
-                    key: 'NATIONAL_ID',
+                    label: 'NATIONAL_ID',
+                    key: 'national_id',
                     __typename: 'DocumentTypeNode',
                   },
                   __typename: 'DocumentNode',
@@ -147,38 +104,27 @@ export const fakeHousehold = {
           },
           household: {
             id:
-              'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
-            unicefId: 'HH-20-0000.0001',
+              'SG91c2Vob2xkTm9kZTo0MmY5MGUzOS0zZGM4LTQ2MTctYjQ3Zi0xMGM1MWQ3MTk0Nzg=',
+            unicefId: 'HH-20-0000.2185',
             status: 'ACTIVE',
             admin1: {
               id:
-                'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-              name: 'Nangarhar',
-              level: 1,
-              pCode: 'AF06',
+                'QXJlYU5vZGU6NjYyMmM5MjgtYTI0MC00YzhjLWExMDgtODU5ZTk5MDBmNzIx',
+              name: 'Ghazni',
+              level: 0,
+              pCode: 'AF11',
               __typename: 'AreaNode',
             },
             admin2: {
               id:
-                'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-              name: 'Achin',
-              level: 2,
-              pCode: 'AF0617',
+                'QXJlYU5vZGU6NmExNWMzYTAtMmE2OS00M2Q5LWJlM2YtYThjMWQyY2FjN2Ji',
+              name: 'Abband',
+              level: 1,
+              pCode: 'AF1115',
               __typename: 'AreaNode',
             },
             programs: {
-              edges: [
-                {
-                  node: {
-                    id:
-                      'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                    name:
-                      'Surface campaign practice actually about about will what.',
-                    __typename: 'ProgramNode',
-                  },
-                  __typename: 'ProgramNodeEdge',
-                },
-              ],
+              edges: [],
               __typename: 'ProgramNodeConnection',
             },
             __typename: 'HouseholdNode',
@@ -190,37 +136,39 @@ export const fakeHousehold = {
       {
         node: {
           id:
-            'SW5kaXZpZHVhbE5vZGU6YWI5YWZhNzUtMTg0Yy00NDIxLWJmMGUtNTIzZGUxNWMyOGFm',
-          age: 22,
-          lastRegistrationDate: '1988-06-15',
-          createdAt: '2022-02-07T11:46:27.922555',
-          updatedAt: '2022-02-07T11:46:27.922577',
-          fullName: 'Angela Kowalska',
-          sex: 'FEMALE',
-          unicefId: 'IND-88-0000.0006',
-          birthDate: '2000-01-10',
-          maritalStatus: 'SINGLE',
-          phoneNo: '+48724467321',
+            'SW5kaXZpZHVhbE5vZGU6YWNmYWUyZDItOWNjOS00NDI2LWE2N2YtYTA5Mjk5MDE1ODA3',
+          age: 68,
+          lastRegistrationDate: '1974-12-15',
+          createdAt: '2023-12-19T20:53:28.667064+00:00',
+          updatedAt: '2024-01-10T14:17:15.813266+00:00',
+          fullName: 'Milton Friedman',
+          sex: 'MALE',
+          unicefId: 'IND-74-0000.4237',
+          birthDate: '1955-02-03',
+          maritalStatus: 'MARRIED',
+          phoneNo: '0048605899014',
+          phoneNoValid: false,
+          email: '',
           sanctionListPossibleMatch: false,
           sanctionListConfirmedMatch: false,
           deduplicationGoldenRecordStatus: 'UNIQUE',
-          sanctionListLastCheck: '2022-02-08T07:35:39.718645',
-          role: 'NO_ROLE',
-          relationship: 'BROTHER_SISTER',
+          sanctionListLastCheck: '2024-01-12T00:00:28.326695+00:00',
+          role: 'PRIMARY',
+          relationship: 'HEAD',
           status: 'ACTIVE',
           documents: {
             edges: [
               {
                 node: {
                   id:
-                    'RG9jdW1lbnROb2RlOjM0NjQwYmU2LTc4ZTgtNDc2Zi1iYWM2LWFjOTIwZTIwYmExOQ==',
+                    'RG9jdW1lbnROb2RlOjNkN2ExZjM3LTMyNmItNDIzZS1iZTllLTU4N2MyNWJjZmNiZA==',
                   country: 'Poland',
                   countryIso3: 'POL',
-                  documentNumber: 'CSH221395',
+                  documentNumber: 'XYZ132964',
                   photo: null,
                   type: {
-                    label: 'National ID',
-                    key: 'NATIONAL_ID',
+                    label: 'NATIONAL_ID',
+                    key: 'national_id',
                     __typename: 'DocumentTypeNode',
                   },
                   __typename: 'DocumentNode',
@@ -236,38 +184,187 @@ export const fakeHousehold = {
           },
           household: {
             id:
-              'SG91c2Vob2xkTm9kZTo3NjExNzM2Ny0yYWFiLTRmNTEtODUwOC1mMzBmODliYWUzYzE=',
-            unicefId: 'HH-20-0000.0001',
+              'SG91c2Vob2xkTm9kZTo0MmY5MGUzOS0zZGM4LTQ2MTctYjQ3Zi0xMGM1MWQ3MTk0Nzg=',
+            unicefId: 'HH-20-0000.2185',
             status: 'ACTIVE',
             admin1: {
               id:
-                'QWRtaW5BcmVhTm9kZTo3NmU0MDRlYS1mYjVhLTRkMDktODVkMS1hNTA3MjU4OThmNzk=',
-              name: 'Nangarhar',
-              level: 1,
-              pCode: 'AF06',
+                'QXJlYU5vZGU6NjYyMmM5MjgtYTI0MC00YzhjLWExMDgtODU5ZTk5MDBmNzIx',
+              name: 'Ghazni',
+              level: 0,
+              pCode: 'AF11',
               __typename: 'AreaNode',
             },
             admin2: {
               id:
-                'QWRtaW5BcmVhTm9kZTpkMTU1MjA2MC05NWExLTQ5ODItODY3MC0yMzg4NDcxZDUxYTA=',
-              name: 'Achin',
-              level: 2,
-              pCode: 'AF0617',
+                'QXJlYU5vZGU6NmExNWMzYTAtMmE2OS00M2Q5LWJlM2YtYThjMWQyY2FjN2Ji',
+              name: 'Abband',
+              level: 1,
+              pCode: 'AF1115',
               __typename: 'AreaNode',
             },
             programs: {
-              edges: [
-                {
-                  node: {
-                    id:
-                      'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-                    name:
-                      'Surface campaign practice actually about about will what.',
-                    __typename: 'ProgramNode',
+              edges: [],
+              __typename: 'ProgramNodeConnection',
+            },
+            __typename: 'HouseholdNode',
+          },
+          __typename: 'IndividualNode',
+        },
+        __typename: 'IndividualNodeEdge',
+      },
+      {
+        node: {
+          id:
+            'SW5kaXZpZHVhbE5vZGU6ZmU4MGI4YmUtYTIzNS00ODRjLWI5YTAtYTllY2FjY2JkMzgz',
+          age: 46,
+          lastRegistrationDate: '1988-06-15',
+          createdAt: '2023-12-19T20:53:28.667298+00:00',
+          updatedAt: '2024-01-10T14:17:15.852195+00:00',
+          fullName: 'Ludwig Mises',
+          sex: 'MALE',
+          unicefId: 'IND-88-0000.4238',
+          birthDate: '1977-01-29',
+          maritalStatus: 'MARRIED',
+          phoneNo: '0048734123423',
+          phoneNoValid: false,
+          email: '',
+          sanctionListPossibleMatch: false,
+          sanctionListConfirmedMatch: false,
+          deduplicationGoldenRecordStatus: 'UNIQUE',
+          sanctionListLastCheck: '2024-01-12T00:00:28.326695+00:00',
+          role: 'NO_ROLE',
+          relationship: 'BROTHER_SISTER',
+          status: 'ACTIVE',
+          documents: {
+            edges: [
+              {
+                node: {
+                  id:
+                    'RG9jdW1lbnROb2RlOjRhMTdiMzZjLTExNmMtNGZkZC05NmQ3LTM2MmNhODRlYTNlOA==',
+                  country: 'Poland',
+                  countryIso3: 'POL',
+                  documentNumber: 'WSH66666',
+                  photo: null,
+                  type: {
+                    label: 'NATIONAL_ID',
+                    key: 'national_id',
+                    __typename: 'DocumentTypeNode',
                   },
-                  __typename: 'ProgramNodeEdge',
+                  __typename: 'DocumentNode',
                 },
-              ],
+                __typename: 'DocumentNodeEdge',
+              },
+            ],
+            __typename: 'DocumentNodeConnection',
+          },
+          identities: {
+            edges: [],
+            __typename: 'IndividualIdentityNodeConnection',
+          },
+          household: {
+            id:
+              'SG91c2Vob2xkTm9kZTo0MmY5MGUzOS0zZGM4LTQ2MTctYjQ3Zi0xMGM1MWQ3MTk0Nzg=',
+            unicefId: 'HH-20-0000.2185',
+            status: 'ACTIVE',
+            admin1: {
+              id:
+                'QXJlYU5vZGU6NjYyMmM5MjgtYTI0MC00YzhjLWExMDgtODU5ZTk5MDBmNzIx',
+              name: 'Ghazni',
+              level: 0,
+              pCode: 'AF11',
+              __typename: 'AreaNode',
+            },
+            admin2: {
+              id:
+                'QXJlYU5vZGU6NmExNWMzYTAtMmE2OS00M2Q5LWJlM2YtYThjMWQyY2FjN2Ji',
+              name: 'Abband',
+              level: 1,
+              pCode: 'AF1115',
+              __typename: 'AreaNode',
+            },
+            programs: {
+              edges: [],
+              __typename: 'ProgramNodeConnection',
+            },
+            __typename: 'HouseholdNode',
+          },
+          __typename: 'IndividualNode',
+        },
+        __typename: 'IndividualNodeEdge',
+      },
+      {
+        node: {
+          id:
+            'SW5kaXZpZHVhbE5vZGU6ZTE2ZDYwODgtY2QzMC00M2Q5LThmMzktYWNmYTE0MmFmNzE3',
+          age: 38,
+          lastRegistrationDate: '1988-06-15',
+          createdAt: '2023-12-19T20:53:28.667509+00:00',
+          updatedAt: '2024-01-16T12:48:22.336734+00:00',
+          fullName: 'Henry Hazzlit',
+          sex: 'MALE',
+          unicefId: 'IND-88-0000.4239',
+          birthDate: '1985-12-12',
+          maritalStatus: 'SINGLE',
+          phoneNo: '0048875012932',
+          phoneNoValid: false,
+          email: '',
+          sanctionListPossibleMatch: false,
+          sanctionListConfirmedMatch: false,
+          deduplicationGoldenRecordStatus: 'UNIQUE',
+          sanctionListLastCheck: '2024-01-12T00:00:28.326695+00:00',
+          role: 'NO_ROLE',
+          relationship: 'COUSIN',
+          status: 'ACTIVE',
+          documents: {
+            edges: [
+              {
+                node: {
+                  id:
+                    'RG9jdW1lbnROb2RlOmMyMGI5OTEzLTM5NjgtNGNjZC1hZWJhLWUzNTdmMWI5Y2Y2Yg==',
+                  country: 'Poland',
+                  countryIso3: 'POL',
+                  documentNumber: 'TSH111111',
+                  photo: null,
+                  type: {
+                    label: 'NATIONAL_ID',
+                    key: 'national_id',
+                    __typename: 'DocumentTypeNode',
+                  },
+                  __typename: 'DocumentNode',
+                },
+                __typename: 'DocumentNodeEdge',
+              },
+            ],
+            __typename: 'DocumentNodeConnection',
+          },
+          identities: {
+            edges: [],
+            __typename: 'IndividualIdentityNodeConnection',
+          },
+          household: {
+            id:
+              'SG91c2Vob2xkTm9kZTo0MmY5MGUzOS0zZGM4LTQ2MTctYjQ3Zi0xMGM1MWQ3MTk0Nzg=',
+            unicefId: 'HH-20-0000.2185',
+            status: 'ACTIVE',
+            admin1: {
+              id:
+                'QXJlYU5vZGU6NjYyMmM5MjgtYTI0MC00YzhjLWExMDgtODU5ZTk5MDBmNzIx',
+              name: 'Ghazni',
+              level: 0,
+              pCode: 'AF11',
+              __typename: 'AreaNode',
+            },
+            admin2: {
+              id:
+                'QXJlYU5vZGU6NmExNWMzYTAtMmE2OS00M2Q5LWJlM2YtYThjMWQyY2FjN2Ji',
+              name: 'Abband',
+              level: 1,
+              pCode: 'AF1115',
+              __typename: 'AreaNode',
+            },
+            programs: {
+              edges: [],
               __typename: 'ProgramNodeConnection',
             },
             __typename: 'HouseholdNode',
@@ -279,23 +376,14 @@ export const fakeHousehold = {
     ],
   },
   programs: {
-    edges: [
-      {
-        node: {
-          id:
-            'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-          name: 'Surface campaign practice actually about about will what.',
-          __typename: 'ProgramNode',
-        },
-        __typename: 'ProgramNodeEdge',
-      },
-    ],
+    edges: [],
     __typename: 'ProgramNodeConnection',
   },
   __typename: 'HouseholdNode',
-  activeIndividualsCount: 2,
+  activeIndividualsCount: 4,
   countryOrigin: 'San Marino',
   country: 'Isle of Man',
+  zipCode: null,
   femaleAgeGroup05Count: 0,
   femaleAgeGroup611Count: 0,
   femaleAgeGroup1217Count: 0,
@@ -325,298 +413,33 @@ export const fakeHousehold = {
   returnee: false,
   nameEnumerator: 'Harley Rawlings',
   lastSyncAt: null,
-  consentSharing: [
-    'HUMANITARIAN_PARTNER',
-    'PRIVATE_PARTNER',
-    'GOVERNMENT_PARTNER',
-    'UNICEF',
-    '',
-  ],
+  consentSharing: ['HUMANITARIAN_PARTNER'],
   orgEnumerator: 'UNICEF',
-  updatedAt: '2022-02-07T11:46:27.904196',
+  updatedAt: '2024-01-10T14:17:15.917715+00:00',
   consent: true,
+  collectIndividualData: 'A_',
   registrationDataImport: {
-    name: 'romaniaks',
+    name: '1234',
     dataSource: 'XLS',
-    importDate: '2022-02-07T11:45:52.336512',
+    importDate: '2023-12-19T20:53:19.372647+00:00',
     importedBy: {
-      firstName: 'Maciej',
-      lastName: 'Szewczyk',
-      email: 'fffff@gmail.com',
-      username: 'maciej.szewczyk@tivix.com',
+      firstName: 'Root',
+      lastName: 'Rootkowski',
+      email: 'wyderka_@kellton.com',
+      username: 'root',
       __typename: 'UserNode',
     },
     __typename: 'RegistrationDataImportNode',
   },
   paymentrecordSet: {
-    edges: [
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6ZGViY2E5YWQtNzBhNS00MDk2LTkxYjctMmU3MGRkZjRhYmMy',
-          fullName: 'Brian Morgan',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
-            totalPersonsCovered: 2,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-              name: 'Surface campaign practice actually about about will what.',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 88608141.04,
-            assistanceMeasurement: 'Vietnamese đồng',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6ODZhZmQ4NjQtYmNlNS00N2Q0LWE5YmEtYzlkZTVjZGYwMDJm',
-          fullName: 'Jennifer Weber MD',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOjI1ZTNkODA0LTAzMzEtNDhkOC1iYTk2LWVmZjEzYmU3ZDdiYQ==',
-            totalPersonsCovered: 2,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-              name: 'Surface campaign practice actually about about will what.',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 88608141.04,
-            assistanceMeasurement: 'Vietnamese đồng',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6ZDJiMTAzNjUtMDBlMy00ZjMyLTg2MTUtN2UyMDUxM2YyZmQ1',
-          fullName: 'Jason Jacobs',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOmUwZGUxMGMyLTMxNWUtNDhjYS1hNDU5LWM2NTQyZDc1MmJlNw==',
-            totalPersonsCovered: 3,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-              name: 'Surface campaign practice actually about about will what.',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 2058088.16,
-            assistanceMeasurement: 'Nigerian naira',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6NGM4ZGYyYjQtNTI5Ni00YmJhLTgzOTQtNGNkMGI0M2MyZjEy',
-          fullName: 'Micheal Massey',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOmUwZGUxMGMyLTMxNWUtNDhjYS1hNDU5LWM2NTQyZDc1MmJlNw==',
-            totalPersonsCovered: 3,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-              name: 'Surface campaign practice actually about about will what.',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 2058088.16,
-            assistanceMeasurement: 'Nigerian naira',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6YzZlYzMwMDUtZWUzZC00MjI3LWI2YzctM2MxZDcxNzQwYTA4',
-          fullName: 'Stephen Smith',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
-            totalPersonsCovered: 4,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-              name: 'Surface campaign practice actually about about will what.',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 17600499.7,
-            assistanceMeasurement: 'Vietnamese đồng',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6OThjMzVmNzEtOWY1Ni00NjMwLWJjNWItOWFlODkxNmU0OThh',
-          fullName: 'Jessica Thornton',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
-            totalPersonsCovered: 4,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-              name: 'Surface campaign practice actually about about will what.',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 17600499.7,
-            assistanceMeasurement: 'Vietnamese đồng',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6MDVkNDkyNjctMjhhNy00ZDU5LTllOTgtYmRjMjJjNGRlNzg3',
-          fullName: 'Bethany Rodriguez',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
-            totalPersonsCovered: 4,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-              name: 'Surface campaign practice actually about about will what.',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 17600499.7,
-            assistanceMeasurement: 'Vietnamese đồng',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6MjEwMWVmNmUtODZjYi00MDI2LWI1MmUtMzdjMmQyNWQzZmE0',
-          fullName: 'Melanie Haley MD',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
-            totalPersonsCovered: 4,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-              name: 'Surface campaign practice actually about about will what.',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 17600499.7,
-            assistanceMeasurement: 'Vietnamese đồng',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-      {
-        node: {
-          id:
-            'UGF5bWVudFJlY29yZE5vZGU6NWRhNGFjZjYtYjc5My00ZThkLWJlYzktMDRiMTI4ZTJkOGNi',
-          fullName: 'Greg Cohen',
-          parent: {
-            id:
-              'Q2FzaFBsYW5Ob2RlOjkyZDc0NTRiLWVlNWEtNDM3Yy1hNTJiLWVmZjI0NGQyZjYyZA==',
-            totalPersonsCovered: 4,
-            program: {
-              id:
-                'UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm',
-              name: 'Surface campaign practice actually about about will what.',
-              __typename: 'ProgramNode',
-            },
-            totalDeliveredQuantity: 17600499.7,
-            assistanceMeasurement: 'Vietnamese đồng',
-            __typename: 'CashPlanNode',
-          },
-          __typename: 'PaymentRecordNode',
-        },
-        __typename: 'PaymentRecordNodeEdge',
-      },
-    ],
+    edges: [],
     __typename: 'PaymentRecordNodeConnection',
   },
-  programsWithDeliveredQuantity: [
+  deliveredQuantities: [
     {
-      id: 'c4d5657d-1a29-46e1-8190-df7f85a0d2ef',
-      name: 'Surface campaign practice actually about about will what.',
-      quantity: [
-        {
-          totalDeliveredQuantity: '3251.00',
-          currency: 'USD',
-          __typename: 'DeliveredQuantityNode',
-        },
-        {
-          totalDeliveredQuantity: '3048.00',
-          currency: 'BAM',
-          __typename: 'DeliveredQuantityNode',
-        },
-        {
-          totalDeliveredQuantity: '2959.00',
-          currency: 'BND',
-          __typename: 'DeliveredQuantityNode',
-        },
-        {
-          totalDeliveredQuantity: '4904.00',
-          currency: 'ISK',
-          __typename: 'DeliveredQuantityNode',
-        },
-        {
-          totalDeliveredQuantity: '2505.00',
-          currency: 'LSL',
-          __typename: 'DeliveredQuantityNode',
-        },
-        {
-          totalDeliveredQuantity: '115.00',
-          currency: 'TMT',
-          __typename: 'DeliveredQuantityNode',
-        },
-        {
-          totalDeliveredQuantity: '484.00',
-          currency: 'UAH',
-          __typename: 'DeliveredQuantityNode',
-        },
-        {
-          totalDeliveredQuantity: '2073.00',
-          currency: 'UGX',
-          __typename: 'DeliveredQuantityNode',
-        },
-        {
-          totalDeliveredQuantity: '895.00',
-          currency: 'UZS',
-          __typename: 'DeliveredQuantityNode',
-        },
-        {
-          totalDeliveredQuantity: '2335.00',
-          currency: 'YER',
-          __typename: 'DeliveredQuantityNode',
-        },
-      ],
-      __typename: 'ProgramsWithDeliveredQuantityNode',
+      totalDeliveredQuantity: '0',
+      currency: 'USD',
+      __typename: 'DeliveredQuantityNode',
     },
   ],
 } as HouseholdNode;

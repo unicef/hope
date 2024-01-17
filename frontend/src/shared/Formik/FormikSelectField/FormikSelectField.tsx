@@ -97,7 +97,7 @@ export const FormikSelectField = ({
             ) : null
           }
         >
-          {otherProps.choices.map((each) => (
+          {otherProps.choices?.map((each) => (
             <MenuItem
               key={each.value ? each.value : each.name || ''}
               value={each.value ? each.value : each.name || ''}

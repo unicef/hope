@@ -131,15 +131,15 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
               >
                 <a
                   class="sc-bdVaJa hWuxQp"
-                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/population/individuals/SW5kaXZpZHVhbE5vZGU6YTI2ODYyMTAtYjBhNi00NTI1LWI4YTAtYTFmY2FlMWIwMjE5"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/population/individuals/SW5kaXZpZHVhbE5vZGU6MDgyMTk0ZjctMWEwMS00MDIwLWEzNTgtOTI0ZDkyODM1N2Yz"
                 >
-                  IND-42-0000.0001
+                  IND-69-0000.4236
                 </a>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Alicja Kowalska
+                Friedrich Hayek
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -163,21 +163,21 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Not a Family Member. Can only act as a recipient.
+                Wife / Husband
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <time
-                  datetime="-894672000000"
+                  datetime="-118108800000"
                 >
-                  26 Aug 1941
+                  5 Apr 1966
                 </time>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Female
+                Male
               </td>
             </tr>
             <tr
@@ -189,15 +189,15 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
               >
                 <a
                   class="sc-bdVaJa hWuxQp"
-                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/population/individuals/SW5kaXZpZHVhbE5vZGU6YWNmYWUyZDItOWNjOS00NDI2LWE2N2YtYTA5Mjk5MDE1ODA3"
                 >
-                  IND-88-0000.0005
+                  IND-74-0000.4237
                 </a>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Agata Kowalska
+                Milton Friedman
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -227,15 +227,15 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <time
-                  datetime="-188611200000"
+                  datetime="-470534400000"
                 >
-                  10 Jan 1964
+                  3 Feb 1955
                 </time>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Female
+                Male
               </td>
             </tr>
             <tr
@@ -247,15 +247,15 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
               >
                 <a
                   class="sc-bdVaJa hWuxQp"
-                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/population/individuals/SW5kaXZpZHVhbE5vZGU6YWI5YWZhNzUtMTg0Yy00NDIxLWJmMGUtNTIzZGUxNWMyOGFm"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/population/individuals/SW5kaXZpZHVhbE5vZGU6ZmU4MGI4YmUtYTIzNS00ODRjLWI5YTAtYTllY2FjY2JkMzgz"
                 >
-                  IND-88-0000.0006
+                  IND-88-0000.4238
                 </a>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Angela Kowalska
+                Ludwig Mises
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
@@ -285,15 +285,73 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
                 <time
-                  datetime="947462400000"
+                  datetime="223344000000"
                 >
-                  10 Jan 2000
+                  29 Jan 1977
                 </time>
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Female
+                Male
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-bdVaJa hWuxQp"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/population/individuals/SW5kaXZpZHVhbE5vZGU6ZTE2ZDYwODgtY2QzMC00M2Q5LThmMzktYWNmYTE0MmFmNzE3"
+                >
+                  IND-88-0000.4239
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Henry Hazzlit
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-bwzfXH jDYBWd"
+                >
+                  <div
+                    class="sc-htpNat dNIAUP"
+                    data-cy="status-container"
+                  >
+                    ACTIVE
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                None
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Cousin
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <time
+                  datetime="503193600000"
+                >
+                  12 Dec 1985
+                </time>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Male
               </td>
             </tr>
           </tbody>
@@ -312,7 +370,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
           <p
             class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1-3 of 3
+            1-4 of 4
           </p>
           <div
             class="MuiTablePagination-actions"
