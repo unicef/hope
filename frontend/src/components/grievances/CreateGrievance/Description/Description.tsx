@@ -130,11 +130,7 @@ export const Description = ({
                         {values.selectedHousehold.unicefId}
                       </BlackLink>
                     ) : (
-                      <div>
-                        {values.selectedHousehold?.id
-                          ? values.selectedHousehold.unicefId
-                          : '-'}
-                      </div>
+                      <div>{values.selectedHousehold?.unicefId || '-'}</div>
                     )}
                   </span>
                 ),
@@ -153,11 +149,7 @@ export const Description = ({
                         {values.selectedIndividual.unicefId}
                       </BlackLink>
                     ) : (
-                      <div>
-                        {values.selectedIndividual?.id
-                          ? values.selectedIndividual.unicefId
-                          : '-'}
-                      </div>
+                      <div>{values.selectedIndividual?.unicefId || '-'}</div>
                     )}
                   </span>
                 ),
