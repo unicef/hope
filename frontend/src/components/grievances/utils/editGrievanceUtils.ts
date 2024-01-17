@@ -33,7 +33,7 @@ interface EditValuesTypes {
   householdDataUpdateFields?;
   partner?;
   comments?;
-  programme?;
+  program?;
   documentation?;
   documentationToUpdate?;
   documentationToDelete?;
@@ -202,17 +202,17 @@ export function prepareInitialValues(
     priority: ticket.priority === 0 ? 'Not set' : ticket.priority,
     urgency: ticket.urgency === 0 ? 'Not set' : ticket.urgency,
     partner: ticket.partner?.id,
-    comments: ticket.comments,
-    programme: ticket.programme?.id,
+    comments: ticket.comments || '',
+    program: ticket.programs[0]?.id || '',
     description: ticket.description || '',
     assignedTo: ticket?.assignedTo?.id || '',
-    category: ticket.category || null,
+    category: ticket.category || '',
     language: ticket.language || '',
     admin: ticket.admin2 ? { node: ticket.admin2 } : null,
     area: ticket.area || '',
     selectedHousehold: ticket.household || null,
     selectedIndividual: ticket.individual || null,
-    issueType: ticket.issueType || null,
+    issueType: ticket.issueType || '',
     paymentRecord: ticket?.paymentRecord?.id || null,
     selectedPaymentRecords: ticket?.paymentRecord?.id
       ? [ticket.paymentRecord.id]
@@ -508,7 +508,7 @@ export function prepareVariables(businessArea, values, ticket) {
     urgency: values.urgency === 'Not set' ? 0 : values.urgency,
     partner: values.partner,
     comments: values.comments,
-    programme: values.programme,
+    program: ticket.programs?.[0]?.id || values?.program,
     paymentRecord: values.selectedPaymentRecords
       ? values.selectedPaymentRecords[0]
       : null,

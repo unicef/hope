@@ -9,7 +9,6 @@ import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
 import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { today } from '../../../utils/utils';
@@ -20,6 +19,7 @@ import {
 } from '../../../__generated__/graphql';
 import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const EditPaymentPlanPage = (): React.ReactElement => {
   const { id } = useParams();
@@ -36,14 +36,18 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
 
   const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
   const {
     data: allTargetPopulationsData,
     loading: loadingTargetPopulations,
   } = useAllTargetPopulationsQuery({
-    variables: { businessArea, paymentPlanApplicable: false },
+    variables: {
+      businessArea,
+      paymentPlanApplicable: false,
+      program: [programId],
+    },
   });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
@@ -120,7 +124,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
         },
       });
       showMessage(t('Payment Plan Edited'), {
-        pathname: `/${businessArea}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
+        pathname: `/${baseUrl}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
         historyMethod: 'push',
       });
     } catch (e) {
@@ -140,7 +144,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
           <EditPaymentPlanHeader
             paymentPlan={paymentPlan}
             handleSubmit={submitForm}
-            businessArea={businessArea}
+            baseUrl={baseUrl}
             permissions={permissions}
           />
           <PaymentPlanTargeting

@@ -5,9 +5,8 @@ import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { ProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { ClearApplyButtons } from '../../../core/ClearApplyButtons';
-import { ContainerWithBorder } from '../../../core/ContainerWithBorder';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
+import { FiltersSection } from '../../../core/FiltersSection';
 import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
@@ -54,7 +53,11 @@ export const LookUpProgrammesFiltersSurveys = ({
   };
 
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      applyHandler={handleApplyFilter}
+      clearHandler={handleClearFilter}
+      isOnPaper={false}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -69,6 +72,7 @@ export const LookUpProgrammesFiltersSurveys = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label='Status'
             value={filter.status}
+            data-cy='filters-status'
           >
             {choicesData.programStatusChoices.map((item) => {
               return (
@@ -82,6 +86,7 @@ export const LookUpProgrammesFiltersSurveys = ({
         <Grid item xs={3}>
           <DatePickerFilter
             label='Start Date'
+            dataCy='filters-start-date'
             onChange={(date) =>
               handleFilterChange(
                 'startDate',
@@ -94,6 +99,7 @@ export const LookUpProgrammesFiltersSurveys = ({
         <Grid item xs={3}>
           <DatePickerFilter
             label='End Date'
+            dataCy='filters-end-date'
             onChange={(date) =>
               handleFilterChange(
                 'endDate',
@@ -107,6 +113,7 @@ export const LookUpProgrammesFiltersSurveys = ({
           <SelectFilter
             onChange={(e) => handleFilterChange('sector', e.target.value)}
             label='Sector'
+            data-cy='filters-sector'
             value={filter.sector}
             multiple
           >
@@ -123,6 +130,7 @@ export const LookUpProgrammesFiltersSurveys = ({
           <NumberTextField
             topLabel='Num. of Households'
             placeholder='From'
+            data-cy='filters-number-of-households-min'
             value={filter.numberOfHouseholdsMin}
             onChange={(e) =>
               handleFilterChange('numberOfHouseholdsMin', e.target.value)
@@ -132,6 +140,7 @@ export const LookUpProgrammesFiltersSurveys = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
+            data-cy='filters-number-of-households-max'
             value={filter.numberOfHouseholdsMax}
             placeholder='To'
             onChange={(e) =>
@@ -143,6 +152,7 @@ export const LookUpProgrammesFiltersSurveys = ({
         <Grid item xs={3}>
           <NumberTextField
             topLabel='Budget (USD)'
+            data-cy='filters-budget-min'
             value={filter.budgetMin}
             placeholder='From'
             onChange={(e) => handleFilterChange('budgetMin', e.target.value)}
@@ -151,15 +161,28 @@ export const LookUpProgrammesFiltersSurveys = ({
         <Grid item xs={3}>
           <NumberTextField
             value={filter.budgetMax}
+            data-cy='filters-budget-max'
             placeholder='To'
             onChange={(e) => handleFilterChange('budgetMax', e.target.value)}
           />
         </Grid>
+        <Grid item xs={3}>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('dataCollectingType', e.target.value)}
+            label='Data Collecting Type'
+            value={filter.dataCollectingType}
+            data-cy='filters-data-collecting-type'
+          >
+            {choicesData.dataCollectingTypeChoices.map((item) => {
+              return (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              );
+            })}
+          </SelectFilter>
+        </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 };

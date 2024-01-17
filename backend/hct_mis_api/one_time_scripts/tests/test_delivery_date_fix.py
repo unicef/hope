@@ -51,7 +51,7 @@ class TestFixDeliveryDate(APITestCase):
             delivered_quantity=150,
             currency="PLN",
         )
-        cls.payment_1.unicef_id = "RCPT-0060-23-0.000.001"
+        cls.payment_1.unicef_id = "RCPT-0060-24-0.000.001"
         cls.payment_1.save()
 
         hoh2 = IndividualFactory(household=None)
@@ -63,7 +63,7 @@ class TestFixDeliveryDate(APITestCase):
             delivered_quantity=150,
             currency="PLN",
         )
-        cls.payment_2.unicef_id = "RCPT-0060-23-0.000.002"
+        cls.payment_2.unicef_id = "RCPT-0060-24-0.000.002"
         cls.payment_2.save()
 
         hoh3 = IndividualFactory(household=None)
@@ -75,7 +75,7 @@ class TestFixDeliveryDate(APITestCase):
             delivered_quantity=150,
             currency="PLN",
         )
-        cls.payment_3.unicef_id = "RCPT-0060-23-0.000.003"
+        cls.payment_3.unicef_id = "RCPT-0060-24-0.000.003"
         cls.payment_3.save()
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)

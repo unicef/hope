@@ -11,6 +11,7 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
     $search: String
     $module: String
     $userId: String
+    $programId: String
   ) {
     allLogEntries(
       after: $after
@@ -22,6 +23,7 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
       search: $search
       module: $module
       userId: $userId
+      programId: $programId
     ) {
       pageInfo {
         hasNextPage
@@ -40,7 +42,7 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
           objectId
           timestamp
           isUserGenerated
-          contentType{
+          contentType {
             id
             appLabel
             model
@@ -54,7 +56,7 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
         }
       }
     }
-    logEntryActionChoices{
+    logEntryActionChoices {
       name
       value
     }

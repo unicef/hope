@@ -8,6 +8,7 @@ generates:
   src/__generated__/graphql.tsx:
     config:
       withHooks: true
+      addTypename: true
     plugins:
       - typescript
       - typescript-operations

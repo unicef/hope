@@ -4,10 +4,10 @@ export default class ErrorPage extends BaseComponent {
   // Locators
   pageNotFound = "h1";
   buttonRefresh = "button";
-  buttonCountryDashboard = "a";
+  buttonCountryDashboard = '[data-cy="button-go-to-country-dashboard"]';
 
   // Texts
-  text404Error = "Oops! Page Not Found";
+  text404Error = "Access Denied";
   textRefresh = "REFRESH PAGE";
   textGoTo = "GO TO COUNTRY DASHBOARD";
   // Elements

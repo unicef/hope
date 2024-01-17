@@ -1299,7 +1299,7 @@
       "deduplication_golden_record_duplicates_percentage": 50,
       "deduplication_golden_record_duplicates_allowed": 5,
       "screen_beneficiary": false,
-      "countries": [],
+      "countries": ["fea412b2-a617-4c23-b773-d0001f36a932"],
       "is_payment_plan_applicable": false
     }
   },
@@ -6658,35 +6658,35 @@
     "model": "core.datacollectingtype",
     "pk": 1,
     "fields": {
-        "created": "2023-09-25T17:57:16.282Z",
-        "modified": "2023-09-25T17:57:16.282Z",
-        "code": "partial_individuals",
-        "label": "Partial",
-        "description": "Partial individuals collected",
-        "type": "SOCIAL",
-        "active": true,
-        "individual_filters_available": false,
-        "household_filters_available": true,
-        "compatible_types": [],
-        "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
-    }
-},
-{
-    "model": "core.datacollectingtype",
-    "pk": 2,
-    "fields": {
-        "created": "2023-09-25T17:57:16.284Z",
-        "modified": "2023-09-25T17:57:16.284Z",
-        "code": "full_collection",
-        "label": "Full",
-        "description": "Full individual collected",
-        "active": true,
-        "individual_filters_available": true,
-        "household_filters_available": true,
-        "compatible_types": [],
-        "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+      "created": "2023-09-25T17:57:16.284Z",
+      "modified": "2023-09-25T17:57:16.284Z",
+      "label": "Full",
+      "code": "full",
+      "description": "Full individual collected",
+      "active": true,
+      "individual_filters_available": true,
+      "household_filters_available": true,
+      "compatible_types": [1, 2, 3],
+      "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
     }
   },
+  {
+  "model": "core.datacollectingtype",
+  "pk": 2,
+  "fields": {
+    "created": "2023-09-25T17:57:16.282Z",
+    "modified": "2023-09-25T17:57:16.282Z",
+    "label": "Partial",
+    "code": "partial",
+    "description": "Partial individuals collected",
+    "type": "SOCIAL",
+    "active": true,
+    "individual_filters_available": false,
+    "household_filters_available": true,
+    "compatible_types": [2, 3],
+    "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
+  }
+},
   {
       "model": "core.datacollectingtype",
       "pk": 3,
@@ -6698,10 +6698,10 @@
           "description": "Size only collected",
           "type": "STANDARD",
           "active": true,
-          "individual_filters_available": false,
+          "individual_filters_available": true,
           "household_filters_available": true,
-          "compatible_types": [],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "compatible_types": [3],
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {
@@ -6716,8 +6716,8 @@
           "active": true,
           "individual_filters_available": false,
           "household_filters_available": true,
-          "compatible_types": [],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "compatible_types": [4],
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {
@@ -6732,8 +6732,8 @@
           "active": true,
           "individual_filters_available": false,
           "household_filters_available": false,
-          "compatible_types": [],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "compatible_types": [5],
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {
@@ -6748,7 +6748,7 @@
           "active": false,
           "individual_filters_available": true,
           "compatible_types": [],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {
@@ -6764,7 +6764,7 @@
           "deprecated": true,
           "individual_filters_available": true,
           "compatible_types": [],
-          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68"]
+          "limit_to": ["c259b1a0-ae3a-494e-b343-f7c8eb060c68", "3e269a73-123b-43e1-86af-ced1b30d8e80"]
       }
   },
   {

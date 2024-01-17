@@ -1,18 +1,19 @@
 import PaymentVerification from "../../page-objects/pages/payment_verification/payment_verification.po";
 import PVDetailsPage from "../../page-objects/pages/payment_verification/details_page.po";
-import ErrorPage from "../../page-objects/404.po";
 
-let error404Page = new ErrorPage();
 let paymentVerificationPage = new PaymentVerification();
 let paymentVerificationDetailsPage = new PVDetailsPage();
 let defaultNumberOfVPlans016 = 0;
 
 const paymentPlanID = "PP-0060-23-00000002";
 describe("Payment Verification", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
-    cy.adminLogin();
     cy.navigateToHomePage();
     paymentVerificationPage.clickMenuButtonPaymentVerification();
+    // paymentVerificationPage.getButtonFiltersExpand().click();
   });
 
   after(() => {
@@ -185,7 +186,7 @@ describe("Payment Verification", () => {
           "Choose Active Verification Plan",
           "Press Finish button",
           "Press Finish button on pop-up",
-          "Check if Verification Plan was Finish",
+          "Check if Verification Plan was finished",
         ]);
         paymentVerificationDetailsPage.getActivatePlan().click();
         paymentVerificationDetailsPage.getActivate().click();
@@ -217,28 +218,10 @@ describe("Payment Verification", () => {
         paymentVerificationDetailsPage.checkPaymentPlanDetailsTitle();
         paymentVerificationDetailsPage.checkVerificationPlansSummaryTitle();
       });
-      // ToDo: Enable after fix 404 page
-      it.skip("404 Error page", () => {
-        cy.scenario([
-          "Go to Payment Plan page",
-          "Click first row",
-          "Delete part of URL",
-          "Check if 404 occurred",
-        ]);
-        paymentVerificationPage.getPaymentPlanRows().first().click();
-        paymentVerificationDetailsPage
-          .getPaymentVerificationTitle()
-          .contains("Payment Plan");
-        cy.url().then((url) => {
-          let newUrl = url.slice(0, -10);
-          cy.visit(newUrl);
-          error404Page.getPageNoFound();
-        });
-      });
     });
   });
   describe("Regression tests Payment Verification", () => {
-    it("174517: Check clear cash", () => {
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Payment Verification page",
         "Press Menu User Profile button",

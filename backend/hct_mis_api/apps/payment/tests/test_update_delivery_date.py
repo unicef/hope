@@ -58,7 +58,7 @@ class TestDeliveryDate(APITestCase):
         household_1 = HouseholdFactory(head_of_household=hoh1)
         cls.payment_1 = PaymentFactory(
             parent=cls.payment_plan,
-            unicef_id="RCPT-0060-23-0.000.001",
+            unicef_id="RCPT-0060-24-0.000.001",
             household=household_1,
             entitlement_quantity=212,
             delivered_quantity=150,
@@ -69,7 +69,7 @@ class TestDeliveryDate(APITestCase):
         household_2 = HouseholdFactory(head_of_household=hoh2)
         cls.payment_2 = PaymentFactory(
             parent=cls.payment_plan,
-            unicef_id="RCPT-0060-23-0.000.002",
+            unicef_id="RCPT-0060-24-0.000.002",
             household=household_2,
             entitlement_quantity=212,
             delivered_quantity=150,
@@ -80,7 +80,7 @@ class TestDeliveryDate(APITestCase):
         household_3 = HouseholdFactory(head_of_household=hoh3)
         cls.payment_3 = PaymentFactory(
             parent=cls.payment_plan,
-            unicef_id="RCPT-0060-23-0.000.003",
+            unicef_id="RCPT-0060-24-0.000.003",
             household=household_3,
             entitlement_quantity=212,
             delivered_quantity=150,
@@ -98,9 +98,9 @@ class TestDeliveryDate(APITestCase):
         old_delivery_date2 = self.payment_2.delivery_date
         old_delivery_date3 = self.payment_3.delivery_date
         file_no_delivery_date = file_without_delivery_dates()
-        self.payment_1.unicef_id = "RCPT-0060-23-0.000.001"
-        self.payment_2.unicef_id = "RCPT-0060-23-0.000.002"
-        self.payment_3.unicef_id = "RCPT-0060-23-0.000.003"
+        self.payment_1.unicef_id = "RCPT-0060-24-0.000.001"
+        self.payment_2.unicef_id = "RCPT-0060-24-0.000.002"
+        self.payment_3.unicef_id = "RCPT-0060-24-0.000.003"
         self.payment_1.save()
         self.payment_2.save()
         self.payment_3.save()

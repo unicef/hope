@@ -20,6 +20,7 @@ import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+import { useProgramContext } from "../../../../programContext";
 
 export interface ApprovePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -29,6 +30,7 @@ export const ApprovePaymentPlan = ({
   paymentPlan,
 }: ApprovePaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { isActiveProgram } = useProgramContext();
 
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -48,7 +50,7 @@ export const ApprovePaymentPlan = ({
 
   const validationSchema = Yup.object().shape({
     comment: Yup.string()
-      .min(2, 'Too short')
+      .min(4, 'Too short')
       .max(255, 'Too long'),
   });
 
@@ -81,6 +83,7 @@ export const ApprovePaymentPlan = ({
                 variant='contained'
                 onClick={() => setApproveDialogOpen(true)}
                 data-cy='button-approve'
+                disabled={!isActiveProgram}
               >
                 {t('Approve')}
               </Button>

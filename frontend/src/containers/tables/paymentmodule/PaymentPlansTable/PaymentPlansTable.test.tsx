@@ -24,7 +24,6 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
             totalEntitledQuantityTo: null,
             isFollowUp: null,
           }}
-          businessArea='afghanistan'
         />
       </MockedProvider>,
     );
@@ -51,7 +50,6 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
             totalEntitledQuantityTo: null,
             isFollowUp: null,
           }}
-          businessArea='afghanistan'
         />
       </MockedProvider>,
     );

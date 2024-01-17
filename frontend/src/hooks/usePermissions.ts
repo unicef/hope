@@ -1,9 +1,9 @@
-import { useBusinessArea } from './useBusinessArea';
+import { useBaseUrl } from './useBaseUrl';
 import { useCachedMe } from './useCachedMe';
 
 export function usePermissions(): string[] {
   const { data, loading } = useCachedMe();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   if (loading || !data) {
     return null;
   }

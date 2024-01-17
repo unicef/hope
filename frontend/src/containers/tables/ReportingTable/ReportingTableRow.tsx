@@ -7,16 +7,16 @@ import styled from 'styled-components';
 import { Pointer } from '../../../components/core/Pointer';
 import { StatusBox } from '../../../components/core/StatusBox';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { formatNumber, reportStatusToColor } from '../../../utils/utils';
 import { ReportNode } from '../../../__generated__/graphql';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const UnderlinedTableCell = styled(TableCell)`
   text-decoration: underline;
 `;
 const DownloadTableCell = styled(TableCell)`
   span {
-    color: #9f9f9f;
+    color: #003C8F;
     font-weight: 500;
     display: flex;
     justify-content: center;
@@ -33,10 +33,10 @@ export const ReportingTableRow = ({
   statusChoices,
 }: ReportingTableRowProps): React.ReactElement => {
   const { t } = useTranslation();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const history = useHistory();
   const handleClick = (): void => {
-    const path = `/${businessArea}/reporting/${report.id}`;
+    const path = `/${baseUrl}/reporting/${report.id}`;
     history.push(path);
   };
 

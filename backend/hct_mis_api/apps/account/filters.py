@@ -7,6 +7,7 @@ from django.db.models.functions import Lower
 from django_filters import BooleanFilter, CharFilter, FilterSet, MultipleChoiceFilter
 
 from hct_mis_api.apps.account.models import USER_STATUS_CHOICES, Partner, Role
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 
 if TYPE_CHECKING:
@@ -65,7 +66,12 @@ class UsersFilter(FilterSet):
         return qs.filter(q_obj)
 
     def business_area_filter(self, qs: "QuerySet", name: str, value: str) -> "QuerySet[User]":
-        return qs.filter(user_roles__business_area__slug=value)
+        business_area_id = BusinessArea.objects.get(slug=value).id
+        return qs.filter(
+            Q(user_roles__business_area__slug=value)
+            | Q(partner__permissions__has_key=str(business_area_id))
+            | Q(partner__name="UNICEF")
+        )
 
     def partners_filter(self, qs: "QuerySet", name: str, values: List["UUID"]) -> "QuerySet[User]":
         q_obj = Q()

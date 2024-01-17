@@ -41,12 +41,22 @@ snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_house
 
 snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_invalid_search_type 1'] = {
     'data': {
-        'allGrievanceTicket': {
-            'edges': [
+        'allGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 4
+                }
             ],
-            'totalCount': 0
+            'message': '"Invalid search search_type \'invalid\'"',
+            'path': [
+                'allGrievanceTicket'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['TestGrievanceQuerySearchFilter::test_grievance_list_filtered_by_ticket_household_unicef_id 1'] = {

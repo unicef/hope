@@ -54,6 +54,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/identification/tax_id_issuer_i_c": "UKR",
                     "individual_questions/identification/bank_account_number_i_c": "UA3481939838393949",
                     "individual_questions/identification/bank_name_i_c": "Privat",
+                    "individual_questions/identification/account_holder_name_i_c": "Name 123",
                 }
             ],
             "wash_questions/score_bed": "5",
@@ -240,6 +241,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/individual_vulnerabilities/disability_i_c": "disabled",
                     "individual_questions/mas_treatment_i_f": "1",
                     "individual_questions/arm_picture_i_f": "signature-12_13_0.png",
+                    "individual_questions/identification/account_holder_name_i_c": "Name 333",
                 },
                 {
                     "individual_questions/role_i_c": "primary",
@@ -262,6 +264,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/birth_date_i_c": "1983-06-20",
                     "individual_questions/mas_treatment_i_f": "1",
                     "individual_questions/arm_picture_i_f": "signature-12_13_0.png",
+                    "individual_questions/identification/account_holder_name_i_c": "Name qwerty",
                 },
                 {
                     "individual_questions/role_i_c": "primary",
@@ -604,9 +607,12 @@ class TestKoboSaveValidatorsMethods(TestCase):
         self.assertEqual(result, [])
 
         result = validator.validate_everything(self.INVALID_JSON, business_area)
-
         result.sort(key=itemgetter("header"))
         expected = [
+            {
+                "header": "account_holder_name_i_c",
+                "message": "Missing individual required field account_holder_name_i_c",
+            },
             {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
             {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
             {

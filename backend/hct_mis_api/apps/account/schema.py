@@ -62,13 +62,18 @@ class RoleNode(DjangoObjectType):
         exclude = ("id",)
 
 
+class RoleChoiceObject(graphene.ObjectType):
+    name = graphene.String()
+    value = graphene.String()
+    subsystem = graphene.String()
+
+
 class UserBusinessAreaNode(DjangoObjectType):
     permissions = graphene.List(graphene.String)
     is_accountability_applicable = graphene.Boolean()
 
     def resolve_permissions(self, info: Any) -> Set:
-        user_roles = UserRole.objects.filter(user=info.context.user, business_area_id=self.id)
-        return permissions_resolver(user_roles)
+        return info.context.user.permissions_in_business_area(self.slug)
 
     def resolve_is_accountability_applicable(self, info: Any) -> bool:
         return all([bool(flag_state("ALLOW_ACCOUNTABILITY_MODULE")), self.is_accountability_applicable])
@@ -80,17 +85,6 @@ class UserBusinessAreaNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class UserObjectType(DjangoObjectType):
-    business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
-
-    def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
-        return BusinessArea.objects.filter(user_roles__user=self).distinct()
-
-    class Meta:
-        model = get_user_model()
-        exclude = ("password",)
-
-
 class PartnerType(DjangoObjectType):
     class Meta:
         model = Partner
@@ -100,7 +94,7 @@ class UserNode(DjangoObjectType):
     business_areas = DjangoFilterConnectionField(UserBusinessAreaNode)
 
     def resolve_business_areas(self, info: Any) -> "QuerySet[BusinessArea]":
-        return BusinessArea.objects.filter(user_roles__user=self).distinct()
+        return info.context.user.business_areas
 
     class Meta:
         model = get_user_model()
@@ -140,6 +134,36 @@ class JSONLazyString(graphene.Scalar):
         return json.loads(value)
 
 
+class PartnerNodeForProgram(DjangoObjectType):
+    id = graphene.ID()
+    name = graphene.String()
+    admin_areas = graphene.List(graphene.String)
+    area_access = graphene.String()
+
+    class Meta:
+        model = Partner
+
+    @staticmethod
+    def _get_areas_ids(partner: Partner, info_context_headers: Dict) -> List[str]:
+        if program_id := partner.program.id:
+            program = partner.program
+            areas_ids = partner.get_permissions().areas_for(str(program.business_area_id), str(program_id))
+            return areas_ids if areas_ids else []
+        else:
+            return []
+
+    def resolve_admin_areas(self, info: Any, **kwargs: Any) -> List[str]:
+        areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
+        return areas_ids
+
+    def resolve_area_access(self, info: Any, **kwargs: Any) -> str:
+        areas_ids = PartnerNodeForProgram._get_areas_ids(self, info.context.headers)
+        if len(areas_ids) != 0:
+            return "ADMIN_AREA"
+        else:
+            return "BUSINESS_AREA"
+
+
 class Query(graphene.ObjectType):
     me = graphene.Field(UserNode)
     all_users = DjangoPermissionFilterConnectionField(
@@ -150,7 +174,7 @@ class Query(graphene.ObjectType):
         ),
         max_limit=1000,
     )
-    user_roles_choices = graphene.List(ChoiceObject)
+    user_roles_choices = graphene.List(RoleChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
@@ -164,13 +188,17 @@ class Query(graphene.ObjectType):
         return info.context.user
 
     def resolve_user_roles_choices(self, info: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(Role.get_roles_as_choices())
+        return [
+            dict(name=role.name, value=role.id, subsystem=role.subsystem)
+            for role in Role.objects.all().order_by("name")
+        ]
 
     def resolve_user_status_choices(self, info: Any) -> List[Dict[str, Any]]:
         return to_choice_object(USER_STATUS_CHOICES)
 
     def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(Partner.get_partners_as_choices())
+        business_area_id = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area")).id
+        return to_choice_object(Partner.get_partners_for_ba_as_choices(business_area_id))
 
     def resolve_has_available_users_to_export(self, info: Any, business_area_slug: str) -> bool:
         return (

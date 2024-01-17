@@ -1,16 +1,17 @@
-import React from 'react';
 import {
   FormControl,
   FormHelperText,
-  MenuItem,
-  InputLabel,
-  Select,
   IconButton,
   InputAdornment,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
 } from '@material-ui/core';
-import styled from 'styled-components';
-import get from 'lodash/get';
 import { Close } from '@material-ui/icons';
+import get from 'lodash/get';
+import React from 'react';
+import styled from 'styled-components';
 
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
@@ -61,6 +62,15 @@ export const FormikSelectField = ({
           value={value}
           id={`textField-${field.name}`}
           error={isInvalid}
+          renderValue={(selected) => {
+            const selectedItem = otherProps.choices.find(
+              (choice) => choice.value === selected || choice.name === selected,
+            );
+
+            return selectedItem
+              ? selectedItem.labelEn || selectedItem.name || selectedItem.label
+              : selected;
+          }}
           SelectDisplayProps={{ 'data-cy': `select-${field.name}` }}
           MenuProps={{
             'data-cy': `select-options-${field.name}`,
@@ -81,11 +91,11 @@ export const FormikSelectField = ({
               </EndInputAdornment>
             )
           }
-          InputProps={{
-            startAdornment: icon ? (
+          startAdornment={
+            icon ? (
               <StartInputAdornment position='start'>{icon}</StartInputAdornment>
-            ) : null,
-          }}
+            ) : null
+          }
         >
           {otherProps.choices.map((each) => (
             <MenuItem
@@ -94,7 +104,18 @@ export const FormikSelectField = ({
               data-cy={`select-option-${each.name}`}
               disabled={each.disabled || false}
             >
-              {each.labelEn || each.name || each.label}
+              {each.description ? (
+                <ListItemText
+                  primary={each.labelEn || each.name || each.label}
+                  secondary={each.description}
+                  primaryTypographyProps={{ noWrap: true }}
+                  secondaryTypographyProps={{
+                    style: { whiteSpace: 'normal', maxWidth: '300px' },
+                  }}
+                />
+              ) : (
+                each.labelEn || each.name || each.label
+              )}
             </MenuItem>
           ))}
         </Select>

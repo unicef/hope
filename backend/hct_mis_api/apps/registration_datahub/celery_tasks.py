@@ -60,10 +60,7 @@ def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
 @log_start_and_end
 @sentry_tags
 def registration_xlsx_import_task(
-    self: Any,
-    registration_data_import_id: str,
-    import_data_id: str,
-    business_area_id: str,
+    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -87,6 +84,7 @@ def registration_xlsx_import_task(
                     registration_data_import_id=registration_data_import_id,
                     import_data_id=import_data_id,
                     business_area_id=business_area_id,
+                    program_id=str(program_id),
                 )
     except Exception as e:
         logger.warning(e)
@@ -106,7 +104,7 @@ def registration_xlsx_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_kobo_import_task(
-    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str
+    self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
 ) -> None:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
@@ -121,6 +119,7 @@ def registration_kobo_import_task(
                 registration_data_import_id=registration_data_import_id,
                 import_data_id=import_data_id,
                 business_area_id=business_area_id,
+                program_id=str(program_id),
             )
     except Exception as e:
         logger.warning(e)
@@ -156,6 +155,7 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
         if not_started_rdi is None:
             return
         business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
+        program_id = RegistrationDataImport.objects.get(id=not_started_rdi.hct_id).program.id
         with configure_scope() as scope:
             scope.set_tag("business_area", business_area)
 
@@ -163,6 +163,7 @@ def registration_kobo_import_hourly_task(self: Any) -> None:
                 registration_data_import_id=str(not_started_rdi.id),
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
+                program_id=str(program_id),
             )
     except Exception as e:
         raise self.retry(exc=e)
@@ -188,6 +189,7 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
             return
 
         business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
+        program_id = RegistrationDataImport.objects.get(id=not_started_rdi.hct_id).program.id
         with configure_scope() as scope:
             scope.set_tag("business_area", business_area)
 
@@ -195,6 +197,7 @@ def registration_xlsx_import_hourly_task(self: Any) -> None:
                 registration_data_import_id=str(not_started_rdi.id),
                 import_data_id=str(not_started_rdi.import_data.id),
                 business_area_id=str(business_area.id),
+                program_id=str(program_id),
             )
     except Exception as e:
         raise self.retry(exc=e)
@@ -249,12 +252,13 @@ def rdi_deduplication_task(self: Any, registration_data_import_id: str) -> None:
         )
 
         rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_id)
+        program_id = RegistrationDataImport.objects.get(id=rdi_obj.hct_id).program.id
 
         with configure_scope() as scope:
             scope.set_tag("business_area", rdi_obj.business_area_slug)
 
             with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
-                DeduplicateTask(rdi_obj.business_area_slug).deduplicate_imported_individuals(
+                DeduplicateTask(rdi_obj.business_area_slug, program_id).deduplicate_imported_individuals(
                     registration_data_import_datahub=rdi_obj
                 )
     except Exception as e:
@@ -326,9 +330,10 @@ def check_and_set_taxid(queryset: "QuerySet") -> Dict:
 @log_start_and_end
 @sentry_tags
 def automate_registration_diia_import_task(
-    self: Any, page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
+    self: Any, program_id: "UUID", page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
@@ -344,7 +349,8 @@ def automate_registration_diia_import_task(
                     date=timezone.now(),
                     page_size=page_size,
                 )
-                rdi = service.create_rdi(None, rdi_name)
+                program = Program.objects.get(id=program_id)
+                rdi = service.create_rdi(imported_by=None, program=program, rdi_name=rdi_name)
                 service.execute(rdi.id, diia_hh_count=page_size)
                 return [rdi_name, page_size]
         except Exception as e:
@@ -355,9 +361,14 @@ def automate_registration_diia_import_task(
 @log_start_and_end
 @sentry_tags
 def registration_diia_import_task(
-    self: Any, diia_hh_ids: List, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
+    self: Any,
+    program_id: "UUID",
+    diia_hh_ids: List,
+    template: str = "Diia ukraine rdi {date} {page_size}",
+    **filters: Any,
 ) -> List:
     from hct_mis_api.apps.core.models import BusinessArea
+    from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
         RdiDiiaCreateTask,
     )
@@ -373,7 +384,8 @@ def registration_diia_import_task(
                     date=timezone.now(),
                     page_size=len(diia_hh_ids),
                 )
-                rdi = service.create_rdi(None, rdi_name)
+                program = Program.objects.get(id=program_id)
+                rdi = service.create_rdi(imported_by=None, program=program, rdi_name=rdi_name)
                 service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
                 return [rdi_name, len(diia_hh_ids)]
         except Exception as e:

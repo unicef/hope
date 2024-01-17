@@ -45,9 +45,9 @@ ingress:
 
 postgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
-  username: stgcashubusr
+  username: devcashubusr
   password: #secret-variables: POSTGRES_PASSWORD
-  database: stg_hope_appdb_datahubdb
+  database: dump_hope_tmp
 registrationdatahubpostgresql:
   host: pgsql-14-reserved-hctmis-devstg.postgres.database.azure.com
   username: stgreghubusr
@@ -58,3 +58,6 @@ cashassistdatahubpostgresql:
   username: stgcashubusr
   password: #secret-variables: CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD
   database: stg_cashassist_datahubdb
+
+pgadmin:
+  storage: 250Gi

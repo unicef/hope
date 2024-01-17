@@ -14,7 +14,11 @@ from django_filters import (
 )
 
 import hct_mis_api.apps.targeting.models as target_models
-from hct_mis_api.apps.core.filters import DateTimeRangeFilter, IntegerFilter
+from hct_mis_api.apps.core.filters import (
+    DateTimeRangeFilter,
+    GlobalProgramFilterMixin,
+    IntegerFilter,
+)
 from hct_mis_api.apps.core.utils import CustomOrderingFilter
 from hct_mis_api.apps.program.models import Program
 
@@ -36,7 +40,7 @@ class HouseholdFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug")
 
 
-class TargetPopulationFilter(FilterSet):
+class TargetPopulationFilter(GlobalProgramFilterMixin, FilterSet):
     """Query target population records.
 
     Loads associated entries for Households and TargetRules.
@@ -65,9 +69,6 @@ class TargetPopulationFilter(FilterSet):
     created_at_range = DateTimeRangeFilter(field_name="created_at")
 
     payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
-
-    payment_plan_applicable = BooleanFilter(method="filter_payment_plan_applicable")
-
     status_not = CharFilter(field_name="status", exclude=True)
 
     total_households_count_with_valid_phone_no_max = IntegerFilter(
@@ -137,14 +138,13 @@ class TargetPopulationFilter(FilterSet):
 
     class Meta:
         model = target_models.TargetPopulation
-        fields = (
-            "name",
-            "created_by_name",
-            "created_at",
-            "updated_at",
-            "status",
-            "households",
-        )
+        fields = {
+            "program": ["exact"],
+            "created_at": ["exact", "lte", "gte"],
+            "updated_at": ["exact", "lte", "gte"],
+            "status": ["exact"],
+            "households": ["exact"],
+        }
 
         filter_overrides = {
             IntegerRangeField: {"filter_class": NumericRangeFilter},
@@ -159,6 +159,7 @@ class TargetPopulationFilter(FilterSet):
             "updated_at",
             "status",
             "total_family_size",
+            "total_households_count",
             "program__id",
         )
     )

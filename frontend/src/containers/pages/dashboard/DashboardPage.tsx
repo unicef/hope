@@ -2,31 +2,29 @@ import { Tab, Tabs, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
+import { useDashboardYearsChoiceDataQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { DashboardFilters } from '../../../components/dashboard/DashboardFilters';
 import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
 import { ExportModal } from '../../../components/dashboard/ExportModal';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
-import { useDashboardYearsChoiceDataQuery } from '../../../__generated__/graphql';
 import { DashboardYearPage } from './DashboardYearPage';
-
-const initialFilter = {
-  program: '',
-  administrativeArea: '',
-};
 
 export const DashboardPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
+  const { businessArea } = useBaseUrl();
   const [selectedTab, setSelectedTab] = useState(0);
-
+  const initialFilter = {
+    administrativeArea: '',
+    program: '',
+  };
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
@@ -55,7 +53,7 @@ export const DashboardPage = (): React.ReactElement => {
   const tabs = (
     <Tabs
       value={selectedTab}
-      onChange={(event: React.ChangeEvent<{}>, newValue: number) => {
+      onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
         setSelectedTab(newValue);
       }}
       indicatorColor='primary'

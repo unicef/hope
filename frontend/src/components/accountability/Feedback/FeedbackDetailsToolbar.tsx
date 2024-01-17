@@ -1,12 +1,14 @@
-import { Box, Button } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory, useParams } from 'react-router-dom';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { FeedbackQuery } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { PageHeader } from '../../core/PageHeader';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { ButtonTooltip } from '../../core/ButtonTooltip';
+import { useProgramContext } from '../../../programContext';
 
 interface FeedbackDetailsToolbarProps {
   feedback: FeedbackQuery['feedback'];
@@ -19,13 +21,14 @@ export const FeedbackDetailsToolbar = ({
 }: FeedbackDetailsToolbarProps): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const businessArea = useBusinessArea();
+  const { baseUrl } = useBaseUrl();
   const history = useHistory();
+  const { isActiveProgram } = useProgramContext();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: t('Feedback'),
-      to: `/${businessArea}/grievance/feedback`,
+      to: `/${baseUrl}/grievance/feedback`,
     },
   ];
 
@@ -42,24 +45,26 @@ export const FeedbackDetailsToolbar = ({
       <Box display='flex' alignItems='center'>
         {canEdit && (
           <Box mr={3}>
-            <Button
+            <ButtonTooltip
               color='primary'
               variant='outlined'
               component={Link}
-              to={`/${businessArea}/grievance/feedback/edit-ticket/${id}`}
+              to={`/${baseUrl}/grievance/feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
               data-cy='button-edit'
+              title={t('Program has to be active to edit a Feedback')}
+              disabled={!isActiveProgram}
             >
               {t('Edit')}
-            </Button>
+            </ButtonTooltip>
           </Box>
         )}
         {!hasLinkedGrievance && (
           <Box mr={3}>
-            <Button
+            <ButtonTooltip
               onClick={() =>
                 history.push({
-                  pathname: `/${businessArea}/grievance/new-ticket`,
+                  pathname: `/${baseUrl}/grievance/new-ticket`,
                   state: {
                     selectedHousehold: feedback?.householdLookup,
                     selectedIndividual: feedback?.individualLookup,
@@ -71,9 +76,13 @@ export const FeedbackDetailsToolbar = ({
               variant='contained'
               color='primary'
               data-cy='button-create-linked-ticket'
+              title={t(
+                'Program has to be active to create a Linked Ticket to Feedback',
+              )}
+              disabled={!isActiveProgram}
             >
               {t('Create Linked Ticket')}
-            </Button>
+            </ButtonTooltip>
           </Box>
         )}
       </Box>

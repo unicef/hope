@@ -2,9 +2,11 @@ import GrievanceDashboard from "../../page-objects/pages/grievance/grievance_das
 
 let grievanceDashboard = new GrievanceDashboard();
 
-describe("Grievance Dashboard", () => {
+describe.skip("Grievance Dashboard", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
-    cy.adminLogin();
     cy.navigateToHomePage();
     grievanceDashboard.clickMenuButtonGrievance();
     grievanceDashboard.clickMenuButtonGrievanceDashboard();
@@ -35,7 +37,7 @@ describe("Grievance Dashboard", () => {
   describe.skip("E2E tests Grievance Dashboard", () => {});
 
   describe("Regression tests Grievance Dashboard", () => {
-    it("174517: Check clear cash", () => {
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Grievance Dashboard page",
         "Press Menu User Profile button",

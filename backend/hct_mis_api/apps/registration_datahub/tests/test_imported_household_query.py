@@ -5,7 +5,7 @@ from django.core.management import call_command
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
@@ -43,7 +43,8 @@ class TestImportedHouseholdQuery(APITestCase):
     def setUpTestData(cls) -> None:
         call_command("loadbusinessareas")
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
-        cls.user = UserFactory.create()
+        cls.partner = PartnerFactory(name="Test1")
+        cls.user = UserFactory.create(partner=cls.partner)
         sizes_list = (2, 4, 5, 1, 3, 11, 14)
         cls.households = [
             ImportedHouseholdFactory(

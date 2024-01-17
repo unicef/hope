@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.9.12-slim-bullseye as base
+FROM python:3.9.18-slim-bullseye as base
 
 ARG UID=82
 
@@ -24,8 +24,7 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   libpangocairo-1.0-0 \
   shared-mime-info \
   wkhtmltopdf \
-  curl \
-  vim &&\
+  curl &&\
   addgroup --system --gid "${UID}" hope &&\
   adduser --system --uid "${UID}" --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
   mkdir -p /code /tmp /data &&\
@@ -44,8 +43,8 @@ WORKDIR /code
 RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/$WAITFORIT_VERSION/waitforit-linux_amd64 &&\
   chmod +x /usr/local/bin/waitforit
 
-COPY ./docker-entrypoint.sh /bin/
-ENTRYPOINT ["docker-entrypoint.sh"]
+COPY ./docker/entrypoint.sh /bin/
+ENTRYPOINT ["entrypoint.sh"]
 
 RUN curl -o /code/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 

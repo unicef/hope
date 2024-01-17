@@ -6,20 +6,20 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  hasPermissionInModule,
-  hasPermissions,
-} from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { usePermissions } from '../../../hooks/usePermissions';
 import {
   useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
 } from '../../../__generated__/graphql';
-import { menuItems } from './menuItems';
+import {
+  hasPermissionInModule,
+  hasPermissions,
+} from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { MenuItem, menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -61,13 +61,13 @@ export const DrawerItems = ({
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
-  const businessArea = useBusinessArea();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-first',
   });
-  const clearLocation = currentLocation.replace(`/${businessArea}`, '');
+  const clearLocation = currentLocation.replace(`/${baseUrl}`, '');
   const history = useHistory();
   const initialIndex = menuItems.findIndex((item) => {
     if (!item.secondaryActions) {
@@ -82,13 +82,53 @@ export const DrawerItems = ({
   const [expandedItem, setExpandedItem] = React.useState(
     initialIndex !== -1 ? initialIndex : null,
   );
+
+  //close nav when changing business area or program
+  useEffect(() => {
+    setExpandedItem(null);
+  }, [baseUrl]);
+
   if (permissions === null || !businessAreaData) return null;
 
-  const cashAssistIndex = menuItems.findIndex(
-    (item) => item.name === 'Cash Assist',
-  );
+  const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
+    const updatedMenuItems = [...items];
+    const getIndexByName = (name: string): number => {
+      return updatedMenuItems.findIndex((item) => item?.name === name);
+    };
+    const cashAssistIndex = getIndexByName('Cash Assist');
+    const programDetailsIndex = getIndexByName('Programme Details');
+    const reportingIndex = getIndexByName('Reporting');
 
-  menuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
+    // Remove 'Reporting' item when program is selected
+    if (reportingIndex !== -1 && !isAllPrograms) {
+      updatedMenuItems.splice(reportingIndex, 1);
+    }
+
+    //Set CashAssist URL
+    updatedMenuItems[cashAssistIndex].href =
+      cashAssistUrlData?.cashAssistUrlPrefix;
+
+    //When GlobalProgramFilter applied
+    if (!isAllPrograms) {
+      updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
+    }
+    //When GlobalProgramFilter not applied show some pages only
+    if (isAllPrograms) {
+      const pagesAvailableForAllPrograms = [
+        'Country Dashboard',
+        'Programme Management',
+        'Reporting',
+        'Grievance',
+        'Activity Log',
+      ];
+      return updatedMenuItems.filter((item) =>
+        pagesAvailableForAllPrograms.includes(item.name),
+      );
+    }
+    return updatedMenuItems;
+  };
+
+  const preparedMenuItems = prepareMenuItems(menuItems);
 
   const {
     isPaymentPlanApplicable,
@@ -115,7 +155,7 @@ export const DrawerItems = ({
 
   return (
     <div>
-      {menuItems.map((item, index) => {
+      {preparedMenuItems?.map((item, index) => {
         if (
           item.permissionModule &&
           !hasPermissionInModule(item.permissionModule, permissions)
@@ -135,10 +175,10 @@ export const DrawerItems = ({
           );
 
           return (
-            <div key={item.name + hrefForCollapsibleItem}>
+            <div key={item?.name + hrefForCollapsibleItem}>
               <ListItem
                 button
-                data-cy={`nav-${item.name}`}
+                data-cy={`nav-${item?.name}`}
                 onClick={() => {
                   if (index === expandedItem) {
                     setExpandedItem(null);
@@ -146,12 +186,12 @@ export const DrawerItems = ({
                     setExpandedItem(index);
                   }
                   if (hrefForCollapsibleItem) {
-                    history.push(`/${businessArea}${hrefForCollapsibleItem}`);
+                    history.push(`/${baseUrl}${hrefForCollapsibleItem}`);
                   }
                 }}
               >
                 <Icon>{item.icon}</Icon>
-                <Text primary={item.name} />
+                <Text primary={item?.name} />
                 {expandedItem !== null && expandedItem === index ? (
                   <ExpandLess />
                 ) : (
@@ -173,7 +213,7 @@ export const DrawerItems = ({
                             component={Link}
                             data-cy={`nav-${secondary.name}`}
                             key={secondary.name}
-                            to={`/${businessArea}${secondary.href}`}
+                            to={`/${baseUrl}${secondary.href}`}
                             selected={Boolean(
                               secondary.selectedRegexp.exec(clearLocation),
                             )}
@@ -190,31 +230,31 @@ export const DrawerItems = ({
         }
         return item.external ? (
           <ListItem
-            data-cy={`nav-${item.name}`}
+            data-cy={`nav-${item?.name}`}
             button
-            key={item.name + item.href}
+            key={item?.name + item.href}
           >
             <StyledLink target='_blank' href={item.href}>
               <Box display='flex'>
                 <Icon>{item.icon}</Icon>
-                <Text primary={item.name} />
+                <Text primary={item?.name} />
               </Box>
             </StyledLink>
           </ListItem>
         ) : (
           <ListItem
             button
-            data-cy={`nav-${item.name}`}
+            data-cy={`nav-${item?.name}`}
             component={Link}
-            key={item.name + item.href}
-            to={`/${businessArea}${item.href}`}
+            key={item?.name + item.href}
+            to={`/${baseUrl}${item.href}`}
             onClick={() => {
               setExpandedItem(null);
             }}
             selected={Boolean(item.selectedRegexp.exec(clearLocation))}
           >
             <Icon>{item.icon}</Icon>
-            <Text primary={item.name} />
+            <Text primary={item?.name} />
           </ListItem>
         );
       })}

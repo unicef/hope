@@ -1,7 +1,12 @@
 import logging
+import typing
+from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from django.core.exceptions import ValidationError
+
+import xlrd
+from graphql.execution.base import ResolveInfo
 
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import (
@@ -16,8 +21,13 @@ from hct_mis_api.apps.core.field_attributes.fields_types import (
     TYPE_STRING,
     Scope,
 )
-from hct_mis_api.apps.core.utils import xlrd_rows_iterator
-from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
+from hct_mis_api.apps.core.utils import decode_id_string_required, xlrd_rows_iterator
+from hct_mis_api.apps.household.models import (
+    BLANK,
+    NOT_PROVIDED,
+    RELATIONSHIP_UNKNOWN,
+    Household,
+)
 from hct_mis_api.apps.program.models import Program
 
 if TYPE_CHECKING:
@@ -69,7 +79,7 @@ class CommonValidator(BaseValidator):
         end_date = kwargs.get("end_date")
         if start_date and end_date:
             if start_date > end_date:
-                logger.error(
+                logger.info(
                     f"Start date cannot be greater than the end date, "
                     f"start_date={start_date.strftime('%m/%d/%Y, %H:%M:%S')} "
                     f"end_date={end_date.strftime('%m/%d/%Y, %H:%M:%S')}"
@@ -78,16 +88,16 @@ class CommonValidator(BaseValidator):
 
 
 def prepare_choices_for_validation(choices_sheet: "Worksheet") -> Dict[str, List[str]]:
-    from collections import defaultdict
-
-    import xlrd
-
     choices_mapping = defaultdict(list)
     first_row = choices_sheet.row(0)
     choices_headers_map = [col.value for col in first_row]
-    if {"list_name", "name", "label::English (en)"}.issubset(set(choices_headers_map)) is False:
-        logger.error("Choices sheet does not contain all required columns")
-        raise ValueError("Choices sheet does not contain all required columns")
+    required_columns = {"list_name", "name"}
+    if required_columns.issubset(set(choices_headers_map)) is False:
+        missing_columns = required_columns - set(choices_headers_map)
+        str_missing_columns = ", ".join(missing_columns)
+        msg = f"Choices sheet does not contain all required columns, missing columns: {str_missing_columns}"
+        logger.warning(msg)
+        raise ValidationError(msg)
 
     for row_number in range(1, choices_sheet.nrows):
         row = choices_sheet.row(row_number)
@@ -169,8 +179,8 @@ class KoboTemplateValidator:
                 columns_names_and_numbers_mapping[column_name] = index
 
         if None in columns_names_and_numbers_mapping.values():
-            logger.error("Survey sheet does not contain all required columns")
-            raise ValueError("Survey sheet does not contain all required columns")
+            logger.warning("Survey sheet does not contain all required columns")
+            raise ValidationError("Survey sheet does not contain all required columns")
 
         return columns_names_and_numbers_mapping
 
@@ -326,13 +336,45 @@ class DataCollectingTypeValidator(BaseValidator):
 
         # user can update the program and don't update data collecting type
         if data_collecting_type:
+            # can't update for draft program
             if (
                 program
-                and program.status != Program.DRAFT
                 and program.data_collecting_type.code != data_collecting_type.code
+                and program.status != Program.DRAFT
             ):
-                raise ValidationError("DataCollectingType can be updated only for Program within status draft")
+                raise ValidationError("The Data Collection Type for this programme cannot be edited.")
+            # can update for draft program and without population
+            elif (
+                program
+                and program.data_collecting_type.code != data_collecting_type.code
+                and program.status == Program.DRAFT
+                and Household.objects.filter(program=program).exists()
+            ):
+                raise ValidationError("DataCollectingType can be updated only for Program without any households")
             elif not data_collecting_type.active:
                 raise ValidationError("Only active DataCollectingType can be used in Program")
             elif data_collecting_type.deprecated:
                 raise ValidationError("Avoid using the deprecated DataCollectingType in Program")
+
+
+def raise_program_status_is(status: str) -> typing.Callable:
+    def decorator(func: typing.Callable) -> typing.Callable:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            if len(args) >= 3 and isinstance(args[2], ResolveInfo):
+                info = args[2]
+                inputs = kwargs.get("input", {})
+            else:
+                raise Exception("ResolveInfo object missing")
+
+            encoded_program_id = inputs.get("program") or info.context.headers.get("Program")
+            if encoded_program_id and encoded_program_id != "all":
+                program = Program.objects.get(id=decode_id_string_required(encoded_program_id))
+
+                if program.status == status:
+                    raise ValidationError(f"In order to proceed this action, program status must not be {status}")
+
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

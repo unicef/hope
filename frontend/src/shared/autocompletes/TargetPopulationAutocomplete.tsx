@@ -1,26 +1,21 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import { useHistory, useLocation } from 'react-router-dom';
 import get from 'lodash/get';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useDebounce } from '../../hooks/useDebounce';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useAllTargetPopulationForChoicesLazyQuery } from '../../__generated__/graphql';
-import TextField from '../TextField';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
-    .MuiFormControl-marginDense {
-    margin-top: 6px;
-  }
-`;
+import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useDebounce } from '../../hooks/useDebounce';
+import {
+  createHandleApplyFilterChange,
+  getAutocompleteOptionLabel,
+  handleAutocompleteChange,
+  handleAutocompleteClose,
+  handleOptionSelected,
+} from '../../utils/utils';
+import { BaseAutocomplete } from './BaseAutocomplete';
 
 export const TargetPopulationAutocomplete = ({
   disabled,
-  fullWidth = true,
   name,
   filter,
   value,
@@ -46,8 +41,8 @@ export const TargetPopulationAutocomplete = ({
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
-  const debouncedInputText = useDebounce(inputValue, 500);
-  const businessArea = useBusinessArea();
+  const debouncedInputText = useDebounce(inputValue, 800);
+  const { businessArea, programId } = useBaseUrl();
 
   const [
     loadData,
@@ -58,19 +53,38 @@ export const TargetPopulationAutocomplete = ({
       first: 20,
       orderBy: 'name',
       name: debouncedInputText,
+      program: [programId],
     },
+    fetchPolicy: 'cache-and-network',
   });
 
-  useEffect(() => {
-    if (open) {
-      loadData();
-    }
-  }, [open, debouncedInputText, loadData]);
+  const isMounted = useRef(true);
 
-  // load all TPs on mount to match the value from the url
+  const loadDataCallback = useCallback(() => {
+    if (businessArea) {
+      loadData({ variables: { businessArea, name: debouncedInputText } });
+    }
+  }, [loadData, businessArea, debouncedInputText]);
+
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    isMounted.current = true;
+    if (open && isMounted.current) {
+      loadDataCallback();
+    }
+    return () => {
+      isMounted.current = false;
+    };
+  }, [open, debouncedInputText, loadDataCallback]);
+
+  useEffect(() => {
+    isMounted.current = true;
+    if (isMounted.current) {
+      loadDataCallback();
+    }
+    return () => {
+      isMounted.current = false;
+    };
+  }, [loadDataCallback]);
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
@@ -81,64 +95,40 @@ export const TargetPopulationAutocomplete = ({
     appliedFilter,
     setAppliedFilter,
   );
-  if (!data) return null;
+
+  const allEdges = get(data, 'allTargetPopulations.edges', []);
 
   return (
-    <StyledAutocomplete
+    <BaseAutocomplete
       value={value}
-      fullWidth={fullWidth}
-      open={open}
-      filterOptions={(options1) => options1}
-      onChange={(_, selectedValue) =>
-        handleFilterChange(name, selectedValue?.node?.id)
-      }
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={(e, reason) => {
-        setOpen(false);
-        if (reason === 'select-option') return;
-        onInputTextChange('');
-      }}
-      getOptionSelected={(option, value1) => {
-        return option.node?.id === value1;
-      }}
-      getOptionLabel={(option) => {
-        let optionLabel;
-        if (option?.node) {
-          optionLabel = `${option.node.name}`;
-        } else {
-          optionLabel =
-            data?.allTargetPopulation?.edges?.find(
-              (el) => el.node.id === option,
-            )?.node.name || '';
-        }
-        return `${optionLabel}`;
-      }}
       disabled={disabled}
-      options={get(data, 'allTargetPopulation.edges', [])}
+      label={label || t('Target Population')}
+      dataCy='filters-target-population-autocomplete'
+      loadData={loadData}
       loading={loading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label || t('Target Population')}
-          variant='outlined'
-          margin='dense'
-          value={inputValue}
-          onChange={(e) => onInputTextChange(e.target.value)}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color='inherit' size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
+      allEdges={allEdges}
+      handleChange={(_, selectedValue) => {
+        handleAutocompleteChange(
+          name,
+          selectedValue?.node?.id,
+          handleFilterChange,
+        );
+      }}
+      handleOpen={() => setOpen(true)}
+      open={open}
+      handleClose={(_, reason) =>
+        handleAutocompleteClose(setOpen, onInputTextChange, reason)
+      }
+      handleOptionSelected={(option, value1) =>
+        handleOptionSelected(option?.node?.id, value1)
+      }
+      handleOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue)
+      }
+      data={data}
+      inputValue={inputValue}
+      onInputTextChange={onInputTextChange}
+      debouncedInputText={debouncedInputText}
     />
   );
 };

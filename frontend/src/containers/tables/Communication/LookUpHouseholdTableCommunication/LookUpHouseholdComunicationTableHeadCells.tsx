@@ -41,13 +41,6 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Programme',
-    id: 'program__id',
-    numeric: false,
-    dataCy: 'household-programme-id',
-  },
-  {
-    disablePadding: false,
     label: 'Registration Date',
     id: 'last_registration_date',
     numeric: false,

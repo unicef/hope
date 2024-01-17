@@ -9,7 +9,6 @@ export const AllHouseholds = gql`
     $businessArea: String
     $orderBy: String
     $familySize: String
-    $programs: [ID]
     $headOfHouseholdFullNameIcontains: String
     $headOfHouseholdPhoneNoValid: Boolean
     $adminArea: ID
@@ -19,6 +18,8 @@ export const AllHouseholds = gql`
     $lastRegistrationDate: String
     $admin2: ID
     $withdrawn: Boolean
+    $program: ID
+
   ) {
     allHouseholds(
       after: $after
@@ -28,7 +29,6 @@ export const AllHouseholds = gql`
       businessArea: $businessArea
       size: $familySize
       orderBy: $orderBy
-      programs: $programs
       headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
       headOfHousehold_PhoneNoValid: $headOfHouseholdPhoneNoValid
       adminArea: $adminArea
@@ -38,6 +38,7 @@ export const AllHouseholds = gql`
       lastRegistrationDate: $lastRegistrationDate
       admin2: $admin2
       withdrawn: $withdrawn
+      program: $program
     ) {
       pageInfo {
         hasNextPage

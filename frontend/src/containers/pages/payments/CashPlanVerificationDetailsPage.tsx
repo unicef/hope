@@ -3,32 +3,32 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  PaymentVerificationPlanStatus,
+  useCashPlanQuery,
+  useCashPlanVerificationSamplingChoicesQuery,
+} from '../../../__generated__/graphql';
 import { BlackLink } from '../../../components/core/BlackLink';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { TableWrapper } from '../../../components/core/TableWrapper';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { TableWrapper } from '../../../components/core/TableWrapper';
 import { CashPlanDetailsSection } from '../../../components/payments/CashPlanDetailsSection';
 import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
 import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   decodeIdString,
   getFilterFromQueryParams,
   isPermissionDeniedError,
 } from '../../../utils/utils';
-import {
-  PaymentVerificationPlanStatus,
-  useCashPlanQuery,
-  useCashPlanVerificationSamplingChoicesQuery,
-} from '../../../__generated__/graphql';
+import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
-import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 
 const Container = styled.div`
   display: flex;
@@ -61,14 +61,17 @@ const initialFilter = {
 export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const permissions = usePermissions();
-  const businessArea = useBusinessArea();
+
+  const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const location = useLocation();
+
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
+
   const { id } = useParams();
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
@@ -89,7 +92,7 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
-      to: `/${businessArea}/payment-verification`,
+      to: `/${baseUrl}/payment-verification`,
     },
   ];
 
@@ -136,7 +139,6 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
       <>
         {canCreate && (
           <CreateVerificationPlan
-            disabled={false}
             cashOrPaymentPlanId={cashPlan.id}
             canCreatePaymentVerificationPlan={
               cashPlan.canCreatePaymentVerificationPlan
@@ -145,18 +147,19 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
           />
         )}
 
-        {isFinished && (
-          <Button
-            variant='contained'
-            color='primary'
-            component={Link}
-            to={`/${businessArea}/grievance/payment-verification/${decodeIdString(
-              cashPlan.id,
-            )}`}
-          >
-            {t('View Tickets')}
-          </Button>
-        )}
+        {isFinished &&
+          (isAllPrograms ? (
+            <Button
+              variant='contained'
+              color='primary'
+              component={Link}
+              to={`/${baseUrl}/grievance/payment-verification/${decodeIdString(
+                cashPlan.id,
+              )}`}
+            >
+              {t('View Tickets')}
+            </Button>
+          ) : null)}
       </>
     </PageHeader>
   );

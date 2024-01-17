@@ -200,6 +200,7 @@ class RdiMergeTask:
                 **household_data,
                 registration_data_import=obj_hct,
                 business_area=obj_hct.business_area,
+                program=obj_hct.program,
             )
             self.merge_admin_areas(imported_household, household)
             households_dict[imported_household.id] = household
@@ -266,9 +267,11 @@ class RdiMergeTask:
             individual = Individual(
                 **values,
                 household=household,
+                registration_id=getattr(household, "registration_id", None),
                 business_area=obj_hct.business_area,
                 registration_data_import=obj_hct,
                 imported_individual_id=imported_individual.id,
+                program=obj_hct.program,
             )
             if household:
                 individual.registration_id = household.registration_id
@@ -310,6 +313,8 @@ class RdiMergeTask:
                 bank_name=imported_bank_account_info.bank_name,
                 bank_account_number=imported_bank_account_info.bank_account_number.replace(" ", ""),
                 debit_card_number=imported_bank_account_info.debit_card_number.replace(" ", ""),
+                bank_branch_name=imported_bank_account_info.bank_branch_name,
+                account_holder_name=imported_bank_account_info.account_holder_name,
             )
             roles_to_create.append(role)
 
@@ -328,7 +333,7 @@ class RdiMergeTask:
                 household__in=imported_households, individual__in=imported_individuals
             )
             imported_bank_account_infos = ImportedBankAccountInfo.objects.filter(individual__in=imported_individuals)
-
+            household_ids = []
             try:
                 with transaction.atomic(using="default"), transaction.atomic(using="registration_datahub"):
                     old_obj_hct = copy_model_object(obj_hct)
@@ -396,9 +401,9 @@ class RdiMergeTask:
                             .select_for_update()
                             .order_by("pk")
                         )
-                        DeduplicateTask(obj_hct.business_area.slug).deduplicate_individuals_against_population(
-                            individuals
-                        )
+                        DeduplicateTask(
+                            obj_hct.business_area.slug, obj_hct.program.id
+                        ).deduplicate_individuals_against_population(individuals)
                         logger.info(f"RDI:{registration_data_import_id} Deduplicated {len(individual_ids)} individuals")
                         golden_record_duplicates = Individual.objects.filter(
                             registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
@@ -445,7 +450,14 @@ class RdiMergeTask:
                     imported_households.delete()
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                     transaction.on_commit(lambda: deduplicate_documents.delay())
-                    log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
+                    log_create(
+                        RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+                        "business_area",
+                        None,
+                        obj_hct.program_id,
+                        old_obj_hct,
+                        obj_hct,
+                    )
                     logger.info(f"Datahub data for RDI: {obj_hct.id} was cleared")
             except Exception:
                 # remove es individuals if exists

@@ -50,7 +50,8 @@ def create_es_query(options: Dict) -> Dict:
     grievance_status = options.pop("grievance_status", "active")
     created_at_range = options.pop("created_at_range", None)
 
-    business_area = options.pop("business_area")
+    business_area = options.pop("business_area", None)
+    programs = options.pop("programs", None)
 
     if created_at_range:
         date_range = {"range": {"created_at": {}}}
@@ -116,7 +117,12 @@ def create_es_query(options: Dict) -> Dict:
         "sort": [sort],
     }
 
+    query_dict["query"]["bool"]["filter"] = []
+    if business_area or programs:
+        query_dict["query"]["bool"]["filter"] = []
     if business_area:
-        query_dict["query"]["bool"]["filter"] = {"term": {"business_area.slug": business_area}}
+        query_dict["query"]["bool"]["filter"].append({"term": {"business_area.slug": business_area}})
+    if programs:
+        query_dict["query"]["bool"]["filter"].append({"term": {"programs": {"value": programs}}})
 
     return query_dict

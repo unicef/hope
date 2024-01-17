@@ -70,7 +70,7 @@ export const fakeMe = {
               'ACTIVITY_LOG_DOWNLOAD',
               'ACTIVITY_LOG_VIEW',
               'GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR',
-              'PRORGRAMME_VIEW_LIST_AND_DETAILS',
+              'PROGRAMME_VIEW_LIST_AND_DETAILS',
               'GRIEVANCES_ADD_NOTE_AS_CREATOR',
               'PROGRAMME_CREATE',
               'GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER',

@@ -7,13 +7,13 @@ import { BlackLink } from '../../../core/BlackLink';
 import { LabelizedField } from '../../../core/LabelizedField';
 
 interface RelatedFollowUpPaymentPlansProps {
-  businessArea: string;
+  baseUrl: string;
   followUps: PaymentPlanQuery['paymentPlan']['followUps'];
 }
 
 export const RelatedFollowUpPaymentPlans = ({
   followUps,
-  businessArea,
+  baseUrl,
 }: RelatedFollowUpPaymentPlansProps): React.ReactElement => {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
@@ -30,7 +30,7 @@ export const RelatedFollowUpPaymentPlans = ({
     followUpLinks = truncatedFollowUps.map((followUp) => (
       <BlackLink
         key={followUp?.node?.id}
-        to={`/${businessArea}/payment-module/followup-payment-plans/${followUp?.node?.id}`}
+        to={`/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`}
       >
         {followUp?.node?.unicefId}
         <br />
@@ -40,10 +40,14 @@ export const RelatedFollowUpPaymentPlans = ({
 
   return (
     <LabelizedField label={t('Related Follow-Up Payment Plans')}>
-      <Box display="flex" flexDirection="column">
+      <Box display='flex' flexDirection='column'>
         {followUpLinks || '-'}
         {followUps?.edges?.length > 5 && (
-          <Button variant='outlined' color='primary' onClick={handleButtonClick}>
+          <Button
+            variant='outlined'
+            color='primary'
+            onClick={handleButtonClick}
+          >
             {showAll ? t('Hide') : t('See all')}
           </Button>
         )}

@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
 import { createHandleApplyFilterChange } from '../../utils/utils';
-import { ClearApplyButtons } from './ClearApplyButtons';
-import { ContainerWithBorder } from './ContainerWithBorder';
+import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
 
@@ -60,7 +59,10 @@ export function ActivityLogPageFilters({
     registrationdataimport: 'Registration Data Import',
   };
   return (
-    <ContainerWithBorder>
+    <FiltersSection
+      clearHandler={handleClearFilter}
+      applyHandler={handleApplyFilter}
+    >
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
@@ -94,7 +96,7 @@ export function ActivityLogPageFilters({
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
-            label='User'
+            label={t('User')}
             filter={filter}
             name='userId'
             value={filter.userId}
@@ -105,10 +107,6 @@ export function ActivityLogPageFilters({
           />
         </Grid>
       </Grid>
-      <ClearApplyButtons
-        clearHandler={handleClearFilter}
-        applyHandler={handleApplyFilter}
-      />
-    </ContainerWithBorder>
+    </FiltersSection>
   );
 }

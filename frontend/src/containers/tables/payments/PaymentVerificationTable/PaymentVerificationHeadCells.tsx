@@ -26,16 +26,9 @@ export const headCells: HeadCell<CashPlanAndPaymentPlanNode>[] = [
   {
     disablePadding: false,
     label: 'Timeframe',
-    id: 'startDate',
+    id: 'timeframe',
     numeric: false,
     dataCy: 'startDate',
-  },
-  {
-    disablePadding: false,
-    label: 'Programme',
-    id: 'program__name',
-    numeric: false,
-    dataCy: 'program__name',
   },
   {
     disablePadding: false,

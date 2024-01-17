@@ -3,11 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  ProgramNode,
-  useAllProgramsForChoicesQuery,
-  useProgrammeChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+import { useProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
 import { SurveyTabsValues } from '../../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { LookUpProgrammesFiltersSurveys } from './LookUpProgrammesFiltersSurveys';
@@ -47,6 +43,7 @@ export const LookUpSelectionSurveys = ({
     numberOfHouseholdsMax: '',
     budgetMin: '',
     budgetMax: '',
+    dataCollectingType: ''
   };
 
   const [filterP, setFilterP] = useState(
@@ -59,9 +56,8 @@ export const LookUpSelectionSurveys = ({
   const initialFilterTP = {
     name: '',
     status: '',
-    program: '',
-    totalHouseholdsCountMin: null,
-    totalHouseholdsCountMax: null,
+    totalHouseholdsCountMin: '',
+    totalHouseholdsCountMax: '',
     createdAtRangeMin: undefined,
     createdAtRangeMax: undefined,
   };
@@ -82,14 +78,6 @@ export const LookUpSelectionSurveys = ({
     variables: { businessArea },
   });
 
-  const { data, loading: programsLoading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const allPrograms = data?.allPrograms?.edges || [];
-  const programs = allPrograms.map((edge) => edge.node);
-
   const handleChange = (type: number, value: string): void => {
     setValues({
       ...values,
@@ -104,7 +92,7 @@ export const LookUpSelectionSurveys = ({
     });
   };
 
-  if (programsLoading || choicesLoading) return null;
+  if (choicesLoading) return null;
 
   return (
     <Box>
@@ -152,12 +140,10 @@ export const LookUpSelectionSurveys = ({
           {selectedTab === SurveyTabsValues.TARGET_POPULATION && (
             <LookUpTargetPopulationFiltersSurveys
               filter={filterTP}
-              programs={programs as ProgramNode[]}
               setFilter={setFilterTP}
               initialFilter={initialFilterTP}
               appliedFilter={appliedFilterTP}
               setAppliedFilter={setAppliedFilterTP}
-              addBorder={false}
             />
           )}
         </Box>

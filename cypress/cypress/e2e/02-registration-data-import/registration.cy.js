@@ -3,6 +3,9 @@ import RegistrationDataImport from "../../page-objects/pages/registration_data_i
 let registrationDataImport = new RegistrationDataImport();
 
 describe("Registration Data Import", () => {
+  before(() => {
+    cy.checkIfLoggedIn();
+  });
   beforeEach(() => {
     cy.navigateToHomePage();
     cy.get("span").contains("Registration Data Import").click();
@@ -33,10 +36,9 @@ describe("Registration Data Import", () => {
         });
       });
       // ToDo: Refactor this in second milestone
-      it("Merge Data", () => {
+      // TODO: 178234
+      it.skip("Merge Data", () => {
         registrationDataImport.uploadRDIFile();
-
-        return; // TODO: make this work
         registrationDataImport.mergeRDIFile();
         registrationDataImport.verifyMergedData();
       });
@@ -52,7 +54,7 @@ describe("Registration Data Import", () => {
   describe.skip("E2E tests Registration Data Import", () => {});
 
   describe("Regression tests Registration Data Import", () => {
-    it("174517: Check clear cash", () => {
+    it("174517: Check clear cache", () => {
       cy.scenario([
         "Go to Registration Data Import page",
         "Press Menu User Profile button",

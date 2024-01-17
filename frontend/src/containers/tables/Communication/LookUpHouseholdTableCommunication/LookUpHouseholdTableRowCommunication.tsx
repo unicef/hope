@@ -51,12 +51,6 @@ export const LookUpHouseholdTableRowCommunication = ({
       radioChangeHandler(household);
     }
   };
-  const renderPrograms = (): string => {
-    const programNames = household.programs?.edges?.map(
-      (edge) => edge.node.name,
-    );
-    return programNames?.length ? programNames.join(', ') : '-';
-  };
 
   const isSelectionDisabled =
     redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly || false;
@@ -104,7 +98,6 @@ export const LookUpHouseholdTableRowCommunication = ({
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household?.admin2?.name || '-'}</TableCell>
-      <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>

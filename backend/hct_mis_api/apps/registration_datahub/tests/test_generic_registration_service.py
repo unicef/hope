@@ -84,7 +84,7 @@ class TestGenericRegistrationService(TestCase):
                 "ff": "random",
             }
         ]
-        cls.individual_wit_bank_account_and_tax_and_disability = {
+        cls.individual_with_bank_account_and_tax_and_disability = {
             "id_type": "tax_id",
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
@@ -100,7 +100,7 @@ class TestGenericRegistrationService(TestCase):
             "disability_id_type_i_c": "disability_certificate",
             "disability_id_i_c": "xyz",
         }
-        cls.individual_wit_bank_account_and_tax = {
+        cls.individual_with_bank_account_and_tax = {
             "id_type": "tax_id",
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
@@ -175,14 +175,14 @@ class TestGenericRegistrationService(TestCase):
                 source_id=1,
                 fields={
                     "household": self.household,
-                    "individuals": [self.individual_wit_bank_account_and_tax_and_disability],
+                    "individuals": [self.individual_with_bank_account_and_tax_and_disability],
                 },
                 files=json.dumps(self.files).encode(),
             ),
             Record(
                 **self.defaults,
                 source_id=2,
-                fields={"household": self.household, "individuals": [self.individual_wit_bank_account_and_tax]},
+                fields={"household": self.household, "individuals": [self.individual_with_bank_account_and_tax]},
                 files=json.dumps({}).encode(),
             ),
             Record(
@@ -207,7 +207,7 @@ class TestGenericRegistrationService(TestCase):
             ),
         ]
         records = Record.objects.bulk_create(records)
-        bad_records = Record.objects.bulk_create(bad_records)
+        Record.objects.bulk_create(bad_records)
 
         service = GenericRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"generic rdi {datetime.datetime.now()}")
@@ -227,8 +227,7 @@ class TestGenericRegistrationService(TestCase):
         registration_datahub_import = ImportedHousehold.objects.all()[0].registration_data_import
         registration_data_import = RegistrationDataImport.objects.get(id=registration_datahub_import.hct_id)
         self.assertIn("ff", ImportedHousehold.objects.all()[0].flex_fields.keys())
-        self.assertEqual(registration_data_import.programs.count(), 1)
-        self.assertEqual(registration_data_import.programs.all()[0], self.program)
+        self.assertEqual(registration_data_import.program, self.program)
 
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_PRIMARY).count(), 1)
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
@@ -241,7 +240,7 @@ class TestGenericRegistrationService(TestCase):
                 source_id=1,
                 fields={
                     "household": self.household,
-                    "individuals": [self.individual_wit_bank_account_and_tax_and_disability],
+                    "individuals": [self.individual_with_bank_account_and_tax_and_disability],
                     "enumerators": "ABC",
                     "marketing": {"can_unicef_contact_you": "YES"},
                 },

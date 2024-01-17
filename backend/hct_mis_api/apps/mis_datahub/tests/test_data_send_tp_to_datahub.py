@@ -110,6 +110,7 @@ class TestDataSendTpToDatahub(TestCase):
         cls.household = HouseholdFactory.build(
             size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country=country
         )
+        cls.household.household_collection.save()
         unhcr, _ = Partner.objects.get_or_create(name=UNHCR, defaults={"is_un": True})
         cls.individual = IndividualFactory(household=cls.household, relationship="HEAD", registration_data_import=rdi)
         IndividualIdentity.objects.create(partner=unhcr, number="UN-TEST", individual=cls.individual, country=country)

@@ -16,6 +16,7 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import {useProgramContext} from "../../../../programContext";
 
 export interface LockFspPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -28,6 +29,7 @@ export const LockFspPaymentPlan = ({
 }: LockFspPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
+  const { isActiveProgram } = useProgramContext();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   const {
     mutatePaymentPlanAction: lock,
@@ -51,7 +53,7 @@ export const LockFspPaymentPlan = ({
           variant='contained'
           onClick={() => setLockDialogOpen(true)}
           data-cy='button-lock-plan'
-          disabled={!canLockFsp}
+          disabled={!canLockFsp || !isActiveProgram}
         >
           {t('Lock FSP')}
         </Button>
