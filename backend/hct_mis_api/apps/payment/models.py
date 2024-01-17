@@ -1132,7 +1132,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         verbose_name=_("Created by"),
     )
     name = models.CharField(max_length=100, unique=True)
-    vision_vendor_number = models.CharField(max_length=100, unique=True)
+    vision_vendor_number = models.CharField(max_length=100)
     delivery_mechanisms = HorizontalChoiceArrayField(
         models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24)
     )
@@ -1157,6 +1157,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         through="FspXlsxTemplatePerDeliveryMechanism",
         related_name="financial_service_providers",
     )
+    payment_gateway_id = models.CharField(max_length=255, null=True)
 
     def __str__(self) -> str:
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
@@ -1197,7 +1198,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
 
     @property
     def is_payment_gateway(self) -> bool:
-        return self.communication_channel == self.COMMUNICATION_CHANNEL_API
+        return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
 
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):

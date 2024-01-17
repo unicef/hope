@@ -131,6 +131,7 @@ class PaymentPlanService:
         # send to payment gateway if applicable
         not_sent_pg_delivery_mechanisms = self.payment_plan.delivery_mechanisms.filter(
             financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
             sent_to_payment_gateway=False,
         )
         if not_sent_pg_delivery_mechanisms.exists():

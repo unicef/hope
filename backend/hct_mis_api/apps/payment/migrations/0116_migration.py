@@ -21,4 +21,14 @@ class Migration(migrations.Migration):
             name='background_action_status',
             field=django_fsm.FSMField(blank=True, choices=[('RULE_ENGINE_RUN', 'Rule Engine Running'), ('RULE_ENGINE_ERROR', 'Rule Engine Errored'), ('XLSX_EXPORTING', 'Exporting XLSX file'), ('XLSX_EXPORT_ERROR', 'Export XLSX file Error'), ('XLSX_IMPORT_ERROR', 'Import XLSX file Error'), ('XLSX_IMPORTING_ENTITLEMENTS', 'Importing Entitlements XLSX file'), ('XLSX_IMPORTING_RECONCILIATION', 'Importing Reconciliation XLSX file'), ('EXCLUDE_BENEFICIARIES', 'Exclude Beneficiaries Running'), ('EXCLUDE_BENEFICIARIES_ERROR', 'Exclude Beneficiaries Error'), ('SEND_TO_PAYMENT_GATEWAY', 'Sending to Payment Gateway'), ('SEND_TO_PAYMENT_GATEWAY_ERROR', 'Send to Payment Gateway Error')], db_index=True, default=None, max_length=50, null=True),
         ),
+        migrations.AddField(
+            model_name='financialserviceprovider',
+            name='payment_gateway_id',
+            field=models.CharField(max_length=255, null=True),
+        ),
+        migrations.AlterField(
+            model_name='financialserviceprovider',
+            name='vision_vendor_number',
+            field=models.CharField(max_length=100),
+        ),
     ]

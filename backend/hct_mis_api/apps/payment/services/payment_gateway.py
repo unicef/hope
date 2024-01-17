@@ -42,7 +42,7 @@ class PaymentInstructionStatus(Enum):
 class PaymentGatewayPaymentInstructionSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
     unicef_id = serializers.CharField(source="payment_plan.unicef_id")
-    fsp = serializers.CharField(source="financial_service_provider.vision_vendor_number")
+    fsp = serializers.CharField(source="financial_service_provider.payment_gateway_id")
     payload = serializers.SerializerMethodField()
 
     def get_payload(self, obj: DeliveryMechanismPerPaymentPlan) -> Dict:
@@ -125,6 +125,7 @@ class PaymentInstructionData:
 
 @dataclass
 class FspData:
+    id: int
     remote_id: str
     name: str
     vision_vendor_number: str
@@ -269,8 +270,9 @@ class PaymentGatewayService:
         fsps = self.api.get_fsps()
         for fsp in fsps:
             FinancialServiceProvider.objects.update_or_create(
-                vision_vendor_number=fsp.vision_vendor_number,
+                payment_gateway_id=fsp.id,
                 defaults={
+                    "vision_vendor_number": fsp.vision_vendor_number,
                     "name": fsp.name,
                     "communication_channel": FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                     "data_transfer_configuration": fsp.configuration,
@@ -282,6 +284,7 @@ class PaymentGatewayService:
         payment_plans = PaymentPlan.objects.filter(
             status=PaymentPlan.Status.ACCEPTED,
             delivery_mechanisms__financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            delivery_mechanisms__financial_service_provider__payment_gateway_id__isnull=False,
             delivery_mechanisms__sent_to_payment_gateway=True,
         ).distinct()
 
@@ -289,6 +292,7 @@ class PaymentGatewayService:
             if not payment_plan.is_reconciled:
                 for delivery_mechanism in payment_plan.delivery_mechanisms.filter(
                     financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                    financial_service_provider__payment_gateway_id__isnull=False,
                     sent_to_payment_gateway=True,
                 ):
                     pending_payments = payment_plan.eligible_payments.filter(
