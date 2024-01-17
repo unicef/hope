@@ -69,9 +69,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               <a
                 class="sc-bdVaJa jtVjYx"
-                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6ZjVmMzgwN2ItYTBjOS00Mjk0LTg0Y2QtNDhkMjllMjZhODU3"
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6YWNmYWUyZDItOWNjOS00NDI2LWE2N2YtYTA5Mjk5MDE1ODA3"
               >
-                Agata Kowalska
+                Milton Friedman
               </a>
             </div>
           </div>
@@ -209,7 +209,7 @@ Jameschester, SC 24934
             <div
               data-cy="label-Administrative Level 1"
             >
-              Nangarhar
+              Ghazni
             </div>
           </div>
         </div>
@@ -226,7 +226,7 @@ Jameschester, SC 24934
             <div
               data-cy="label-Administrative Level 2"
             >
-              Achin
+              Abband
             </div>
           </div>
         </div>
@@ -311,7 +311,7 @@ Jameschester, SC 24934
             <div
               data-cy="label-LENGTH OF TIME SINCE ARRIVAL"
             >
-              12
+              10
             </div>
           </div>
         </div>
@@ -421,7 +421,27 @@ Jameschester, SC 24934
           <div
             data-cy="label-Cash received"
           >
-            -
+            <div
+              class="MuiBox-root MuiBox-root-1"
+            >
+              <div
+                class="MuiGrid-root MuiGrid-container"
+              >
+                <div
+                  class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+                >
+                  <div
+                    class="MuiBox-root MuiBox-root-2"
+                  >
+                    <div
+                      class="MuiBox-root MuiBox-root-3"
+                    >
+                      USD 0.00
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -444,7 +464,7 @@ Jameschester, SC 24934
               <div
                 class="sc-jTzLTM dhULVO"
               >
-                USD 24,697.00
+                USD 0.00
               </div>
             </div>
           </div>
