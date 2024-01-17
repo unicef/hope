@@ -74,7 +74,9 @@ export const Description = ({
       householdId: values.selectedHousehold?.id,
       individualId: values.selectedIndividual?.id,
     },
+    fetchPolicy: 'network-only',
   });
+
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
