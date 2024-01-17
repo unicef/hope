@@ -9292,7 +9292,7 @@ export type GrievanceTicketDetailedFragment = (
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'status' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'adminAreaTitle' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'status' | 'createdAt' | 'residenceStatus' | 'maleChildrenCount' | 'femaleChildrenCount' | 'childrenDisabledCount' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'adminAreaTitle' | 'address'>
   & { admin1: Maybe<(
     { __typename?: 'AreaNode' }
     & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
@@ -14676,6 +14676,9 @@ export const HouseholdMinimalFragmentDoc = gql`
   status
   createdAt
   residenceStatus
+  maleChildrenCount
+  femaleChildrenCount
+  childrenDisabledCount
   size
   totalCashReceived
   totalCashReceivedUsd
