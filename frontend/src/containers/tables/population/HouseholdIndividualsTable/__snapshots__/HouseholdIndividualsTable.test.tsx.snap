@@ -45,7 +45,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-bZQynM fgJQBP"
+                  class="sc-EHOje hUWbrG"
                   data-cy="table-label"
                 >
                   Individual ID
@@ -56,7 +56,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-bZQynM fgJQBP"
+                  class="sc-EHOje hUWbrG"
                   data-cy="table-label"
                 >
                   Individual
@@ -67,7 +67,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-bZQynM fgJQBP"
+                  class="sc-EHOje hUWbrG"
                   data-cy="table-label"
                 >
                   Status
@@ -78,7 +78,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-bZQynM fgJQBP"
+                  class="sc-EHOje hUWbrG"
                   data-cy="table-label"
                 >
                   Role
@@ -89,7 +89,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-bZQynM fgJQBP"
+                  class="sc-EHOje hUWbrG"
                   data-cy="table-label"
                 >
                   Relationship to HoH
@@ -100,7 +100,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-bZQynM fgJQBP"
+                  class="sc-EHOje hUWbrG"
                   data-cy="table-label"
                 >
                   Date of Birth
@@ -111,7 +111,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 scope="col"
               >
                 <span
-                  class="sc-bZQynM fgJQBP"
+                  class="sc-EHOje hUWbrG"
                   data-cy="table-label"
                 >
                   Gender
