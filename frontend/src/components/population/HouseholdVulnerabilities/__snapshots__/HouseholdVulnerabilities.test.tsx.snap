@@ -17,30 +17,7 @@ exports[`components/population/HouseholdVulnerabilities should render 1`] = `
       </div>
       <div
         class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
-      >
-        <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
-        >
-          <div>
-            <span
-              class="sc-bdVaJa kwsjSG"
-              color="textSecondary"
-            >
-              months displaced
-            </span>
-            <div
-              data-cy="label-months displaced"
-            >
-              <span
-                class="sc-bwzfXH kOktSP"
-                color="textSecondary"
-              >
-                10
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      />
     </div>
   </div>
 </div>

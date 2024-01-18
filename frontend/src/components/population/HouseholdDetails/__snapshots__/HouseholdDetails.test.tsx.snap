@@ -50,7 +50,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Residence Status"
             >
-              Displaced  |  Refugee / Asylum Seeker
+              None
             </div>
           </div>
         </div>
@@ -69,9 +69,9 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             >
               <a
                 class="sc-bdVaJa jtVjYx"
-                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6YWNmYWUyZDItOWNjOS00NDI2LWE2N2YtYTA5Mjk5MDE1ODA3"
+                href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx"
               >
-                Milton Friedman
+                Jan Kowalski
               </a>
             </div>
           </div>
@@ -123,7 +123,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Country"
             >
-              Isle of Man
+              -
             </div>
           </div>
         </div>
@@ -140,7 +140,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Country of Origin"
             >
-              San Marino
+              -
             </div>
           </div>
         </div>
@@ -157,8 +157,7 @@ exports[`components/population/HouseholdDetails should render 1`] = `
             <div
               data-cy="label-Address"
             >
-              938 Luna Cliffs Apt. 551
-Jameschester, SC 24934
+              Ohio
             </div>
           </div>
         </div>
@@ -209,7 +208,7 @@ Jameschester, SC 24934
             <div
               data-cy="label-Administrative Level 1"
             >
-              Ghazni
+              -
             </div>
           </div>
         </div>
@@ -226,7 +225,7 @@ Jameschester, SC 24934
             <div
               data-cy="label-Administrative Level 2"
             >
-              Abband
+              -
             </div>
           </div>
         </div>
@@ -277,7 +276,7 @@ Jameschester, SC 24934
             <div
               data-cy="label-Geolocation"
             >
-              70.210209, 172.085021
+              -
             </div>
           </div>
         </div>
@@ -311,7 +310,7 @@ Jameschester, SC 24934
             <div
               data-cy="label-LENGTH OF TIME SINCE ARRIVAL"
             >
-              10
+              -
             </div>
           </div>
         </div>
@@ -436,7 +435,17 @@ Jameschester, SC 24934
                     <div
                       class="MuiBox-root MuiBox-root-3"
                     >
-                      USD 0.00
+                      USD 5,755.00
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-4"
+                    >
+                      (AZN 92.00)
+                    </div>
+                    <div
+                      class="MuiBox-root MuiBox-root-5"
+                    >
+                      (COP 3,177.00)
                     </div>
                   </div>
                 </div>
