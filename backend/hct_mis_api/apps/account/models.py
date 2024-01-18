@@ -317,7 +317,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             list(
                 set(
                     [perm for perms in all_partner_roles_permissions_list for perm in perms]
-                    + [perm for perms in all_user_roles_permissions_list for perm in perms]
+                    + [perm for perms in all_user_roles_permissions_list if perms for perm in perms]
                 )
             )
             if has_program_access
