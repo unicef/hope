@@ -7,6 +7,26 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestPaymentPlanReconciliation::test_correct_message_displayed_when_file_is_protected 1'] = {
+    'data': {
+        'importXlsxPaymentPlanPaymentListPerFsp': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 5,
+                    'line': 3
+                }
+            ],
+            'message': 'Workbook is protected. Remove password to reconcile file.',
+            'path': [
+                'importXlsxPaymentPlanPaymentListPerFsp'
+            ]
+        }
+    ]
+}
+
 snapshots['TestPaymentPlanReconciliation::test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule 1'] = {
     'data': {
         'setSteficonRuleOnPaymentPlanPaymentList': {
