@@ -102,7 +102,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     category: category || null,
     language: '',
     consent: false,
-    admin: selectedHousehold?.admin2.id || null,
+    admin: selectedHousehold?.admin2?.id || null,
     area: '',
     selectedHousehold: selectedHousehold || null,
     selectedIndividual: selectedIndividual || null,
