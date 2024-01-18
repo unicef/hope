@@ -3,27 +3,26 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  IndividualNode,
+  useAllIndividualsFlexFieldsAttributesQuery,
+  useGrievancesChoiceDataQuery,
+  useHouseholdChoiceDataQuery,
+  useIndividualQuery,
+} from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { FlagTooltip } from '../../../components/core/FlagTooltip';
-import { WarningTooltip } from '../../../components/core/WarningTooltip';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { IndividualBioData } from '../../../components/population/IndividualBioData/IndividualBioData';
+import { IndividualFlags } from '../../../components/population/IndividualFlags';
 import { IndividualPhotoModal } from '../../../components/population/IndividualPhotoModal';
 import { IndividualVulnerabilities } from '../../../components/population/IndividualVulnerabilities/IndividualVunerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import {
-  IndividualNode,
-  useHouseholdChoiceDataQuery,
-  useIndividualQuery,
-  useAllIndividualsFlexFieldsAttributesQuery,
-  useGrievancesChoiceDataQuery,
-} from '../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;
@@ -90,17 +89,8 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
 
   const { individual } = data;
 
-  let duplicateTooltip = null;
-  if (individual?.status === 'DUPLICATE') {
-    duplicateTooltip = (
-      <WarningTooltip confirmed message={t('Confirmed Duplicate')} />
-    );
-  } else if (individual?.deduplicationGoldenRecordStatus !== 'UNIQUE') {
-    duplicateTooltip = <WarningTooltip message={t('Possible Duplicate')} />;
-  }
-
   return (
-    <div>
+    <>
       <PageHeader
         title={`${t('Individual ID')}: ${individual?.unicefId}`}
         breadCrumbs={
@@ -111,24 +101,7 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
             ? breadCrumbsItems
             : null
         }
-        flags={
-          <>
-            <Box mr={2}>{duplicateTooltip}</Box>
-            <Box mr={2}>
-              {individual?.sanctionListPossibleMatch && (
-                <FlagTooltip message={t('Sanction List Possible Match')} />
-              )}
-            </Box>
-            <Box mr={2}>
-              {individual?.sanctionListConfirmedMatch && (
-                <FlagTooltip
-                  message={t('Sanction List Confirmed Match')}
-                  confirmed
-                />
-              )}
-            </Box>
-          </>
-        }
+        flags={<IndividualFlags individual={individual} />}
       >
         <Box mr={2}>
           {individual?.photo ? (
@@ -153,6 +126,6 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
           <UniversalActivityLogTable objectId={individual?.id} />
         )}
       </Container>
-    </div>
+    </>
   );
 };

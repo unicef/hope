@@ -1619,7 +1619,6 @@ type HouseholdNode implements Node {
   hasDuplicates: Boolean
   adminAreaTitle: String
   status: String
-  programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
   deliveredQuantities: [DeliveredQuantityNode]
   activeIndividualsCount: Int
 }
@@ -3525,12 +3524,6 @@ enum ProgramStatus {
   ACTIVE
   DRAFT
   FINISHED
-}
-
-type ProgramsWithDeliveredQuantityNode {
-  id: ID
-  name: String
-  quantity: [DeliveredQuantityNode]
 }
 
 type Query {
