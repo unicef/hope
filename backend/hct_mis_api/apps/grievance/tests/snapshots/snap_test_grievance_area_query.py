@@ -15,6 +15,11 @@ snapshots['TestGrievanceAreaQuery::test_one_admin2_is_filtered_0_with_permission
                     'node': {
                         'description': 'doshi'
                     }
+                },
+                {
+                    'node': {
+                        'description': 'no_admin'
+                    }
                 }
             ]
         }
