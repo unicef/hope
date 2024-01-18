@@ -223,8 +223,6 @@ class Partner(MPTTModel, models.Model):
 
     @property
     def business_area_ids(self) -> List[str]:
-        if self.is_unicef:
-            return list(BusinessArea.objects.filter(active=True).values_list("id", flat=True))
         return self.get_permissions().business_area_ids()
 
 
