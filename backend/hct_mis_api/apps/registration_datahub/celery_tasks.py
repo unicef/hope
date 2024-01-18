@@ -280,9 +280,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
     try:
         return PullKoboSubmissions().execute(kobo_import_data)
     except Exception as e:
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-        RegistrationDataImport.objects.filter(
+        KoboImportData.objects.filter(
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
         raise self.retry(exc=e)
