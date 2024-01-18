@@ -1,10 +1,15 @@
 import { Grid } from '@material-ui/core';
 import { Field } from 'formik';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { ContentLink } from '../../core/ContentLink';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import {
+  AllHouseholdsQuery,
+  useHouseholdLazyQuery,
+} from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../core/LoadingComponent';
 
 interface HouseholdQuestionnaireProps {
   values;
@@ -15,7 +20,25 @@ export const HouseholdQuestionnaire = ({
 }: HouseholdQuestionnaireProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
-  const selectedHouseholdData = values.selectedHousehold;
+  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
+    values.selectedHousehold;
+  const [
+    getHousehold,
+    { data: fullHousehold, loading: fullHouseholdLoading },
+  ] = useHouseholdLazyQuery({ variables: { id: household?.id } });
+
+  useEffect(() => {
+    if (values.selectedHousehold) {
+      getHousehold();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.selectedHousehold]);
+
+  if (!fullHousehold) return null;
+  if (fullHouseholdLoading) return <LoadingComponent />;
+
+  const selectedHouseholdData = fullHousehold?.household;
+
   return (
     <Grid container spacing={6}>
       {[
