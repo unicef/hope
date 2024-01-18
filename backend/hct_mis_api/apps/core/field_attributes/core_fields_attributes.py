@@ -1760,7 +1760,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "lookup": "account_holder_name",
         "label": {"English(EN)": "Account holder name"},
         "hint": "",
-        "required": True,
+        "required": False,
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "account_holder_name_i_c",
