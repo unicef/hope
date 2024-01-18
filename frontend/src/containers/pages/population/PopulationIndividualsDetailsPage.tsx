@@ -3,27 +3,26 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  IndividualNode,
+  useAllIndividualsFlexFieldsAttributesQuery,
+  useGrievancesChoiceDataQuery,
+  useHouseholdChoiceDataQuery,
+  useIndividualQuery,
+} from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { FlagTooltip } from '../../../components/core/FlagTooltip';
-import { WarningTooltip } from '../../../components/core/WarningTooltip';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../components/core/PageHeader';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { IndividualBioData } from '../../../components/population/IndividualBioData/IndividualBioData';
+import { IndividualFlags } from '../../../components/population/IndividualFlags';
 import { IndividualPhotoModal } from '../../../components/population/IndividualPhotoModal';
 import { IndividualVulnerabilities } from '../../../components/population/IndividualVulnerabilities/IndividualVunerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
-import {
-  IndividualNode,
-  useHouseholdChoiceDataQuery,
-  useIndividualQuery,
-  useAllIndividualsFlexFieldsAttributesQuery,
-  useGrievancesChoiceDataQuery,
-} from '../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;
@@ -88,36 +87,6 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
     },
   ];
 
-  const getDuplicateTooltip = (individualObject): React.ReactElement => {
-    if (individualObject?.status === 'DUPLICATE') {
-      return <WarningTooltip confirmed message={t('Confirmed Duplicate')} />;
-    }
-    if (individualObject?.deduplicationGoldenRecordStatus !== 'UNIQUE') {
-      return <WarningTooltip message={t('Possible Duplicate')} />;
-    }
-    return null;
-  };
-
-  const getSanctionListPossibleMatchTooltip = (
-    individualObject,
-  ): React.ReactElement => {
-    if (individualObject?.sanctionListPossibleMatch) {
-      return <FlagTooltip message={t('Sanction List Possible Match')} />;
-    }
-    return null;
-  };
-
-  const getSanctionListConfirmedMatchTooltip = (
-    individualObject,
-  ): React.ReactElement => {
-    if (individualObject?.sanctionListConfirmedMatch) {
-      return (
-        <FlagTooltip message={t('Sanction List Confirmed Match')} confirmed />
-      );
-    }
-    return null;
-  };
-
   const { individual } = data;
 
   return (
@@ -132,13 +101,7 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
             ? breadCrumbsItems
             : null
         }
-        flags={
-          <>
-            <Box mr={2}>{getDuplicateTooltip(individual)}</Box>
-            <Box mr={2}>{getSanctionListPossibleMatchTooltip(individual)}</Box>
-            <Box mr={2}>{getSanctionListConfirmedMatchTooltip(individual)}</Box>
-          </>
-        }
+        flags={<IndividualFlags individual={individual} />}
       >
         <Box mr={2}>
           {individual?.photo ? (
