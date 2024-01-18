@@ -13362,7 +13362,7 @@ export type AllIndividualsForPopulationTableQuery = (
       & Pick<IndividualNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex' | 'lastRegistrationDate'>
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'status' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex' | 'lastRegistrationDate'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -25300,6 +25300,7 @@ export const AllIndividualsForPopulationTableDocument = gql`
         sanctionListPossibleMatch
         sanctionListConfirmedMatch
         deduplicationGoldenRecordStatus
+        status
         sanctionListLastCheck
         fullName
         household {
