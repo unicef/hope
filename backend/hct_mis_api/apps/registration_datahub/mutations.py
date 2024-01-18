@@ -448,6 +448,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
 
 
 class SaveKoboProjectImportDataAsync(PermissionMutation):
+    # TODO first this one, and the query KoboImportData($id: ID!)
     import_data = graphene.Field(KoboImportDataNode)
 
     class Arguments:

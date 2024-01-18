@@ -20,6 +20,16 @@ class PullKoboSubmissions:
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     def execute(self, kobo_import_data: Dict) -> Dict:
+        # TODO: need to investigate this one
+        # getting an Error when merging an RDI where there's an external member which is not a collector.
+        # Would be better to get this at import stage (instead of merge).
+        #
+        # the issue happens when the collector is an individual of another household.
+        # please check attached file.
+        #
+        # Show an error at the validation of an RDI import when there is any individual set to be an external member
+        # but it's not an external collector.
+        #
         kobo_import_data.status = KoboImportData.STATUS_RUNNING
         kobo_import_data.save()
         kobo_api = KoboAPI(kobo_import_data.business_area_slug)
@@ -37,6 +47,7 @@ class PullKoboSubmissions:
         kobo_import_data.file = file
         kobo_import_data.save()
         if validation_errors:
+            #
             validation_errors.sort(key=operator.itemgetter("header"))
             kobo_import_data.validation_errors = json.dumps(validation_errors)
             kobo_import_data.status = KoboImportData.STATUS_VALIDATION_ERROR

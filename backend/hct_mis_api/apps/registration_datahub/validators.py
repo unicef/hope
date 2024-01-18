@@ -1149,6 +1149,17 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def validate_everything(self, submissions: List, business_area: BusinessArea) -> List:
+        #
+        # TODO: need to investigate this one
+        # getting an Error when merging an RDI where there's an external member which is not a collector.
+        # Would be better to get this at import stage (instead of merge).
+        #
+        # the issue happens when the collector is an individual of another household.
+        # please check attached file.
+        #
+        # Show an error at the validation of an RDI import when there is any individual set to be an external member
+        # but it's not an external collector.
+        #
         try:
             reduced_submissions: Sequence = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
@@ -1233,6 +1244,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 head_of_hh_counter = 0
                 primary_collector_counter = 0
                 alternate_collector_counter = 0
+                household_has_collector = False
                 expected_hh_fields = {
                     *self.expected_household_fields,
                 }
@@ -1274,10 +1286,13 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 if i_field == "relationship_i_c" and i_value.upper() == "HEAD":
                                     head_of_hh_counter += 1
                                 if i_field == "role_i_c":
+
                                     role = i_value.upper()
                                     if role == ROLE_PRIMARY:
+                                        household_has_collector = True
                                         primary_collector_counter += 1
                                     elif role == ROLE_ALTERNATE:
+                                        household_has_collector = True
                                         alternate_collector_counter += 1
 
                                 expected_i_fields.discard(i_field)
@@ -1308,6 +1323,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                                 }
                             )
                         if primary_collector_counter == 0:
+                            # TODO: it's okay??
                             errors.append(
                                 {"header": "role_i_c", "message": "Household must have a " "primary collector"}
                             )
