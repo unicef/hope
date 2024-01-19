@@ -33,6 +33,7 @@ import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlrea
 import {
   getGrievanceDetailsPath,
   prepareVariables,
+  selectedIssueType,
 } from '../../../components/grievances/utils/createGrievanceUtils';
 import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
@@ -221,16 +222,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const selectedIssueType = (values): string => {
-    return values.issueType
-      ? choicesData.grievanceTicketIssueTypeChoices
-          .filter((el) => el.category === values.category.toString())[0]
-          .subCategories.filter(
-            (el) => el.value === values.issueType.toString(),
-          )[0].name
-      : '-';
-  };
-
   let steps = [
     'Category Selection',
     'Household/Individual Look up',
@@ -318,6 +309,13 @@ export const CreateGrievancePage = (): React.ReactElement => {
           dataChangeComponentDict,
           EmptyComponent,
         );
+
+        const issueTypeToDisplay = (): string =>
+          selectedIssueType(
+            values,
+            choicesData.grievanceTicketIssueTypeChoices,
+          );
+
         return (
           <>
             <AutoSubmitFormOnEnter />
@@ -376,7 +374,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           <Description
                             values={values}
                             showIssueType={showIssueType}
-                            selectedIssueType={selectedIssueType}
+                            selectedIssueType={issueTypeToDisplay}
                             baseUrl={baseUrl}
                             choicesData={choicesData}
                             userChoices={userChoices}
