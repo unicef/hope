@@ -29,11 +29,11 @@ export const GrievanceRoutes = (): React.ReactElement => {
     },
     {
       path: `${path}/grievance/tickets/user-generated/:id`,
-      component: <GrievancesDetailsPage />,
+      component: <GrievancesDetailsPage key='user' />,
     },
     {
       path: `${path}/grievance/tickets/system-generated/:id`,
-      component: <GrievancesDetailsPage />,
+      component: <GrievancesDetailsPage key='system' />,
     },
     {
       path: `${path}/grievance/rdi/:id`,
