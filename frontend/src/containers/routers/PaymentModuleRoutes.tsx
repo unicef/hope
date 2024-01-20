@@ -7,15 +7,10 @@ import { EditFollowUpSetUpFspPage } from '../pages/paymentmodule/EditFollowUpSet
 import { EditPaymentPlanPage } from '../pages/paymentmodule/EditPaymentPlanPage';
 import { EditSetUpFspPage } from '../pages/paymentmodule/EditSetUpFspPage';
 import { FollowUpPaymentPlanDetailsPage } from '../pages/paymentmodule/FollowUpPaymentPlanDetailsPage';
-import { FollowUpPaymentPlansPage } from '../pages/paymentmodule/FollowUpPaymentPlansPage';
 import { PaymentDetailsPage } from '../pages/paymentmodule/PaymentDetailsPage';
+import { PaymentModulePage } from '../pages/paymentmodule/PaymentModulePage';
 import { PaymentPlanDetailsPage } from '../pages/paymentmodule/PaymentPlanDetailsPage';
-import { PaymentPlansPage } from '../pages/paymentmodule/PaymentPlansPage';
-import { ProgramCycleDetailsPagePaymentModule } from '../pages/paymentmodule/ProgramCycleDetailsPagePaymentModule';
-import { ProgramCyclesPagePaymentModule } from '../pages/paymentmodule/ProgramCyclesPagePaymentModule';
 import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
-import { SetUpFspPageFollowUp } from '../pages/paymentmodule/SetUpFspPageFollowUp';
-import { SetUpPaymentInstructionsPage } from '../pages/paymentmodule/SetUpPaymentInstructionsPage';
 
 export const PaymentModuleRoutes = (): React.ReactElement => {
   const { path } = useRouteMatch();
@@ -26,23 +21,16 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
       component: <CreatePaymentPlanPage />,
     },
     {
-      path: `${path}/payment-module/payment-plans`,
-      component: <PaymentPlansPage />,
+      path: `${path}/payment-module`,
+      component: <PaymentModulePage />,
       exact: true,
     },
-    {
-      path: `${path}/payment-module/followup-payment-plans`,
-      component: <FollowUpPaymentPlansPage />,
-      exact: true,
-    },
+
     {
       path: `${path}/payment-module/followup-payment-plans/:id/edit`,
       component: <EditFollowUpPaymentPlanPage />,
     },
-    {
-      path: `${path}/payment-module/followup-payment-plans/:id/setup-fsp/create`,
-      component: <SetUpFspPageFollowUp />,
-    },
+
     {
       path: `${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`,
       component: <EditFollowUpSetUpFspPage />,
@@ -55,22 +43,12 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
       path: `${path}/payment-module/payment-plans/:id/setup-fsp/edit`,
       component: <EditSetUpFspPage />,
     },
-    {
-      path: `${path}/payment-module/payment-plans/:id/setup-payment-instructions/create`,
-      component: <SetUpPaymentInstructionsPage />,
-    },
+
     {
       path: `${path}/payment-module/payment-plans/:id/edit`,
       component: <EditPaymentPlanPage />,
     },
-    {
-      path: `${path}/payment-module/program-cycles/:id`,
-      component: <ProgramCycleDetailsPagePaymentModule />,
-    },
-    {
-      path: `${path}/payment-module/program-cycles`,
-      component: <ProgramCyclesPagePaymentModule />,
-    },
+
     {
       path: `${path}/payment-module/payments/:id`,
       component: <PaymentDetailsPage />,

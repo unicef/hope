@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { Switch, useRouteMatch } from 'react-router-dom';
 import { SentryRoute } from '../../components/core/SentryRoute';
 import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
 import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
@@ -10,26 +10,43 @@ import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
 
 export const AccountabilityRoutes = (): React.ReactElement => {
   const { path } = useRouteMatch();
+
+  const accountabilityRoutes = [
+    {
+      path: `${path}/accountability/surveys/create`,
+      component: <CreateSurveyPage />,
+    },
+    {
+      path: `${path}/accountability/surveys/:id`,
+      component: <SurveyDetailsPage />,
+    },
+    {
+      path: `${path}/accountability/surveys`,
+      component: <SurveysPage />,
+      exact: true,
+    },
+    {
+      path: `${path}/accountability/communication/create`,
+      component: <CreateCommunicationPage />,
+    },
+    {
+      path: `${path}/accountability/communication/:id`,
+      component: <CommunicationDetailsPage />,
+    },
+    {
+      path: `${path}/accountability/communication`,
+      component: <CommunicationPage />,
+      exact: true,
+    },
+  ];
+
   return (
-    <>
-      <SentryRoute path={`${path}/accountability/surveys/create`}>
-        <CreateSurveyPage />
-      </SentryRoute>
-      <SentryRoute path={`${path}/accountability/surveys/:id`}>
-        <SurveyDetailsPage />
-      </SentryRoute>
-      <SentryRoute path={`${path}/accountability/surveys`}>
-        <SurveysPage />
-      </SentryRoute>
-      <SentryRoute path={`${path}/accountability/communication/create`}>
-        <CreateCommunicationPage />
-      </SentryRoute>
-      <SentryRoute path={`${path}/accountability/communication/:id`}>
-        <CommunicationDetailsPage />
-      </SentryRoute>
-      <SentryRoute path={`${path}/accountability/communication`}>
-        <CommunicationPage />
-      </SentryRoute>
-    </>
+    <Switch>
+      {accountabilityRoutes.map((route) => (
+        <SentryRoute key={route.path} path={route.path} exact={route.exact}>
+          {route.component}
+        </SentryRoute>
+      ))}
+    </Switch>
   );
 };
