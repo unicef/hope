@@ -31,7 +31,7 @@ snapshots['TestPaymentPlanReconciliation::test_follow_up_pp_entitlements_can_be_
     'data': {
         'setSteficonRuleOnPaymentPlanPaymentList': {
             'paymentPlan': {
-                'unicefId': 'PP-0060-23-00000001'
+                'unicefId': 'PP-0060-23-00000002'
             }
         }
     }

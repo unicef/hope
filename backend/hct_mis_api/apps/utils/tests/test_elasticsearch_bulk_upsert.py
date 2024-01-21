@@ -1,4 +1,4 @@
-from unittest.mock import patch
+import time
 
 from django.conf import settings
 
@@ -93,47 +93,37 @@ class TestBulkUpsert(BaseElasticSearchTestCase, APITestCase):
         cls.individual_unicef_id_to_search = Individual.objects.get(full_name=cls.individual_2.full_name).unicef_id
 
     def test_bulk_upsert_household(self) -> None:
-        from elasticsearch.helpers import bulk as original_bulk
-
-        with patch("elasticsearch.helpers.bulk") as mock_bulk:
-            mock_bulk.side_effect = lambda *args, **kwargs: original_bulk(*args, **kwargs, refresh="wait_for")
-
-            _id = self.household_unicef_id_to_search
-            bulk_upsert_households([_id])
-            es_response = (
-                HouseholdDocument()
-                .search()
-                .from_dict({"query": {"bool": {"should": [{"match_phrase_prefix": {"unicef_id": _id}}]}}})
-                .execute()
-            )
-            item = es_response.to_dict()["hits"]["hits"][0]["_source"]
-
-            self.assertEqual(item["business_area"], self.household_2.business_area.slug)
-            self.assertEqual(item["registration_id"], int(self.household_2.registration_id))
-            self.assertEqual(item["unicef_id"], self.household_unicef_id_to_search)
-            self.assertEqual(item["head_of_household"]["full_name"], self.individual_2.full_name)
+        _id = self.household_unicef_id_to_search
+        bulk_upsert_households([_id])
+        time.sleep(1)
+        es_response = (
+            HouseholdDocument()
+            .search()
+            .from_dict({"query": {"bool": {"should": [{"match_phrase_prefix": {"unicef_id": _id}}]}}})
+            .execute()
+        )
+        item = es_response.to_dict()["hits"]["hits"][0]["_source"]
+        self.assertEqual(item["business_area"], self.household_2.business_area.slug)
+        self.assertEqual(item["registration_id"], int(self.household_2.registration_id))
+        self.assertEqual(item["unicef_id"], self.household_unicef_id_to_search)
+        self.assertEqual(item["head_of_household"]["full_name"], self.individual_2.full_name)
 
     def test_bulk_upsert_individuals(self) -> None:
-        from elasticsearch.helpers import bulk as original_bulk
-
-        with patch("elasticsearch.helpers.bulk") as mock_bulk:
-            mock_bulk.side_effect = lambda *args, **kwargs: original_bulk(*args, **kwargs, refresh="wait_for")
-
-            _id = self.individual_unicef_id_to_search
-            bulk_upsert_individuals([_id])
-            es_response = (
-                IndividualDocumentAfghanistan()
-                .search()
-                .from_dict({"query": {"bool": {"should": [{"match_phrase_prefix": {"unicef_id": _id}}]}}})
-                .execute()
-            )
-            item = es_response.to_dict()["hits"]["hits"][0]["_source"]
-
-            self.assertEqual(item["full_name"], self.individual_2.full_name)
-            self.assertEqual(item["birth_date"], str(self.individual_2.birth_date))
-            self.assertEqual(item["phone_no"], self.individual_2.phone_no)
-            self.assertEqual(item["business_area"], self.individual_2.business_area.slug)
-            self.assertEqual(item["unicef_id"], self.individual_unicef_id_to_search)
-            self.assertEqual(item["documents"][0]["number"], "987-654-321")
-            self.assertEqual(item["relationship"], self.individual_2.relationship)
-            self.assertEqual(item["sex"], self.individual_2.sex)
+        _id = self.individual_unicef_id_to_search
+        bulk_upsert_individuals([_id])
+        time.sleep(1)
+        es_response = (
+            IndividualDocumentAfghanistan()
+            .search()
+            .from_dict({"query": {"bool": {"should": [{"match_phrase_prefix": {"unicef_id": _id}}]}}})
+            .execute()
+        )
+        item = es_response.to_dict()["hits"]["hits"][0]["_source"]
+        self.assertEqual(item["full_name"], self.individual_2.full_name)
+        self.assertEqual(item["birth_date"], str(self.individual_2.birth_date))
+        self.assertEqual(item["phone_no"], self.individual_2.phone_no)
+        self.assertEqual(item["business_area"], self.individual_2.business_area.slug)
+        self.assertEqual(item["unicef_id"], self.individual_unicef_id_to_search)
+        self.assertEqual(item["documents"][0]["number"], "987-654-321")
+        self.assertEqual(item["relationship"], self.individual_2.relationship)
+        self.assertEqual(item["sex"], self.individual_2.sex)
