@@ -1065,7 +1065,7 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
         try:
             import_service.open_workbook()
         except BadZipFile:
-            msg = "Workbook is protected. Remove password to reconcile file."
+            msg = "Wrong file type or password protected .zip file. Upload another file, or remove the password."
             logger.info(msg)
             raise GraphQLError(msg)
 

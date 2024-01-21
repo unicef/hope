@@ -19,7 +19,7 @@ snapshots['TestPaymentPlanReconciliation::test_correct_message_displayed_when_fi
                     'line': 3
                 }
             ],
-            'message': 'Workbook is protected. Remove password to reconcile file.',
+            'message': 'Wrong file type or password protected .zip file. Upload another file, or remove the password.',
             'path': [
                 'importXlsxPaymentPlanPaymentListPerFsp'
             ]
