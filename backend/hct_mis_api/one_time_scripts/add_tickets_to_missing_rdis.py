@@ -135,7 +135,8 @@ def create_tickets_for_missing_rdis(rdis: QuerySet) -> None:
             )
             individuals_ids = list(
                 Individual.original_and_repr_objects.filter(
-                    Q(household__id__in=households_ids) | Q(represented_households__id__in=households_ids)
+                    Q(is_original=True)
+                    & (Q(household__id__in=households_ids) | Q(represented_households__id__in=households_ids))
                 ).values_list("id", flat=True)
             )
             handle_add_individual_details_for_fix(households_ids, program)
@@ -302,25 +303,7 @@ def create_new_needs_adjudication_representations(tickets: QuerySet, program: Pr
                 needs_adjudication_ticket.golden_records_individual,
                 *needs_adjudication_ticket.possible_duplicates(manager="original_and_repr_objects").all(),
             ]
-
-            needs_adjudication_ticket_copy = copy.deepcopy(needs_adjudication_ticket)
-            if hasattr(needs_adjudication_ticket_copy, "role_reassign_data"):
-                needs_adjudication_ticket_copy = handle_role_reassign_data(needs_adjudication_ticket_copy, program)
-            if hasattr(needs_adjudication_ticket_copy, "extra_data"):
-                needs_adjudication_ticket_copy = handle_extra_data(needs_adjudication_ticket_copy, program)
-            needs_adjudication_ticket_copy.pk = None
-            # Copy Grievance Ticket
-            grievance_ticket_data, notes_to_create, documents_to_create = copy_grievance_ticket(
-                needs_adjudication_ticket_copy,
-                program,
-                needs_adjudication_ticket,
-            )
-            objects_to_create_dict["notes"].extend(notes_to_create)
-            objects_to_create_dict["documents"].extend(documents_to_create)
-            objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
-            objects_to_create_dict["tickets"].append(needs_adjudication_ticket_copy)
-
-            possible_duplicates = [
+            possible_duplicates_repr = [
                 get_individual_representation_per_program_by_old_individual_id(
                     program=program,
                     old_individual_id=individual.id,
@@ -328,41 +311,60 @@ def create_new_needs_adjudication_representations(tickets: QuerySet, program: Pr
                 for individual in individuals
                 if individual
             ]
-            possible_duplicates = [individual for individual in possible_duplicates if individual]
-            if possible_duplicates:
-                needs_adjudication_ticket_copy.golden_records_individual = possible_duplicates.pop()
-
-            # Handle selected_individuals
-            old_selected_individuals = needs_adjudication_ticket.selected_individuals(
-                manager="original_and_repr_objects"
-            ).all()
-            selected_individuals = [
-                get_individual_representation_per_program_by_old_individual_id(
-                    program=program,
-                    old_individual_id=individual,
+            possible_duplicates_repr = [individual for individual in possible_duplicates_repr if individual]
+            if len(possible_duplicates_repr) > 1:
+                needs_adjudication_ticket_copy = copy.deepcopy(needs_adjudication_ticket)
+                if hasattr(needs_adjudication_ticket_copy, "role_reassign_data"):
+                    needs_adjudication_ticket_copy = handle_role_reassign_data(needs_adjudication_ticket_copy, program)
+                if hasattr(needs_adjudication_ticket_copy, "extra_data"):
+                    needs_adjudication_ticket_copy = handle_extra_data(needs_adjudication_ticket_copy, program)
+                needs_adjudication_ticket_copy.pk = None
+                # Copy Grievance Ticket
+                grievance_ticket_data, notes_to_create, documents_to_create = copy_grievance_ticket(
+                    needs_adjudication_ticket_copy,
+                    program,
+                    needs_adjudication_ticket,
                 )
-                for individual in old_selected_individuals
-            ]
-            selected_individuals = [individual for individual in selected_individuals if individual]
+                objects_to_create_dict["notes"].extend(notes_to_create)
+                objects_to_create_dict["documents"].extend(documents_to_create)
+                objects_to_create_dict["grievance_tickets"].append(grievance_ticket_data)
+                objects_to_create_dict["tickets"].append(needs_adjudication_ticket_copy)
 
-            new_possible_duplicates_to_create.extend(
-                [
-                    PossibleDuplicateThrough(
-                        ticketneedsadjudicationdetails=needs_adjudication_ticket_copy,
-                        individual=individual,
+                needs_adjudication_ticket_copy.golden_records_individual = possible_duplicates_repr.pop()
+
+                # Handle selected_individuals
+                old_selected_individuals = (
+                    needs_adjudication_ticket.selected_individuals(manager="original_and_repr_objects")
+                    .filter(is_original=True)
+                    .all()
+                )
+                selected_individuals = [
+                    get_individual_representation_per_program_by_old_individual_id(
+                        program=program,
+                        old_individual_id=individual,
                     )
-                    for individual in possible_duplicates
+                    for individual in old_selected_individuals
                 ]
-            )
-            new_selected_individuals_to_create.extend(
-                [
-                    SelectedIndividualThrough(
-                        ticketneedsadjudicationdetails=needs_adjudication_ticket_copy,
-                        individual=individual,
-                    )
-                    for individual in selected_individuals
-                ]
-            )
+                selected_individuals = [individual for individual in selected_individuals if individual]
+
+                new_possible_duplicates_to_create.extend(
+                    [
+                        PossibleDuplicateThrough(
+                            ticketneedsadjudicationdetails=needs_adjudication_ticket_copy,
+                            individual=individual,
+                        )
+                        for individual in possible_duplicates_repr
+                    ]
+                )
+                new_selected_individuals_to_create.extend(
+                    [
+                        SelectedIndividualThrough(
+                            ticketneedsadjudicationdetails=needs_adjudication_ticket_copy,
+                            individual=individual,
+                        )
+                        for individual in selected_individuals
+                    ]
+                )
 
         handle_bulk_create_paginated_data([], objects_to_create_dict, TicketNeedsAdjudicationDetails)
         PossibleDuplicateThrough.objects.bulk_create(new_possible_duplicates_to_create)
