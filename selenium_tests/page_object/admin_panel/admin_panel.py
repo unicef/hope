@@ -9,6 +9,18 @@ class AdminPanel(BaseComponents):
     permissionText = "content-main"
     loginButton = '//*[@id="login-form"]/div[3]/input'
     loggedName = '//*[@class="changelink"]/a'
+    buttonLogout = '//*[@id="user-tools"]/a[3]'
+    loggedOut = '//*[@id="content"]'
+    errorNote = '//*[@class="errornote"]'
+
+    def getErrorLogin(self):
+        return self.wait_for(self.errorNote, By.XPATH)
+
+    def getLoggedOut(self):
+        return self.wait_for(self.loggedOut, By.XPATH)
+
+    def getButtonLogout(self) -> WebElement:
+        return self.wait_for(self.buttonLogout, By.XPATH)
 
     def getLogin(self) -> WebElement:
         return self.wait_for(self.login, By.ID)
