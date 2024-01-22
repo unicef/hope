@@ -60,12 +60,12 @@ def from_received_to_status(
         return PaymentVerification.STATUS_NOT_RECEIVED
 
 
-def to_decimal(received_amount: Optional[Union[Decimal, float, int]]) -> Optional[Decimal]:
-    if received_amount is None:
+def to_decimal(received_amount: Optional[Union[Decimal, float, int, str]]) -> Optional[Decimal]:
+    if received_amount is None or str(received_amount).strip() == "":
         return None
 
-    if isinstance(received_amount, Decimal):
-        return received_amount
+    if isinstance(received_amount, str):
+        received_amount = float(received_amount.strip())
 
     return Decimal(f"{round(received_amount, 2):.2f}")
 
