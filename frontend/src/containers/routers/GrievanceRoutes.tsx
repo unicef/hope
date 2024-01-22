@@ -38,18 +38,22 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/rdi/:id`,
       component: <GrievancesTablePage key='rdi' />,
+      exact: true,
     },
     {
       path: `${path}/grievance/payment-verification/:cashPlanId`,
       component: <GrievancesTablePage key='verificationId' />,
+      exact: true,
     },
     {
       path: `${path}/grievance/tickets/user-generated`,
       component: <GrievancesTablePage key='user' />,
+      exact: true,
     },
     {
       path: `${path}/grievance/tickets/system-generated`,
       component: <GrievancesTablePage key='system' />,
+      exact: true,
     },
     {
       path: `${path}/grievance/dashboard`,
@@ -76,7 +80,11 @@ export const GrievanceRoutes = (): React.ReactElement => {
   return (
     <>
       {grievanceRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path}>
+        <SentryRoute
+          key={route.path}
+          path={route.path}
+          exact={route?.exact || false}
+        >
           {route.component}
         </SentryRoute>
       ))}
