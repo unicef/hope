@@ -168,7 +168,6 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
             "head_of_household",
             "registration_data_import",
             "mis_unicef_id",
-            "diia_rec_id",
             "flex_registrations_record",
             "kobo_submission_uuid",
             "kobo_asset_id",
