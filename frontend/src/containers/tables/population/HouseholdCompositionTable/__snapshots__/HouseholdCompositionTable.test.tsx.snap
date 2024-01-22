@@ -78,14 +78,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
           </td>
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
           >
@@ -96,14 +92,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
           />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
         </tr>
         <tr
           class="MuiTableRow-root"
@@ -115,14 +107,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
           </td>
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
           >
@@ -133,14 +121,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
           />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
         </tr>
         <tr
           class="MuiTableRow-root"
@@ -152,14 +136,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
           </td>
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
           >
@@ -170,14 +150,10 @@ exports[`components/population/HouseholdCompositionTable should render 1`] = `
           />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
           <td
             class="MuiTableCell-root MuiTableCell-body sc-bwzfXH qOtXu MuiTableCell-alignLeft"
-          >
-            0
-          </td>
+          />
         </tr>
         <tr
           class="MuiTableRow-root"

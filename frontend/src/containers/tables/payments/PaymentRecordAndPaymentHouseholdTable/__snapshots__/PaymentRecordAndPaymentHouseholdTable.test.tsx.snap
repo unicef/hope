@@ -227,62 +227,9 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               >
                 <a
                   class="sc-iwsKbI cnzqJu"
-                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-records/UGF5bWVudFJlY29yZE5vZGU6OTljYTYxY2EtMzRmNS00OGFjLWIzMzItZTA4YzY4ZWU0NGNj"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-records/UGF5bWVudFJlY29yZE5vZGU6Y2JkMjU1MjctNTIwNS00Mjk5LWFiYmYtYTZjYTgzNzEyYjk1"
                 >
-                  123-21-PR-00009
-                </a>
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                <div
-                  class="sc-htoDjs koRFFa"
-                >
-                  <div
-                    class="sc-dnqmqq QDGnp"
-                    data-cy="status-container"
-                  >
-                    UNSUCCESSFUL
-                  </div>
-                </div>
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                Alyssa Davis
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                GNF 8,581
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                GNF 4,659
-              </td>
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
-              >
-                <time
-                  datetime="1641564918000"
-                >
-                  7 Jan 2022
-                </time>
-              </td>
-            </tr>
-            <tr
-              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
-              role="checkbox"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
-              >
-                <a
-                  class="sc-iwsKbI cnzqJu"
-                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-records/UGF5bWVudFJlY29yZE5vZGU6NGRmMjhlZWEtMjhjMC00Mzk2LTk2Y2MtZDMzOGU4Yzk0ZDE5"
-                >
-                  123-21-PR-00002
+                  123-21-PR-00008
                 </a>
               </td>
               <td
@@ -302,25 +249,78 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
               >
-                Jesse Reynolds
+                Ashley Reid
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                AED 3,562.50
+                AZN 303.41
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
-                AED 2,833.00
+                AZN 92.00
               </td>
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
               >
                 <time
-                  datetime="1689016601000"
+                  datetime="1677709280000"
                 >
-                  10 Jul 2023
+                  1 Mar 2023
+                </time>
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-gzVnrw btWNie MuiTableRow-hover"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <a
+                  class="sc-iwsKbI cnzqJu"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-records/UGF5bWVudFJlY29yZE5vZGU6YThhNzdkZTEtNWYxZi00MzBjLWJlOGMtODVhNzkzNjJiMzZm"
+                >
+                  123-21-PR-00004
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                <div
+                  class="sc-htoDjs koRFFa"
+                >
+                  <div
+                    class="sc-dnqmqq jLdboi"
+                    data-cy="status-container"
+                  >
+                    DELIVERED PARTIALLY
+                  </div>
+                </div>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+              >
+                Arthur Fletcher
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                COP 6,091.99
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                COP 3,177.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
+              >
+                <time
+                  datetime="1627714361000"
+                >
+                  31 Jul 2021
                 </time>
               </td>
             </tr>
@@ -335,7 +335,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                   class="sc-iwsKbI cnzqJu"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payments/UGF5bWVudE5vZGU6MTAwMDAwMDAtZmVlZC1iZWVmLTAwMDAtMDAwMDBiYWRmMDBk"
                 >
-                  RCPT-0060-23-0.000.043
+                  RCPT-0060-24-0.000.001
                 </a>
               </td>
               <td
