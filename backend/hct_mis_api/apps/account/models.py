@@ -195,12 +195,20 @@ class Partner(MPTTModel, models.Model):
         return [(partner.id, partner.name) for partner in cls.objects.exclude(name="Default Empty Partner")]
 
     @classmethod
-    def get_partners_for_ba_as_choices(cls, business_area_id: UUID) -> List:
-        return [
-            (partner.id, partner.name)
-            for partner in cls.objects.exclude(name="Default Empty Partner")
-            if str(business_area_id) in partner.business_area_ids or partner.is_unicef
-        ]
+    def get_partners_for_program_as_choices(cls, business_area_id: str, program_id: Optional[str] = None) -> List:
+        partners = cls.objects.exclude(name="Default Empty Partner")
+        if program_id:
+            return [
+                (partner.id, partner.name)
+                for partner in partners
+                if program_id in partner.get_program_ids_for_business_area(business_area_id)
+            ]
+        else:
+            return [
+                (partner.id, partner.name)
+                for partner in partners
+                if partner.get_program_ids_for_business_area(business_area_id)
+            ]
 
     @property
     def is_unicef(self) -> bool:
@@ -224,6 +232,18 @@ class Partner(MPTTModel, models.Model):
     @property
     def business_area_ids(self) -> List[str]:
         return self.get_permissions().business_area_ids()
+
+    def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
+        from hct_mis_api.apps.program.models import Program
+
+        if self.is_unicef:
+            return [
+                str(program_id)
+                for program_id in Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
+            ]
+        programs_for_business_area = self.get_permissions().get_programs_for_business_area(business_area_id)
+
+        return programs_for_business_area.get_program_ids() if programs_for_business_area else []
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
