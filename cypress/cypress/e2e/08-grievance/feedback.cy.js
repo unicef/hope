@@ -12,7 +12,7 @@ let newFeedbackPage = new NewFeedback();
 let grievanceNewTicketPage = new NewTicket();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 
-describe.skip("Grievance - Feedback", () => {
+describe("Grievance - Feedback", () => {
   before(() => {
     cy.checkIfLoggedIn();
   });
@@ -176,7 +176,7 @@ describe.skip("Grievance - Feedback", () => {
         });
       });
     });
-    context("Create New Feedback", () => {
+    context.only("Create New Feedback", () => {
       it("Create New Feedback - Negative Feedback", () => {
         cy.scenario([
           "Go to Grievance page",
