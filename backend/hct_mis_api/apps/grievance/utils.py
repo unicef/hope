@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
@@ -8,6 +8,7 @@ from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
     GrievanceDocument,
@@ -21,9 +22,6 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.validators import validate_file
 from hct_mis_api.apps.household.models import Individual
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.accountability.models import Feedback
 
 logger = logging.getLogger(__name__)
 
@@ -165,6 +163,7 @@ def filter_based_on_partner_areas_2(
     id_container: Callable[[Any], List[Any]],
 ) -> QuerySet["GrievanceTicket", "Feedback"]:
     business_area_id_str = str(business_area_id)
+    program_id_str = None
     if program_id:
         program_id_str = str(program_id)
     try:
@@ -188,6 +187,11 @@ def filter_based_on_partner_areas_2(
                 filter_q |= Q(areas_null_and_program_q | Q(program_q & Q(admin2__in=areas_ids)))
             else:
                 filter_q |= areas_null_and_program_q
+
+        # add Feedbacks without program for "All Programmes" query
+        if not program_id_str and queryset.model is Feedback:
+            filter_q |= Q(program__isnull=True)
+
         queryset = queryset.filter(filter_q)
         return queryset
     except (Partner.DoesNotExist, AssertionError):

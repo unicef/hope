@@ -104,10 +104,13 @@ class FeedbackFilter(FilterSet):
         return queryset.filter(unicef_id=value)
 
     def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+        filter_q = Q(program__isnull=True)
         if value is True:
-            return qs.filter(program__status=Program.ACTIVE)
+            filter_q |= Q(program__status=Program.ACTIVE)
+            return qs.filter(filter_q)
         elif value is False:
-            return qs.filter(program__status=Program.FINISHED)
+            filter_q |= Q(program__status=Program.FINISHED)
+            return qs.filter(filter_q)
         else:
             return qs
 
