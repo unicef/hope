@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { Switch, useRouteMatch } from 'react-router-dom';
 import { SentryRoute } from '../../components/core/SentryRoute';
 import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
@@ -38,22 +38,18 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/rdi/:id`,
       component: <GrievancesTablePage key='rdi' />,
-      exact: true,
     },
     {
       path: `${path}/grievance/payment-verification/:cashPlanId`,
       component: <GrievancesTablePage key='verificationId' />,
-      exact: true,
     },
     {
       path: `${path}/grievance/tickets/user-generated`,
       component: <GrievancesTablePage key='user' />,
-      exact: true,
     },
     {
       path: `${path}/grievance/tickets/system-generated`,
       component: <GrievancesTablePage key='system' />,
-      exact: true,
     },
     {
       path: `${path}/grievance/dashboard`,
@@ -78,16 +74,12 @@ export const GrievanceRoutes = (): React.ReactElement => {
   ];
 
   return (
-    <>
+    <Switch>
       {grievanceRoutes.map((route) => (
-        <SentryRoute
-          key={route.path}
-          path={route.path}
-          exact={route?.exact || false}
-        >
+        <SentryRoute key={route.path} path={route.path}>
           {route.component}
         </SentryRoute>
       ))}
-    </>
+    </Switch>
   );
 };
