@@ -66,16 +66,13 @@ class SentryFilter:
         return False
 
     def before_send(self, event: dict, hint: dict) -> Optional[dict]:
-        log.info("SentryFilter.before_send: hint=%s", hint)
         url = event.get("transaction")
         if url and url in self.IGNORABLE_URLS:
             return None
 
         if "log_record" in hint and self.filter_logs(hint, url):
-            log.info("SentryFilter.before_send: Ignoring log_record")
             return None
         if "exc_info" in hint and self.filter_exceptions(hint):
-            log.info("SentryFilter.before_send: Ignoring exc_info")
             return None
 
         return event
