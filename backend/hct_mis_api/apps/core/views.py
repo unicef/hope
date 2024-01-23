@@ -102,6 +102,3 @@ class UploadFile(UploadFilePermissionMixin, View):
     def format_form_error(form: forms.Form) -> Any:
         return form.errors.get_json_data()["__all__"][0]["message"]
 
-
-def react_main(request):
-    return render(request,'core/react-main.html')

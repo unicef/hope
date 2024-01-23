@@ -25,9 +25,9 @@ from hct_mis_api.apps.core.views import (
     logout_view,
     schema,
     trigger_error,
-    react_main,
 )
 from hct_mis_api.apps.utils.cypress import get_cypress_xlsx_file, handle_cypress_command
+from hct_mis_api.apps.web.views import react_main
 
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])
