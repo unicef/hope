@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseService):
-    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "n", "s")
+    COLUMNS_TYPES = ("s", "s", "n", "s", "s", "s", "s", "s", "n", "n", "s")
 
     def __init__(self, payment_plan: PaymentPlan, file: io.BytesIO) -> None:
         self.payment_plan = payment_plan
