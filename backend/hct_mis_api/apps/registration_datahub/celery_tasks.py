@@ -80,7 +80,7 @@ def registration_xlsx_import_task(
             with configure_scope() as scope:
                 scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area_id))
                 rdi = RegistrationDataImport.objects.get(datahub_id=registration_data_import_id)
-                if rdi.status != RegistrationDataImport.IMPORT_SCHEDULED:
+                if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
                     raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
                 rdi.status = RegistrationDataImport.IMPORTING
                 rdi.save()
