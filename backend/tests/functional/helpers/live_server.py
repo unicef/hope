@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.options import Options
 
 
 class CustomLiveServer(LiveServerTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         chrome_options = Options()
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
@@ -13,5 +13,5 @@ class CustomLiveServer(LiveServerTestCase):
         self.browser = webdriver.Chrome(options=chrome_options)
         self.browser.implicitly_wait(2)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.browser.quit()
