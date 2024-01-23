@@ -11,7 +11,6 @@ import {
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
-  useUserChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
@@ -130,7 +129,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
-  const { data: userChoices } = useUserChoiceDataQuery();
+
   const [mutate, { loading }] = useCreateGrievanceMutation();
   const {
     data: programsData,
@@ -377,7 +376,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             selectedIssueType={issueTypeToDisplay}
                             baseUrl={baseUrl}
                             choicesData={choicesData}
-                            userChoices={userChoices}
                             programsData={programsData}
                             setFieldValue={setFieldValue}
                             errors={errors}

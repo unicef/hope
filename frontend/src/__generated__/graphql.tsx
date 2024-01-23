@@ -2873,7 +2873,7 @@ export type ImportedHouseholdNode = Node & {
   consentSharing: ImportedHouseholdConsentSharing,
   residenceStatus: ImportedHouseholdResidenceStatus,
   countryOrigin?: Maybe<Scalars['String']>,
-  size: Scalars['Int'],
+  size?: Maybe<Scalars['Int']>,
   address: Scalars['String'],
   country?: Maybe<Scalars['String']>,
   zipCode?: Maybe<Scalars['String']>,
@@ -2981,7 +2981,8 @@ export enum ImportedHouseholdResidenceStatus {
   Refugee = 'REFUGEE',
   OthersOfConcern = 'OTHERS_OF_CONCERN',
   Host = 'HOST',
-  NonHost = 'NON_HOST'
+  NonHost = 'NON_HOST',
+  Returnee = 'RETURNEE'
 }
 
 export enum ImportedIndividualDeduplicationBatchStatus {
@@ -5645,6 +5646,7 @@ export type Query = {
   userRolesChoices?: Maybe<Array<Maybe<RoleChoiceObject>>>,
   userStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   userPartnerChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  partnerForGrievanceChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   hasAvailableUsersToExport?: Maybe<Scalars['Boolean']>,
   importedHousehold?: Maybe<ImportedHouseholdNode>,
   allImportedHouseholds?: Maybe<ImportedHouseholdNodeConnection>,
@@ -6607,6 +6609,12 @@ export type QueryAllUsersArgs = {
   isMessageCreator?: Maybe<Scalars['Boolean']>,
   isFeedbackCreator?: Maybe<Scalars['Boolean']>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryPartnerForGrievanceChoicesArgs = {
+  householdId?: Maybe<Scalars['ID']>,
+  individualId?: Maybe<Scalars['ID']>
 };
 
 
@@ -12195,6 +12203,20 @@ export type GrievancesChoiceDataQuery = (
       & Pick<ChoiceObject, 'name' | 'value'>
     )>>> }
   )>>>, grievanceTicketSearchTypesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type PartnerForGrievanceChoicesQueryVariables = {
+  householdId?: Maybe<Scalars['ID']>,
+  individualId?: Maybe<Scalars['ID']>
+};
+
+
+export type PartnerForGrievanceChoicesQuery = (
+  { __typename?: 'Query' }
+  & { partnerForGrievanceChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -22602,6 +22624,58 @@ export function useGrievancesChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.
 export type GrievancesChoiceDataQueryHookResult = ReturnType<typeof useGrievancesChoiceDataQuery>;
 export type GrievancesChoiceDataLazyQueryHookResult = ReturnType<typeof useGrievancesChoiceDataLazyQuery>;
 export type GrievancesChoiceDataQueryResult = ApolloReactCommon.QueryResult<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>;
+export const PartnerForGrievanceChoicesDocument = gql`
+    query partnerForGrievanceChoices($householdId: ID, $individualId: ID) {
+  partnerForGrievanceChoices(householdId: $householdId, individualId: $individualId) {
+    name
+    value
+  }
+}
+    `;
+export type PartnerForGrievanceChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>, 'query'>;
+
+    export const PartnerForGrievanceChoicesComponent = (props: PartnerForGrievanceChoicesComponentProps) => (
+      <ApolloReactComponents.Query<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables> query={PartnerForGrievanceChoicesDocument} {...props} />
+    );
+    
+export type PartnerForGrievanceChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables> & TChildProps;
+export function withPartnerForGrievanceChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PartnerForGrievanceChoicesQuery,
+  PartnerForGrievanceChoicesQueryVariables,
+  PartnerForGrievanceChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables, PartnerForGrievanceChoicesProps<TChildProps>>(PartnerForGrievanceChoicesDocument, {
+      alias: 'partnerForGrievanceChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePartnerForGrievanceChoicesQuery__
+ *
+ * To run a query within a React component, call `usePartnerForGrievanceChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePartnerForGrievanceChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePartnerForGrievanceChoicesQuery({
+ *   variables: {
+ *      householdId: // value for 'householdId'
+ *      individualId: // value for 'individualId'
+ *   },
+ * });
+ */
+export function usePartnerForGrievanceChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>(PartnerForGrievanceChoicesDocument, baseOptions);
+      }
+export function usePartnerForGrievanceChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>(PartnerForGrievanceChoicesDocument, baseOptions);
+        }
+export type PartnerForGrievanceChoicesQueryHookResult = ReturnType<typeof usePartnerForGrievanceChoicesQuery>;
+export type PartnerForGrievanceChoicesLazyQueryHookResult = ReturnType<typeof usePartnerForGrievanceChoicesLazyQuery>;
+export type PartnerForGrievanceChoicesQueryResult = ApolloReactCommon.QueryResult<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>;
 export const RelatedGrievanceTicketsDocument = gql`
     query RelatedGrievanceTickets($id: ID!) {
   grievanceTicket(id: $id) {
@@ -30772,7 +30846,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   consentSharing?: Resolver<ResolversTypes['ImportedHouseholdConsentSharing'], ParentType, ContextType>,
   residenceStatus?: Resolver<ResolversTypes['ImportedHouseholdResidenceStatus'], ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  size?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   zipCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -31959,6 +32033,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['RoleChoiceObject']>>>, ParentType, ContextType>,
   userStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   userPartnerChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  partnerForGrievanceChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType, QueryPartnerForGrievanceChoicesArgs>,
   hasAvailableUsersToExport?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryHasAvailableUsersToExportArgs, 'businessAreaSlug'>>,
   importedHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType, RequireFields<QueryImportedHouseholdArgs, 'id'>>,
   allImportedHouseholds?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNodeConnection']>, ParentType, ContextType, QueryAllImportedHouseholdsArgs>,
