@@ -21,6 +21,7 @@ const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent')
 const paths = require('./paths');
 const modules = require('./modules');
 const getClientEnvironment = require('./env');
+const DjangoTagsPlugin = require('./DjangoTagsPlugin');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const ForkTsCheckerWebpackPlugin = require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
@@ -192,7 +193,10 @@ module.exports = function(webpackEnv) {
     ].filter(Boolean),
     output: {
       // The build folder.
-      path: path.resolve(__dirname, '../../backend/static/'),
+      path: path.resolve(
+        __dirname,
+        '../../backend/hct_mis_api/apps/web/static/',
+      ),
       // Add /* filename */ comments to generated require()s in the output.
       pathinfo: isEnvDevelopment,
       // There will be one main bundle, and one file per asynchronous chunk.
@@ -204,10 +208,10 @@ module.exports = function(webpackEnv) {
       chunkFilename: '[name].chunk.js',
       // We inferred the "public path" (such as / or /my-project) from homepage.
       // We use "/" in development.
-      publicPath: '/api/static/',
+      publicPath: '___STATIC_TAG___',
       // Point sourcemap entries to original disk location (format as URL on Windows)
-      devtoolModuleFilenameTemplate: ((info) =>
-            path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')),
+      devtoolModuleFilenameTemplate: (info) =>
+        path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
       // Prevents conflicts when multiple Webpack runtimes (from different apps)
       // are used on the same page.
       jsonpFunction: `webpackJsonp${appPackageJson.name}`,
@@ -696,6 +700,12 @@ module.exports = function(webpackEnv) {
           processFn: generateNginxHeaderFile,
         },
       ),
+      new DjangoTagsPlugin({
+        djangoAppName: 'web',
+        djangoTemplatePath: path.resolve(
+        __dirname,
+        '../../backend/hct_mis_api/apps/web/templates/web',
+      )}),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
