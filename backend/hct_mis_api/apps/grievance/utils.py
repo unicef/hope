@@ -175,10 +175,10 @@ def filter_based_on_partner_areas_2(
             else:
                 programs_permissions = {}  # type: ignore
         else:
-            areas = partner_permission.areas_for(business_area_id_str, program_id_str)
+            areas = partner_permission.areas_for(business_area_id_str, program_id_str)  # type: ignore
             if areas is None:
                 return queryset.model.objects.none()
-            programs_permissions = {program_id_str: areas}.items()
+            programs_permissions = {program_id_str: areas}.items()  # type: ignore
 
         for program_id, areas_ids in programs_permissions:
             program_q = Q(**{lookup_id: id_container(program_id)})
