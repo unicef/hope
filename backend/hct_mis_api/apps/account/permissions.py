@@ -432,6 +432,33 @@ class DjangoPermissionFilterFastConnectionField(DjangoFastConnectionField):
         return get_filtering_args_from_filterset(self.filterset_class, self.node_type)
 
     @classmethod
+    def connection_resolver(
+        cls,
+        resolver: Any,
+        connection: Any,
+        default_manager: Any,
+        queryset_resolver: Any,
+        max_limit: Any,
+        enforce_first_or_last: Any,
+        root: Any,
+        info: Any,
+        **args: Any,
+    ) -> Any:
+        if not info.context.user.is_authenticated:
+            raise PermissionDenied("Permission Denied: User is not authenticated.")
+        return super().connection_resolver(
+            resolver,
+            connection,
+            default_manager,
+            queryset_resolver,
+            max_limit,
+            enforce_first_or_last,
+            root,
+            info,
+            **args,
+        )
+
+    @classmethod
     def resolve_queryset(
         cls,
         connection: Any,

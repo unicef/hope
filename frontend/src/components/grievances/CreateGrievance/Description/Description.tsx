@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import {
   AllProgramsForChoicesQuery,
   GrievancesChoiceDataQuery,
-  UserChoiceDataQuery,
+  usePartnerForGrievanceChoicesQuery,
 } from '../../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
@@ -50,7 +50,6 @@ export interface DescriptionProps {
   selectedIssueType: (values) => string;
   baseUrl: string;
   choicesData: GrievancesChoiceDataQuery;
-  userChoices: UserChoiceDataQuery;
   programsData: AllProgramsForChoicesQuery;
   setFieldValue: (field: string, value, shouldValidate?: boolean) => void;
   errors;
@@ -63,7 +62,6 @@ export const Description = ({
   selectedIssueType,
   baseUrl,
   choicesData,
-  userChoices,
   programsData,
   setFieldValue,
   errors,
@@ -71,6 +69,14 @@ export const Description = ({
 }: DescriptionProps): React.ReactElement => {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
+  const { data: partnerChoicesData } = usePartnerForGrievanceChoicesQuery({
+    variables: {
+      householdId: values.selectedHousehold?.id,
+      individualId: values.selectedIndividual?.id,
+    },
+    fetchPolicy: 'network-only',
+  });
+
   const categoryChoices: {
     [id: number]: string;
   } = choicesToDict(choicesData?.grievanceTicketCategoryChoices || []);
@@ -125,11 +131,7 @@ export const Description = ({
                         {values.selectedHousehold.unicefId}
                       </BlackLink>
                     ) : (
-                      <div>
-                        {values.selectedHousehold?.id
-                          ? values.selectedHousehold.unicefId
-                          : '-'}
-                      </div>
+                      <div>{values.selectedHousehold?.unicefId || '-'}</div>
                     )}
                   </span>
                 ),
@@ -148,11 +150,7 @@ export const Description = ({
                         {values.selectedIndividual.unicefId}
                       </BlackLink>
                     ) : (
-                      <div>
-                        {values.selectedIndividual?.id
-                          ? values.selectedIndividual.unicefId
-                          : '-'}
-                      </div>
+                      <div>{values.selectedIndividual?.unicefId || '-'}</div>
                     )}
                   </span>
                 ),
@@ -177,7 +175,7 @@ export const Description = ({
                 fullWidth
                 variant='outlined'
                 label={t('Partner*')}
-                choices={userChoices.userPartnerChoices}
+                choices={partnerChoicesData?.partnerForGrievanceChoices || []}
                 component={FormikSelectField}
               />
             </Grid>
