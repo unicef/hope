@@ -12,7 +12,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
-class Test(TestCase):
+class TestHandleRole(TestCase):
     def test_handle_role(self) -> None:
         business_area = create_afghanistan()
         program = ProgramFactory(
