@@ -1,4 +1,4 @@
-from .base_components import BaseComponent
+from base_components import BaseComponent
 
 
 class LoginPage(BaseComponent):
