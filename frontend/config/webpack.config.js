@@ -195,7 +195,7 @@ module.exports = function(webpackEnv) {
       // The build folder.
       path: path.resolve(
         __dirname,
-        '../../backend/hct_mis_api/apps/web/static/',
+        '../../backend/hct_mis_api/apps/web/static/web/',
       ),
       // Add /* filename */ comments to generated require()s in the output.
       pathinfo: isEnvDevelopment,
@@ -375,9 +375,8 @@ module.exports = function(webpackEnv) {
             // A missing `test` is equivalent to a match.
             {
               test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-              loader: require.resolve('url-loader'),
+              loader: require.resolve('./django-file-loader'),
               options: {
-                limit: imageInlineSizeLimit,
                 name: 'static/[name].[hash:8].[ext]',
               },
             },

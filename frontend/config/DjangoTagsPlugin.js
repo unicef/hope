@@ -24,7 +24,7 @@ class DjangoTagsPlugin {
         }
 
 
-        const modifiedData = data.replaceAll(new RegExp(tagToSearch+"\\/(.*?)\"","g"), "{% static \"$1\" %}\"");
+        const modifiedData = data.replaceAll(new RegExp(tagToSearch+"\\/(.*?)\"","g"), `{% static "/${this.options.djangoAppName}/$1" %}"`);
         console.log("Modified index.html");
         fs.writeFile(targetPath, modifiedData, 'utf8', (writeErr) => {
           if (writeErr) {

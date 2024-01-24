@@ -10,6 +10,12 @@
       name="description"
       content="UNICEF HOPE"
     />
+      <script>
+          function addPublicPath(url){
+            let publicPath = "{% static "web/" %}";
+            return publicPath + url;
+          }
+      </script>
     <link rel="apple-touch-icon" href="{% static "web/logo192.png" %}" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
