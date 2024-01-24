@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.decorators.csrf import csrf_exempt
 
 import adminactions.actions as actions
@@ -27,6 +27,7 @@ from hct_mis_api.apps.core.views import (
     trigger_error,
 )
 from hct_mis_api.apps.utils.cypress import get_cypress_xlsx_file, handle_cypress_command
+from hct_mis_api.apps.web.views import react_main
 
 # register all adminactions
 actions.add_to_site(site, exclude=["export_delete_tree"])
@@ -114,7 +115,13 @@ if settings.CYPRESS_TESTING:
     api_patterns.append(path("cypress/xlsx/<int:seed>/", get_cypress_xlsx_file))
 
 urlpatterns = (
-    [path("", homepage), path("_health", homepage), path("api/", include(api_patterns))]
+    [
+        path("_health", homepage),
+        path("api/", include(api_patterns)),
+    ]
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    + [
+        re_path(r"^.*$", react_main, name="react-main"),
+    ]
 )
