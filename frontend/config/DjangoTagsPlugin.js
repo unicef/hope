@@ -45,4 +45,5 @@ class DjangoTagsPlugin {
   }
 }
 
+
 module.exports = DjangoTagsPlugin;
