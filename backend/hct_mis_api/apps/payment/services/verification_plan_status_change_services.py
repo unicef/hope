@@ -149,12 +149,9 @@ class VerificationPlanStatusChangeServices:
                 admin2_id=verification.payment_obj.household.admin2_id,
             )
             grievance_ticket_list.append(grievance_ticket)
-            # program taken from verification.payment_obj.target_population if payment_obj is PaymentRecord instance;
-            # and from verification.payment_obj.parent.target_population if payment_obj is Payment instance
-            program = (
-                getattr(verification.payment_obj.target_population, "program", None)
-                or verification.payment_obj.parent.target_population.program
-            )
+            # get program from parent GenericPaymentPlan.program
+            program = verification.payment_obj.parent.program
+
             tickets_programs.append(
                 GrievanceTicketProgramThrough(grievanceticket=grievance_ticket, program_id=program.id)
             )

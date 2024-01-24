@@ -77,8 +77,6 @@ class Command(BaseCommand):
             ],
             "erp_datahub": ["downpayment", "fundscommitment"],
             "registration_datahub": [
-                "diiahousehold",
-                "diiaindividual",
                 "importdata",
                 "importedindividualidentity",
                 "importeddocumenttype",
