@@ -163,25 +163,22 @@ def filter_based_on_partner_areas_2(
     id_container: Callable[[Any], List[Any]],
 ) -> QuerySet["GrievanceTicket", "Feedback"]:
     business_area_id_str = str(business_area_id)
-    program_id_str = None
-    if program_id:
-        program_id_str = str(program_id)
     try:
         partner_permission = user_partner.get_permissions()
         filter_q = Q()
-        if not program_id:
+        if program_id:
+            areas = partner_permission.areas_for(business_area_id_str, str(program_id))
+            if areas is None:
+                return queryset.model.objects.none()
+            programs_permissions = {str(program_id): areas}.items()
+        else:
             if business_area_permission := partner_permission.get_programs_for_business_area(business_area_id_str):
                 programs_permissions = business_area_permission.programs.items()
             else:
                 programs_permissions = {}  # type: ignore
-        else:
-            areas = partner_permission.areas_for(business_area_id_str, program_id_str)  # type: ignore
-            if areas is None:
-                return queryset.model.objects.none()
-            programs_permissions = {program_id_str: areas}.items()  # type: ignore
 
-        for program_id, areas_ids in programs_permissions:
-            program_q = Q(**{lookup_id: id_container(program_id)})
+        for perm_program_id, areas_ids in programs_permissions:
+            program_q = Q(**{lookup_id: id_container(perm_program_id)})
             areas_null_and_program_q = program_q & Q(admin2__isnull=True)
             if areas_ids:
                 filter_q |= Q(areas_null_and_program_q | Q(program_q & Q(admin2__in=areas_ids)))
@@ -189,7 +186,7 @@ def filter_based_on_partner_areas_2(
                 filter_q |= areas_null_and_program_q
 
         # add Feedbacks without program for "All Programmes" query
-        if not program_id_str and queryset.model is Feedback:
+        if queryset.model is Feedback and not program_id:
             filter_q |= Q(program__isnull=True)
 
         queryset = queryset.filter(filter_q)
