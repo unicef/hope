@@ -94,7 +94,7 @@ class FeedbackFilter(FilterSet):
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     created_by = CharFilter(method="filter_created_by")
     feedback_id = CharFilter(method="filter_feedback_id")
-    is_active_program = BooleanFilter(method="filter_is_active_program")
+    is_active_program = CharFilter(method="filter_is_active_program")
     program = CharFilter(method="filter_by_program")
 
     def filter_created_by(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
@@ -103,12 +103,12 @@ class FeedbackFilter(FilterSet):
     def filter_feedback_id(self, queryset: QuerySet, name: str, value: str) -> QuerySet[Feedback]:
         return queryset.filter(unicef_id=value)
 
-    def filter_is_active_program(self, qs: QuerySet, name: str, value: bool) -> QuerySet:
+    def filter_is_active_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         filter_q = Q(program__isnull=True)
-        if value is True:
+        if value in ["true", "True"]:
             filter_q |= Q(program__status=Program.ACTIVE)
             return qs.filter(filter_q)
-        elif value is False:
+        elif value in ["false", "False"]:
             filter_q |= Q(program__status=Program.FINISHED)
             return qs.filter(filter_q)
         else:
