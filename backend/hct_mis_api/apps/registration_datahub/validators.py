@@ -683,7 +683,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 area = queryset.filter(p_code=p_code).first()
                 if not area:
                     message = f"Sheet Households: Area with code: {p_code} does not exist"
-                if area.area_type.country not in business_area_countries:
+                elif area.area_type.country not in business_area_countries:
                     message = (
                         f"Sheet Households: Admin Area: {p_code} unavailable in Business Area: {business_area_slug}"
                     )
