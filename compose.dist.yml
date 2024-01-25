@@ -13,11 +13,6 @@ volumes:
 
 
 services:
-  # proxy:
-  #   image: tivix/docker-nginx:v17
-  #   ports:
-  #     - "80:80"
-
   redis:
     restart: always
     image: redis:4.0.11-alpine3.8

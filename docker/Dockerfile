@@ -77,6 +77,7 @@ USER hope
 COPY ./docker/entrypoint.sh /bin/
 ENTRYPOINT ["entrypoint.sh"]
 
+
 # Frontend builder
 FROM node:16.20.0-buster-slim as frontend-builder
 
@@ -86,7 +87,6 @@ COPY ./frontend/package.json ./frontend/yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY ./frontend ./
 RUN NODE_ENV="production" yarn build
-#
 
 
 FROM be-dist AS dist
