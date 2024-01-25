@@ -53,16 +53,11 @@ services:
     image: unicef/hct-mis-proxy
     environment:
       - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_HOST=frontend:80
     build:
       context: ../proxy
       dockerfile: Dockerfile
     depends_on:
       - backend
-      - frontend
-
-  frontend:
-    image: ${FRONTEND_IMAGE}
 
   redis:
     restart: unless-stopped
