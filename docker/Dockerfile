@@ -43,9 +43,6 @@ WORKDIR /code
 RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/$WAITFORIT_VERSION/waitforit-linux_amd64 &&\
   chmod +x /usr/local/bin/waitforit
 
-COPY ./docker/entrypoint.sh /bin/
-ENTRYPOINT ["entrypoint.sh"]
-
 RUN curl -o /code/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 
 # Dist builder image
@@ -67,6 +64,18 @@ FROM builder AS dev
 RUN poetry install
 COPY ./backend ./
 
+COPY ./docker/entrypoint.sh /bin/
+ENTRYPOINT ["entrypoint.sh"]
+
+## Dist (backend only) image
+FROM base AS be-dist
+
+COPY --chown=hope:hope ./backend ./
+COPY --chown=hope:hope --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
+USER hope
+
+COPY ./docker/entrypoint.sh /bin/
+ENTRYPOINT ["entrypoint.sh"]
 
 # Frontend builder
 FROM node:16.20.0-buster-slim as frontend-builder
@@ -78,10 +87,8 @@ RUN yarn install --frozen-lockfile
 COPY ./frontend ./
 RUN NODE_ENV="production" yarn build
 #
-## Dist image
-FROM base AS dist
 
-COPY --chown=hope:hope ./ ./
-COPY --chown=hope:hope --from=frontend-builder /backend/hct_mis_api/apps/web/ /teemp
-COPY --chown=hope:hope --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
-USER hope
+
+FROM be-dist AS dist
+
+COPY --chown=hope:hope --from=frontend-builder /backend/hct_mis_api/apps/web/ ./hct_mis_api/apps/web/
