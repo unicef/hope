@@ -1,6 +1,14 @@
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
+const paths = require("./paths");
 
+function copyPublicFolder() {
+  console.log("Copying public folder", paths.appPublic, paths.appBuild)
+  fs.copySync(paths.appPublic, paths.appBuild, {
+    dereference: true,
+    filter: file => file !== paths.appHtml,
+  });
+}
 class DjangoTagsPlugin {
   constructor(options) {
     this.options = options;
@@ -32,6 +40,7 @@ class DjangoTagsPlugin {
             return callback();
           }
 
+          copyPublicFolder()
           // Delete the original file
           fs.unlink(indexPath, (unlinkErr) => {
             if (unlinkErr) {
@@ -44,6 +53,7 @@ class DjangoTagsPlugin {
     });
   }
 }
+
 
 
 module.exports = DjangoTagsPlugin;

@@ -174,76 +174,83 @@ if SENTRY_DSN:
 
     sentry_key = re.search(r"//(.*)@", SENTRY_DSN).group(1)
     sentry_id = re.search(r"@.*/(\d*)$", SENTRY_DSN).group(1)
-    # CSP_REPORT_URI = (f"https://excubo.unicef.io/api/{sentry_id}/security/?sentry_key={sentry_key}",)
-    # CSP_REPORT_ONLY = True  # TODO: change to False after testing
-# CSP_REPORT_PERCENTAGE = 0.1
-#
-# # default source as self
-# CSP_DEFAULT_SRC = ("'self'",)
-# CSP_FRAME_ANCESTORS = ("'none'",)
-# CSP_STYLE_SRC = (
-#     "'self'",
-#     "'unsafe-inline'",
-#     "'unsafe-eval'",
-#     "fonts.googleapis.com",
-#     "cdn.jsdelivr.net",
-#     "cdnjs.cloudflare.com",
-#     "maxcdn.bootstrapcdn.com",
-#     "unpkg.com",
-#     "hctmisdev.blob.core.windows.net",  # dev
-#     "saunihopestg.blob.core.windows.net",  # stg
-#     "saunihopetrn.blob.core.windows.net",  # trn
-#     "saunihopeprd.blob.core.windows.net",  # prod
-# )
-# CSP_SCRIPT_SRC = (
-#     "'self'",
-#     "'unsafe-inline'",
-#     "'unsafe-eval'",
-#     "hctmisdev.blob.core.windows.net",
-#     "saunihopestg.blob.core.windows.net",
-#     "saunihopetrn.blob.core.windows.net",
-#     "saunihopeprd.blob.core.windows.net",
-#     "gov-bam.nr-data.net",
-#     "js-agent.newrelic.com",
-#     "cdn.jsdelivr.net",
-#     "cdnjs.cloudflare.com",
-#     "unpkg.com",
-# )
-# CSP_IMG_SRC = (
-#     "'self'",
-#     "data:",
-#     "cdn.datatables.net",
-#     "hctmisdev.blob.core.windows.net",
-#     "saunihopestg.blob.core.windows.net",
-#     "saunihopetrn.blob.core.windows.net",
-#     "saunihopeprd.blob.core.windows.net",
-#     "map1a.vis.earthdata.nasa.gov",
-#     "map1b.vis.earthdata.nasa.gov",
-#     "map1c.vis.earthdata.nasa.gov",
-# )
-# CSP_FONT_SRC = (
-#     "'self'",
-#     "data:",
-#     "fonts.gstatic.com",
-#     "maxcdn.bootstrapcdn.com",
-#     "hctmisdev.blob.core.windows.net",
-#     "saunihopestg.blob.core.windows.net",
-#     "saunihopetrn.blob.core.windows.net",
-#     "saunihopeprd.blob.core.windows.net",
-# )
-# CSP_MEDIA_SRC = ("'self'",)
-# CSP_CONNECT_SRC = (
-#     "excubo.unicef.io",
-#     "sentry.io",
-#     "gov-bam.nr-data.net",
-#     "cdn.jsdelivr.net",
-#     "hope.unicef.org",  # prod
-#     "trn-hope.unitst.org",  # trn
-#     "stg-hope.unitst.org",  # stg
-#     "dev-hope.unitst.org",  # dev
-# )
+    CSP_REPORT_URI = (f"https://excubo.unicef.io/api/{sentry_id}/security/?sentry_key={sentry_key}",)
+    CSP_REPORT_ONLY = True  # TODO: change to False after testing
+CSP_REPORT_PERCENTAGE = 0.1
+
+# default source as self
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'none'",)
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "fonts.googleapis.com",
+    "cdn.jsdelivr.net",
+    "cdnjs.cloudflare.com",
+    "maxcdn.bootstrapcdn.com",
+    "unpkg.com",
+    "hctmisdev.blob.core.windows.net",  # dev
+    "saunihopestg.blob.core.windows.net",  # stg
+    "saunihopetrn.blob.core.windows.net",  # trn
+    "saunihopeprd.blob.core.windows.net",  # prod
+)
+CSP_SCRIPT_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+    "gov-bam.nr-data.net",
+    "js-agent.newrelic.com",
+    "cdn.jsdelivr.net",
+    "cdnjs.cloudflare.com",
+    "unpkg.com",
+)
+CSP_IMG_SRC = (
+    "'self'",
+    "data:",
+    "cdn.datatables.net",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+    "map1a.vis.earthdata.nasa.gov",
+    "map1b.vis.earthdata.nasa.gov",
+    "map1c.vis.earthdata.nasa.gov",
+)
+CSP_FONT_SRC = (
+    "'self'",
+    "data:",
+    "fonts.gstatic.com",
+    "maxcdn.bootstrapcdn.com",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+)
+CSP_MEDIA_SRC = ("'self'",)
+CSP_CONNECT_SRC = (
+    "excubo.unicef.io",
+    "sentry.io",
+    "gov-bam.nr-data.net",
+    "cdn.jsdelivr.net",
+    "hope.unicef.org",  # prod
+    "trn-hope.unitst.org",  # trn
+    "stg-hope.unitst.org",  # stg
+    "dev-hope.unitst.org",  # dev
+)
 
 DEBUG = env.bool("DEBUG", default=False)
+if DEBUG:
+    CSP_CONNECT_SRC += ("localhost:8080", )
+    CSP_FONT_SRC += ("localhost:8080", )
+    CSP_IMG_SRC += ("localhost:8080", )
+    CSP_SCRIPT_SRC += ("localhost:8080", )
+    CSP_STYLE_SRC += ("localhost:8080", )
+
 
 if DEBUG:
     ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
@@ -337,7 +344,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
-    # "csp.contrib.rate_limiting.RateLimitedCSPMiddleware",
+    "csp.contrib.rate_limiting.RateLimitedCSPMiddleware",
 ]
 
 TEMPLATES: List[Dict[str, Any]] = [
