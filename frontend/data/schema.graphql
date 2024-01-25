@@ -1710,7 +1710,6 @@ enum ImportDataDataType {
   XLSX
   JSON
   FLEX
-  DIIA
 }
 
 type ImportDataNode implements Node {
@@ -2037,7 +2036,6 @@ type ImportedHouseholdNode implements Node {
   koboAssetId: String!
   koboSubmissionTime: DateTime
   rowId: Int
-  diiaRecId: String!
   enumeratorRecId: Int
   misUnicefId: String
   programId: UUID
@@ -3786,7 +3784,6 @@ type RefuseRegistrationDataImportMutation {
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
-  DIIA
   FLEX_REGISTRATION
   API
   EDOPOMOGA

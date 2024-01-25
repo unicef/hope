@@ -2603,8 +2603,7 @@ export type HouseholdUpdateDataObjectType = {
 export enum ImportDataDataType {
   Xlsx = 'XLSX',
   Json = 'JSON',
-  Flex = 'FLEX',
-  Diia = 'DIIA'
+  Flex = 'FLEX'
 }
 
 export type ImportDataNode = Node & {
@@ -2931,7 +2930,6 @@ export type ImportedHouseholdNode = Node & {
   koboAssetId: Scalars['String'],
   koboSubmissionTime?: Maybe<Scalars['DateTime']>,
   rowId?: Maybe<Scalars['Int']>,
-  diiaRecId: Scalars['String'],
   enumeratorRecId?: Maybe<Scalars['Int']>,
   misUnicefId?: Maybe<Scalars['String']>,
   programId?: Maybe<Scalars['UUID']>,
@@ -6867,7 +6865,6 @@ export type RegistrationDataImportDatahubNodeEdge = {
 export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
   Kobo = 'KOBO',
-  Diia = 'DIIA',
   FlexRegistration = 'FLEX_REGISTRATION',
   Api = 'API',
   Edopomoga = 'EDOPOMOGA'
@@ -9033,6 +9030,13 @@ export type GrievanceTicketDetailedFragment = (
   )>, paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordAndPaymentNode' }
     & Pick<PaymentRecordAndPaymentNode, 'id' | 'caId' | 'deliveredQuantity' | 'objType'>
+    & { parent: Maybe<(
+      { __typename?: 'CashPlanAndPaymentPlanNode' }
+      & Pick<CashPlanAndPaymentPlanNode, 'id' | 'unicefId' | 'objType'>
+    )>, verification: Maybe<(
+      { __typename?: 'PaymentVerificationNode' }
+      & Pick<PaymentVerificationNode, 'id'>
+    )> }
   )>, relatedTickets: Maybe<Array<Maybe<(
     { __typename?: 'GrievanceTicketNode' }
     & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status'>
@@ -14917,6 +14921,14 @@ export const GrievanceTicketDetailedFragmentDoc = gql`
     caId
     deliveredQuantity
     objType
+    parent {
+      id
+      unicefId
+      objType
+    }
+    verification {
+      id
+    }
   }
   relatedTickets {
     id
@@ -30904,7 +30916,6 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  diiaRecId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   enumeratorRecId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
