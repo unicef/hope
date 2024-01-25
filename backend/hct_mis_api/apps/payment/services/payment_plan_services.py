@@ -135,7 +135,7 @@ class PaymentPlanService:
             sent_to_payment_gateway=False,
         )
         if not_sent_pg_delivery_mechanisms.exists():
-            send_to_payment_gateway.delay(self.payment_plan.pk)
+            send_to_payment_gateway.delay(self.payment_plan.pk, self.user.pk)
         else:
             raise GraphQLError("Already sent to Payment Gateway")
 
