@@ -639,16 +639,17 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def send_to_payment_gateway(self: Any, payment_plan_id: str) -> None:
+def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> None:
     from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayService
 
     try:
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        user = get_user_model().objects.get(pk=user_id)
 
         payment_plan.background_action_status_send_to_payment_gateway()
         payment_plan.save(update_fields=["background_action_status"])
 
-        PaymentGatewayService().create_payment_instructions(payment_plan)
+        PaymentGatewayService().create_payment_instructions(payment_plan, user.email)
         PaymentGatewayService().add_records_to_payment_instructions(payment_plan)
 
         payment_plan.background_action_status_none()

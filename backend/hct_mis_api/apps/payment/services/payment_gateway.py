@@ -46,8 +46,15 @@ class PaymentGatewayPaymentInstructionSerializer(ReadOnlyModelSerializer):
     payload = serializers.SerializerMethodField()
 
     def get_payload(self, obj: DeliveryMechanismPerPaymentPlan) -> Dict:
+        primary_country = obj.payment_plan.business_area.countries.first()
         return {
             "destination_currency": obj.payment_plan.currency,
+            "user": self.context["user_email"],
+            "business_area": {
+                "code": obj.payment_plan.business_area.code,
+                "name": obj.payment_plan.business_area.name,
+                "primary_country": primary_country.iso_code2 if primary_country else None,
+            },
         }
 
     class Meta:
@@ -223,12 +230,12 @@ class PaymentGatewayService:
     def __init__(self) -> None:
         self.api = PaymentGatewayAPI()
 
-    def create_payment_instructions(self, payment_plan: PaymentPlan) -> None:
+    def create_payment_instructions(self, payment_plan: PaymentPlan, user_email: str) -> None:
         # for each sfp, create payment instruction
         for delivery_mechanism in payment_plan.delivery_mechanisms.all():
             if delivery_mechanism.financial_service_provider.is_payment_gateway:
                 data = PaymentGatewayPaymentInstructionSerializer(
-                    delivery_mechanism,
+                    delivery_mechanism, context={"user_email": user_email}
                 ).data
                 response = self.api.create_payment_instruction(data)
                 assert response.remote_id == str(
