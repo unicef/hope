@@ -76,7 +76,7 @@ stages:
               -t $(Docker.url)/$(Docker.backend.repository):latest \
               --push \
               -f ./docker/Dockerfile \
-              ./backend
+              ./
             displayName: Docker build
           - script: |
               docker buildx create --use
@@ -89,7 +89,7 @@ stages:
               --push \
               --target dev \
               -f ./docker/Dockerfile \
-              ./backend
+              ./
             displayName: Docker build dev
           - script: |
               docker buildx create --use
@@ -100,7 +100,7 @@ stages:
               -t $(Docker.url.trn)/$(Docker.backend.repository):$(tag) \
               --push \
               -f ./docker/Dockerfile \
-              ./backend
+              ./
             displayName: Docker build trn
             condition: and(succeeded(), eq(variables.isTraining, true))
 
