@@ -7767,6 +7767,7 @@ export type TargetPopulationNode = Node & {
   totalFamilySize?: Maybe<Scalars['Int']>,
   householdList?: Maybe<HouseholdNodeConnection>,
   totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']>,
+  hasEmptyCriteria?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -32661,6 +32662,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   householdList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeHouseholdListArgs>,
   totalHouseholdsCountWithValidPhoneNo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  hasEmptyCriteria?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
