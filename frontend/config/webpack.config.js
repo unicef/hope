@@ -193,10 +193,7 @@ module.exports = function(webpackEnv) {
     ].filter(Boolean),
     output: {
       // The build folder.
-      path: path.resolve(
-        __dirname,
-        '../../backend/hct_mis_api/apps/web/static/web/',
-      ),
+      path: paths.appBuild,
       // Add /* filename */ comments to generated require()s in the output.
       pathinfo: isEnvDevelopment,
       // There will be one main bundle, and one file per asynchronous chunk.
@@ -701,10 +698,8 @@ module.exports = function(webpackEnv) {
       ),
       new DjangoTagsPlugin({
         djangoAppName: 'web',
-        djangoTemplatePath: path.resolve(
-        __dirname,
-        '../../backend/hct_mis_api/apps/web/templates/web',
-      )}),
+        djangoTemplatePath: paths.djangoTemplatePath,
+      }),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.

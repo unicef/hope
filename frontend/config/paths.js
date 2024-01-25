@@ -86,6 +86,10 @@ module.exports = {
   appNodeModules: resolveApp('node_modules'),
   publicUrl: getPublicUrl(resolveApp('package.json')),
   servedPath: getServedPath(resolveApp('package.json')),
+  djangoTemplatePath: path.resolve(
+        __dirname,
+        '../../backend/hct_mis_api/apps/web/templates/web',
+      ),
 };
 
 
