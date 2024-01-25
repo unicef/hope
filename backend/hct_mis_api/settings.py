@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -179,9 +179,9 @@ if SENTRY_DSN:
 CSP_REPORT_PERCENTAGE = 0.1
 
 # default source as self
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_FRAME_ANCESTORS = ("'none'",)
-CSP_STYLE_SRC = (
+CSP_DEFAULT_SRC: Tuple[str, ...] = ("'self'",)
+CSP_FRAME_ANCESTORS: Tuple[str, ...] = ("'none'",)
+CSP_STYLE_SRC: Tuple[str, ...] = (
     "'self'",
     "'unsafe-inline'",
     "'unsafe-eval'",
@@ -195,7 +195,7 @@ CSP_STYLE_SRC = (
     "saunihopetrn.blob.core.windows.net",  # trn
     "saunihopeprd.blob.core.windows.net",  # prod
 )
-CSP_SCRIPT_SRC = (
+CSP_SCRIPT_SRC: Tuple[str, ...] = (
     "'self'",
     "'unsafe-inline'",
     "'unsafe-eval'",
@@ -209,7 +209,7 @@ CSP_SCRIPT_SRC = (
     "cdnjs.cloudflare.com",
     "unpkg.com",
 )
-CSP_IMG_SRC = (
+CSP_IMG_SRC: Tuple[str, ...] = (
     "'self'",
     "data:",
     "cdn.datatables.net",
@@ -221,7 +221,7 @@ CSP_IMG_SRC = (
     "map1b.vis.earthdata.nasa.gov",
     "map1c.vis.earthdata.nasa.gov",
 )
-CSP_FONT_SRC = (
+CSP_FONT_SRC: Tuple[str, ...] = (
     "'self'",
     "data:",
     "fonts.gstatic.com",
@@ -231,8 +231,8 @@ CSP_FONT_SRC = (
     "saunihopetrn.blob.core.windows.net",
     "saunihopeprd.blob.core.windows.net",
 )
-CSP_MEDIA_SRC = ("'self'",)
-CSP_CONNECT_SRC = (
+CSP_MEDIA_SRC: Tuple[str, ...] = ("'self'",)
+CSP_CONNECT_SRC: Tuple[str, ...] = (
     "excubo.unicef.io",
     "sentry.io",
     "gov-bam.nr-data.net",
@@ -245,11 +245,11 @@ CSP_CONNECT_SRC = (
 
 DEBUG = env.bool("DEBUG", default=False)
 if DEBUG:
-    CSP_CONNECT_SRC += ("localhost:8080", )
-    CSP_FONT_SRC += ("localhost:8080", )
-    CSP_IMG_SRC += ("localhost:8080", )
-    CSP_SCRIPT_SRC += ("localhost:8080", )
-    CSP_STYLE_SRC += ("localhost:8080", )
+    CSP_CONNECT_SRC += ("localhost:8080",)
+    CSP_FONT_SRC += ("localhost:8080",)
+    CSP_IMG_SRC += ("localhost:8080",)
+    CSP_SCRIPT_SRC += ("localhost:8080",)
+    CSP_STYLE_SRC += ("localhost:8080",)
 
 
 if DEBUG:
