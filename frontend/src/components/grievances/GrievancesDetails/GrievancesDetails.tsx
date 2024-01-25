@@ -122,20 +122,21 @@ export const GrievancesDetails = ({
   };
 
   const renderPaymentPlanUrl = (): React.ReactElement => {
-    const { parent } = ticket?.paymentRecord;
-    if (parent?.objType === 'PaymentPlan') {
+    if (ticket?.paymentRecord?.parent?.objType === 'PaymentPlan') {
       return (
         <ContentLink
-          href={`/${baseUrl}/payment-module/payment-plans/${parent.id}`}
+          href={`/${baseUrl}/payment-module/payment-plans/${ticket?.paymentRecord?.parent?.id}`}
         >
-          {parent.unicefId}
+          {ticket?.paymentRecord?.parent?.unicefId}
         </ContentLink>
       );
     }
-    if (parent.objType === 'CashPlan') {
+    if (ticket?.paymentRecord?.parent?.objType === 'CashPlan') {
       return (
-        <ContentLink href={`/${baseUrl}/cashplans/${parent.id}`}>
-          {parent.unicefId}
+        <ContentLink
+          href={`/${baseUrl}/cashplans/${ticket?.paymentRecord?.parent?.id}`}
+        >
+          {ticket?.paymentRecord?.parent?.unicefId}
         </ContentLink>
       );
     }
@@ -146,9 +147,9 @@ export const GrievancesDetails = ({
   const renderPaymentVerificationUrl = (): React.ReactElement => {
     if (ticket?.paymentRecord?.verification?.id) {
       let link = '';
-      if (ticket.paymentRecord.objType === 'PaymentRecord') {
+      if (ticket.paymentRecord?.objType === 'PaymentRecord') {
         link = `/${baseUrl}/payment-verification/payment-plan/cash-plan/${ticket.paymentRecord.verification.id}`;
-      } else if (ticket.paymentRecord.objType === 'Payment') {
+      } else if (ticket.paymentRecord?.objType === 'Payment') {
         link = `/${baseUrl}/payment-verification/payment-plan/${ticket.paymentRecord.verification.id}`;
       }
 
