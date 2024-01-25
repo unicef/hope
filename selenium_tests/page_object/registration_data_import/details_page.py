@@ -1,8 +1,8 @@
 from page_object.base_components import BaseComponents
 
 
-class RDIDetailsPage extends BaseComponent {
-  // Locators
-  // Texts
-  // Elements
-}
+class RDIDetailsPage(BaseComponents):
+    pass
+    # Locators
+    # Texts
+    # Elements

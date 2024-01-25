@@ -1,93 +1,111 @@
 from page_object.base_components import BaseComponents
 
 
-class Targeting extends BaseComponent {
-  // Locators
-  titlePage = 'h5[data-cy="page-header-title"]';
-  searchFilter = 'div[data-cy="filters-search"]';
-  statusFilter = 'div[data-cy="filters-status"]';
-  programFilter = 'div[data-cy="filters-program"]';
-  minNumberOfHouseholds = 'div[data-cy="filters-total-households-count-min"]';
-  maxNumberOfHouseholds = 'div[data-cy="filters-total-households-count-max"]';
-  buttonCreateNew = 'a[data-cy="button-target-population-create-new"]';
-  tabTitle = 'h6[data-cy="table-title"]';
-  tabColumnLabel = 'span[data-cy="table-label"]';
-  statusOptions = 'li[role="option"]';
-  rows = 'tr[role="checkbox"]';
+class Targeting(BaseComponents):
+  # Locators
+  titlePage = 'h5[data-cy="page-header-title"]'
+  searchFilter = 'div[data-cy="filters-search"]'
+  statusFilter = 'div[data-cy="filters-status"]'
+  programFilter = 'div[data-cy="filters-program"]'
+  minNumberOfHouseholds = 'div[data-cy="filters-total-households-count-min"]'
+  maxNumberOfHouseholds = 'div[data-cy="filters-total-households-count-max"]'
+  buttonCreateNew = 'a[data-cy="button-target-population-create-new"]'
+  tabTitle = 'h6[data-cy="table-title"]'
+  tabColumnLabel = 'span[data-cy="table-label"]'
+  statusOptions = 'li[role="option"]'
+  rows = 'tr[role="checkbox"]'
 
-  // Texts
+  # Texts
 
-  textTitlePage = "Targeting";
-  textCreateNew = "Create new";
-  textTabTitle = "Target Populations";
-  textTabName = "Name";
-  textTabStatus = "Status";
-  textTabProgramme = "Programme";
-  textTabNOHouseholds = "Num. of Households";
-  textTabDateCreated = "Date Created";
-  textTabLastEdited = "Last Edited";
-  textTabCreatedBy = "Created by";
-  buttonApply = 'button[data-cy="button-filters-apply"]';
-  buttonClear = 'button[data-cy="button-filters-clear"]';
+  textTitlePage = "Targeting"
+  textCreateNew = "Create new"
+  textTabTitle = "Target Populations"
+  textTabName = "Name"
+  textTabStatus = "Status"
+  textTabProgramme = "Programme"
+  textTabNOHouseholds = "Num. of Households"
+  textTabDateCreated = "Date Created"
+  textTabLastEdited = "Last Edited"
+  textTabCreatedBy = "Created by"
+  buttonApply = 'button[data-cy="button-filters-apply"]'
+  buttonClear = 'button[data-cy="button-filters-clear"]'
 
-  // Elements
+  # Elements
 
-  getTitlePage = () => cy.get(this.titlePage);
-  getSearchFilter = () => cy.get(this.searchFilter);
-  getStatusFilter = () => cy.get(this.statusFilter);
-  getProgramFilter = () => cy.get(this.programFilter);
-  getMinNumberOfHouseholdsFilter = () => cy.get(this.minNumberOfHouseholds);
-  getMaxNumberOfHouseholdsFilter = () => cy.get(this.maxNumberOfHouseholds);
-  getButtonCreateNew = () => cy.get(this.buttonCreateNew);
-  getTabTitle = () => cy.get(this.tabTitle);
-  getTabColumnName = () => cy.get(this.tabColumnLabel).eq(0);
-  getTabColumnStatus = () => cy.get(this.tabColumnLabel).eq(1);
-  getTabColumnNOHouseholds = () => cy.get(this.tabColumnLabel).eq(2);
-  getTabColumnDateCreated = () => cy.get(this.tabColumnLabel).eq(3);
-  getTabColumnLastEdited = () => cy.get(this.tabColumnLabel).eq(4);
-  getTabColumnCreatedBy = () => cy.get(this.tabColumnLabel).eq(5);
-  getStatusOption = () => cy.get(this.statusOptions);
-  getApply = () => cy.get(this.buttonApply);
-  getClear = () => cy.get(this.buttonClear);
+  getTitlePage(self):
+        return self.wait_for(self.titlePage)
+  getSearchFilter(self):
+        return self.wait_for(self.searchFilter)
+  getStatusFilter(self):
+        return self.wait_for(self.statusFilter)
+  getProgramFilter(self):
+        return self.wait_for(self.programFilter)
+  getMinNumberOfHouseholdsFilter(self):
+        return self.wait_for(self.minNumberOfHouseholds)
+  getMaxNumberOfHouseholdsFilter(self):
+        return self.wait_for(self.maxNumberOfHouseholds)
+  getButtonCreateNew(self):
+        return self.wait_for(self.buttonCreateNew)
+  getTabTitle(self):
+        return self.wait_for(self.tabTitle)
+  getTabColumnName(self):
+        return self.wait_for(self.tabColumnLabel).eq(0)
+  getTabColumnStatus(self):
+        return self.wait_for(self.tabColumnLabel).eq(1)
+  getTabColumnNOHouseholds(self):
+        return self.wait_for(self.tabColumnLabel).eq(2)
+  getTabColumnDateCreated(self):
+        return self.wait_for(self.tabColumnLabel).eq(3)
+  getTabColumnLastEdited(self):
+        return self.wait_for(self.tabColumnLabel).eq(4)
+  getTabColumnCreatedBy(self):
+        return self.wait_for(self.tabColumnLabel).eq(5)
+  getStatusOption(self):
+        return self.wait_for(self.statusOptions)
+  getApply(self):
+        return self.wait_for(self.buttonApply)
+  getClear(self):
+        return self.wait_for(self.buttonClear)
 
-  getTargetPopulationsRows = () => cy.get(this.rows);
+  getTargetPopulationsRows(self):
+        return self.wait_for(self.rows)
 
   checkElementsOnPage() {
-    this.getTitlePage().should("be.visible").contains(this.textTitlePage);
-    // this.getButtonFiltersExpand().click();
-    this.getSearchFilter().should("be.visible");
-    this.getStatusFilter().should("be.visible");
-    this.getMinNumberOfHouseholdsFilter().should("be.visible");
-    this.getMaxNumberOfHouseholdsFilter().should("be.visible");
-    this.getButtonCreateNew().should("be.visible").contains(this.textCreateNew);
-    this.getTabTitle().should("be.visible").contains(this.textTabTitle);
-    this.getTabColumnName().should("be.visible").contains(this.textTabName);
-    this.getTabColumnStatus().should("be.visible").contains(this.textTabStatus);
+    this.getTitlePage().should("be.visible").contains(this.textTitlePage)
+    # this.getButtonFiltersExpand().click()
+    this.getSearchFilter().should("be.visible")
+    this.getStatusFilter().should("be.visible")
+    this.getMinNumberOfHouseholdsFilter().should("be.visible")
+    this.getMaxNumberOfHouseholdsFilter().should("be.visible")
+    this.getButtonCreateNew().should("be.visible").contains(this.textCreateNew)
+    this.getTabTitle().should("be.visible").contains(this.textTabTitle)
+    this.getTabColumnName().should("be.visible").contains(this.textTabName)
+    this.getTabColumnStatus().should("be.visible").contains(this.textTabStatus)
     this.getTabColumnNOHouseholds()
       .should("be.visible")
-      .contains(this.textTabNOHouseholds);
+      .contains(this.textTabNOHouseholds)
     this.getTabColumnDateCreated()
       .scrollIntoView()
       .should("be.visible")
-      .contains(this.textTabDateCreated);
+      .contains(this.textTabDateCreated)
     this.getTabColumnLastEdited()
       .scrollIntoView()
       .should("be.visible")
-      .contains(this.textTabLastEdited);
+      .contains(this.textTabLastEdited)
     this.getTabColumnCreatedBy()
       .scrollIntoView()
       .should("be.visible")
-      .contains(this.textTabCreatedBy);
+      .contains(this.textTabCreatedBy)
   }
 
   selectStatus(status) {
-    this.getStatusFilter().click();
-    this.getStatusOption().contains(status).click();
-    this.pressEscapeFromElement(this.getStatusOption().contains(status));
-    this.getApply().click();
+    this.getStatusFilter().click()
+    this.getStatusOption().contains(status).click()
+    this.pressEscapeFromElement(this.getStatusOption().contains(status))
+    this.getApply().click()
   }
 
   chooseTargetPopulationRow(row) {
-    return this.getTargetPopulationsRows().eq(row);
+    return this.getTargetPopulationsRows().eq(row)
   }
 }
