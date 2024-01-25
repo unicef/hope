@@ -1619,7 +1619,6 @@ type HouseholdNode implements Node {
   hasDuplicates: Boolean
   adminAreaTitle: String
   status: String
-  programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
   deliveredQuantities: [DeliveredQuantityNode]
   activeIndividualsCount: Int
 }
@@ -1980,7 +1979,7 @@ type ImportedHouseholdNode implements Node {
   consentSharing: ImportedHouseholdConsentSharing!
   residenceStatus: ImportedHouseholdResidenceStatus!
   countryOrigin: String
-  size: Int!
+  size: Int
   address: String!
   country: String
   zipCode: String
@@ -2078,6 +2077,7 @@ enum ImportedHouseholdResidenceStatus {
   OTHERS_OF_CONCERN
   HOST
   NON_HOST
+  RETURNEE
 }
 
 enum ImportedIndividualDeduplicationBatchStatus {
@@ -3527,12 +3527,6 @@ enum ProgramStatus {
   FINISHED
 }
 
-type ProgramsWithDeliveredQuantityNode {
-  id: ID
-  name: String
-  quantity: [DeliveredQuantityNode]
-}
-
 type Query {
   accountabilityCommunicationMessage(id: ID!): CommunicationMessageNode
   allAccountabilityCommunicationMessages(offset: Int, before: String, after: String, first: Int, last: Int, numberOfRecipients: Int, numberOfRecipients_Gte: Int, numberOfRecipients_Lte: Int, targetPopulation: ID, createdBy: ID, program: String, createdAtRange: String, title: String, body: String, samplingType: String, orderBy: String): CommunicationMessageNodeConnection
@@ -3680,6 +3674,7 @@ type Query {
   userRolesChoices: [RoleChoiceObject]
   userStatusChoices: [ChoiceObject]
   userPartnerChoices: [ChoiceObject]
+  partnerForGrievanceChoices(householdId: ID, individualId: ID): [ChoiceObject]
   hasAvailableUsersToExport(businessAreaSlug: String!): Boolean
   importedHousehold(id: ID!): ImportedHouseholdNode
   allImportedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, rdiId: String, businessArea: String, orderBy: String): ImportedHouseholdNodeConnection
