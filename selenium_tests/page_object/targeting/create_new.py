@@ -7,5 +7,6 @@ class CreateNew(BaseComponents):
   # Texts
   textTargetingCriteria = "Targeting Criteria"
   # Elements
-  getTargetingCriteria(self):
+
+  def getTargetingCriteria(self):
         return self.wait_for(self.targetingCriteria)

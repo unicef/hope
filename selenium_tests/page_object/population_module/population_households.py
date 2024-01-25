@@ -2,107 +2,126 @@ from page_object.base_components import BaseComponents
 
 
 class PopulationHouseholds(BaseComponents):
-  # Locators
-  householdTableRow = 'tr[data-cy="household-table-row"]'
-  statusContainer = 'div[data-cy="status-container"]'
-  householdId = 'th[data-cy="household-id"]'
-  labelStatus = 'th[data-cy="status"]'
-  householdHeadName = 'th[data-cy="household-head-name"]'
-  householdSize = 'th[data-cy="household-size"]'
-  householdLocation = 'th[data-cy="household-location"]'
-  householdResidenceStatus = 'th[data-cy="household-residence-status"]'
-  householdTotalCashReceived = 'th[data-cy="household-total-cash-received"]'
-  householdRegistrationDate = 'th[data-cy="household-registration-date"]'
-  tableTitle = 'h6[data-cy="table-title"]'
-  buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
-  buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
-  hhFiltersStatus = 'div[data-cy="hh-filters-status"]'
-  hhFiltersOrderBy = 'div[data-cy="hh-filters-order-by"]'
-  hhFiltersHouseholdSizeTo = 'div[data-cy="hh-filters-household-size-to"]'
-  hhFiltersHouseholdSizeFrom = 'div[data-cy="hh-filters-household-size-from"]'
-  hhFiltersResidenceStatus = 'div[data-cy="hh-filters-residence-status"]'
-  filterSearchType = 'div[data-cy="filter-search-type"]'
-  filterSearchType1 = 'div[data-cy="filter-search-type"]'
-  hhFiltersSearch = 'div[data-cy="hh-filters-search"]'
-  pageHeaderTitle = 'h5[data-cy="page-header-title"]'
-  # ToDo: Add data-cy
-  filterAdminLevel2 = "brak"
+    # Locators
+    householdTableRow = 'tr[data-cy="household-table-row"]'
+    statusContainer = 'div[data-cy="status-container"]'
+    householdId = 'th[data-cy="household-id"]'
+    labelStatus = 'th[data-cy="status"]'
+    householdHeadName = 'th[data-cy="household-head-name"]'
+    householdSize = 'th[data-cy="household-size"]'
+    householdLocation = 'th[data-cy="household-location"]'
+    householdResidenceStatus = 'th[data-cy="household-residence-status"]'
+    householdTotalCashReceived = 'th[data-cy="household-total-cash-received"]'
+    householdRegistrationDate = 'th[data-cy="household-registration-date"]'
+    tableTitle = 'h6[data-cy="table-title"]'
+    buttonFiltersApply = 'button[data-cy="button-filters-apply"]'
+    buttonFiltersClear = 'button[data-cy="button-filters-clear"]'
+    hhFiltersStatus = 'div[data-cy="hh-filters-status"]'
+    hhFiltersOrderBy = 'div[data-cy="hh-filters-order-by"]'
+    hhFiltersHouseholdSizeTo = 'div[data-cy="hh-filters-household-size-to"]'
+    hhFiltersHouseholdSizeFrom = 'div[data-cy="hh-filters-household-size-from"]'
+    hhFiltersResidenceStatus = 'div[data-cy="hh-filters-residence-status"]'
+    filterSearchType = 'div[data-cy="filter-search-type"]'
+    filterSearchType1 = 'div[data-cy="filter-search-type"]'
+    hhFiltersSearch = 'div[data-cy="hh-filters-search"]'
+    pageHeaderTitle = 'h5[data-cy="page-header-title"]'
 
-  # Texts
-  textTitle = "Households"
-  # Elements
-  getHouseholdTableRow(self):
+    # Texts
+    textTitle = "Households"
+
+    # Elements
+
+    def getHouseholdTableRow(self):
         return self.wait_for(self.householdTableRow)
-  getStatusContainer(self):
+
+    def getStatusContainer(self):
         return self.wait_for(self.statusContainer)
-  getHouseholdId(self):
+
+    def getHouseholdId(self):
         return self.wait_for(self.householdId)
-  getLabelStatus(self):
+
+    def getLabelStatus(self):
         return self.wait_for(self.labelStatus)
-  getHouseholdHeadName(self):
+
+    def getHouseholdHeadName(self):
         return self.wait_for(self.householdHeadName)
-  getHouseholdSize(self):
+
+    def getHouseholdSize(self):
         return self.wait_for(self.householdSize)
-  getHouseholdLocation(self):
+
+    def getHouseholdLocation(self):
         return self.wait_for(self.householdLocation)
-  getHouseholdResidenceStatus(self):
+
+    def getHouseholdResidenceStatus(self):
         return self.wait_for(self.householdResidenceStatus)
-  getHouseholdTotalCashReceived(self):
+
+    def getHouseholdTotalCashReceived(self):
         return self.wait_for(self.householdTotalCashReceived)
-  getHouseholdRegistrationDate(self):
+
+    def getHouseholdRegistrationDate(self):
         return self.wait_for(self.householdRegistrationDate)
-  getTableTitle(self):
+
+    def getTableTitle(self):
         return self.wait_for(self.tableTitle)
-  getButtonFiltersApply(self):
+
+    def getButtonFiltersApply(self):
         return self.wait_for(self.buttonFiltersApply)
-  getButtonFiltersClear(self):
+
+    def getButtonFiltersClear(self):
         return self.wait_for(self.buttonFiltersClear)
-  getHhFiltersStatus(self):
+
+    def getHhFiltersStatus(self):
         return self.wait_for(self.hhFiltersStatus)
-  getHhFiltersOrderBy(self):
+
+    def getHhFiltersOrderBy(self):
         return self.wait_for(self.hhFiltersOrderBy)
-  getHhFiltersHouseholdSizeTo(self):
+
+    def getHhFiltersHouseholdSizeTo(self):
         return self.wait_for(self.hhFiltersHouseholdSizeTo)
-  getHhFiltersHouseholdSizeFrom(self):
+
+    def getHhFiltersHouseholdSizeFrom(self):
         return self.wait_for(self.hhFiltersHouseholdSizeFrom)
-  getHhFiltersResidenceStatus(self):
+
+    def getHhFiltersResidenceStatus(self):
         return self.wait_for(self.hhFiltersResidenceStatus)
-  getFilterSearchType(self):
+
+    def getFilterSearchType(self):
         return self.wait_for(self.filterSearchType)
-  getFilterSearchType1(self):
+
+    def getFilterSearchType1(self):
         return self.wait_for(self.filterSearchType1)
-  getHhFiltersSearch(self):
+
+    def getHhFiltersSearch(self):
         return self.wait_for(self.hhFiltersSearch)
-  getPageHeaderTitle(self):
+
+    def getPageHeaderTitle(self):
         return self.wait_for(self.pageHeaderTitle)
 
-  checkElementsOnPage() {
-    this.getHouseholdTableRow().should("be.visible")
-    this.getStatusContainer().should("be.visible")
-    this.getHouseholdId().should("be.visible")
-    this.getLabelStatus().should("be.visible")
-    this.getHouseholdHeadName().should("be.visible")
-    this.getHouseholdSize().should("be.visible")
-    this.getHouseholdLocation().should("be.visible")
-    this.getHouseholdResidenceStatus().should("be.visible")
-    this.getHouseholdTotalCashReceived().should("be.visible")
-    this.getHouseholdRegistrationDate().should("be.visible")
-    this.getTableTitle().should("be.visible")
-    this.getButtonFiltersApply().should("be.visible")
-    this.getButtonFiltersClear().should("be.visible")
-    this.getHhFiltersStatus().should("be.visible")
-    this.getHhFiltersOrderBy().should("be.visible")
-    this.getHhFiltersHouseholdSizeTo().should("be.visible")
-    this.getHhFiltersHouseholdSizeFrom().should("be.visible")
-    this.getHhFiltersResidenceStatus().should("be.visible")
-    this.getFilterSearchType().should("be.visible")
-    this.getFilterSearchType1().should("be.visible")
-    this.getHhFiltersSearch().should("be.visible")
-    this.getPageHeaderTitle().should("be.visible")
-  }
-  clickNavHouseholds() {
-    this.getMenuButtonProgrammePopulation().click()
-    this.getMenuButtonHouseholds().should("be.visible")
-    this.getMenuButtonHouseholds().click()
-  }
-}
+    def checkElementsOnPage(self):
+        self.getHouseholdTableRow().should("be.visible")
+        self.getStatusContainer().should("be.visible")
+        self.getHouseholdId().should("be.visible")
+        self.getLabelStatus().should("be.visible")
+        self.getHouseholdHeadName().should("be.visible")
+        self.getHouseholdSize().should("be.visible")
+        self.getHouseholdLocation().should("be.visible")
+        self.getHouseholdResidenceStatus().should("be.visible")
+        self.getHouseholdTotalCashReceived().should("be.visible")
+        self.getHouseholdRegistrationDate().should("be.visible")
+        self.getTableTitle().should("be.visible")
+        self.getButtonFiltersApply().should("be.visible")
+        self.getButtonFiltersClear().should("be.visible")
+        self.getHhFiltersStatus().should("be.visible")
+        self.getHhFiltersOrderBy().should("be.visible")
+        self.getHhFiltersHouseholdSizeTo().should("be.visible")
+        self.getHhFiltersHouseholdSizeFrom().should("be.visible")
+        self.getHhFiltersResidenceStatus().should("be.visible")
+        self.getFilterSearchType().should("be.visible")
+        self.getFilterSearchType1().should("be.visible")
+        self.getHhFiltersSearch().should("be.visible")
+        self.getPageHeaderTitle().should("be.visible")
+
+    def clickNavHouseholds(self):
+        self.getMenuButtonProgrammePopulation().click()
+        self.getMenuButtonHouseholds().should("be.visible")
+        self.getMenuButtonHouseholds().click()

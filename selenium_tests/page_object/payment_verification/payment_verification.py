@@ -2,124 +2,125 @@ from page_object.base_components import BaseComponents
 
 
 class PaymentVerification(BaseComponents):
-  # Locators
-  paymentVerificationTitle = "h5[data-cy='page-header-title']"
-  paymentPlanID = 'div[data-cy="filter-search"]'
-  status = 'div[data-cy="filter-status"]'
-  FSP = 'div[data-cy="filter-fsp"]'
-  modality = 'div[data-cy="filter-Modality"]'
-  startDate = 'div[data-cy="filter-start-date"]'
-  endDate = 'div[data-cy="filter-end-date"]'
-  statusOptions = 'li[role="option"]'
-  listOfPaymentPlansTitle = 'h6[data-cy="table-title"]'
-  buttonApply = 'button[data-cy="button-filters-apply"]'
-  tableTitle = 'table[data-cy="table-title"]'
-  tableColumn = 'span[data-cy="table-label"]'
-  rows = 'tr[data-cy="cash-plan-table-row"]'
+    # Locators
+    paymentVerificationTitle = "h5[data-cy='page-header-title']"
+    paymentPlanID = 'div[data-cy="filter-search"]'
+    status = 'div[data-cy="filter-status"]'
+    FSP = 'div[data-cy="filter-fsp"]'
+    modality = 'div[data-cy="filter-Modality"]'
+    startDate = 'div[data-cy="filter-start-date"]'
+    endDate = 'div[data-cy="filter-end-date"]'
+    statusOptions = 'li[role="option"]'
+    listOfPaymentPlansTitle = 'h6[data-cy="table-title"]'
+    buttonApply = 'button[data-cy="button-filters-apply"]'
+    tableTitle = 'table[data-cy="table-title"]'
+    tableColumn = 'span[data-cy="table-label"]'
+    rows = 'tr[data-cy="cash-plan-table-row"]'
 
-  # Texts
-  textTitle = "Payment Verification"
-  textTabTitle = "List of Payment Plans"
-  textPaymentPlanID = "Payment Plan ID"
-  textStatus = "Status"
-  textFSP = "FSP"
-  textModality = "Delivery Mechanism"
-  textStartDate = "Start Date"
-  textEndDate = "End Date"
-  textProgramme = "Programme"
-  textPaymentPlanID = "Payment Plan ID"
-  textVerificationStatus = "Verification Status"
-  textCashAmount = "Cash Amount"
-  textTimeframe = "Timeframe"
-  textLastModifiedDate = "Last Modified Date"
+    # Texts
+    textTitle = "Payment Verification"
+    textTabTitle = "List of Payment Plans"
+    textPaymentPlanID = "Payment Plan ID"
+    textStatus = "Status"
+    textFSP = "FSP"
+    textModality = "Delivery Mechanism"
+    textStartDate = "Start Date"
+    textEndDate = "End Date"
+    textProgramme = "Programme"
+    textPaymentPlanID = "Payment Plan ID"
+    textVerificationStatus = "Verification Status"
+    textCashAmount = "Cash Amount"
+    textTimeframe = "Timeframe"
+    textLastModifiedDate = "Last Modified Date"
 
-  # Elements
-  getPaymentVerificationTitle(self):
+    # Elements
+    def getPaymentVerificationTitle(self):
         return self.wait_for(self.paymentVerificationTitle)
-  getListOfPaymentPlansTitle(self):
+
+    def getListOfPaymentPlansTitle(self):
         return self.wait_for(self.listOfPaymentPlansTitle)
-  getPaymentPlanID(self):
+
+    def getPaymentPlanID(self):
         return self.wait_for(self.paymentPlanID).eq(0)
-  getStatus(self):
+
+    def getStatus(self):
         return self.wait_for(self.status)
-  getFSP(self):
+
+    def getFSP(self):
         return self.wait_for(self.FSP)
-  getModality(self):
+
+    def getModality(self):
         return self.wait_for(self.modality)
-  getStartDate(self):
+
+    def getStartDate(self):
         return self.wait_for(self.startDate)
-  getEndDate(self):
+
+    def getEndDate(self):
         return self.wait_for(self.endDate)
-  getTable(self):
+
+    def getTable(self):
         return self.wait_for(self.tableTitle)
-  getPaymentPlanID(self):
+
+    def getPaymentPlanID(self):
         return self.wait_for(self.tableColumn).eq(0)
-  getVerificationStatus(self):
+
+    def getVerificationStatus(self):
         return self.wait_for(self.tableColumn).eq(1)
-  getCashAmount(self):
+
+    def getCashAmount(self):
         return self.wait_for(self.tableColumn).eq(2)
-  getTimeFrame(self):
+
+    def getTimeFrame(self):
         return self.wait_for(self.tableColumn).eq(3)
-  getLastModifiedDate(self):
+
+    def getLastModifiedDate(self):
         return self.wait_for(self.tableColumn).eq(4)
-  getPaymentPlanRows(self):
+
+    def getPaymentPlanRows(self):
         return self.wait_for(self.rows)
-  getStatusOption(self):
+
+    def getStatusOption(self):
         return self.wait_for(self.statusOptions)
-  getApply(self):
+
+    def getApply(self):
         return self.wait_for(self.buttonApply)
 
-  checkPaymentVerificationTitle() {
-    return this.getPaymentVerificationTitle().contains(this.textTitle)
-  }
+    def checkPaymentVerificationTitle(self):
+        return self.getPaymentVerificationTitle().contains(self.textTitle)
 
-  checkListOfPaymentPlansTitle() {
-    return this.getListOfPaymentPlansTitle().contains(this.textTabTitle)
-  }
+    def checkListOfPaymentPlansTitle(self):
+        return self.getListOfPaymentPlansTitle().contains(self.textTabTitle)
 
-  checkAllSearchFieldsVisible() {
-    this.getPaymentPlanID().should("be.visible")
-    this.getPaymentPlanID().get("span").contains(this.textPaymentPlanID)
-    this.getStatus().should("be.visible")
-    this.getStatus().get("span").contains(this.textStatus)
-    this.getFSP().should("be.visible")
-    this.getFSP().get("span").contains(this.textFSP)
-    this.getModality().should("be.visible")
-    this.getModality().get("span").contains(this.textModality)
-    this.getStartDate().should("be.visible")
-    this.getStartDate().get("span").contains(this.textStartDate)
-    this.getEndDate().should("be.visible")
-    this.getEndDate().get("span").contains(this.textEndDate)
-  }
+    def checkAllSearchFieldsVisible(self):
+        self.getPaymentPlanID().should("be.visible")
+        self.getPaymentPlanID().get("span").contains(self.textPaymentPlanID)
+        self.getStatus().should("be.visible")
+        self.getStatus().get("span").contains(self.textStatus)
+        self.getFSP().should("be.visible")
+        self.getFSP().get("span").contains(self.textFSP)
+        self.getModality().should("be.visible")
+        self.getModality().get("span").contains(self.textModality)
+        self.getStartDate().should("be.visible")
+        self.getStartDate().get("span").contains(self.textStartDate)
+        self.getEndDate().should("be.visible")
+        self.getEndDate().get("span").contains(self.textEndDate)
 
-  checkPaymentPlansTableVisible() {
-    this.getTable().should("be.visible")
-    this.getPaymentPlanID()
-      .should("be.visible")
-      .contains(this.textPaymentPlanID)
-    this.getVerificationStatus()
-      .should("be.visible")
-      .contains(this.textVerificationStatus)
-    this.getCashAmount().should("be.visible").contains(this.textCashAmount)
-    this.getTimeFrame().should("be.visible").contains(this.textTimeframe)
-    this.getLastModifiedDate()
-      .scrollIntoView()
-      .should("be.visible")
-      .contains(this.textLastModifiedDate)
-  }
+    def checkPaymentPlansTableVisible(self):
+        self.getTable().should("be.visible")
+        self.getPaymentPlanID()
+        self.getVerificationStatus()
+        self.getCashAmount().should("be.visible").contains(self.textCashAmount)
+        self.getTimeFrame().should("be.visible").contains(self.textTimeframe)
+        self.getLastModifiedDate()
 
-  countPaymentPlanArray() {
-    return Array.from(Array(1).keys())
-  }
+    def countPaymentPlanArray(self):
+        return  # Array.from(Array(1).keys())
 
-  choosePaymentPlan(row) {
-    return this.getPaymentPlanRows().eq(row)
-  }
+    def choosePaymentPlan(self, row):
+        return self.getPaymentPlanRows().eq(row)
 
-  selectStatus(status) {
-    this.getStatus().click()
-    this.getStatusOption().contains(status).click()
-    this.pressEscapeFromElement(this.getStatusOption().contains(status))
-    this.getApply().click()
-  }
-}
+    def selectStatus(self, status):
+        self.getStatus().click()
+        self.getStatusOption().contains(status).click()
+        self.pressEscapeFromElement(self.getStatusOption().contains(status))
+        self.getApply().click()

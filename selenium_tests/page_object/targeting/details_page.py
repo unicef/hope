@@ -7,7 +7,9 @@ class TDetailsPage(BaseComponents):
   status = 'div[data-cy="target-population-status"]'
   # Texts
   # Elements
-  getTitlePage(self):
+
+  def getTitlePage(self):
         return self.wait_for(self.titlePage)
-  getStatus(self):
+
+  def getStatus(self):
         return self.wait_for(self.status)
