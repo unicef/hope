@@ -58,18 +58,29 @@ RUN python3 -m venv --copies $VIRTUAL_ENV &&\
   poetry config virtualenvs.create false &&\
   poetry config cache-dir /var/cache/poetry
 
-COPY pyproject.toml poetry.lock ./
+COPY backend/pyproject.toml backend/poetry.lock ./
 RUN poetry install --without dev
 
 # Dev image
 FROM builder AS dev
 
 RUN poetry install
-COPY ./ ./
+COPY ./backend ./
+
+
+# Frontend builder
+FROM node:16.20.0-buster-slim as frontend-builder
+
+WORKDIR /fe-build
+COPY ./frontend/package.json ./frontend/yarn.lock ./
+RUN yarn install --frozen-lockfile
+COPY ./frontend ./
+RUN NODE_ENV="production" yarn build
 
 # Dist image
 FROM base AS dist
 
 COPY --chown=hope:hope ./ ./
+COPY --chown=hope:hope --from=frontend-builder /fe-build /teemp
 COPY --chown=hope:hope --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 USER hope
