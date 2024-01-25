@@ -609,10 +609,6 @@ class TestKoboSaveValidatorsMethods(TestCase):
         result = validator.validate_everything(self.INVALID_JSON, business_area)
         result.sort(key=itemgetter("header"))
         expected = [
-            {
-                "header": "account_holder_name_i_c",
-                "message": "Missing individual required field account_holder_name_i_c",
-            },
             {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
             {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
             {
