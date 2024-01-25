@@ -188,7 +188,8 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
-        return getattr(grievance_ticket.ticket_details, "payment_obj", None)
+        payment_verification = getattr(grievance_ticket.ticket_details, "payment_verification", None)
+        return getattr(payment_verification, "payment_obj", None) if payment_verification else None
 
     @staticmethod
     def resolve_admin(grievance_ticket: GrievanceTicket, info: Any) -> Optional[str]:
