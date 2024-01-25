@@ -121,6 +121,49 @@ export const GrievancesDetails = ({
     return <>-</>;
   };
 
+  const renderPaymentPlanUrl = (): React.ReactElement => {
+    const { parent } = ticket?.paymentRecord;
+    if (parent?.objType === 'PaymentPlan') {
+      return (
+        <ContentLink
+          href={`/${baseUrl}/payment-module/payment-plans/${parent.id}`}
+        >
+          {parent.unicefId}
+        </ContentLink>
+      );
+    }
+    if (parent.objType === 'CashPlan') {
+      return (
+        <ContentLink href={`/${baseUrl}/cashplans/${parent.id}`}>
+          {parent.unicefId}
+        </ContentLink>
+      );
+    }
+
+    return <>-</>;
+  };
+
+  const renderPaymentVerificationUrl = (): React.ReactElement => {
+    if (ticket?.paymentRecord?.verification?.id) {
+      let link = '';
+      if (ticket.paymentRecord.objType === 'PaymentRecord') {
+        link = `/${baseUrl}/payment-verification/payment-plan/cash-plan/${ticket.paymentRecord.verification.id}`;
+      } else if (ticket.paymentRecord.objType === 'Payment') {
+        link = `/${baseUrl}/payment-verification/payment-plan/${ticket.paymentRecord.verification.id}`;
+      }
+
+      if (link) {
+        return (
+          <ContentLink href={link}>
+            {ticket.paymentRecord?.verification?.id}
+          </ContentLink>
+        );
+      }
+    }
+
+    return <>-</>;
+  };
+
   const mappedPrograms = (): React.ReactElement => {
     if (!ticket.programs?.length) {
       return <>-</>;
@@ -252,6 +295,16 @@ export const GrievancesDetails = ({
               {
                 label: t('Payment ID'),
                 value: <span>{renderPaymentUrl()}</span>,
+                size: 3,
+              },
+              {
+                label: t('Payment Plan'),
+                value: <span>{renderPaymentPlanUrl()}</span>,
+                size: 3,
+              },
+              {
+                label: t('Payment Verification'),
+                value: <span>{renderPaymentVerificationUrl()}</span>,
                 size: 3,
               },
               {
