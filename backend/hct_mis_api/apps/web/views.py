@@ -1,10 +1,5 @@
-from typing import TYPE_CHECKING
-
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-
-if TYPE_CHECKING:
-    from django.http import HttpResponse
 
 
 def react_main(request: HttpRequest) -> HttpResponse:
