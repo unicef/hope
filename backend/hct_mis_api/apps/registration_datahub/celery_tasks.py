@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from django.core.cache import cache
 from django.db import transaction
@@ -280,9 +280,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
     try:
         return PullKoboSubmissions().execute(kobo_import_data)
     except Exception as e:
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-        RegistrationDataImport.objects.filter(
+        KoboImportData.objects.filter(
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
         raise self.retry(exc=e)
@@ -324,72 +322,6 @@ def check_and_set_taxid(queryset: "QuerySet") -> Dict:
         except Exception as e:
             results["errors"].append(f"Record: {record.pk} - {e.__class__.__name__}: {str(e)}")
     return results
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def automate_registration_diia_import_task(
-    self: Any, program_id: "UUID", page_size: int, template: str = "Diia ukraine rdi {date} {page_size}", **filters: Any
-) -> List:
-    from hct_mis_api.apps.core.models import BusinessArea
-    from hct_mis_api.apps.program.models import Program
-    from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
-        RdiDiiaCreateTask,
-    )
-
-    with locked_cache(key="automate_rdi_diia_creation_task") as locked:
-        if not locked:
-            return []
-        try:
-            with configure_scope() as scope:
-                scope.set_tag("business_area", BusinessArea.objects.get(slug="ukraine"))
-                service = RdiDiiaCreateTask()
-                rdi_name = template.format(
-                    date=timezone.now(),
-                    page_size=page_size,
-                )
-                program = Program.objects.get(id=program_id)
-                rdi = service.create_rdi(imported_by=None, program=program, rdi_name=rdi_name)
-                service.execute(rdi.id, diia_hh_count=page_size)
-                return [rdi_name, page_size]
-        except Exception as e:
-            raise self.retry(exc=e)
-
-
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
-@log_start_and_end
-@sentry_tags
-def registration_diia_import_task(
-    self: Any,
-    program_id: "UUID",
-    diia_hh_ids: List,
-    template: str = "Diia ukraine rdi {date} {page_size}",
-    **filters: Any,
-) -> List:
-    from hct_mis_api.apps.core.models import BusinessArea
-    from hct_mis_api.apps.program.models import Program
-    from hct_mis_api.apps.registration_datahub.tasks.rdi_diia_create import (
-        RdiDiiaCreateTask,
-    )
-
-    with locked_cache(key="registration_diia_import_task") as locked:
-        if not locked:
-            return []
-        try:
-            with configure_scope() as scope:
-                scope.set_tag("business_area", BusinessArea.objects.get(slug="ukraine"))
-                service = RdiDiiaCreateTask()
-                rdi_name = template.format(
-                    date=timezone.now(),
-                    page_size=len(diia_hh_ids),
-                )
-                program = Program.objects.get(id=program_id)
-                rdi = service.create_rdi(imported_by=None, program=program, rdi_name=rdi_name)
-                service.execute(rdi.id, diia_hh_ids=diia_hh_ids)
-                return [rdi_name, len(diia_hh_ids)]
-        except Exception as e:
-            raise self.retry(exc=e)
 
 
 @app.task

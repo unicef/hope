@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -18,7 +20,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 class TestEraseRdiMutation(APITestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     ERASE_IMPORT_QUERY = """
       mutation EraseRegistrationDataImportMutation($id: ID!) {
