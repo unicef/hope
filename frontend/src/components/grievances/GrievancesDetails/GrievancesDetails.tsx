@@ -129,21 +129,6 @@ export const GrievancesDetails = ({
     );
   };
 
-  const renderPaymentVerificationUrl = (): React.ReactElement => {
-    let link = '';
-    if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
-      link = `/${baseUrl}/payment-verification/payment-plan/cash-plan/${ticket?.paymentRecord?.verification?.id}`;
-    } else if (ticket?.paymentRecord?.objType === 'Payment') {
-      link = `/${baseUrl}/payment-verification/payment-plan/${ticket?.paymentRecord?.verification?.id}`;
-    }
-
-    return renderUrl(
-      ticket?.paymentRecord?.objType,
-      link,
-      ticket?.paymentRecord?.verification?.id,
-    );
-  };
-
   const mappedPrograms = (): React.ReactElement => {
     if (!ticket.programs?.length) {
       return <>-</>;
@@ -280,11 +265,6 @@ export const GrievancesDetails = ({
               {
                 label: t('Payment Plan'),
                 value: <span>{renderPaymentPlanUrl()}</span>,
-                size: 3,
-              },
-              {
-                label: t('Payment Verification'),
-                value: <span>{renderPaymentVerificationUrl()}</span>,
                 size: 3,
               },
               {
