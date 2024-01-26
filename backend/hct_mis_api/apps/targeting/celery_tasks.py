@@ -13,7 +13,6 @@ from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
