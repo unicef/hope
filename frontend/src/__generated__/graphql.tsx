@@ -9300,7 +9300,7 @@ export type GrievanceTicketDetailedFragment = (
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'status' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'adminAreaTitle' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'status' | 'createdAt' | 'residenceStatus' | 'maleChildrenCount' | 'femaleChildrenCount' | 'childrenDisabledCount' | 'size' | 'totalCashReceived' | 'totalCashReceivedUsd' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'adminAreaTitle' | 'address'>
   & { admin1: Maybe<(
     { __typename?: 'AreaNode' }
     & Pick<AreaNode, 'id' | 'name' | 'level' | 'pCode'>
@@ -13362,7 +13362,7 @@ export type AllIndividualsForPopulationTableQuery = (
       & Pick<IndividualNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex' | 'lastRegistrationDate'>
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'status' | 'sanctionListLastCheck' | 'fullName' | 'relationship' | 'age' | 'sex' | 'lastRegistrationDate'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -14698,6 +14698,9 @@ export const HouseholdMinimalFragmentDoc = gql`
   status
   createdAt
   residenceStatus
+  maleChildrenCount
+  femaleChildrenCount
+  childrenDisabledCount
   size
   totalCashReceived
   totalCashReceivedUsd
@@ -25297,6 +25300,7 @@ export const AllIndividualsForPopulationTableDocument = gql`
         sanctionListPossibleMatch
         sanctionListConfirmedMatch
         deduplicationGoldenRecordStatus
+        status
         sanctionListLastCheck
         fullName
         household {

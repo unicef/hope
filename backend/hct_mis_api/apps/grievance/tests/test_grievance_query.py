@@ -174,15 +174,8 @@ class TestGrievanceQuery(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
-
-        cls.partner = PartnerFactory(name="Partner1")
-        cls.partner_2 = PartnerFactory(name="Partner2")
-        cls.user = UserFactory.create(partner=cls.partner)
-        cls.user2 = UserFactory.create(partner=cls.partner_2)
-
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
-
         country = Country.objects.first()
         area_type = AreaTypeFactory(
             name="Admin type one",
@@ -191,6 +184,26 @@ class TestGrievanceQuery(APITestCase):
         )
         cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
         cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
+
+        cls.partner = PartnerFactory(name="Partner1")
+        cls.partner_2 = PartnerFactory(name="Partner2")
+        # update partner perms
+        cls.partner.permissions = {
+            str(cls.business_area.pk): {
+                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        cls.partner_2.permissions = {
+            str(cls.business_area.pk): {
+                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        cls.partner.save()
+        cls.partner_2.save()
+        cls.user = UserFactory.create(partner=cls.partner)
+        cls.user2 = UserFactory.create(partner=cls.partner_2)
 
         _, individuals = create_household({"size": 2})
         cls.individual_1 = individuals[0]
