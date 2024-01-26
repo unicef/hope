@@ -85,18 +85,21 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
-        return self.total_number_of_households
+    @staticmethod
+    def resolve_total_number_of_households(program: Program, info: Any, **kwargs: Any) -> int:
+        return program.household_count
 
-    def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
-        return self.households_with_tp_in_program.count()
+    @staticmethod
+    def resolve_total_number_of_households_with_tp_in_program(program: Program, info: Any, **kwargs: Any) -> int:
+        return program.households_with_tp_in_program.count()
 
-    def resolve_partners(self, info: Any, **kwargs: Any) -> List:
+    @staticmethod
+    def resolve_partners(program: Program, info: Any, **kwargs: Any) -> List[Partner]:
         # filter Partners by program_id and program.business_area_id
         partners_list = []
         for partner in Partner.objects.all():
-            partner.program = self
-            if partner.get_permissions().areas_for(str(self.business_area_id), str(self.pk)) is not None:
+            partner.program = program
+            if partner.get_permissions().areas_for(str(program.business_area_id), str(program.pk)) is not None:
                 partners_list.append(partner)
         return partners_list
 
