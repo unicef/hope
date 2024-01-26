@@ -114,11 +114,22 @@ export const GrievancesDetails = ({
   };
 
   const renderPaymentUrl = (): React.ReactElement => {
-    return renderUrl(
-      'PaymentRecord',
-      `/${baseUrl}/payment-records/${ticket?.paymentRecord?.id}`,
-      ticket?.paymentRecord?.caId,
-    );
+    if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
+      return renderUrl(
+        'PaymentRecord',
+        `/${baseUrl}/payment-records/${ticket?.paymentRecord?.id}`,
+        ticket?.paymentRecord?.caId,
+      );
+    }
+
+    if (ticket?.paymentRecord?.objType === 'Payment') {
+      return renderUrl(
+        'Payment',
+        `/${baseUrl}/payment-module/payments/${ticket?.paymentRecord?.id}`,
+        ticket?.paymentRecord?.caId,
+      );
+    }
+    return <>-</>;
   };
 
   const renderPaymentPlanUrl = (): React.ReactElement => {
