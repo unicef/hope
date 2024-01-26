@@ -67,8 +67,8 @@ stages:
               -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
               -t $(Docker.url)/$(Docker.backend.repository):latest \
               --push \
-              -f ./backend/docker/Dockerfile \
-              ./backend
+              -f ./docker/Dockerfile \
+              ./
             displayName: Docker build
           - script: |
               docker buildx create --use
@@ -79,8 +79,8 @@ stages:
               --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
               -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
               --push --target dev \
-              -f ./backend/docker/Dockerfile \
-              ./backend
+              -f ./docker/Dockerfile \
+              ./
             displayName: Docker build dev
 
   - stage: build_and_push_cypress
