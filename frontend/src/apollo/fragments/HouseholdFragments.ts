@@ -6,6 +6,9 @@ export const householdMinimal = gql`
     status
     createdAt
     residenceStatus
+    maleChildrenCount
+    femaleChildrenCount
+    childrenDisabledCount
     size
     totalCashReceived
     totalCashReceivedUsd

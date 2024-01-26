@@ -6,27 +6,454 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
     class="sc-bdVaJa ksQzqc"
   >
     <div
-      class="sc-bwzfXH iIRzZu"
-      data-cy="loading-container"
+      class="makeStyles-root-13"
     >
       <div
-        class="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
-        role="progressbar"
-        style="width: 40px; height: 40px;"
+        class="MuiPaper-root makeStyles-paper-14 MuiPaper-elevation1 MuiPaper-rounded"
       >
-        <svg
-          class="MuiCircularProgress-svg"
-          viewBox="22 22 44 44"
+        <div
+          class="MuiTableContainer-root"
         >
-          <circle
-            class="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate"
-            cx="44"
-            cy="44"
-            fill="none"
-            r="20.2"
-            stroke-width="3.6"
-          />
-        </svg>
+          <div
+            class="MuiBox-root MuiBox-root-19"
+          >
+            <div
+              class="MuiToolbar-root MuiToolbar-regular makeStyles-root-20 MuiToolbar-gutters"
+            >
+              <h6
+                class="MuiTypography-root makeStyles-title-22 MuiTypography-h6"
+                data-cy="table-title"
+              >
+                Users List
+              </h6>
+            </div>
+            <div
+              class="MuiBox-root MuiBox-root-23"
+            />
+          </div>
+          <table
+            aria-label="enhanced table"
+            aria-labelledby="tableTitle"
+            class="MuiTable-root makeStyles-table-15"
+            data-cy="table-title"
+          >
+            <thead
+              class="MuiTableHead-root"
+            >
+              <tr
+                class="MuiTableRow-root MuiTableRow-head"
+              >
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                    data-cy="table-label"
+                    role="button"
+                    tabindex="0"
+                  >
+                    
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                    data-cy="table-label"
+                    role="button"
+                    tabindex="0"
+                  >
+                    Name
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
+                <th
+                  aria-sort="descending"
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH MuiTableSortLabel-active"
+                    data-cy="table-label"
+                    role="button"
+                    tabindex="0"
+                  >
+                    Status
+                    <span
+                      class="makeStyles-visuallyHidden-24"
+                    >
+                      sorted descending
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionDesc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                    data-cy="table-label"
+                    role="button"
+                    tabindex="0"
+                  >
+                    Partner
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                    data-cy="table-label"
+                    role="button"
+                    tabindex="0"
+                  >
+                    Email
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
+                <th
+                  class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                  scope="col"
+                >
+                  <span
+                    aria-disabled="false"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
+                    data-cy="table-label"
+                    role="button"
+                    tabindex="0"
+                  >
+                    Last Login
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                      />
+                    </svg>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="MuiTableBody-root"
+            >
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root"
+                data-cy="table-row"
+                style="height: 70px; min-height: 70px;"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body"
+                  colspan="6"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="MuiTablePagination-root"
+          data-cy="table-pagination"
+        >
+          <div
+            class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
+          >
+            <div
+              class="MuiTablePagination-spacer"
+            />
+            <p
+              class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+              id="mui-5806"
+            >
+              Rows per page:
+            </p>
+            <div
+              class="MuiInputBase-root MuiTablePagination-input MuiTablePagination-selectRoot"
+            >
+              <div
+                aria-haspopup="listbox"
+                aria-labelledby="mui-5806 mui-73230"
+                class="MuiSelect-root MuiSelect-select MuiTablePagination-select MuiSelect-selectMenu MuiInputBase-input"
+                id="mui-73230"
+                role="button"
+                tabindex="0"
+              >
+                10
+              </div>
+              <input
+                aria-hidden="true"
+                class="MuiSelect-nativeInput"
+                tabindex="-1"
+                value="10"
+              />
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSelect-icon MuiTablePagination-selectIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M7 10l5 5 5-5z"
+                />
+              </svg>
+            </div>
+            <p
+              class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+            >
+              1-NaN of undefined
+            </p>
+            <div
+              class="MuiTablePagination-actions"
+            >
+              <button
+                aria-label="Previous page"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+                disabled=""
+                tabindex="-1"
+                title="Previous page"
+                type="button"
+              >
+                <span
+                  class="MuiIconButton-label"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
+                    />
+                  </svg>
+                </span>
+              </button>
+              <button
+                aria-label="Next page"
+                class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+                disabled=""
+                tabindex="-1"
+                title="Next page"
+                type="button"
+              >
+                <span
+                  class="MuiIconButton-label"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
+                    />
+                  </svg>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -82,7 +509,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -106,7 +533,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -131,7 +558,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU MuiTableSortLabel-active"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH MuiTableSortLabel-active"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -160,7 +587,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -184,7 +611,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -208,7 +635,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 >
                   <span
                     aria-disabled="false"
-                    class="MuiButtonBase-root MuiTableSortLabel-root sc-bZQynM ciIUPU"
+                    class="MuiButtonBase-root MuiTableSortLabel-root sc-EHOje dirFCH"
                     data-cy="table-label"
                     role="button"
                     tabindex="0"
@@ -271,10 +698,10 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
                 >
                   <div
-                    class="sc-htoDjs koRFFa"
+                    class="sc-gzVnrw bspsIV"
                   >
                     <div
-                      class="sc-dnqmqq fBXPNU"
+                      class="sc-htoDjs ipbmXx"
                       data-cy="status-container"
                     >
                       ACTIVE

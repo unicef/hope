@@ -100,6 +100,7 @@ stages:
               -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
               -t $(Docker.url)/$(Docker.backend.repository):latest \
               --push \
+              -f ./backend/docker/Dockerfile \
               ./backend
             displayName: Docker build
           - script: |
@@ -112,6 +113,7 @@ stages:
               -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
               --push \
               --target dev \
+              -f ./backend/docker/Dockerfile \
               ./backend
             displayName: Docker build dev
           - script: |
@@ -122,6 +124,7 @@ stages:
               --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:$(additionalTag) \
               -t $(Docker.url.trn)/$(Docker.backend.repository):$(tag) \
               --push \
+              -f ./backend/docker/Dockerfile \
               ./backend
             displayName: Docker build trn
             condition: and(succeeded(), eq(variables.isTraining, true))

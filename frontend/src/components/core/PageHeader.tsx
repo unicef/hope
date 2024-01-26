@@ -2,9 +2,7 @@ import { Box, Typography } from '@material-ui/core';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import React from 'react';
 import styled from 'styled-components';
-import { registrationDataImportErasedColor } from '../../utils/utils';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
-import { StatusBox } from './StatusBox';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
@@ -54,11 +52,6 @@ const TitleWrapper = styled.div`
   }
 `;
 
-const StatusErasedWrapper = styled.div`
-  margin-left: 15px;
-  text-transform: uppercase;
-`;
-
 const TitleContainer = styled.div`
   width: 100%;
   word-wrap: break-word;
@@ -71,7 +64,6 @@ interface Props {
   tabs?: React.ReactElement;
   hasInputComponent?: boolean;
   flags?: React.ReactElement;
-  isErased?: boolean;
   handleBack?: () => void;
 }
 
@@ -82,7 +74,6 @@ export const PageHeader = ({
   tabs = null,
   hasInputComponent,
   flags,
-  isErased,
   handleBack,
 }: Props): React.ReactElement => {
   return (
@@ -109,14 +100,6 @@ export const PageHeader = ({
                       {title}
                     </Typography>
                   </TitleContainer>
-                  {isErased ? (
-                    <StatusErasedWrapper>
-                      <StatusBox
-                        status='erased'
-                        statusToColor={registrationDataImportErasedColor}
-                      />
-                    </StatusErasedWrapper>
-                  ) : null}
                   <Box display='flex' ml={2}>
                     {flags}
                   </Box>

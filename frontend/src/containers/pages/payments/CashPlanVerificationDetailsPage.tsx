@@ -126,7 +126,7 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
   const toolbar = (
     <PageHeader
       title={
-        <BlackLink fullWidth to={`/${businessArea}/cashplans/${cashPlan.id}`}>
+        <BlackLink fullWidth to={`/${baseUrl}/cashplans/${cashPlan.id}`}>
           {t('Payment Plan')} {cashPlan.caId}
         </BlackLink>
       }

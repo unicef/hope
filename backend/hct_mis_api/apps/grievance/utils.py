@@ -171,9 +171,10 @@ def filter_based_on_partner_areas_2(
         partner_permission = user_partner.get_permissions()
         filter_q = Q()
         if not program_id:
-            programs_permissions = partner_permission.get_programs_for_business_area(
-                business_area_id_str
-            ).programs.items()
+            if business_area_permission := partner_permission.get_programs_for_business_area(business_area_id_str):
+                programs_permissions = business_area_permission.programs.items()
+            else:
+                programs_permissions = {}  # type: ignore
         else:
             areas = partner_permission.areas_for(business_area_id_str, program_id_str)
             if areas is None:
@@ -182,10 +183,11 @@ def filter_based_on_partner_areas_2(
 
         for program_id, areas_ids in programs_permissions:
             program_q = Q(**{lookup_id: id_container(program_id)})
+            areas_null_and_program_q = program_q & Q(admin2__isnull=True)
             if areas_ids:
-                filter_q |= Q(program_q & Q(admin2__in=areas_ids))
+                filter_q |= Q(areas_null_and_program_q | Q(program_q & Q(admin2__in=areas_ids)))
             else:
-                filter_q |= program_q
+                filter_q |= areas_null_and_program_q
         queryset = queryset.filter(filter_q)
         return queryset
     except (Partner.DoesNotExist, AssertionError):

@@ -167,6 +167,15 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         assert "errors" not in response, response["errors"]
         self.assertEqual(len(response["data"]["allFeedbacks"]["edges"]), 1)
 
+    def test_permission_denied_when_user_is_not_provided(self) -> None:
+        self.create_new_feedback()
+        response = self.graphql_request(
+            request_string=self.ALL_FEEDBACKS_QUERY,
+            variables={},
+        )
+        self.assertIsNotNone(response.get("errors"))
+        self.assertIn("Permission Denied", response["errors"][0]["message"])
+
     def test_filtering_feedbacks(self) -> None:
         self.create_new_feedback(
             data=self.create_dummy_correct_input()
