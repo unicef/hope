@@ -1,6 +1,5 @@
 import json
 from collections import defaultdict
-from math import ceil
 from typing import Any, Dict, List, Optional, Union
 
 from django.contrib.gis.geos import Point
@@ -18,7 +17,7 @@ from hct_mis_api.apps.core.kobo.common import (
     get_field_name,
 )
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import rename_dict_keys
+from hct_mis_api.apps.core.utils import chunks, rename_dict_keys
 from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
@@ -205,39 +204,33 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         bank_accounts_to_create = []
         collectors_to_create = defaultdict(list)
         household_batch_size = 50
-        for index, household in enumerate(self.reduced_submissions):
-            submission_meta_data = get_submission_metadata(household)
-            if self.business_area.get_sys_option("ignore_amended_kobo_submissions"):
-                submission_meta_data["amended"] = False
+        for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):
+            for household in reduced_submission_chunk:
+                submission_meta_data = get_submission_metadata(household)
+                if self.business_area.get_sys_option("ignore_amended_kobo_submissions"):
+                    submission_meta_data["amended"] = False
 
-            if KoboImportedSubmission.objects.filter(**submission_meta_data).exists():
-                continue
+                if KoboImportedSubmission.objects.filter(**submission_meta_data).exists():
+                    continue
 
-            submission_meta_data.pop("amended", None)
-            self.handle_household(
-                bank_accounts_to_create,
-                collectors_to_create,
-                head_of_households_mapping,
-                household,
-                households_to_create,
-                individuals_ids_hash_dict,
-                registration_data_import,
-                submission_meta_data,
-            )
-            if index % household_batch_size == 0:
-                logger.info(
-                    f"Processing batch {int(index / household_batch_size)} of {int(ceil(len(self.reduced_submissions) / household_batch_size))}"
+                submission_meta_data.pop("amended", None)
+                self.handle_household(
+                    bank_accounts_to_create,
+                    collectors_to_create,
+                    head_of_households_mapping,
+                    household,
+                    households_to_create,
+                    individuals_ids_hash_dict,
+                    registration_data_import,
+                    submission_meta_data,
                 )
-                self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
-                bank_accounts_to_create = []
-                head_of_households_mapping = {}
-                households_to_create = []
-
-        self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
+            self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
+            bank_accounts_to_create = []
+            head_of_households_mapping = {}
+            households_to_create = []
         self._handle_collectors(collectors_to_create, individuals_ids_hash_dict)
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
-
         rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()
