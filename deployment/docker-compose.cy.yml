@@ -50,12 +50,9 @@ services:
 
 
   proxy:
-    image: unicef/hct-mis-proxy
+    image: tivix/docker-nginx:v17
     environment:
-      - DJANGO_APPLICATION_SERVICE_HOST=backend
-    build:
-      context: ../proxy
-      dockerfile: Dockerfile
+      - UPSTREAMS=/:localhost:8000
     depends_on:
       - backend
 

@@ -55,18 +55,11 @@ services:
     image: unicef/hct-mis-proxy
     environment:
       - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_HOST=frontend:80
     build:
       context: ./proxy
       dockerfile: Dockerfile
     depends_on:
       - backend
-      - frontend
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
 
   redis:
     restart: unless-stopped
@@ -75,7 +68,7 @@ services:
   backend:
     <<: *django_envs
     build:
-      context: ./backend
+      context: ./
       dockerfile: docker/Dockerfile
     command: cy
     volumes:
@@ -113,7 +106,7 @@ services:
   celery_worker:
     <<: *django_envs
     build:
-      context: ./backend
+      context: ./
       dockerfile: docker/Dockerfile
     restart: unless-stopped
     command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
