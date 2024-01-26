@@ -9029,7 +9029,7 @@ export type GrievanceTicketDetailedFragment = (
     & HouseholdDetailedFragment
   )>, paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordAndPaymentNode' }
-    & Pick<PaymentRecordAndPaymentNode, 'id' | 'caId' | 'deliveredQuantity' | 'objType'>
+    & Pick<PaymentRecordAndPaymentNode, 'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'>
     & { parent: Maybe<(
       { __typename?: 'CashPlanAndPaymentPlanNode' }
       & Pick<CashPlanAndPaymentPlanNode, 'id' | 'unicefId' | 'objType'>
@@ -14920,6 +14920,7 @@ export const GrievanceTicketDetailedFragmentDoc = gql`
     id
     caId
     deliveredQuantity
+    entitlementQuantity
     objType
     parent {
       id
