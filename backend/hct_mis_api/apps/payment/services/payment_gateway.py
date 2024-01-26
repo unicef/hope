@@ -2,7 +2,7 @@ import logging
 import os
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from django.db.models import QuerySet
 from django.utils.timezone import now
@@ -44,17 +44,17 @@ class PaymentGatewayPaymentInstructionSerializer(ReadOnlyModelSerializer):
     unicef_id = serializers.CharField(source="payment_plan.unicef_id")
     fsp = serializers.CharField(source="financial_service_provider.payment_gateway_id")
     payload = serializers.SerializerMethodField()
+    extra = serializers.SerializerMethodField()
+
+    def get_extra(self, obj: DeliveryMechanismPerPaymentPlan) -> Dict:
+        return {
+            "user": self.context["user_email"],
+            "business_area": obj.payment_plan.business_area.code,
+        }
 
     def get_payload(self, obj: DeliveryMechanismPerPaymentPlan) -> Dict:
-        primary_country = obj.payment_plan.business_area.countries.first()
         return {
             "destination_currency": obj.payment_plan.currency,
-            "user": self.context["user_email"],
-            "business_area": {
-                "code": obj.payment_plan.business_area.code,
-                "name": obj.payment_plan.business_area.name,
-                "primary_country": primary_country.iso_code2 if primary_country else None,
-            },
         }
 
     class Meta:
@@ -69,12 +69,9 @@ class PaymentGatewayPaymentInstructionSerializer(ReadOnlyModelSerializer):
 
 class PaymentGatewayPaymentSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
-    record_code = serializers.SerializerMethodField()
+    record_code = serializers.CharField(source="unicef_id")
     payload = serializers.SerializerMethodField()
     extra_data = serializers.SerializerMethodField()
-
-    def get_record_code(self, obj: Payment) -> Dict:
-        return obj.unicef_id
 
     def get_extra_data(self, obj: Payment) -> Dict:
         return {}
@@ -165,8 +162,8 @@ class PaymentGatewayAPI:
         self.api_key = api_key or os.getenv("PAYMENT_GATEWAY_API_KEY")
         self.api_url = api_url or os.getenv("PAYMENT_GATEWAY_API_URL")
 
-        if self.api_key is None:
-            raise ValueError("Missing Payment Gateway API Key")
+        if not self.api_key or not self.api_url:
+            raise ValueError("Missing Payment Gateway API Key/URL")
 
         self._client = session()
         retries = Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=None)
@@ -180,12 +177,12 @@ class PaymentGatewayAPI:
         return response.json()
 
     def _post(self, endpoint: str, data: Optional[Union[Dict, List]] = None) -> Dict:
-        response = self._client.post(self.api_url + endpoint, json=data)
+        response = self._client.post(f"{self.api_url}{endpoint}", json=data)
         response_data = self.validate_response(response)
         return response_data
 
     def _get(self, endpoint: str, params: Optional[Dict] = None) -> Dict:
-        response = self._client.get(self.api_url + endpoint, params=params)
+        response = self._client.get(f"{self.api_url}{endpoint}", params=params)
         response_data = self.validate_response(response)
         return response_data
 
@@ -215,8 +212,11 @@ class PaymentGatewayAPI:
     def add_records_to_payment_instruction(
         self, payment_records: QuerySet[Payment], remote_id: str
     ) -> AddRecordsResponseData:
-        data = PaymentGatewayPaymentSerializer(payment_records, many=True).data
-        response_data = self._post(self.Endpoints.PAYMENT_INSTRUCTION_ADD_RECORDS.format(remote_id=remote_id), data)
+        serializer = PaymentGatewayPaymentSerializer(payment_records, many=True)
+        serializer.is_valid(raise_exception=True)
+        response_data = self._post(
+            self.Endpoints.PAYMENT_INSTRUCTION_ADD_RECORDS.format(remote_id=remote_id), serializer.data
+        )
         return AddRecordsResponseData(**response_data)
 
     def get_records_for_payment_instruction(self, payment_instruction_remote_id: str) -> List[PaymentRecordData]:
@@ -248,11 +248,12 @@ class PaymentGatewayService:
 
     def change_payment_instruction_status(
         self, new_status: PaymentInstructionStatus, delivery_mechanism: DeliveryMechanismPerPaymentPlan
-    ) -> str:
+    ) -> Optional[str]:
         if delivery_mechanism.financial_service_provider.is_payment_gateway:
             response_status = self.api.change_payment_instruction_status(new_status, delivery_mechanism.id)
             assert new_status.value == response_status, f"{new_status} != {response_status}"
             return response_status
+        return None
 
     def add_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
         for delivery_mechanism in payment_plan.delivery_mechanisms.all():
