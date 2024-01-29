@@ -26,9 +26,4 @@ class Migration(migrations.Migration):
             name='payment_gateway_id',
             field=models.CharField(max_length=255, null=True),
         ),
-        migrations.AlterField(
-            model_name='financialserviceprovider',
-            name='vision_vendor_number',
-            field=models.CharField(max_length=100),
-        ),
     ]

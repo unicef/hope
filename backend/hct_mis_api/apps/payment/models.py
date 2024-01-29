@@ -1132,7 +1132,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         verbose_name=_("Created by"),
     )
     name = models.CharField(max_length=100, unique=True)
-    vision_vendor_number = models.CharField(max_length=100)
+    vision_vendor_number = models.CharField(max_length=100, unique=True)
     delivery_mechanisms = HorizontalChoiceArrayField(
         models.CharField(choices=GenericPayment.DELIVERY_TYPE_CHOICE, max_length=24)
     )
