@@ -36,6 +36,7 @@ class TestGrievanceApproveAutomaticMutation(BaseElasticSearchTestCase):
             assigned_to=cls.user,
             category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT,
             language="PL",
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
             created_by=cls.user,
             business_area=cls.business_area,
             issue_type=random.choice(
@@ -93,18 +94,33 @@ class TestGrievanceApproveAutomaticMutation(BaseElasticSearchTestCase):
             BulkActionService().bulk_assign(
                 [self.grievance_ticket1.id, self.grievance_ticket2.id], self.user_two.id, self.business_area.slug
             )
-            self.assertEqual(mock_bulk.call_count, 1)
+            self.assertEqual(mock_bulk.call_count, 2)
+
             self.grievance_ticket1.refresh_from_db()
             self.grievance_ticket2.refresh_from_db()
+
             self.assertEqual(self.grievance_ticket1.assigned_to, self.user_two)
             self.assertEqual(self.grievance_ticket2.assigned_to, self.user_two)
+
+            self.assertEqual(self.grievance_ticket1.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+            self.assertEqual(self.grievance_ticket2.status, GrievanceTicket.STATUS_ASSIGNED)
+
             all_documents = GrievanceTicketDocument.search().query("match_all").execute()
             grievance_tickets_documents_dict = {document.meta.id: document for document in all_documents}
+
             self.assertEqual(
                 grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].assigned_to.id, str(self.user_two.id)
             )
             self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket1.id)].status,
+                GrievanceTicket.STATUS_FOR_APPROVAL,
+            )
+
+            self.assertEqual(
                 grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].assigned_to.id, str(self.user_two.id)
+            )
+            self.assertEqual(
+                grievance_tickets_documents_dict[str(self.grievance_ticket2.id)].status, GrievanceTicket.STATUS_ASSIGNED
             )
 
     def test_bulk_update_priority(self) -> None:

@@ -155,6 +155,8 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
     )
     is_visible = models.BooleanField(default=True)
+    household_count = models.PositiveIntegerField(default=0)
+    individual_count = models.PositiveIntegerField(default=0)
 
     objects = SoftDeletableIsVisibleManager()
 
@@ -168,9 +170,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             .count()
         )
 
-    @property
-    def total_number_of_households(self) -> int:
-        return self.household_set.count()
+    def adjust_program_size(self) -> None:
+        self.household_count = self.household_set.count()
+        self.individual_count = self.individuals.count()
 
     @property
     def households_with_tp_in_program(self) -> QuerySet:

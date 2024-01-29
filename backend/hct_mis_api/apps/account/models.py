@@ -231,8 +231,6 @@ class Partner(MPTTModel, models.Model):
 
     @property
     def business_area_ids(self) -> List[str]:
-        if self.is_unicef:
-            return list(BusinessArea.objects.filter(active=True).values_list("id", flat=True))
         return self.get_permissions().business_area_ids()
 
     def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
@@ -339,7 +337,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             list(
                 set(
                     [perm for perms in all_partner_roles_permissions_list for perm in perms]
-                    + [perm for perms in all_user_roles_permissions_list for perm in perms]
+                    + [perm for perms in all_user_roles_permissions_list if perms for perm in perms]
                 )
             )
             if has_program_access
