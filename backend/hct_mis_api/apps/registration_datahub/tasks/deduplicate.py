@@ -660,7 +660,11 @@ class HardDocumentDeduplication:
         self, new_documents: QuerySet[Document], registration_data_import: Optional[RegistrationDataImport] = None
     ) -> None:
         documents_to_dedup = evaluate_qs(
-            new_documents.filter(Q(status=Document.STATUS_PENDING) & Q(type__is_identity_document=True))
+            new_documents.filter(
+                Q(status=Document.STATUS_PENDING)
+                & Q(type__is_identity_document=True)
+                & Q(program=registration_data_import.program)
+            )
             .select_related("individual", "type")
             .select_for_update(of=("self",))  # no need to lock individuals
             .order_by("pk")
@@ -673,7 +677,11 @@ class HardDocumentDeduplication:
         # added order_by because test was failed randomly
         all_matching_number_documents = (
             Document.objects.select_related("individual", "individual__household", "individual__business_area")
-            .filter(document_number__in=documents_numbers, status=Document.STATUS_VALID)
+            .filter(
+                ocument_number__in=documents_numbers,
+                status=Document.STATUS_VALID,
+                program=registration_data_import.program,
+            )
             .annotate(
                 signature=Concat(
                     Case(
