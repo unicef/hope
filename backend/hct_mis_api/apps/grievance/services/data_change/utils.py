@@ -32,7 +32,6 @@ from hct_mis_api.apps.household.models import (
     HEAD,
     RELATIONSHIP_UNKNOWN,
     ROLE_ALTERNATE,
-    ROLE_NO_ROLE,
     ROLE_PRIMARY,
     BankAccountInfo,
     Document,
@@ -107,14 +106,15 @@ def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> Non
 
 
 def handle_role(role: str, household: Household, individual: Individual) -> None:
+    if individual_role := IndividualRoleInHousehold.objects.filter(household=household, individual=individual).first():
+        individual_role.delete(soft=False)
+
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         IndividualRoleInHousehold.objects.update_or_create(
             household=household,
             role=role,
             defaults={"individual": individual},
         )
-    elif role == ROLE_NO_ROLE:
-        IndividualRoleInHousehold.objects.filter(household=household, individual=individual).delete()
 
 
 def handle_add_document(document: Document, individual: Individual) -> Document:
