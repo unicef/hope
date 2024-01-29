@@ -1,5 +1,6 @@
 import camelCase from 'lodash/camelCase';
 import React from 'react';
+import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -8,7 +9,6 @@ import {
   camelizeArrayObjects,
   thingForSpecificGrievanceType,
 } from '../../../utils/utils';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
@@ -26,7 +26,7 @@ interface EditValuesTypes {
   area: string;
   selectedHousehold?;
   selectedIndividual?;
-  selectedPaymentRecords: string[];
+  selectedPaymentRecords;
   paymentRecord?: string;
   selectedLinkedTickets: string[];
   individualData?;
@@ -215,7 +215,7 @@ export function prepareInitialValues(
     issueType: ticket.issueType || '',
     paymentRecord: ticket?.paymentRecord?.id || null,
     selectedPaymentRecords: ticket?.paymentRecord?.id
-      ? [ticket.paymentRecord.id]
+      ? [ticket.paymentRecord]
       : [],
     selectedLinkedTickets: ticket.linkedTickets.map(
       (linkedTicket) => linkedTicket.id,
@@ -319,7 +319,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareSesitiveVariables(requiredVariables, values) {
+function prepareSensitiveVariables(requiredVariables, values) {
   return {
     variables: {
       input: {
@@ -462,7 +462,7 @@ export const prepareVariablesDict = {
   [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: preparePositiveFeedbackVariables,
   [GRIEVANCE_CATEGORIES.REFERRAL]: prepareReferralVariables,
   [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: prepareGrievanceComplaintVariables,
-  [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: prepareSesitiveVariables,
+  [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: prepareSensitiveVariables,
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
     [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: prepareAddIndividualVariables,
     [GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL]: prepareDeleteIndividualVariables,
@@ -510,7 +510,7 @@ export function prepareVariables(businessArea, values, ticket) {
     comments: values.comments,
     program: ticket.programs?.[0]?.id || values?.program,
     paymentRecord: values.selectedPaymentRecords
-      ? values.selectedPaymentRecords[0]
+      ? values.selectedPaymentRecords[0]?.id
       : null,
     documentation: values.documentation || null,
     documentationToUpdate: mapDocumentationToUpdate(
