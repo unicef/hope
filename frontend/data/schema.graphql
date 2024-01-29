@@ -3470,6 +3470,8 @@ type ProgramNode implements Node {
   individualDataNeeded: Boolean
   dataCollectingType: DataCollectingTypeNode
   isVisible: Boolean!
+  householdCount: Int!
+  individualCount: Int!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
