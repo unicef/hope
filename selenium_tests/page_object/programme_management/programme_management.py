@@ -64,7 +64,6 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.buttonDelete)
 
     def getButtonDeletePopup(self) -> WebElement:
-        # self.wait_for("//*[contains(text(), 'Are you sure you want to remove the partner from this program?')")
         return self.wait_for("/html/body/div[2]/div[3]/div/div[3]/div/button[2]", By.XPATH)
 
     def choosePartnerOption(self, optionName: str) -> None:
