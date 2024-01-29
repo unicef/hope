@@ -97,7 +97,9 @@ export const GrievancesDetails = ({
       </Box>
     );
   };
+
   const renderUrl = (
+    obj,
     objType: string,
     href: string,
     displayedId: string,
@@ -106,7 +108,7 @@ export const GrievancesDetails = ({
       return <>{displayedId}</>;
     }
 
-    if (ticket?.paymentRecord?.objType === objType) {
+    if (obj?.objType === objType) {
       return <ContentLink href={href}>{displayedId}</ContentLink>;
     }
 
@@ -116,6 +118,7 @@ export const GrievancesDetails = ({
   const renderPaymentUrl = (): React.ReactElement => {
     if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
       return renderUrl(
+        ticket?.paymentRecord,
         'PaymentRecord',
         `/${baseUrl}/payment-records/${ticket?.paymentRecord?.id}`,
         ticket?.paymentRecord?.caId,
@@ -124,6 +127,7 @@ export const GrievancesDetails = ({
 
     if (ticket?.paymentRecord?.objType === 'Payment') {
       return renderUrl(
+        ticket?.paymentRecord,
         'Payment',
         `/${baseUrl}/payment-module/payments/${ticket?.paymentRecord?.id}`,
         ticket?.paymentRecord?.caId,
@@ -133,11 +137,23 @@ export const GrievancesDetails = ({
   };
 
   const renderPaymentPlanUrl = (): React.ReactElement => {
-    return renderUrl(
-      ticket?.paymentRecord?.parent?.objType,
-      `/${baseUrl}/payment-module/payment-plans/${ticket?.paymentRecord?.parent?.id}`,
-      ticket?.paymentRecord?.parent?.unicefId,
-    );
+    if (ticket?.paymentRecord?.parent?.objType === 'PaymentPlan') {
+      return renderUrl(
+        ticket?.paymentRecord?.parent,
+        'PaymentPlan',
+        `/${baseUrl}/payment-module/payment-plans/${ticket?.paymentRecord?.parent?.id}`,
+        ticket?.paymentRecord?.parent?.unicefId,
+      );
+    }
+    if (ticket?.paymentRecord?.parent?.objType === 'CashPlan') {
+      return renderUrl(
+        ticket?.paymentRecord?.parent,
+        'CashPlan',
+        `/${baseUrl}/cashplans/${ticket?.paymentRecord?.parent?.id}`,
+        ticket?.paymentRecord?.parent?.unicefId,
+      );
+    }
+    return <>-</>;
   };
 
   const mappedPrograms = (): React.ReactElement => {
