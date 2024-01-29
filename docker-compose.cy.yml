@@ -2,6 +2,7 @@ version: '3.7'
 x-django-envs: &django_envs
   environment:
     - ENV=dev
+    - DEBUG=true
     - SECRET_KEY=31283012-38dasda
     - POSTGRES_DB=postgres
     - POSTGRES_USER=postgres
@@ -55,9 +56,6 @@ services:
     image: tivix/docker-nginx:v17
     environment:
       - UPSTREAMS=/:backend:8000
-    build:
-      context: ./proxy
-      dockerfile: Dockerfile
     ports:
       - "8082:80"
     depends_on:
