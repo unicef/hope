@@ -1,5 +1,5 @@
 from base64 import b64decode
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
 from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
@@ -35,7 +35,7 @@ def create_tickets_based_on_payment_records_service(
         )
 
     # for the first ticket_details use already create grievance_ticket
-    ticket = grievance_ticket
+    ticket: Optional[GrievanceTicket] = grievance_ticket
     # create linked tickets for all payment ids
     for payment_record_encoded_id in payment_record_encoded_ids_list:
         node_name, obj_id = b64decode(payment_record_encoded_id).decode().split(":")
@@ -56,7 +56,7 @@ def create_tickets_based_on_payment_records_service(
         model.objects.create(
             individual=individual,
             household=household,
-            payment_content_type=get_content_type_for_model(payment_record),  # type: ignore
+            payment_content_type=get_content_type_for_model(payment_record),
             payment_object_id=payment_record.pk,
             ticket=ticket,
         )
