@@ -61,6 +61,7 @@ class TestWithdrawHousehold(APITestCase):
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
         household.registration_data_import.save()
+        household.program = self.program_one
         household.programs.add(self.program_one)
 
         individual_data = {

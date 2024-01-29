@@ -2,10 +2,9 @@ import logging
 from contextlib import contextmanager
 from typing import Dict, Iterator, List
 
-from django.test import TestCase
-
 from elasticsearch import Elasticsearch
 
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import (
     create_afghanistan,
     create_kenya,
@@ -40,8 +39,8 @@ def create_query(obj_list: List[str]) -> Dict:
     return {"query": {"terms": {"_id": obj_list}}}
 
 
-class TestGPFMigrationToES(TestCase):
-    databases = {"default"}
+class TestGPFMigrationToES(BaseElasticSearchTestCase):
+    databases = {"default", "registration_datahub"}
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -77,6 +76,7 @@ class TestGPFMigrationToES(TestCase):
         cls.household_4 = HouseholdFactory(
             head_of_household=cls.individual_4, program=cls.program_4, business_area=cls.kenya_ba
         )
+        super().setUpTestData()
 
     def test_migrate_program_id_to_household_es(self) -> None:
         logging.disable(logging.INFO)

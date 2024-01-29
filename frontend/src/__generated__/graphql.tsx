@@ -5724,7 +5724,7 @@ export type QueryAllFeedbacksArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
   feedbackId?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>,
+  isActiveProgram?: Maybe<Scalars['String']>,
   program?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -11875,7 +11875,7 @@ export type AllFeedbacksQueryVariables = {
   feedbackId?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   program?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>
+  isActiveProgram?: Maybe<Scalars['String']>
 };
 
 
@@ -21809,7 +21809,7 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllFeedbacksDocument = gql`
-    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String, $program: String, $isActiveProgram: Boolean) {
+    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String, $program: String, $isActiveProgram: String) {
   allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, issueType: $issueType, createdAtRange: $createdAtRange, createdBy: $createdBy, feedbackId: $feedbackId, orderBy: $orderBy, program: $program, isActiveProgram: $isActiveProgram) {
     totalCount
     pageInfo {

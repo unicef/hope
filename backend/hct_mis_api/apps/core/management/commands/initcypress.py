@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from typing import Any
 
+from django.conf import settings
 from django.core.management import BaseCommand, call_command
 
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
@@ -31,22 +32,22 @@ class Command(BaseCommand):
         call_command("flush", "--noinput", database="cash_assist_datahub_erp")
         call_command("flush", "--noinput", database="registration_datahub")
 
-        call_command("loaddata", "hct_mis_api/apps/geo/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/core/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/account/fixtures/data.json")
-        call_command("loaddata", "hct_mis_api/apps/program/fixtures/data-cypress.json")
-        call_command("loaddata", "hct_mis_api/apps/registration_data/fixtures/data-cypress.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/account/fixtures/data.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
         call_command(
             "loaddata",
-            "hct_mis_api/apps/registration_datahub/fixtures/data-cypress.json",
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/data-cypress.json",
             database="registration_datahub",
         )
-        call_command("loaddata", "hct_mis_api/apps/household/fixtures/data-cypress.json")
-        call_command("loaddata", "hct_mis_api/apps/targeting/fixtures/data-cypress.json")
-        call_command("loaddata", "hct_mis_api/apps/steficon/fixtures/data-cypress.json")
-        call_command("loaddata", "hct_mis_api/apps/payment/fixtures/data-cypress.json")
-        call_command("loaddata", "hct_mis_api/apps/grievance/fixtures/data-cypress.json")
-        call_command("loaddata", "hct_mis_api/apps/accountability/fixtures/data-cypress.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/targeting/fixtures/data-cypress.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/steficon/fixtures/data-cypress.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/payment/fixtures/data-cypress.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/grievance/fixtures/data-cypress.json")
+        call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
 
         partner = Partner.objects.get(name="UNICEF")
 
