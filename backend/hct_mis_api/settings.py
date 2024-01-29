@@ -84,7 +84,6 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
 FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
 
-
 ####
 # Other settings
 ####
@@ -167,7 +166,6 @@ if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY:
     DEFAULT_FILE_STORAGE = "hct_mis_api.apps.core.storage.AzureMediaStorage"
     STATICFILES_STORAGE = "hct_mis_api.apps.core.storage.AzureStaticStorage"
 
-
 SENTRY_DSN = env("SENTRY_DSN")
 if SENTRY_DSN:
     import re
@@ -195,6 +193,14 @@ CSP_STYLE_SRC: Tuple[str, ...] = (
     "saunihopetrn.blob.core.windows.net",  # trn
     "saunihopeprd.blob.core.windows.net",  # prod
 )
+CSP_MANIFEST_SRC: Tuple[str, ...] = (
+    "'self'",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+)
+
 CSP_SCRIPT_SRC: Tuple[str, ...] = (
     "'self'",
     "'unsafe-inline'",
@@ -245,12 +251,12 @@ CSP_CONNECT_SRC: Tuple[str, ...] = (
 
 DEBUG = env.bool("DEBUG", default=False)
 if DEBUG:
-    CSP_CONNECT_SRC += ("localhost:8080",)
-    CSP_FONT_SRC += ("localhost:8080",)
-    CSP_IMG_SRC += ("localhost:8080",)
-    CSP_SCRIPT_SRC += ("localhost:8080",)
-    CSP_STYLE_SRC += ("localhost:8080",)
-
+    CSP_CONNECT_SRC += (FRONTEND_HOST,)
+    CSP_FONT_SRC += (FRONTEND_HOST,)
+    CSP_IMG_SRC += (FRONTEND_HOST,)
+    CSP_SCRIPT_SRC += (FRONTEND_HOST,)
+    CSP_STYLE_SRC += (FRONTEND_HOST,)
+    CSP_MANIFEST_SRC += (FRONTEND_HOST,)
 
 if DEBUG:
     ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
@@ -318,7 +324,6 @@ if env("POSTGRES_SSL", default=False):
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
     }
-
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: Dict[str, str] = {
@@ -1097,6 +1102,5 @@ LOGGING: Dict[str, Any] = {
 # overwrite Azure logs
 logger_azure = logging.getLogger("azure.core.pipeline.policies.http_logging_policy")
 logger_azure.setLevel(logging.WARNING)
-
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
