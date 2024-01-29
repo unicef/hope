@@ -156,6 +156,7 @@ class PaymentPlanService:
 
     def unlock(self) -> PaymentPlan:
         self.payment_plan.delivery_mechanisms.all().delete()
+        self.payment_plan.payment_items.all().update(conflicted=False)
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()

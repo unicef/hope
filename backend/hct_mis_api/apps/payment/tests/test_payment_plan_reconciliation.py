@@ -965,3 +965,16 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "file": BytesIO(content),
             },
         )
+
+    def test_correct_message_displayed_when_file_is_protected(self) -> None:
+        content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/import_file_protected.xlsx").read_bytes()
+        pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+
+        self.snapshot_graphql_request(
+            request_string=IMPORT_XLSX_PER_FSP_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
+                "file": BytesIO(content),
+            },
+        )

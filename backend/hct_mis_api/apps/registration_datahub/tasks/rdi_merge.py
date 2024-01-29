@@ -38,6 +38,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
@@ -450,6 +451,7 @@ class RdiMergeTask:
                     imported_households.delete()
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                     transaction.on_commit(lambda: deduplicate_documents.delay())
+                    rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
                     log_create(
                         RegistrationDataImport.ACTIVITY_LOG_MAPPING,
                         "business_area",
