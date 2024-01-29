@@ -24,6 +24,7 @@ def create_tickets_based_on_payment_records_service(
     household = decode_and_get_object(household_encoded_id, Household, False)
     # Payment or PaymentRecord ids
     payment_record_encoded_ids_list = details.get("payment_record", [])
+    grievance_tickets_to_return = []
     # create only one ticket details if no payment ids
     if not payment_record_encoded_ids_list:
         model.objects.create(
@@ -33,6 +34,8 @@ def create_tickets_based_on_payment_records_service(
             payment_object_id=None,
             ticket=grievance_ticket,
         )
+        grievance_ticket.refresh_from_db()
+        grievance_tickets_to_return = [grievance_ticket]
 
     # for the first ticket_details use already create grievance_ticket
     ticket: Optional[GrievanceTicket] = grievance_ticket
@@ -60,10 +63,11 @@ def create_tickets_based_on_payment_records_service(
             payment_object_id=payment_record.pk,
             ticket=ticket,
         )
+        ticket.refresh_from_db()
+        grievance_tickets_to_return.append(ticket)
         ticket = None
 
-    grievance_ticket.refresh_from_db()
-    return [grievance_ticket]
+    return grievance_tickets_to_return
 
 
 def update_ticket_based_on_payment_record_service(
