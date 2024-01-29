@@ -23,9 +23,7 @@ export const LookUpPaymentRecordDisplay = ({
   const renderPaymentRecords = (): React.ReactElement => {
     if (values.selectedPaymentRecords.length) {
       return values.selectedPaymentRecords.map((record) => (
-        <Box mb={1} key={record.id}>
-          <BlueText>{record.caId}</BlueText>
-        </Box>
+        <BlueText>{record.caId}</BlueText>
       ));
     }
     return <BlueText>-</BlueText>;
