@@ -11,6 +11,7 @@ from hct_mis_api.apps.grievance.constants import PRIORITY_CHOICES, URGENCY_CHOIC
 from hct_mis_api.apps.grievance.documents import (
     bulk_update_assigned_to,
     bulk_update_priority,
+    bulk_update_status,
     bulk_update_urgency,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
@@ -27,11 +28,21 @@ class BulkActionService:
     ) -> QuerySet[GrievanceTicket]:
         user = get_object_or_404(User, id=assigned_to_id)
         queryset = GrievanceTicket.objects.filter(~Q(status=GrievanceTicket.STATUS_CLOSED), id__in=tickets_ids)
+
+        new_tickets = queryset.filter(status=GrievanceTicket.STATUS_NEW)
+        new_tickets_ids = list(map(str, new_tickets.values_list("id", flat=True)))
+
         updated_count = queryset.update(assigned_to=user)
         if updated_count != len(tickets_ids):
             raise ValidationError("Some tickets do not exist or are closed")
+
+        # Update also status to assigned if status is new
+        new_tickets.update(status=GrievanceTicket.STATUS_ASSIGNED)
+
         self._clear_cache(business_area_slug)
+
         bulk_update_assigned_to(tickets_ids, assigned_to_id)
+        bulk_update_status(new_tickets_ids, GrievanceTicket.STATUS_ASSIGNED)
         return queryset
 
     @transaction.atomic

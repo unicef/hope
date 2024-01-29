@@ -13,7 +13,7 @@ export const AllFeedbacks = gql`
     $feedbackId: String
     $orderBy: String
     $program: String
-    $isActiveProgram: Boolean
+    $isActiveProgram: String
   ) {
     allFeedbacks(
       offset: $offset
