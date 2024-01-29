@@ -20,6 +20,7 @@ from hct_mis_api.apps.household.models import (
     Household,
     Individual,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedHouseholdFactory,
@@ -66,7 +67,8 @@ class TestRdiMergeTask(BaseElasticSearchTestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        cls.rdi = RegistrationDataImportFactory()
+        program = ProgramFactory()
+        cls.rdi = RegistrationDataImportFactory(program=program)
         cls.rdi.business_area.postpone_deduplication = True
         cls.rdi.business_area.save()
         cls.rdi_hub = RegistrationDataImportDatahubFactory(
