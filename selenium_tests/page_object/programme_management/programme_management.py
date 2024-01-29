@@ -67,7 +67,7 @@ class ProgrammeManagement(BaseComponents):
         # self.wait_for("//*[contains(text(), 'Are you sure you want to remove the partner from this program?')")
         return self.wait_for("/html/body/div[2]/div[3]/div/div[3]/div/button[2]", By.XPATH)
 
-    def choosePartnerOption(self, optionName: str) -> WebElement:
+    def choosePartnerOption(self, optionName: str) -> None:
         # Todo: Change undefined to name of Partner
         selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(self.inputPartner).click()
@@ -92,7 +92,7 @@ class ProgrammeManagement(BaseComponents):
     def getInputStartDate(self) -> WebElement:
         return self.wait_for(self.inputStartDate)
 
-    def chooseInputStartDateViaCalendar(self, day: int):
+    def chooseInputStartDateViaCalendar(self, day: int) -> None:
         self.find_in_element(self.getLabelStartDate(), self.calendarIcon)[0].click()
         self.getCalendar()
         self.get_elements('//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
@@ -103,7 +103,7 @@ class ProgrammeManagement(BaseComponents):
                           By.XPATH)[day - 1].click()
         self.wait_for_disappear(self.calendar)
 
-    def chooseInputEndDateViaCalendar(self, day: int):
+    def chooseInputEndDateViaCalendar(self, day: int) -> None:
         self.find_in_element(self.getLabelEndDate(), self.calendarIcon)[0].click()
         self.getCalendar()
         self.get_elements('//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
@@ -134,7 +134,7 @@ class ProgrammeManagement(BaseComponents):
     def getButtonSave(self) -> WebElement:
         return self.wait_for(self.buttonSave)
 
-    def chooseOptionSelector(self, optionName):
+    def chooseOptionSelector(self, optionName: str) -> None:
         selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(self.selectSelector).click()
         self.wait_for(selectOption).click()
@@ -143,7 +143,7 @@ class ProgrammeManagement(BaseComponents):
     def getLabelSelector(self) -> WebElement:
         return self.wait_for(self.labelSelector)
 
-    def chooseOptionDataCollectingType(self, optionName):
+    def chooseOptionDataCollectingType(self, optionName: str) -> None:
         selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(self.inputDataCollectingType).click()
         self.wait_for(selectOption).click()
@@ -158,7 +158,7 @@ class ProgrammeManagement(BaseComponents):
     def getButtonNewProgram(self) -> WebElement:
         return self.wait_for(self.buttonNewProgram)
 
-    def fillFiltersSearch(self, filterText):
+    def fillFiltersSearch(self, filterText: str) -> None:
         self.wait_for(self.filtersSearch, By.XPATH).send_keys(filterText)
         # ToDo: Delete sleep
         sleep(1)
