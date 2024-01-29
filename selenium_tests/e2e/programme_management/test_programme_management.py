@@ -4,6 +4,7 @@ from helpers.date_time_format import FTime
 from datetime import datetime
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_details.programme_details import ProgrammeDetails
+from dateutil.relativedelta import relativedelta
 
 
 class TestProgrammeManagement:
@@ -398,7 +399,7 @@ class TestProgrammeManagement:
             {"program_name": "New Programme - " + str(random.random()),
              "selector": "Health",
              "dataCollectingType": "Partial"
-             }, id="Name Change"),
+             }, id="Change Date"),
     ])
     def test_create_programme_chose_dates_via_calendar(self,
                                                        pageProgrammeManagement: ProgrammeManagement,
@@ -417,4 +418,5 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         assert str(datetime.now().strftime('15 %b %Y')) in pageProgrammeDetails.getLabelStartDate().text
-        assert str(datetime.now().strftime('25 %b %Y')) in pageProgrammeDetails.getLabelEndDate().text
+        end_date = datetime.now() + relativedelta(months=1)
+        assert str(end_date.strftime('25 %b %Y')) in pageProgrammeDetails.getLabelEndDate().text
