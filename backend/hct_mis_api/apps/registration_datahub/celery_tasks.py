@@ -13,6 +13,10 @@ from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.exceptions import (
+    AlreadyRunningException,
+    WrongStatusException,
+)
 from hct_mis_api.apps.registration_datahub.models import ImportedHousehold
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import (
     HardDocumentDeduplication,
@@ -61,7 +65,7 @@ def locked_cache(key: Union[int, str], timeout: int = 60 * 60 * 24) -> Any:
 @sentry_tags
 def registration_xlsx_import_task(
     self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
-) -> None:
+) -> bool:
     try:
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
@@ -70,14 +74,14 @@ def registration_xlsx_import_task(
 
         with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
             if not locked:
-                raise Exception(
+                raise AlreadyRunningException(
                     f"Task with key registration_xlsx_import_task {registration_data_import_id} is already running"
                 )
             with configure_scope() as scope:
                 scope.set_tag("business_area", BusinessArea.objects.get(pk=business_area_id))
                 rdi = RegistrationDataImport.objects.get(datahub_id=registration_data_import_id)
-                if rdi.status != RegistrationDataImport.IMPORT_SCHEDULED:
-                    raise Exception("Rdi is not in status IMPORT_SCHEDULED while trying to import")
+                if rdi.status not in (RegistrationDataImport.IMPORT_SCHEDULED, RegistrationDataImport.IMPORT_ERROR):
+                    raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
                 rdi.status = RegistrationDataImport.IMPORTING
                 rdi.save()
                 RdiXlsxCreateTask().execute(
@@ -86,6 +90,10 @@ def registration_xlsx_import_task(
                     business_area_id=business_area_id,
                     program_id=str(program_id),
                 )
+                return True
+    except (WrongStatusException, AlreadyRunningException) as e:
+        logger.info(str(e))
+        return True
     except Exception as e:
         logger.warning(e)
         from hct_mis_api.apps.registration_datahub.models import (
@@ -280,9 +288,7 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
     try:
         return PullKoboSubmissions().execute(kobo_import_data)
     except Exception as e:
-        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-
-        RegistrationDataImport.objects.filter(
+        KoboImportData.objects.filter(
             id=kobo_import_data.id,
         ).update(status=KoboImportData.STATUS_ERROR, error=str(e))
         raise self.retry(exc=e)

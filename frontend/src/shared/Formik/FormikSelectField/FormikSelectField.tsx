@@ -97,27 +97,29 @@ export const FormikSelectField = ({
             ) : null
           }
         >
-          {otherProps.choices?.map((each) => (
-            <MenuItem
-              key={each.value ? each.value : each.name || ''}
-              value={each.value ? each.value : each.name || ''}
-              data-cy={`select-option-${each.name}`}
-              disabled={each.disabled || false}
-            >
-              {each.description ? (
-                <ListItemText
-                  primary={each.labelEn || each.name || each.label}
-                  secondary={each.description}
-                  primaryTypographyProps={{ noWrap: true }}
-                  secondaryTypographyProps={{
-                    style: { whiteSpace: 'normal', maxWidth: '300px' },
-                  }}
-                />
-              ) : (
-                each.labelEn || each.name || each.label
-              )}
-            </MenuItem>
-          ))}
+          {otherProps.choices.map((each) => {
+            return (
+              <MenuItem
+                key={each.value ? each.value : each.name || ''}
+                value={each.value ? each.value : each.name || ''}
+                data-cy={`select-option-${each.name || each.label}`}
+                disabled={each.disabled || false}
+              >
+                {each.description ? (
+                  <ListItemText
+                    primary={each.labelEn || each.name || each.label}
+                    secondary={each.description}
+                    primaryTypographyProps={{ noWrap: true }}
+                    secondaryTypographyProps={{
+                      style: { whiteSpace: 'normal', maxWidth: '300px' },
+                    }}
+                  />
+                ) : (
+                  each.labelEn || each.name || each.label
+                )}
+              </MenuItem>
+            );
+          })}
         </Select>
         {isInvalid && (
           <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>

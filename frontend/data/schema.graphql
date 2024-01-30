@@ -1710,7 +1710,6 @@ enum ImportDataDataType {
   XLSX
   JSON
   FLEX
-  DIIA
 }
 
 type ImportDataNode implements Node {
@@ -2037,7 +2036,6 @@ type ImportedHouseholdNode implements Node {
   koboAssetId: String!
   koboSubmissionTime: DateTime
   rowId: Int
-  diiaRecId: String!
   enumeratorRecId: Int
   misUnicefId: String
   programId: UUID
@@ -3472,6 +3470,8 @@ type ProgramNode implements Node {
   individualDataNeeded: Boolean
   dataCollectingType: DataCollectingTypeNode
   isVisible: Boolean!
+  householdCount: Int!
+  individualCount: Int!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3533,7 +3533,7 @@ type Query {
   allAccountabilityCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, sex: String, orderBy: String): CommunicationMessageRecipientMapNodeConnection
   accountabilityCommunicationMessageSampleSize(input: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeNode
   feedback(id: ID!): FeedbackNode
-  allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, isActiveProgram: Boolean, program: String, orderBy: String): FeedbackNodeConnection
+  allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, isActiveProgram: String, program: String, orderBy: String): FeedbackNodeConnection
   feedbackIssueTypeChoices: [ChoiceObject]
   survey(id: ID!): SurveyNode
   allSurveys(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, targetPopulation: ID, businessArea: String, createdAtRange: String, search: String, createdBy: String, orderBy: String): SurveyNodeConnection
@@ -3786,7 +3786,6 @@ type RefuseRegistrationDataImportMutation {
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
-  DIIA
   FLEX_REGISTRATION
   API
   EDOPOMOGA
