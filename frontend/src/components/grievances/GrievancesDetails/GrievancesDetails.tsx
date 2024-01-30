@@ -115,43 +115,54 @@ export const GrievancesDetails = ({
     return <>-</>;
   };
 
-  const renderPaymentUrl = (): React.ReactElement => {
-    if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
-      return renderUrl(
-        ticket?.paymentRecord,
-        'PaymentRecord',
-        `/${baseUrl}/payment-records/${ticket?.paymentRecord?.id}`,
-        ticket?.paymentRecord?.caId,
-      );
+  const getUrl = (objType: string, id: string): string => {
+    switch (objType) {
+      case 'PaymentRecord':
+        return `/${baseUrl}/payment-records/${id}`;
+      case 'Payment':
+        return `/${baseUrl}/payment-module/payments/${id}`;
+      case 'PaymentPlan':
+        return `/${baseUrl}/payment-module/payment-plans/${id}`;
+      case 'CashPlan':
+        return `/${baseUrl}/cashplans/${id}`;
+      default:
+        return '';
     }
+  };
 
-    if (ticket?.paymentRecord?.objType === 'Payment') {
+  const renderPaymentUrl = (): React.ReactElement => {
+    const paymentRecord = ticket?.paymentRecord;
+    if (paymentRecord) {
       return renderUrl(
-        ticket?.paymentRecord,
-        'Payment',
-        `/${baseUrl}/payment-module/payments/${ticket?.paymentRecord?.id}`,
-        ticket?.paymentRecord?.caId,
+        paymentRecord,
+        paymentRecord.objType,
+        getUrl(paymentRecord.objType, paymentRecord.id),
+        paymentRecord.caId,
       );
     }
     return <>-</>;
   };
 
   const renderPaymentPlanUrl = (): React.ReactElement => {
-    if (ticket?.paymentRecord?.parent?.objType === 'PaymentPlan') {
+    const parent = ticket?.paymentRecord?.parent;
+    if (parent) {
       return renderUrl(
-        ticket?.paymentRecord?.parent,
-        'PaymentPlan',
-        `/${baseUrl}/payment-module/payment-plans/${ticket?.paymentRecord?.parent?.id}`,
-        ticket?.paymentRecord?.parent?.unicefId,
+        parent,
+        parent.objType,
+        getUrl(parent.objType, parent.id),
+        parent.unicefId,
       );
     }
-    if (ticket?.paymentRecord?.parent?.objType === 'CashPlan') {
-      return renderUrl(
-        ticket?.paymentRecord?.parent,
-        'CashPlan',
-        `/${baseUrl}/cashplans/${ticket?.paymentRecord?.parent?.id}`,
-        ticket?.paymentRecord?.parent?.unicefId,
-      );
+    return <>-</>;
+  };
+
+  const renderPaymentPlanVerificationUrl = (): React.ReactElement => {
+    const parent = ticket?.paymentRecord?.parent;
+    if (parent) {
+      const url = `/${baseUrl}/payment-verification/${
+        parent.objType === 'CashPlan' ? 'cash-plan' : 'payment-plan'
+      }/${parent.id}`;
+      return renderUrl(parent, parent.objType, url, parent.unicefId);
     }
     return <>-</>;
   };
@@ -292,6 +303,11 @@ export const GrievancesDetails = ({
               {
                 label: t('Payment Plan'),
                 value: <span>{renderPaymentPlanUrl()}</span>,
+                size: 3,
+              },
+              {
+                label: t('Payment Plan Verification'),
+                value: <span>{renderPaymentPlanVerificationUrl()}</span>,
                 size: 3,
               },
               {
