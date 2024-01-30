@@ -35,6 +35,10 @@ export const DatePickerFilter = ({
         value={datePickerValue}
         format='YYYY-MM-DD'
         InputAdornmentProps={{ position: 'end' }}
+        KeyboardButtonProps={{
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ...({ 'data-cy': 'calendar-icon' } as any),
+        }}
         fullWidth={fullWidth}
         {...props}
       />

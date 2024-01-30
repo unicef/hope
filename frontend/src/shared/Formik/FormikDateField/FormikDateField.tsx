@@ -66,6 +66,10 @@ export const FormikDateField = ({
       PopoverProps={{
         PaperProps: { 'data-cy': 'date-picker-container' },
       }}
+      KeyboardButtonProps={{
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...({ 'data-cy': 'calendar-icon' } as any),
+      }}
     />
   );
 
