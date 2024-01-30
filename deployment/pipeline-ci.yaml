@@ -5,8 +5,7 @@ trigger:
     - develop
     - staging
     - master
-    - global-program-filter
-    - testing-ephemeral
+    - ephemeral-1
     - ops/*
   paths:
     exclude:
