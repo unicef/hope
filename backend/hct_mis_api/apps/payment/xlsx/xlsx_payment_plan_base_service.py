@@ -11,4 +11,5 @@ class XlsxPaymentPlanBaseService:
         "currency",
         "entitlement_quantity",
         "entitlement_quantity_usd",
+        "status",
     )
