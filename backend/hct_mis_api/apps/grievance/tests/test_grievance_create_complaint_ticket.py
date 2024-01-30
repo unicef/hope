@@ -246,7 +246,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
         self,
         household: Optional[str] = None,
         individual: Optional[str] = None,
-        payment_records: List[Optional[str]] = [],
+        payment_records: List[Optional[str]] = list,
     ) -> Dict:
         return {
             "input": {
