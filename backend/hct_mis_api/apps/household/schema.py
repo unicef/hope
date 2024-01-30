@@ -294,16 +294,13 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         business_area_slug = info.context.headers.get("Business-Area")
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
-        if not program_id:
-            raise PermissionDenied("Permission Denied")
-
         if not user.partner.is_unicef:
-            partner_permission = user.partner.get_permissions()
-            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(program_id))
-            if areas_from_partner is None:
+            if program_id and str(object_instance.program_id) != program_id:
                 raise PermissionDenied("Permission Denied")
 
-            if str(object_instance.program_id) != program_id:
+            partner_permission = user.partner.get_permissions()
+            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(object_instance.program_id))
+            if areas_from_partner is None:
                 raise PermissionDenied("Permission Denied")
 
             if len(areas_from_partner) > 0 and object_instance.household_id and object_instance.household.admin_area_id:
@@ -318,7 +315,9 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area, program_id
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value,
+            object_instance.business_area,
+            object_instance.program_id,
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
@@ -452,16 +451,14 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         business_area_slug = info.context.headers.get("Business-Area")
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
-        if not program_id:
-            raise PermissionDenied("Permission Denied")
-
         if not user.partner.is_unicef:
             partner_permission = user.partner.get_permissions()
-            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(program_id))
-            if areas_from_partner is None:
+
+            if program_id and str(object_instance.program_id) != program_id:
                 raise PermissionDenied("Permission Denied")
 
-            if str(object_instance.program_id) != program_id:
+            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(object_instance.program_id))
+            if areas_from_partner is None:
                 raise PermissionDenied("Permission Denied")
 
             if len(areas_from_partner) > 0 and object_instance.admin_area_id:
@@ -475,7 +472,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
         # if user doesn't have permission to view all households, we check based on their grievance tickets
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area, program_id
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value,
+            object_instance.business_area,
+            object_instance.program_id,
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()

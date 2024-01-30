@@ -8,6 +8,7 @@ from hct_mis_api.apps.household.fixtures import (
 )
 from hct_mis_api.apps.household.models import Document, Household, Individual
 from hct_mis_api.apps.household.services.household_withdraw import HouseholdWithdraw
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestHouseholdWithdraw(TestCase):
@@ -25,6 +26,7 @@ class TestHouseholdWithdraw(TestCase):
             DocumentFactory.create_batch(3, individual=individual, status=Document.STATUS_NEED_INVESTIGATION)
 
         household, individuals = create_household_for_fixtures({"size": 5})
+        household.program = ProgramFactory()
         for individual in individuals:
             DocumentFactory.create_batch(2, individual=individual, status=Document.STATUS_VALID)
             DocumentFactory.create_batch(3, individual=individual, status=Document.STATUS_NEED_INVESTIGATION)
