@@ -533,3 +533,44 @@ class TestXLSXValidatorsMethods(APITestCase):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
+
+    def test_validate_incorrect_admin_area(self) -> None:
+        file_path = f"{self.FILES_DIR_PATH}/invalid_area.xlsx"
+
+        expected_result = [
+            {
+                "header": "admin1_h_c",
+                "row_number": 3,
+                "message": "Sheet Households: Area with code: F-35 does not exist",
+            },
+            {
+                "header": "admin2_h_c",
+                "row_number": 3,
+                "message": "Sheet Households: Area with code: F-35 does not exist",
+            },
+            {
+                "header": "admin1_h_c",
+                "row_number": 4,
+                "message": "Sheet Households: Area with code: F-35 does not exist",
+            },
+            {
+                "header": "admin2_h_c",
+                "row_number": 4,
+                "message": "Sheet Households: Area with code: F-35 does not exist",
+            },
+            {
+                "header": "admin1_h_c",
+                "row_number": 6,
+                "message": "Sheet Households: Area with code: F-35 does not exist",
+            },
+            {
+                "header": "admin2_h_c",
+                "row_number": 6,
+                "message": "Sheet Households: Area with code: F-35 does not exist",
+            },
+        ]
+
+        with open(file_path, "rb") as file:
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
+            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+        self.assertEqual(result, expected_result)
