@@ -72,7 +72,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
     permissions,
   );
   const canSendToFsp = false; // TODO: disabled for now
-  // hasPermissions(PERMISSIONS.PM_SENDING_PAYMENT_PLAN_TO_FSP, permissions) &&
+  // hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
   // paymentPlan.status === PaymentPlanStatus.Accepted &&
   // paymentPlan.deliveryMechanisms.some(
   //   ({ fsp: { communicationChannel } }) =>
@@ -151,7 +151,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
           canExportXlsx={canExportXlsx}
-          canSendToFsp={canSendToFsp}
+          canSendToPaymentGateway={canSendToFsp}
           paymentPlan={paymentPlan}
         />
       );
@@ -161,7 +161,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
           canExportXlsx={canExportXlsx}
-          canSendToFsp={canSendToFsp}
+          canSendToPaymentGateway={canSendToFsp}
           paymentPlan={paymentPlan}
         />
       );
