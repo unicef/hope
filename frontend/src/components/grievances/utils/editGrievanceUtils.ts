@@ -1,6 +1,9 @@
 import camelCase from 'lodash/camelCase';
 import React from 'react';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import {
+  GrievanceTicketQuery,
+  PaymentRecordAndPaymentNode,
+} from '../../../__generated__/graphql';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
@@ -26,7 +29,10 @@ interface EditValuesTypes {
   area: string;
   selectedHousehold?;
   selectedIndividual?;
-  selectedPaymentRecords;
+  selectedPaymentRecords: Pick<
+    PaymentRecordAndPaymentNode,
+    'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
+  >[];
   paymentRecord?: string;
   selectedLinkedTickets: string[];
   individualData?;
