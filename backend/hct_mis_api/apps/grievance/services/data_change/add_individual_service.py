@@ -29,6 +29,7 @@ from hct_mis_api.apps.grievance.services.data_change.utils import (
     update_es,
     verify_flex_fields,
 )
+from hct_mis_api.apps.grievance.signals import individual_added
 from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
@@ -154,6 +155,7 @@ class AddIndividualService(DataChangeService):
         )
 
         update_es(individual)
+        individual_added.send(sender=TicketAddIndividualDetails, instance=individual)
 
         if not self.grievance_ticket.business_area.postpone_deduplication:
             transaction.on_commit(

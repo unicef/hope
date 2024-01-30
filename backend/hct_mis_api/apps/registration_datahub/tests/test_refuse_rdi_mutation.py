@@ -1,5 +1,7 @@
 from typing import Any, List
 
+from django.conf import settings
+
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -22,7 +24,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 
 class TestRefuseRdiMutation(BaseElasticSearchTestCase, APITestCase):
     databases = "__all__"
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     REFUSE_IMPORT_QUERY = """
       mutation RefuseRDI($id: ID!, $refuseReason: String) {

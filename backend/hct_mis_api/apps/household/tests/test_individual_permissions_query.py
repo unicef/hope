@@ -79,7 +79,13 @@ class TestIndividualPermissionsQuery(APITestCase):
         permissions = [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS]
         cls.create_user_role_with_permissions(cls.user, permissions, cls.business_area)
 
-    def test_unicef_partner_has_access(self) -> None:
+    def test_unicef_partner_has_access_for_program(self) -> None:
+        self._test_unicef_partner_has_access(self.id_to_base64(self.program_one.id, "ProgramNode"))
+
+    def test_unicef_partner_has_access_query_all_programs(self) -> None:
+        self._test_unicef_partner_has_access("all")
+
+    def _test_unicef_partner_has_access(self, program: str) -> None:
         self.user.partner = self.unicef_partner
         self.user.save()
 
@@ -88,14 +94,22 @@ class TestIndividualPermissionsQuery(APITestCase):
             context={
                 "user": self.user,
                 "headers": {
-                    "Program": self.id_to_base64(self.program_one.id, "ProgramNode"),
+                    "Program": program,
                     "Business-Area": self.business_area.slug,
                 },
             },
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_not_unicef_partner_with_program_and_without_admin_area_has_access(self) -> None:
+    def test_not_unicef_partner_with_program_and_without_admin_area_has_access_for_program(self) -> None:
+        self._test_not_unicef_partner_with_program_and_without_admin_area_has_access(
+            self.id_to_base64(self.program_one.id, "ProgramNode")
+        )
+
+    def test_not_unicef_partner_with_program_and_without_admin_area_has_access_query_all_programs(self) -> None:
+        self._test_not_unicef_partner_with_program_and_without_admin_area_has_access("all")
+
+    def _test_not_unicef_partner_with_program_and_without_admin_area_has_access(self, program: str) -> None:
         permissions: PartnerPermission = self.not_unicef_partner.get_permissions()
         permissions.set_program_areas(str(self.business_area.id), str(self.program_one.id), [])
         self.not_unicef_partner.set_permissions(permissions)
@@ -108,14 +122,22 @@ class TestIndividualPermissionsQuery(APITestCase):
             context={
                 "user": self.user,
                 "headers": {
-                    "Program": self.id_to_base64(self.program_one.id, "ProgramNode"),
+                    "Program": program,
                     "Business-Area": self.business_area.slug,
                 },
             },
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access(self) -> None:
+    def test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access_for_program(self) -> None:
+        self._test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access(
+            self.id_to_base64(self.program_one.id, "ProgramNode")
+        )
+
+    def test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access_query_all_programs(self) -> None:
+        self._test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access("all")
+
+    def _test_not_unicef_partner_with_program_and_with_correct_admin_area_has_access(self, program: str) -> None:
         permissions: PartnerPermission = self.not_unicef_partner.get_permissions()
         permissions.set_program_areas(str(self.business_area.id), str(self.program_one.id), [str(self.area2.id)])
         self.not_unicef_partner.set_permissions(permissions)
@@ -128,14 +150,24 @@ class TestIndividualPermissionsQuery(APITestCase):
             context={
                 "user": self.user,
                 "headers": {
-                    "Program": self.id_to_base64(self.program_one.id, "ProgramNode"),
+                    "Program": program,
                     "Business-Area": self.business_area.slug,
                 },
             },
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access(self) -> None:
+    def test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access_for_program(self) -> None:
+        self._test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access(
+            self.id_to_base64(self.program_one.id, "ProgramNode")
+        )
+
+    def test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access_query_all_programs(
+        self,
+    ) -> None:
+        self._test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access("all")
+
+    def _test_not_unicef_partner_with_program_and_with_wrong_admin_area_doesnt_have_access(self, program: str) -> None:
         permissions: PartnerPermission = self.not_unicef_partner.get_permissions()
         permissions.set_program_areas(str(self.business_area.id), str(self.program_one.id), [str(self.area3.id)])
         self.not_unicef_partner.set_permissions(permissions)
@@ -148,14 +180,22 @@ class TestIndividualPermissionsQuery(APITestCase):
             context={
                 "user": self.user,
                 "headers": {
-                    "Program": self.id_to_base64(self.program_one.id, "ProgramNode"),
+                    "Program": program,
                     "Business-Area": self.business_area.slug,
                 },
             },
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_not_unicef_partner_without_program_doesnt_have_access(self) -> None:
+    def test_not_unicef_partner_without_program_doesnt_have_access_for_program(self) -> None:
+        self._test_not_unicef_partner_without_program_doesnt_have_access(
+            self.id_to_base64(self.program_one.id, "ProgramNode")
+        )
+
+    def test_not_unicef_partner_without_program_doesnt_have_access_query_all_programs(self) -> None:
+        self._test_not_unicef_partner_without_program_doesnt_have_access("all")
+
+    def _test_not_unicef_partner_without_program_doesnt_have_access(self, program: str) -> None:
         self.user.partner = self.not_unicef_partner
         self.user.save()
 
@@ -164,7 +204,7 @@ class TestIndividualPermissionsQuery(APITestCase):
             context={
                 "user": self.user,
                 "headers": {
-                    "Program": self.id_to_base64(self.program_one.id, "ProgramNode"),
+                    "Program": program,
                     "Business-Area": self.business_area.slug,
                 },
             },

@@ -2603,8 +2603,7 @@ export type HouseholdUpdateDataObjectType = {
 export enum ImportDataDataType {
   Xlsx = 'XLSX',
   Json = 'JSON',
-  Flex = 'FLEX',
-  Diia = 'DIIA'
+  Flex = 'FLEX'
 }
 
 export type ImportDataNode = Node & {
@@ -2931,7 +2930,6 @@ export type ImportedHouseholdNode = Node & {
   koboAssetId: Scalars['String'],
   koboSubmissionTime?: Maybe<Scalars['DateTime']>,
   rowId?: Maybe<Scalars['Int']>,
-  diiaRecId: Scalars['String'],
   enumeratorRecId?: Maybe<Scalars['Int']>,
   misUnicefId?: Maybe<Scalars['String']>,
   programId?: Maybe<Scalars['UUID']>,
@@ -5283,6 +5281,8 @@ export type ProgramNode = Node & {
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
   dataCollectingType?: Maybe<DataCollectingTypeNode>,
   isVisible: Scalars['Boolean'],
+  householdCount: Scalars['Int'],
+  individualCount: Scalars['Int'],
   households: HouseholdNodeConnection,
   householdSet: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
@@ -5726,7 +5726,7 @@ export type QueryAllFeedbacksArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
   feedbackId?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>,
+  isActiveProgram?: Maybe<Scalars['String']>,
   program?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -6867,7 +6867,6 @@ export type RegistrationDataImportDatahubNodeEdge = {
 export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
   Kobo = 'KOBO',
-  Diia = 'DIIA',
   FlexRegistration = 'FLEX_REGISTRATION',
   Api = 'API',
   Edopomoga = 'EDOPOMOGA'
@@ -11871,7 +11870,7 @@ export type AllFeedbacksQueryVariables = {
   feedbackId?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   program?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>
+  isActiveProgram?: Maybe<Scalars['String']>
 };
 
 
@@ -21796,7 +21795,7 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllFeedbacksDocument = gql`
-    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String, $program: String, $isActiveProgram: Boolean) {
+    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String, $program: String, $isActiveProgram: String) {
   allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, issueType: $issueType, createdAtRange: $createdAtRange, createdBy: $createdBy, feedbackId: $feedbackId, orderBy: $orderBy, program: $program, isActiveProgram: $isActiveProgram) {
     totalCount
     pageInfo {
@@ -30904,7 +30903,6 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  diiaRecId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   enumeratorRecId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
@@ -31852,6 +31850,8 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType>,
   isVisible?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  householdCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  individualCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdSetArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, ProgramNodeIndividualsArgs>,
