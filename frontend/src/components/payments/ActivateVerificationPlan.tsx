@@ -27,6 +27,8 @@ export const ActivateVerificationPlan = ({
     try {
       await mutate({
         variables: { paymentVerificationPlanId },
+        refetchQueries: ['AllPaymentVerifications'],
+        awaitRefetchQueries: true
       });
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
