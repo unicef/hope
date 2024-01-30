@@ -87,7 +87,8 @@ export enum Action {
   Authorize = 'AUTHORIZE',
   Review = 'REVIEW',
   Reject = 'REJECT',
-  Finish = 'FINISH'
+  Finish = 'FINISH',
+  SendToPaymentGateway = 'SEND_TO_PAYMENT_GATEWAY'
 }
 
 export type ActionPaymentPlanInput = {
@@ -1442,6 +1443,7 @@ export type DeliveryMechanismNode = Node & {
   status: Scalars['String'],
   deliveryMechanism?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanism>,
   deliveryMechanismOrder: Scalars['Int'],
+  sentToPaymentGateway: Scalars['Boolean'],
   name?: Maybe<Scalars['String']>,
   order?: Maybe<Scalars['Int']>,
   fsp?: Maybe<FinancialServiceProviderNode>,
@@ -4622,7 +4624,9 @@ export enum PaymentPlanBackgroundActionStatus {
   XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
   XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION',
   ExcludeBeneficiaries = 'EXCLUDE_BENEFICIARIES',
-  ExcludeBeneficiariesError = 'EXCLUDE_BENEFICIARIES_ERROR'
+  ExcludeBeneficiariesError = 'EXCLUDE_BENEFICIARIES_ERROR',
+  SendToPaymentGateway = 'SEND_TO_PAYMENT_GATEWAY',
+  SendToPaymentGatewayError = 'SEND_TO_PAYMENT_GATEWAY_ERROR'
 }
 
 export enum PaymentPlanCurrency {
@@ -12460,7 +12464,7 @@ export type PaymentPlanQuery = (
       )> }
     )>, deliveryMechanisms: Maybe<Array<Maybe<(
       { __typename?: 'DeliveryMechanismNode' }
-      & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order'>
+      & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order' | 'sentToPaymentGateway'>
       & { fsp: Maybe<(
         { __typename?: 'FinancialServiceProviderNode' }
         & Pick<FinancialServiceProviderNode, 'id' | 'name' | 'communicationChannel'>
@@ -23240,6 +23244,7 @@ export const PaymentPlanDocument = gql`
       id
       name
       order
+      sentToPaymentGateway
       fsp {
         id
         name
@@ -30207,6 +30212,7 @@ export type DeliveryMechanismNodeResolvers<ContextType = any, ParentType extends
   status?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanism']>, ParentType, ContextType>,
   deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  sentToPaymentGateway?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   order?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,

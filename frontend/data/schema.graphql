@@ -44,6 +44,7 @@ enum Action {
   REVIEW
   REJECT
   FINISH
+  SEND_TO_PAYMENT_GATEWAY
 }
 
 input ActionPaymentPlanInput {
@@ -929,6 +930,7 @@ type DeliveryMechanismNode implements Node {
   status: String!
   deliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism
   deliveryMechanismOrder: Int!
+  sentToPaymentGateway: Boolean!
   name: String
   order: Int
   fsp: FinancialServiceProviderNode
@@ -2907,6 +2909,8 @@ enum PaymentPlanBackgroundActionStatus {
   XLSX_IMPORTING_RECONCILIATION
   EXCLUDE_BENEFICIARIES
   EXCLUDE_BENEFICIARIES_ERROR
+  SEND_TO_PAYMENT_GATEWAY
+  SEND_TO_PAYMENT_GATEWAY_ERROR
 }
 
 enum PaymentPlanCurrency {
