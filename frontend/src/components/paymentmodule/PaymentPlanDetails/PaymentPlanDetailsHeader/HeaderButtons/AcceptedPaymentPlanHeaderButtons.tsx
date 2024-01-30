@@ -4,6 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import {
+  Action,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
   useExportXlsxPpListPerFspMutation,
@@ -11,18 +12,19 @@ import {
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
 import { useProgramContext } from "../../../../../programContext";
+import {usePaymentPlanAction} from "../../../../../hooks/usePaymentPlanAction";
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
   canExportXlsx: boolean;
-  canSendToFsp: boolean;
+  canSendToPaymentGateway: boolean;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
 export const AcceptedPaymentPlanHeaderButtons = ({
   canDownloadXlsx,
   canExportXlsx,
-  canSendToFsp,
+  canSendToPaymentGateway,
   paymentPlan,
 }: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -33,6 +35,15 @@ export const AcceptedPaymentPlanHeaderButtons = ({
     mutateExport,
     { loading: loadingExport },
   ] = useExportXlsxPpListPerFspMutation();
+
+  const {
+    mutatePaymentPlanAction: sendToPaymentGateway,
+    loading: LoadingSendToPaymentGateway,
+  } = usePaymentPlanAction(
+    Action.SendToPaymentGateway,
+    paymentPlan.id,
+    () => showMessage(t('Sending to Payment Gateway started')),
+  );
 
   const shouldDisableExportXlsx =
     loadingExport ||
@@ -94,10 +105,16 @@ export const AcceptedPaymentPlanHeaderButtons = ({
           </Box>
         )}
         <Box m={2}>
-          {/*TODO: connect this button*/}
-          <Button color='primary' variant='contained' disabled={!canSendToFsp}>
-            {t('Send to FSP')}
-          </Button>
+          <Button
+              type='button'
+              color='primary'
+              variant='contained'
+              onClick={() => sendToPaymentGateway()}
+              data-cy='button-send-to-payment-gateway'
+              disabled={!canSendToPaymentGateway || LoadingSendToPaymentGateway}
+            >
+                {t('Send to FSP')}
+            </Button>
         </Box>
       </>
     </Box>

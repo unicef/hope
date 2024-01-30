@@ -1043,8 +1043,9 @@ class Query(graphene.ObjectType):
 
         def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
             fsps = FinancialServiceProvider.objects.filter(
+                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism)
+                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
                 delivery_mechanisms__contains=[mechanism],
-                fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism,
             ).distinct()
             return (
                 [
