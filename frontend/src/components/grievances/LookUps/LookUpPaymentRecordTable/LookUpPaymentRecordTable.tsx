@@ -50,7 +50,7 @@ export function LookUpPaymentRecordTable({
     setFieldValue('selectedPaymentRecords', newSelected);
   };
 
-  const handleSelectAllCheckboxesClick = (_event, rows): void => {
+  const handleSelectAllCheckboxesClick = (_, rows): void => {
     if (!selected.length) {
       const newSelecteds = rows;
       setSelected(newSelecteds);
