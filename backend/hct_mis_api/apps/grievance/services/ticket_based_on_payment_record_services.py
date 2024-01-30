@@ -1,7 +1,6 @@
 from base64 import b64decode
 from typing import Dict, List, Optional, Type, Union
 
-from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
@@ -59,8 +58,7 @@ def create_tickets_based_on_payment_records_service(
         model.objects.create(
             individual=individual,
             household=household,
-            payment_content_type=get_content_type_for_model(payment_record),
-            payment_object_id=payment_record.pk,
+            payment_obj=payment_record,
             ticket=ticket,
         )
         ticket.refresh_from_db()
