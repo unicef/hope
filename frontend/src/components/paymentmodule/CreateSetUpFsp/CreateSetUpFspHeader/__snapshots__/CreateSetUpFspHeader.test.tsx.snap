@@ -3,14 +3,14 @@
 exports[`components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader should render 1`] = `
 <div>
   <div
-    class="sc-bZQynM dsDRHi"
+    class="sc-ifAKCX hPNxSD"
     data-cy="page-header-container"
   >
     <div
-      class="sc-gzVnrw YPbNu"
+      class="sc-EHOje xCQCx"
     >
       <div
-        class="sc-iwsKbI jVTAHI"
+        class="sc-htoDjs ehUDZT"
       >
         <svg
           aria-hidden="true"
@@ -24,7 +24,7 @@ exports[`components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader should ren
         </svg>
       </div>
       <div
-        class="sc-htoDjs dmLXTD"
+        class="sc-bZQynM hoGuXF"
       >
         <div>
           <div
@@ -45,7 +45,7 @@ exports[`components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader should ren
             class="MuiBox-root MuiBox-root-1"
           >
             <div
-              class="sc-jTzLTM kVKYxK"
+              class="sc-gZMcBi jDLnjQ"
             >
               <h5
                 class="MuiTypography-root MuiTypography-h5"
@@ -60,12 +60,12 @@ exports[`components/paymentmodule/CreateSetUpFsp/CreateSetUpFspHeader should ren
           </div>
         </div>
         <div
-          class="sc-dnqmqq gwXewl"
+          class="sc-gzVnrw cHjfCB"
         />
       </div>
     </div>
     <div
-      class="sc-gZMcBi bLdEQm"
+      class="sc-dnqmqq bUccVO"
     />
   </div>
 </div>

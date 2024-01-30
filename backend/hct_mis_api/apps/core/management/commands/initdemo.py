@@ -66,11 +66,6 @@ class Command(BaseCommand):
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/data.json",
             database="registration_datahub",
         )
-        call_command(
-            "loaddata",
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/fixtures/diiadata.json",
-            database="registration_datahub",
-        )
         call_command("loaddata", "hct_mis_api/apps/steficon/fixtures/data.json")
         call_command("loaddata", "hct_mis_api/aurora/fixtures/data.json")
 

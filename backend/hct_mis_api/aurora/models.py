@@ -1,8 +1,12 @@
+import json
+from typing import Dict
+
 from django.db import models
 
 import swapper
 from strategy_field.fields import StrategyField
 
+from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.aurora.rdi import registry
 
 
@@ -95,3 +99,20 @@ class RecordBase(models.Model):
 class Record(RecordBase):
     class Meta:
         swappable = swapper.swappable_setting("aurora", "Record")
+
+    def mark_as_invalid(self, msg: str) -> None:
+        self.error_message = msg
+        self.status = self.STATUS_ERROR
+        self.save()
+
+    def mark_as_imported(self) -> None:
+        self.status = self.STATUS_IMPORTED
+        self.save()
+
+    def get_data(self) -> Dict:
+        if self.storage:
+            return json.loads(self.storage.tobytes().decode())
+        if not self.files:
+            return self.fields
+        files = json.loads(self.files.tobytes().decode())
+        return combine_collections(files, self.fields)

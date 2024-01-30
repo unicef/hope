@@ -71,9 +71,8 @@ export const RegistrationDataImportTable = ({
           getTitle={(data) =>
             noTitle
               ? null
-              : `${t('List of Imports')} (${
-                  data.allRegistrationDataImports.totalCount
-                })`
+              : `${t('List of Imports')} (${data?.allRegistrationDataImports
+                  ?.totalCount || 0})`
           }
           headCells={enableRadioButton ? headCells : headCells.slice(1)}
           defaultOrderBy='importDate'

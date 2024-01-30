@@ -16,6 +16,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
 import pytz
+from freezegun import freeze_time
 from openpyxl import load_workbook
 from parameterized import parameterized
 from pytz import utc
@@ -938,6 +939,7 @@ class TestPaymentPlanReconciliation(APITestCase):
             )
         )
 
+    @freeze_time("2023-12-12")
     def test_follow_up_pp_entitlements_can_be_changed_with_steficon_rule(self) -> None:
         pp = PaymentPlanFactory(is_follow_up=True, status=PaymentPlan.Status.LOCKED, unicef_id="unicef_id_12345_2023")
         rule = RuleFactory(name="SomeRule")
@@ -957,6 +959,19 @@ class TestPaymentPlanReconciliation(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=IMPORT_XLSX_PP_MUTATION,
+            context={"user": self.user},
+            variables={
+                "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
+                "file": BytesIO(content),
+            },
+        )
+
+    def test_correct_message_displayed_when_file_is_protected(self) -> None:
+        content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/import_file_protected.xlsx").read_bytes()
+        pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+
+        self.snapshot_graphql_request(
+            request_string=IMPORT_XLSX_PER_FSP_MUTATION,
             context={"user": self.user},
             variables={
                 "paymentPlanId": encode_id_base64(pp.id, "PaymentPlan"),
