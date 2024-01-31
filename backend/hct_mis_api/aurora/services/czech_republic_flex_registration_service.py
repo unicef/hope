@@ -112,7 +112,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         zip_code = household_address.get("zip_code_h_c", "")
 
         household_data = {
-            "flex_registrations_record": record,
+            # "flex_registrations_record": record,
             "registration_data_import": registration_data_import,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
