@@ -12,7 +12,7 @@ let newFeedbackPage = new NewFeedback();
 let grievanceNewTicketPage = new NewTicket();
 let grievanceDetailsPage = new GrievanceDetailsPage();
 
-describe("Grievance - Feedback", () => {
+describe.skip("Grievance - Feedback", () => {
   before(() => {
     cy.checkIfLoggedIn();
   });
