@@ -141,9 +141,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         )
         partner = user.partner
         has_partner_area_access = partner.is_unicef
-        ticket_program_id = object_instance.programs.first().id if object_instance.programs.first() else None
+        ticket_program_id = str(object_instance.programs.first().id) if object_instance.programs.first() else None
         if not partner.is_unicef:
-            if program_id and str(ticket_program_id) != program_id:
+            if program_id and ticket_program_id != program_id:
                 log_and_raise(f"Program id mismatch: {object_instance.program_id} != {program_id}")
 
             if not object_instance.admin2 or not ticket_program_id:
@@ -152,7 +152,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
             else:
                 partner_permission = partner.get_permissions()
                 partner_areas_list: Optional[List] = partner_permission.areas_for(
-                    str(business_area.id), str(ticket_program_id)
+                    str(business_area.id), ticket_program_id
                 )
                 if partner_areas_list is not None:
                     # partner_areas_list is []
@@ -167,7 +167,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
                     has_partner_area_access = False
 
         if (
-            user.has_permission(perm, business_area, str(ticket_program_id)) or check_creator or check_assignee
+            user.has_permission(perm, business_area, ticket_program_id) or check_creator or check_assignee
         ) and has_partner_area_access:
             return None
 

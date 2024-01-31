@@ -174,9 +174,8 @@ def filter_based_on_partner_areas_2(
         else:
             if business_area_permission := partner_permission.get_programs_for_business_area(business_area_id_str):
                 programs_permissions = business_area_permission.programs.items()
-                if (
-                    not programs_permissions
-                ):  # if user does not have permission to any program in this business area -> only non-program tickets
+                # if user does not have permission to any program in this business area -> only non-program tickets
+                if not programs_permissions:
                     return queryset.model.objects.none()
             else:
                 return queryset.model.objects.none()
