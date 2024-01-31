@@ -117,56 +117,63 @@ def handle_role(role: str, household: Household, individual: Individual) -> None
         )
 
 
-def handle_add_document(document: Document, individual: Individual) -> Document:
-    from hct_mis_api.apps.household.models import Document, DocumentType
-
-    document_key = document.get("key")
-    country_code = document.get("country")
-    country = geo_models.Country.objects.get(iso_code3=country_code)
-    number = document.get("number")
-    photo = document.get("photo")
-    photoraw = document.get("photoraw")
+def handle_add_document(document_data: Dict, individual: Individual) -> Document:
+    document_key = document_data.get("key")
+    country_code = document_data.get("country")
+    number = document_data.get("number")
+    photo = document_data.get("photo")
+    photoraw = document_data.get("photoraw")
     if photo:
         photo = photoraw
-    document_type = DocumentType.objects.get(key=document_key)
 
     document_already_exists = Document.objects.filter(
-        document_number=number, type=document_type, country=country
+        document_number=number,
+        type__key=document_key,
+        country__iso_code3=country_code,
+        program_id=individual.program_id,
     ).exists()
     if document_already_exists:
         raise ValidationError(f"Document with number {number} of type {document_key} already exists")
 
-    return Document(document_number=number, individual=individual, type=document_type, photo=photo, country=country)
+    document_type = DocumentType.objects.get(key=document_key)
+    country = geo_models.Country.objects.get(iso_code3=country_code)
+
+    return Document(
+        document_number=number,
+        individual=individual,
+        type=document_type,
+        photo=photo,
+        country=country,
+        program_id=individual.program_id,
+    )
 
 
 def handle_edit_document(document_data: Dict) -> Document:
-    updated_document = document_data.get("value", {})
-
-    document_key = updated_document.get("key")
-    country_code = updated_document.get("country")
-    country = geo_models.Country.objects.get(iso_code3=country_code)
-    number = updated_document.get("number")
-    photo = updated_document.get("photo")
-    photoraw = updated_document.get("photoraw")
+    document_key = document_data.get("key")
+    country_code = document_data.get("country")
+    number = document_data.get("number")
+    photo = document_data.get("photo")
+    photoraw = document_data.get("photoraw")
     if photo:
         photo = photoraw
 
-    document_id = decode_id_string(updated_document.get("id"))
-    document_type = DocumentType.objects.get(key=document_key)
-
+    document = get_object_or_404(Document.objects.select_for_update(), id=(decode_id_string(document_data.get("id"))))
     document_already_exists = (
-        Document.objects.exclude(pk=document_id)
-        .filter(document_number=number, type=document_type, country=country)
+        Document.objects.exclude(pk=document.id)
+        .filter(
+            document_number=number,
+            type__key=document_key,
+            country__iso_code3=country_code,
+            program_id=document.program_id,
+        )
         .exists()
     )
     if document_already_exists:
         raise ValidationError(f"Document with number {number} of type {document_key} already exists")
 
-    document = get_object_or_404(Document.objects.select_for_update(), id=document_id)
-
     document.document_number = number
-    document.type = document_type
-    document.country = country
+    document.type = DocumentType.objects.get(key=document_key)
+    document.country = geo_models.Country.objects.get(iso_code3=country_code)
     document.photo = photo
 
     return document
