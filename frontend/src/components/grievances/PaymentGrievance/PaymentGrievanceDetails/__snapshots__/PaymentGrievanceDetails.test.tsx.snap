@@ -49,6 +49,13 @@ exports[`components/grievances/PaymentGrievanceDetails should render with data 1
             class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
             scope="col"
           >
+            Entitlement Value
+             ($)
+          </th>
+          <th
+            class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+            scope="col"
+          >
             Delivered Value
              ($)
           </th>
@@ -76,6 +83,9 @@ exports[`components/grievances/PaymentGrievanceDetails should render with data 1
         >
           <td
             class="MuiTableCell-root MuiTableCell-body"
+          />
+          <td
+            class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
           />
           <td
             class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight"
