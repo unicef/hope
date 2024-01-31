@@ -3,7 +3,7 @@ import math
 
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import Record
+from hct_mis_api.aurora.models import Record
 
 logger = logging.getLogger(__name__)
 
