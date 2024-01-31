@@ -1,6 +1,5 @@
 from typing import Iterable
 
-from django.contrib.admin.options import get_content_type_for_model
 from django.utils import timezone
 
 from hct_mis_api.apps.payment.models import (
@@ -23,8 +22,7 @@ class CreatePaymentVerifications:
             payment_record_verification = PaymentVerification(
                 status_date=timezone.now(),
                 payment_verification_plan=self.payment_verification_plan,
-                payment_content_type=get_content_type_for_model(payment_record),
-                payment_object_id=payment_record.pk,
+                payment_obj=payment_record,
                 received_amount=None,
             )
             payment_record_verifications_to_create.append(payment_record_verification)
