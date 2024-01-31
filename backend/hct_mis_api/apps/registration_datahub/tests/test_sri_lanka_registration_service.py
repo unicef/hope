@@ -1,5 +1,6 @@
 import datetime
 
+from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
@@ -19,15 +20,15 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    Record,
 )
-from hct_mis_api.apps.registration_datahub.services.sri_lanka_flex_registration_service import (
-    SriLankaRegistrationService,
-)
+from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
+)
+from hct_mis_api.aurora.services.sri_lanka_flex_registration_service import (
+    SriLankaRegistrationService,
 )
 
 
@@ -36,7 +37,7 @@ class TestSriLankaRegistrationService(TestCase):
         "default",
         "registration_datahub",
     }
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(cls) -> None:
@@ -107,6 +108,8 @@ class TestSriLankaRegistrationService(TestCase):
                 "confirm_nic_number": "123456789V",
                 "national_id_no_i_c": "123456789V",
                 "branch_or_branch_code": "7472_002",
+                "account_holder_name_i_c": "Test Holder Name 123",
+                "bank_branch_name_i_c": "Branch Name 123",
                 "confirm_bank_account_number": "0082785064",
                 "who_answers_this_phone": "alternate collector",
                 "confirm_alternate_collector_phone_number": "+94788908046",
@@ -123,7 +126,7 @@ class TestSriLankaRegistrationService(TestCase):
                 "moh_center_of_reference": "MOH279",
             }
         ]
-
+        Record = get_record_model()
         records = [
             Record(
                 registration=17,
@@ -152,6 +155,7 @@ class TestSriLankaRegistrationService(TestCase):
 
     @freeze_time("2023-12-12")
     def test_import_data_to_datahub(self) -> None:
+        Record = get_record_model()
         service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
@@ -166,6 +170,10 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.count(), 1)
         self.assertEqual(ImportedBankAccountInfo.objects.count(), 1)
         self.assertEqual(ImportedDocument.objects.count(), 1)
+
+        bank_acc_info = ImportedBankAccountInfo.objects.first()
+        self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 123")
+        self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 123")
 
         imported_household = ImportedHousehold.objects.first()
         self.assertEqual(imported_household.admin1, "LK1")
@@ -201,6 +209,7 @@ class TestSriLankaRegistrationService(TestCase):
         self.assertEqual(ImportedIndividual.objects.filter(full_name="Dome").first().age_at_registration, 43)
 
     def test_import_record_twice(self) -> None:
+        Record = get_record_model()
         service = SriLankaRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"sri_lanka rdi {datetime.datetime.now()}")
 

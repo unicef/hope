@@ -24,7 +24,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': None
+                                'fullName': 'John Doe'
                             }
                         }
                     }
@@ -41,9 +41,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                             'individual': {
                                 'fullName': 'John Doe'
                             },
-                            'paymentRecord': {
-                                'fullName': None
-                            }
+                            'paymentRecord': None
                         }
                     }
                 },
@@ -60,7 +58,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': None
+                                'fullName': 'John Doe'
                             }
                         }
                     }
@@ -96,7 +94,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': None
+                                'fullName': 'John Doe'
                             }
                         }
                     }
@@ -113,9 +111,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                             'individual': {
                                 'fullName': 'John Doe'
                             },
-                            'paymentRecord': {
-                                'fullName': None
-                            }
+                            'paymentRecord': None
                         }
                     }
                 },
@@ -132,7 +128,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': None
+                                'fullName': 'John Doe'
                             }
                         }
                     }
@@ -168,7 +164,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_pay
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': None
+                                'fullName': 'John Doe'
                             }
                         }
                     }
@@ -204,7 +200,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_two
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': None
+                                'fullName': 'John Doe'
                             }
                         }
                     }
@@ -222,7 +218,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_two
                                 'fullName': 'John Doe'
                             },
                             'paymentRecord': {
-                                'fullName': None
+                                'fullName': 'John Doe'
                             }
                         }
                     }

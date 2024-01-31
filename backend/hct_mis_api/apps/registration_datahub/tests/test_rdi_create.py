@@ -76,7 +76,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         "default",
         "registration_datahub",
     }
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -401,6 +401,32 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         self.assertEqual(individual.seeing_disability, "")
         self.assertEqual(individual.hearing_disability, "")
 
+    def test_create_receiver_poi_document(self) -> None:
+        task = self.RdiXlsxCreateTask()
+        individual = ImportedIndividualFactory()
+        task.business_area = self.business_area
+        doc_type = ImportedDocumentType.objects.get_or_create(
+            label="Receiver POI",
+            key="receiver_poi",
+        )[0]
+        task.documents = {
+            "individual_10_receiver_poi_i_c": {
+                "individual": individual,
+                "name": "Receiver POI",
+                "key": "receiver_poi",
+                "value": "TEST123_qwerty",
+                "issuing_country": Country("AFG"),
+                "photo": None,
+            }
+        }
+        task._create_documents()
+
+        documents = ImportedDocument.objects.values("document_number", "type_id")
+        self.assertEqual(documents.count(), 1)
+
+        expected = [{"document_number": "TEST123_qwerty", "type_id": doc_type.id}]
+        self.assertEqual(list(documents), expected)
+
 
 @disabled_locally_test
 class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
@@ -408,7 +434,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         "default",
         "registration_datahub",
     }
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @staticmethod
     def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:

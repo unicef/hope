@@ -499,7 +499,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Boolean",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -5442,6 +5442,16 @@
                 "defaultValue": null
               },
               {
+                "name": "dataCollectingType",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -5921,6 +5931,22 @@
             "deprecationReason": null
           },
           {
+            "name": "dataCollectingTypeChoices",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChoiceObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "allActivePrograms",
             "description": null,
             "args": [
@@ -6068,6 +6094,16 @@
               },
               {
                 "name": "numberOfHouseholdsWithTpInProgram",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "dataCollectingType",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -8439,6 +8475,43 @@
             "name": "userPartnerChoices",
             "description": null,
             "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "ChoiceObject",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "partnerForGrievanceChoices",
+            "description": null,
+            "args": [
+              {
+                "name": "householdId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "individualId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
             "type": {
               "kind": "LIST",
               "name": null,
@@ -18942,7 +19015,7 @@
             "deprecationReason": null
           },
           {
-            "name": "programsWithDeliveredQuantity",
+            "name": "deliveredQuantities",
             "description": null,
             "args": [],
             "type": {
@@ -18950,7 +19023,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "ProgramsWithDeliveredQuantityNode",
+                "name": "DeliveredQuantityNode",
                 "ofType": null
               }
             },
@@ -24715,6 +24788,38 @@
             "deprecationReason": null
           },
           {
+            "name": "householdCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "individualCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "households",
             "description": null,
             "args": [
@@ -27207,12 +27312,6 @@
             "deprecationReason": null
           },
           {
-            "name": "DIIA",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "FLEX_REGISTRATION",
             "description": null,
             "isDeprecated": false,
@@ -28682,6 +28781,18 @@
           },
           {
             "name": "EXCLUDE_BENEFICIARIES_ERROR",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEND_TO_PAYMENT_GATEWAY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEND_TO_PAYMENT_GATEWAY_ERROR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -39445,6 +39556,22 @@
             "deprecationReason": null
           },
           {
+            "name": "sentToPaymentGateway",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "name",
             "description": null,
             "args": [],
@@ -49207,57 +49334,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "ProgramsWithDeliveredQuantityNode",
-        "description": null,
-        "fields": [
-          {
-            "name": "id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "ID",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "name",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "quantity",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "DeliveredQuantityNode",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "DeliveredQuantityNode",
         "description": null,
         "fields": [
@@ -56623,13 +56699,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Int",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -57411,22 +57483,6 @@
             "deprecationReason": null
           },
           {
-            "name": "diiaRecId",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "enumeratorRecId",
             "description": null,
             "args": [],
@@ -57646,6 +57702,12 @@
           },
           {
             "name": "NON_HOST",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "RETURNEE",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -59209,12 +59271,6 @@
           },
           {
             "name": "FLEX",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DIIA",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -70492,6 +70548,12 @@
           },
           {
             "name": "FINISH",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEND_TO_PAYMENT_GATEWAY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

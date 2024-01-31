@@ -278,6 +278,7 @@ exports[`components/ProgramDetails should render 1`] = `
           >
             <h6
               class="MuiTypography-root MuiTypography-h6"
+              data-cy="label-partner-name"
             />
             <div>
               <span

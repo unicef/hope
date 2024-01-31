@@ -38,7 +38,10 @@ import { NewDocumentationFieldArray } from '../../../components/grievances/Docum
 import { LookUpLinkedTickets } from '../../../components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
 import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
-import { getGrievanceDetailsPath } from '../../../components/grievances/utils/createGrievanceUtils';
+import {
+  getGrievanceDetailsPath,
+  selectedIssueType,
+} from '../../../components/grievances/utils/createGrievanceUtils';
 import {
   EmptyComponent,
   dataChangeComponentDict,
@@ -218,14 +221,6 @@ export const EditGrievancePage = (): React.ReactElement => {
     },
   ];
 
-  const issueTypeDict = choicesData.grievanceTicketIssueTypeChoices.reduce(
-    (prev, curr) => {
-      // eslint-disable-next-line no-param-reassign
-      prev[curr.category] = curr;
-      return prev;
-    },
-    {},
-  );
   const showIssueType = (values): boolean => {
     return (
       values.category ===
@@ -261,6 +256,7 @@ export const EditGrievancePage = (): React.ReactElement => {
     ticket.category,
     baseUrl,
   );
+
   const categoryDescription =
     GRIEVANCE_CATEGORY_DESCRIPTIONS[
       GRIEVANCE_CATEGORIES_NAMES[ticket.category]
@@ -355,18 +351,12 @@ export const EditGrievancePage = (): React.ReactElement => {
                       </Grid>
                       {showIssueType(values) ? (
                         <Grid item xs={6}>
-                          <Field
-                            name='issueType'
-                            disabled
-                            label={t('Issue Type')}
-                            required
-                            variant='outlined'
-                            choices={
-                              issueTypeDict[values.category.toString()]
-                                .subCategories
-                            }
-                            component={FormikSelectField}
-                          />
+                          <LabelizedField label={t('Issue Type')}>
+                            {selectedIssueType(
+                              values,
+                              choicesData.grievanceTicketIssueTypeChoices,
+                            )}
+                          </LabelizedField>
                         </Grid>
                       ) : null}
                       {values.category && (

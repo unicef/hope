@@ -32,6 +32,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.account.schema import PartnerNodeForProgram
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.schema import ChoiceObject, DataCollectingTypeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
@@ -84,18 +85,21 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_total_number_of_households(self, info: Any, **kwargs: Any) -> Int:
-        return self.total_number_of_households
+    @staticmethod
+    def resolve_total_number_of_households(program: Program, info: Any, **kwargs: Any) -> int:
+        return program.household_count
 
-    def resolve_total_number_of_households_with_tp_in_program(self, info: Any, **kwargs: Any) -> Int:
-        return self.households_with_tp_in_program.count()
+    @staticmethod
+    def resolve_total_number_of_households_with_tp_in_program(program: Program, info: Any, **kwargs: Any) -> int:
+        return program.households_with_tp_in_program.count()
 
-    def resolve_partners(self, info: Any, **kwargs: Any) -> List:
+    @staticmethod
+    def resolve_partners(program: Program, info: Any, **kwargs: Any) -> List[Partner]:
         # filter Partners by program_id and program.business_area_id
         partners_list = []
         for partner in Partner.objects.all():
-            partner.program = self
-            if partner.get_permissions().areas_for(str(self.business_area_id), str(self.pk)) is not None:
+            partner.program = program
+            if partner.get_permissions().areas_for(str(program.business_area_id), str(program.pk)) is not None:
                 partners_list.append(partner)
         return partners_list
 
@@ -180,6 +184,8 @@ class Query(graphene.ObjectType):
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
+    data_collecting_type_choices = graphene.List(ChoiceObject)
+
     all_active_programs = DjangoPermissionFilterConnectionField(
         ProgramNode,
         filterset_class=ProgramFilter,
@@ -226,6 +232,20 @@ class Query(graphene.ObjectType):
 
     def resolve_cash_plan_status_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(Program.STATUS_CHOICE)
+
+    def resolve_data_collecting_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return list(
+            DataCollectingType.objects.filter(
+                active=True,
+                deprecated=False,
+                limit_to__slug=info.context.headers.get("Business-Area").lower(),
+            )
+            .exclude(code__iexact="unknown")
+            .annotate(name=F("label"))
+            .annotate(value=F("code"))
+            .values("name", "value")
+            .order_by("name")
+        )
 
     def resolve_all_cash_plans(self, info: Any, **kwargs: Any) -> QuerySet[CashPlan]:
         payment_verification_summary_qs = PaymentVerificationSummary.objects.filter(

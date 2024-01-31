@@ -12,18 +12,19 @@ from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_TAX_ID
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
+    ImportedBankAccountInfo,
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
-    Record,
 )
-from hct_mis_api.apps.registration_datahub.services.ukraine_flex_registration_service import (
-    UkraineBaseRegistrationService,
-)
+from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
+)
+from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
+    UkraineBaseRegistrationService,
 )
 
 
@@ -36,6 +37,7 @@ class TestUkrainianRegistrationService(TestCase):
 
     @classmethod
     def setUp(cls) -> None:
+        Record = get_record_model()
         ImportedDocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
@@ -71,6 +73,10 @@ class TestUkrainianRegistrationService(TestCase):
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
             "email": "email123@mail.com",
+            "bank_account_number": "123 123 321 321",
+            "bank_account": "111 123 321 321",
+            "account_holder_name_i_c": "Test Holder Name 111",
+            "bank_branch_name_i_c": "Branch Name 111",
         }
         individual_wit_bank_account_and_tax = {
             "tax_id_no_i_c": "123123123",
@@ -83,6 +89,10 @@ class TestUkrainianRegistrationService(TestCase):
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
             "email": "email321@mail.com",
+            "bank_account_number": "111 222 000 333",
+            "bank_account": "222 123 321 321",
+            "account_holder_name_i_c": "Test Holder Name 222",
+            "bank_branch_name_i_c": "Branch Name 222",
         }
         individual_with_no_tax = {
             "tax_id_no_i_c": "",
@@ -95,6 +105,10 @@ class TestUkrainianRegistrationService(TestCase):
             "gender_i_c": "male",
             "phone_no_i_c": "0501706662",
             "email": "email111@mail.com",
+            "bank_account_number": "111 222 222 111",
+            "bank_account": "333 123 321 321",
+            "account_holder_name_i_c": "Test Holder Name 333",
+            "bank_branch_name_i_c": "Branch Name 333",
         }
         individual_without_bank_account = {
             "tax_id_no_i_c": "TESTID",
@@ -172,6 +186,7 @@ class TestUkrainianRegistrationService(TestCase):
         cls.user = UserFactory.create()
 
     def test_import_data_to_datahub(self) -> None:
+        Record = get_record_model()
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
@@ -179,6 +194,10 @@ class TestUkrainianRegistrationService(TestCase):
         self.records[2].refresh_from_db()
         self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
         self.assertEqual(ImportedHousehold.objects.count(), 4)
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 3)
+        bank_acc_info = ImportedBankAccountInfo.objects.get(bank_account_number="333123321321")
+        self.assertEqual(bank_acc_info.account_holder_name, "Test Holder Name 333")
+        self.assertEqual(bank_acc_info.bank_branch_name, "Branch Name 333")
         self.assertEqual(
             ImportedDocument.objects.filter(
                 document_number="TESTID", type__key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID]
@@ -192,6 +211,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(registration_data_import.program, self.program)
 
     def test_import_data_to_datahub_retry(self) -> None:
+        Record = get_record_model()
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids_all = [x.id for x in self.records]
@@ -207,6 +227,7 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(ImportedHousehold.objects.count(), 4)
 
     def test_import_document_validation(self) -> None:
+        Record = get_record_model()
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
 

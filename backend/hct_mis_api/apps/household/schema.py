@@ -35,11 +35,7 @@ from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.decorators import cached_in_django_cache
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import (
-    ChoiceObject,
-    FieldAttributeNode,
-    _custom_dict_or_attr_resolver,
-)
+from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
 from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_permission_decorator,
@@ -83,7 +79,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.services.household_programs_with_delivered_quantity import (
-    programs_with_delivered_quantity,
+    delivered_quantity_service,
 )
 from hct_mis_api.apps.payment.utils import get_payment_items_for_dashboard
 from hct_mis_api.apps.program.models import Program
@@ -192,15 +188,6 @@ class DeliveredQuantityNode(graphene.ObjectType):
     currency = graphene.String()
 
 
-class ProgramsWithDeliveredQuantityNode(graphene.ObjectType):
-    class Meta:
-        default_resolver = _custom_dict_or_attr_resolver
-
-    id = graphene.ID()
-    name = graphene.String()
-    quantity = graphene.List(DeliveredQuantityNode)
-
-
 class IndividualRoleInHouseholdNode(DjangoObjectType):
     class Meta:
         model = IndividualRoleInHousehold
@@ -307,16 +294,13 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         business_area_slug = info.context.headers.get("Business-Area")
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
-        if not program_id:
-            raise PermissionDenied("Permission Denied")
-
         if not user.partner.is_unicef:
-            partner_permission = user.partner.get_permissions()
-            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(program_id))
-            if areas_from_partner is None:
+            if program_id and str(object_instance.program_id) != program_id:
                 raise PermissionDenied("Permission Denied")
 
-            if str(object_instance.program_id) != program_id:
+            partner_permission = user.partner.get_permissions()
+            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(object_instance.program_id))
+            if areas_from_partner is None:
                 raise PermissionDenied("Permission Denied")
 
             if len(areas_from_partner) > 0 and object_instance.household_id and object_instance.household.admin_area_id:
@@ -331,7 +315,9 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area, program_id
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value,
+            object_instance.business_area,
+            object_instance.program_id,
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
@@ -389,7 +375,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     admin1 = graphene.Field(AreaNode)
     admin2 = graphene.Field(AreaNode)
     status = graphene.String()
-    programs_with_delivered_quantity = graphene.List(ProgramsWithDeliveredQuantityNode)
+    delivered_quantities = graphene.List(DeliveredQuantityNode)
     active_individuals_count = graphene.Int()
     individuals = DjangoFilterConnectionField(
         IndividualNode,
@@ -416,8 +402,8 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return ""
 
     @staticmethod
-    def resolve_programs_with_delivered_quantity(parent: Household, info: Any) -> List[Dict[str, Any]]:
-        return programs_with_delivered_quantity(parent)
+    def resolve_delivered_quantities(parent: Household, info: Any) -> List[Dict[str, Any]]:
+        return delivered_quantity_service(parent)
 
     @staticmethod
     def resolve_country(parent: Household, info: Any) -> str:
@@ -465,16 +451,14 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         business_area_slug = info.context.headers.get("Business-Area")
         business_area_id = BusinessArea.objects.get(slug=business_area_slug).id
 
-        if not program_id:
-            raise PermissionDenied("Permission Denied")
-
         if not user.partner.is_unicef:
             partner_permission = user.partner.get_permissions()
-            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(program_id))
-            if areas_from_partner is None:
+
+            if program_id and str(object_instance.program_id) != program_id:
                 raise PermissionDenied("Permission Denied")
 
-            if str(object_instance.program_id) != program_id:
+            areas_from_partner = partner_permission.areas_for(str(business_area_id), str(object_instance.program_id))
+            if areas_from_partner is None:
                 raise PermissionDenied("Permission Denied")
 
             if len(areas_from_partner) > 0 and object_instance.admin_area_id:
@@ -488,7 +472,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
         # if user doesn't have permission to view all households, we check based on their grievance tickets
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area, program_id
+            Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value,
+            object_instance.business_area,
+            object_instance.program_id,
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()

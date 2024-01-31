@@ -13,6 +13,7 @@ from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_disable_individual_service,
 )
+from hct_mis_api.apps.grievance.signals import individual_marked_as_duplicated
 from hct_mis_api.apps.grievance.utils import traverse_sibling_tickets
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.models import (
@@ -253,5 +254,6 @@ def mark_as_duplicate_individual(
         individual_to_remove,
     )
     household.refresh_from_db()
+    individual_marked_as_duplicated.send(sender=Individual, instance=individual_to_remove)
     if household.active_individuals.count() == 0:
         household.withdraw()

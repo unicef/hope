@@ -92,6 +92,7 @@ stages:
               -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
               -t $(Docker.url)/$(Docker.backend.repository):latest \
               --push \
+              -f ./backend/docker/Dockerfile \
               ./backend
             displayName: Docker build
           - script: |
@@ -103,6 +104,7 @@ stages:
               --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
               -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
               --push --target dev \
+              -f ./backend/docker/Dockerfile \
               ./backend
             displayName: Docker build dev
 

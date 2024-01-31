@@ -1,5 +1,6 @@
 import datetime
 
+from django.conf import settings
 from django.test import TestCase
 from django.utils import timezone
 
@@ -25,15 +26,15 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
-    Record,
 )
-from hct_mis_api.apps.registration_datahub.services.czech_republic_flex_registration_service import (
-    CzechRepublicFlexRegistration,
-)
+from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
+)
+from hct_mis_api.aurora.services.czech_republic_flex_registration_service import (
+    CzechRepublicFlexRegistration,
 )
 
 
@@ -42,7 +43,7 @@ class TestCzechRepublicRegistrationService(TestCase):
         "default",
         "registration_datahub",
     }
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUp(cls) -> None:
@@ -116,6 +117,8 @@ class TestCzechRepublicRegistrationService(TestCase):
                 "bank_account_h_f": "y",
                 "bank_account_number": "CZ6003000000000306979952",
                 "bank_account_number_h_f": "CZ6003000000000306979952",
+                "account_holder_name_i_c": "Test Holder Name CZ",
+                "bank_branch_name_i_c": "Branch Name CZ",
                 "birth_date_i_c": "1995-08-01",
                 "confirm_phone_number": "+420774844183",
                 "country_origin_h_c": "ukr",
@@ -197,7 +200,7 @@ class TestCzechRepublicRegistrationService(TestCase):
                 "legal_guardia_not_primary_carer": "n",
             },
         ]
-
+        Record = get_record_model()
         records = [
             Record(
                 registration=25,
@@ -224,6 +227,7 @@ class TestCzechRepublicRegistrationService(TestCase):
         service.process_records(rdi.id, records_ids)
 
         self.records[0].refresh_from_db()
+        Record = get_record_model()
         self.assertEqual(
             Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 1
         )
@@ -273,6 +277,8 @@ class TestCzechRepublicRegistrationService(TestCase):
 
         bank_account_info = ImportedBankAccountInfo.objects.first()
         self.assertEqual(bank_account_info.bank_account_number, "CZ6003000000000306979952")
+        self.assertEqual(bank_account_info.bank_branch_name, "Branch Name CZ")
+        self.assertEqual(bank_account_info.account_holder_name, "Test Holder Name CZ")
         # self.assertEqual(ImportedDocument.objects.count(), 8)
 
         birth_certificate = ImportedDocument.objects.filter(type__key="birth_certificate").first()

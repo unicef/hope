@@ -188,7 +188,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def resolve_payment_record(grievance_ticket: GrievanceTicket, info: Any) -> Optional[Any]:
-        return getattr(grievance_ticket.ticket_details, "payment_obj", None)
+        payment_verification = getattr(grievance_ticket.ticket_details, "payment_verification", None)
+        payment_obj = getattr(grievance_ticket.ticket_details, "payment_obj", None)
+        return getattr(payment_verification, "payment_obj", None) if payment_verification else payment_obj
 
     @staticmethod
     def resolve_admin(grievance_ticket: GrievanceTicket, info: Any) -> Optional[str]:
@@ -249,7 +251,7 @@ class TicketComplaintDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_payment_record(self, info: Any) -> Optional[Any]:
-        return getattr(self, "payment_record", None)
+        return getattr(self, "payment_obj", None)
 
 
 class TicketSensitiveDetailsNode(DjangoObjectType):
@@ -262,7 +264,7 @@ class TicketSensitiveDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_payment_record(self, info: Any) -> Optional[Any]:
-        return getattr(self, "payment_record", None)
+        return getattr(self, "payment_obj", None)
 
 
 class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
@@ -569,7 +571,9 @@ class Query(graphene.ObjectType):
 
         queryset = queryset.prefetch_related(*to_prefetch)
 
-        if not user.partner.is_unicef:  # Full access to all AdminAreas if is_unicef
+        # Full access to all AdminAreas if is_unicef
+        # and ignore filtering for Cross Area tickets
+        if not user.partner.is_unicef and not kwargs.get("is_cross_area", False):
             queryset = filter_grievance_tickets_based_on_partner_areas_2(
                 queryset, user.partner, business_area_id, program_id
             )

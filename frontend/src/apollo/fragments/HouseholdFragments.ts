@@ -6,6 +6,9 @@ export const householdMinimal = gql`
     status
     createdAt
     residenceStatus
+    maleChildrenCount
+    femaleChildrenCount
+    childrenDisabledCount
     size
     totalCashReceived
     totalCashReceivedUsd
@@ -155,13 +158,9 @@ export const householdDetailed = gql`
       }
     }
     flexFields
-    programsWithDeliveredQuantity {
-      id
-      name
-      quantity {
-        totalDeliveredQuantity
-        currency
-      }
+    deliveredQuantities {
+      totalDeliveredQuantity
+      currency
     }
   }
 `;
@@ -176,13 +175,13 @@ export const mergedHouseholdMinimal = gql`
     }
     size
     admin1 {
-        id
-        name
-    }    
+      id
+      name
+    }
     admin2 {
-        id
-        name
-    }    
+      id
+      name
+    }
     firstRegistrationDate
     hasDuplicates
   }

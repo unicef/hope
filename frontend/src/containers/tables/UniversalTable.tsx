@@ -1,6 +1,5 @@
 import React, { ReactElement, useState } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
-import { LoadingComponent } from '../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../components/core/PermissionDenied';
 import { HeadCell } from '../../components/core/Table/EnhancedTableHead';
 import {
@@ -93,14 +92,12 @@ export function UniversalTable<T, K>({
 
     return <div>Unexpected error</div>;
   }
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
 
   let correctTitle = title;
   if (getTitle) {
     correctTitle = getTitle(data);
   }
-  const { edges } = data[queriedObjectName];
+  const edges = data?.[queriedObjectName]?.edges || [];
   const typedEdges = edges.map((edge) => edge.node as T);
 
   return (
@@ -115,8 +112,8 @@ export function UniversalTable<T, K>({
       rowsPerPageOptions={rowsPerPageOptions}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={data[queriedObjectName].totalCount}
-      handleChangePage={(event, newPage) => {
+      itemsCount={data?.[queriedObjectName]?.totalCount}
+      handleChangePage={(_event, newPage) => {
         if (!edges.length) return;
         const variables = {
           first: undefined,

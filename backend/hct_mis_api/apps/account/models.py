@@ -174,7 +174,7 @@ class Partner(MPTTModel, models.Model):
     permissions = JSONField(default=dict, blank=True)
 
     def __str__(self) -> str:
-        return self.name
+        return f"{self.name} [Sub-Partner of {self.parent.name}]" if self.parent else self.name
 
     @property
     def is_child(self) -> bool:
@@ -192,7 +192,23 @@ class Partner(MPTTModel, models.Model):
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
-        return [(role.id, role.name) for role in cls.objects.exclude(name="Default Empty Partner")]
+        return [(partner.id, partner.name) for partner in cls.objects.exclude(name="Default Empty Partner")]
+
+    @classmethod
+    def get_partners_for_program_as_choices(cls, business_area_id: str, program_id: Optional[str] = None) -> List:
+        partners = cls.objects.exclude(name="Default Empty Partner")
+        if program_id:
+            return [
+                (partner.id, partner.name)
+                for partner in partners
+                if program_id in partner.get_program_ids_for_business_area(business_area_id)
+            ]
+        else:
+            return [
+                (partner.id, partner.name)
+                for partner in partners
+                if partner.get_program_ids_for_business_area(business_area_id)
+            ]
 
     @property
     def is_unicef(self) -> bool:
@@ -215,9 +231,19 @@ class Partner(MPTTModel, models.Model):
 
     @property
     def business_area_ids(self) -> List[str]:
-        if self.is_unicef:
-            return list(BusinessArea.objects.filter(active=True).values_list("id", flat=True))
         return self.get_permissions().business_area_ids()
+
+    def get_program_ids_for_business_area(self, business_area_id: str) -> List[str]:
+        from hct_mis_api.apps.program.models import Program
+
+        if self.is_unicef:
+            return [
+                str(program_id)
+                for program_id in Program.objects.filter(business_area_id=business_area_id).values_list("id", flat=True)
+            ]
+        programs_for_business_area = self.get_permissions().get_programs_for_business_area(business_area_id)
+
+        return programs_for_business_area.get_program_ids() if programs_for_business_area else []
 
 
 class User(AbstractUser, NaturalKeyModel, UUIDModel):
@@ -311,7 +337,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             list(
                 set(
                     [perm for perms in all_partner_roles_permissions_list for perm in perms]
-                    + [perm for perms in all_user_roles_permissions_list for perm in perms]
+                    + [perm for perms in all_user_roles_permissions_list if perms for perm in perms]
                 )
             )
             if has_program_access

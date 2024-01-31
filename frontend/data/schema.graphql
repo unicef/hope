@@ -44,6 +44,7 @@ enum Action {
   REVIEW
   REJECT
   FINISH
+  SEND_TO_PAYMENT_GATEWAY
 }
 
 input ActionPaymentPlanInput {
@@ -929,6 +930,7 @@ type DeliveryMechanismNode implements Node {
   status: String!
   deliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism
   deliveryMechanismOrder: Int!
+  sentToPaymentGateway: Boolean!
   name: String
   order: Int
   fsp: FinancialServiceProviderNode
@@ -1619,7 +1621,7 @@ type HouseholdNode implements Node {
   hasDuplicates: Boolean
   adminAreaTitle: String
   status: String
-  programsWithDeliveredQuantity: [ProgramsWithDeliveredQuantityNode]
+  deliveredQuantities: [DeliveredQuantityNode]
   activeIndividualsCount: Int
 }
 
@@ -1710,7 +1712,6 @@ enum ImportDataDataType {
   XLSX
   JSON
   FLEX
-  DIIA
 }
 
 type ImportDataNode implements Node {
@@ -1979,7 +1980,7 @@ type ImportedHouseholdNode implements Node {
   consentSharing: ImportedHouseholdConsentSharing!
   residenceStatus: ImportedHouseholdResidenceStatus!
   countryOrigin: String
-  size: Int!
+  size: Int
   address: String!
   country: String
   zipCode: String
@@ -2037,7 +2038,6 @@ type ImportedHouseholdNode implements Node {
   koboAssetId: String!
   koboSubmissionTime: DateTime
   rowId: Int
-  diiaRecId: String!
   enumeratorRecId: Int
   misUnicefId: String
   programId: UUID
@@ -2077,6 +2077,7 @@ enum ImportedHouseholdResidenceStatus {
   OTHERS_OF_CONCERN
   HOST
   NON_HOST
+  RETURNEE
 }
 
 enum ImportedIndividualDeduplicationBatchStatus {
@@ -2908,6 +2909,8 @@ enum PaymentPlanBackgroundActionStatus {
   XLSX_IMPORTING_RECONCILIATION
   EXCLUDE_BENEFICIARIES
   EXCLUDE_BENEFICIARIES_ERROR
+  SEND_TO_PAYMENT_GATEWAY
+  SEND_TO_PAYMENT_GATEWAY_ERROR
 }
 
 enum PaymentPlanCurrency {
@@ -3471,6 +3474,8 @@ type ProgramNode implements Node {
   individualDataNeeded: Boolean
   dataCollectingType: DataCollectingTypeNode
   isVisible: Boolean!
+  householdCount: Int!
+  individualCount: Int!
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3526,19 +3531,13 @@ enum ProgramStatus {
   FINISHED
 }
 
-type ProgramsWithDeliveredQuantityNode {
-  id: ID
-  name: String
-  quantity: [DeliveredQuantityNode]
-}
-
 type Query {
   accountabilityCommunicationMessage(id: ID!): CommunicationMessageNode
   allAccountabilityCommunicationMessages(offset: Int, before: String, after: String, first: Int, last: Int, numberOfRecipients: Int, numberOfRecipients_Gte: Int, numberOfRecipients_Lte: Int, targetPopulation: ID, createdBy: ID, program: String, createdAtRange: String, title: String, body: String, samplingType: String, orderBy: String): CommunicationMessageNodeConnection
   allAccountabilityCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, sex: String, orderBy: String): CommunicationMessageRecipientMapNodeConnection
   accountabilityCommunicationMessageSampleSize(input: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeNode
   feedback(id: ID!): FeedbackNode
-  allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, isActiveProgram: Boolean, program: String, orderBy: String): FeedbackNodeConnection
+  allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, isActiveProgram: String, program: String, orderBy: String): FeedbackNodeConnection
   feedbackIssueTypeChoices: [ChoiceObject]
   survey(id: ID!): SurveyNode
   allSurveys(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, targetPopulation: ID, businessArea: String, createdAtRange: String, search: String, createdBy: String, orderBy: String): SurveyNodeConnection
@@ -3630,7 +3629,7 @@ type Query {
   dataCollectingType(id: ID!): DataCollectingTypeNode
   dataCollectionTypeChoices: [DataCollectingTypeChoiceObject]
   program(id: ID!): ProgramNode
-  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
+  allPrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   cashPlan(id: ID!): CashPlanNode
@@ -3640,7 +3639,8 @@ type Query {
   programSectorChoices: [ChoiceObject]
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
-  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, orderBy: String): ProgramNodeConnection
+  dataCollectingTypeChoices: [ChoiceObject]
+  allActivePrograms(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, numberOfHouseholdsWithTpInProgram: String, dataCollectingType: String, orderBy: String): ProgramNodeConnection
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(offset: Int, before: String, after: String, first: Int, last: Int, program: [ID], createdAt: DateTime, createdAt_Lte: DateTime, createdAt_Gte: DateTime, updatedAt: DateTime, updatedAt_Lte: DateTime, updatedAt_Gte: DateTime, status: String, households: [ID], name: String, createdByName: String, totalHouseholdsCountMin: Int, totalHouseholdsCountMax: Int, totalIndividualsCountMin: Int, totalIndividualsCountMax: Int, businessArea: String, createdAtRange: String, paymentPlanApplicable: Boolean, statusNot: String, totalHouseholdsCountWithValidPhoneNoMax: Int, totalHouseholdsCountWithValidPhoneNoMin: Int, orderBy: String): TargetPopulationNodeConnection
   targetPopulationHouseholds(targetPopulation: ID!, offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
@@ -3678,6 +3678,7 @@ type Query {
   userRolesChoices: [RoleChoiceObject]
   userStatusChoices: [ChoiceObject]
   userPartnerChoices: [ChoiceObject]
+  partnerForGrievanceChoices(householdId: ID, individualId: ID): [ChoiceObject]
   hasAvailableUsersToExport(businessAreaSlug: String!): Boolean
   importedHousehold(id: ID!): ImportedHouseholdNode
   allImportedHouseholds(offset: Int, before: String, after: String, first: Int, last: Int, rdiId: String, businessArea: String, orderBy: String): ImportedHouseholdNodeConnection
@@ -3789,7 +3790,6 @@ type RefuseRegistrationDataImportMutation {
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
-  DIIA
   FLEX_REGISTRATION
   API
   EDOPOMOGA

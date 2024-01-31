@@ -141,6 +141,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         name
         order
+        sentToPaymentGateway
         fsp {
           id
           name

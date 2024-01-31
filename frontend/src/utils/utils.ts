@@ -298,6 +298,10 @@ export function paymentPlanBackgroundActionStatusToColor(
       theme.hctPalette.gray,
     [PaymentPlanBackgroundActionStatus.XlsxImportError]:
       theme.palette.error.main,
+    [PaymentPlanBackgroundActionStatus.SendToPaymentGateway]:
+      theme.hctPalette.gray,
+    [PaymentPlanBackgroundActionStatus.SendToPaymentGatewayError]:
+      theme.palette.error.main,
   };
   if (status in colorsMap) {
     return colorsMap[status];
@@ -1056,4 +1060,9 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
   } catch (e) {
     return false;
   }
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const arraysHaveSameContent = (a: any[], b: any[]): boolean => {
+  return a.length === b.length && a.every((val, index) => val === b[index]);
 };
