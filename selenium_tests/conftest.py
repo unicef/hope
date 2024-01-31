@@ -11,6 +11,7 @@ def pytest_configure():
     pytest.CSRF = ""
     pytest.SESSION_ID = ""
     pytest.session = requests.Session()
+    pytest.path = "http://localhost:8082"
 
 
 @pytest.fixture(scope='class')
@@ -57,7 +58,7 @@ def logout(request, browser):
 
 
 @pytest.fixture
-def pageProgrammeManagement(request, browser) -> ProgrammeManagement:
+def pageProgrammeManagement(request, browser: webdriver) -> ProgrammeManagement:
     yield ProgrammeManagement(browser)
 
 

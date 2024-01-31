@@ -1,9 +1,11 @@
 import pytest
 import random
-from helpers.date_time_format import FTime
+
+from helpers.date_time_format import FormatTime
 from datetime import datetime
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_details.programme_details import ProgrammeDetails
+from dateutil.relativedelta import relativedelta
 
 
 class TestProgrammeManagement:
@@ -12,36 +14,36 @@ class TestProgrammeManagement:
         pytest.param(
             {"program_name": "New Programme - " + str(random.random()),
              "selector": "Child Protection",
-             "startDate": FTime(1, 5, 2023),
-             "endDate": FTime(12, 12, 2033),
+             "startDate": FormatTime(1, 5, 2023),
+             "endDate": FormatTime(12, 12, 2033),
              "dataCollectingType": "Full"
              }, id="Child Protection & Full"),
         pytest.param(
             {"program_name": "New Programme - " + str(random.random()),
              "selector": "Education",
-             "startDate": FTime(11, 12, 2002),
-             "endDate": FTime(1, 8, 2043),
+             "startDate": FormatTime(11, 12, 2002),
+             "endDate": FormatTime(1, 8, 2043),
              "dataCollectingType": "Size only"
              }, id="Education & Size only"),
         pytest.param(
             {"program_name": "New Programme - " + str(random.random()),
              "selector": "WASH",
-             "startDate": FTime(1, 1, 2022),
-             "endDate": FTime(1, 2, 2022),
+             "startDate": FormatTime(1, 1, 2022),
+             "endDate": FormatTime(1, 2, 2022),
              "dataCollectingType": "size/age/gender disaggregated"
              }, id="WASH & size/age/gender disaggregated"),
     ])
     def test_create_programme(self,
                               pageProgrammeManagement: ProgrammeManagement,
                               pageProgrammeDetails: ProgrammeDetails,
-                              test_data: dict):
+                              test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].f_num)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].f_num)
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getButtonNext().click()
@@ -49,8 +51,8 @@ class TestProgrammeManagement:
         # Check Details page
         assert test_data["program_name"] in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
-        assert test_data["startDate"].f_text_mon in pageProgrammeDetails.getLabelStartDate().text
-        assert test_data["endDate"].f_text_mon in pageProgrammeDetails.getLabelEndDate().text
+        assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
+        assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
         assert test_data["selector"] in pageProgrammeDetails.getLabelSelector().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
@@ -62,8 +64,8 @@ class TestProgrammeManagement:
         pytest.param(
             {"program_name": "New Programme - " + str(random.random()),
              "selector": "Health",
-             "startDate": FTime(1, 1, 2022),
-             "endDate": FTime(1, 2, 2022),
+             "startDate": FormatTime(1, 1, 2022),
+             "endDate": FormatTime(1, 2, 2022),
              "dataCollectingType": "Partial",
              "description": f"Text with random {str(random.random())} text",
              "budget": 1000.99,
@@ -74,14 +76,14 @@ class TestProgrammeManagement:
     def test_create_programme_optional_values(self,
                                               pageProgrammeManagement: ProgrammeManagement,
                                               pageProgrammeDetails: ProgrammeDetails,
-                                              test_data: dict):
+                                              test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].f_num)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].f_num)
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputFreqOfPaymentOneOff().click()
@@ -98,8 +100,8 @@ class TestProgrammeManagement:
         # Check Details page
         assert test_data["program_name"] in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
-        assert test_data["startDate"].f_text_mon in pageProgrammeDetails.getLabelStartDate().text
-        assert test_data["endDate"].f_text_mon in pageProgrammeDetails.getLabelEndDate().text
+        assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
+        assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
         assert test_data["selector"] in pageProgrammeDetails.getLabelSelector().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
         assert "One-off" in pageProgrammeDetails.getLabelFreqOfPayment().text
@@ -111,22 +113,22 @@ class TestProgrammeManagement:
         pytest.param(
             {"program_name": "New Programme - " + str(random.random()),
              "selector": "Health",
-             "startDate": FTime(1, 1, 2022),
-             "endDate": FTime(1, 2, 2022),
+             "startDate": FormatTime(1, 1, 2022),
+             "endDate": FormatTime(1, 2, 2022),
              "dataCollectingType": "Partial"
              }, id="One-off"),
     ])
     def test_create_programme_Frequency_of_Payment(self,
                                                    pageProgrammeManagement: ProgrammeManagement,
                                                    pageProgrammeDetails: ProgrammeDetails,
-                                                   test_data: dict):
+                                                   test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].f_num)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].f_num)
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputFreqOfPaymentOneOff().click()
@@ -135,8 +137,8 @@ class TestProgrammeManagement:
         # Check Details page
         assert test_data["program_name"] in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
-        assert test_data["startDate"].f_text_mon in pageProgrammeDetails.getLabelStartDate().text
-        assert test_data["endDate"].f_text_mon in pageProgrammeDetails.getLabelEndDate().text
+        assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
+        assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
         assert test_data["selector"] in pageProgrammeDetails.getLabelSelector().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
         assert "One-off" in pageProgrammeDetails.getLabelFreqOfPayment().text
@@ -148,22 +150,22 @@ class TestProgrammeManagement:
         pytest.param(
             {"program_name": "New Programme - " + str(random.random()),
              "selector": "Health",
-             "startDate": FTime(1, 1, 2022),
-             "endDate": FTime(1, 2, 2022),
+             "startDate": FormatTime(1, 1, 2022),
+             "endDate": FormatTime(1, 2, 2022),
              "dataCollectingType": "Partial"
              }, id="Yes"),
     ])
     def test_create_programme_Cash_Plus(self,
                                         pageProgrammeManagement: ProgrammeManagement,
                                         pageProgrammeDetails: ProgrammeDetails,
-                                        test_data: dict):
+                                        test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].f_num)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].f_num)
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
@@ -172,8 +174,8 @@ class TestProgrammeManagement:
         # Check Details page
         assert test_data["program_name"] in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
-        assert test_data["startDate"].f_text_mon in pageProgrammeDetails.getLabelStartDate().text
-        assert test_data["endDate"].f_text_mon in pageProgrammeDetails.getLabelEndDate().text
+        assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
+        assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
         assert test_data["selector"] in pageProgrammeDetails.getLabelSelector().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
@@ -185,22 +187,22 @@ class TestProgrammeManagement:
         pytest.param(
             {"program_name": "CheckProgramme - " + str(random.random()),
              "selector": "Health",
-             "startDate": FTime(1, 1, 2022),
-             "endDate": FTime(1, 2, 2022),
+             "startDate": FormatTime(1, 1, 2022),
+             "endDate": FormatTime(1, 2, 2022),
              "dataCollectingType": "Partial"
              }, id="programme_management_page"),
     ])
     def test_create_programme_check(self,
                                     pageProgrammeManagement: ProgrammeManagement,
                                     pageProgrammeDetails: ProgrammeDetails,
-                                    test_data: dict):
+                                    test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].f_num)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].f_num)
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
@@ -209,8 +211,8 @@ class TestProgrammeManagement:
         # Check Details page
         assert test_data["program_name"] in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
-        assert test_data["startDate"].f_text_mon in pageProgrammeDetails.getLabelStartDate().text
-        assert test_data["endDate"].f_text_mon in pageProgrammeDetails.getLabelEndDate().text
+        assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
+        assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
         assert test_data["selector"] in pageProgrammeDetails.getLabelSelector().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
@@ -228,21 +230,21 @@ class TestProgrammeManagement:
         pytest.param(
             {"program_name": "CheckParents - " + str(random.random()),
              "selector": "Health",
-             "startDate": FTime(1, 1, 2022),
-             "endDate": FTime(1, 2, 2022),
+             "startDate": FormatTime(1, 1, 2022),
+             "endDate": FormatTime(1, 2, 2022),
              "dataCollectingType": "Partial"
              }, id="programme_management_page"),
     ])
     def test_create_programme_add_partners_Business_Area(self, pageProgrammeManagement: ProgrammeManagement,
                                                          pageProgrammeDetails: ProgrammeDetails,
-                                                         test_data: dict):
+                                                         test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].f_num)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].f_num)
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
@@ -258,22 +260,22 @@ class TestProgrammeManagement:
         pytest.param(
             {"program_name": "CheckParents - " + str(random.random()),
              "selector": "Health",
-             "startDate": FTime(1, 1, 2022),
-             "endDate": FTime(1, 2, 2022),
+             "startDate": FormatTime(1, 1, 2022),
+             "endDate": FormatTime(1, 2, 2022),
              "dataCollectingType": "Partial"
              }, id="programme_management_page"),
     ])
     def test_create_programme_add_partners_Admin_Area(self,
                                                       pageProgrammeManagement: ProgrammeManagement,
                                                       pageProgrammeDetails: ProgrammeDetails,
-                                                      test_data: dict):
+                                                      test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].f_num)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].f_num)
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
@@ -287,7 +289,8 @@ class TestProgrammeManagement:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "16" in pageProgrammeDetails.getLabelAreaAccess().text
 
-    def test_create_programme_check_empty_mandatory_fields(self, pageProgrammeManagement):
+
+    def test_create_programme_check_empty_mandatory_fields(self, pageProgrammeManagement: ProgrammeManagement) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
@@ -304,22 +307,22 @@ class TestProgrammeManagement:
         pytest.param(
             {"program_name": "CheckParents - " + str(random.random()),
              "selector": "Health",
-             "startDate": FTime(1, 1, 2022),
-             "endDate": FTime(1, 2, 2022),
+             "startDate": FormatTime(1, 1, 2022),
+             "endDate": FormatTime(1, 2, 2022),
              "dataCollectingType": "Partial"
              }, id="programme_management_page"),
     ])
     def test_create_programme_delete_partners(self,
                                               pageProgrammeManagement: ProgrammeManagement,
                                               pageProgrammeDetails: ProgrammeDetails,
-                                              test_data: dict):
+                                              test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].f_num)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].f_num)
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
@@ -330,33 +333,29 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonDeletePopup().click()
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        try:
+        with pytest.raises(Exception):
             assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
-        except:
-            assert True
-        else:
-            assert False
 
     @pytest.mark.parametrize("test_data", [
         pytest.param(
             {"program_name": "New Programme - " + str(random.random()),
              "selector": "Health",
-             "startDate": FTime(1, 1, 2022),
-             "endDate": FTime(1, 2, 2022),
+             "startDate": FormatTime(1, 1, 2022),
+             "endDate": FormatTime(1, 2, 2022),
              "dataCollectingType": "Partial"
              }, id="Name Change"),
     ])
     def test_create_programme_back_scenarios(self,
                                              pageProgrammeManagement: ProgrammeManagement,
                                              pageProgrammeDetails: ProgrammeDetails,
-                                             test_data: dict):
+                                             test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys("Test Name")
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].f_num)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].f_num)
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
@@ -373,8 +372,8 @@ class TestProgrammeManagement:
         # Check Details page
         assert test_data["program_name"] in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
-        assert test_data["startDate"].f_text_mon in pageProgrammeDetails.getLabelStartDate().text
-        assert test_data["endDate"].f_text_mon in pageProgrammeDetails.getLabelEndDate().text
+        assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
+        assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
         assert test_data["selector"] in pageProgrammeDetails.getLabelSelector().text
         assert test_data["dataCollectingType"] in pageProgrammeDetails.getLabelDataCollectingType().text
         assert "Regular" in pageProgrammeDetails.getLabelFreqOfPayment().text
@@ -383,7 +382,10 @@ class TestProgrammeManagement:
         assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
-    def test_create_programme_cancel_scenario(self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails):
+        
+    def test_create_programme_cancel_scenario(self,
+                                              pageProgrammeManagement: ProgrammeManagement,
+                                              pageProgrammeDetails: ProgrammeDetails) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
@@ -396,12 +398,12 @@ class TestProgrammeManagement:
             {"program_name": "New Programme - " + str(random.random()),
              "selector": "Health",
              "dataCollectingType": "Partial"
-             }, id="Name Change"),
+             }, id="Change Date"),
     ])
     def test_create_programme_chose_dates_via_calendar(self,
                                                        pageProgrammeManagement: ProgrammeManagement,
                                                        pageProgrammeDetails: ProgrammeDetails,
-                                                       test_data: dict):
+                                                       test_data: dict) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
@@ -414,5 +416,6 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert str(datetime.now().strftime('15 %b %Y')) in pageProgrammeDetails.getLabelStartDate().text
-        assert str(datetime.now().strftime('25 %b %Y')) in pageProgrammeDetails.getLabelEndDate().text
+        assert str(datetime.now().strFormatTime('15 %b %Y')) in pageProgrammeDetails.getLabelStartDate().text
+        end_date = datetime.now() + relativedelta(months=1)
+        assert str(end_date.strFormatTime('25 %b %Y')) in pageProgrammeDetails.getLabelEndDate().text

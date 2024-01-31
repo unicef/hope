@@ -24788,6 +24788,38 @@
             "deprecationReason": null
           },
           {
+            "name": "householdCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "individualCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "households",
             "description": null,
             "args": [
@@ -28749,6 +28781,18 @@
           },
           {
             "name": "EXCLUDE_BENEFICIARIES_ERROR",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEND_TO_PAYMENT_GATEWAY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEND_TO_PAYMENT_GATEWAY_ERROR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -39505,6 +39549,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sentToPaymentGateway",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -70488,6 +70548,12 @@
           },
           {
             "name": "FINISH",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEND_TO_PAYMENT_GATEWAY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
