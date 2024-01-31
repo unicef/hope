@@ -64,6 +64,7 @@ class PaymentGatewayPaymentInstructionSerializer(ReadOnlyModelSerializer):
             "unicef_id",
             "fsp",
             "payload",
+            "extra",
         ]
 
 
