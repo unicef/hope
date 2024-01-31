@@ -155,11 +155,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
                     str(business_area.id), ticket_program_id
                 )
                 if partner_areas_list is not None:
-                    # partner_areas_list is []
-                    if len(partner_areas_list) > 0:
+                    if partner_areas_list:
                         has_partner_area_access = str(object_instance.admin2.id) in partner_areas_list
                     else:
-                        # has access to the whole BA
+                        # partner_areas_list is [] -> has access full area access
                         has_partner_area_access = True
                 else:
                     # partner_areas_list is None
