@@ -1,4 +1,3 @@
-import logging
 from unittest import skip
 
 from django.test import TestCase
@@ -19,9 +18,6 @@ from hct_mis_api.one_time_scripts.gpf_migrate_psql_data import migrate_program_p
 @skip(reason="This migration does not include all changes")
 class TestGPFMigrationToPSQL(TestCase):
     databases = {"default"}
-
-    logging.disable(logging.INFO)
-    logging.disable(logging.ERROR)
 
     @classmethod
     def setUpTestData(cls) -> None:
