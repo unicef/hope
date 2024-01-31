@@ -231,6 +231,44 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                 class="sc-htpNat hcDmtB"
                 color="textSecondary"
               >
+                Payment Plan
+              </span>
+              <div
+                data-cy="label-Payment Plan"
+              >
+                <span>
+                  -
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
+                Payment Plan Verification
+              </span>
+              <div
+                data-cy="label-Payment Plan Verification"
+              >
+                <span>
+                  -
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          >
+            <div>
+              <span
+                class="sc-htpNat hcDmtB"
+                color="textSecondary"
+              >
                 Programme
               </span>
               <div
