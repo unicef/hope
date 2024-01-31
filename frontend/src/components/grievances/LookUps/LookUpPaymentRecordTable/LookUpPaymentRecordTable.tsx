@@ -36,13 +36,13 @@ export function LookUpPaymentRecordTable({
     _event:
       | React.MouseEvent<HTMLButtonElement, MouseEvent>
       | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
-    name: string,
+    selectedPaymentRecord,
   ): void => {
-    const selectedIndex = selected.indexOf(name);
+    const selectedIndex = selected.indexOf(selectedPaymentRecord);
     const newSelected = [...selected];
 
     if (selectedIndex === -1) {
-      newSelected.push(name);
+      newSelected.push(selectedPaymentRecord);
     } else {
       newSelected.splice(selectedIndex, 1);
     }
@@ -50,9 +50,9 @@ export function LookUpPaymentRecordTable({
     setFieldValue('selectedPaymentRecords', newSelected);
   };
 
-  const handleSelectAllCheckboxesClick = (event, rows): void => {
+  const handleSelectAllCheckboxesClick = (_, rows): void => {
     if (!selected.length) {
-      const newSelecteds = rows.map((row) => row.id);
+      const newSelecteds = rows;
       setSelected(newSelecteds);
       setFieldValue('selectedPaymentRecords', newSelecteds);
       return;
@@ -61,6 +61,7 @@ export function LookUpPaymentRecordTable({
     setFieldValue('selectedPaymentRecords', []);
   };
   const numSelected = selected.length;
+
   if (isEditTicket) {
     return (
       <UniversalTable<
