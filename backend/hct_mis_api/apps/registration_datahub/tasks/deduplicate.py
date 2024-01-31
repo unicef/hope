@@ -659,142 +659,148 @@ class HardDocumentDeduplication:
     def deduplicate(
         self, new_documents: QuerySet[Document], registration_data_import: Optional[RegistrationDataImport] = None
     ) -> None:
-        program_q = (
-            Q(program=registration_data_import.program)
-            if registration_data_import and registration_data_import.program
-            else Q()
-        )
-        documents_to_dedup = evaluate_qs(
-            new_documents.filter(Q(status=Document.STATUS_PENDING) & Q(type__is_identity_document=True) & program_q)
-            .select_related("individual", "type")
-            .select_for_update(of=("self",))  # no need to lock individuals
-            .order_by("pk")
-        )
-        documents_numbers = [x.document_number for x in documents_to_dedup]
-        new_document_signatures = [self._generate_signature(d) for d in documents_to_dedup]
-        new_document_signatures_duplicated_in_batch = [
-            d for d in new_document_signatures if new_document_signatures.count(d) > 1
-        ]
-        # added order_by because test was failed randomly
-        all_matching_number_documents = (
-            Document.objects.select_related("individual", "individual__household", "individual__business_area")
-            .filter(Q(document_number__in=documents_numbers) & Q(status=Document.STATUS_VALID) & program_q)
-            .annotate(
-                signature=Concat(
-                    Case(
-                        When(
-                            Q(type__valid_for_deduplication=True),
-                            then=Concat(F("type_id"), Value("--"), output_field=CharField()),
+        if registration_data_import and registration_data_import.program:
+            program_ids = [str(registration_data_import.program_id)]
+        else:
+            program_ids = list(set(new_documents.filter(program__isnull=False).values_list("program", flat=True)))
+            program_ids = [str(program_id) for program_id in program_ids]
+
+        for program_id in program_ids:
+            program_q = Q(program=program_id)
+            documents_to_dedup = evaluate_qs(
+                new_documents.filter(Q(status=Document.STATUS_PENDING) & Q(type__is_identity_document=True) & program_q)
+                .select_related("individual", "type")
+                .select_for_update(of=("self",))  # no need to lock individuals
+                .order_by("pk")
+            )
+            documents_numbers = [x.document_number for x in documents_to_dedup]
+            new_document_signatures = [self._generate_signature(d) for d in documents_to_dedup]
+            new_document_signatures_duplicated_in_batch = [
+                d for d in new_document_signatures if new_document_signatures.count(d) > 1
+            ]
+            # added order_by because test was failed randomly
+            all_matching_number_documents = (
+                Document.objects.select_related("individual", "individual__household", "individual__business_area")
+                .filter(Q(document_number__in=documents_numbers) & Q(status=Document.STATUS_VALID) & program_q)
+                .annotate(
+                    signature=Concat(
+                        Case(
+                            When(
+                                Q(type__valid_for_deduplication=True),
+                                then=Concat(F("type_id"), Value("--"), output_field=CharField()),
+                            ),
+                            default=Value(""),
                         ),
-                        default=Value(""),
-                    ),
-                    F("document_number"),
-                    Value("--"),
-                    F("country_id"),
-                    output_field=CharField(),
+                        F("document_number"),
+                        Value("--"),
+                        F("country_id"),
+                        output_field=CharField(),
+                    )
                 )
+                .order_by("individual_id")
             )
-            .order_by("individual_id")
-        )
-        all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
-        all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
-        already_processed_signatures = []
-        ticket_data_dict = {}
-        possible_duplicates_individuals_id_set = set()
+            all_matching_number_documents_dict = {d.signature: d for d in all_matching_number_documents}
+            all_matching_number_documents_signatures = all_matching_number_documents_dict.keys()
+            already_processed_signatures = []
+            ticket_data_dict = {}
+            possible_duplicates_individuals_id_set = set()
 
-        for new_document in documents_to_dedup:
-            new_document_signature = self._generate_signature(new_document)
+            for new_document in documents_to_dedup:
+                new_document_signature = self._generate_signature(new_document)
 
-            if new_document_signature in all_matching_number_documents_signatures:
-                new_document.status = Document.STATUS_NEED_INVESTIGATION
-                ticket_data = ticket_data_dict.get(
-                    new_document_signature,
-                    {"original": all_matching_number_documents_dict[new_document_signature], "possible_duplicates": []},
+                if new_document_signature in all_matching_number_documents_signatures:
+                    new_document.status = Document.STATUS_NEED_INVESTIGATION
+                    ticket_data = ticket_data_dict.get(
+                        new_document_signature,
+                        {
+                            "original": all_matching_number_documents_dict[new_document_signature],
+                            "possible_duplicates": [],
+                        },
+                    )
+                    ticket_data["possible_duplicates"].append(new_document)
+                    ticket_data_dict[new_document_signature] = ticket_data
+                    possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
+                    continue
+
+                if (
+                    new_document_signature in new_document_signatures_duplicated_in_batch
+                    and new_document_signature in already_processed_signatures
+                ):
+                    new_document.status = Document.STATUS_NEED_INVESTIGATION
+                    ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
+                    possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
+                    continue
+
+                new_document.status = Document.STATUS_VALID
+                already_processed_signatures.append(new_document_signature)
+
+                if new_document_signature in new_document_signatures_duplicated_in_batch:
+                    ticket_data_dict[new_document_signature] = {
+                        "original": new_document,
+                        "possible_duplicates": [],
+                    }
+
+            try:
+                Document.objects.bulk_update(documents_to_dedup, ("status", "updated_at"))
+            except IntegrityError:
+                log.error(
+                    f"Hard Deduplication Documents bulk update error."
+                    f"All matching documents in DB: {all_matching_number_documents_signatures}"
+                    f"New documents to dedup: {new_document_signatures}"
+                    f"new_document_signatures_duplicated_in_batch: {new_document_signatures_duplicated_in_batch}"
                 )
-                ticket_data["possible_duplicates"].append(new_document)
-                ticket_data_dict[new_document_signature] = ticket_data
-                possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
-                continue
+                raise
 
-            if (
-                new_document_signature in new_document_signatures_duplicated_in_batch
-                and new_document_signature in already_processed_signatures
-            ):
-                new_document.status = Document.STATUS_NEED_INVESTIGATION
-                ticket_data_dict[new_document_signature]["possible_duplicates"].append(new_document)
-                possible_duplicates_individuals_id_set.add(str(new_document.individual_id))
-                continue
-
-            new_document.status = Document.STATUS_VALID
-            already_processed_signatures.append(new_document_signature)
-
-            if new_document_signature in new_document_signatures_duplicated_in_batch:
-                ticket_data_dict[new_document_signature] = {
-                    "original": new_document,
-                    "possible_duplicates": [],
-                }
-
-        try:
-            Document.objects.bulk_update(documents_to_dedup, ("status", "updated_at"))
-        except IntegrityError:
-            log.error(
-                f"Hard Deduplication Documents bulk update error."
-                f"All matching documents in DB: {all_matching_number_documents_signatures}"
-                f"New documents to dedup: {new_document_signatures}"
-                f"new_document_signatures_duplicated_in_batch: {new_document_signatures_duplicated_in_batch}"
-            )
-            raise
-
-        PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
-        possible_duplicates_through_existing_list = (
-            PossibleDuplicateThrough.objects.filter(individual__in=possible_duplicates_individuals_id_set)
-            .order_by("ticketneedsadjudicationdetails")
-            .values_list(
-                "ticketneedsadjudicationdetails_id",
-                "individual_id",
-                "ticketneedsadjudicationdetails__golden_records_individual",
-            )
-        )
-
-        possible_duplicates_through_dict = defaultdict(set)
-        for ticked_details_id, individual_id, main_individual_id in possible_duplicates_through_existing_list:
-            possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
-            possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
-
-        ticket_data_collected = []
-        tickets_programs = []
-        GrievanceTicketProgramThrough = GrievanceTicket.programs.through
-        for ticket_data in ticket_data_dict.values():
-            main_individual = ticket_data["original"].individual
-            prepared_ticket = self._prepare_grievance_ticket_documents_deduplication(
-                main_individual=main_individual,
-                business_area=main_individual.business_area,
-                registration_data_import=registration_data_import,
-                possible_duplicates_individuals=[d.individual for d in ticket_data["possible_duplicates"]],
-                possible_duplicates_through_dict=possible_duplicates_through_dict,
-            )
-            if prepared_ticket is None:
-                continue
-            ticket_data_collected.append(prepared_ticket)
-            tickets_programs.append(
-                GrievanceTicketProgramThrough(
-                    grievanceticket=prepared_ticket.ticket, program_id=main_individual.program_id
+            PossibleDuplicateThrough = TicketNeedsAdjudicationDetails.possible_duplicates.through
+            possible_duplicates_through_existing_list = (
+                PossibleDuplicateThrough.objects.filter(individual__in=possible_duplicates_individuals_id_set)
+                .order_by("ticketneedsadjudicationdetails")
+                .values_list(
+                    "ticketneedsadjudicationdetails_id",
+                    "individual_id",
+                    "ticketneedsadjudicationdetails__golden_records_individual",
                 )
             )
 
-        GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
-        GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
+            possible_duplicates_through_dict = defaultdict(set)
+            for ticked_details_id, individual_id, main_individual_id in possible_duplicates_through_existing_list:
+                possible_duplicates_through_dict[str(ticked_details_id)].add(str(individual_id))
+                possible_duplicates_through_dict[str(ticked_details_id)].add(str(main_individual_id))
 
-        created_tickets = TicketNeedsAdjudicationDetails.objects.bulk_create(
-            [x.ticket_details for x in ticket_data_collected]
-        )
-        # makes flat list from list of lists models
-        duplicates_models_to_create_flat = list(
-            itertools.chain(*[x.possible_duplicates_throughs for x in ticket_data_collected])
-        )
-        PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
-        for created_ticket in created_tickets:
-            created_ticket.populate_cross_area_flag()
+            ticket_data_collected = []
+            tickets_programs = []
+            GrievanceTicketProgramThrough = GrievanceTicket.programs.through
+            for ticket_data in ticket_data_dict.values():
+                main_individual = ticket_data["original"].individual
+                prepared_ticket = self._prepare_grievance_ticket_documents_deduplication(
+                    main_individual=main_individual,
+                    business_area=main_individual.business_area,
+                    registration_data_import=registration_data_import,
+                    possible_duplicates_individuals=[d.individual for d in ticket_data["possible_duplicates"]],
+                    possible_duplicates_through_dict=possible_duplicates_through_dict,
+                )
+                if prepared_ticket is None:
+                    continue
+                ticket_data_collected.append(prepared_ticket)
+                tickets_programs.append(
+                    GrievanceTicketProgramThrough(
+                        grievanceticket=prepared_ticket.ticket, program_id=main_individual.program_id
+                    )
+                )
+
+            GrievanceTicket.objects.bulk_create([x.ticket for x in ticket_data_collected])
+            GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
+
+            created_tickets = TicketNeedsAdjudicationDetails.objects.bulk_create(
+                [x.ticket_details for x in ticket_data_collected]
+            )
+            # makes flat list from list of lists models
+            duplicates_models_to_create_flat = list(
+                itertools.chain(*[x.possible_duplicates_throughs for x in ticket_data_collected])
+            )
+            PossibleDuplicateThrough.objects.bulk_create(duplicates_models_to_create_flat)
+            for created_ticket in created_tickets:
+                created_ticket.populate_cross_area_flag()
 
     def _generate_signature(self, document: Document) -> str:
         if document.type.valid_for_deduplication:
