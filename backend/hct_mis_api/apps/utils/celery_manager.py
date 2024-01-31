@@ -112,4 +112,5 @@ class RegistrationDataXlsxImportCeleryManager(BaseCeleryTaskManager):
             "registration_data_import_id": str(rdi_datahub.id),
             "import_data_id": str(rdi_datahub.import_data_id),
             "business_area_id": str(rdi.business_area_id),
+            "program_id": str(rdi.program_id),
         }
