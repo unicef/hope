@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.9.18-slim-bookworm as base
+FROM python:3.11.7-slim-bookworm as base
 
 ARG UID=82
 

@@ -57,7 +57,7 @@ stages:
             inputs:
               versionSpec: "3.9"
             displayName: "Use Python 3.9"
-          - script: pip install black==23.1 isort==5.12
+          - script: pip install black==23.12 isort==5.13
           # remember to update this if you change the version of black/isort in pyproject.toml
             displayName: "Install tools"
           - script: black --check .
@@ -292,7 +292,6 @@ stages:
               scriptPath: './backend/compare_coverage.py'
               arguments: 'backend/coverage.xml $(System.ArtifactsDirectory)/old_coverage/coverage.xml'
               pythonInterpreter: 'python3'
-              continueOnError: true
 
   - stage: trivy
     dependsOn: [build_and_push_backend]
@@ -311,6 +310,7 @@ stages:
           - script: |
               docker pull $(Docker.url)/$(Docker.backend.repository):$(tag)
               docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 -e TRIVY_SEVERITY=HIGH,CRITICAL aquasec/trivy:0.47.0 image $(Docker.url)/$(Docker.backend.repository):$(tag)
+            continueOnError: true
 
   - stage: e2e_tests
     dependsOn: [build_and_push_backend, build_and_push_frontend, test_frontend, build_and_push_cypress]

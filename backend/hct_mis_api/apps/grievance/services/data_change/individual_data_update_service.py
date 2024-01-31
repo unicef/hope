@@ -315,7 +315,7 @@ class IndividualDataUpdateService(DataChangeService):
         if is_approved(role_data):
             handle_role(role_data.get("value"), household, new_individual)
         documents_to_create = [handle_add_document(document, new_individual) for document in documents]
-        documents_to_update = [handle_edit_document(document) for document in documents_to_edit]
+        documents_to_update = [handle_edit_document(document.get("value", {})) for document in documents_to_edit]
         identities_to_create = [handle_add_identity(identity, new_individual) for identity in identities]
         identities_to_update = [handle_edit_identity(identity) for identity in identities_to_edit]
         payment_channels_to_create = [
@@ -325,7 +325,7 @@ class IndividualDataUpdateService(DataChangeService):
             handle_update_payment_channel(payment_channel) for payment_channel in payment_channels_to_edit
         ]
         Document.objects.bulk_create(documents_to_create)
-        Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo"])
+        Document.objects.bulk_update(documents_to_update, ["document_number", "type", "photo", "country"])
         Document.objects.filter(id__in=documents_to_remove).delete()
         IndividualIdentity.objects.bulk_create(identities_to_create)
         IndividualIdentity.objects.bulk_update(identities_to_update, ["number", "partner"])
