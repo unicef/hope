@@ -14,6 +14,7 @@ class TestAdminPanel:
         assert "Permissions" in PageAdminPanel.getPermissionText().text
 
     # ToDo: Change cypress-username user to normal user
+    @pytest.mark.skip(reason="Change cypress-username user to normal user")
     def test_login_normal_user(self, browser: webdriver, logout, PageAdminPanel: AdminPanel):
         browser.get("http://localhost:8082/api/unicorn/")
         PageAdminPanel.getLogin().send_keys('cypress-username')
