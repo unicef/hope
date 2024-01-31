@@ -27,12 +27,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
+from hct_mis_api.aurora.models import Record
 from hct_mis_api.aurora.services.czech_republic_flex_registration_service import (
     CzechRepublicFlexRegistration,
 )
@@ -200,7 +200,6 @@ class TestCzechRepublicRegistrationService(TestCase):
                 "legal_guardia_not_primary_carer": "n",
             },
         ]
-        Record = get_record_model()
         records = [
             Record(
                 registration=25,
@@ -227,7 +226,6 @@ class TestCzechRepublicRegistrationService(TestCase):
         service.process_records(rdi.id, records_ids)
 
         self.records[0].refresh_from_db()
-        Record = get_record_model()
         self.assertEqual(
             Record.objects.filter(id__in=records_ids, ignored=False, status=Record.STATUS_IMPORTED).count(), 1
         )
