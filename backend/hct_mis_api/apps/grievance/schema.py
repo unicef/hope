@@ -170,7 +170,10 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         ) and has_partner_area_access:
             return None
 
-        log_and_raise(f"User is not active creator/assignee and does not have '{perm}' permission")
+        log_and_raise(
+            f"User is not active creator/assignee and does not have '{perm}' permission"
+            f" or user does not have access to the ticket's program or its admin area"
+        )
 
     class Meta:
         model = GrievanceTicket
