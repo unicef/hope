@@ -125,6 +125,7 @@ class PaymentInstructionData:
     fsp: str
     system: int
     payload: dict
+    extra: dict
     id: Optional[int] = None
 
 
