@@ -11,6 +11,7 @@ from hct_mis_api.apps.grievance.services.data_change.add_individual_service impo
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.household.models import SINGLE, Individual
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestAddIndividualService(BaseElasticSearchTestCase, TestCase):
@@ -19,7 +20,8 @@ class TestAddIndividualService(BaseElasticSearchTestCase, TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         create_afghanistan()
-        household, _ = create_household()
+        program = ProgramFactory()
+        household, _ = create_household({"program": program})
         ticket_details = TicketAddIndividualDetailsFactory(
             household=household,
             individual_data={

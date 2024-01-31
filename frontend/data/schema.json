@@ -499,7 +499,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Boolean",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -27275,12 +27275,6 @@
           },
           {
             "name": "KOBO",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DIIA",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -57429,22 +57423,6 @@
             "deprecationReason": null
           },
           {
-            "name": "diiaRecId",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "enumeratorRecId",
             "description": null,
             "args": [],
@@ -59233,12 +59211,6 @@
           },
           {
             "name": "FLEX",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DIIA",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
