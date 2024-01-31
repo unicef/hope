@@ -36,3 +36,4 @@ class AdminPanel(BaseComponents):
 
     def getLoggedName(self):
         return self.wait_for(self.loggedName, By.XPATH)
+        
