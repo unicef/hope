@@ -3,7 +3,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { decodeIdString } from '../../../../utils/utils';
 import { BlueText, DarkGrey, LightGrey, StyledBox } from '../LookUpStyles';
 
 export const LookUpPaymentRecordDisplay = ({
@@ -24,7 +23,7 @@ export const LookUpPaymentRecordDisplay = ({
   const renderPaymentRecords = (): React.ReactElement => {
     if (values.selectedPaymentRecords.length) {
       return values.selectedPaymentRecords.map((record) => (
-        <BlueText>{decodeIdString(record)}</BlueText>
+        <BlueText>{record.caId}</BlueText>
       ));
     }
     return <BlueText>-</BlueText>;
