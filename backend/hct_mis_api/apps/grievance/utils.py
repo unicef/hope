@@ -174,16 +174,19 @@ def filter_based_on_partner_areas_2(
         else:
             if business_area_permission := partner_permission.get_programs_for_business_area(business_area_id_str):
                 programs_permissions = business_area_permission.programs.items()
+                if (
+                    not programs_permissions
+                ):  # if user does not have permission to any program in this business area -> only non-program tickets
+                    return queryset.model.objects.none()
             else:
-                programs_permissions = {}  # type: ignore
-
+                return queryset.model.objects.none()
         for perm_program_id, areas_ids in programs_permissions:
             program_q = Q(**{lookup_id: id_container(perm_program_id)})
             areas_null_and_program_q = program_q & Q(admin2__isnull=True)
             if areas_ids:
                 filter_q |= Q(areas_null_and_program_q | Q(program_q & Q(admin2__in=areas_ids)))
             else:
-                filter_q |= areas_null_and_program_q
+                filter_q |= program_q  # empty areas -> full area access
 
         # add Feedbacks without program for "All Programmes" query
         if queryset.model is Feedback and not program_id:
