@@ -376,3 +376,22 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         )
         self.document9.refresh_from_db()
         self.assertEqual(self.document9.status, Document.STATUS_INVALID)
+
+    def test_hard_documents_deduplication_for_the_diff_program(self) -> None:
+        program_2 = ProgramFactory(business_area=self.business_area)
+
+        new_document_from_other_program = Document.objects.create(
+            country=geo_models.Country.objects.get(iso_code2="PL"),
+            type=DocumentType.objects.get(key="national_id"),
+            document_number="ASD123",
+            individual=self.individuals[0],
+            status=Document.STATUS_PENDING,
+            program=program_2,
+        )
+
+        new_document_from_other_program.refresh_from_db()
+        self.assertEqual(new_document_from_other_program.status, Document.STATUS_PENDING)
+
+        HardDocumentDeduplication().deduplicate(self.get_documents_query([new_document_from_other_program]))
+        new_document_from_other_program.refresh_from_db()
+        self.assertEqual(new_document_from_other_program.status, Document.STATUS_VALID)
