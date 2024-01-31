@@ -178,6 +178,37 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_edit_payment_channel_for_
     ]
 }
 
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_household_data_change_with_admin_area 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'addIndividualTicketDetails': None,
+                    'category': 2,
+                    'description': 'AreaTest',
+                    'householdDataUpdateTicketDetails': {
+                        'household': {
+                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
+                        },
+                        'householdData': {
+                            'admin_area_title': {
+                                'approve_status': False,
+                                'previous_value': None,
+                                'value': 'City Test1 - area1'
+                            },
+                            'flex_fields': {
+                            }
+                        }
+                    },
+                    'individualDataUpdateTicketDetails': None,
+                    'issueType': 13,
+                    'sensitiveTicketDetails': None
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_0_with_permission 1'] = {
     'data': {
         'createGrievanceTicket': {

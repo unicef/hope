@@ -7,7 +7,11 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import {
+  FinancialServiceProviderCommunicationChannel,
+  PaymentPlanQuery,
+  PaymentPlanStatus
+} from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import { StatusBox } from '../../../core/StatusBox';
@@ -70,14 +74,15 @@ export const PaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
     permissions,
   );
-  const canSendToFsp = false; // TODO: disabled for now
-  // hasPermissions(PERMISSIONS.PM_SENDING_PAYMENT_PLAN_TO_FSP, permissions) &&
-  // paymentPlan.status === PaymentPlanStatus.Accepted &&
-  // paymentPlan.deliveryMechanisms.some(
-  //   ({ fsp: { communicationChannel } }) =>
-  //     communicationChannel ===
-  //     FinancialServiceProviderCommunicationChannel.Api,
-  // );
+  const canSendToPaymentGateway = hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
+  paymentPlan.status === PaymentPlanStatus.Accepted &&
+  paymentPlan.deliveryMechanisms.some(
+    (deliveryMechanism) => {
+      const { sentToPaymentGateway, fsp } = deliveryMechanism;
+      const {communicationChannel} = fsp;
+      return !sentToPaymentGateway && communicationChannel === FinancialServiceProviderCommunicationChannel.Api ;
+    }
+  );
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -150,7 +155,7 @@ export const PaymentPlanDetailsHeader = ({
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
           canExportXlsx={canExportXlsx}
-          canSendToFsp={canSendToFsp}
+          canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
         />
       );
@@ -160,7 +165,7 @@ export const PaymentPlanDetailsHeader = ({
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
           canExportXlsx={canExportXlsx}
-          canSendToFsp={canSendToFsp}
+          canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
         />
       );

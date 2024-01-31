@@ -60,7 +60,7 @@ class HouseholdDataUpdateService(DataChangeService):
             current_value = getattr(area, "p_code", None)
 
             if value := admin_area_title.get("value", None):
-                admin_area_title["value"] = value.split("-")[1].strip()
+                admin_area_title["value"] = value
             admin_area_title["previous_value"] = current_value
             household_data_with_approve_status["admin_area_title"] = admin_area_title
 

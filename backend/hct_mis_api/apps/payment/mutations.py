@@ -752,6 +752,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             PaymentPlan.Action.REJECT.name: _get_reject_permission(pp_status),
             PaymentPlan.Action.FINISH.name: [],
+            PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.name: [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
         }
         cls.has_permission(info, action_to_permissions_map[action], business_area)
 
