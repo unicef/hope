@@ -13,7 +13,7 @@ def test_conditional(decorator: Any) -> Any:
         _decorated = decorator(fn)
 
         @wraps(fn)
-        def wrapper(self, *args, **kwargs) -> Any:
+        def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
             if not settings.IS_TEST:
                 return _decorated(self, *args, **kwargs)
             return fn(self, *args, **kwargs)
