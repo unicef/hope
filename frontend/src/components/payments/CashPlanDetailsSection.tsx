@@ -12,8 +12,8 @@ import { UniversalMoment } from '../core/UniversalMoment';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const ChartContainer = styled.div`
-  width: 150px;
-  height: 150px;
+  width: 100%;
+  height: 100%;
 `;
 
 const BorderLeftBox = styled.div`
@@ -44,43 +44,42 @@ export const CashPlanDetailsSection = ({
 
   return (
     <Grid container>
-      <Grid item xs={9}>
+      <Grid item xs={7}>
         <Title data-cy='div-payment-plan-details'>
           <Typography variant='h6'>{t('Payment Plan Details')}</Typography>
         </Title>
-        <Grid data-cy='grid-payment-plan-details' container>
-          {[
-            { label: t('PROGRAMME NAME'), value: planNode.program.name },
-            {
-              label: t('PROGRAMME ID'),
-              value: (
-                <BlackLink to={`/${baseUrl}/details/${planNode.program.id}`}>
-                  {planNode.program?.caId}
-                </BlackLink>
-              ),
-            },
-            {
-              label: t('PAYMENT RECORDS'),
-              value: planNode.availablePaymentRecordsCount,
-            },
-            {
-              label: t('START DATE'),
-              value: <UniversalMoment>{planNode.startDate}</UniversalMoment>,
-            },
-            {
-              label: t('END DATE'),
-              value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
-            },
-          ].map((el) => (
-            <Grid item xs={4} key={el.label}>
-              <Box pt={2} pb={2}>
+        <Box pr={2}>
+          <Grid data-cy='grid-payment-plan-details' container spacing={3}>
+            {[
+              {
+                label: t('PROGRAMME NAME'),
+                value: (
+                  <BlackLink to={`/${baseUrl}/details/${planNode.program.id}`}>
+                    {planNode.program.name}
+                  </BlackLink>
+                ),
+              },
+              {
+                label: t('PAYMENT RECORDS'),
+                value: planNode.availablePaymentRecordsCount,
+              },
+              {
+                label: t('START DATE'),
+                value: <UniversalMoment>{planNode.startDate}</UniversalMoment>,
+              },
+              {
+                label: t('END DATE'),
+                value: <UniversalMoment>{planNode.endDate}</UniversalMoment>,
+              },
+            ].map((el) => (
+              <Grid item xs={3} key={el.label}>
                 <LabelizedField label={el.label}>{el.value}</LabelizedField>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
       </Grid>
-      <Grid data-cy='grid-bank-reconciliation' item xs={3}>
+      <Grid data-cy='grid-bank-reconciliation' item xs={5}>
         <BorderLeftBox>
           <Title>
             <Typography variant='h6' data-cy='table-label'>
@@ -88,7 +87,7 @@ export const CashPlanDetailsSection = ({
             </Typography>
           </Title>
           <Grid container>
-            <Grid item xs={6}>
+            <Grid item xs={3}>
               <Grid container direction='column'>
                 <LabelizedField label={t('SUCCESSFUL')}>
                   <p>{bankReconciliationSuccessPercentage}%</p>
@@ -98,11 +97,9 @@ export const CashPlanDetailsSection = ({
                 </LabelizedField>
               </Grid>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={9}>
               <ChartContainer>
                 <Doughnut
-                  width={200}
-                  height={200}
                   options={{
                     maintainAspectRatio: false,
                     cutoutPercentage: 80,
