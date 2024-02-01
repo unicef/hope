@@ -35,12 +35,6 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
     model = Program
     permission = Grant.API_PROGRAM_CREATE
 
-    def filter_queryset(self, queryset: "QuerySet") -> "QuerySet":
-        return queryset.filter(business_area=self.selected_business_area)
-
-    def get_queryset(self) -> "QuerySet":
-        return Program.objects.filter(business_area=self.selected_business_area)
-
     def perform_create(self, serializer: "BaseSerializer") -> None:
         serializer.save(business_area=self.selected_business_area)
 
