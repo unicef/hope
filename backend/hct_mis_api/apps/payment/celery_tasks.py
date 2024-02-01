@@ -636,7 +636,7 @@ def periodic_sync_payment_gateway_fsp(self: Any) -> None:
         raise self.retry(exc=e)
 
 
-@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@app.task(bind=True)
 @log_start_and_end
 @sentry_tags
 def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> None:
@@ -654,12 +654,11 @@ def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> No
 
         payment_plan.background_action_status_none()
         payment_plan.save(update_fields=["background_action_status"])
-    except Exception as e:
+    except Exception:
         msg = "Error while sending to Payment Gateway"
         logger.exception(msg)
         payment_plan.background_action_status_send_to_payment_gateway_error()
         payment_plan.save(update_fields=["background_action_status"])
-        raise self.retry(exc=e)
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
