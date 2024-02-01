@@ -1,5 +1,6 @@
 import pytest
 import random
+
 from helpers.date_time_format import FormatTime
 from datetime import datetime
 from page_object.programme_management.programme_management import ProgrammeManagement
@@ -288,6 +289,7 @@ class TestProgrammeManagement:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "16" in pageProgrammeDetails.getLabelAreaAccess().text
 
+
     def test_create_programme_check_empty_mandatory_fields(self, pageProgrammeManagement: ProgrammeManagement) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -380,6 +382,7 @@ class TestProgrammeManagement:
         assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
+        
     def test_create_programme_cancel_scenario(self,
                                               pageProgrammeManagement: ProgrammeManagement,
                                               pageProgrammeDetails: ProgrammeDetails) -> None:
