@@ -1,5 +1,6 @@
 import datetime
 import json
+from typing import Dict
 
 from django.conf import settings
 from django.test import TestCase
@@ -16,6 +17,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
+    ImportedIndividual,
 )
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
@@ -24,16 +26,36 @@ from hct_mis_api.aurora.fixtures import (
 )
 from hct_mis_api.aurora.models import Record
 from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
+    Registration2024,
     UkraineBaseRegistrationService,
 )
 
 
-class TestUkrainianRegistrationService(TestCase):
+class BaseTestUkrainianRegistrationService(TestCase):
     databases = {
         "default",
         "registration_datahub",
     }
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
+
+    @classmethod
+    def individual_wit_bank_account_and_tax_and_disability(cls) -> Dict:
+        return {
+            "tax_id_no_i_c": "123123123",
+            "bank_account_h_f": "y",
+            "relationship_i_c": "head",
+            "given_name_i_c": "Jan",
+            "family_name_i_c": "Romaniak",
+            "patronymic": "Roman",
+            "birth_date": "1991-11-18",
+            "gender_i_c": "male",
+            "phone_no_i_c": "0501706662",
+            "email": "email123@mail.com",
+            "bank_account_number": "123 123 321 321",
+            "bank_account": "111 123 321 321",
+            "account_holder_name_i_c": "Test Holder Name 111",
+            "bank_branch_name_i_c": "Branch Name 111",
+        }
 
     @classmethod
     def setUp(cls) -> None:
@@ -61,22 +83,7 @@ class TestUkrainianRegistrationService(TestCase):
                 "size_h_c": 5,
             }
         ]
-        individual_wit_bank_account_and_tax_and_disability = {
-            "tax_id_no_i_c": "123123123",
-            "bank_account_h_f": "y",
-            "relationship_i_c": "head",
-            "given_name_i_c": "Jan",
-            "family_name_i_c": "Romaniak",
-            "patronymic": "Roman",
-            "birth_date": "1991-11-18",
-            "gender_i_c": "male",
-            "phone_no_i_c": "0501706662",
-            "email": "email123@mail.com",
-            "bank_account_number": "123 123 321 321",
-            "bank_account": "111 123 321 321",
-            "account_holder_name_i_c": "Test Holder Name 111",
-            "bank_branch_name_i_c": "Branch Name 111",
-        }
+
         individual_wit_bank_account_and_tax = {
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
@@ -150,7 +157,10 @@ class TestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=1,
-                fields={"household": household, "individuals": [individual_wit_bank_account_and_tax_and_disability]},
+                fields={
+                    "household": household,
+                    "individuals": [cls.individual_wit_bank_account_and_tax_and_disability()],
+                },
                 files=json.dumps(files).encode(),
             ),
             Record(
@@ -183,6 +193,12 @@ class TestUkrainianRegistrationService(TestCase):
         cls.records = Record.objects.bulk_create(records)
         cls.bad_records = Record.objects.bulk_create(bad_records)
         cls.user = UserFactory.create()
+
+
+class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
+    @classmethod
+    def setUp(cls) -> None:
+        super().setUp()
 
     def test_import_data_to_datahub(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
@@ -231,3 +247,34 @@ class TestUkrainianRegistrationService(TestCase):
         self.bad_records[0].refresh_from_db()
         self.assertEqual(self.bad_records[0].status, Record.STATUS_ERROR)
         self.assertEqual(ImportedHousehold.objects.count(), 0)
+
+
+class TestRegistration2024(BaseTestUkrainianRegistrationService):
+    @classmethod
+    def setUp(cls) -> None:
+        super().setUp()
+
+    @classmethod
+    def individual_wit_bank_account_and_tax_and_disability(cls) -> Dict:
+        return {
+            **super().individual_wit_bank_account_and_tax_and_disability(),
+            "low_income_hh_h_f": True,
+            "single_headed_hh_h_f": False,
+        }
+
+    def test_import_data_to_datahub(self) -> None:
+        service = Registration2024(self.registration)
+        rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
+        records_ids = [x.id for x in self.records]
+        service.process_records(rdi.id, records_ids)
+
+        print(ImportedHousehold.objects.all())
+        print(ImportedBankAccountInfo.objects.all())
+        print(ImportedIndividual.objects.all())
+
+        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
+        self.assertEqual(ImportedHousehold.objects.count(), 4)
+        self.assertEqual(ImportedBankAccountInfo.objects.count(), 3)
+
+        ind = ImportedIndividual.objects.get(family_name="Romaniak")
+        self.assertEqual(ind.flex_fields, {"low_income_hh_h_f": True, "single_headed_hh_h_f": False})
