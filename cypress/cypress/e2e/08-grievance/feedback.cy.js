@@ -176,7 +176,7 @@ describe.skip("Grievance - Feedback", () => {
         });
       });
     });
-    context("Create New Feedback", () => {
+    context.only("Create New Feedback", () => {
       it("Create New Feedback - Negative Feedback", () => {
         cy.scenario([
           "Go to Grievance page",
@@ -203,6 +203,7 @@ describe.skip("Grievance - Feedback", () => {
         newFeedbackPage.getDescription().type("Test Description");
         newFeedbackPage.getComments().type("Test comment");
         newFeedbackPage.getAdminAreaAutocomplete().click();
+        newFeedbackPage.getAdminAreaAutocomplete().type("Zari");
         newFeedbackPage.getOption().contains("Zari").click();
         newFeedbackPage.getInputArea().type("Test Area");
         newFeedbackPage.getInputLanguage().type("Random Language");
@@ -245,6 +246,7 @@ describe.skip("Grievance - Feedback", () => {
         newFeedbackPage.getDescription().type("Test Description");
         newFeedbackPage.getComments().type("Test comment");
         newFeedbackPage.getAdminAreaAutocomplete().click();
+        newFeedbackPage.getAdminAreaAutocomplete().type("Zari");
         newFeedbackPage.getOption().contains("Zari").click();
         newFeedbackPage.getInputArea().type("Test Area");
         newFeedbackPage.getInputLanguage().type("Random Language");

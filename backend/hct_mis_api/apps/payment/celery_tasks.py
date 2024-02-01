@@ -17,7 +17,7 @@ from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportSevice,
 )
@@ -618,4 +618,59 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
 
     except Exception as e:
         logger.exception("Export PDF Payment Plan Summary Error")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_gateway_fsp(self: Any) -> None:
+    try:
+        from hct_mis_api.apps.payment.services.payment_gateway import (
+            PaymentGatewayService,
+        )
+
+        PaymentGatewayService().sync_fsps()
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True)
+@log_start_and_end
+@sentry_tags
+def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayService
+
+    try:
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        user = get_user_model().objects.get(pk=user_id)
+
+        payment_plan.background_action_status_send_to_payment_gateway()
+        payment_plan.save(update_fields=["background_action_status"])
+
+        PaymentGatewayService().create_payment_instructions(payment_plan, user.email)
+        PaymentGatewayService().add_records_to_payment_instructions(payment_plan)
+
+        payment_plan.background_action_status_none()
+        payment_plan.save(update_fields=["background_action_status"])
+    except Exception:
+        msg = "Error while sending to Payment Gateway"
+        logger.exception(msg)
+        payment_plan.background_action_status_send_to_payment_gateway_error()
+        payment_plan.save(update_fields=["background_action_status"])
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_gateway_records(self: Any) -> None:
+    try:
+        from hct_mis_api.apps.payment.services.payment_gateway import (
+            PaymentGatewayService,
+        )
+
+        PaymentGatewayService().sync_records()
+    except Exception as e:
+        logger.exception(e)
         raise self.retry(exc=e)

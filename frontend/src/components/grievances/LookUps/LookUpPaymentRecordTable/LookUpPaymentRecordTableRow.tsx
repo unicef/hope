@@ -1,26 +1,25 @@
-import { Checkbox, Radio } from '@material-ui/core';
+import { Checkbox } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
+import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../../utils/utils';
-import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
 import { StatusBox } from '../../../core/StatusBox';
 import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordAndPaymentNode;
   openInNewTab: boolean;
-  selected: Array<string>;
+  selected: Array<PaymentRecordAndPaymentNode>;
   checkboxClickHandler: (
     event:
       | React.MouseEvent<HTMLButtonElement, MouseEvent>
       | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
-    number: string,
+    selectedPaymentRecord: PaymentRecordAndPaymentNode,
   ) => void;
 }
 
@@ -30,12 +29,10 @@ export function LookUpPaymentRecordTableRow({
   checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  const location = useLocation();
-  const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const isSelected = (name: string): boolean => selected.includes(name);
-  const isItemSelected = isSelected(paymentRecord.id);
+  const isItemSelected = (item): boolean =>
+    selected.some((selectedItem) => selectedItem.id === item.id);
+  const paymentRecordIsSelected = isItemSelected(paymentRecord);
   const received = paymentRecord?.verification?.receivedAmount;
-
   const renderUrl = (objType): string => {
     if (objType === 'Payment') {
       return `/${baseUrl}/payment-module/payments/${paymentRecord.id}`;
@@ -45,27 +42,18 @@ export function LookUpPaymentRecordTableRow({
 
   return (
     <ClickableTableRow
-      onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
+      onClick={(event) => checkboxClickHandler(event, paymentRecord)}
       hover
       role='checkbox'
       key={paymentRecord.id}
     >
       <TableCell padding='checkbox'>
-        {isEditTicket ? (
-          <Radio
-            color='primary'
-            onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
-            checked={isItemSelected}
-            inputProps={{ 'aria-labelledby': paymentRecord.id }}
-          />
-        ) : (
-          <Checkbox
-            color='primary'
-            onClick={(event) => checkboxClickHandler(event, paymentRecord.id)}
-            checked={isItemSelected}
-            inputProps={{ 'aria-labelledby': paymentRecord.id }}
-          />
-        )}
+        <Checkbox
+          color='primary'
+          onClick={(event) => checkboxClickHandler(event, paymentRecord)}
+          checked={paymentRecordIsSelected}
+          inputProps={{ 'aria-labelledby': paymentRecord.id }}
+        />
       </TableCell>
       <TableCell align='left'>
         {!isAllPrograms ? (

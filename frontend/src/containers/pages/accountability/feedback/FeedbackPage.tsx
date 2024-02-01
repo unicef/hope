@@ -13,14 +13,14 @@ import { FeedbackFilters } from '../../../../components/accountability/Feedback/
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
-import {useProgramContext} from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 
 export const FeedbackPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
   const location = useLocation();
-  const { isActiveProgram } = useProgramContext();
+  const { isActiveProgram, isAllPrograms } = useProgramContext();
 
   const initialFilter = {
     feedbackId: '',
@@ -29,7 +29,7 @@ export const FeedbackPage = (): React.ReactElement => {
     createdAtRangeMin: '',
     createdAtRangeMax: '',
     program: '',
-    programState: isActiveProgram,
+    programState: isAllPrograms ? 'all' : '',
   };
 
   const [filter, setFilter] = useState(

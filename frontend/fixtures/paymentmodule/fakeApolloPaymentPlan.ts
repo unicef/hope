@@ -139,6 +139,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
         communicationChannel: FinancialServiceProviderCommunicationChannel.Api,
         __typename: 'FinancialServiceProviderNode',
       },
+      sentToPaymentGateway: false,
       __typename: 'DeliveryMechanismNode',
     },
     {
@@ -152,6 +153,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
         communicationChannel: FinancialServiceProviderCommunicationChannel.Xlsx,
         __typename: 'FinancialServiceProviderNode',
       },
+      sentToPaymentGateway: false,
       __typename: 'DeliveryMechanismNode',
     },
     {
@@ -165,6 +167,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
         communicationChannel: FinancialServiceProviderCommunicationChannel.Xlsx,
         __typename: 'FinancialServiceProviderNode',
       },
+      sentToPaymentGateway: false,
       __typename: 'DeliveryMechanismNode',
     },
   ],

@@ -72,6 +72,7 @@ DEFAULTS = {
 }
 
 env = Env(**DEFAULTS)
+IS_TEST = False
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -795,6 +796,7 @@ if SENTRY_DSN:
     from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
 
     from hct_mis_api import get_full_version
+    from hct_mis_api.apps.utils.sentry import SentryFilter
 
     sentry_logging = LoggingIntegration(
         level=logging.INFO,
@@ -813,6 +815,7 @@ if SENTRY_DSN:
             "AuthCanceled",
             "TokenNotProvided",
         ],
+        before_send=SentryFilter().before_send,
         environment=env("SENTRY_ENVIRONMENT", default=None),
     )
     ignore_logger("graphql.execution.utils")
