@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.9.18-slim-bullseye as base
+FROM python:3.11.7-slim-bullseye as base
 
 ARG UID=82
 
@@ -8,6 +8,8 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   --mount=type=cache,target=/var/lib/apt,sharing=private \
   apt-get update &&\
   apt-get install -y --no-install-recommends \
+  chromium-driver \
+  chromium \
   build-essential \
   libjpeg-dev \
   zlib1g-dev \

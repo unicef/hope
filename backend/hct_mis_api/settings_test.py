@@ -94,3 +94,4 @@ SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 LOGGING_DISABLED = True
+IS_TEST = True

@@ -903,6 +903,7 @@ class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
 
     @property
     def payment_record(self) -> Optional["PaymentRecord"]:
+        # TODO: need to double check this property sometimes return null ???
         return getattr(self.payment_verification, "payment_obj", None)
 
     class Meta:

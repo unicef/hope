@@ -87,7 +87,8 @@ export enum Action {
   Authorize = 'AUTHORIZE',
   Review = 'REVIEW',
   Reject = 'REJECT',
-  Finish = 'FINISH'
+  Finish = 'FINISH',
+  SendToPaymentGateway = 'SEND_TO_PAYMENT_GATEWAY'
 }
 
 export type ActionPaymentPlanInput = {
@@ -1442,6 +1443,7 @@ export type DeliveryMechanismNode = Node & {
   status: Scalars['String'],
   deliveryMechanism?: Maybe<DeliveryMechanismPerPaymentPlanDeliveryMechanism>,
   deliveryMechanismOrder: Scalars['Int'],
+  sentToPaymentGateway: Scalars['Boolean'],
   name?: Maybe<Scalars['String']>,
   order?: Maybe<Scalars['Int']>,
   fsp?: Maybe<FinancialServiceProviderNode>,
@@ -2603,8 +2605,7 @@ export type HouseholdUpdateDataObjectType = {
 export enum ImportDataDataType {
   Xlsx = 'XLSX',
   Json = 'JSON',
-  Flex = 'FLEX',
-  Diia = 'DIIA'
+  Flex = 'FLEX'
 }
 
 export type ImportDataNode = Node & {
@@ -2931,7 +2932,6 @@ export type ImportedHouseholdNode = Node & {
   koboAssetId: Scalars['String'],
   koboSubmissionTime?: Maybe<Scalars['DateTime']>,
   rowId?: Maybe<Scalars['Int']>,
-  diiaRecId: Scalars['String'],
   enumeratorRecId?: Maybe<Scalars['Int']>,
   misUnicefId?: Maybe<Scalars['String']>,
   programId?: Maybe<Scalars['UUID']>,
@@ -4624,7 +4624,9 @@ export enum PaymentPlanBackgroundActionStatus {
   XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
   XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION',
   ExcludeBeneficiaries = 'EXCLUDE_BENEFICIARIES',
-  ExcludeBeneficiariesError = 'EXCLUDE_BENEFICIARIES_ERROR'
+  ExcludeBeneficiariesError = 'EXCLUDE_BENEFICIARIES_ERROR',
+  SendToPaymentGateway = 'SEND_TO_PAYMENT_GATEWAY',
+  SendToPaymentGatewayError = 'SEND_TO_PAYMENT_GATEWAY_ERROR'
 }
 
 export enum PaymentPlanCurrency {
@@ -5283,6 +5285,8 @@ export type ProgramNode = Node & {
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
   dataCollectingType?: Maybe<DataCollectingTypeNode>,
   isVisible: Scalars['Boolean'],
+  householdCount: Scalars['Int'],
+  individualCount: Scalars['Int'],
   households: HouseholdNodeConnection,
   householdSet: HouseholdNodeConnection,
   individuals: IndividualNodeConnection,
@@ -5726,7 +5730,7 @@ export type QueryAllFeedbacksArgs = {
   createdAtRange?: Maybe<Scalars['String']>,
   createdBy?: Maybe<Scalars['String']>,
   feedbackId?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>,
+  isActiveProgram?: Maybe<Scalars['String']>,
   program?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -6867,7 +6871,6 @@ export type RegistrationDataImportDatahubNodeEdge = {
 export enum RegistrationDataImportDataSource {
   Xls = 'XLS',
   Kobo = 'KOBO',
-  Diia = 'DIIA',
   FlexRegistration = 'FLEX_REGISTRATION',
   Api = 'API',
   Edopomoga = 'EDOPOMOGA'
@@ -9032,7 +9035,14 @@ export type GrievanceTicketDetailedFragment = (
     & HouseholdDetailedFragment
   )>, paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordAndPaymentNode' }
-    & Pick<PaymentRecordAndPaymentNode, 'id' | 'caId' | 'deliveredQuantity' | 'objType'>
+    & Pick<PaymentRecordAndPaymentNode, 'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'>
+    & { parent: Maybe<(
+      { __typename?: 'CashPlanAndPaymentPlanNode' }
+      & Pick<CashPlanAndPaymentPlanNode, 'id' | 'unicefId' | 'objType'>
+    )>, verification: Maybe<(
+      { __typename?: 'PaymentVerificationNode' }
+      & Pick<PaymentVerificationNode, 'id'>
+    )> }
   )>, relatedTickets: Maybe<Array<Maybe<(
     { __typename?: 'GrievanceTicketNode' }
     & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status'>
@@ -11871,7 +11881,7 @@ export type AllFeedbacksQueryVariables = {
   feedbackId?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   program?: Maybe<Scalars['String']>,
-  isActiveProgram?: Maybe<Scalars['Boolean']>
+  isActiveProgram?: Maybe<Scalars['String']>
 };
 
 
@@ -12454,7 +12464,7 @@ export type PaymentPlanQuery = (
       )> }
     )>, deliveryMechanisms: Maybe<Array<Maybe<(
       { __typename?: 'DeliveryMechanismNode' }
-      & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order'>
+      & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order' | 'sentToPaymentGateway'>
       & { fsp: Maybe<(
         { __typename?: 'FinancialServiceProviderNode' }
         & Pick<FinancialServiceProviderNode, 'id' | 'name' | 'communicationChannel'>
@@ -14916,7 +14926,16 @@ export const GrievanceTicketDetailedFragmentDoc = gql`
     id
     caId
     deliveredQuantity
+    entitlementQuantity
     objType
+    parent {
+      id
+      unicefId
+      objType
+    }
+    verification {
+      id
+    }
   }
   relatedTickets {
     id
@@ -21796,7 +21815,7 @@ export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImpor
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
 export const AllFeedbacksDocument = gql`
-    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String, $program: String, $isActiveProgram: Boolean) {
+    query AllFeedbacks($offset: Int, $before: String, $after: String, $first: Int, $last: Int, $issueType: String, $createdAtRange: String, $createdBy: String, $feedbackId: String, $orderBy: String, $program: String, $isActiveProgram: String) {
   allFeedbacks(offset: $offset, before: $before, after: $after, first: $first, last: $last, issueType: $issueType, createdAtRange: $createdAtRange, createdBy: $createdBy, feedbackId: $feedbackId, orderBy: $orderBy, program: $program, isActiveProgram: $isActiveProgram) {
     totalCount
     pageInfo {
@@ -23225,6 +23244,7 @@ export const PaymentPlanDocument = gql`
       id
       name
       order
+      sentToPaymentGateway
       fsp {
         id
         name
@@ -30192,6 +30212,7 @@ export type DeliveryMechanismNodeResolvers<ContextType = any, ParentType extends
   status?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   deliveryMechanism?: Resolver<Maybe<ResolversTypes['DeliveryMechanismPerPaymentPlanDeliveryMechanism']>, ParentType, ContextType>,
   deliveryMechanismOrder?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  sentToPaymentGateway?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   order?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   fsp?: Resolver<Maybe<ResolversTypes['FinancialServiceProviderNode']>, ParentType, ContextType>,
@@ -30904,7 +30925,6 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  diiaRecId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   enumeratorRecId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
@@ -31852,6 +31872,8 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   dataCollectingType?: Resolver<Maybe<ResolversTypes['DataCollectingTypeNode']>, ParentType, ContextType>,
   isVisible?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  householdCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  individualCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdSetArgs>,
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, ProgramNodeIndividualsArgs>,

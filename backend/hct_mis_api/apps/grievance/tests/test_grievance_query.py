@@ -347,11 +347,34 @@ class TestGrievanceQuery(APITestCase):
             },
             variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
+        # access also from All Programs
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
         # add admin2 for Grievance
         gt.admin2 = self.admin_area_1
         gt.save()
-        # no access because no program id in header like All Programmes
         assert gt.admin2 is self.admin_area_1
+        # still has access from query for specific Program and All Programs
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
         self.snapshot_graphql_request(
             request_string=self.GRIEVANCE_QUERY,
             context={
@@ -402,7 +425,7 @@ class TestGrievanceQuery(APITestCase):
             },
             variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
-        # add admin_area_1 for for Partner
+        # add admin_area_1 for Partner
         self.partner.permissions = {
             str(self.business_area.pk): {
                 "programs": {str(self.program.id): [str(self.admin_area_1.pk)]},
@@ -416,6 +439,26 @@ class TestGrievanceQuery(APITestCase):
                 "user": self.user,
                 "headers": {
                     "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
+
+        # no access to any program in BA
+        self.partner.permissions = {
+            str(self.business_area.pk): {
+                "programs": {},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        self.partner.save()
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
                     "Business-Area": self.business_area.slug,
                 },
             },

@@ -76,7 +76,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         "default",
         "registration_datahub",
     }
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -434,7 +434,7 @@ class TestRdiKoboCreateTask(BaseElasticSearchTestCase):
         "default",
         "registration_datahub",
     }
-    fixtures = ("hct_mis_api/apps/geo/fixtures/data.json",)
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @staticmethod
     def _return_test_image(*args: Any, **kwargs: Any) -> BytesIO:

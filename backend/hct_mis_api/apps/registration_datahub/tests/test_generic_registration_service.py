@@ -22,12 +22,12 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualRoleInHousehold,
 )
-from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
+from hct_mis_api.aurora.models import Record
 from hct_mis_api.aurora.services.generic_registration_service import (
     GenericRegistrationService,
 )
@@ -168,7 +168,6 @@ class TestGenericRegistrationService(TestCase):
         cls.user = UserFactory.create()
 
     def test_import_data_to_datahub(self) -> None:
-        Record = get_record_model()
         records = [
             Record(
                 **self.defaults,
@@ -233,7 +232,6 @@ class TestGenericRegistrationService(TestCase):
         self.assertEqual(ImportedIndividualRoleInHousehold.objects.filter(role=ROLE_ALTERNATE).count(), 1)
 
     def test_import_data_to_datahub_household_individual(self) -> None:
-        Record = get_record_model()
         records = [
             Record(
                 **self.defaults,
