@@ -36,7 +36,10 @@ export const VerificationPaymentDetailsPage = (): React.ReactElement => {
 
   const { payment } = data;
 
-  const verification = payment.parent?.verificationPlans?.edges[0].node;
+  const {verificationPlans} = payment?.parent
+  const verificationPlansAmount = verificationPlans?.edges.length
+  const verification = verificationPlans.edges[verificationPlansAmount - 1].node
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
@@ -64,12 +67,12 @@ export const VerificationPaymentDetailsPage = (): React.ReactElement => {
       title={`${t('Payment ID')} ${payment.unicefId}`}
       breadCrumbs={breadCrumbsItems}
     >
-      {verification.verificationChannel === 'MANUAL' &&
+      {verification?.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
-      verification.status !== PaymentVerificationPlanStatus.Finished ? (
+      verification?.status !== PaymentVerificationPlanStatus.Finished ? (
         <VerifyManual
           paymentVerificationId={payment.verification?.id}
-          enabled
+          enabled={payment.verification.isManuallyEditable}
         />
       ) : null}
     </PageHeader>

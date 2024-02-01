@@ -140,7 +140,9 @@ export const ProgramDetails = ({
               {program.partners.map((partner) => (
                 <Grid key={partner.id} item xs={3}>
                   <StyledBox p={6} flexDirection='column'>
-                    <Typography variant='h6'>{partner.name}</Typography>
+                    <Typography data-cy='label-partner-name' variant='h6'>
+                      {partner.name}
+                    </Typography>
                     <LabelizedField
                       label={t('Area Access')}
                       value={

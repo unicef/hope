@@ -141,6 +141,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
         input_data = self._create_variables(
             household=self.id_to_base64(self.household.id, "HouseholdNode"),
             individual=self.id_to_base64(self.individuals[0].id, "IndividualNode"),
+            payment_records=[],
         )
 
         self.snapshot_graphql_request(
@@ -234,7 +235,7 @@ class TestGrievanceCreateComplaintTicketQuery(APITestCase):
     def test_create_complaint_ticket_without_extras(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = self._create_variables()
+        input_data = self._create_variables(payment_records=[])
 
         self.snapshot_graphql_request(
             request_string=self.CREATE_GRIEVANCE_MUTATION,

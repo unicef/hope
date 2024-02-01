@@ -16,9 +16,10 @@ export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Payment Plan Name',
-    id: 'headOfHousehold',
+    label: 'Programme Name',
+    id: 'payment_record__parent__program__name',
     numeric: false,
+    disableSort: true,
   },
   {
     disablePadding: false,

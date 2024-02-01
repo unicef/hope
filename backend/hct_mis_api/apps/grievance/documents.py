@@ -46,6 +46,10 @@ def bulk_update_urgency(grievance_tickets_ids: Sequence[str], urgency: int) -> N
     bulk_update_grievance_ticket_es(grievance_tickets_ids, {"urgency": urgency})
 
 
+def bulk_update_status(grievance_tickets_ids: Sequence[str], status: int) -> None:
+    bulk_update_grievance_ticket_es(grievance_tickets_ids, {"status": status})
+
+
 @es_autosync()
 def bulk_update_grievance_ticket_es(grievance_tickets_ids: Sequence[str], update_query_doc: dict) -> None:
     from elasticsearch.helpers import bulk

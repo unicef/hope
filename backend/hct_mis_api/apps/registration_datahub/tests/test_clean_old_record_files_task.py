@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.registration_datahub.utils import get_record_model
+from hct_mis_api.aurora.models import Record
 
 
 class TestClearRecordFilesTask(APITestCase):
@@ -11,7 +11,6 @@ class TestClearRecordFilesTask(APITestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
-        Record = get_record_model()
         cls.record_1 = Record.objects.create(
             registration=1,
             status=Record.STATUS_IMPORTED,

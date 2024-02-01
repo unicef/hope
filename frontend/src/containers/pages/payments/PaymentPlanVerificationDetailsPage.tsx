@@ -1,7 +1,7 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   PaymentVerificationPlanStatus,
@@ -60,6 +60,7 @@ const initialFilter = {
 
 export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
+  const history = useHistory();
   const permissions = usePermissions();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const location = useLocation();
@@ -124,6 +125,7 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
 
   const toolbar = (
     <PageHeader
+      handleBack={() => history.push(`/${baseUrl}/payment-verification`)}
       title={
         <BlackLink
           data-cy='plan-link'

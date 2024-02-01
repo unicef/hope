@@ -19,9 +19,8 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     RegistrationDataImportDatahub,
 )
-from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.celery_tasks import process_flex_records_task
-from hct_mis_api.aurora.models import Registration
+from hct_mis_api.aurora.models import Record, Registration
 from hct_mis_api.aurora.rdi import AuroraProcessor
 
 if TYPE_CHECKING:
@@ -112,7 +111,6 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         rdi_datahub = RegistrationDataImportDatahub.objects.get(id=rdi.datahub_id)
         import_data = rdi_datahub.import_data
 
-        Record = get_record_model()
         records_ids_to_import = (
             Record.objects.filter(id__in=records_ids)
             .exclude(status=Record.STATUS_IMPORTED)

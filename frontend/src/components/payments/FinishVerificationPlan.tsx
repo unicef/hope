@@ -37,6 +37,8 @@ export function FinishVerificationPlan({
     try {
       await mutate({
         variables: { paymentVerificationPlanId: verificationPlan.id },
+        refetchQueries: ['AllPaymentVerifications'],
+        awaitRefetchQueries: true
       });
       setFinishDialogOpen(false);
       showMessage(t('Verification plan has been finished'));

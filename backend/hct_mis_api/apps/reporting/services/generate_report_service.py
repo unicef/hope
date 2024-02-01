@@ -806,7 +806,7 @@ class GenerateReportService:
         context = {
             "report_type": self.report.get_report_type_display(),
             "created_at": GenerateReportContentHelpers._format_date(self.report.created_at),
-            "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/programs/{encode_id_base64(self.report.program.id, "Program")}/reporting/{encode_id_base64(self.report.id, "Report")}',
+            "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/programs/all/reporting/{encode_id_base64(self.report.id, "Report")}',
             "title": "Report",
         }
         text_body = render_to_string("report.txt", context=context)
