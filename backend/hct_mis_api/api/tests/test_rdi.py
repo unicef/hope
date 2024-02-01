@@ -48,6 +48,7 @@ class CreateRDITests(HOPEApiTestCase):
 
         rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
         self.assertIsNotNone(rdi)
+        self.assertEqual(rdi.program, self.program)
 
         self.assertEqual(response.json()["id"], str(hrdi.id))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))

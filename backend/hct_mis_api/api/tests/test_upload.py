@@ -79,6 +79,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hrdi)
         rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
         self.assertIsNotNone(rdi)
+        self.assertEqual(rdi.program, self.program)
 
         hh = ImportedHousehold.objects.filter(registration_data_import=hrdi).first()
         self.assertIsNotNone(hh)
