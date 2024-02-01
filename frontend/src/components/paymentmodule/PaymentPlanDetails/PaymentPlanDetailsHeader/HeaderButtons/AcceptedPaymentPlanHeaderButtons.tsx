@@ -11,8 +11,9 @@ import {
 } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import { useProgramContext } from "../../../../../programContext";
-import {usePaymentPlanAction} from "../../../../../hooks/usePaymentPlanAction";
+import { useProgramContext } from '../../../../../programContext';
+import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
+import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
@@ -39,17 +40,16 @@ export const AcceptedPaymentPlanHeaderButtons = ({
   const {
     mutatePaymentPlanAction: sendToPaymentGateway,
     loading: LoadingSendToPaymentGateway,
-  } = usePaymentPlanAction(
-    Action.SendToPaymentGateway,
-    paymentPlan.id,
-    () => showMessage(t('Sending to Payment Gateway started')),
+  } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () =>
+    showMessage(t('Sending to Payment Gateway started')),
   );
 
   const shouldDisableExportXlsx =
     loadingExport ||
     !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
     !canExportXlsx ||
-    paymentPlan?.backgroundActionStatus === PaymentPlanBackgroundActionStatus.XlsxExporting ||
+    paymentPlan?.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting ||
     !isActiveProgram;
 
   return (
@@ -60,8 +60,11 @@ export const AcceptedPaymentPlanHeaderButtons = ({
             <CreateFollowUpPaymentPlan paymentPlan={paymentPlan} />
           </Box>
         )}
+        <Box p={2}>
+          <SplitIntoPaymentLists paymentPlan={paymentPlan} />
+        </Box>
         {!paymentPlan.hasPaymentListExportFile && (
-          <Box p={2}>
+          <Box m={2}>
             <LoadingButton
               loading={loadingExport}
               disabled={shouldDisableExportXlsx}
@@ -106,15 +109,15 @@ export const AcceptedPaymentPlanHeaderButtons = ({
         )}
         <Box m={2}>
           <Button
-              type='button'
-              color='primary'
-              variant='contained'
-              onClick={() => sendToPaymentGateway()}
-              data-cy='button-send-to-payment-gateway'
-              disabled={!canSendToPaymentGateway || LoadingSendToPaymentGateway}
-            >
-                {t('Send to FSP')}
-            </Button>
+            type='button'
+            color='primary'
+            variant='contained'
+            onClick={() => sendToPaymentGateway()}
+            data-cy='button-send-to-payment-gateway'
+            disabled={!canSendToPaymentGateway || LoadingSendToPaymentGateway}
+          >
+            {t('Send to FSP')}
+          </Button>
         </Box>
       </>
     </Box>
