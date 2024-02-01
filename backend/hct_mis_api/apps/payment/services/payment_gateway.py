@@ -64,6 +64,7 @@ class PaymentGatewayPaymentInstructionSerializer(ReadOnlyModelSerializer):
             "unicef_id",
             "fsp",
             "payload",
+            "extra",
         ]
 
 
@@ -112,7 +113,6 @@ class PaymentRecordData:
     parent: str
     status: str
     hope_status: str
-    success: bool
     # delivered_amount: int # TODO wait for implementation on PG side
 
 
@@ -124,6 +124,7 @@ class PaymentInstructionData:
     fsp: str
     system: int
     payload: dict
+    extra: dict
     id: Optional[int] = None
 
 
@@ -213,7 +214,6 @@ class PaymentGatewayAPI:
         self, payment_records: QuerySet[Payment], remote_id: str
     ) -> AddRecordsResponseData:
         serializer = PaymentGatewayPaymentSerializer(payment_records, many=True)
-        serializer.is_valid(raise_exception=True)
         response_data = self._post(
             self.Endpoints.PAYMENT_INSTRUCTION_ADD_RECORDS.format(remote_id=remote_id), serializer.data
         )

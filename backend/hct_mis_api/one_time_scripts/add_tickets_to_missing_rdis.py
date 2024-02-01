@@ -203,7 +203,6 @@ def update_needs_adjudication_representations(tickets: QuerySet, program: Progra
     tickets_to_update_count = len(tickets_to_update_ids)
     logger.info(f"Tickets to handle: {tickets_to_update_count}")
     for batch_start in range(0, tickets_to_update_count, BATCH_SIZE):
-        print("I am in")
         logger.info(f"Handling needs adjudication tickets: {batch_start} of {tickets_to_update_count}")
         batched_tickets_to_update_ids = tickets_to_update_ids[batch_start : batch_start + BATCH_SIZE]
         batched_tickets_to_update = TicketNeedsAdjudicationDetails.objects.filter(

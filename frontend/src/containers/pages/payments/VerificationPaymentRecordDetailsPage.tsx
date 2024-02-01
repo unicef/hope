@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
+  PaymentVerificationPlanStatus,
   usePaymentRecordQuery,
   usePaymentVerificationChoicesQuery,
 } from '../../../__generated__/graphql';
@@ -34,7 +35,10 @@ export const VerificationPaymentRecordDetailsPage = (): React.ReactElement => {
   const { paymentRecord } = data;
   if (!paymentRecord || !choicesData || permissions === null) return null;
 
-  const verification = paymentRecord.parent?.verificationPlans?.edges[0].node;
+  const {verificationPlans} = paymentRecord?.parent
+  const verificationPlansAmount = verificationPlans?.edges.length
+  const verification = verificationPlans.edges[verificationPlansAmount - 1].node
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
@@ -62,8 +66,9 @@ export const VerificationPaymentRecordDetailsPage = (): React.ReactElement => {
       title={`${t('Payment Record ID')} ${paymentRecord.caId}`}
       breadCrumbs={breadCrumbsItems}
     >
-      {verification.verificationChannel === 'MANUAL' &&
-      hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
+      {verification?.verificationChannel === 'MANUAL' &&
+      hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
+      verification?.status !== PaymentVerificationPlanStatus.Finished ? (
         <VerifyManual
           paymentVerificationId={paymentRecord.verification.id}
           enabled={paymentRecord.verification.isManuallyEditable}
