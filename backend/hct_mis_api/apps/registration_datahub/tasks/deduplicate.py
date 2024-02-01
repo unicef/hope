@@ -659,7 +659,7 @@ class HardDocumentDeduplication:
     def deduplicate(
         self, new_documents: QuerySet[Document], registration_data_import: Optional[RegistrationDataImport] = None
     ) -> None:
-        if registration_data_import and registration_data_import.program:
+        if registration_data_import and registration_data_import.program_id:
             program_ids = [str(registration_data_import.program_id)]
         else:
             program_ids = list(set(new_documents.filter(program__isnull=False).values_list("program", flat=True)))
