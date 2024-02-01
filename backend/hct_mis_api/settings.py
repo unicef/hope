@@ -72,6 +72,7 @@ DEFAULTS = {
 }
 
 env = Env(**DEFAULTS)
+IS_TEST = False
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path

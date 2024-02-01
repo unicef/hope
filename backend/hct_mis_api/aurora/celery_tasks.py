@@ -11,10 +11,9 @@ from hct_mis_api.apps.registration_datahub.celery_tasks import (
     locked_cache,
     merge_registration_data_import_task,
 )
-from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags
-from hct_mis_api.aurora.models import Registration
+from hct_mis_api.aurora.models import Record, Registration
 from hct_mis_api.aurora.services.extract_record import extract
 
 if TYPE_CHECKING:
@@ -45,7 +44,6 @@ def process_flex_records_task(self: Any, reg_id: "UUID", rdi_id: "UUID", records
 @log_start_and_end
 @sentry_tags
 def extract_records_task(max_records: int = 500) -> None:
-    Record = get_record_model()
     records_ids = Record.objects.filter(data__isnull=True).only("pk").values_list("pk", flat=True)[:max_records]
     extract(records_ids)
 
@@ -55,7 +53,6 @@ def extract_records_task(max_records: int = 500) -> None:
 @sentry_tags
 def fresh_extract_records_task(records_ids: Optional["_QuerySet[Any, Any]"] = None) -> None:
     if not records_ids:
-        Record = get_record_model()
         records_ids = Record.objects.all().only("pk").values_list("pk", flat=True)[:5000]
     extract(records_ids)
 
@@ -87,7 +84,6 @@ def automate_rdi_creation_task(
             if service is None:
                 raise NotImplementedError
 
-            Record = get_record_model()
             qs = Record.objects.filter(registration=registration_id, **filters).exclude(
                 status__in=[Record.STATUS_IMPORTED, Record.STATUS_ERROR]
             )
@@ -132,7 +128,6 @@ def clean_old_record_files_task(default_timedelta: int = 60) -> None:
             timezone.now() - timedelta(config.CLEARING_RECORD_FILES_TIMEDELTA),
             timezone.now() - timedelta(default_timedelta),
         )
-        Record = get_record_model()
         Record.objects.filter(timestamp__lt=time_threshold, status=Record.STATUS_IMPORTED).exclude(files=None).update(
             files=None
         )
