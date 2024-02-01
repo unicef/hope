@@ -23,7 +23,8 @@
       "administrative_areas_of_implementation": "",
       "individual_data_needed": false,
       "admin_areas": [],
-      "data_collecting_type": 1
+      "data_collecting_type": 1,
+      "programme_code": "ABC2"
     },
     "model": "program.program",
     "pk": "de3a43bf-a755-41ff-a5c0-acd02cf3d244"
@@ -54,7 +55,8 @@
       "administrative_areas_of_implementation": "other data here ",
       "individual_data_needed": true,
       "admin_areas": [],
-      "data_collecting_type": 1
+      "data_collecting_type": 1,
+      "programme_code": "ABC1"
     }
   }
 ]

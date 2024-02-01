@@ -138,6 +138,7 @@ class TestDataSendTpToDatahub(TestCase):
             "name": self.program.name,
             "scope": self.program.scope,
             "start_date": timezone.make_aware(datetime.combine(self.program.start_date, datetime.min.time())),
+            "programme_code": self.program.programme_code,
         }
         dh_program_dict = dh_models.Program.objects.first().__dict__
         dh_program_dict.pop("_state")

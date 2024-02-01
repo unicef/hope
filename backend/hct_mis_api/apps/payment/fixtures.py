@@ -1,3 +1,5 @@
+import random
+import string
 from datetime import timedelta
 from decimal import Decimal
 from random import choice, randint
@@ -386,6 +388,7 @@ class RealProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     individual_data_needed = factory.fuzzy.FuzzyChoice((True, False))
+    programme_code = factory.LazyAttribute(lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4)))
 
     @factory.post_generation
     def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -863,6 +866,7 @@ def generate_payment_plan() -> None:
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
         data_collecting_type=DataCollectingType.objects.get(code="full"),
+        programme_code="T3ST",
     )[0]
     program_cycle = ProgramCycleFactory(
         program=program,
