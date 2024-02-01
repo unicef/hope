@@ -14,6 +14,8 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     COLLECT_TYPE_FULL,
@@ -31,13 +33,16 @@ class CreateRDITests(HOPEApiTestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.url = reverse("api:rdi-create", args=[cls.business_area.slug])
+        cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
 
     def test_create_rdi(self) -> None:
         data = {
             "name": "aaaa",
             "collect_data_policy": "FULL",
+            "program": str(self.program.id),
         }
         response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         hrdi = RegistrationDataImportDatahub.objects.filter(name="aaaa").first()
         self.assertTrue(hrdi)
 
