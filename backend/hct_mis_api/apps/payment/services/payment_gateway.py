@@ -113,7 +113,6 @@ class PaymentRecordData:
     parent: str
     status: str
     hope_status: str
-    success: bool
     # delivered_amount: int # TODO wait for implementation on PG side
 
 
