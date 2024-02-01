@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.11.7-slim-bookworm as base
+FROM python:3.11.7-slim-bullseye as base
 
 ARG UID=82
 
@@ -12,15 +12,20 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
   chromium \
   build-essential \
   libjpeg-dev \
+  zlib1g-dev \
   postgresql-client \
   libpq-dev \
   python3-psycopg2 \
   python3-gdal \
   gdal-bin \
+  libcairo2 \
+  libcairo2-dev \
   libffi-dev \
   libgdk-pixbuf2.0-0 \
   libpango-1.0-0 \
   libpangocairo-1.0-0 \
+  shared-mime-info \
+  wkhtmltopdf \
   curl &&\
   addgroup --system --gid "${UID}" hope &&\
   adduser --system --uid "${UID}" --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
