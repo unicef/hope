@@ -21,7 +21,7 @@ variables:
 
 stages:
   - stage: test_frontend
-    displayName: Test-Frontend
+    displayName: FE tests
     jobs:
       - job: frontend_tests
         pool:
@@ -45,7 +45,7 @@ stages:
             displayName: "Test"
 
   - stage: build_and_push_backend
-    displayName: BUILD and PUSH
+    displayName: BE build & push
     jobs:
       - job: build_push_backend
         pool:
@@ -87,7 +87,7 @@ stages:
 
   - stage: build_and_push_frontend
     dependsOn: test_frontend
-    displayName: BUILD and PUSH Frontend
+    displayName: FE build & push
     jobs:
       - job: build_and_push_frontend
         pool:
@@ -113,7 +113,7 @@ stages:
 
   - stage: build_and_push_cypress
     dependsOn: test_frontend
-    displayName: BUILD and PUSH cypress
+    displayName: CY build & push
     jobs:
       - job: build_and_push_cypress
         pool:
@@ -139,7 +139,7 @@ stages:
 
   - stage: lint_backend
     dependsOn: build_and_push_backend
-    displayName: Lint-Backend
+    displayName: BE lint
     jobs:
       - job: django_lint
         pool:
@@ -176,7 +176,7 @@ stages:
 
   - stage: mypy_backend
     dependsOn: build_and_push_backend
-    displayName: Mypy-Backend
+    displayName: BE mypy
     jobs:
       - job: django_mypy
         pool:
@@ -213,7 +213,7 @@ stages:
 
   - stage: format_backend
     dependsOn: [build_and_push_backend]
-    displayName: Check-Format-Backend
+    displayName: BE format
     jobs:
       - job: django_black
         pool:
@@ -239,7 +239,7 @@ stages:
 
   - stage: test_backend
     dependsOn: [format_backend, lint_backend, mypy_backend]
-    displayName: Test-Backend
+    displayName: BE tests
     jobs:
       - job: django_tests
         pool:
@@ -298,7 +298,7 @@ stages:
 
   - stage: trivy
     dependsOn: [build_and_push_backend]
-    displayName: Trivy
+    displayName: BE Trivy
     jobs:
       - job: run_trivy
         pool:
@@ -317,7 +317,7 @@ stages:
 
   - stage: e2e_tests
     dependsOn: [build_and_push_backend, build_and_push_frontend, test_frontend, build_and_push_cypress]
-    displayName: E2E-Tests
+    displayName: E2E tests
     jobs:
       - job: cypress_tests
         pool:
