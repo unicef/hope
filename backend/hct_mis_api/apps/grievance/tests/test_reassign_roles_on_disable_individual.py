@@ -24,13 +24,14 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program_one = ProgramFactory(name="Test program ONE", business_area=business_area)
 
-        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
+        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054", program=cls.program_one)
         cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
+        cls.household.registration_data_import.program = cls.program_one
         cls.household.registration_data_import.save()
         cls.household.programs.add(cls.program_one)
 
-        cls.primary_collector_individual = IndividualFactory(household=None)
+        cls.primary_collector_individual = IndividualFactory(household=None, program=cls.program_one)
         cls.household.head_of_household = cls.primary_collector_individual
         cls.household.save()
         cls.primary_collector_individual.household = cls.household
@@ -45,7 +46,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
             role=ROLE_PRIMARY,
         )
 
-        cls.alternate_collector_individual = IndividualFactory(household=None)
+        cls.alternate_collector_individual = IndividualFactory(household=None, program=cls.program_one)
         cls.alternate_collector_individual.household = cls.household
         cls.alternate_collector_individual.save()
 
@@ -56,10 +57,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         )
 
     def test_reassign_role_to_another_individual(self) -> None:
-        individual = IndividualFactory(household=None)
-
-        individual.household = self.household
-        individual.save()
+        individual = IndividualFactory(household=self.household, program=self.program_one)
 
         role_reassign_data = {
             "HEAD": {
@@ -109,9 +107,7 @@ class TestReassignRolesOnDisableIndividual(APITestCase):
         self.assertTrue("Cannot reassign the role" in str(context.exception))
 
     def test_reassign_alternate_role(self) -> None:
-        individual = IndividualFactory(household=None)
-        individual.household = self.household
-        individual.save()
+        individual = IndividualFactory(household=self.household, program=self.program_one)
 
         role_reassign_data = {
             str(self.alternate_role.id): {

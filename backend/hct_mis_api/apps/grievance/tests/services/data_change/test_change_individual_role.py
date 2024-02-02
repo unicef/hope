@@ -30,6 +30,7 @@ class TestChangeIndividualRole(BaseElasticSearchTestCase, TestCase):
         household = HouseholdFactory.build(business_area=business_area, program=program)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
+        household.registration_data_import.program = household.program
         household.registration_data_import.save()
 
         individual = IndividualFactory(household=household, business_area=business_area, program=program)

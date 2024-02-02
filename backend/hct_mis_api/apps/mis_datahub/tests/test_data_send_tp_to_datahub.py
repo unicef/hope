@@ -29,8 +29,7 @@ from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refres
 
 
 class TestDataSendTpToDatahub(TestCase):
-    multi_db = True
-    databases = "__all__"
+    databases = {"default", "registration_datahub", "cash_assist_datahub_mis"}
 
     @staticmethod
     def _pre_test_commands() -> None:
@@ -88,7 +87,7 @@ class TestDataSendTpToDatahub(TestCase):
             ca_hash_id=uuid.uuid4(),
             ca_id="TEST",
         )
-        rdi = RegistrationDataImportFactory()
+        rdi = RegistrationDataImportFactory(program=cls.program)
 
         cls.create_first_household(admin_area2, rdi)
 
@@ -108,11 +107,18 @@ class TestDataSendTpToDatahub(TestCase):
     def create_first_household(cls, admin_area: Any, rdi: RegistrationDataImportFactory) -> None:
         country = Country.objects.filter(iso_code2="PL").first()
         cls.household = HouseholdFactory.build(
-            size=1, registration_data_import=rdi, admin_area=admin_area, unhcr_id="UNHCR-1337", country=country
+            size=1,
+            registration_data_import=rdi,
+            admin_area=admin_area,
+            unhcr_id="UNHCR-1337",
+            country=country,
+            program=cls.program,
         )
         cls.household.household_collection.save()
         unhcr, _ = Partner.objects.get_or_create(name=UNHCR, defaults={"is_un": True})
-        cls.individual = IndividualFactory(household=cls.household, relationship="HEAD", registration_data_import=rdi)
+        cls.individual = IndividualFactory(
+            household=cls.household, relationship="HEAD", registration_data_import=rdi, program=cls.program
+        )
         IndividualIdentity.objects.create(partner=unhcr, number="UN-TEST", individual=cls.individual, country=country)
         IndividualRoleInHousehold.objects.create(
             individual=cls.individual,
