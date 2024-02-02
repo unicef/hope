@@ -106,8 +106,14 @@ def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> Non
 
 
 def handle_role(role: str, household: Household, individual: Individual) -> None:
-    if individual_role := IndividualRoleInHousehold.objects.filter(household=household, individual=individual).first():
-        individual_role.delete(soft=False)
+    if already_with_another_role := IndividualRoleInHousehold.objects.filter(
+        household=household,
+        individual=individual,
+    ).first():
+        if already_with_another_role.role == ROLE_PRIMARY:
+            raise ValidationError("Ticket cannot be closed, primary collector role has to be reassigned")
+        else:
+            already_with_another_role.delete(soft=False)
 
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         IndividualRoleInHousehold.objects.update_or_create(
