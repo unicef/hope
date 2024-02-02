@@ -85,15 +85,15 @@ stages:
           - script: |
               docker buildx create --use
               docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag) \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag) \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
-              -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
-              -t $(Docker.url)/$(Docker.backend.repository):latest \
-              --push \
-              -f ./backend/docker/Dockerfile \
-              ./backend
+                --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag) \
+                --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+                --cache-to=type=registry,dest=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag),mode=max \
+                --cache-to=type=registry,dest=$(Docker.url)/$(Docker.backend.repository)-cache:latest,mode=max \
+                -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
+                -t $(Docker.url)/$(Docker.backend.repository):latest \
+                --push \
+                -f ./backend/docker/Dockerfile \
+                ./backend
             displayName: Docker build
           - script: |
               docker buildx create --use
