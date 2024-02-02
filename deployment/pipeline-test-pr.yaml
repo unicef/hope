@@ -26,7 +26,7 @@ stages:
       - job: frontend_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "[FRONTEND TEST]"
+        displayName: "FE tests"
         steps:
           - task: NodeTool@0
             inputs:
@@ -50,13 +50,13 @@ stages:
       - job: build_push_backend
         pool:
           vmImage: ubuntu-latest
-        displayName: "[Build]"
+        displayName: "BE build & push"
         steps:
           - task: Docker@2
             inputs:
               containerRegistry: '$(Docker.registryConnection)'
               command: 'login'
-            displayName: Docker Login
+            displayName: Docker login
           - script: |
               docker buildx create --use
               docker buildx build \
@@ -69,7 +69,7 @@ stages:
                 --push \
                 -f ./backend/docker/Dockerfile \
                 ./backend
-            displayName: Docker build
+            displayName: Docker build dist image
           - script: |
               docker buildx create --use
               docker buildx build \
@@ -83,7 +83,7 @@ stages:
                 --push --target dev \
                 -f ./backend/docker/Dockerfile \
                 ./backend
-            displayName: Docker build dev
+            displayName: Docker build dev image
 
   - stage: build_and_push_frontend
     dependsOn: test_frontend
@@ -92,7 +92,7 @@ stages:
       - job: build_and_push_frontend
         pool:
           vmImage: ubuntu-latest
-        displayName: "[Build_Frontend]"
+        displayName: "FE build & push"
         steps:
           - task: Docker@2
             inputs:
@@ -109,7 +109,7 @@ stages:
               -t $(Docker.url)/$(Docker.frontend.repository):latest \
               --push \
               ./frontend
-            displayName: Docker build
+            displayName: Docker build image
 
   - stage: build_and_push_cypress
     dependsOn: test_frontend
@@ -118,7 +118,7 @@ stages:
       - job: build_and_push_cypress
         pool:
           vmImage: ubuntu-latest
-        displayName: "[Build_Cypress]"
+        displayName: "CY build & push"
         steps:
           - task: Docker@2
             inputs:
@@ -135,7 +135,7 @@ stages:
               -t $(Docker.url)/$(Docker.cypress.repository):latest \
               --push \
               ./cypress
-            displayName: Docker build
+            displayName: Docker build image
 
   - stage: lint_backend
     dependsOn: build_and_push_backend
@@ -144,16 +144,16 @@ stages:
       - job: django_lint
         pool:
           vmImage: ubuntu-latest
-        displayName: "[DJANGO LINT]"
+        displayName: "BE Lint"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
 
           - task: DockerCompose@0
-            displayName: "Run tests"
+            displayName: "Run linter"
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
@@ -181,16 +181,16 @@ stages:
       - job: django_mypy
         pool:
           vmImage: ubuntu-latest
-        displayName: "[DJANGO MYPY]"
+        displayName: "BE mypy"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
 
           - task: DockerCompose@0
-            displayName: "Run tests"
+            displayName: "Run mypy"
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
@@ -218,22 +218,22 @@ stages:
       - job: django_black
         pool:
           vmImage: ubuntu-latest
-        displayName: "[DJANGO BLACK]"
+        displayName: "BE format"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
 
           - task: DockerCompose@0
-            displayName: "Run tests"
+            displayName: "Run formatter"
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
               dockerComposeFile: '**/docker-compose.tst.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run --no-deps backend ./dev.sh black .'
+              dockerComposeCommand: 'run --no-deps backend ./dev.sh black . --check'
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
 
@@ -244,10 +244,10 @@ stages:
       - job: django_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "[DJANGO TEST]"
+        displayName: "BE tests"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
@@ -262,7 +262,7 @@ stages:
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
           - task: PublishTestResults@2
-            displayName: "Publish Test Result"
+            displayName: "Publish tests result"
             condition: always()
             inputs:
               testResultsFormat: 'JUnit'
@@ -273,7 +273,7 @@ stages:
               testRunTitle: 'TEST Results'
           - script: |
               sed -i 's|/code/hct_mis_api|backend/hct_mis_api|g' backend/coverage.xml
-            displayName: "fix coverage.xml"
+            displayName: "Fix coverage.xml"
           - task: PublishCodeCoverageResults@2
             inputs:
               summaryFileLocation: 'backend/coverage.xml'
@@ -288,7 +288,7 @@ stages:
               artifact: 'BackendLineCoverage'
               path: '$(System.ArtifactsDirectory)/old_coverage'
           - task: PythonScript@0
-            displayName: 'Check Coverage'
+            displayName: 'Check coverage'
             continueOnError: true
             inputs:
               scriptSource: 'filePath'
@@ -303,10 +303,10 @@ stages:
       - job: run_trivy
         pool:
           vmImage: ubuntu-latest
-        displayName: "[TRIVY]"
+        displayName: "BE Trivy"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
@@ -322,17 +322,17 @@ stages:
       - job: cypress_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "[CYPRESS TEST]"
+        displayName: "E2E tests"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
           - script: |
               mkdir -p cypress-results cypress-reports
           - task: DockerCompose@0
-            displayName: "Run tests"
+            displayName: "Run e2e tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
@@ -346,12 +346,12 @@ stages:
                BRANCH_NAME=$(System.PullRequest.SourceBranch)
                BUILD_ID=$(Build.BuildId)
           - task: PublishBuildArtifacts@1
-            displayName: 'Publish Test Report Artifacts'
+            displayName: 'Publish tests artifacts'
             condition: always()
             inputs:
               PathtoPublish: './cypress-reports'
           - task: PublishTestResults@2
-            displayName: "Publish Test Result"
+            displayName: "Publish tests result"
             condition: always()
             inputs:
               testResultsFormat: 'JUnit'
