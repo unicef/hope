@@ -379,18 +379,41 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_hard_documents_deduplication_for_the_diff_program(self) -> None:
         program_2 = ProgramFactory(business_area=self.business_area)
-        self.individuals[0].program = program_2
-        self.individuals[0].save()
 
+        household, individuals = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.registration_data_import,
+                "business_area": self.business_area,
+                "program": program_2,
+            },
+            individuals_data=[
+                {
+                    "registration_data_import": self.registration_data_import,
+                    "given_name": "Test",
+                    "full_name": "Test Testowski",
+                    "middle_name": "",
+                    "family_name": "Testowski",
+                    "phone_no": "123-123-123",
+                    "phone_no_alternative": "",
+                    "relationship": HEAD,
+                    "sex": MALE,
+                    "birth_date": "1955-09-07",
+                    "program": program_2,
+                }
+            ],
+        )
+        individual = individuals[0]
         new_document_from_other_program = Document.objects.create(
             country=geo_models.Country.objects.get(iso_code2="PL"),
             type=DocumentType.objects.get(key="national_id"),
             document_number="ASD123",
-            individual=self.individuals[0],
+            individual=individual,
             status=Document.STATUS_PENDING,
-            program=program_2,
+            # now filtering is by Individual.program
+            # program=program_2,
         )
-
+        individual.refresh_from_db()
+        self.assertEqual(str(individual.program_id), str(program_2.pk))
         new_document_from_other_program.refresh_from_db()
         self.assertEqual(new_document_from_other_program.status, Document.STATUS_PENDING)
 
