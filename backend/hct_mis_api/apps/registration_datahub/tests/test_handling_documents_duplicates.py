@@ -379,6 +379,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_hard_documents_deduplication_for_the_diff_program(self) -> None:
         program_2 = ProgramFactory(business_area=self.business_area)
+        self.individuals[0].program = program_2
+        self.individuals[0].save()
 
         new_document_from_other_program = Document.objects.create(
             country=geo_models.Country.objects.get(iso_code2="PL"),
