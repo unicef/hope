@@ -44,32 +44,7 @@ stages:
             workingDirectory: 'frontend'
             displayName: "Test"
 
-  # - stage: check_backend_format
-  #   dependsOn: []
-  #   displayName: Check BE format
-  #   jobs:
-  #     - job: check_backend_format
-  #       pool:
-  #         vmImage: ubuntu-latest
-  #       displayName: "[CHECK FORMAT]"
-  #       steps:
-  #         - task: UsePythonVersion@0
-  #           inputs:
-  #             versionSpec: "3.9"
-  #           displayName: "Use Python 3.9"
-  #         - script: pip install black==23.12 isort==5.13
-  #         # remember to update this if you change the version of black/isort in pyproject.toml
-  #           displayName: "Install tools"
-  #         - script: black --check .
-  #           workingDirectory: 'backend'
-  #           displayName: "Check format"
-  #         - script: isort --check-only .
-  #           workingDirectory: 'backend'
-  #           displayName: "Check imports order"
-
-
   - stage: build_and_push_backend
-    dependsOn: check_backend_format
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
