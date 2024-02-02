@@ -296,7 +296,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         if payment_delivery_date := payment.delivery_date:
             payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
 
-        if delivered_quantity is not None and delivered_quantity != "":
+        if delivered_quantity is not None and str(delivered_quantity).strip() != "":
             status, delivered_quantity = self._get_delivered_quantity_status_and_value(
                 delivered_quantity, payment.entitlement_quantity, payment_id
             )
