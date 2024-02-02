@@ -98,14 +98,16 @@ stages:
           - script: |
               docker buildx create --use
               docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
-              -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
-              --push --target dev \
-              -f ./backend/docker/Dockerfile \
-              ./backend
+                --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
+                --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
+                --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+                --cache-to type=registry,ref=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag),mode=max \
+                --cache-to type=registry,ref=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest,mode=max \
+                -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
+                -t $(Docker.url)/$(Docker.backend.repository):dev-latest \
+                --push --target dev \
+                -f ./backend/docker/Dockerfile \
+                ./backend
             displayName: Docker build dev
 
   - stage: build_and_push_frontend
