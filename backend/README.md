@@ -1,6 +1,5 @@
 # Development
 
-
 ## VSCode setup
 
 ```sh
