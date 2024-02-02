@@ -662,11 +662,18 @@ class HardDocumentDeduplication:
         if registration_data_import and registration_data_import.program_id:
             program_ids = [str(registration_data_import.program_id)]
         else:
-            program_ids = list(set(new_documents.filter(program__isnull=False).values_list("program", flat=True)))
+            # can remove filter after refactoring Individual.program null=False
+            program_ids = list(
+                set(
+                    new_documents.filter(individual__program__isnull=False).values_list(
+                        "individual__program_id", flat=True
+                    )
+                )
+            )
             program_ids = [str(program_id) for program_id in program_ids]
 
         for program_id in program_ids:
-            program_q = Q(program=program_id)
+            program_q = Q(individual__program=program_id)
             documents_to_dedup = evaluate_qs(
                 new_documents.filter(Q(status=Document.STATUS_PENDING) & Q(type__is_identity_document=True) & program_q)
                 .select_related("individual", "type")
