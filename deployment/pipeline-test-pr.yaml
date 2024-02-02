@@ -144,7 +144,7 @@ stages:
       - job: django_lint
         pool:
           vmImage: ubuntu-latest
-        displayName: "BE Lint"
+        displayName: "BE lint"
         steps:
           - task: Docker@2
             displayName: "ACR Login"
