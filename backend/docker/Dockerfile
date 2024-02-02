@@ -44,10 +44,6 @@ WORKDIR /code
 RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/v2.4.1/waitforit-linux_amd64 &&\
   chmod +x /usr/local/bin/waitforit
 
-COPY ./docker/entrypoint.sh /bin/
-ENTRYPOINT ["entrypoint.sh"]
-
-
 FROM alpine:3.19.1 as certs
 RUN apk add curl && mkdir /data
 RUN curl -o /data/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
@@ -71,6 +67,9 @@ FROM builder AS dev
 RUN poetry install
 COPY ./ ./
 
+COPY ./docker/entrypoint.sh /bin/
+ENTRYPOINT ["entrypoint.sh"]
+
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
 
 # Dist image
@@ -79,4 +78,8 @@ FROM base AS dist
 COPY --chown=hope:hope ./ ./
 COPY --chown=hope:hope --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 COPY --chown=hope:hope --from=certs /data/psql-cert.crt /code/psql-cert.crt
+
+COPY ./docker/entrypoint.sh /bin/
+ENTRYPOINT ["entrypoint.sh"]
+
 USER hope
