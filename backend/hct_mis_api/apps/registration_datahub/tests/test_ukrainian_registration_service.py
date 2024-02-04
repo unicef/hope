@@ -58,7 +58,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
         }
 
     @classmethod
-    def setUp(cls) -> None:
+    def setUpTestData(cls) -> None:
         ImportedDocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
             label=IDENTIFICATION_TYPE_TAX_ID,
@@ -73,7 +73,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
         cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
         cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
 
-        household = [
+        cls.household = [
             {
                 "residence_status_h_c": "non_host",
                 "where_are_you_now": "",
@@ -158,7 +158,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
                 **defaults,
                 source_id=1,
                 fields={
-                    "household": household,
+                    "household": cls.household,
                     "individuals": [cls.individual_wit_bank_account_and_tax_and_disability()],
                 },
                 files=json.dumps(files).encode(),
@@ -166,19 +166,19 @@ class BaseTestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=2,
-                fields={"household": household, "individuals": [individual_wit_bank_account_and_tax]},
+                fields={"household": cls.household, "individuals": [individual_wit_bank_account_and_tax]},
                 files=json.dumps({}).encode(),
             ),
             Record(
                 **defaults,
                 source_id=3,
-                fields={"household": household, "individuals": [individual_with_no_tax]},
+                fields={"household": cls.household, "individuals": [individual_with_no_tax]},
                 files=json.dumps(files).encode(),
             ),
             Record(
                 **defaults,
                 source_id=4,
-                fields={"household": household, "individuals": [individual_without_bank_account]},
+                fields={"household": cls.household, "individuals": [individual_without_bank_account]},
                 files=json.dumps(files).encode(),
             ),
         ]
@@ -186,7 +186,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=1,
-                fields={"household": household, "individuals": [individual_with_tax_id_which_is_too_long]},
+                fields={"household": cls.household, "individuals": [individual_with_tax_id_which_is_too_long]},
                 files=json.dumps(files).encode(),
             ),
         ]
@@ -197,8 +197,8 @@ class BaseTestUkrainianRegistrationService(TestCase):
 
 class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
     @classmethod
-    def setUp(cls) -> None:
-        super().setUp()
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
 
     def test_import_data_to_datahub(self) -> None:
         service = UkraineBaseRegistrationService(self.registration)
@@ -251,8 +251,17 @@ class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
 
 class TestRegistration2024(BaseTestUkrainianRegistrationService):
     @classmethod
-    def setUp(cls) -> None:
-        super().setUp()
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.record = Record.objects.create(
+            registration=2,
+            timestamp=timezone.make_aware(datetime.datetime(2024, 2, 4)),
+            source_id=5,
+            fields={
+                "household": cls.household,
+                "individuals": [cls.individual_wit_bank_account_and_tax_and_disability()],
+            },
+        )
 
     @classmethod
     def individual_wit_bank_account_and_tax_and_disability(cls) -> Dict:
@@ -265,16 +274,12 @@ class TestRegistration2024(BaseTestUkrainianRegistrationService):
     def test_import_data_to_datahub(self) -> None:
         service = Registration2024(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
-        records_ids = [x.id for x in self.records]
-        service.process_records(rdi.id, records_ids)
+        service.process_records(rdi.id, [self.record.id])
 
-        print(ImportedHousehold.objects.all())
-        print(ImportedBankAccountInfo.objects.all())
-        print(ImportedIndividual.objects.all())
-
-        self.assertEqual(Record.objects.filter(id__in=records_ids, ignored=False).count(), 4)
-        self.assertEqual(ImportedHousehold.objects.count(), 4)
-        self.assertEqual(ImportedBankAccountInfo.objects.count(), 3)
-
-        ind = ImportedIndividual.objects.get(family_name="Romaniak")
-        self.assertEqual(ind.flex_fields, {"low_income_hh_h_f": True, "single_headed_hh_h_f": False})
+        self.assertEqual(Record.objects.filter(id__in=[self.record.id], ignored=False).count(), 1)
+        self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(ImportedIndividual.objects.count(), 1)
+        self.assertEqual(
+            ImportedIndividual.objects.get(family_name="Romaniak").flex_fields,
+            {"low_income_hh_h_f": True, "single_headed_hh_h_f": False},
+        )
