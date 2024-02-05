@@ -1,5 +1,5 @@
-import { Box } from '@mui/material';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import { Box, TextField, InputAdornment } from '@mui/material';
+import DatePicker from '@mui/lab/DatePicker';
 import moment from 'moment';
 import React from 'react';
 import { FieldLabel } from './FieldLabel';
@@ -12,34 +12,41 @@ export const DatePickerFilter = ({
   dataCy = 'date-picker-filter',
   ...props
 }): React.ReactElement => {
-  const datePickerValue = value ? moment(value) : null;
+  const datePickerValue = value ? moment(value).toISOString() : null;
 
   return (
     <Box display="flex" flexDirection="column">
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
-      <KeyboardDatePicker
-        variant="inline"
-        inputVariant="outlined"
-        data-cy={dataCy}
-        margin="dense"
+      <DatePicker
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="outlined"
+            margin="dense"
+            InputAdornmentProps={{ position: 'end' }}
+            fullWidth={fullWidth}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            inputProps={{ ...params.inputProps, 'data-cy': dataCy }}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <InputAdornment position="end">
+                  {params.InputProps.endAdornment}
+                </InputAdornment>
+              ),
+            }}
+          />
+        )}
         autoOk
-        onChange={(date, inputString) => {
-          if (date?.valueOf()) {
-            const momentDate = moment(date);
-            onChange(momentDate?.toISOString());
-          }
-          if (!inputString) {
+        onChange={(date) => {
+          if (date) {
+            onChange(moment(date).toISOString());
+          } else {
             onChange(null);
           }
         }}
-        value={datePickerValue}
-        format="YYYY-MM-DD"
-        InputAdornmentProps={{ position: 'end' }}
-        KeyboardButtonProps={{
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...({ 'data-cy': 'calendar-icon' } as any),
-        }}
-        fullWidth={fullWidth}
+        value={datePickerValue || null}
+        format="yyyy-MM-dd"
         {...props}
       />
     </Box>

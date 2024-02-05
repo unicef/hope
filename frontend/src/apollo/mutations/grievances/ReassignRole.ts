@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 export const REASSIGN_ROLE = gql`
   mutation ReassignRoleGrievance(
     $grievanceTicketId: ID!

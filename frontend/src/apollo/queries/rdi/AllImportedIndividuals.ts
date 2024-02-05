@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ALL_IMPORTED_INDIVIDUALS_QUERY = gql`
   query AllImportedIndividuals(
