@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Delete } from '@material-ui/icons';
@@ -66,9 +66,9 @@ export const DeletePaymentPlan = ({
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Delete Payment Plan')}</DialogTitle>
@@ -85,11 +85,11 @@ export const DeletePaymentPlan = ({
             <Button onClick={() => setDeleteDialogOpen(false)}>CANCEL</Button>
             <LoadingButton
               loading={loadingDelete}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => handleDelete()}
-              data-cy='button-submit'
+              data-cy="button-submit"
             >
               {t('Delete')}
             </LoadingButton>

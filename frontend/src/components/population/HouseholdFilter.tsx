@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@mui/material';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import GroupIcon from '@material-ui/icons/Group';
@@ -43,19 +43,16 @@ export const HouseholdFilters = ({
   const history = useHistory();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -71,14 +68,14 @@ export const HouseholdFilters = ({
       applyHandler={handleApplyFilter}
       isOnPaper={isOnPaper}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid container item xs={6} spacing={0}>
           <Grid item xs={8}>
             <SearchTextField
               label={t('Search')}
               value={filter.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy='hh-filters-search'
+              data-cy="hh-filters-search"
             />
           </Grid>
           <Grid item xs={4}>
@@ -86,8 +83,8 @@ export const HouseholdFilters = ({
               onChange={(e) => handleFilterChange('searchType', e.target.value)}
               label={t('Search Type')}
               value={filter.searchType}
-              borderRadius='0px 4px 4px 0px'
-              data-cy='filter-search-type'
+              borderRadius="0px 4px 4px 0px"
+              data-cy="filter-search-type"
               fullWidth
               disableClearable
             >
@@ -109,7 +106,7 @@ export const HouseholdFilters = ({
               value={filter.program}
               fullWidth
               icon={<FlashOnIcon />}
-              data-cy='hh-filters-program'
+              data-cy="hh-filters-program"
             >
               {programs.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
@@ -128,7 +125,7 @@ export const HouseholdFilters = ({
             fullWidth
             value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
-            data-cy='hh-filters-residence-status'
+            data-cy="hh-filters-residence-status"
           >
             {choicesData.residenceStatusChoices?.map((status) => (
               <MenuItem key={status.value} value={status.value}>
@@ -139,14 +136,14 @@ export const HouseholdFilters = ({
         </Grid>
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            name='admin2'
+            name="admin2"
             value={filter.admin2}
             filter={filter}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            dataCy='hh-filters-admin2'
+            dataCy="hh-filters-admin2"
           />
         </Grid>
         <Grid item xs={3}>
@@ -159,7 +156,7 @@ export const HouseholdFilters = ({
             onChange={(e) =>
               handleFilterChange('householdSizeMin', e.target.value)
             }
-            data-cy='hh-filters-household-size-from'
+            data-cy="hh-filters-household-size-from"
           />
         </Grid>
         <Grid item xs={3}>
@@ -171,7 +168,7 @@ export const HouseholdFilters = ({
             onChange={(e) =>
               handleFilterChange('householdSizeMax', e.target.value)
             }
-            data-cy='hh-filters-household-size-to'
+            data-cy="hh-filters-household-size-to"
           />
         </Grid>
         <Grid item xs={3}>
@@ -179,7 +176,7 @@ export const HouseholdFilters = ({
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
             value={filter.orderBy}
-            data-cy='hh-filters-order-by'
+            data-cy="hh-filters-order-by"
             disableClearable
           >
             {householdTableOrderOptions.map((order) => (
@@ -194,15 +191,15 @@ export const HouseholdFilters = ({
             onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
             label={t('Status')}
             value={filter.withdrawn}
-            data-cy='hh-filters-status'
+            data-cy="hh-filters-status"
           >
-            <MenuItem key='all' value='null'>
+            <MenuItem key="all" value="null">
               All
             </MenuItem>
-            <MenuItem key='active' value='false'>
+            <MenuItem key="active" value="false">
               Active
             </MenuItem>
-            <MenuItem key='inactive' value='true'>
+            <MenuItem key="inactive" value="true">
               Withdrawn
             </MenuItem>
           </SelectFilter>
@@ -217,10 +214,10 @@ export const HouseholdFilters = ({
               value={filter.programState}
               fullWidth
               disableClearable
-              data-cy='filters-program-state'
+              data-cy="filters-program-state"
             >
-              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
-              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
+              <MenuItem value="active">{t('Active Programmes')}</MenuItem>
+              <MenuItem value="all">{t('All Programmes')}</MenuItem>
             </SelectFilter>
           </Grid>
         )}

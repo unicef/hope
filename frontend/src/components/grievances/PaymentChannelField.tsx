@@ -1,4 +1,4 @@
-import { Grid, IconButton } from '@material-ui/core';
+import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
@@ -44,7 +44,7 @@ export function PaymentChannelField({
         </Grid>
       ) : null}
       <Grid item xs={4}>
-        <LabelizedField label={t('Payment channel item')} value='IBAN' />
+        <LabelizedField label={t('Payment channel item')} value="IBAN" />
       </Grid>
       <Grid item xs={4}>
         <LabelizedField
@@ -56,7 +56,7 @@ export function PaymentChannelField({
         <Field
           name={`${paymentChannelFieldName}.bankAccountNumber`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
           required
@@ -79,7 +79,7 @@ export function PaymentChannelField({
         <Field
           name={`${paymentChannelFieldName}.bankName`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
           required
@@ -87,7 +87,10 @@ export function PaymentChannelField({
         />
       </Grid>
       <Grid item xs={4}>
-        <LabelizedField label={t('Payment channel item')} value='Account holder name' />
+        <LabelizedField
+          label={t('Payment channel item')}
+          value="Account holder name"
+        />
       </Grid>
       <Grid item xs={4}>
         <LabelizedField
@@ -99,7 +102,7 @@ export function PaymentChannelField({
         <Field
           name={`${paymentChannelFieldName}.accountHolderName`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
           required
@@ -107,7 +110,10 @@ export function PaymentChannelField({
         />
       </Grid>
       <Grid item xs={4}>
-        <LabelizedField label={t('Payment channel item')} value='Bank branch name' />
+        <LabelizedField
+          label={t('Payment channel item')}
+          value="Bank branch name"
+        />
       </Grid>
       <Grid item xs={4}>
         <LabelizedField
@@ -119,7 +125,7 @@ export function PaymentChannelField({
         <Field
           name={`${paymentChannelFieldName}.bankBranchName`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
           required

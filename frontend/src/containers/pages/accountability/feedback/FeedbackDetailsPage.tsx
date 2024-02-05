@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useFeedbackQuery } from '../../../../__generated__/graphql';

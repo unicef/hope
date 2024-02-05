@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@mui/material';
 import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,19 +27,16 @@ export function ActivityLogPageFilters({
   const history = useHistory();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -63,13 +60,13 @@ export function ActivityLogPageFilters({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='filters-search'
+            data-cy="filters-search"
           />
         </Grid>
         <Grid item xs={3}>
@@ -98,7 +95,7 @@ export function ActivityLogPageFilters({
           <AssigneeAutocomplete
             label={t('User')}
             filter={filter}
-            name='userId'
+            name="userId"
             value={filter.userId}
             setFilter={setFilter}
             initialFilter={initialFilter}

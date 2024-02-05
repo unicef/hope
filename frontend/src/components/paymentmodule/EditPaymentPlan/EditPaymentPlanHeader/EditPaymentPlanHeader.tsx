@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -46,7 +46,7 @@ export const EditPaymentPlanHeader = ({
   return (
     <PageHeader
       title={
-        <Box display='flex' alignItems='center'>
+        <Box display="flex" alignItems="center">
           {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
           {paymentPlan.unicefId}
           <StatusWrapper>
@@ -71,7 +71,7 @@ export const EditPaymentPlanHeader = ({
           : null
       }
     >
-      <Box display='flex' mt={2} mb={2}>
+      <Box display="flex" mt={2} mb={2}>
         <Box mr={3}>
           <Button
             component={Link}
@@ -80,7 +80,7 @@ export const EditPaymentPlanHeader = ({
             {t('Cancel')}
           </Button>
         </Box>
-        <Button variant='contained' color='primary' onClick={handleSubmit}>
+        <Button variant="contained" color="primary" onClick={handleSubmit}>
           {t('Save')}
         </Button>
       </Box>

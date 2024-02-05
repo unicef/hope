@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import ClearIcon from '@material-ui/icons/Clear';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -43,7 +43,7 @@ export function DiscardVerificationPlan({
         <ErrorButton
           startIcon={<ClearIcon />}
           onClick={() => setDiscardDialogOpen(true)}
-          data-cy='button-discard-plan'
+          data-cy="button-discard-plan"
           disabled={!isActiveProgram}
         >
           DISCARD
@@ -52,9 +52,9 @@ export function DiscardVerificationPlan({
       <Dialog
         open={discardDialogOpen}
         onClose={() => setDiscardDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Discard Verification Plan')}</DialogTitle>
@@ -77,9 +77,9 @@ export function DiscardVerificationPlan({
               {t('CANCEL')}
             </Button>
             <ErrorButtonContained
-              type='submit'
+              type="submit"
               onClick={() => discard()}
-              data-cy='button-submit'
+              data-cy="button-submit"
             >
               {t('DISCARD')}
             </ErrorButtonContained>

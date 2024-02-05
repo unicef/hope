@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from '@material-ui/core';
+import { Button, CircularProgress } from '@mui/material';
 import React from 'react';
 
 export const LoadingButton = ({
@@ -9,7 +9,7 @@ export const LoadingButton = ({
   <Button
     {...otherProps}
     disabled={otherProps.disabled || loading}
-    endIcon={loading ? <CircularProgress color='inherit' size={20} /> : null}
+    endIcon={loading ? <CircularProgress color="inherit" size={20} /> : null}
   >
     {children}
   </Button>

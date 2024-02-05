@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useHouseholdFlexFieldsQuery } from '../../__generated__/graphql';
@@ -21,7 +21,7 @@ export const HouseholdFlexFieldPhotoModal = ({ field }): React.ReactElement => {
   return picUrl ? (
     <PhotoModal src={picUrl} />
   ) : (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       -
     </Box>
   );

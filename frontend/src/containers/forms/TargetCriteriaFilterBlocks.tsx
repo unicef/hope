@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
 import React, { Fragment } from 'react';
@@ -131,10 +131,10 @@ export function TargetCriteriaFilterBlocks({
                   </Fragment>
                 );
               })}
-              <Box display='flex' justifyContent='center'>
+              <Box display="flex" justifyContent="center">
                 <Button
-                  color='primary'
-                  variant='outlined'
+                  color="primary"
+                  variant="outlined"
                   startIcon={<AddCircleOutline />}
                   onClick={() =>
                     arrayHelpers.push({

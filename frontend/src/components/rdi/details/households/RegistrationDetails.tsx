@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@mui/material';
 import Paper from '@material-ui/core/Paper';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,7 +46,7 @@ export function RegistrationDetails({
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>{t('Registration Details')}</Typography>
+        <Typography variant="h6">{t('Registration Details')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={4}>
@@ -68,7 +68,7 @@ export function RegistrationDetails({
       {registrationDataImport.dataSource === 'XLS' ? null : (
         <>
           <hr />
-          <Typography variant='h6'>{t('Data Collection')}</Typography>
+          <Typography variant="h6">{t('Data Collection')}</Typography>
           <Grid container spacing={6}>
             <Grid item xs={4}>
               <LabelizedField label={t('Start time')}>

@@ -1,10 +1,4 @@
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  Grid,
-  MenuItem,
-} from '@material-ui/core';
+import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -49,19 +43,16 @@ export const PaymentPlansFilters = ({
   const history = useHistory();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -82,7 +73,7 @@ export const PaymentPlansFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container spacing={3} alignItems='flex-end'>
+      <Grid container spacing={3} alignItems="flex-end">
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
@@ -94,7 +85,7 @@ export const PaymentPlansFilters = ({
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
-            variant='outlined'
+            variant="outlined"
             label={t('Status')}
             multiple
             value={filter.status}
@@ -111,19 +102,19 @@ export const PaymentPlansFilters = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            id='totalEntitledQuantityFromFilter'
+            id="totalEntitledQuantityFromFilter"
             topLabel={t('Entitled Quantity')}
             value={filter.totalEntitledQuantityFrom}
             placeholder={t('From')}
             onChange={(e) =>
               handleFilterChange('totalEntitledQuantityFrom', e.target.value)
             }
-            data-cy='filters-total-entitled-quantity-from'
+            data-cy="filters-total-entitled-quantity-from"
           />
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            id='totalEntitledQuantityToFilter'
+            id="totalEntitledQuantityToFilter"
             value={filter.totalEntitledQuantityTo}
             placeholder={t('To')}
             onChange={(e) =>
@@ -135,7 +126,7 @@ export const PaymentPlansFilters = ({
                 filter.totalEntitledQuantityFrom >
                   filter.totalEntitledQuantityTo,
             )}
-            data-cy='filters-total-entitled-quantity-to'
+            data-cy="filters-total-entitled-quantity-to"
           />
         </Grid>
         <Grid item xs={3}>
@@ -183,7 +174,7 @@ export const PaymentPlansFilters = ({
                 <Checkbox
                   checked={Boolean(filter.isFollowUp)}
                   value={filter.isFollowUp}
-                  color='primary'
+                  color="primary"
                   onChange={(e) => {
                     if (e.target.checked) {
                       handleFilterChange('isFollowUp', true);

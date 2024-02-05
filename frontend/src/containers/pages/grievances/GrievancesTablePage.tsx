@@ -1,4 +1,4 @@
-import { Tab, Tabs } from '@material-ui/core';
+import { Tab, Tabs } from '@mui/material';
 import React, { useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
@@ -63,10 +63,8 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
   const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;
@@ -88,11 +86,11 @@ export const GrievancesTablePage = (): React.ReactElement => {
         });
         history.push(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}
-      indicatorColor='primary'
-      textColor='primary'
-      variant='scrollable'
-      scrollButtons='auto'
-      aria-label='tabs'
+      indicatorColor="primary"
+      textColor="primary"
+      variant="scrollable"
+      scrollButtons="auto"
+      aria-label="tabs"
     >
       {mappedTabs}
     </Tabs>
@@ -106,7 +104,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
 
   return (
     <>
-      <PageHeader tabs={tabs} title='Grievance Tickets' />
+      <PageHeader tabs={tabs} title="Grievance Tickets" />
       <GrievancesFilters
         choicesData={choicesData}
         filter={filter}

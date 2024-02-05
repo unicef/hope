@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import React from 'react';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
@@ -132,11 +132,11 @@ export function AddIndividualGrievanceDetails({
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Individual Data')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Individual Data')}</Typography>
           {canApproveDataChange && (
             <Button
-              data-cy='button-approve'
+              data-cy="button-approve"
               onClick={() =>
                 confirm({
                   title: t('Warning'),
@@ -146,8 +146,8 @@ export function AddIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.addIndividualTicketDetails
-                          .approveStatus,
+                        approveStatus:
+                          !ticket.addIndividualTicketDetails.approveStatus,
                       },
                       refetchQueries: () => [
                         {
@@ -172,7 +172,7 @@ export function AddIndividualGrievanceDetails({
                   ? 'outlined'
                   : 'contained'
               }
-              color='primary'
+              color="primary"
               disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             >
               {ticket.addIndividualTicketDetails.approveStatus

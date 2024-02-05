@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import { Field } from 'formik';
 import get from 'lodash/get';
 import React from 'react';
@@ -42,23 +42,23 @@ export function TargetPopulationProgramme({
   }));
 
   return (
-    <PaperContainer data-cy='target-population-program-container'>
+    <PaperContainer data-cy="target-population-program-container">
       <Title>
-        <Typography data-cy='program-title' variant='h6'>
+        <Typography data-cy="program-title" variant="h6">
           {t('Programme')}
         </Typography>
       </Title>
       <OverviewContainer>
-        <Box display='flex' flexDirection='column'>
+        <Box display="flex" flexDirection="column">
           <GreyText>
             {t('Selected programme that the Target Population is created for')}
           </GreyText>
           <Field
-            name='program'
+            name="program"
             label={t('Programme')}
             data-cy="input-program"
             fullWidth
-            variant='outlined'
+            variant="outlined"
             required
             choices={mappedPrograms}
             component={FormikSelectFieldConfirmProgram}

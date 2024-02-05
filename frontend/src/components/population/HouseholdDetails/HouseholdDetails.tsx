@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -69,7 +69,7 @@ export const HouseholdDetails = ({
     <>
       <Container>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <Overview>
           <Grid container spacing={3}>
@@ -195,7 +195,7 @@ export const HouseholdDetails = ({
       </Container>
       <OverviewPaper>
         <Title>
-          <Typography variant='h6'>{t('Benefits')}</Typography>
+          <Typography variant="h6">{t('Benefits')}</Typography>
         </Title>
         <Grid container>
           <Grid item xs={3}>
@@ -204,7 +204,7 @@ export const HouseholdDetails = ({
                 <Box mb={2}>
                   <Grid container>
                     <Grid item xs={6}>
-                      <Box display='flex' flexDirection='column'>
+                      <Box display="flex" flexDirection="column">
                         {household?.deliveredQuantities?.map((item) => (
                           <Box
                             key={`${item.currency}-${item.totalDeliveredQuantity}`}

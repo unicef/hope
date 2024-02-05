@@ -1,4 +1,4 @@
-import { InputAdornment } from '@material-ui/core';
+import { InputAdornment } from '@mui/material';
 import SearchIcon from '@material-ui/icons/Search';
 import styled from 'styled-components';
 import React from 'react';
@@ -24,14 +24,14 @@ export const SearchTextField = ({
       {...props}
       fullWidth={fullWidth}
       theme={{ borderRadius }}
-      variant='outlined'
-      margin='dense'
+      variant="outlined"
+      margin="dense"
       inputProps={{ maxLength: 200 }}
       // https://github.com/mui-org/material-ui/issues/12805
       // eslint-disable-next-line react/jsx-no-duplicate-props
       InputProps={{
         startAdornment: (
-          <InputAdornment position='start'>
+          <InputAdornment position="start">
             {(icon as JSX.Element) || <SearchIcon />}
           </InputAdornment>
         ),

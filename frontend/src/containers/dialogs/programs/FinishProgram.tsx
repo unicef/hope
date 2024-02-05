@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,7 +17,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 interface FinishProgramProps {
   program: ProgramQuery['program'];
@@ -64,11 +64,10 @@ export function FinishProgram({
       },
     });
     if (!response.errors && response.data.updateProgram) {
-
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Finished
-      })
+        status: ProgramStatus.Finished,
+      });
 
       showMessage(t('Programme finished.'), {
         pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
@@ -84,17 +83,17 @@ export function FinishProgram({
   return (
     <span>
       <Button
-        color='primary'
+        color="primary"
         onClick={() => setOpen(true)}
-        data-cy='button-finish-program'
+        data-cy="button-finish-program"
       >
         {t('Finish Programme')}
       </Button>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Finish Programme')}</DialogTitle>
@@ -109,11 +108,11 @@ export function FinishProgram({
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
               loading={loading}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={finishProgram}
-              data-cy='button-finish-program'
+              data-cy="button-finish-program"
             >
               {t('FINISH')}
             </LoadingButton>

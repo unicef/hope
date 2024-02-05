@@ -8,7 +8,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -58,8 +58,8 @@ export const FlagDetails = ({
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Flag Details')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Flag Details')}</Typography>
           <Box>
             <ViewSanctionList
               referenceNumber={details.sanctionListIndividual.referenceNumber}
@@ -81,8 +81,8 @@ export const FlagDetails = ({
                     }),
                   )
                 }
-                variant='outlined'
-                color='primary'
+                variant="outlined"
+                color="primary"
               >
                 {isFlagConfirmed ? t('REMOVE FLAG') : t('CONFIRM FLAG')}
               </Button>
@@ -93,17 +93,17 @@ export const FlagDetails = ({
       <Table className={classes.table}>
         <TableHead>
           <TableRow>
-            <TableCell align='left' />
-            <TableCell align='left'>{t('Ref. No. on Sanction List')}</TableCell>
-            <TableCell align='left'>{t('Full Name')}</TableCell>
-            <TableCell align='left'>{t('Date of Birth')}</TableCell>
-            <TableCell align='left'>{t('National Ids')}</TableCell>
-            <TableCell align='left'>{t('Source')}</TableCell>
+            <TableCell align="left" />
+            <TableCell align="left">{t('Ref. No. on Sanction List')}</TableCell>
+            <TableCell align="left">{t('Full Name')}</TableCell>
+            <TableCell align="left">{t('Date of Birth')}</TableCell>
+            <TableCell align="left">{t('National Ids')}</TableCell>
+            <TableCell align="left">{t('Source')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           <TableRow>
-            <TableCell align='left'>
+            <TableCell align="left">
               {isFlagConfirmed ? (
                 <FlagTooltip
                   message={t('Sanction List Confirmed Match')}
@@ -113,42 +113,42 @@ export const FlagDetails = ({
                 ''
               )}
             </TableCell>
-            <TableCell align='left'>-</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">-</TableCell>
+            <TableCell align="left">
               {details.goldenRecordsIndividual.fullName}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               <UniversalMoment>
                 {details.goldenRecordsIndividual.birthDate}
               </UniversalMoment>
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.goldenRecordsIndividual.documents.edges
                 .filter((item) => item.node.type.key === 'NATIONAL_ID')
                 .map((item) => item.node.documentNumber)
                 .join(', ') || '-'}
             </TableCell>
-            <TableCell align='left'>{t('Golden Record')}</TableCell>
+            <TableCell align="left">{t('Golden Record')}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left' />
-            <TableCell align='left'>
+            <TableCell align="left" />
+            <TableCell align="left">
               {details.sanctionListIndividual.referenceNumber}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.sanctionListIndividual.fullName}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.sanctionListIndividual.datesOfBirth.edges
                 .map((item) => moment(item.node.date).format(DATE_FORMAT))
                 .join(', ') || '-'}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.sanctionListIndividual.documents.edges
                 .map((item) => item.node.documentNumber)
                 .join(', ') || '-'}
             </TableCell>
-            <TableCell align='left'>{t('Sanction List')}</TableCell>
+            <TableCell align="left">{t('Sanction List')}</TableCell>
           </TableRow>
         </TableBody>
       </Table>

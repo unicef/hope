@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import {
   AllAddIndividualFieldsQuery,
@@ -28,11 +28,11 @@ export const GrievanceFlexFieldPhotoModalNewIndividual = ({
   const picUrl: string = flexFields[flexField.name];
 
   return (
-    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+    <Box style={{ height: '100%' }} display="flex" alignItems="center">
       {picUrl ? (
         <PhotoModal src={picUrl} />
       ) : (
-        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+        <Box style={{ height: '100%' }} display="flex" alignItems="center">
           -
         </Box>
       )}

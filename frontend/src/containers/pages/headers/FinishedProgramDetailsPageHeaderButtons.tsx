@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import {
@@ -28,7 +28,7 @@ export const FinishedProgramDetailsPageHeaderButtons = ({
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canActivate && (
         <Box m={2}>
           <ReactivateProgram program={program} />
@@ -37,9 +37,9 @@ export const FinishedProgramDetailsPageHeaderButtons = ({
       {!isPaymentPlanApplicable && (
         <Box m={2}>
           <Button
-            variant='contained'
-            color='primary'
-            component='a'
+            variant="contained"
+            color="primary"
+            component="a"
             disabled={!program.caHashId}
             href={`${data.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_program&id=/${program.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}

@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '../../containers/dialogs/Dialog';
@@ -37,16 +37,16 @@ export const ViewSanctionList = ({
     setFilter({ ...filter, [name]: e.target.value });
   return (
     <>
-      <Button color='primary' onClick={() => setDialogOpen(true)}>
+      <Button color="primary" onClick={() => setDialogOpen(true)}>
         {t('VIEW SANCTION LIST')}
       </Button>
       <Dialog
         fullWidth
-        maxWidth='md'
+        maxWidth="md"
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Sanction List View')}</DialogTitle>
@@ -59,7 +59,7 @@ export const ViewSanctionList = ({
                   label={t('Reference Number')}
                   value={filter.referenceNumber}
                   onChange={(e) => handleFilterChange(e, 'referenceNumber')}
-                  data-cy='filters-search'
+                  data-cy="filters-search"
                 />
               </Grid>
               <Grid item>
@@ -67,7 +67,7 @@ export const ViewSanctionList = ({
                   label={t('Full Name')}
                   value={filter.fullName}
                   onChange={(e) => handleFilterChange(e, 'fullName')}
-                  data-cy='filters-search'
+                  data-cy="filters-search"
                 />
               </Grid>
             </Grid>

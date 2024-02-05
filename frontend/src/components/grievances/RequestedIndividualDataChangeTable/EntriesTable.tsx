@@ -4,7 +4,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
-} from '@material-ui/core';
+} from '@mui/material';
 import camelCase from 'lodash/camelCase';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,17 +60,17 @@ export const EntriesTable = ({
     <StyledTable>
       <TableHead>
         <TableRow>
-          <TableCell align='left' />
-          <TableCell data-cy='table-cell-type-of-data' align='left'>
+          <TableCell align="left" />
+          <TableCell data-cy="table-cell-type-of-data" align="left">
             {t('Type of Data')}
           </TableCell>
-          <TableCell data-cy='table-cell-previous-current-value' align='left'>
+          <TableCell data-cy="table-cell-previous-current-value" align="left">
             {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
               ? t('Previous')
               : t('Current')}{' '}
             {t('Value')}
           </TableCell>
-          <TableCell data-cy='table-cell-new-value' align='left'>
+          <TableCell data-cy="table-cell-new-value" align="left">
             {t('New Value')}
           </TableCell>
         </TableRow>

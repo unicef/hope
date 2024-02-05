@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,13 +35,13 @@ export function EditFspHeader({
           : null
       }
     >
-      <Box display='flex' mt={2} mb={2}>
+      <Box display="flex" mt={2} mb={2}>
         <Box mr={3}>
           <Button component={Link} to={`/${baseUrl}/payment-module`}>
             {t('Cancel')}
           </Button>
         </Box>
-        <Button variant='contained' color='primary' onClick={handleSubmit}>
+        <Button variant="contained" color="primary" onClick={handleSubmit}>
           {t('Save')}
         </Button>
       </Box>

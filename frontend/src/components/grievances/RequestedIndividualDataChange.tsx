@@ -1,4 +1,4 @@
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
@@ -77,18 +77,22 @@ export function RequestedIndividualDataChange({
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
   allApprovedCount += documents.filter((el) => el.approve_status).length;
-  allApprovedCount += documentsToRemove.filter((el) => el.approve_status)
-    .length;
+  allApprovedCount += documentsToRemove.filter(
+    (el) => el.approve_status,
+  ).length;
   allApprovedCount += documentsToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += identities.filter((el) => el.approve_status).length;
-  allApprovedCount += identitiesToRemove.filter((el) => el.approve_status)
-    .length;
+  allApprovedCount += identitiesToRemove.filter(
+    (el) => el.approve_status,
+  ).length;
   allApprovedCount += identitiesToEdit.filter((el) => el.approve_status).length;
   allApprovedCount += paymentChannels.filter((el) => el.approve_status).length;
-  allApprovedCount += paymentChannelsToRemove.filter((el) => el.approve_status)
-    .length;
-  allApprovedCount += paymentChannelsToEdit.filter((el) => el.approve_status)
-    .length;
+  allApprovedCount += paymentChannelsToRemove.filter(
+    (el) => el.approve_status,
+  ).length;
+  allApprovedCount += paymentChannelsToEdit.filter(
+    (el) => el.approve_status,
+  ).length;
   allApprovedCount += entries.filter(
     ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
@@ -216,10 +220,10 @@ export function RequestedIndividualDataChange({
       return (
         <Button
           onClick={submitForm}
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           disabled={!approveEnabled}
-          data-cy='button-approve'
+          data-cy="button-approve"
         >
           {t('Approve')}
         </Button>
@@ -235,10 +239,10 @@ export function RequestedIndividualDataChange({
             submitForm();
           })
         }
-        variant='contained'
-        color='primary'
+        variant="contained"
+        color="primary"
         disabled={!approveEnabled}
-        data-cy='button-approve'
+        data-cy="button-approve"
       >
         {t('Approve')}
       </Button>
@@ -332,13 +336,13 @@ export function RequestedIndividualDataChange({
         return (
           <StyledBox>
             <Title>
-              <Box display='flex' justifyContent='space-between'>
-                <Typography variant='h6'>Requested Data Change</Typography>
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="h6">Requested Data Change</Typography>
                 {shouldShowEditButton(allChangesLength) ? (
                   <Button
                     onClick={() => setEdit(true)}
-                    variant='outlined'
-                    color='primary'
+                    variant="outlined"
+                    color="primary"
                     disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                   >
                     {t('EDIT')}

@@ -1,4 +1,4 @@
-import { Box, TableCell } from '@material-ui/core';
+import { Box, TableCell } from '@mui/material';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -35,16 +35,15 @@ export const PaymentPlanTableRow = ({
   const handleClick = (): void => {
     history.push(paymentPlanPath);
   };
-  const {
-    data: statusChoicesData,
-  } = useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } =
+    useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
 
   const followUpLinks = (): React.ReactElement => {
     if (!plan.followUps?.edges?.length) return <>-</>;
     return (
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         {plan.followUps?.edges?.map((followUp) => {
           const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`;
           return (
@@ -63,10 +62,10 @@ export const PaymentPlanTableRow = ({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={plan.id}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {plan.isFollowUp ? 'Follow-up: ' : ''}
         {canViewDetails ? (
           <BlackLink to={paymentPlanPath}>{plan.unicefId}</BlackLink>
@@ -74,7 +73,7 @@ export const PaymentPlanTableRow = ({
           plan.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusContainer>
           <StatusBox
             status={plan.status}
@@ -82,33 +81,33 @@ export const PaymentPlanTableRow = ({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{plan.totalHouseholdsCount || '-'}</TableCell>
-      <TableCell align='left'>{plan.currencyName}</TableCell>
-      <TableCell align='right'>
+      <TableCell align="left">{plan.totalHouseholdsCount || '-'}</TableCell>
+      <TableCell align="left">{plan.currencyName}</TableCell>
+      <TableCell align="right">
         {`${formatCurrencyWithSymbol(
           plan.totalEntitledQuantity,
           plan.currency,
         )}`}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {`${formatCurrencyWithSymbol(
           plan.totalDeliveredQuantity,
           plan.currency,
         )}`}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {`${formatCurrencyWithSymbol(
           plan.totalUndeliveredQuantity,
           plan.currency,
         )}`}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{plan.dispersionStartDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{plan.dispersionEndDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{followUpLinks()}</TableCell>
+      <TableCell align="left">{followUpLinks()}</TableCell>
     </ClickableTableRow>
   );
 };

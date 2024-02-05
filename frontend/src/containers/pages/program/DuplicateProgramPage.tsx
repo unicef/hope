@@ -1,4 +1,4 @@
-import { Box, Step, StepButton, Stepper } from '@material-ui/core';
+import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -37,10 +37,8 @@ export const DuplicateProgramPage = (): ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: userPartnerChoicesData,
-    loading: userPartnerChoicesLoading,
-  } = useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
+    useUserPartnerChoicesQuery();
 
   const handleSubmit = async (values): Promise<void> => {
     try {
@@ -178,7 +176,7 @@ export const DuplicateProgramPage = (): ReactElement => {
               <Stepper activeStep={step}>
                 <Step>
                   <StepButton
-                    data-cy='step-button-details'
+                    data-cy="step-button-details"
                     onClick={() => setStep(0)}
                   >
                     {t('Details')}
@@ -186,7 +184,7 @@ export const DuplicateProgramPage = (): ReactElement => {
                 </Step>
                 <Step>
                   <StepButton
-                    data-cy='step-button-partners'
+                    data-cy="step-button-partners"
                     onClick={() => setStep(1)}
                   >
                     {t('Programme Partners')}

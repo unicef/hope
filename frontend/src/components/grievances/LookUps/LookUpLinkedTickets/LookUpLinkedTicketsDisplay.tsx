@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useLocation } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/Edit';
@@ -35,33 +35,33 @@ export const LookUpLinkedTicketsDisplay = ({
   };
   return (
     <StyledBox disabled={disabled}>
-      <Grid container justifyContent='space-between'>
+      <Grid container justifyContent="space-between">
         <Grid item>
-          <Box display='flex' flexDirection='column'>
+          <Box display="flex" flexDirection="column">
             {t('Ticket ID')}:{renderLinkedTickets()}
           </Box>
         </Grid>
         {!isEditTicket && (
           <Grid item>
             <Box p={2}>
-              <Grid container justifyContent='center' alignItems='center'>
+              <Grid container justifyContent="center" alignItems="center">
                 <Grid item>
                   <LightGrey>
                     <EditIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => setLookUpDialogOpen(true)}
-                      data-cy='button-edit'
+                      data-cy="button-edit"
                     />
                   </LightGrey>
                 </Grid>
                 <Grid item>
                   <DarkGrey>
                     <DeleteIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => handleRemove()}
-                      data-cy='button-delete'
+                      data-cy="button-delete"
                     />
                   </DarkGrey>
                 </Grid>

@@ -10,7 +10,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
@@ -95,11 +95,11 @@ export const LinkedGrievancesModal = ({
         onClick={() => history.push(grievanceDetailsPath)}
         key={row.id}
       >
-        <TableCell align='left'>
+        <TableCell align="left">
           <BlackLink to={grievanceDetailsPath}>{row.unicefId}</BlackLink>
         </TableCell>
-        <TableCell align='left'>{categoryChoices[row.category]}</TableCell>
-        <TableCell align='left'>
+        <TableCell align="left">{categoryChoices[row.category]}</TableCell>
+        <TableCell align="left">
           <StatusBox
             status={statusChoices[row.status]}
             statusToColor={grievanceTicketStatusToColor}
@@ -171,9 +171,9 @@ export const LinkedGrievancesModal = ({
       <StyledDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='lg'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="lg"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Linked Grievances')}</DialogTitle>
@@ -188,9 +188,9 @@ export const LinkedGrievancesModal = ({
           <StyledTable>
             <TableHead>
               <TableRow>
-                <TableCell align='left'>{t('Ticket Id')}</TableCell>
-                <TableCell align='left'>{t('Category')}</TableCell>
-                <TableCell align='left'>{t('Status')}</TableCell>
+                <TableCell align="left">{t('Ticket Id')}</TableCell>
+                <TableCell align="left">{t('Category')}</TableCell>
+                <TableCell align="left">{t('Status')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>{renderRows()}</TableBody>

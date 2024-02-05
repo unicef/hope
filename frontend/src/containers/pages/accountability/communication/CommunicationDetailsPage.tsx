@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
 import { LoadingComponent } from '../../../../components/core/LoadingComponent';
 import { PageHeader } from '../../../../components/core/PageHeader';
@@ -53,7 +53,7 @@ export function CommunicationDetailsPage(): React.ReactElement {
             : null
         }
       />
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <CommunicationDetails message={message} />
         <CommunicationMessageDetails message={message} />
         <RecipientsTable

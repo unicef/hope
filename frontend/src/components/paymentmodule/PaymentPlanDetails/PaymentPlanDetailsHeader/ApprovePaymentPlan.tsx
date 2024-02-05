@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
@@ -20,7 +20,7 @@ import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
-import { useProgramContext } from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 
 export interface ApprovePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -35,23 +35,19 @@ export const ApprovePaymentPlan = ({
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
 
-  const {
-    mutatePaymentPlanAction: approve,
-    loading: loadingApprove,
-  } = usePaymentPlanAction(
-    Action.Approve,
-    paymentPlan.id,
-    () => showMessage(t('Payment Plan has been approved.')),
-    () => setApproveDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: approve, loading: loadingApprove } =
+    usePaymentPlanAction(
+      Action.Approve,
+      paymentPlan.id,
+      () => showMessage(t('Payment Plan has been approved.')),
+      () => setApproveDialogOpen(false),
+    );
   const initialValues = {
     comment: '',
   };
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string()
-      .min(4, 'Too short')
-      .max(255, 'Too long'),
+    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
   });
 
   const shouldShowLastApproverMessage = (): boolean => {
@@ -79,10 +75,10 @@ export const ApprovePaymentPlan = ({
             {approveDialogOpen && <AutoSubmitFormOnEnter />}
             <Box p={2}>
               <Button
-                color='primary'
-                variant='contained'
+                color="primary"
+                variant="contained"
                 onClick={() => setApproveDialogOpen(true)}
-                data-cy='button-approve'
+                data-cy="button-approve"
                 disabled={!isActiveProgram}
               >
                 {t('Approve')}
@@ -91,9 +87,9 @@ export const ApprovePaymentPlan = ({
             <Dialog
               open={approveDialogOpen}
               onClose={() => setApproveDialogOpen(false)}
-              scroll='paper'
-              aria-labelledby='form-dialog-title'
-              maxWidth='md'
+              scroll="paper"
+              aria-labelledby="form-dialog-title"
+              maxWidth="md"
             >
               <DialogTitleWrapper>
                 <DialogTitle>{t('Approve Payment Plan')}</DialogTitle>
@@ -114,11 +110,11 @@ export const ApprovePaymentPlan = ({
                   )}
                   <Form>
                     <Field
-                      name='comment'
+                      name="comment"
                       multiline
                       fullWidth
-                      variant='filled'
-                      label='Comment (optional)'
+                      variant="filled"
+                      label="Comment (optional)"
                       component={FormikTextField}
                     />
                   </Form>
@@ -131,11 +127,11 @@ export const ApprovePaymentPlan = ({
                   </Button>
                   <LoadingButton
                     loading={loadingApprove}
-                    type='submit'
-                    color='primary'
-                    variant='contained'
+                    type="submit"
+                    color="primary"
+                    variant="contained"
                     onClick={submitForm}
-                    data-cy='button-submit'
+                    data-cy="button-submit"
                   >
                     {t('Approve')}
                   </LoadingButton>

@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -64,7 +64,7 @@ export const IndividualBioData = ({
   const mappedIndividualDocuments = individual?.documents?.edges?.map(
     (edge) => (
       <Grid item xs={3} key={edge.node.id}>
-        <Box flexDirection='column'>
+        <Box flexDirection="column">
           <Box mb={1}>
             <LabelizedField label={edge.node.type.label}>
               {edge.node.photo ? (
@@ -78,7 +78,7 @@ export const IndividualBioData = ({
               )}
             </LabelizedField>
           </Box>
-          <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
+          <LabelizedField label="issued">{edge.node.country}</LabelizedField>
         </Box>
       </Grid>
     ),
@@ -86,13 +86,13 @@ export const IndividualBioData = ({
 
   const mappedIdentities = individual?.identities?.edges?.map((item) => (
     <Grid item xs={3} key={item.node.id}>
-      <Box flexDirection='column'>
+      <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={`${item.node.partner} ID`}>
             {item.node.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label='issued'>{item.node.country}</LabelizedField>
+        <LabelizedField label="issued">{item.node.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -147,7 +147,7 @@ export const IndividualBioData = ({
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>{t('Bio Data')}</Typography>
+        <Typography variant="h6">{t('Bio Data')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={3}>

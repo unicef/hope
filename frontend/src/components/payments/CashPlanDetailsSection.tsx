@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
@@ -45,11 +45,11 @@ export const CashPlanDetailsSection = ({
   return (
     <Grid container>
       <Grid item xs={7}>
-        <Title data-cy='div-payment-plan-details'>
-          <Typography variant='h6'>{t('Payment Plan Details')}</Typography>
+        <Title data-cy="div-payment-plan-details">
+          <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
         <Box pr={2}>
-          <Grid data-cy='grid-payment-plan-details' container spacing={3}>
+          <Grid data-cy="grid-payment-plan-details" container spacing={3}>
             {[
               {
                 label: t('PROGRAMME NAME'),
@@ -79,16 +79,16 @@ export const CashPlanDetailsSection = ({
           </Grid>
         </Box>
       </Grid>
-      <Grid data-cy='grid-bank-reconciliation' item xs={5}>
+      <Grid data-cy="grid-bank-reconciliation" item xs={5}>
         <BorderLeftBox>
           <Title>
-            <Typography variant='h6' data-cy='table-label'>
+            <Typography variant="h6" data-cy="table-label">
               {t('Bank reconciliation')}
             </Typography>
           </Title>
           <Grid container>
             <Grid item xs={3}>
-              <Grid container direction='column'>
+              <Grid container direction="column">
                 <LabelizedField label={t('SUCCESSFUL')}>
                   <p>{bankReconciliationSuccessPercentage}%</p>
                 </LabelizedField>

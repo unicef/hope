@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import React from 'react';
@@ -32,19 +32,19 @@ export const LookUpPaymentRecordDisplay = ({
     <StyledBox disabled={disabled}>
       <Grid container>
         <Grid item>
-          <Box display='flex' flexDirection='column'>
+          <Box display="flex" flexDirection="column">
             {t('Payment ID')}:{renderPaymentRecords()}
           </Box>
         </Grid>
         {disabled || (
           <Grid item>
             <Box p={2}>
-              <Grid container justifyContent='center' alignItems='center'>
+              <Grid container justifyContent="center" alignItems="center">
                 <Grid item>
                   <LightGrey>
                     <EditIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => setLookUpDialogOpen(true)}
                     />
                   </LightGrey>
@@ -52,8 +52,8 @@ export const LookUpPaymentRecordDisplay = ({
                 <Grid item>
                   <DarkGrey>
                     <DeleteIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => handleRemove()}
                     />
                   </DarkGrey>

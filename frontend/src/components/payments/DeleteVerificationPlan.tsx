@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import ClearIcon from '@material-ui/icons/Clear';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,7 +48,7 @@ export function DeleteVerificationPlan({
         <ErrorButton
           startIcon={<ClearIcon />}
           onClick={() => setDeleteDialogOpen(true)}
-          data-cy='button-delete-plan'
+          data-cy="button-delete-plan"
           disabled={!isActiveProgram}
         >
           DELETE
@@ -57,9 +57,9 @@ export function DeleteVerificationPlan({
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Delete Verification Plan')}</DialogTitle>
@@ -81,9 +81,9 @@ export function DeleteVerificationPlan({
               {t('CANCEL')}
             </Button>
             <ErrorButtonContained
-              type='submit'
+              type="submit"
               onClick={() => handleDeleteVerificationPlan()}
-              data-cy='button-submit'
+              data-cy="button-submit"
             >
               {t('DELETE')}
             </ErrorButtonContained>

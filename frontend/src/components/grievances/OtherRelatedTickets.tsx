@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -76,9 +76,9 @@ export const OtherRelatedTickets = ({
   return linkedTickets.length > 0 || existingTickets.length > 0 ? (
     <ApproveBox>
       <Title>
-        <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
+        <Typography variant="h6">{t('Other Related Tickets')}</Typography>
       </Title>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <LabelizedField
           label={`For Household ${ticket.household?.unicefId || '-'} `}
         >
@@ -100,8 +100,9 @@ export const OtherRelatedTickets = ({
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t('For Household')} ${ticket.household?.unicefId ||
-                '-'} `}
+              label={`${t('For Household')} ${
+                ticket.household?.unicefId || '-'
+              } `}
             >
               <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>

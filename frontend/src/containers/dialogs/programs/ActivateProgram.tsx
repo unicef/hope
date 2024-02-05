@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,7 +17,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 interface ActivateProgramProps {
   program: ProgramQuery['program'];
@@ -64,11 +64,10 @@ export function ActivateProgram({
       },
     });
     if (!response.errors && response.data.updateProgram) {
-
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Active
-      })
+        status: ProgramStatus.Active,
+      });
 
       showMessage(t('Programme activated.'), {
         pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
@@ -84,18 +83,18 @@ export function ActivateProgram({
   return (
     <span>
       <Button
-        variant='contained'
-        color='primary'
+        variant="contained"
+        color="primary"
         onClick={() => setOpen(true)}
-        data-cy='button-activate-program'
+        data-cy="button-activate-program"
       >
         Activate
       </Button>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Activate Programme')}</DialogTitle>
@@ -107,16 +106,16 @@ export function ActivateProgram({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button data-cy='button-cancel' onClick={() => setOpen(false)}>
+            <Button data-cy="button-cancel" onClick={() => setOpen(false)}>
               {t('CANCEL')}
             </Button>
             <LoadingButton
               loading={loading}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={activateProgram}
-              data-cy='button-activate-program-modal'
+              data-cy="button-activate-program-modal"
             >
               {t('ACTIVATE')}
             </LoadingButton>

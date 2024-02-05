@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Slider from '@material-ui/core/Slider';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 
 const useStyles = makeStyles({
   root: {
@@ -27,8 +27,8 @@ export const FormikSliderField = ({
 
   return (
     <div className={classes.root}>
-      <Typography variant='caption'>{otherProps.label}</Typography>
-      <Grid container spacing={2} alignItems='center'>
+      <Typography variant="caption">{otherProps.label}</Typography>
+      <Grid container spacing={2} alignItems="center">
         <Grid item xs>
           <Slider
             {...otherProps}
@@ -37,7 +37,7 @@ export const FormikSliderField = ({
             max={max}
             value={typeof field.value === 'number' ? field.value : 0}
             onChange={handleSliderChange}
-            aria-labelledby='input-slider'
+            aria-labelledby="input-slider"
           />
         </Grid>
         <Grid item>

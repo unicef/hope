@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
@@ -75,10 +75,8 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useCashPlanVerificationSamplingChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useCashPlanVerificationSamplingChoicesQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
@@ -128,14 +126,14 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
       handleBack={() => history.push(`/${baseUrl}/payment-verification`)}
       title={
         <BlackLink
-          data-cy='plan-link'
+          data-cy="plan-link"
           to={`/${baseUrl}/payment-module/${
             isFollowUp ? 'followup-payment-plans' : 'payment-plans'
           }/${paymentPlan.id}`}
           fullWidth
         >
           {t('Payment Plan')}{' '}
-          <span data-cy='plan-id'>{paymentPlan.unicefId}</span>
+          <span data-cy="plan-id">{paymentPlan.unicefId}</span>
         </BlackLink>
       }
       breadCrumbs={
@@ -158,8 +156,8 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
         {isFinished &&
           (isAllPrograms ? (
             <Button
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               component={Link}
               to={`/${baseUrl}/grievance/payment-verification/${decodeIdString(
                 paymentPlan.id,
@@ -229,7 +227,7 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
         hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={paymentPlan.id}
-            objectType='PaymentPlan'
+            objectType="PaymentPlan"
           />
         )}
     </>

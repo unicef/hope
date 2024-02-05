@@ -7,7 +7,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
-} from '@material-ui/core';
+} from '@mui/material';
 import styled from 'styled-components';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { useAllKoboProjectsQuery } from '../../../../__generated__/graphql';
@@ -29,7 +29,11 @@ export function KoboProjectSelect(): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const [field] = useField('koboAssetId');
-  const { data: koboProjectsData, loading, error } = useAllKoboProjectsQuery({
+  const {
+    data: koboProjectsData,
+    loading,
+    error,
+  } = useAllKoboProjectsQuery({
     variables: { businessAreaSlug: businessArea },
   });
   const koboProjects = koboProjectsData?.allKoboProjects?.edges || [];
@@ -43,11 +47,11 @@ export function KoboProjectSelect(): React.ReactElement {
 
   return (
     <>
-      <FormControl variant='outlined' margin='dense'>
+      <FormControl variant="outlined" margin="dense">
         <StyledInputLabel>{t('Select Project')}</StyledInputLabel>
         <ComboBox
           {...field}
-          variant='outlined'
+          variant="outlined"
           label={t('Kobo Project')}
           disabled={loading}
           fullWidth
@@ -55,7 +59,7 @@ export function KoboProjectSelect(): React.ReactElement {
             <>
               {loading ? (
                 <CircularProgressContainer>
-                  <CircularProgress color='inherit' size={20} />{' '}
+                  <CircularProgress color="inherit" size={20} />{' '}
                 </CircularProgressContainer>
               ) : null}
             </>

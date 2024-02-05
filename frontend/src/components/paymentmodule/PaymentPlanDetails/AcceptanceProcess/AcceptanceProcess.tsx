@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Button, Typography } from '@mui/material';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import React, { useState } from 'react';
@@ -15,7 +15,7 @@ import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { Title } from '../../../core/Title';
-import { useProgramContext } from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 
 const ButtonContainer = styled(Box)`
@@ -36,10 +36,8 @@ export const AcceptanceProcess = ({
 
   const { edges } = paymentPlan.approvalProcess;
   const [showAll, setShowAll] = useState(false);
-  const [
-    mutate,
-    { loading: exportPdfLoading },
-  ] = useExportPdfPpSummaryMutation();
+  const [mutate, { loading: exportPdfLoading }] =
+    useExportPdfPpSummaryMutation();
 
   const matchDataSize = (
     data: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'],
@@ -64,23 +62,23 @@ export const AcceptanceProcess = ({
     }
   };
 
-  const canExportPdf = hasPermissions(
-    PERMISSIONS.PM_EXPORT_PDF_SUMMARY,
-    permissions,
-  ) && (paymentPlan.status === PaymentPlanStatus.Accepted || paymentPlan.status === PaymentPlanStatus.Finished);
+  const canExportPdf =
+    hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
+    (paymentPlan.status === PaymentPlanStatus.Accepted ||
+      paymentPlan.status === PaymentPlanStatus.Finished);
 
   return (
     <Box m={5}>
       <ContainerColumnWithBorder>
-        <Box display='flex' justifyContent='space-between' mt={4}>
+        <Box display="flex" justifyContent="space-between" mt={4}>
           <Title>
-            <Typography variant='h6'>{t('Acceptance Process')}</Typography>
+            <Typography variant="h6">{t('Acceptance Process')}</Typography>
           </Title>
           {canExportPdf && (
             <LoadingButton
               loading={exportPdfLoading}
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               onClick={handleExportPdf}
               disabled={!isActiveProgram}
             >
@@ -98,8 +96,8 @@ export const AcceptanceProcess = ({
         {edges.length > 1 && (
           <ButtonContainer>
             <Button
-              variant='outlined'
-              color='primary'
+              variant="outlined"
+              color="primary"
               onClick={() => setShowAll(!showAll)}
               endIcon={showAll ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             >

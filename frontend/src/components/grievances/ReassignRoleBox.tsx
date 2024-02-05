@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from '@material-ui/core';
+import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@material-ui/icons/Warning';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
@@ -131,17 +131,17 @@ export const ReassignRoleBox = ({
   return (
     <StyledBox>
       <OrangeTitle>
-        <Typography variant='h6'>
+        <Typography variant="h6">
           <WarnIcon />
           {t('Individual is the HOH or the collector for the household')}
         </Typography>
       </OrangeTitle>
-      <Typography variant='body2'>
+      <Typography variant="body2">
         {t(
           'Upon removing you will need to select new individual(s) for this role.',
         )}
       </Typography>
-      <Box mt={3} display='flex' flexDirection='column'>
+      <Box mt={3} display="flex" flexDirection="column">
         {shouldShowReassignHoH && (
           <Box mb={2} mt={2}>
             <Box mb={2}>

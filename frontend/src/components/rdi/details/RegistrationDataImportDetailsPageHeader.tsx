@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
@@ -64,8 +64,8 @@ export const RegistrationDataImportDetailsPageHeader = ({
           });
         })
       }
-      variant='contained'
-      color='primary'
+      variant="contained"
+      color="primary"
       disabled={!isActiveProgram}
     >
       {t('Erase import')}
@@ -84,8 +84,8 @@ export const RegistrationDataImportDetailsPageHeader = ({
             <LoadingButton
               loading={refuseLoading}
               onClick={() => setShowRefuseRdiForm(true)}
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               disabled={!isActiveProgram}
             >
               {t('Refuse Import')}
@@ -115,8 +115,8 @@ export const RegistrationDataImportDetailsPageHeader = ({
       buttons = (
         <MergeButtonContainer>
           <Button
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             component={Link}
             to={`/${baseUrl}/grievance/rdi/${registration.id}`}
           >

@@ -1,4 +1,4 @@
-import { Button, FormHelperText, Grid } from '@material-ui/core';
+import { Button, FormHelperText, Grid } from '@mui/material';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray } from 'formik';
 import React from 'react';
@@ -20,7 +20,7 @@ export const NewDocumentationFieldArray = ({
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name='documentation'
+        name="documentation"
         render={(arrayHelpers) => {
           return (
             <>
@@ -29,13 +29,13 @@ export const NewDocumentationFieldArray = ({
                   index={index}
                   key={`${index}-documentation-file`}
                   onDelete={() => arrayHelpers.remove(index)}
-                  baseName='documentation'
+                  baseName="documentation"
                   setFieldValue={setFieldValue}
                 />
               ))}
               <Grid item xs={12}>
                 <Button
-                  color='primary'
+                  color="primary"
                   onClick={() => {
                     arrayHelpers.push({
                       name: '',

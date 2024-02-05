@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider } from '@material-ui/core';
+import { ThemeProvider } from '@mui/material';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { theme } from '../../../theme';
 import { Field, Form, Formik } from 'formik';
@@ -29,18 +29,18 @@ export const TextField = () => {
             <Form>
               <FieldWrapper>
                 <Field
-                  name='textField'
-                  label='Text field'
-                  type='text'
+                  name="textField"
+                  label="Text field"
+                  type="text"
                   fullWidth
                   component={FormikTextField}
                 />
               </FieldWrapper>
               <FieldWrapper>
                 <Field
-                  name='requiredTextField'
-                  label='Required text field'
-                  type='text'
+                  name="requiredTextField"
+                  label="Required text field"
+                  type="text"
                   fullWidth
                   required
                   component={FormikTextField}

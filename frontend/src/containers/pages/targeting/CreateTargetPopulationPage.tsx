@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -50,13 +50,11 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     variables: { businessAreaSlug: businessArea },
   });
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'network-only',
-  });
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, status: [ProgramStatus.Active] },
+      fetchPolicy: 'network-only',
+    });
 
   if (loadingPrograms) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -125,7 +123,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
           />
           {values.program ? (
             <FieldArray
-              name='criterias'
+              name="criterias"
               render={(arrayHelpers) => (
                 <TargetingCriteria
                   helpers={arrayHelpers}
@@ -146,7 +144,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
           )}
           <Exclusions />
           <PaperContainer>
-            <Typography variant='h6'>
+            <Typography variant="h6">
               {t('Save to see the list of households')}
             </Typography>
             <Label>

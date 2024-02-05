@@ -7,7 +7,7 @@ import {
   DialogTitle,
   Grid,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
@@ -32,7 +32,7 @@ import { FieldBorder } from '../../core/FieldBorder';
 import { GreyText } from '../../core/GreyText';
 import { LabelizedField } from '../../core/LabelizedField';
 import { LoadingButton } from '../../core/LoadingButton';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -49,11 +49,8 @@ export const CreateFollowUpPaymentPlan = ({
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
-  const {
-    id,
-    totalWithdrawnHouseholdsCount,
-    unsuccessfulPaymentsCount,
-  } = paymentPlan;
+  const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
+    paymentPlan;
 
   if (permissions === null) return null;
 
@@ -114,10 +111,10 @@ export const CreateFollowUpPaymentPlan = ({
         <Form>
           <Box p={2}>
             <Button
-              variant='outlined'
-              color='primary'
+              variant="outlined"
+              color="primary"
               onClick={() => setDialogOpen(true)}
-               disabled={
+              disabled={
                 !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
                 !isActiveProgram
               }
@@ -128,8 +125,8 @@ export const CreateFollowUpPaymentPlan = ({
           <Dialog
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
-            scroll='paper'
-            maxWidth='md'
+            scroll="paper"
+            maxWidth="md"
           >
             <DialogTitleWrapper>
               <DialogTitle>{t('Create Follow-up Payment Plan')}</DialogTitle>
@@ -137,10 +134,10 @@ export const CreateFollowUpPaymentPlan = ({
             <DialogContent>
               <DialogContainer>
                 <Box p={5}>
-                  <Box display='flex' flexDirection='column'>
+                  <Box display="flex" flexDirection="column">
                     {unsuccessfulPaymentsCount === 0 && (
                       <Box mb={2}>
-                        <FieldBorder color='#FF0200'>
+                        <FieldBorder color="#FF0200">
                           <GreyText>
                             {t(
                               'Follow-up Payment Plan might be started just for unsuccessful payments',
@@ -151,7 +148,7 @@ export const CreateFollowUpPaymentPlan = ({
                     )}
                     {totalWithdrawnHouseholdsCount > 0 && (
                       <Box mb={4}>
-                        <FieldBorder color='#FF0200'>
+                        <FieldBorder color="#FF0200">
                           <GreyText>
                             {t(
                               'Withdrawn Household cannot be added into follow-up payment plan',
@@ -203,16 +200,16 @@ export const CreateFollowUpPaymentPlan = ({
                   <Grid container spacing={3}>
                     <Grid item xs={6}>
                       <Field
-                        name='dispersionStartDate'
+                        name="dispersionStartDate"
                         label={t('Dispersion Start Date')}
                         component={FormikDateField}
                         required
                         disabled={loading}
                         fullWidth
                         decoratorEnd={
-                          <CalendarTodayRoundedIcon color='disabled' />
+                          <CalendarTodayRoundedIcon color="disabled" />
                         }
-                        data-cy='input-dispersion-start-date'
+                        data-cy="input-dispersion-start-date"
                         tooltip={t(
                           'The first day from which payments could be delivered.',
                         )}
@@ -220,7 +217,7 @@ export const CreateFollowUpPaymentPlan = ({
                     </Grid>
                     <Grid item xs={6}>
                       <Field
-                        name='dispersionEndDate'
+                        name="dispersionEndDate"
                         label={t('Dispersion End Date')}
                         component={FormikDateField}
                         required
@@ -229,9 +226,9 @@ export const CreateFollowUpPaymentPlan = ({
                         initialFocusedDate={values.dispersionStartDate}
                         fullWidth
                         decoratorEnd={
-                          <CalendarTodayRoundedIcon color='disabled' />
+                          <CalendarTodayRoundedIcon color="disabled" />
                         }
-                        data-cy='input-dispersion-end-date'
+                        data-cy="input-dispersion-end-date"
                         tooltip={t(
                           'The last day on which payments could be delivered.',
                         )}
@@ -248,11 +245,11 @@ export const CreateFollowUpPaymentPlan = ({
                 </Button>
                 <LoadingButton
                   loading={loading}
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {t('Save')}
                 </LoadingButton>

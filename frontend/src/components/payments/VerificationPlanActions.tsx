@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { GetApp } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -43,15 +43,11 @@ export const VerificationPlanActions = ({
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
-  const [
-    mutateExport,
-    { loading: loadingExport },
-  ] = useExportXlsxPaymentVerificationPlanFileMutation();
+  const [mutateExport, { loading: loadingExport }] =
+    useExportXlsxPaymentVerificationPlanFileMutation();
 
-  const [
-    mutateInvalid,
-    { loading: loadingInvalid },
-  ] = useInvalidPaymentVerificationPlanMutation();
+  const [mutateInvalid, { loading: loadingInvalid }] =
+    useInvalidPaymentVerificationPlanMutation();
 
   if (!verificationPlan || !samplingChoicesData || !permissions) return null;
 
@@ -101,7 +97,7 @@ export const VerificationPlanActions = ({
 
   return (
     <Title>
-      <Box display='flex' alignItems='center' justifyContent='flex-end'>
+      <Box display="flex" alignItems="center" justifyContent="flex-end">
         {isPending && (
           <>
             <Box mr={2}>
@@ -119,7 +115,7 @@ export const VerificationPlanActions = ({
               />
             )}
             {canActivate && (
-              <Box alignItems='center' display='flex'>
+              <Box alignItems="center" display="flex">
                 <ActivateVerificationPlan
                   paymentVerificationPlanId={verificationPlan.id}
                 />
@@ -128,7 +124,7 @@ export const VerificationPlanActions = ({
           </>
         )}
         {isActive && (
-          <Box display='flex'>
+          <Box display="flex">
             {verificationChannelXLSX && (
               <>
                 {canExport && (
@@ -138,8 +134,8 @@ export const VerificationPlanActions = ({
                       disabled={
                         loadingExport || verificationPlan.xlsxFileExporting
                       }
-                      color='primary'
-                      variant='outlined'
+                      color="primary"
+                      variant="outlined"
                       startIcon={<GetApp />}
                       onClick={async () => {
                         try {
@@ -172,8 +168,8 @@ export const VerificationPlanActions = ({
                       href={`/api/download-payment-verification-plan/${verificationPlan.id}`}
                     >
                       <Button
-                        color='primary'
-                        variant='outlined'
+                        color="primary"
+                        variant="outlined"
                         startIcon={<GetApp />}
                       >
                         {t('Download Xlsx')}
@@ -205,8 +201,8 @@ export const VerificationPlanActions = ({
                   <Box p={2}>
                     <LoadingButton
                       loading={loadingInvalid}
-                      color='primary'
-                      variant='outlined'
+                      color="primary"
+                      variant="outlined"
                       onClick={async () => {
                         try {
                           await mutateInvalid({

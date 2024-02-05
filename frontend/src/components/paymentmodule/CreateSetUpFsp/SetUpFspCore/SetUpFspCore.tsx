@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Stepper from '@material-ui/core/Stepper';
@@ -43,12 +43,10 @@ export const SetUpFspCore = ({
   const { id } = useParams();
   const location = useLocation();
 
-  const {
-    data: deliveryMechanismsData,
-    loading: deliveryMechanismLoading,
-  } = useAllDeliveryMechanismsQuery({
-    fetchPolicy: 'network-only',
-  });
+  const { data: deliveryMechanismsData, loading: deliveryMechanismLoading } =
+    useAllDeliveryMechanismsQuery({
+      fetchPolicy: 'network-only',
+    });
 
   const { data: fspsData } = useAvailableFspsForDeliveryMechanismsQuery({
     variables: {
@@ -65,9 +63,8 @@ export const SetUpFspCore = ({
   const [activeStep, setActiveStep] = useState(isEdit ? 1 : 0);
   // const [warning, setWarning] = useState('');
 
-  const [
-    chooseDeliveryMechanisms,
-  ] = useChooseDeliveryMechForPaymentPlanMutation();
+  const [chooseDeliveryMechanisms] =
+    useChooseDeliveryMechForPaymentPlanMutation();
 
   const [assignFspToDeliveryMechanism] = useAssignFspToDeliveryMechMutation();
 
@@ -198,7 +195,7 @@ export const SetUpFspCore = ({
                 {/* // warning not shown in Payment Module 1.0 */}
                 {/* {warning && <DeliveryMechanismWarning warning={warning} />} */}
                 <FieldArray
-                  name='deliveryMechanisms'
+                  name="deliveryMechanisms"
                   render={(arrayHelpers) => {
                     return (
                       <>
@@ -213,12 +210,13 @@ export const SetUpFspCore = ({
                               value: el.id,
                             }));
 
-                            const deliveryMechanismsChoices = deliveryMechanismsData.allDeliveryMechanisms.map(
-                              (el) => ({
-                                name: el.name,
-                                value: el.value,
-                              }),
-                            );
+                            const deliveryMechanismsChoices =
+                              deliveryMechanismsData.allDeliveryMechanisms.map(
+                                (el) => ({
+                                  name: el.name,
+                                  value: el.value,
+                                }),
+                              );
 
                             return (
                               <DeliveryMechanismRow

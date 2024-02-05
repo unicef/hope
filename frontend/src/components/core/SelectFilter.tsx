@@ -1,4 +1,4 @@
-import { Box, IconButton, InputAdornment } from '@material-ui/core';
+import { Box, IconButton, InputAdornment } from '@mui/material';
 import { makeStyles } from '@material-ui/core/styles';
 import { Close } from '@material-ui/icons';
 import React from 'react';
@@ -59,39 +59,39 @@ export const SelectFilter = ({
       <StyledFormControl
         theme={{ borderRadius }}
         fullWidth={fullWidth}
-        variant='outlined'
-        margin='dense'
+        variant="outlined"
+        margin="dense"
       >
-        <Box display='grid'>
+        <Box display="grid">
           <InputLabel>{label}</InputLabel>
           <Select
             /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
             // @ts-ignore
             className={classes.select}
             onChange={onChange}
-            variant='outlined'
+            variant="outlined"
             label={label}
             MenuProps={{
               getContentAnchorEl: null,
             }}
             InputProps={{
               startAdornment: icon ? (
-                <StartInputAdornment position='start'>
+                <StartInputAdornment position="start">
                   {icon}
                 </StartInputAdornment>
               ) : null,
               endAdornment:
                 isValue && !disableClearable ? (
-                  <EndInputAdornment position='end'>
+                  <EndInputAdornment position="end">
                     <IconButton
-                      size='small'
+                      size="small"
                       onClick={() => {
                         onChange({
                           target: { value: otherProps.multiple ? [] : '' },
                         });
                       }}
                     >
-                      <XIcon fontSize='small' />
+                      <XIcon fontSize="small" />
                     </IconButton>
                   </EndInputAdornment>
                 ) : null,

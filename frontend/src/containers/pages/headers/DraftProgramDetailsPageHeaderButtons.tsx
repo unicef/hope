@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { ProgramQuery } from '../../../__generated__/graphql';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
@@ -21,7 +21,7 @@ export const DraftProgramDetailsPageHeaderButtons = ({
   canDuplicate,
 }: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement => {
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canRemove && (
         <Box m={2}>
           <DeleteProgram program={program} />

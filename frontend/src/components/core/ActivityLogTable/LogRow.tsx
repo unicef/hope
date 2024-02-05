@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
-import { IconButton, makeStyles } from '@material-ui/core';
+import { IconButton, makeStyles } from '@mui/material';
 import clsx from 'clsx';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
@@ -52,7 +52,7 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
   const { length } = keys;
   if (length === 1) {
     return (
-      <Row role='checkbox'>
+      <Row role="checkbox">
         <Cell weight={headCells[0].weight}>
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>

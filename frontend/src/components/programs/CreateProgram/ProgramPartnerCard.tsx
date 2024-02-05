@@ -1,4 +1,4 @@
-import { Box, Checkbox, Collapse, Grid, IconButton } from '@material-ui/core';
+import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@material-ui/icons';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -55,9 +55,8 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const { t } = useTranslation();
   const selectedAdminAreasLength = values.partners[index]?.adminAreas?.length;
   const initialExpanded = selectedAdminAreasLength > 0;
-  const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(
-    initialExpanded,
-  );
+  const [isAdminAreaExpanded, setIsAdminAreaExpanded] =
+    useState(initialExpanded);
   const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
     AreaTreeNode.buildTree(
       allAreasTreeData,
@@ -65,7 +64,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     ),
   );
   const businessAreaOptionLabel = (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       <BigText>{t('Business Area')}</BigText>
       <SmallText>
         {t('The partner has access to the entire business area')}
@@ -93,7 +92,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <Checkbox
               id={node.id}
-              color='primary'
+              color="primary"
               checked={Boolean(node.checked)}
               indeterminate={node.checked === 'indeterminate'}
               onChange={(event) => handleCheckBoxSelect(event, node)}
@@ -115,8 +114,8 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   };
 
   const adminAreaOptionLabel = (
-    <Box display='flex' flexDirection='column'>
-      <Box display='flex' justifyContent='space-between' alignItems='center'>
+    <Box display="flex" flexDirection="column">
+      <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box>
           <BigText>{t('Admin Area')}</BigText>
           <SmallText>
@@ -159,13 +158,13 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   };
 
   return (
-    <Grid container direction='column'>
-      <Box display='flex' justifyContent='space-between'>
+    <Grid container direction="column">
+      <Box display="flex" justifyContent="space-between">
         <Grid item xs={6}>
           <Field
             name={`partners[${index}].id`}
             label={t('Partner')}
-            color='primary'
+            color="primary"
             choices={partnerChoices}
             component={FormikSelectField}
           />

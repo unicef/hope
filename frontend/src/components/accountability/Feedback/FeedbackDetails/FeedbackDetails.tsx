@@ -1,4 +1,4 @@
-import { Grid, GridSize, Typography } from '@material-ui/core';
+import { Grid, GridSize, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '../../../../utils/utils';
@@ -32,7 +32,7 @@ export const FeedbackDetails = ({
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>

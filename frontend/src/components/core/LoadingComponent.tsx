@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 
 const Container = styled.div`
   width: 100%;
@@ -24,7 +24,7 @@ export function LoadingComponent({
     return null;
   }
   return (
-    <Container absolute={absolute} data-cy='loading-container'>
+    <Container absolute={absolute} data-cy="loading-container">
       <CircularProgress />
     </Container>
   );

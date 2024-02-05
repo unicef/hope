@@ -1,4 +1,4 @@
-import { Box, FormHelperText, Grid } from '@material-ui/core';
+import { Box, FormHelperText, Grid } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { isInvalid } from '../../../../utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
@@ -48,7 +48,7 @@ export const LookUpHouseholdIndividualSelection = ({
         redirectedFromRelatedTicket={redirectedFromRelatedTicket}
         isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
       />
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <LookUpHouseholdIndividualSelectionDisplay
           disableUnselectHousehold={
             redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly

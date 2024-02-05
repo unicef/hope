@@ -1,4 +1,4 @@
-import { Checkbox } from '@material-ui/core';
+import { Checkbox } from '@mui/material';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
@@ -44,18 +44,18 @@ export function LookUpPaymentRecordTableRow({
     <ClickableTableRow
       onClick={(event) => checkboxClickHandler(event, paymentRecord)}
       hover
-      role='checkbox'
+      role="checkbox"
       key={paymentRecord.id}
     >
-      <TableCell padding='checkbox'>
+      <TableCell padding="checkbox">
         <Checkbox
-          color='primary'
+          color="primary"
           onClick={(event) => checkboxClickHandler(event, paymentRecord)}
           checked={paymentRecordIsSelected}
           inputProps={{ 'aria-labelledby': paymentRecord.id }}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {!isAllPrograms ? (
           <BlackLink to={renderUrl(paymentRecord.objType)}>
             {paymentRecord.caId}
@@ -64,7 +64,7 @@ export function LookUpPaymentRecordTableRow({
           <span>{paymentRecord.caId}</span>
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {paymentRecord.status ? (
           <StatusBox
             status={paymentRecord.status}
@@ -74,14 +74,14 @@ export function LookUpPaymentRecordTableRow({
           '-'
         )}
       </TableCell>
-      <TableCell align='left'>{paymentRecord.parent.programName}</TableCell>
-      <TableCell align='right'>
+      <TableCell align="left">{paymentRecord.parent.programName}</TableCell>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,
           paymentRecord.currency,
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {received === null || received === undefined
           ? '-'
           : formatCurrencyWithSymbol(received, paymentRecord.currency)}

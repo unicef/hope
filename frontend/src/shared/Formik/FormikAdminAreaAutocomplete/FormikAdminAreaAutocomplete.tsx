@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { FieldLabel } from '../../../components/core/FieldLabel';
 import { AdminAreaFixedAutocomplete } from '../../autocompletes/AdminAreaFixedAutocomplete';
@@ -18,7 +18,7 @@ export const FormikAdminAreaAutocomplete = ({
     }
   };
   return (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       {label && <FieldLabel>{label}</FieldLabel>}
       <AdminAreaFixedAutocomplete
         disabled={disabled}

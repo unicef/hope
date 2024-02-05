@@ -7,7 +7,7 @@ import {
   ListItemText,
   MenuItem,
   Select,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Close } from '@material-ui/icons';
 import get from 'lodash/get';
 import React from 'react';
@@ -52,7 +52,7 @@ export const FormikSelectField = ({
 
   return (
     <>
-      <FormControl variant='outlined' margin='dense' fullWidth {...otherProps}>
+      <FormControl variant="outlined" margin="dense" fullWidth {...otherProps}>
         <InputLabel>{otherProps.label}</InputLabel>
         <Select
           {...field}
@@ -79,21 +79,21 @@ export const FormikSelectField = ({
           }}
           endAdornment={
             showX && (
-              <EndInputAdornment position='end'>
+              <EndInputAdornment position="end">
                 <IconButton
-                  size='small'
+                  size="small"
                   onClick={() => {
                     form.setFieldValue(field.name, multiple ? [] : '');
                   }}
                 >
-                  <XIcon fontSize='small' />
+                  <XIcon fontSize="small" />
                 </IconButton>
               </EndInputAdornment>
             )
           }
           startAdornment={
             icon ? (
-              <StartInputAdornment position='start'>{icon}</StartInputAdornment>
+              <StartInputAdornment position="start">{icon}</StartInputAdornment>
             ) : null
           }
         >

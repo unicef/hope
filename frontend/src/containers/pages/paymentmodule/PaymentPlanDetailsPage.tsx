@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -27,18 +27,13 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { baseUrl, businessArea } = useBaseUrl();
-  const {
-    data,
-    loading,
-    startPolling,
-    stopPolling,
-    error,
-  } = usePaymentPlanQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data, loading, startPolling, stopPolling, error } =
+    usePaymentPlanQuery({
+      variables: {
+        id,
+      },
+      fetchPolicy: 'cache-and-network',
+    });
 
   const status = data?.paymentPlan?.status;
   const backgroundActionStatus = data?.paymentPlan?.backgroundActionStatus;
@@ -77,7 +72,7 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   const { paymentPlan } = data;
 
   return (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       <PaymentPlanDetailsHeader
         paymentPlan={paymentPlan}
         baseUrl={baseUrl}

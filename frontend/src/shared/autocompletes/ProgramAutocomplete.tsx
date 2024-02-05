@@ -1,4 +1,4 @@
-import { InputAdornment } from '@material-ui/core';
+import { InputAdornment } from '@mui/material';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import get from 'lodash/get';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -82,7 +82,7 @@ export const ProgramAutocomplete = ({
       value={value}
       disabled={disabled}
       label={t('Programme')}
-      dataCy='filters-program'
+      dataCy="filters-program"
       loadData={loadData}
       loading={loading}
       allEdges={allEdges}
@@ -114,7 +114,7 @@ export const ProgramAutocomplete = ({
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
       startAdornment={
-        <InputAdornment position='start'>
+        <InputAdornment position="start">
           <FlashOnIcon />
         </InputAdornment>
       }

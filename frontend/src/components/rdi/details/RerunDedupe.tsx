@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
@@ -16,7 +16,7 @@ import {
   useRerunDedupeMutation,
 } from '../../../__generated__/graphql';
 import { LoadingButton } from '../../core/LoadingButton';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 interface RerunDedupeProps {
   registration: RegistrationDetailedFragment;
@@ -44,18 +44,18 @@ export function RerunDedupe({
   return (
     <span>
       <Button
-          color='primary'
-          variant='contained'
-          onClick={() => setOpen(true)}
-          disabled={!isActiveProgram}
+        color="primary"
+        variant="contained"
+        onClick={() => setOpen(true)}
+        disabled={!isActiveProgram}
       >
         {t('Rerun Deduplication')}
       </Button>
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Rerun Deduplication')}</DialogTitle>
@@ -70,9 +70,9 @@ export function RerunDedupe({
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
               loading={loading}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={rerunDedupe}
             >
               {t('Rerun')}

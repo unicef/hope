@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import AddIcon from '@material-ui/icons/Add';
 import { FieldArray } from 'formik';
 import React from 'react';
@@ -50,7 +50,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
   return (
     <BaseSection title={title} description={description}>
       <FieldArray
-        name='partners'
+        name="partners"
         render={(arrayHelpers) => {
           const {
             form: { setFieldValue },
@@ -69,11 +69,11 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                   setFieldValue={setFieldValue}
                 />
               ))}
-              <Box display='flex' justifyContent='space-between'>
-                <Box display='flex'>
+              <Box display="flex" justifyContent="space-between">
+                <Box display="flex">
                   <Box mr={2}>
                     <Button
-                      data-cy='button-cancel'
+                      data-cy="button-cancel"
                       component={Link}
                       to={`/${baseUrl}/list`}
                     >
@@ -82,32 +82,32 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                   </Box>
                   <ButtonTooltip
                     disabled={addPartnerDisabled}
-                    data-cy='button-add-partner'
+                    data-cy="button-add-partner"
                     title={tooltipText}
                     onClick={() =>
                       arrayHelpers.push({ id: '', areaAccess: 'BUSINESS_AREA' })
                     }
-                    variant='outlined'
-                    color='primary'
+                    variant="outlined"
+                    color="primary"
                     endIcon={<AddIcon />}
                   >
                     {t('Add Partner')}
                   </ButtonTooltip>
                 </Box>
-                <Box display='flex'>
+                <Box display="flex">
                   <Box mr={2}>
                     <Button
-                      data-cy='button-back'
-                      variant='outlined'
+                      data-cy="button-back"
+                      variant="outlined"
                       onClick={() => setStep(step - 1)}
                     >
                       {t('Back')}
                     </Button>
                   </Box>
                   <Button
-                    data-cy='button-save'
-                    variant='contained'
-                    color='primary'
+                    data-cy="button-save"
+                    variant="contained"
+                    color="primary"
                     onClick={submitForm}
                   >
                     {t('Save')}

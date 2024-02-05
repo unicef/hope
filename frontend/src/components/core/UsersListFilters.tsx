@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -27,19 +27,16 @@ export const UsersListFilters = ({
   const history = useHistory();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -91,7 +88,8 @@ export const UsersListFilters = ({
             {choices.userRolesChoices.map((item) => {
               return (
                 <MenuItem key={item.value} value={item.value}>
-                  {item.name} ({item.subsystem === "CA" ? "Cash Assist" : item.subsystem})
+                  {item.name} (
+                  {item.subsystem === 'CA' ? 'Cash Assist' : item.subsystem})
                 </MenuItem>
               );
             })}

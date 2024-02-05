@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,19 +29,16 @@ export const LookUpRegistrationFiltersCommunication = ({
   const history = useHistory();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -62,22 +59,22 @@ export const LookUpRegistrationFiltersCommunication = ({
       applyHandler={handleApplyFilter}
       isOnPaper={false}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={4}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='filter-search'
+            data-cy="filter-search"
           />
         </Grid>
         <Grid item xs={4}>
           <AssigneeAutocomplete
-            name='importedBy'
+            name="importedBy"
             label={t('Imported By')}
             filter={filter}
             value={filter.importedBy}
-            data-cy='filter-imported-by'
+            data-cy="filter-imported-by"
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
@@ -88,7 +85,7 @@ export const LookUpRegistrationFiltersCommunication = ({
           <NumberTextField
             topLabel={t('Num. of Recipients')}
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
-            placeholder='From'
+            placeholder="From"
             icon={<GroupIcon />}
             onChange={(e) =>
               handleFilterChange(
@@ -96,13 +93,13 @@ export const LookUpRegistrationFiltersCommunication = ({
                 e.target.value,
               )
             }
-            data-cy='filter-size-min'
+            data-cy="filter-size-min"
           />
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
             value={filter.totalHouseholdsCountWithValidPhoneNoMax}
-            placeholder='To'
+            placeholder="To"
             icon={<GroupIcon />}
             onChange={(e) =>
               handleFilterChange(
@@ -110,7 +107,7 @@ export const LookUpRegistrationFiltersCommunication = ({
                 e.target.value,
               )
             }
-            data-cy='filter-size-max'
+            data-cy="filter-size-max"
           />
         </Grid>
         <Grid item xs={3}>
@@ -119,7 +116,7 @@ export const LookUpRegistrationFiltersCommunication = ({
             placeholder={t('From')}
             onChange={(date) => handleFilterChange('importDateRangeMin', date)}
             value={filter.importDateRangeMin}
-            data-cy='filter-import-date-range-min'
+            data-cy="filter-import-date-range-min"
           />
         </Grid>
         <Grid item xs={3}>
@@ -127,7 +124,7 @@ export const LookUpRegistrationFiltersCommunication = ({
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('importDateRangeMax', date)}
             value={filter.importDateRangeMax}
-            data-cy='filter-import-date-range-max'
+            data-cy="filter-import-date-range-max"
           />
         </Grid>
       </Grid>

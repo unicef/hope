@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
 import React from 'react';
@@ -30,19 +30,16 @@ export const ProgrammesFilters = ({
   const history = useHistory();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -57,21 +54,21 @@ export const ProgrammesFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
-            label='Search'
+            label="Search"
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='filters-search'
+            data-cy="filters-search"
           />
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
-            label='Status'
+            label="Status"
             value={filter.status}
-            data-cy='filters-status'
+            data-cy="filters-status"
           >
             {choicesData.programStatusChoices.map((item) => {
               return (
@@ -84,8 +81,8 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
-            label='Start Date'
-            data-cy='filters-start-date'
+            label="Start Date"
+            data-cy="filters-start-date"
             onChange={(date) =>
               handleFilterChange(
                 'startDate',
@@ -97,8 +94,8 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
-            label='End Date'
-            data-cy='filters-end-date'
+            label="End Date"
+            data-cy="filters-end-date"
             onChange={(date) =>
               handleFilterChange(
                 'endDate',
@@ -111,8 +108,8 @@ export const ProgrammesFilters = ({
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sector', e.target.value)}
-            label='Sector'
-            data-cy='filters-sector'
+            label="Sector"
+            data-cy="filters-sector"
             value={filter.sector}
             multiple
           >
@@ -127,9 +124,9 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            data-cy='filters-number-of-households-min'
-            topLabel='Num. of Households'
-            placeholder='From'
+            data-cy="filters-number-of-households-min"
+            topLabel="Num. of Households"
+            placeholder="From"
             value={filter.numberOfHouseholdsMin}
             onChange={(e) =>
               handleFilterChange('numberOfHouseholdsMin', e.target.value)
@@ -139,9 +136,9 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            data-cy='filters-number-of-households-max'
+            data-cy="filters-number-of-households-max"
             value={filter.numberOfHouseholdsMax}
-            placeholder='To'
+            placeholder="To"
             onChange={(e) =>
               handleFilterChange('numberOfHouseholdsMax', e.target.value)
             }
@@ -150,27 +147,29 @@ export const ProgrammesFilters = ({
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            data-cy='filters-budget-min'
-            topLabel='Budget (USD)'
+            data-cy="filters-budget-min"
+            topLabel="Budget (USD)"
             value={filter.budgetMin}
-            placeholder='From'
+            placeholder="From"
             onChange={(e) => handleFilterChange('budgetMin', e.target.value)}
           />
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
-            data-cy='filters-budget-max'
+            data-cy="filters-budget-max"
             value={filter.budgetMax}
-            placeholder='To'
+            placeholder="To"
             onChange={(e) => handleFilterChange('budgetMax', e.target.value)}
           />
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('dataCollectingType', e.target.value)}
-            label='Data Collecting Type'
+            onChange={(e) =>
+              handleFilterChange('dataCollectingType', e.target.value)
+            }
+            label="Data Collecting Type"
             value={filter.dataCollectingType}
-            data-cy='filters-data-collecting-type'
+            data-cy="filters-data-collecting-type"
           >
             {choicesData.dataCollectingTypeChoices.map((item) => {
               return (

@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@mui/material';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
 import GroupIcon from '@material-ui/icons/Group';
 import React from 'react';
@@ -34,19 +34,16 @@ export const LookUpHouseholdFiltersCommunication = ({
   const history = useHistory();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -62,14 +59,14 @@ export const LookUpHouseholdFiltersCommunication = ({
       clearHandler={handleClearFilter}
       isOnPaper={false}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             fullWidth
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='hh-filters-search'
+            data-cy="hh-filters-search"
           />
         </Grid>
         <Grid item xs={3}>
@@ -81,7 +78,7 @@ export const LookUpHouseholdFiltersCommunication = ({
             fullWidth
             value={filter.residenceStatus}
             icon={<AssignmentIndRoundedIcon />}
-            data-cy='hh-filters-residence-status'
+            data-cy="hh-filters-residence-status"
           >
             {choicesData.residenceStatusChoices?.map((status) => (
               <MenuItem key={status.value} value={status.value}>
@@ -92,14 +89,14 @@ export const LookUpHouseholdFiltersCommunication = ({
         </Grid>
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            name='admin2'
+            name="admin2"
             value={filter.admin2}
             filter={filter}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            dataCy='hh-filters-admin2'
+            dataCy="hh-filters-admin2"
           />
         </Grid>
         <Grid item xs={3}>
@@ -112,7 +109,7 @@ export const LookUpHouseholdFiltersCommunication = ({
             onChange={(e) =>
               handleFilterChange('householdSizeMin', e.target.value)
             }
-            data-cy='hh-filters-household-size-from'
+            data-cy="hh-filters-household-size-from"
           />
         </Grid>
         <Grid item xs={3}>
@@ -124,7 +121,7 @@ export const LookUpHouseholdFiltersCommunication = ({
             onChange={(e) =>
               handleFilterChange('householdSizeMax', e.target.value)
             }
-            data-cy='hh-filters-household-size-to'
+            data-cy="hh-filters-household-size-to"
           />
         </Grid>
         <Grid item xs={3}>
@@ -132,7 +129,7 @@ export const LookUpHouseholdFiltersCommunication = ({
             onChange={(e) => handleFilterChange('orderBy', e.target.value)}
             label={t('Sort by')}
             value={filter.orderBy}
-            data-cy='hh-filters-order-by'
+            data-cy="hh-filters-order-by"
           >
             {householdTableOrderOptions.map((order) => (
               <MenuItem key={order.value} value={order.value}>
@@ -146,15 +143,15 @@ export const LookUpHouseholdFiltersCommunication = ({
             onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
             label={t('Status')}
             value={filter.withdrawn}
-            data-cy='hh-filters-status'
+            data-cy="hh-filters-status"
           >
-            <MenuItem key='all' value='null'>
+            <MenuItem key="all" value="null">
               All
             </MenuItem>
-            <MenuItem key='active' value='false'>
+            <MenuItem key="active" value="false">
               Active
             </MenuItem>
-            <MenuItem key='inactive' value='true'>
+            <MenuItem key="inactive" value="true">
               Withdrawn
             </MenuItem>
           </SelectFilter>

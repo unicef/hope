@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 export const FormikTagsSelectField = ({
@@ -27,7 +27,7 @@ export const FormikTagsSelectField = ({
         {...otherProps}
         multiple
         name={field.name}
-        id='tags-standard'
+        id="tags-standard"
         options={[]}
         value={field.value}
         onChange={form.handleChange}
@@ -38,11 +38,11 @@ export const FormikTagsSelectField = ({
             <TextField
               {...params}
               id={`textField-${field.name}`}
-              margin='dense'
+              margin="dense"
               onBlur={onBlur}
               error={isInvalid}
               helperText={isInvalid && form.errors[field.name]}
-              variant='outlined'
+              variant="outlined"
               label={label}
             />
           );

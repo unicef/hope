@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -56,7 +56,7 @@ export function RegistrationIndividualBioData({
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
     <Grid key={edge.node.id} item xs={3}>
-      <Box flexDirection='column'>
+      <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={edge.node.type.label}>
             {edge.node.photo ? (
@@ -77,7 +77,7 @@ export function RegistrationIndividualBioData({
 
   const mappedIdentities = individual.identities?.edges?.map((item) => (
     <Grid key={item.node.id} item xs={3}>
-      <Box flexDirection='column'>
+      <Box flexDirection="column">
         <Box mb={1}>
           <LabelizedField label={`${item.node.partner} ID`}>
             {item.node.documentNumber}
@@ -91,7 +91,7 @@ export function RegistrationIndividualBioData({
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>{t('Bio Data')}</Typography>
+        <Typography variant="h6">{t('Bio Data')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={3}>

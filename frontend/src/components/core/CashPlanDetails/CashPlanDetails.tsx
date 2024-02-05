@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -73,9 +73,9 @@ export function CashPlanDetails({
   };
   return (
     <ContainerWithBorder>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <Title>
-          <Typography variant='h6'>{t('Payment Plan Details')}</Typography>
+          <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>

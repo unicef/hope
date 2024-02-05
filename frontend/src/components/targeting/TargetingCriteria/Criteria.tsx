@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { Delete, Edit } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -101,7 +101,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <MathSign src={LessThanEqual} alt='less_than' />
+          <MathSign src={LessThanEqual} alt="less_than" />
           <span>{field.arguments[0]}</span>
         </p>
       );
@@ -110,7 +110,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <MathSign src={GreaterThanEqual} alt='greater_than' />
+          <MathSign src={GreaterThanEqual} alt="greater_than" />
           <span>{field.arguments[0]}</span>
         </p>
       );
@@ -179,7 +179,7 @@ export function Criteria({
   individualsFiltersBlocks,
 }: CriteriaProps): React.ReactElement {
   return (
-    <CriteriaElement alternative={alternative} data-cy='criteria-container'>
+    <CriteriaElement alternative={alternative} data-cy="criteria-container">
       {rules.map((each, index) => {
         //eslint-disable-next-line
         return <CriteriaField key={index} field={each} />;
@@ -195,11 +195,11 @@ export function Criteria({
       })}
       {isEdit && (
         <ButtonsContainer>
-          <IconButton data-cy='button-edit' onClick={editFunction}>
+          <IconButton data-cy="button-edit" onClick={editFunction}>
             <Edit />
           </IconButton>
           {canRemove && (
-            <IconButton data-cy='button-edit' onClick={removeFunction}>
+            <IconButton data-cy="button-edit" onClick={removeFunction}>
               <Delete />
             </IconButton>
           )}

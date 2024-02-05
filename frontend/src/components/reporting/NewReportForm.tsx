@@ -5,7 +5,7 @@ import {
   Grid,
   Paper,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
@@ -57,17 +57,13 @@ export const NewReportForm = (): React.ReactElement => {
       .required(t('Date To is required')),
   });
 
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useReportChoiceDataQuery();
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsQuery({
+      variables: { businessArea, status: ['ACTIVE'] },
+      fetchPolicy: 'cache-and-network',
+    });
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
   const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
@@ -154,9 +150,9 @@ export const NewReportForm = (): React.ReactElement => {
     const adminArea2Field = (
       <Grid item xs={12}>
         <Field
-          name='adminArea2'
+          name="adminArea2"
           label={t('Administrative Level 2')}
-          variant='outlined'
+          variant="outlined"
           component={FormikAdminAreaAutocompleteMultiple}
           parentId={values.adminArea1?.node?.id}
         />
@@ -165,10 +161,10 @@ export const NewReportForm = (): React.ReactElement => {
     const programField = (
       <Grid item xs={12}>
         <Field
-          name='program'
+          name="program"
           label={t('Programme')}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           choices={mappedPrograms}
           component={FormikSelectField}
         />
@@ -222,8 +218,8 @@ export const NewReportForm = (): React.ReactElement => {
   return (
     <>
       <Button
-        color='primary'
-        variant='contained'
+        color="primary"
+        variant="contained"
         onClick={() => setDialogOpen(true)}
       >
         {t('NEW REPORT')}
@@ -231,17 +227,17 @@ export const NewReportForm = (): React.ReactElement => {
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
+        scroll="paper"
         PaperComponent={React.forwardRef((props, ref) => (
           <Paper
             {...{
               ...props,
               ref,
             }}
-            data-cy='dialog-setup-new-report'
+            data-cy="dialog-setup-new-report"
           />
         ))}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="form-dialog-title"
       >
         <Formik
           initialValues={initialValue}
@@ -253,7 +249,7 @@ export const NewReportForm = (): React.ReactElement => {
               {dialogOpen && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
                 <DialogTitle disableTypography>
-                  <Typography variant='h6'>
+                  <Typography variant="h6">
                     {t('Generate New Report')}
                   </Typography>
                 </DialogTitle>
@@ -263,10 +259,10 @@ export const NewReportForm = (): React.ReactElement => {
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
                       <Field
-                        name='reportType'
+                        name="reportType"
                         label={t('Report Type')}
                         fullWidth
-                        variant='outlined'
+                        variant="outlined"
                         required
                         choices={choicesData.reportTypesChoices}
                         component={FormikSelectField}
@@ -280,19 +276,19 @@ export const NewReportForm = (): React.ReactElement => {
                       <Grid container spacing={3}>
                         <Grid item xs={6}>
                           <Field
-                            name='dateFrom'
+                            name="dateFrom"
                             label={t('From Date')}
                             component={FormikDateField}
                             required
                             fullWidth
                             decoratorEnd={
-                              <CalendarTodayRoundedIcon color='disabled' />
+                              <CalendarTodayRoundedIcon color="disabled" />
                             }
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Field
-                            name='dateTo'
+                            name="dateTo"
                             label={t('To Date')}
                             component={FormikDateField}
                             required
@@ -300,7 +296,7 @@ export const NewReportForm = (): React.ReactElement => {
                             initialFocusedDate={values.dateFrom}
                             fullWidth
                             decoratorEnd={
-                              <CalendarTodayRoundedIcon color='disabled' />
+                              <CalendarTodayRoundedIcon color="disabled" />
                             }
                             minDate={values.dateFrom}
                           />
@@ -313,9 +309,9 @@ export const NewReportForm = (): React.ReactElement => {
                       <>
                         <Grid item xs={12}>
                           <Field
-                            name='adminArea1'
+                            name="adminArea1"
                             label={t('Administrative Level 1')}
-                            variant='outlined'
+                            variant="outlined"
                             level={1}
                             component={FormikAdminAreaAutocomplete}
                             onClear={() => setFieldValue('adminArea2', [])}
@@ -326,19 +322,19 @@ export const NewReportForm = (): React.ReactElement => {
                         </Grid>
                         <Grid item xs={12}>
                           <Field
-                            name='adminArea2'
+                            name="adminArea2"
                             label={t('Administrative Level 2')}
-                            variant='outlined'
+                            variant="outlined"
                             component={FormikAdminAreaAutocompleteMultiple}
                             parentId={values.adminArea1?.node?.id}
                           />
                         </Grid>
                         <Grid item xs={12}>
                           <Field
-                            name='program'
+                            name="program"
                             label={t('Programme')}
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             choices={mappedPrograms}
                             component={FormikSelectField}
                           />
@@ -355,11 +351,11 @@ export const NewReportForm = (): React.ReactElement => {
                   </Button>
                   <LoadingButton
                     loading={loading}
-                    type='submit'
-                    color='primary'
-                    variant='contained'
+                    type="submit"
+                    color="primary"
+                    variant="contained"
                     onClick={submitForm}
-                    data-cy='button-submit'
+                    data-cy="button-submit"
                   >
                     {t('GENERATE')}
                   </LoadingButton>

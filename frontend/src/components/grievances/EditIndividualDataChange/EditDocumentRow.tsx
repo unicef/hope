@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import Close from '@material-ui/icons/Close';
 import { useLocation } from 'react-router-dom';
@@ -57,13 +57,13 @@ export function EditDocumentRow({
         }
         countryChoices={addIndividualFieldsData.countriesChoices}
         documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
-        baseName='individualDataUpdateDocumentsToEdit'
+        baseName="individualDataUpdateDocumentsToEdit"
         isEdited={isEdited}
         photoSrc={document.node.photo}
         setFieldValue={setFieldValue}
         values={values}
       />
-      <Box display='flex' alignItems='center'>
+      <Box display="flex" alignItems="center">
         <IconButton
           onClick={() => {
             arrayHelpers.remove({
@@ -109,7 +109,7 @@ export function EditDocumentRow({
       <Grid item xs={1}>
         {!removed ? (
           !isEditTicket && (
-            <Box display='flex' align-items='center'>
+            <Box display="flex" align-items="center">
               <IconButton
                 onClick={() => {
                   setFieldValue(
@@ -137,7 +137,7 @@ export function EditDocumentRow({
             </Box>
           )
         ) : (
-          <Box display='flex' alignItems='center' height={48} color='red'>
+          <Box display="flex" alignItems="center" height={48} color="red">
             {t('REMOVED')}
           </Box>
         )}

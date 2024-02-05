@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -11,7 +11,7 @@ export const GreyBox = ({
   children,
   ...props
 }: React.PropsWithChildren<
-React.ComponentProps<typeof Box>
->): React.ReactElement =>  {
+  React.ComponentProps<typeof Box>
+>): React.ReactElement => {
   return <StyledGreyBox {...props}>{children}</StyledGreyBox>;
 };

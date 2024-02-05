@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import {Typography, Paper, Tooltip} from '@material-ui/core';
+import { Typography, Paper, Tooltip } from '@mui/material';
 import { AddCircleOutline } from '@material-ui/icons';
 
 const PaperContainer = styled(Paper)`
@@ -46,44 +46,45 @@ const AddCriteria = styled.div`
   }
 `;
 
-export function TargetingCriteriaDisabled({ showTooltip = false }): React.ReactElement {
+export function TargetingCriteriaDisabled({
+  showTooltip = false,
+}): React.ReactElement {
   const { t } = useTranslation();
   return (
     <div>
       <PaperContainer>
         <Title>
-          <Typography variant='h6'>{t('Targeting Criteria')}</Typography>
+          <Typography variant="h6">{t('Targeting Criteria')}</Typography>
         </Title>
-          {showTooltip ? (
-            <ContentWrapper>
-                <Tooltip title="Make sure program has checked household filter flag or individual filter flag">
-                <div>
-                  <AddCriteria
-                    onClick={() => null}
-                    data-cy='button-target-population-disabled-add-criteria'
-                  >
-                    <IconWrapper>
-                      <AddCircleOutline />
-                      <p>{t('Add Filter')}</p>
-                    </IconWrapper>
-                  </AddCriteria>
-                </div>
-                </Tooltip>
-            </ContentWrapper>
-
-          ) : (
-            <ContentWrapper>
-              <AddCriteria
-                onClick={() => null}
-                data-cy='button-target-population-disabled-add-criteria'
-              >
-                <IconWrapper>
-                  <AddCircleOutline />
-                  <p>{t('Add Filter')}</p>
-                </IconWrapper>
-              </AddCriteria>
-            </ContentWrapper>
-          )}
+        {showTooltip ? (
+          <ContentWrapper>
+            <Tooltip title="Make sure program has checked household filter flag or individual filter flag">
+              <div>
+                <AddCriteria
+                  onClick={() => null}
+                  data-cy="button-target-population-disabled-add-criteria"
+                >
+                  <IconWrapper>
+                    <AddCircleOutline />
+                    <p>{t('Add Filter')}</p>
+                  </IconWrapper>
+                </AddCriteria>
+              </div>
+            </Tooltip>
+          </ContentWrapper>
+        ) : (
+          <ContentWrapper>
+            <AddCriteria
+              onClick={() => null}
+              data-cy="button-target-population-disabled-add-criteria"
+            >
+              <IconWrapper>
+                <AddCircleOutline />
+                <p>{t('Add Filter')}</p>
+              </IconWrapper>
+            </AddCriteria>
+          </ContentWrapper>
+        )}
       </PaperContainer>
     </div>
   );

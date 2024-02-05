@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from '@material-ui/core';
+import { Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@material-ui/icons';
 import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
@@ -73,7 +73,7 @@ export const AddIndividualDataChangeField = ({
     case 'DATE':
       fieldProps = {
         component: FormikDateField,
-        decoratorEnd: <CalendarTodayRoundedIcon color='disabled' />,
+        decoratorEnd: <CalendarTodayRoundedIcon color="disabled" />,
       };
       break;
 
@@ -99,7 +99,7 @@ export const AddIndividualDataChangeField = ({
             field.name,
           )}`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={field.labelEn}
           required={field.required}
           disabled={isEditTicket}
@@ -139,7 +139,7 @@ export const AddIndividualDataChange = ({
     !isEditTicket && (
       <>
         <Title>
-          <Typography variant='h6'>{t('Individual Data')}</Typography>
+          <Typography variant="h6">{t('Individual Data')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={12}>
@@ -164,7 +164,7 @@ export const AddIndividualDataChange = ({
         </Grid>
         <Grid container spacing={3}>
           <FieldArray
-            name='individualData.documents'
+            name="individualData.documents"
             render={(arrayHelpers) => {
               return (
                 <>
@@ -183,7 +183,7 @@ export const AddIndividualDataChange = ({
                         }
                         countryChoices={data.countriesChoices}
                         documentTypeChoices={data.documentTypeChoices}
-                        baseName='individualData.documents'
+                        baseName="individualData.documents"
                         baseNameArray={values.individualData.documents}
                         setFieldValue={setFieldValue}
                         values={values}
@@ -193,7 +193,7 @@ export const AddIndividualDataChange = ({
                   <Grid item xs={8} />
                   <Grid item xs={12}>
                     <Button
-                      color='primary'
+                      color="primary"
                       startIcon={<AddCircleOutline />}
                       disabled={isEditTicket}
                       onClick={() => {
@@ -215,7 +215,7 @@ export const AddIndividualDataChange = ({
         </Grid>
         <Grid container spacing={3}>
           <FieldArray
-            name='individualData.identities'
+            name="individualData.identities"
             render={(arrayHelpers) => {
               return (
                 <>
@@ -233,7 +233,7 @@ export const AddIndividualDataChange = ({
                         }
                         countryChoices={data.countriesChoices}
                         identityTypeChoices={data.identityTypeChoices}
-                        baseName='individualData.identities'
+                        baseName="individualData.identities"
                         baseNameArray={values.individualData.identities}
                         values={values}
                       />
@@ -242,7 +242,7 @@ export const AddIndividualDataChange = ({
                   <Grid item xs={8} />
                   <Grid item xs={12}>
                     <Button
-                      color='primary'
+                      color="primary"
                       startIcon={<AddCircleOutline />}
                       onClick={() => {
                         arrayHelpers.push({

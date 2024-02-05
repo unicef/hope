@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import styled from 'styled-components';
 import { UniversalMoment } from '../../../core/UniversalMoment';
@@ -27,7 +27,7 @@ const GreyBox = styled(Box)`
 interface GreyInfoCardProps {
   topMessage: string;
   topDate: string;
-  approvals: PaymentPlanQuery["paymentPlan"]["approvalProcess"]["edges"][number]["node"]["actions"]["approval"];
+  approvals: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][number]['node']['actions']['approval'];
 }
 
 export const GreyInfoCard = ({
@@ -39,7 +39,7 @@ export const GreyInfoCard = ({
     const { info, createdAt, comment, createdBy } = action;
     return (
       info && (
-        <Box alignItems='center' display='flex' key={createdAt}>
+        <Box alignItems="center" display="flex" key={createdAt}>
           {info}
           <Box ml={1}>
             <GreyText>
@@ -63,16 +63,16 @@ export const GreyInfoCard = ({
   });
 
   return (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       <Box p={3}>
         <GreyTitle>
           {topMessage} on <UniversalMoment>{topDate}</UniversalMoment>
         </GreyTitle>
       </Box>
       <GreyBox
-        display='flex'
-        flexDirection='column'
-        alignItems='center'
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
         ml={3}
         mr={3}
         p={3}

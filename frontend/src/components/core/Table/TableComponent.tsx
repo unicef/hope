@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 import Paper from '@material-ui/core/Paper';
 import Skeleton from '@material-ui/lab/Skeleton';
@@ -107,23 +107,23 @@ export function TableComponent<T>({
     body = Array.from({ length: rowsPerPage }).map(() => (
       <TableRow
         key={uuidv4()}
-        data-cy='table-row'
+        data-cy="table-row"
         style={{ height: 70, minHeight: 70 }}
       >
         <TableCell colSpan={headCells.length}>
-          <Skeleton variant='rect' width='100%' height={70} />
+          <Skeleton variant="rect" width="100%" height={70} />
         </TableCell>
       </TableRow>
     ));
   } else if (!data?.length) {
     body = (
       <TableRow
-        data-cy='table-row'
+        data-cy="table-row"
         style={{ height: 70 * emptyRows, minHeight: 70 }}
       >
         <TableCell colSpan={headCells.length}>
           <div className={classes.empty}>
-            <FindInPageIcon className={classes.icon} fontSize='inherit' />
+            <FindInPageIcon className={classes.icon} fontSize="inherit" />
             <Box mt={2}>No results</Box>
             <Box className={classes.smallerText} mt={2}>
               {t(
@@ -151,19 +151,19 @@ export function TableComponent<T>({
   const table = (
     <>
       <TableContainer>
-        <Box display='flex' justifyContent='space-between'>
+        <Box display="flex" justifyContent="space-between">
           {title ? <EnhancedTableToolbar title={title} /> : null}
-          <Box p={5} display='flex'>
+          <Box p={5} display="flex">
             {actions || null}
           </Box>
         </Box>
 
         <Table
           className={classes.table}
-          aria-labelledby='tableTitle'
-          size='medium'
-          aria-label='enhanced table'
-          data-cy='table-title'
+          aria-labelledby="tableTitle"
+          size="medium"
+          aria-label="enhanced table"
+          data-cy="table-title"
         >
           <EnhancedTableHead<T>
             order={order}
@@ -181,7 +181,7 @@ export function TableComponent<T>({
       </TableContainer>
       <TablePagination
         rowsPerPageOptions={rowsPerPageOptions}
-        component='div'
+        component="div"
         count={itemsCount}
         rowsPerPage={rowsPerPage}
         page={page}
@@ -189,7 +189,7 @@ export function TableComponent<T>({
         onRowsPerPageChange={handleChangeRowsPerPage}
         backIconButtonProps={{ ...(loading && { disabled: true }) }}
         nextIconButtonProps={{ ...(loading && { disabled: true }) }}
-        data-cy='table-pagination'
+        data-cy="table-pagination"
       />
     </>
   );

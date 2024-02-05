@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-} from '@material-ui/core';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@material-ui/icons';
 import get from 'lodash/get';
 import React, { useState } from 'react';
@@ -60,15 +54,11 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
-  const [
-    mutate,
-    { data: uploadData, loading: fileLoading, error },
-  ] = useImportXlsxPpListPerFspMutation();
+  const [mutate, { data: uploadData, loading: fileLoading, error }] =
+    useImportXlsxPpListPerFspMutation();
 
-  const xlsxErrors: ImportXlsxPpListPerFspMutation['importXlsxPaymentPlanPaymentListPerFsp']['errors'] = get(
-    uploadData,
-    'importXlsxPaymentPlanPaymentListPerFsp.errors',
-  );
+  const xlsxErrors: ImportXlsxPpListPerFspMutation['importXlsxPaymentPlanPaymentListPerFsp']['errors'] =
+    get(uploadData, 'importXlsxPaymentPlanPaymentListPerFsp.errors');
   const canUploadReconciliation =
     hasPermissions(
       PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
@@ -108,13 +98,13 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
   return (
     <>
       {canUploadReconciliation && (
-        <Box key='import'>
+        <Box key="import">
           <Button
             startIcon={
               !isActiveProgram ? <DisabledUploadIcon /> : <UploadIcon />
             }
-            color='primary'
-            data-cy='button-import'
+            color="primary"
+            data-cy="button-import"
             onClick={() => setOpenImport(true)}
             disabled={!isActiveProgram}
           >
@@ -125,10 +115,10 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
       <Dialog
         open={open}
         onClose={() => setOpenImport(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
-        <DialogTitleWrapper data-cy='dialog-import'>
+        <DialogTitleWrapper data-cy="dialog-import">
           <DialogTitle>{t('Select File to Import')}</DialogTitle>
           <>
             <DropzoneField
@@ -163,7 +153,7 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
           </>
           <DialogActions>
             <Button
-              data-cy='close-button'
+              data-cy="close-button"
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
@@ -174,11 +164,11 @@ export const ImportXlsxPaymentPlanPaymentListPerFsp = ({
             <LoadingButton
               loading={fileLoading}
               disabled={!fileToImport}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => handleImport()}
-              data-cy='button-import-submit'
+              data-cy="button-import-submit"
             >
               {t('IMPORT')}
             </LoadingButton>

@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import { Field } from 'formik';
 import React from 'react';
@@ -28,7 +28,7 @@ export const DocumentationField = ({
         <Field
           name={`${baseName}[${index}].name`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Document Name')}
           component={FormikTextField}
           required
@@ -36,10 +36,10 @@ export const DocumentationField = ({
         />
       </Grid>
       <Grid item xs={3}>
-        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+        <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <input
-            type='file'
-            accept='.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,image/*'
+            type="file"
+            accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,image/*"
             onChange={(event) => {
               setFieldValue(
                 `${baseName}[${index}].file`,

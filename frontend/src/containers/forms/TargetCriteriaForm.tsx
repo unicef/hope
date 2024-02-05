@@ -6,7 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { AddCircleOutline } from '@material-ui/icons';
 import { FieldArray, Formik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
@@ -123,9 +123,8 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(
-    businessArea,
-  );
+  const { data, loading } =
+    useCachedImportedIndividualFieldsQuery(businessArea);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -180,9 +179,8 @@ export function TargetCriteriaForm({
         const hasNulls = block.individualBlockFilters.some(
           filterNullOrNoSelections,
         );
-        const hasFromToError = block.individualBlockFilters.some(
-          filterEmptyFromTo,
-        );
+        const hasFromToError =
+          block.individualBlockFilters.some(filterEmptyFromTo);
 
         return hasNulls || hasFromToError;
       },
@@ -231,39 +229,43 @@ export function TargetCriteriaForm({
           <Dialog
             open={open}
             onClose={onClose}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
             fullWidth
-            maxWidth='md'
+            maxWidth="md"
           >
             {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
               <DialogTitle disableTypography>
-                <Typography data-cy='title-add-filter' variant='h6'>
+                <Typography data-cy="title-add-filter" variant="h6">
                   {t('Add Filter')}
                 </Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
-              {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-              // @ts-ignore
-              errors.nonFieldErrors && (
-                <DialogError>
-                  <ul>
-                    {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                    // @ts-ignore
-                    errors.nonFieldErrors.map((message) => (
-                      <li key={message}>{message}</li>
-                    ))}
-                  </ul>
-                </DialogError>
-              )}
+              {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                // @ts-ignore
+                errors.nonFieldErrors && (
+                  <DialogError>
+                    <ul>
+                      {
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                        // @ts-ignore
+                        errors.nonFieldErrors.map((message) => (
+                          <li key={message}>{message}</li>
+                        ))
+                      }
+                    </ul>
+                  </DialogError>
+                )
+              }
               <DialogDescription>
                 All rules defined below have to be true for the entire
                 household.
               </DialogDescription>
               <FieldArray
-                name='filters'
+                name="filters"
                 render={(arrayHelpers) => (
                   <ArrayFieldWrapper
                     arrayHelpers={arrayHelpers}
@@ -296,7 +298,7 @@ export function TargetCriteriaForm({
                 )}
               />
               {householdFiltersAvailable ? (
-                <Box display='flex' flexDirection='column'>
+                <Box display="flex" flexDirection="column">
                   <ButtonBox>
                     <Button
                       onClick={() =>
@@ -304,9 +306,9 @@ export function TargetCriteriaForm({
                           .getArrayHelpers()
                           .push({ fieldName: '' })
                       }
-                      color='primary'
+                      color="primary"
                       startIcon={<AddCircleOutline />}
-                      data-cy='button-household-rule'
+                      data-cy="button-household-rule"
                     >
                       ADD HOUSEHOLD RULE
                     </Button>
@@ -328,7 +330,7 @@ export function TargetCriteriaForm({
                     </DialogDescription>
                   ) : null}
                   <FieldArray
-                    name='individualsFiltersBlocks'
+                    name="individualsFiltersBlocks"
                     render={(arrayHelpers) => (
                       <ArrayFieldWrapper
                         arrayHelpers={arrayHelpers}
@@ -349,10 +351,10 @@ export function TargetCriteriaForm({
                       </ArrayFieldWrapper>
                     )}
                   />
-                  <Box display='flex' flexDirection='column'>
+                  <Box display="flex" flexDirection="column">
                     <ButtonBox>
                       <Button
-                        data-cy='button-individual-rule'
+                        data-cy="button-individual-rule"
                         onClick={() =>
                           individualsFiltersBlocksWrapperRef.current
                             .getArrayHelpers()
@@ -360,7 +362,7 @@ export function TargetCriteriaForm({
                               individualBlockFilters: [{ fieldName: '' }],
                             })
                         }
-                        color='primary'
+                        color="primary"
                         startIcon={<AddCircleOutline />}
                       >
                         ADD INDIVIDUAL RULE GROUP
@@ -372,7 +374,7 @@ export function TargetCriteriaForm({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <StyledBox display='flex' justifyContent='flex-end'>
+                <StyledBox display="flex" justifyContent="flex-end">
                   <div>
                     <Button
                       onClick={() => {
@@ -384,10 +386,10 @@ export function TargetCriteriaForm({
                     </Button>
                     <Button
                       onClick={submitForm}
-                      type='submit'
-                      color='primary'
-                      variant='contained'
-                      data-cy='button-target-population-add-criteria'
+                      type="submit"
+                      color="primary"
+                      variant="contained"
+                      data-cy="button-target-population-add-criteria"
                     >
                       Save
                     </Button>

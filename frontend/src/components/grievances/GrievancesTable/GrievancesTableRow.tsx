@@ -1,4 +1,4 @@
-import { Checkbox } from '@material-ui/core';
+import { Checkbox } from '@mui/material';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import React from 'react';
@@ -124,12 +124,12 @@ export const GrievancesTableRow = ({
     <ClickableTableRow
       onClick={handleRowClick}
       hover
-      role='checkbox'
+      role="checkbox"
       key={ticket.id}
     >
-      <TableCell align='left' padding='checkbox'>
+      <TableCell align="left" padding="checkbox">
         <Checkbox
-          color='primary'
+          color="primary"
           onClick={(event) => {
             event.stopPropagation();
             checkboxClickHandler(ticket);
@@ -139,20 +139,20 @@ export const GrievancesTableRow = ({
           inputProps={{ 'aria-labelledby': ticket.unicefId }}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={detailsPath}>{ticket.unicefId}</BlackLink>
         ) : (
           ticket.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={statusChoices[ticket.status]}
           statusToColor={grievanceTicketStatusToColor}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED ? (
           renderUserName(ticket.assignedTo)
         ) : (
@@ -166,10 +166,10 @@ export const GrievancesTableRow = ({
           />
         )}
       </TableCell>
-      <TableCell align='left'>{categoryChoices[ticket.category]}</TableCell>
-      <TableCell align='left'>{issueType}</TableCell>
-      <TableCell align='left'>{ticket.household?.unicefId || '-'}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{categoryChoices[ticket.category]}</TableCell>
+      <TableCell align="left">{issueType}</TableCell>
+      <TableCell align="left">{ticket.household?.unicefId || '-'}</TableCell>
+      <TableCell align="left">
         <StatusBox
           status={
             priorityChoicesData[
@@ -181,7 +181,7 @@ export const GrievancesTableRow = ({
           statusToColor={grievanceTicketBadgeColors}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={
             urgencyChoicesData[
@@ -193,7 +193,7 @@ export const GrievancesTableRow = ({
           statusToColor={grievanceTicketBadgeColors}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <LinkedTicketsModal
           ticket={ticket}
           categoryChoices={categoryChoices}
@@ -203,14 +203,14 @@ export const GrievancesTableRow = ({
           baseUrl={baseUrl}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{ticket.createdAt}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{ticket.userModified}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{ticket.totalDays}</TableCell>
-      {isAllPrograms && <TableCell align='left'>{mappedPrograms}</TableCell>}
+      <TableCell align="left">{ticket.totalDays}</TableCell>
+      {isAllPrograms && <TableCell align="left">{mappedPrograms}</TableCell>}
     </ClickableTableRow>
   );
 };

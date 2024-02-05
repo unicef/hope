@@ -7,7 +7,7 @@ import {
   MenuList,
   Paper,
   Popper,
-} from '@material-ui/core';
+} from '@mui/material';
 import React from 'react';
 import styled from 'styled-components';
 import { MeQuery } from '../__generated__/graphql';
@@ -85,9 +85,9 @@ export function UserProfileMenu({
       <UserProfileButton
         ref={anchorRef}
         onClick={handleToggle}
-        data-cy='menu-user-profile'
+        data-cy="menu-user-profile"
       >
-        <Avatar alt={meData.me.email} src='/static/images/avatar/1.jpg' />
+        <Avatar alt={meData.me.email} src="/static/images/avatar/1.jpg" />
         <MenuButtonText> {meData.me.email}</MenuButtonText>
       </UserProfileButton>
       <Popper
@@ -109,16 +109,16 @@ export function UserProfileMenu({
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList
                   autoFocusItem={open}
-                  id='menu-list-grow'
+                  id="menu-list-grow"
                   onKeyDown={handleListKeyDown}
                 >
                   <MenuItem
                     onClick={handleClearCacheAndReloadWindow}
-                    data-cy='menu-item-clear-cache'
+                    data-cy="menu-item-clear-cache"
                   >
                     Clear Cache
                   </MenuItem>
-                  <MenuItem onClick={handleLogout} data-cy='menu-item-logout'>
+                  <MenuItem onClick={handleLogout} data-cy="menu-item-logout">
                     Logout
                   </MenuItem>
                 </MenuList>

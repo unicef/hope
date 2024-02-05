@@ -1,4 +1,4 @@
-import { Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Button, DialogContent, DialogTitle } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -42,8 +42,8 @@ export const FinalizeTargetPopulation = ({
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <DialogTitleWrapper>
         <DialogTitle>{t('Send to Cash Assist')}</DialogTitle>
@@ -61,11 +61,11 @@ export const FinalizeTargetPopulation = ({
           <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
           <LoadingButton
             onClick={() => onSubmit(targetPopulationId)}
-            color='primary'
-            variant='contained'
+            color="primary"
+            variant="contained"
             loading={loading}
             disabled={loading || !totalHouseholds}
-            data-cy='button-target-population-send-to-cash-assist'
+            data-cy="button-target-population-send-to-cash-assist"
           >
             {t('Send to cash assist')}
           </LoadingButton>

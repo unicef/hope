@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
@@ -20,7 +20,7 @@ import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
-import { useProgramContext } from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 
 export interface AuthorizePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -34,23 +34,19 @@ export const AuthorizePaymentPlan = ({
   const { isActiveProgram } = useProgramContext();
 
   const { showMessage } = useSnackbar();
-  const {
-    mutatePaymentPlanAction: authorize,
-    loading: loadingAuthorize,
-  } = usePaymentPlanAction(
-    Action.Authorize,
-    paymentPlan.id,
-    () => showMessage(t('Payment Plan has been authorized.')),
-    () => setAuthorizeDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: authorize, loading: loadingAuthorize } =
+    usePaymentPlanAction(
+      Action.Authorize,
+      paymentPlan.id,
+      () => showMessage(t('Payment Plan has been authorized.')),
+      () => setAuthorizeDialogOpen(false),
+    );
   const initialValues = {
     comment: '',
   };
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string()
-      .min(4, 'Too short')
-      .max(255, 'Too long'),
+    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
   });
 
   const shouldShowLastAuthorizerMessage = (): boolean => {
@@ -78,10 +74,10 @@ export const AuthorizePaymentPlan = ({
             {authorizeDialogOpen && <AutoSubmitFormOnEnter />}
             <Box p={2}>
               <Button
-                color='primary'
-                variant='contained'
+                color="primary"
+                variant="contained"
                 onClick={() => setAuthorizeDialogOpen(true)}
-                data-cy='button-authorize'
+                data-cy="button-authorize"
                 disabled={!isActiveProgram}
               >
                 {t('Authorize')}
@@ -90,9 +86,9 @@ export const AuthorizePaymentPlan = ({
             <Dialog
               open={authorizeDialogOpen}
               onClose={() => setAuthorizeDialogOpen(false)}
-              scroll='paper'
-              aria-labelledby='form-dialog-title'
-              maxWidth='md'
+              scroll="paper"
+              aria-labelledby="form-dialog-title"
+              maxWidth="md"
             >
               <DialogTitleWrapper>
                 <DialogTitle>{t('Authorize')}</DialogTitle>
@@ -113,11 +109,11 @@ export const AuthorizePaymentPlan = ({
                   )}
                   <Form>
                     <Field
-                      name='comment'
+                      name="comment"
                       multiline
                       fullWidth
-                      variant='filled'
-                      label='Comment (optional)'
+                      variant="filled"
+                      label="Comment (optional)"
                       component={FormikTextField}
                     />
                   </Form>
@@ -130,11 +126,11 @@ export const AuthorizePaymentPlan = ({
                   </Button>
                   <LoadingButton
                     loading={loadingAuthorize}
-                    type='submit'
-                    color='primary'
-                    variant='contained'
+                    type="submit"
+                    color="primary"
+                    variant="contained"
                     onClick={submitForm}
-                    data-cy='button-submit'
+                    data-cy="button-submit"
                   >
                     {t('Authorize')}
                   </LoadingButton>

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
@@ -45,10 +45,10 @@ export function DropzoneField({
   const acceptedFilename =
     acceptedFiles.length > 0 ? acceptedFiles[0].name : null;
   return (
-    <Box display='flex' justifyContent='center' p={5}>
+    <Box display="flex" justifyContent="center" p={5}>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
-        <input {...getInputProps()} data-cy='file-input' />
+        <input {...getInputProps()} data-cy="file-input" />
         {dontShowFilename || !acceptedFilename
           ? t('UPLOAD FILE')
           : acceptedFilename}

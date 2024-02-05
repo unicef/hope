@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider } from '@material-ui/core';
+import { ThemeProvider } from '@mui/material';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { theme } from '../../../theme';
 import { Field, Form, Formik } from 'formik';
@@ -15,7 +15,10 @@ const FieldWrapper = styled.div`
   width: 300px;
 `;
 
-const sampleChoices = [{name: 'Sample', value: 'sample'}, {name: 'Choice', value: 'choice'}]
+const sampleChoices = [
+  { name: 'Sample', value: 'sample' },
+  { name: 'Choice', value: 'choice' },
+];
 
 export const RadioGroup = () => {
   return (
@@ -23,15 +26,14 @@ export const RadioGroup = () => {
       <StyledThemeProvider theme={theme}>
         <Formik
           initialValues={{ choiceField: sampleChoices[0].value }}
-          onSubmit={(values) => {
-          }}
+          onSubmit={(values) => {}}
         >
           {() => (
             <Form>
               <FieldWrapper>
                 <Field
-                  name='choiceField'
-                  label='Sample label'
+                  name="choiceField"
+                  label="Sample label"
                   choices={sampleChoices}
                   component={FormikRadioGroup}
                 />

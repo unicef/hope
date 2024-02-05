@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import Paper from '@material-ui/core/Paper';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
@@ -101,10 +101,13 @@ export const GrievancesTable = ({
   const optionsData = get(data, 'allUsers.edges', []);
 
   const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
-    [key: number]: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
+    [
+      key: number
+    ]: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
   }>({ 0: [] });
 
-  const selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][] = [];
+  const selectedTickets: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][] =
+    [];
   const currentSelectedTickets = selectedTicketsPerPage[page];
   for (const pageKey of Object.keys(selectedTicketsPerPage)) {
     selectedTickets.push(...selectedTicketsPerPage[pageKey]);
@@ -118,14 +121,10 @@ export const GrievancesTable = ({
     setSelectedTicketsPerPage(newSelectedTicketsPerPage);
   };
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
-  const {
-    data: currentUserData,
-    loading: currentUserDataLoading,
-  } = useMeQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
+  const { data: currentUserData, loading: currentUserDataLoading } =
+    useMeQuery();
   const permissions = usePermissions();
 
   if (choicesLoading || currentUserDataLoading) return <LoadingComponent />;
@@ -214,9 +213,9 @@ export const GrievancesTable = ({
 
   return (
     <>
-      <Box display='flex' flexDirection='column' px={5} pt={5}>
-        <Box display='flex' justifyContent='space-between' px={5}>
-          <Box display='flex' ml='auto'>
+      <Box display="flex" flexDirection="column" px={5} pt={5}>
+        <Box display="flex" justifyContent="space-between" px={5}>
+          <Box display="flex" ml="auto">
             <Box>
               {/* TODO: Enable Export Report button */}
               {/* <Button
@@ -248,7 +247,7 @@ export const GrievancesTable = ({
         <TableWrapper>
           <Paper>
             <EnhancedTableToolbar title={t('Grievance Tickets List')} />
-            <Box display='flex' flexDirection='row' marginX={6} gridGap={16}>
+            <Box display="flex" flexDirection="row" marginX={6} gridGap={16}>
               <BulkAssignModal
                 selectedTickets={selectedTickets}
                 businessArea={businessArea}
@@ -272,14 +271,14 @@ export const GrievancesTable = ({
               {selectedTab === GRIEVANCE_TICKETS_TYPES.userGenerated &&
                 hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions) && (
                   <ButtonTooltip
-                    variant='contained'
-                    color='primary'
+                    variant="contained"
+                    color="primary"
                     component={Link}
                     title={t(
                       'Program has to be active to create a new Grievance Ticket',
                     )}
                     to={`/${baseUrl}/grievance/new-ticket`}
-                    data-cy='button-new-ticket'
+                    data-cy="button-new-ticket"
                     disabled={!isActiveProgram}
                   >
                     {t('NEW TICKET')}
@@ -296,10 +295,10 @@ export const GrievancesTable = ({
               query={useAllGrievanceTicketQuery}
               onSelectAllClick={handleSelectAllCheckboxesClick}
               numSelected={currentSelectedTickets?.length || 0}
-              queriedObjectName='allGrievanceTicket'
+              queriedObjectName="allGrievanceTicket"
               initialVariables={initialVariables}
-              defaultOrderBy='created_at'
-              defaultOrderDirection='desc'
+              defaultOrderBy="created_at"
+              defaultOrderDirection="desc"
               onPageChanged={setPage}
               renderRow={(row) => (
                 <GrievancesTableRow

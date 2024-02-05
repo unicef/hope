@@ -4,7 +4,7 @@ import {
   Checkbox,
   FormHelperText,
   Grid,
-} from '@material-ui/core';
+} from '@mui/material';
 import get from 'lodash/get';
 import { LabelizedField } from '../../../components/core/LabelizedField';
 
@@ -45,7 +45,7 @@ export const Check = ({
         control={
           <Checkbox
             {...otherProps}
-            color='primary'
+            color="primary"
             checked={checked}
             onChange={handleChange}
             data-cy={`input-${field.name}`}

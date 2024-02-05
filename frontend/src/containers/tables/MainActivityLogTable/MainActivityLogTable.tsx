@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import Collapse from '@material-ui/core/Collapse';
-import { Paper } from '@material-ui/core';
+import { Paper } from '@mui/material';
 import TablePagination from '@material-ui/core/TablePagination';
 import {
   AllLogEntriesQuery,
@@ -86,7 +86,7 @@ export const MainActivityLogTable = ({
         </Table>
         <TablePagination
           rowsPerPageOptions={[5, 10, 15, 20]}
-          component='div'
+          component="div"
           count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}

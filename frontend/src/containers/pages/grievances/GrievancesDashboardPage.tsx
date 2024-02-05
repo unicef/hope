@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
@@ -62,7 +62,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 topNumber={systemGeneratedCount + userGeneratedCount}
                 systemGenerated={systemGeneratedCount}
                 userGenerated={userGeneratedCount}
-                dataCy='total-number-of-tickets'
+                dataCy="total-number-of-tickets"
               />
             </Box>
             <Box mt={5}>
@@ -71,18 +71,23 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 topNumber={numberOfClosedTickets}
                 systemGenerated={closedSystemGeneratedCount}
                 userGenerated={closedUserGeneratedCount}
-                dataCy='total-number-of-closed-tickets'
+                dataCy="total-number-of-closed-tickets"
               />
             </Box>
             <Box mt={5}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
-                topNumber={`${numberOfClosedTickets > 0 ? (
-                  (userWeightedTime + systemWeightedTime) / numberOfClosedTickets
-                ).toFixed(2) : 0} days`}
+                topNumber={`${
+                  numberOfClosedTickets > 0
+                    ? (
+                        (userWeightedTime + systemWeightedTime) /
+                        numberOfClosedTickets
+                      ).toFixed(2)
+                    : 0
+                } days`}
                 systemGenerated={`${systemGeneratedAvgResolution} days`}
                 userGenerated={`${userGeneratedAvgResolution} days`}
-                dataCy='tickets-average-resolution'
+                dataCy="tickets-average-resolution"
               />
             </Box>
             <Box mt={5}>

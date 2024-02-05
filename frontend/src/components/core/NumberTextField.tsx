@@ -1,4 +1,4 @@
-import { Box, InputAdornment } from '@material-ui/core';
+import { Box, InputAdornment } from '@mui/material';
 import styled from 'styled-components';
 import React from 'react';
 import TextField from '../../shared/TextField';
@@ -23,21 +23,21 @@ export const NumberTextField = ({
   ...otherProps
 }): React.ReactElement => {
   return (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
       <TextContainer
         {...otherProps}
         value={value}
         placeholder={placeholder}
         onChange={onChange}
-        variant='outlined'
-        margin='dense'
-        type='number'
+        variant="outlined"
+        margin="dense"
+        type="number"
         InputProps={
           icon
             ? {
                 startAdornment: (
-                  <InputAdornment position='start'>{icon}</InputAdornment>
+                  <InputAdornment position="start">{icon}</InputAdornment>
                 ),
               }
             : null

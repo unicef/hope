@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,19 +33,16 @@ export const TargetPopulationFilters = ({
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -64,13 +61,13 @@ export const TargetPopulationFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
             onChange={(e) => handleFilterChange('name', e.target.value)}
-            data-cy='filters-search'
+            data-cy="filters-search"
             fullWidth
           />
         </Grid>
@@ -81,7 +78,7 @@ export const TargetPopulationFilters = ({
             label={t('Status')}
             icon={<Person />}
             fullWidth
-            data-cy='filters-status'
+            data-cy="filters-status"
           >
             {preparedStatusChoices.sort().map((key) => (
               <MenuItem key={key} value={key}>
@@ -99,7 +96,7 @@ export const TargetPopulationFilters = ({
               handleFilterChange('totalHouseholdsCountMin', e.target.value)
             }
             icon={<Group />}
-            data-cy='filters-total-households-count-min'
+            data-cy="filters-total-households-count-min"
           />
         </Grid>
         <Grid item xs={3}>
@@ -110,7 +107,7 @@ export const TargetPopulationFilters = ({
               handleFilterChange('totalHouseholdsCountMax', e.target.value)
             }
             icon={<Group />}
-            data-cy='filters-total-households-count-max'
+            data-cy="filters-total-households-count-max"
           />
         </Grid>
         <Grid item xs={3}>

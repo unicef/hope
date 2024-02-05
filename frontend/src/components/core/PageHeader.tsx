@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import React from 'react';
 import styled from 'styled-components';
@@ -77,30 +77,30 @@ export const PageHeader = ({
   handleBack,
 }: Props): React.ReactElement => {
   return (
-    <Wrapper data-cy='page-header-container'>
+    <Wrapper data-cy="page-header-container">
       <Container>
         {breadCrumbs && breadCrumbs.length !== 0 ? (
           // Leaving breadcrumbs for permissions, but BackButton goes back to the previous page
           <BackButton
             onClick={() => (handleBack ? handleBack() : window.history.back())}
           >
-            <ArrowBackRoundedIcon fontSize='large' />
+            <ArrowBackRoundedIcon fontSize="large" />
           </BackButton>
         ) : null}
         <HeaderContainer>
           <div>
             {React.isValidElement(title) && hasInputComponent ? (
-              <TitleWrapper data-cy='page-header-title'>{title}</TitleWrapper>
+              <TitleWrapper data-cy="page-header-title">{title}</TitleWrapper>
             ) : (
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
-                <Box display='flex' alignItems='center'>
+                <Box display="flex" alignItems="center">
                   <TitleContainer>
-                    <Typography data-cy='page-header-title' variant='h5'>
+                    <Typography data-cy="page-header-title" variant="h5">
                       {title}
                     </Typography>
                   </TitleContainer>
-                  <Box display='flex' ml={2}>
+                  <Box display="flex" ml={2}>
                     {flags}
                   </Box>
                 </Box>

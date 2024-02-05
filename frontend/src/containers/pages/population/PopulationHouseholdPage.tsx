@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -37,13 +37,11 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-first',
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery({
+      variables: { businessArea },
+      fetchPolicy: 'cache-first',
+    });
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -65,9 +63,9 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
         setAppliedFilter={setAppliedFilter}
       />
       <Box
-        display='flex'
-        flexDirection='column'
-        data-cy='page-details-container'
+        display="flex"
+        flexDirection="column"
+        data-cy="page-details-container"
       >
         <HouseholdTable
           filter={appliedFilter}

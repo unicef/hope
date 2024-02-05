@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Refresh } from '@material-ui/icons';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import React from 'react';
@@ -69,14 +69,14 @@ export const SomethingWentWrong: React.FC = () => {
   return (
     <Container>
       <LogoContainer>
-        <img src={HopeLogo} alt='Hope Logo' width='186' height='101' />
+        <img src={HopeLogo} alt="Hope Logo" width="186" height="101" />
       </LogoContainer>
       <SquareLogo>
         <img
           src={SomethingWentWrongGraphic}
-          alt='Sad face'
-          width='354'
-          height='293'
+          alt="Sad face"
+          width="354"
+          height="293"
         />
       </SquareLogo>
       <TextContainer>
@@ -90,13 +90,13 @@ export const SomethingWentWrong: React.FC = () => {
           </Paragraph>
         )}
       </TextContainer>
-      <Box display='flex' justifyContent='center' alignItems='center'>
+      <Box display="flex" justifyContent="center" alignItems="center">
         <Box mr={4}>
           <Button
             endIcon={<Refresh />}
-            variant='outlined'
-            color='primary'
-            data-cy='button-refresh-page'
+            variant="outlined"
+            color="primary"
+            data-cy="button-refresh-page"
             onClick={refreshAndClearCache}
           >
             REFRESH PAGE
@@ -104,10 +104,10 @@ export const SomethingWentWrong: React.FC = () => {
         </Box>
         <Button
           endIcon={<ArrowBackIcon />}
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           onClick={handleGoBack}
-          data-cy='button-go-back'
+          data-cy="button-go-back"
         >
           GO BACK
         </Button>

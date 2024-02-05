@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Button from '@material-ui/core/Button';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';
@@ -40,12 +40,12 @@ export const RelatedFollowUpPaymentPlans = ({
 
   return (
     <LabelizedField label={t('Related Follow-Up Payment Plans')}>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         {followUpLinks || '-'}
         {followUps?.edges?.length > 5 && (
           <Button
-            variant='outlined'
-            color='primary'
+            variant="outlined"
+            color="primary"
             onClick={handleButtonClick}
           >
             {showAll ? t('Hide') : t('See all')}

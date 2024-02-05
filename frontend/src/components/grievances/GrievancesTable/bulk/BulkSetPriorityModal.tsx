@@ -1,4 +1,4 @@
-import { MenuItem, Select } from '@material-ui/core';
+import { MenuItem, Select } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -67,8 +67,8 @@ export const BulkSetPriorityModal = ({
           value={value}
           onChange={(e) => setValue(e.target.value as number)}
           style={{ width: '100%' }}
-          variant='outlined'
-          margin='dense'
+          variant="outlined"
+          margin="dense"
           label={t('Priority')}
         >
           {priorityChoices.map((choice) => (

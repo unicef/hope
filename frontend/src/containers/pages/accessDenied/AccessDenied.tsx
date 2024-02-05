@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Refresh } from '@material-ui/icons';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import React from 'react';
@@ -66,14 +66,14 @@ export const AccessDenied: React.FC = () => {
   return (
     <Container>
       <LogoContainer>
-        <img src={HopeLogo} alt='Hope Logo' width='186' height='101' />
+        <img src={HopeLogo} alt="Hope Logo" width="186" height="101" />
       </LogoContainer>
       <SquareLogo>
         <img
           src={AccessDeniedGraphic}
-          alt='Hand denying access'
-          width='354'
-          height='293'
+          alt="Hand denying access"
+          width="354"
+          height="293"
         />
       </SquareLogo>
       <TextContainer>
@@ -83,24 +83,24 @@ export const AccessDenied: React.FC = () => {
           or you don&apos;t have the required permissions to view it.
         </Paragraph>
       </TextContainer>
-      <Box display='flex' justifyContent='center' alignItems='center'>
+      <Box display="flex" justifyContent="center" alignItems="center">
         <Box mr={4}>
           <Button
             endIcon={<Refresh />}
-            variant='outlined'
-            color='primary'
+            variant="outlined"
+            color="primary"
             onClick={refreshAndClearCache}
-            data-cy='button-refresh-page'
+            data-cy="button-refresh-page"
           >
             REFRESH PAGE
           </Button>
         </Box>
         <Button
           endIcon={<ArrowBackIcon />}
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           onClick={handleGoBack}
-          data-cy='button-go-back'
+          data-cy="button-go-back"
         >
           GO BACK
         </Button>

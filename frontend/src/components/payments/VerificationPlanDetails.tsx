@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -49,9 +49,9 @@ export const VerificationPlanDetails = ({
   );
   return (
     <Container>
-      <Box display='flex' alignItems='center' justifyContent='space-between'>
+      <Box display="flex" alignItems="center" justifyContent="space-between">
         <Title>
-          <Typography variant='h6'>
+          <Typography variant="h6">
             {t('Verification Plan')} #{verificationPlan.unicefId}
           </Typography>
         </Title>
@@ -69,7 +69,7 @@ export const VerificationPlanDetails = ({
                 <StatusBox
                   status={verificationPlan.status}
                   statusToColor={paymentVerificationStatusToColor}
-                  dataCy='verification-plan-status'
+                  dataCy="verification-plan-status"
                 />
               </LabelizedField>
             </Grid>

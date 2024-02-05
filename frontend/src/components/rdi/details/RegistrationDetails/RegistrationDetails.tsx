@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -85,14 +85,14 @@ export function RegistrationDetails({
   return (
     <ContainerColumnWithBorder>
       <Title>
-        <Typography variant='h6'>{t('Import Details')}</Typography>
+        <Typography variant="h6">{t('Import Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid alignItems='center' container>
+        <Grid alignItems="center" container>
           <Grid item xs={4}>
             <Grid container spacing={3}>
               <Grid item xs={6}>
-                <Box display='flex' flexDirection='column'>
+                <Box display="flex" flexDirection="column">
                   <LabelizedField label={t('status')}>
                     <StatusBox
                       status={registration?.status}
@@ -143,7 +143,7 @@ export function RegistrationDetails({
                 <BigValueContainer>
                   <LabelizedField
                     label={t('Total Number of Households')}
-                    dataCy='households'
+                    dataCy="households"
                   >
                     <BigValue>{registration?.numberOfHouseholds}</BigValue>
                   </LabelizedField>
@@ -153,7 +153,7 @@ export function RegistrationDetails({
                 <BigValueContainer>
                   <LabelizedField
                     label={t('Total Number of Individuals')}
-                    dataCy='individuals'
+                    dataCy="individuals"
                   >
                     <BigValue>{registration?.numberOfIndividuals}</BigValue>
                   </LabelizedField>
@@ -163,9 +163,9 @@ export function RegistrationDetails({
           </Grid>
           {registration.status === 'DEDUPLICATION_FAILED' ? null : (
             <Grid item xs={4}>
-              <Grid container direction='column'>
-                <DedupeBox label='Within Batch' options={withinBatchOptions} />
-                <DedupeBox label='In Population' options={populationOptions} />
+              <Grid container direction="column">
+                <DedupeBox label="Within Batch" options={withinBatchOptions} />
+                <DedupeBox label="In Population" options={populationOptions} />
               </Grid>
             </Grid>
           )}

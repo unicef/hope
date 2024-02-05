@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel, Grid, MenuItem } from '@material-ui/core';
+import { Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -28,19 +28,16 @@ export const ReportingFilters = ({
   const history = useHistory();
   const location = useLocation();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -55,7 +52,7 @@ export const ReportingFilters = ({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SelectFilter
             label={t('Report Type')}
@@ -88,7 +85,7 @@ export const ReportingFilters = ({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            label='Status'
+            label="Status"
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
           >
@@ -110,10 +107,10 @@ export const ReportingFilters = ({
                   handleFilterChange('onlyMy', checked)
                 }
                 value={filter.onlyMy}
-                color='primary'
+                color="primary"
               />
             }
-            label='See my reports only'
+            label="See my reports only"
           />
         </Grid>
       </Grid>

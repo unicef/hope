@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -52,9 +52,9 @@ export const ProgramDetails = ({
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
 
   return (
-    <ContainerColumnWithBorder data-cy='program-details-container'>
+    <ContainerColumnWithBorder data-cy="program-details-container">
       <Title>
-        <Typography variant='h6'>{t('Programme Details')}</Typography>
+        <Typography variant="h6">{t('Programme Details')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
@@ -133,14 +133,14 @@ export const ProgramDetails = ({
         <>
           <DividerLine />
           <Title>
-            <Typography variant='h6'>{t('Programme Partners')}</Typography>
+            <Typography variant="h6">{t('Programme Partners')}</Typography>
           </Title>
           <OverviewContainer>
             <Grid container spacing={6}>
               {program.partners.map((partner) => (
                 <Grid key={partner.id} item xs={3}>
-                  <StyledBox p={6} flexDirection='column'>
-                    <Typography data-cy='label-partner-name' variant='h6'>
+                  <StyledBox p={6} flexDirection="column">
+                    <Typography data-cy="label-partner-name" variant="h6">
                       {partner.name}
                     </Typography>
                     <LabelizedField

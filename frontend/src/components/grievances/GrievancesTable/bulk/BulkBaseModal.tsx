@@ -7,7 +7,7 @@ import {
   Table,
   TableBody,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -15,7 +15,7 @@ import { Dialog } from '../../../../containers/dialogs/Dialog';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
 import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
-import { useProgramContext } from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -64,8 +64,8 @@ export const BulkBaseModal = ({
   const renderButton = (): React.ReactElement => {
     return (
       <Button
-        variant='outlined'
-        color='primary'
+        variant="outlined"
+        color="primary"
         startIcon={icon}
         disabled={!selectedTickets.length || !isActiveProgram}
         onClick={() => setDialogOpen(true)}
@@ -89,11 +89,11 @@ export const BulkBaseModal = ({
       <StyledDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>{title}</DialogTitle>
+          <DialogTitle id="scroll-dialog-title">{title}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box mt={2} mb={6}>
@@ -120,8 +120,8 @@ export const BulkBaseModal = ({
               {t('CANCEL')}
             </Button>
             <Button
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               onClick={onAccept}
               disabled={disabledSave}
             >

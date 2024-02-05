@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { FileCopy } from '@material-ui/icons';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React, { useState } from 'react';
@@ -41,7 +41,7 @@ export const FinalizedTargetPopulationHeaderButtons = ({
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canDuplicate && (
         <IconContainer>
           <Button onClick={() => setOpenDuplicate(true)}>
@@ -52,11 +52,11 @@ export const FinalizedTargetPopulationHeaderButtons = ({
       <Box m={2}>
         {!businessAreaData.businessArea.isPaymentPlanApplicable && (
           <Button
-            variant='contained'
-            color='primary'
-            component='a'
+            variant="contained"
+            color="primary"
+            component="a"
             disabled={!targetPopulation.caHashId}
-            target='_blank'
+            target="_blank"
             href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
           >

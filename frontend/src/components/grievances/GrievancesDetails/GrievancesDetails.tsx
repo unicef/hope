@@ -1,4 +1,4 @@
-import { Box, Grid, GridSize, Typography } from '@material-ui/core';
+import { Box, Grid, GridSize, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -74,7 +74,7 @@ export const GrievancesDetails = ({
 
   const mappedDocumentation = (): React.ReactElement => {
     return (
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         {ticket.documentation?.length
           ? ticket.documentation.map((doc) => {
               if (doc.contentType.includes('image')) {
@@ -82,7 +82,7 @@ export const GrievancesDetails = ({
                   <PhotoModal
                     key={doc.id}
                     src={doc.filePath}
-                    variant='link'
+                    variant="link"
                     linkText={doc.name}
                   />
                 );
@@ -172,7 +172,7 @@ export const GrievancesDetails = ({
       return <>-</>;
     }
     return (
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         {ticket.programs.map((program) => (
           <ContentLink
             key={program.id}
@@ -189,7 +189,7 @@ export const GrievancesDetails = ({
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>

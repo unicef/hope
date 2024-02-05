@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { FileCopy } from '@material-ui/icons';
 import React, { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
@@ -18,7 +18,7 @@ export const DuplicateProgramButtonLink = ({
     <IconButton
       component={Link}
       to={`/${baseUrl}/duplicate/${program.id}`}
-      data-cy='button-copy-program'
+      data-cy="button-copy-program"
     >
       <FileCopy />
     </IconButton>

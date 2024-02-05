@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormikFileField } from '../../../shared/Formik/FormikFileField';
@@ -45,15 +45,15 @@ export const GrievanceFlexFieldPhotoModalEditable = ({
     : flexFields[flexField.name]?.value;
 
   return (
-    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+    <Box style={{ height: '100%' }} display="flex" alignItems="center">
       {isEdited || !picUrl ? (
-        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+        <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <FormikFileField field={field} form={form} />
         </Box>
       ) : (
         <PhotoModal
           src={picUrl}
-          variant='pictureClose'
+          variant="pictureClose"
           closeHandler={() => setEdit(true)}
         />
       )}

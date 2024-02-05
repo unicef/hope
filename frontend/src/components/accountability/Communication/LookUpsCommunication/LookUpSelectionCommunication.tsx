@@ -1,4 +1,4 @@
-import { Box, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
+import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -91,12 +91,10 @@ export const LookUpSelectionCommunication = ({
 
   const { t } = useTranslation();
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery({
+      variables: { businessArea },
+    });
 
   const handleChange = (type: number, value: string[] | string): void => {
     setValues({
@@ -124,18 +122,18 @@ export const LookUpSelectionCommunication = ({
       <BoxWithBorderBottom
         p={4}
         m={4}
-        display='flex'
-        alignItems='center'
-        bgcolor='#F5F5F5'
+        display="flex"
+        alignItems="center"
+        bgcolor="#F5F5F5"
       >
-        <Box pr={5} fontWeight='500' fontSize='medium'>
+        <Box pr={5} fontWeight="500" fontSize="medium">
           {t('Look up for')}
         </Box>
         <RadioGroup
-          aria-labelledby='selection-radio-buttons-group'
+          aria-labelledby="selection-radio-buttons-group"
           value={selectedTab}
           row
-          name='radio-buttons-group'
+          name="radio-buttons-group"
         >
           {communicationTabs.map((tab, index) => (
             <FormControlLabel
@@ -143,7 +141,7 @@ export const LookUpSelectionCommunication = ({
               onChange={() => {
                 setSelectedTab(index);
               }}
-              control={<Radio color='primary' />}
+              control={<Radio color="primary" />}
               label={tab}
               key={tab}
             />

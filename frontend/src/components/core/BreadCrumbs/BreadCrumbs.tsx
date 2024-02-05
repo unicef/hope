@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import ChevronRightRoundedIcon from '@material-ui/icons/ChevronRightRounded';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 
 const BreadCrumbsLink = styled(Link)`
   color: rgba(0, 0, 0, 0.87);

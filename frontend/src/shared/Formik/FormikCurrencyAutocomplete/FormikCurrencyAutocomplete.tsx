@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -50,14 +50,14 @@ export const FormikCurrencyAutocomplete = ({
           <TextField
             {...params}
             label={t('Currency')}
-            variant='outlined'
-            margin='dense'
+            variant="outlined"
+            margin="dense"
             error={isInvalid}
             helperText={`${isInvalid ? get(form.errors, field.name) : ''}`}
             {...otherProps}
           />
         )}
-        data-cy='input-currency'
+        data-cy="input-currency"
       />
     </Box>
   );

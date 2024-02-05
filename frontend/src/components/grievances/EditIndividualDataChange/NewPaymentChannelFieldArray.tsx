@@ -1,4 +1,4 @@
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 import { AddCircleOutline } from '@material-ui/icons';
 import { useLocation } from 'react-router-dom';
@@ -21,7 +21,7 @@ export function NewPaymentChannelFieldArray({
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name='individualDataUpdateFieldsPaymentChannels'
+        name="individualDataUpdateFieldsPaymentChannels"
         render={(arrayHelpers) => {
           return (
             <>
@@ -38,7 +38,7 @@ export function NewPaymentChannelFieldArray({
                         arrayHelpers,
                       )
                     }
-                    baseName='individualDataUpdateFieldsPaymentChannels'
+                    baseName="individualDataUpdateFieldsPaymentChannels"
                     values={values}
                   />
                 );
@@ -46,7 +46,7 @@ export function NewPaymentChannelFieldArray({
               <Grid item xs={8} />
               <Grid item xs={12}>
                 <Button
-                  color='primary'
+                  color="primary"
                   onClick={() => {
                     arrayHelpers.push({
                       id: uuidv4(),

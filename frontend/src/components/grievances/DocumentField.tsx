@@ -1,4 +1,4 @@
-import { Grid, IconButton } from '@material-ui/core';
+import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
@@ -49,7 +49,7 @@ export function DocumentField({
         <Field
           name={`${docFieldName}.key`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Type')}
           component={FormikSelectField}
           choices={documentTypeChoices}
@@ -61,7 +61,7 @@ export function DocumentField({
         <Field
           name={`${docFieldName}.country`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Country')}
           component={FormikSelectField}
           choices={countryChoices}
@@ -73,7 +73,7 @@ export function DocumentField({
         <Field
           name={`${docFieldName}.number`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Document Number')}
           component={FormikTextField}
           required

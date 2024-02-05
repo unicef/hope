@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,12 +31,12 @@ export const LookUpPaymentRecordModal = ({
       {({ submitForm, setFieldValue }) => (
         <>
           <Dialog
-            maxWidth='lg'
+            maxWidth="lg"
             fullWidth
             open={lookUpDialogOpen}
             onClose={() => setLookUpDialogOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
           >
             {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
@@ -55,11 +55,11 @@ export const LookUpPaymentRecordModal = ({
                   {t('CANCEL')}
                 </Button>
                 <Button
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {t('SAVE')}
                 </Button>

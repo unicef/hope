@@ -1,4 +1,4 @@
-import { Box, Step, StepButton, Stepper } from '@material-ui/core';
+import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -30,10 +30,8 @@ export const CreateProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const {
-    data: userPartnerChoicesData,
-    loading: userPartnerChoicesLoading,
-  } = useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
+    useUserPartnerChoicesQuery();
 
   const [mutate] = useCreateProgramMutation({
     refetchQueries: () => [
@@ -167,7 +165,7 @@ export const CreateProgramPage = (): ReactElement => {
               <Stepper activeStep={step}>
                 <Step>
                   <StepButton
-                    data-cy='step-button-details'
+                    data-cy="step-button-details"
                     onClick={() => setStep(0)}
                   >
                     {t('Details')}
@@ -175,7 +173,7 @@ export const CreateProgramPage = (): ReactElement => {
                 </Step>
                 <Step>
                   <StepButton
-                    data-cy='step-button-partners'
+                    data-cy="step-button-partners"
                     onClick={() => setStep(1)}
                   >
                     {t('Programme Partners')}

@@ -1,4 +1,4 @@
-import { Box, Button, Tooltip } from '@material-ui/core';
+import { Box, Button, Tooltip } from '@mui/material';
 import { FileCopy } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,7 @@ import {
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 const IconContainer = styled.span`
   button {
@@ -52,12 +52,12 @@ export const LockedTargetPopulationHeaderButtons = ({
   const { isPaymentPlanApplicable } = businessAreaData.businessArea;
 
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canDuplicate && (
         <IconContainer>
-         <Button
-              onClick={() => setOpenDuplicate(true)}
-              disabled={!isActiveProgram}
+          <Button
+            onClick={() => setOpenDuplicate(true)}
+            disabled={!isActiveProgram}
           >
             <FileCopy />
           </Button>
@@ -67,8 +67,8 @@ export const LockedTargetPopulationHeaderButtons = ({
         <Box m={2}>
           <LoadingButton
             loading={loading}
-            color='primary'
-            variant='outlined'
+            color="primary"
+            variant="outlined"
             onClick={async () => {
               try {
                 await mutate({
@@ -79,7 +79,7 @@ export const LockedTargetPopulationHeaderButtons = ({
                 e.graphQLErrors.map((x) => showMessage(x.message));
               }
             }}
-            data-cy='button-target-population-unlocked'
+            data-cy="button-target-population-unlocked"
             disabled={!isActiveProgram}
           >
             Unlock
@@ -98,11 +98,11 @@ export const LockedTargetPopulationHeaderButtons = ({
             >
               <span>
                 <Button
-                  variant='contained'
-                  color='primary'
+                  variant="contained"
+                  color="primary"
                   disabled={!isActiveProgram}
                   onClick={() => setOpenFinalizePaymentPlan(true)}
-                  data-cy='button-target-population-send-to-hope'
+                  data-cy="button-target-population-send-to-hope"
                 >
                   {t('Mark Ready')}
                 </Button>
@@ -118,13 +118,13 @@ export const LockedTargetPopulationHeaderButtons = ({
             >
               <span>
                 <Button
-                  variant='contained'
-                  color='primary'
+                  variant="contained"
+                  color="primary"
                   disabled={
                     targetPopulation.program.status !== ProgramStatus.Active
                   }
                   onClick={() => setOpenFinalize(true)}
-                  data-cy='button-target-population-send-to-cash-assist'
+                  data-cy="button-target-population-send-to-cash-assist"
                 >
                   {t('Send to Cash Assist')}
                 </Button>

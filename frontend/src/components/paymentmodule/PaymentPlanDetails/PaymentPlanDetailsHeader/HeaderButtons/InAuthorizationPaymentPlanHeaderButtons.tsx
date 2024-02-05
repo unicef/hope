@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { AuthorizePaymentPlan } from '../AuthorizePaymentPlan';
@@ -16,7 +16,7 @@ export const InAuthorizationPaymentPlanHeaderButtons = ({
   canAuthorize,
 }: InAuthorizationPaymentPlanHeaderButtonsProps): React.ReactElement => {
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
       {canAuthorize && <AuthorizePaymentPlan paymentPlan={paymentPlan} />}
     </Box>

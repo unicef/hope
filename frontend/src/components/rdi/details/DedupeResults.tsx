@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -106,12 +106,12 @@ export function DedupeResults({
         {status} ({results.length})
       </Error>
       <Dialog
-        maxWidth='md'
+        maxWidth="md"
         fullWidth
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Duplicates')}</DialogTitle>
@@ -138,10 +138,10 @@ export function DedupeResults({
                 <TableCell style={{ width: 100 }}>
                   {t('Administrative Level 2')}
                 </TableCell>
-                <TableCell style={{ width: 100 }} align='left'>
+                <TableCell style={{ width: 100 }} align="left">
                   {t('Similarity Score')}
                 </TableCell>
-                <TableCell style={{ width: 100 }} align='left'>
+                <TableCell style={{ width: 100 }} align="left">
                   {t('Proximity to the Score')}
                 </TableCell>
               </TableRow>
@@ -160,13 +160,13 @@ export function DedupeResults({
                       {decodeIdString(row.hitId)}
                     </BlackLink>
                   </TableCell>
-                  <TableCell align='left'>{row.fullName}</TableCell>
-                  <TableCell align='left'>
+                  <TableCell align="left">{row.fullName}</TableCell>
+                  <TableCell align="left">
                     {row.age || t('Not provided')}
                   </TableCell>
-                  <TableCell align='left'>{row.location}</TableCell>
-                  <TableCell align='left'>{row.score}</TableCell>
-                  <TableCell align='left'>
+                  <TableCell align="left">{row.location}</TableCell>
+                  <TableCell align="left">{row.score}</TableCell>
+                  <TableCell align="left">
                     {row.proximityToScore > 0 && '+'} {row.proximityToScore}
                   </TableCell>
                 </TableRow>

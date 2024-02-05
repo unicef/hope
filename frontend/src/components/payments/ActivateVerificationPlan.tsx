@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '../../containers/dialogs/Dialog';
@@ -8,7 +8,7 @@ import { DialogFooter } from '../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useActivatePaymentVerificationPlanMutation } from '../../__generated__/graphql';
-import { useProgramContext } from "../../programContext";
+import { useProgramContext } from '../../programContext';
 
 export interface ActivateVerificationPlanProps {
   paymentVerificationPlanId: string;
@@ -28,7 +28,7 @@ export const ActivateVerificationPlan = ({
       await mutate({
         variables: { paymentVerificationPlanId },
         refetchQueries: ['AllPaymentVerifications'],
-        awaitRefetchQueries: true
+        awaitRefetchQueries: true,
       });
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
@@ -40,10 +40,10 @@ export const ActivateVerificationPlan = ({
     <>
       <Box p={2}>
         <Button
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           onClick={() => setActivateDialogOpen(true)}
-          data-cy='button-activate-plan'
+          data-cy="button-activate-plan"
           disabled={!isActiveProgram}
         >
           {t('ACTIVATE')}
@@ -52,9 +52,9 @@ export const ActivateVerificationPlan = ({
       <Dialog
         open={activateDialogOpen}
         onClose={() => setActivateDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Activate Verification Plan')}</DialogTitle>
@@ -72,11 +72,11 @@ export const ActivateVerificationPlan = ({
           <DialogActions>
             <Button onClick={() => setActivateDialogOpen(false)}>CANCEL</Button>
             <Button
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => activate()}
-              data-cy='button-submit'
+              data-cy="button-submit"
             >
               {t('ACTIVATE')}
             </Button>

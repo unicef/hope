@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@material-ui/icons';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -41,10 +41,8 @@ export const EditIndividualDataChange = ({
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
     values.selectedIndividual;
-  const {
-    data: addIndividualFieldsData,
-    loading: addIndividualFieldsLoading,
-  } = useAllAddIndividualFieldsQuery();
+  const { data: addIndividualFieldsData, loading: addIndividualFieldsLoading } =
+    useAllAddIndividualFieldsQuery();
 
   const [
     getIndividual,
@@ -89,11 +87,11 @@ export const EditIndividualDataChange = ({
       {!isEditTicket && (
         <BoxWithBorders>
           <Title>
-            <Typography variant='h6'>{t('Bio Data')}</Typography>
+            <Typography variant="h6">{t('Bio Data')}</Typography>
           </Title>
           <Grid container spacing={3}>
             <FieldArray
-              name='individualDataUpdateFields'
+              name="individualDataUpdateFields"
               render={(arrayHelpers) => (
                 <>
                   {values.individualDataUpdateFields.map((item, index) => (
@@ -113,12 +111,12 @@ export const EditIndividualDataChange = ({
                   ))}
                   <Grid item xs={4}>
                     <Button
-                      color='primary'
+                      color="primary"
                       onClick={() => {
                         arrayHelpers.push({ fieldName: null, fieldValue: '' });
                       }}
                       startIcon={<AddCircleOutline />}
-                      data-cy='button-add-new-field'
+                      data-cy="button-add-new-field"
                       disabled={isEditTicket}
                     >
                       {t('Add new field')}
@@ -133,7 +131,7 @@ export const EditIndividualDataChange = ({
       <BoxWithBorders>
         <Box mt={3}>
           <Title>
-            <Typography variant='h6'>{t('Documents')}</Typography>
+            <Typography variant="h6">{t('Documents')}</Typography>
           </Title>
           <ExistingDocumentFieldArray
             values={values}
@@ -153,7 +151,7 @@ export const EditIndividualDataChange = ({
       <BoxWithBorders>
         <Box mt={3}>
           <Title>
-            <Typography variant='h6'>{t('Identities')}</Typography>
+            <Typography variant="h6">{t('Identities')}</Typography>
           </Title>
           <ExistingIdentityFieldArray
             values={values}
@@ -172,7 +170,7 @@ export const EditIndividualDataChange = ({
       <BoxWithBorders>
         <Box mt={3}>
           <Title>
-            <Typography variant='h6'>{t('Payment Channels')}</Typography>
+            <Typography variant="h6">{t('Payment Channels')}</Typography>
           </Title>
           <ExistingPaymentChannelFieldArray
             values={values}
