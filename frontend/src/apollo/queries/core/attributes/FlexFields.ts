@@ -1,15 +1,15 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const FlexFields = gql`
   query FlexFields {
     allGroupsWithFields {
       name
       labelEn
-    	flexAttributes {
+      flexAttributes {
         id
         labelEn
         associatedWith
       }
-  }
+    }
   }
 `;
