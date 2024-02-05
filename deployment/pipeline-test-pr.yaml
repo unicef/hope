@@ -25,7 +25,7 @@ stages:
       - job: frontend_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "FE tests"
+        displayName: "[FE tests]"
         steps:
           - task: NodeTool@0
             inputs:
@@ -49,7 +49,7 @@ stages:
       - job: build_push_backend
         pool:
           vmImage: ubuntu-latest
-        displayName: "BE build & push"
+        displayName: "[BE build & push]"
         steps:
           - task: Docker@2
             inputs:
@@ -91,7 +91,7 @@ stages:
       - job: build_and_push_cypress
         pool:
           vmImage: ubuntu-latest
-        displayName: "CY build & push"
+        displayName: "[CY build & push]"
         steps:
           - task: Docker@2
             inputs:
@@ -117,7 +117,7 @@ stages:
       - job: django_lint
         pool:
           vmImage: ubuntu-latest
-        displayName: "BE lint"
+        displayName: "[BE lint]"
         steps:
           - task: Docker@2
             displayName: "ACR Login"
@@ -154,7 +154,7 @@ stages:
       - job: django_mypy
         pool:
           vmImage: ubuntu-latest
-        displayName: "BE mypy"
+        displayName: "[BE mypy]"
         steps:
           - task: Docker@2
             displayName: "ACR Login"
@@ -191,7 +191,7 @@ stages:
       - job: django_black
         pool:
           vmImage: ubuntu-latest
-        displayName: "BE format"
+        displayName: "[BE format]"
         steps:
           - task: Docker@2
             displayName: "ACR Login"
@@ -217,7 +217,7 @@ stages:
       - job: django_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "BE tests"
+        displayName: "[BE tests]"
         steps:
           - task: Docker@2
             displayName: "ACR Login"
@@ -276,7 +276,7 @@ stages:
       - job: run_trivy
         pool:
           vmImage: ubuntu-latest
-        displayName: "BE Trivy"
+        displayName: "[BE Trivy]"
         steps:
           - task: Docker@2
             displayName: "ACR Login"
@@ -295,7 +295,7 @@ stages:
       - job: cypress_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "E2E tests"
+        displayName: "[E2E tests]"
         steps:
           - task: Docker@2
             displayName: "ACR Login"
