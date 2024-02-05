@@ -1,5 +1,7 @@
+import random
+import string
 from decimal import Decimal
-from typing import Collection, Optional, Union
+from typing import Any, Collection, Optional, Union
 
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
@@ -157,8 +159,20 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     is_visible = models.BooleanField(default=True)
     household_count = models.PositiveIntegerField(default=0)
     individual_count = models.PositiveIntegerField(default=0)
+    programme_code = models.CharField(max_length=4, null=True, blank=True)
 
     objects = SoftDeletableIsVisibleManager()
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        if not self.programme_code:
+            self.programme_code = self._generate_programme_code()
+        super().save(*args, **kwargs)
+
+    def _generate_programme_code(self) -> str:
+        programme_code = "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+        if Program.objects.filter(business_area_id=self.business_area_id, programme_code=programme_code).exists():
+            return self._generate_programme_code()
+        return programme_code
 
     @staticmethod
     def get_total_number_of_households_from_payments(qs: Union[models.QuerySet, ExtendedQuerySetSequence]) -> int:
@@ -191,7 +205,12 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
                 fields=["name", "business_area", "is_removed"],
                 condition=Q(is_removed=False),
                 name="unique_for_program_if_not_removed",
-            )
+            ),
+            UniqueConstraint(
+                fields=["business_area", "programme_code"],
+                condition=Q(is_removed=False),
+                name="unique_for_business_area_and_programme_code_if_not_removed",
+            ),
         ]
         verbose_name = "Programme"
 

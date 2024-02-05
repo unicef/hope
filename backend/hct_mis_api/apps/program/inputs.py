@@ -22,6 +22,7 @@ class CreateProgramInput(graphene.InputObjectType):
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
     partners = graphene.List(PartnerProgramInput)
+    programme_code = graphene.String()
 
 
 class UpdateProgramInput(graphene.InputObjectType):
@@ -40,6 +41,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
     partners = graphene.List(PartnerProgramInput)
+    programme_code = graphene.String()
 
 
 class CopyProgramInput(graphene.InputObjectType):
@@ -58,3 +60,4 @@ class CopyProgramInput(graphene.InputObjectType):
     individual_data_needed = graphene.Boolean()
     data_collecting_type_code = graphene.String()
     partners = graphene.List(PartnerProgramInput)
+    programme_code = graphene.String()
