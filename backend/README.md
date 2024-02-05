@@ -4,8 +4,8 @@
 
 ```sh
 python3.9 -m venv venv
-docker-compose build
-docker-compose run --rm backend poetry export -f requirements.txt --output venv/requirements.txt
+docker compose build
+docker compose run --rm backend poetry export -f requirements.txt --output venv/requirements.txt
 python3.9 -m pip install -r venv/requirements.txt --require-hashes
 ```
 
@@ -15,13 +15,13 @@ Provide path to `./backend/venv/bin/python3`
 Oneliner to refresh your packages (from `backend` dir):
 
 ```sh
-sh -c ". ./venv/bin/activate ; docker-compose run --rm backend poetry export -f requirements.txt --output venv/requirements.txt ; python3.9 -m pip install -r venv/requirements.txt --require-hashes"
+sh -c ". ./venv/bin/activate ; docker compose run --rm backend poetry export -f requirements.txt --output venv/requirements.txt ; python3.9 -m pip install -r venv/requirements.txt --require-hashes"
 ```
 
 To ensure that your change will pass all the static checks, run this command:
 
 ```shell
-docker-compose run --rm backend sh -c "black . && isort . && flake8 . && mypy ."
+docker compose run --rm backend sh -c "black . && isort . && flake8 . && mypy ."
 ```
 
 ## Testing
@@ -29,7 +29,7 @@ docker-compose run --rm backend sh -c "black . && isort . && flake8 . && mypy ."
 To run tests, you call `./manage.py test`. Example invocation:
 
 ```shell
-docker-compose run --rm backend python3 manage.py test -v3 --keepdb --settings hct_mis_api.settings_test --parallel
+docker compose run --rm backend python3 manage.py test -v3 --keepdb --settings hct_mis_api.settings_test --parallel
 ```
 
 ## Linting
@@ -37,7 +37,7 @@ docker-compose run --rm backend python3 manage.py test -v3 --keepdb --settings h
 To run linting, you use `flake8`. Example invocation:
 
 ```shell
-docker-compose run --rm backend flake8 .
+docker compose run --rm backend flake8 .
 ```
 
 ## Formatting
@@ -45,7 +45,7 @@ docker-compose run --rm backend flake8 .
 To run formatting, you use `black`. Example invocation:
 
 ```shell
-docker-compose run --rm backend black .
+docker compose run --rm backend black .
 ```
 
 ## Isort
@@ -53,7 +53,7 @@ docker-compose run --rm backend black .
 To run isort, you use `isort`. Example invocation:
 
 ```shell
-docker-compose run --rm backend isort .
+docker compose run --rm backend isort .
 ```
 
 ## Mypy
@@ -61,5 +61,5 @@ docker-compose run --rm backend isort .
 To run mypy, you use `mypy`. Example invocation:
 
 ```shell
-docker-compose run --rm backend mypy .
+docker compose run --rm backend mypy .
 ```
