@@ -505,6 +505,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     is_follow_up = models.BooleanField(default=False)
     exclusion_reason = models.TextField(blank=True)
     exclude_household_error = models.TextField(blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         verbose_name = "Payment Plan"
