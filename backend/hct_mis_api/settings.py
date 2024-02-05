@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -84,7 +84,6 @@ WWW_ROOT = "http://{}/".format(DOMAIN_NAME)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[DOMAIN_NAME])
 FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", default=DOMAIN_NAME)
 ADMIN_PANEL_URL = env("ADMIN_PANEL_URL")
-
 
 ####
 # Other settings
@@ -168,7 +167,6 @@ if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY:
     DEFAULT_FILE_STORAGE = "hct_mis_api.apps.core.storage.AzureMediaStorage"
     STATICFILES_STORAGE = "hct_mis_api.apps.core.storage.AzureStaticStorage"
 
-
 SENTRY_DSN = env("SENTRY_DSN")
 if SENTRY_DSN:
     import re
@@ -180,9 +178,9 @@ if SENTRY_DSN:
 CSP_REPORT_PERCENTAGE = 0.1
 
 # default source as self
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_FRAME_ANCESTORS = ("'none'",)
-CSP_STYLE_SRC = (
+CSP_DEFAULT_SRC: Tuple[str, ...] = ("'self'",)
+CSP_FRAME_ANCESTORS: Tuple[str, ...] = ("'none'",)
+CSP_STYLE_SRC: Tuple[str, ...] = (
     "'self'",
     "'unsafe-inline'",
     "'unsafe-eval'",
@@ -196,7 +194,15 @@ CSP_STYLE_SRC = (
     "saunihopetrn.blob.core.windows.net",  # trn
     "saunihopeprd.blob.core.windows.net",  # prod
 )
-CSP_SCRIPT_SRC = (
+CSP_MANIFEST_SRC: Tuple[str, ...] = (
+    "'self'",
+    "hctmisdev.blob.core.windows.net",
+    "saunihopestg.blob.core.windows.net",
+    "saunihopetrn.blob.core.windows.net",
+    "saunihopeprd.blob.core.windows.net",
+)
+
+CSP_SCRIPT_SRC: Tuple[str, ...] = (
     "'self'",
     "'unsafe-inline'",
     "'unsafe-eval'",
@@ -210,7 +216,7 @@ CSP_SCRIPT_SRC = (
     "cdnjs.cloudflare.com",
     "unpkg.com",
 )
-CSP_IMG_SRC = (
+CSP_IMG_SRC: Tuple[str, ...] = (
     "'self'",
     "data:",
     "cdn.datatables.net",
@@ -222,7 +228,7 @@ CSP_IMG_SRC = (
     "map1b.vis.earthdata.nasa.gov",
     "map1c.vis.earthdata.nasa.gov",
 )
-CSP_FONT_SRC = (
+CSP_FONT_SRC: Tuple[str, ...] = (
     "'self'",
     "data:",
     "fonts.gstatic.com",
@@ -232,8 +238,8 @@ CSP_FONT_SRC = (
     "saunihopetrn.blob.core.windows.net",
     "saunihopeprd.blob.core.windows.net",
 )
-CSP_MEDIA_SRC = ("'self'",)
-CSP_CONNECT_SRC = (
+CSP_MEDIA_SRC: Tuple[str, ...] = ("'self'",)
+CSP_CONNECT_SRC: Tuple[str, ...] = (
     "excubo.unicef.io",
     "sentry.io",
     "gov-bam.nr-data.net",
@@ -245,6 +251,13 @@ CSP_CONNECT_SRC = (
 )
 
 DEBUG = env.bool("DEBUG", default=False)
+if DEBUG:
+    CSP_CONNECT_SRC += (FRONTEND_HOST,)
+    CSP_FONT_SRC += (FRONTEND_HOST,)
+    CSP_IMG_SRC += (FRONTEND_HOST,)
+    CSP_SCRIPT_SRC += (FRONTEND_HOST,)
+    CSP_STYLE_SRC += (FRONTEND_HOST,)
+    CSP_MANIFEST_SRC += (FRONTEND_HOST,)
 
 if DEBUG:
     ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
@@ -312,7 +325,6 @@ if env("POSTGRES_SSL", default=False):
         "sslmode": "verify-full",
         "sslrootcert": "/code/psql-cert.crt",
     }
-
 
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING: Dict[str, str] = {
@@ -393,6 +405,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.activity_log.apps.ActivityLogConfig",
     "hct_mis_api.aurora.apps.Config",
     "hct_mis_api.apps.accountability.apps.AccountabilityConfig",
+    "hct_mis_api.apps.web.apps.WebConfig",
 ]
 
 DJANGO_APPS = [
@@ -1092,6 +1105,5 @@ LOGGING: Dict[str, Any] = {
 # overwrite Azure logs
 logger_azure = logging.getLogger("azure.core.pipeline.policies.http_logging_policy")
 logger_azure.setLevel(logging.WARNING)
-
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
