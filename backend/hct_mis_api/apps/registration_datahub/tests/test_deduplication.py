@@ -67,16 +67,22 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
         rdi = RegistrationDataImportFactory(
             datahub_id=cls.registration_data_import_datahub.id,
             business_area=cls.business_area,
+            program=cls.program,
         )
         cls.registration_data_import_datahub.hct_id = rdi.id
         cls.registration_data_import_datahub.save()
 
-        registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
+        registration_data_import_second = RegistrationDataImportFactory(
+            business_area=cls.business_area, program=cls.program
+        )
         (
             cls.household,
             cls.individuals,
         ) = create_imported_household_and_individuals(
-            household_data={"registration_data_import": cls.registration_data_import_datahub},
+            household_data={
+                "registration_data_import": cls.registration_data_import_datahub,
+                "program_id": cls.program.id,
+            },
             individuals_data=[
                 {
                     "registration_data_import": cls.registration_data_import_datahub,
@@ -190,7 +196,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-04",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -203,7 +208,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1997-08-08",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -216,7 +220,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1997-07-07",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -229,7 +232,6 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1996-12-12",
-                    "program": cls.program,
                 },
             ],
         )
@@ -239,7 +241,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
     def test_batch_deduplication(self) -> None:
         task = DeduplicateTask(self.business_area.slug, self.program.id)
 
-        with self.assertNumQueries(9):
+        with self.assertNumQueries(11):
             task.deduplicate_imported_individuals(self.registration_data_import_datahub)
         duplicate_in_batch = ImportedIndividual.objects.order_by("full_name").filter(
             deduplication_batch_status=DUPLICATE_IN_BATCH
@@ -322,8 +324,12 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             has_data_sharing_agreement=True,
         )
         cls.program = ProgramFactory(status="ACTIVE")
-        cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
-        registration_data_import_second = RegistrationDataImportFactory(business_area=cls.business_area)
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area, program=cls.program
+        )
+        registration_data_import_second = RegistrationDataImportFactory(
+            business_area=cls.business_area, program=cls.program
+        )
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
@@ -342,7 +348,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
-                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -355,7 +360,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
                     "birth_date": "1955-09-05",
-                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -368,7 +372,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
-                    "program_id": cls.program.id,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -381,7 +384,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1989-09-10",
-                    "program_id": cls.program.id,
                 },
             ],
         )
@@ -403,7 +405,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": registration_data_import_second,
@@ -416,7 +417,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": FEMALE,
                     "birth_date": "1989-09-10",
-                    "program": cls.program,
                 },
             ],
         )

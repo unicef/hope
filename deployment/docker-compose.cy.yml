@@ -2,6 +2,7 @@ version: '3.7'
 x-django-envs: &django_envs
   environment:
     - ENV=dev
+    - DEBUG=true
     - SECRET_KEY=31283012-38dasda
     - POSTGRES_DB=postgres
     - POSTGRES_USER=postgres
@@ -48,21 +49,14 @@ services:
       - ../cypress-results:/code/cypress/results
       - ../cypress-reports:/code/cypress/reports
 
-
   proxy:
-    image: unicef/hct-mis-proxy
+    image: tivix/docker-nginx:v17
     environment:
-      - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_HOST=frontend:80
-    build:
-      context: ../proxy
-      dockerfile: Dockerfile
+      - UPSTREAMS=/:backend:8000
+    ports:
+      - "8082:80"
     depends_on:
       - backend
-      - frontend
-
-  frontend:
-    image: ${FRONTEND_IMAGE}
 
   redis:
     restart: unless-stopped

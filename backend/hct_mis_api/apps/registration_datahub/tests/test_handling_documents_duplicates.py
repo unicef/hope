@@ -46,7 +46,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             has_data_sharing_agreement=True,
         )
         cls.program = ProgramFactory(business_area=cls.business_area)
-        cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area, program=cls.program
+        )
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
@@ -65,7 +67,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -78,7 +79,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
                     "birth_date": "1955-09-05",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -91,7 +91,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -104,7 +103,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -117,7 +115,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -130,7 +127,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
-                    "program": cls.program,
                 },
             ],
         )
@@ -144,15 +140,28 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="ASD123",
             individual=cls.individuals[0],
             status=Document.STATUS_VALID,
+            program=cls.individuals[0].program,
         )
         cls.document2 = Document.objects.create(
-            type=dt, document_number="ASD123", individual=cls.individuals[1], country=country
+            type=dt,
+            document_number="ASD123",
+            individual=cls.individuals[1],
+            country=country,
+            program=cls.individuals[1].program,
         )
         cls.document3 = Document.objects.create(
-            type=dt, document_number="BBC999", individual=cls.individuals[2], country=country
+            type=dt,
+            document_number="BBC999",
+            individual=cls.individuals[2],
+            country=country,
+            program=cls.individuals[2].program,
         )
         cls.document4 = Document.objects.create(
-            type=dt, document_number="ASD123", individual=cls.individuals[3], country=country
+            type=dt,
+            document_number="ASD123",
+            individual=cls.individuals[3],
+            country=country,
+            program=cls.individuals[3].program,
         )
         cls.document5 = Document.objects.create(
             country=country,
@@ -160,6 +169,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="TOTALY UNIQ",
             individual=cls.individuals[4],
             status=Document.STATUS_VALID,
+            program=cls.individuals[4].program,
         )
         cls.document6 = Document.objects.create(
             country=country,
@@ -167,24 +177,28 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="ASD123",
             individual=cls.individuals[2],
             status=Document.STATUS_VALID,
+            program=cls.individuals[2].program,
         )
         cls.document7 = Document.objects.create(
             country=country,
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[1],
+            program=cls.individuals[1].program,
         )
         cls.document8 = Document.objects.create(
             country=country,
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[4],
+            program=cls.individuals[4].program,
         )
         cls.document9 = Document.objects.create(
             country=country,
             type=dt,
             document_number="UNIQ",
             individual=cls.individuals[5],
+            program=cls.individuals[5].program,
         )
         cls.all_documents = [
             cls.document1,

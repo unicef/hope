@@ -79,6 +79,7 @@ export const CreateProgramPage = (): ReactElement => {
 
   const initialValues = {
     name: '',
+    programmeCode: '',
     startDate: '',
     endDate: '',
     sector: '',
