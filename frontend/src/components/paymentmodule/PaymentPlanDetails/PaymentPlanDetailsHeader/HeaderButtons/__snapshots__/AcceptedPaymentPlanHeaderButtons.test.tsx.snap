@@ -41,6 +41,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
     >
       <button
         class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
+        data-cy="button-send-to-payment-gateway"
         disabled=""
         tabindex="-1"
         type="button"
@@ -96,8 +97,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
       class="MuiBox-root MuiBox-root-6"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
-        tabindex="0"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
+        data-cy="button-send-to-payment-gateway"
+        disabled=""
+        tabindex="-1"
         type="button"
       >
         <span
@@ -105,9 +108,6 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
         >
           Send to FSP
         </span>
-        <span
-          class="MuiTouchRipple-root"
-        />
       </button>
     </div>
   </div>

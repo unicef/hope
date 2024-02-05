@@ -92,7 +92,8 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
             grievanceComplaintTicketExtras: {
               household: values.selectedHousehold?.id,
               individual: values.selectedIndividual?.id,
-              paymentRecord: values.selectedPaymentRecords,
+              paymentRecord:
+                values.selectedPaymentRecords?.map((el) => el.id) || null,
             },
           },
         },
@@ -102,7 +103,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareSesitiveVariables(requiredVariables, values) {
+function prepareSensitiveVariables(requiredVariables, values) {
   return {
     variables: {
       input: {
@@ -322,7 +323,7 @@ export const prepareVariablesDict = {
   [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: preparePositiveFeedbackVariables,
   [GRIEVANCE_CATEGORIES.REFERRAL]: prepareReferralVariables,
   [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: prepareGrievanceComplaintVariables,
-  [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: prepareSesitiveVariables,
+  [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: prepareSensitiveVariables,
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
     [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: prepareAddIndividualVariables,
     [GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL]: prepareDeleteIndividualVariables,

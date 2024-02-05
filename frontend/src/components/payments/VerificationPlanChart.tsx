@@ -9,8 +9,8 @@ interface VerificationPlanDetailsChartProps {
 }
 
 const ChartContainer = styled.div`
-  width: 150px;
-  height: 150px;
+  width: 100%;
+  height: 100%;
 `;
 
 export const VerificationPlanDetailsChart = ({
@@ -20,8 +20,6 @@ export const VerificationPlanDetailsChart = ({
   return (
     <ChartContainer>
       <Doughnut
-        width={200}
-        height={200}
         options={{
           maintainAspectRatio: false,
           cutoutPercentage: 80,

@@ -2,7 +2,7 @@ import logging
 from typing import Any, Iterable
 
 from hct_mis_api.apps.registration_datahub.templatetags.smart_register import is_image
-from hct_mis_api.apps.registration_datahub.utils import get_record_model
+from hct_mis_api.aurora.models import Record
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,6 @@ def extract(records_ids: Iterable[int], raise_exception: bool = False) -> Any:
             return d
 
     for record_id in records_ids:
-        Record = get_record_model()
         record = Record.objects.get(pk=record_id)
         try:
             record.data = _filter(record.get_data())

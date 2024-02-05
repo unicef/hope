@@ -499,7 +499,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Boolean",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -24788,6 +24788,38 @@
             "deprecationReason": null
           },
           {
+            "name": "householdCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "individualCount",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "households",
             "description": null,
             "args": [
@@ -27280,12 +27312,6 @@
             "deprecationReason": null
           },
           {
-            "name": "DIIA",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "FLEX_REGISTRATION",
             "description": null,
             "isDeprecated": false,
@@ -28755,6 +28781,18 @@
           },
           {
             "name": "EXCLUDE_BENEFICIARIES_ERROR",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEND_TO_PAYMENT_GATEWAY",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEND_TO_PAYMENT_GATEWAY_ERROR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -39511,6 +39549,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sentToPaymentGateway",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -57429,22 +57483,6 @@
             "deprecationReason": null
           },
           {
-            "name": "diiaRecId",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "enumeratorRecId",
             "description": null,
             "args": [],
@@ -59233,12 +59271,6 @@
           },
           {
             "name": "FLEX",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "DIIA",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -70516,6 +70548,12 @@
           },
           {
             "name": "FINISH",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEND_TO_PAYMENT_GATEWAY",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

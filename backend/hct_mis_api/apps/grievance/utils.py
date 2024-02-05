@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from django.contrib.auth.models import AbstractUser
 from django.core.cache import cache
@@ -8,6 +8,7 @@ from django.db.models import Q, QuerySet
 from django.shortcuts import get_object_or_404
 
 from hct_mis_api.apps.account.models import Partner
+from hct_mis_api.apps.accountability.models import Feedback
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.grievance.models import (
     GrievanceDocument,
@@ -21,9 +22,6 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.grievance.validators import validate_file
 from hct_mis_api.apps.household.models import Individual
-
-if TYPE_CHECKING:
-    from hct_mis_api.apps.accountability.models import Feedback
 
 logger = logging.getLogger(__name__)
 
@@ -165,29 +163,34 @@ def filter_based_on_partner_areas_2(
     id_container: Callable[[Any], List[Any]],
 ) -> QuerySet["GrievanceTicket", "Feedback"]:
     business_area_id_str = str(business_area_id)
-    if program_id:
-        program_id_str = str(program_id)
     try:
         partner_permission = user_partner.get_permissions()
         filter_q = Q()
-        if not program_id:
-            if business_area_permission := partner_permission.get_programs_for_business_area(business_area_id_str):
-                programs_permissions = business_area_permission.programs.items()
-            else:
-                programs_permissions = {}  # type: ignore
-        else:
-            areas = partner_permission.areas_for(business_area_id_str, program_id_str)
+        if program_id:
+            areas = partner_permission.areas_for(business_area_id_str, str(program_id))
             if areas is None:
                 return queryset.model.objects.none()
-            programs_permissions = {program_id_str: areas}.items()
-
-        for program_id, areas_ids in programs_permissions:
-            program_q = Q(**{lookup_id: id_container(program_id)})
+            programs_permissions = {str(program_id): areas}.items()
+        else:
+            if business_area_permission := partner_permission.get_programs_for_business_area(business_area_id_str):
+                programs_permissions = business_area_permission.programs.items()
+                # if user does not have permission to any program in this business area -> only non-program tickets
+                if not programs_permissions:
+                    return queryset.model.objects.none()
+            else:
+                return queryset.model.objects.none()
+        for perm_program_id, areas_ids in programs_permissions:
+            program_q = Q(**{lookup_id: id_container(perm_program_id)})
             areas_null_and_program_q = program_q & Q(admin2__isnull=True)
             if areas_ids:
                 filter_q |= Q(areas_null_and_program_q | Q(program_q & Q(admin2__in=areas_ids)))
             else:
-                filter_q |= areas_null_and_program_q
+                filter_q |= program_q  # empty areas -> full area access
+
+        # add Feedbacks without program for "All Programmes" query
+        if queryset.model is Feedback and not program_id:
+            filter_q |= Q(program__isnull=True)
+
         queryset = queryset.filter(filter_q)
         return queryset
     except (Partner.DoesNotExist, AssertionError):

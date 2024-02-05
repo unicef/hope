@@ -64,7 +64,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     ) -> Dict:
         household_data = {
             **build_arg_dict_from_dict(localization_dict, SriLankaRegistrationService.HOUSEHOLD_MAPPING_DICT),
-            "flex_registrations_record": record,
+            # "flex_registrations_record": record,
             "registration_data_import": registration_data_import,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
