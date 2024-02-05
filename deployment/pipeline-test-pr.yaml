@@ -284,7 +284,7 @@ stages:
             continueOnError: true
 
   - stage: e2e_tests
-    dependsOn: [build_and_push, build_and_push_cypress]
+    dependsOn: [build_and_push_backend, build_and_push_cypress]
     displayName: E2E-Tests
     jobs:
       - job: cypress_tests
