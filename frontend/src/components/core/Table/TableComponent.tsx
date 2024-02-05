@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 import Paper from '@mui/material/Paper';
-import Skeleton from '@material-ui/lab/Skeleton';
+import Skeleton from '@mui/lab/Skeleton';
 import { createStyles, makeStyles, Theme } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';

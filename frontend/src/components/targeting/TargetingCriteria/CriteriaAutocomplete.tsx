@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/lab/Autocomplete';
 import { TextField, Paper } from '@mui/material';
 import styled from 'styled-components';
 import get from 'lodash/get';

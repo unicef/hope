@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/lab/Autocomplete';
 import styled from 'styled-components';
 import { useDebounce } from '../../../hooks/useDebounce';
 import TextField from '../../../shared/TextField';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '180px')}
@@ -100,7 +100,7 @@ export const AssignedToDropdown = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          margin='dense'
+          margin="dense"
           value={inputValue}
           variant={label ? 'outlined' : 'standard'}
           label={label}
