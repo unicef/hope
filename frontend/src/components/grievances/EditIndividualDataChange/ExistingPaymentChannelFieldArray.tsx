@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import React from 'react';
@@ -21,7 +21,7 @@ export function ExistingPaymentChannelFieldArray({
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name='individualDataUpdatePaymentChannelsToEdit'
+        name="individualDataUpdatePaymentChannelsToEdit"
         render={(arrayHelpers) => {
           return individual?.paymentChannels?.length > 0 ? (
             <>

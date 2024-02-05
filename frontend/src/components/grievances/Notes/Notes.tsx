@@ -1,4 +1,4 @@
-import { Avatar, Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +17,7 @@ import { LoadingButton } from '../../core/LoadingButton';
 import { OverviewContainerColumn } from '../../core/OverviewContainerColumn';
 import { Title } from '../../core/Title';
 import { UniversalMoment } from '../../core/UniversalMoment';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 const Name = styled.span`
   font-size: 16px;
@@ -64,11 +64,11 @@ export function Notes({
   ): React.ReactElement => (
     <Grid container key={noteId}>
       <Grid item xs={2}>
-        <Avatar alt={`${name} picture`} src='/static/images/avatar/1.jpg' />
+        <Avatar alt={`${name} picture`} src="/static/images/avatar/1.jpg" />
       </Grid>
       <Grid item xs={10}>
         <Grid item xs={12}>
-          <Box display='flex' justifyContent='space-between'>
+          <Box display="flex" justifyContent="space-between">
             <Name>{name}</Name>
             <Date>
               <UniversalMoment withTime>{date}</UniversalMoment>
@@ -124,7 +124,7 @@ export function Notes({
           {({ submitForm }) => (
             <StyledBox>
               <Title>
-                <Typography variant='h6'>Notes</Typography>
+                <Typography variant="h6">Notes</Typography>
               </Title>
               <OverviewContainerColumn>
                 {mappedNotes}
@@ -135,7 +135,7 @@ export function Notes({
                     </Grid>
                     <Grid item xs={10}>
                       <Grid item xs={12}>
-                        <Box display='flex' justifyContent='space-between'>
+                        <Box display="flex" justifyContent="space-between">
                           <Name>{renderUserName(meData.me)}</Name>
                         </Box>
                       </Grid>
@@ -143,23 +143,23 @@ export function Notes({
                         <DescMargin>
                           <Form>
                             <Field
-                              name='newNote'
+                              name="newNote"
                               multiline
                               fullWidth
-                              variant='filled'
-                              label='Add a note ...'
+                              variant="filled"
+                              label="Add a note ..."
                               component={FormikTextField}
                             />
                             <Box
                               mt={2}
-                              display='flex'
-                              justifyContent='flex-end'
+                              display="flex"
+                              justifyContent="flex-end"
                             >
                               <LoadingButton
-                                data-cy='button-add-note'
+                                data-cy="button-add-note"
                                 loading={loading}
-                                color='primary'
-                                variant='contained'
+                                color="primary"
+                                variant="contained"
                                 onClick={submitForm}
                                 disabled={!isActiveProgram}
                               >

@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,8 +38,8 @@ export const DeleteTargetPopulation = ({
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <Formik
         validationSchema={null}
@@ -71,11 +71,11 @@ export const DeleteTargetPopulation = ({
                 <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
                 <LoadingButton
                   loading={loading}
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-delete'
+                  data-cy="button-delete"
                 >
                   {t('Delete')}
                 </LoadingButton>

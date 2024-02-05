@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React, { useState } from 'react';
 import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 
@@ -17,12 +17,12 @@ export const GrievanceDocumentPhotoModalEditable = ({
   const picUrl = photoSrc;
 
   return (
-    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+    <Box style={{ height: '100%' }} display="flex" alignItems="center">
       {isEdited || !picUrl ? (
-        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+        <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <input
-            type='file'
-            accept='image/*'
+            type="file"
+            accept="image/*"
             onChange={(event) => {
               setFieldValue(fieldName, event.currentTarget.files[0]);
             }}
@@ -31,7 +31,7 @@ export const GrievanceDocumentPhotoModalEditable = ({
       ) : (
         <PhotoModal
           src={picUrl}
-          variant='pictureClose'
+          variant="pictureClose"
           closeHandler={() => {
             setEdit(true);
             setFieldValue(fieldName, null);

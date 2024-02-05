@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,10 +22,8 @@ export const HouseholdQuestionnaire = ({
   const { t } = useTranslation();
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
-  const [
-    getHousehold,
-    { data: fullHousehold, loading: fullHouseholdLoading },
-  ] = useHouseholdLazyQuery({ variables: { id: household?.id } });
+  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
+    useHouseholdLazyQuery({ variables: { id: household?.id } });
 
   useEffect(() => {
     if (values.selectedHousehold) {
@@ -133,7 +131,7 @@ export const HouseholdQuestionnaire = ({
             data-cy={`input-${el.name}`}
             label={el.label}
             displayValue={el.value || '-'}
-            color='primary'
+            color="primary"
             component={FormikCheckboxField}
           />
         </Grid>

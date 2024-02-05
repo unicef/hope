@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-} from '@material-ui/core';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@material-ui/icons';
 import get from 'lodash/get';
 import React, { useState } from 'react';
@@ -45,15 +39,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
-  const [
-    mutate,
-    { data: uploadData, loading: fileLoading, error },
-  ] = useImportXlsxPpListMutation();
+  const [mutate, { data: uploadData, loading: fileLoading, error }] =
+    useImportXlsxPpListMutation();
 
-  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] = get(
-    uploadData,
-    'importXlsxPaymentPlanPaymentList.errors',
-  );
+  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] =
+    get(uploadData, 'importXlsxPaymentPlanPaymentList.errors');
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -94,11 +84,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
 
   return (
     <>
-      <Box key='import'>
+      <Box key="import">
         <Button
           startIcon={<Publish />}
-          color='primary'
-          data-cy='button-import'
+          color="primary"
+          data-cy="button-import"
           onClick={() => setOpenImport(true)}
           disabled={shouldDisableUpload}
         >
@@ -108,10 +98,10 @@ export const ImportXlsxPaymentPlanPaymentList = ({
       <Dialog
         open={open}
         onClose={() => setOpenImport(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
-        <DialogTitleWrapper data-cy='dialog-import'>
+        <DialogTitleWrapper data-cy="dialog-import">
           <DialogTitle>{t('Select File to Import')}</DialogTitle>
           <>
             <DropzoneField
@@ -135,7 +125,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             />
             {fileToImport &&
             (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
-              <Error data-cy='error-list'>
+              <Error data-cy="error-list">
                 <p>Errors</p>
                 {error
                   ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
@@ -146,7 +136,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
           </>
           <DialogActions>
             <Button
-              data-cy='close-button'
+              data-cy="close-button"
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
@@ -157,11 +147,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             <LoadingButton
               loading={fileLoading}
               disabled={!fileToImport}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => handleImport()}
-              data-cy='button-import-entitlement'
+              data-cy="button-import-entitlement"
             >
               {t('IMPORT')}
             </LoadingButton>

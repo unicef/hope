@@ -7,7 +7,7 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Tooltip } from '@material-ui/core';
+import { Button, Tooltip } from '@mui/material';
 import { SurveyCategory } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
@@ -70,15 +70,15 @@ export const CreateSurveyMenu = (): React.ReactElement => {
         <Tooltip title={t('Program has to be active to create a Survey')}>
           <span>
             <Button
-              aria-controls='customized-menu'
-              aria-haspopup='true'
-              variant='contained'
-              color='primary'
+              aria-controls="customized-menu"
+              aria-haspopup="true"
+              variant="contained"
+              color="primary"
               onClick={handleClick}
               endIcon={
                 anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />
               }
-              data-cy='button-new-survey'
+              data-cy="button-new-survey"
               disabled={!isActiveProgram}
             >
               {t('New Survey')}
@@ -87,44 +87,44 @@ export const CreateSurveyMenu = (): React.ReactElement => {
         </Tooltip>
       ) : (
         <Button
-          aria-controls='customized-menu'
-          aria-haspopup='true'
-          variant='contained'
-          color='primary'
+          aria-controls="customized-menu"
+          aria-haspopup="true"
+          variant="contained"
+          color="primary"
           onClick={handleClick}
           endIcon={
             anchorEl ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />
           }
-          data-cy='button-new-survey'
+          data-cy="button-new-survey"
         >
           {t('New Survey')}
         </Button>
       )}
 
       <StyledMenu
-        id='customized-menu'
+        id="customized-menu"
         anchorEl={anchorEl}
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <StyledMenuItem data-cy='menu-item-rapid-pro'>
+        <StyledMenuItem data-cy="menu-item-rapid-pro">
           <ListItemText
-            data-cy='menu-item-rapid-pro-text'
+            data-cy="menu-item-rapid-pro-text"
             onClick={() => handleMenuItemClick(SurveyCategory.RapidPro)}
             primary={t('New Survey with Rapid Pro')}
           />
         </StyledMenuItem>
-        <StyledMenuItem data-cy='menu-item-sms-text'>
+        <StyledMenuItem data-cy="menu-item-sms-text">
           <ListItemText
-            data-cy='menu-item-sms-text'
+            data-cy="menu-item-sms-text"
             onClick={() => handleMenuItemClick(SurveyCategory.Sms)}
             primary={t('New Survey with SMS')}
           />
         </StyledMenuItem>
-        <StyledMenuItem data-cy='menu-item-manual'>
+        <StyledMenuItem data-cy="menu-item-manual">
           <ListItemText
-            data-cy='menu-item-manual-text'
+            data-cy="menu-item-manual-text"
             onClick={() => handleMenuItemClick(SurveyCategory.Manual)}
             primary={t('New Survey with Manual Process')}
           />

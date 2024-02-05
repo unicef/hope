@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 import { Info } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 const initialFilter = {
   name: '',
@@ -52,21 +52,23 @@ export const TargetPopulationsPage = (): React.ReactElement => {
         <>
           <IconButton
             onClick={() => setToggleInfo(true)}
-            color='primary'
-            aria-label='Targeting Information'
-            data-cy='button-target-population-info'
+            color="primary"
+            aria-label="Targeting Information"
+            data-cy="button-target-population-info"
           >
             <Info />
           </IconButton>
           <TargetingInfoDialog open={isInfoOpen} setOpen={setToggleInfo} />
           {canCreate && (
             <ButtonTooltip
-              variant='contained'
-              color='primary'
-              title={t('Program has to be active to create a new Target Population')}
+              variant="contained"
+              color="primary"
+              title={t(
+                'Program has to be active to create a new Target Population',
+              )}
               component={Link}
               to={`/${baseUrl}/target-population/create`}
-              data-cy='button-target-population-create-new'
+              data-cy="button-target-population-create-new"
               disabled={!isActiveProgram}
             >
               Create new

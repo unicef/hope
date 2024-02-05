@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +20,7 @@ import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
-import { useProgramContext } from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 
 export interface MarkAsReleasedPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -31,19 +31,16 @@ export const MarkAsReleasedPaymentPlan = ({
 }: MarkAsReleasedPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
-  const [markAsReleasedDialogOpen, setMarkAsReleasedDialogOpen] = useState(
-    false,
-  );
+  const [markAsReleasedDialogOpen, setMarkAsReleasedDialogOpen] =
+    useState(false);
   const { showMessage } = useSnackbar();
-  const {
-    mutatePaymentPlanAction: review,
-    loading: loadingReview,
-  } = usePaymentPlanAction(
-    Action.Review,
-    paymentPlan.id,
-    () => showMessage(t('Payment Plan has been marked as reviewed.')),
-    () => setMarkAsReleasedDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: review, loading: loadingReview } =
+    usePaymentPlanAction(
+      Action.Review,
+      paymentPlan.id,
+      () => showMessage(t('Payment Plan has been marked as reviewed.')),
+      () => setMarkAsReleasedDialogOpen(false),
+    );
 
   const shouldShowLastReviewerMessage = (): boolean => {
     const financeReleaseNumberRequired =
@@ -59,9 +56,7 @@ export const MarkAsReleasedPaymentPlan = ({
   };
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string()
-      .min(4, 'Too short')
-      .max(255, 'Too long'),
+    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
   });
 
   return (
@@ -79,10 +74,10 @@ export const MarkAsReleasedPaymentPlan = ({
             {markAsReleasedDialogOpen && <AutoSubmitFormOnEnter />}
             <Box p={2}>
               <Button
-                color='primary'
-                variant='contained'
+                color="primary"
+                variant="contained"
                 onClick={() => setMarkAsReleasedDialogOpen(true)}
-                data-cy='button-mark-as-released'
+                data-cy="button-mark-as-released"
                 disabled={!isActiveProgram}
               >
                 {t('Mark as released')}
@@ -91,9 +86,9 @@ export const MarkAsReleasedPaymentPlan = ({
             <Dialog
               open={markAsReleasedDialogOpen}
               onClose={() => setMarkAsReleasedDialogOpen(false)}
-              scroll='paper'
-              aria-labelledby='form-dialog-title'
-              maxWidth='md'
+              scroll="paper"
+              aria-labelledby="form-dialog-title"
+              maxWidth="md"
             >
               <DialogTitleWrapper>
                 <DialogTitle>{t('Mark as Released')}</DialogTitle>
@@ -116,11 +111,11 @@ export const MarkAsReleasedPaymentPlan = ({
                   )}
                   <Form>
                     <Field
-                      name='comment'
+                      name="comment"
                       multiline
                       fullWidth
-                      variant='filled'
-                      label='Comment (optional)'
+                      variant="filled"
+                      label="Comment (optional)"
                       component={FormikTextField}
                     />
                   </Form>
@@ -133,11 +128,11 @@ export const MarkAsReleasedPaymentPlan = ({
                   </Button>
                   <LoadingButton
                     loading={loadingReview}
-                    type='submit'
-                    color='primary'
-                    variant='contained'
+                    type="submit"
+                    color="primary"
+                    variant="contained"
                     onClick={submitForm}
-                    data-cy='button-submit'
+                    data-cy="button-submit"
                   >
                     {t('Mark as released')}
                   </LoadingButton>

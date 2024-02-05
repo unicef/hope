@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React, { ReactElement } from 'react';
@@ -18,9 +18,9 @@ export const EditProgramButtonLink = ({
 
   return (
     <Button
-      data-cy='button-edit-program'
-      variant='outlined'
-      color='primary'
+      data-cy="button-edit-program"
+      variant="outlined"
+      color="primary"
       startIcon={<EditIcon />}
       component={Link}
       to={`/${baseUrl}/edit/${program.id}`}

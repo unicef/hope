@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -173,10 +173,10 @@ export const FollowUpPaymentPlanDetailsHeader = ({
   return (
     <PageHeader
       title={
-        <Box display='flex' alignItems='center'>
+        <Box display="flex" alignItems="center">
           {t('Follow-up Payment Plan')} ID:{' '}
           <Box ml={1}>
-            <span data-cy='pp-unicef-id'>{paymentPlan.unicefId}</span>
+            <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
           <StatusWrapper>
             <StatusBox

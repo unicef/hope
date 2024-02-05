@@ -2,13 +2,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import {
-  Button,
-  Box,
-  Paper,
-  SnackbarContent,
-  Snackbar,
-} from '@material-ui/core';
+import { Button, Box, Paper, SnackbarContent, Snackbar } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import { useCheckAgainstSanctionListUploadMutation } from '../../../__generated__/graphql';
 import { DropzoneField } from '../../../components/core/DropzoneField';
@@ -27,10 +21,8 @@ export function SanctionList(): React.ReactElement {
     setSnackbarMessage(message);
     setSnackbarShow(true);
   };
-  const [
-    checkAgainstSanctionMutate,
-    { loading: fileLoading },
-  ] = useCheckAgainstSanctionListUploadMutation();
+  const [checkAgainstSanctionMutate, { loading: fileLoading }] =
+    useCheckAgainstSanctionListUploadMutation();
 
   const { t } = useTranslation();
 
@@ -83,27 +75,27 @@ export function SanctionList(): React.ReactElement {
           title={t('Select File to Import to Check Against Sanctions List')}
         />
         <Box
-          display='flex'
-          justifyContent='center'
-          alignItems='center'
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
           mt={20}
           p={3}
         >
           <Paper>
             <Box
-              display='flex'
-              flexDirection='column'
-              alignItems='center'
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
               p={3}
             >
               {importFile}
               <ButtonsContainer>
-                <Box display='flex' justifyContent='space-between' p={3}>
+                <Box display="flex" justifyContent="space-between" p={3}>
                   <Button
-                    variant='text'
-                    color='primary'
-                    component='a'
-                    href='/api/download-sanction-template'
+                    variant="text"
+                    color="primary"
+                    component="a"
+                    href="/api/download-sanction-template"
                     onClick={(event) => {
                       /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
                       // @ts-ignore
@@ -111,17 +103,17 @@ export function SanctionList(): React.ReactElement {
                         event.preventDefault();
                       }
                     }}
-                    data-cy='a-download-sanction-template'
+                    data-cy="a-download-sanction-template"
                   >
                     DOWNLOAD TEMPLATE
                   </Button>
                   <Button
-                    type='submit'
-                    color='primary'
-                    variant='contained'
+                    type="submit"
+                    color="primary"
+                    variant="contained"
                     disabled={!fileToImport}
                     onClick={() => handleImport()}
-                    data-cy='button-import'
+                    data-cy="button-import"
                   >
                     {t('IMPORT')}
                   </Button>
@@ -135,7 +127,7 @@ export function SanctionList(): React.ReactElement {
               autoHideDuration={5000}
               onClose={() => setSnackbarShow(false)}
             >
-              <SnackbarContent message={snackbarMessage} data-cy='snackBar' />
+              <SnackbarContent message={snackbarMessage} data-cy="snackBar" />
             </Snackbar>
           )}
         </Box>

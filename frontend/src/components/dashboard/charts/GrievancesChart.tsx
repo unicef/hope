@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { formatNumber, getPercentage } from '../../../utils/utils';
@@ -54,7 +54,7 @@ export const GrievancesChart = ({
   };
 
   return (
-    <Box mt={6} height='300px'>
+    <Box mt={6} height="300px">
       <Doughnut data={chartData} options={options} />
     </Box>
   );

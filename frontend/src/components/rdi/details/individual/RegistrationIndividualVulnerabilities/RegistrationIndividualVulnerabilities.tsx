@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import React from 'react';
@@ -42,7 +42,7 @@ export function RegistrationIndividualVulnerabilities({
 
   const fields = Object.entries(individual.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
-      if(key in flexAttributesDict === false)
+      if (key in flexAttributesDict === false)
         return (
           <Grid item xs={4} key={key}>
             <LabelizedField label={key} value={value}>
@@ -83,7 +83,7 @@ export function RegistrationIndividualVulnerabilities({
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>{t('Vulnerabilities')}</Typography>
+        <Typography variant="h6">{t('Vulnerabilities')}</Typography>
       </Title>
       <Grid container spacing={6}>
         {fields}

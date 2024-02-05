@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
@@ -23,7 +23,7 @@ export const SetUpFspButtonActions = ({
   const isFollowUp = location.pathname.indexOf('followup') !== -1;
 
   return (
-    <Box pt={3} display='flex'>
+    <Box pt={3} display="flex">
       <Box mr={3}>
         {step === 0 && (
           <Button
@@ -38,9 +38,9 @@ export const SetUpFspButtonActions = ({
         {step === 1 && <Button onClick={handleBackStep}>{t('Back')}</Button>}
       </Box>
       <Button
-        data-cy='button-next-save'
-        variant='contained'
-        color='primary'
+        data-cy="button-next-save"
+        variant="contained"
+        color="primary"
         onClick={submitForm}
       >
         {t(step === 0 ? 'Next' : 'Save')}

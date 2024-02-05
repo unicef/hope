@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import DeleteIcon from '@material-ui/icons/Delete';
 import React from 'react';
 import styled from 'styled-components';
@@ -47,9 +47,9 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
     <Grid container spacing={5}>
       <Grid item xs={4}>
         <StyledBox disabled={disableUnselectHousehold}>
-          <Grid container alignItems='center' justifyContent='space-between'>
+          <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
-              <Box display='flex'>
+              <Box display="flex">
                 {t('Household ID')}:
                 <BlueText>
                   &ensp;
@@ -62,8 +62,8 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                 <DarkGrey>
                   <Flex>
                     <DeleteIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => handleRemove(Types.household)}
                     />
                   </Flex>
@@ -75,9 +75,9 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
       </Grid>
       <Grid item xs={4}>
         <StyledBox disabled={disableUnselectIndividual}>
-          <Grid container alignItems='center' justifyContent='space-between'>
+          <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
-              <Box display='flex'>
+              <Box display="flex">
                 {t('Individual ID')}:
                 <BlueText>
                   &ensp;
@@ -90,8 +90,8 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
                 <DarkGrey>
                   <Flex>
                     <DeleteIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => handleRemove(Types.individual)}
                     />
                   </Flex>

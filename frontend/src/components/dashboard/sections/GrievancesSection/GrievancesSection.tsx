@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -24,17 +24,17 @@ export const GrievancesSection = ({
   const { t } = useTranslation();
   if (!data) return null;
   return (
-    <DashboardPaper title='Grievances and Feedback'>
+    <DashboardPaper title="Grievances and Feedback">
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <CardTitleSmaller>{t('TOTAL NUMBER OF GRIEVANCES')}</CardTitleSmaller>
-          <Typography variant='caption'>
+          <Typography variant="caption">
             {formatNumber(data?.totalNumberOfGrievances)}
           </Typography>
         </Grid>
         <Grid item xs={6}>
           <CardTitleSmaller>{t('TOTAL NUMBER OF FEEDBACK')}</CardTitleSmaller>
-          <Typography variant='caption'>
+          <Typography variant="caption">
             {formatNumber(data?.totalNumberOfFeedback)}
           </Typography>
         </Grid>
@@ -43,7 +43,7 @@ export const GrievancesSection = ({
       <CardTitleSmaller>
         {t('NUMBER OF OPEN SENSITIVE GRIEVANCES')}
       </CardTitleSmaller>
-      <Typography variant='caption'>
+      <Typography variant="caption">
         {formatNumber(data?.totalNumberOfOpenSensitive)}
       </Typography>
     </DashboardPaper>

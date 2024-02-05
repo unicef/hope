@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,7 +57,7 @@ export const IndividualQuestionnaire = ({
             data-cy={`input-${el.name}`}
             label={el.label}
             displayValue={el.value || '-'}
-            color='primary'
+            color="primary"
             component={FormikCheckboxField}
           />
         </Grid>

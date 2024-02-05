@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -56,13 +56,13 @@ export const Selection = ({
     <Grid container spacing={3}>
       <Grid item xs={6}>
         <Field
-          name='category'
-          label='Category*'
+          name="category"
+          label="Category*"
           onChange={(e) => {
             setFieldValue('issueType', null);
             handleChange(e);
           }}
-          variant='outlined'
+          variant="outlined"
           choices={choicesData.grievanceTicketManualCategoryChoices}
           component={FormikSelectField}
           disabled={redirectedFromRelatedTicket}
@@ -71,9 +71,9 @@ export const Selection = ({
       {showIssueType(values) && (
         <Grid item xs={6}>
           <Field
-            name='issueType'
-            label='Issue Type*'
-            variant='outlined'
+            name="issueType"
+            label="Issue Type*"
+            variant="outlined"
             choices={
               redirectedFromRelatedTicket
                 ? dataChangeIssueTypes

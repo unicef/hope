@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -10,7 +10,7 @@ import {
 import {
   FinancialServiceProviderCommunicationChannel,
   PaymentPlanQuery,
-  PaymentPlanStatus
+  PaymentPlanStatus,
 } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
@@ -74,15 +74,18 @@ export const PaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
     permissions,
   );
-  const canSendToPaymentGateway = hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-  paymentPlan.status === PaymentPlanStatus.Accepted &&
-  paymentPlan.deliveryMechanisms.some(
-    (deliveryMechanism) => {
+  const canSendToPaymentGateway =
+    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
+    paymentPlan.status === PaymentPlanStatus.Accepted &&
+    paymentPlan.deliveryMechanisms.some((deliveryMechanism) => {
       const { sentToPaymentGateway, fsp } = deliveryMechanism;
-      const {communicationChannel} = fsp;
-      return !sentToPaymentGateway && communicationChannel === FinancialServiceProviderCommunicationChannel.Api ;
-    }
-  );
+      const { communicationChannel } = fsp;
+      return (
+        !sentToPaymentGateway &&
+        communicationChannel ===
+          FinancialServiceProviderCommunicationChannel.Api
+      );
+    });
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -177,10 +180,10 @@ export const PaymentPlanDetailsHeader = ({
   return (
     <PageHeader
       title={
-        <Box display='flex' alignItems='center'>
+        <Box display="flex" alignItems="center">
           {t('Payment Plan')} ID:{' '}
           <Box ml={1}>
-            <span data-cy='pp-unicef-id'>{paymentPlan.unicefId}</span>
+            <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
           <StatusWrapper ml={2}>
             <StatusBox

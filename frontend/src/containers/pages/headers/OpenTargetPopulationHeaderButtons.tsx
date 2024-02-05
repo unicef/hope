@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton } from '@mui/material';
 import {
   EditRounded,
   Delete,
@@ -15,7 +15,7 @@ import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTar
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationQuery['targetPopulation'];
@@ -38,16 +38,14 @@ export const OpenTargetPopulationHeaderButtons = ({
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
 
-  const [
-    rebuildTargetPopulation,
-    { loading: rebuildTargetPopulationLoading },
-  ] = useRebuildTpMutation();
+  const [rebuildTargetPopulation, { loading: rebuildTargetPopulationLoading }] =
+    useRebuildTpMutation();
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canDuplicate && (
         <IconButton
           onClick={() => setOpenDuplicate(true)}
-          data-cy='button-target-population-duplicate'
+          data-cy="button-target-population-duplicate"
           disabled={!isActiveProgram}
         >
           <FileCopy />
@@ -55,7 +53,7 @@ export const OpenTargetPopulationHeaderButtons = ({
       )}
       {canRemove && (
         <IconButton
-          data-cy='button-delete'
+          data-cy="button-delete"
           onClick={() => setOpenDelete(true)}
           disabled={!isActiveProgram}
         >
@@ -65,9 +63,9 @@ export const OpenTargetPopulationHeaderButtons = ({
       {canEdit && (
         <Box m={2}>
           <Button
-            data-cy='button-edit'
-            variant='outlined'
-            color='primary'
+            data-cy="button-edit"
+            variant="outlined"
+            color="primary"
             startIcon={<EditRounded />}
             component={Link}
             to={`/${baseUrl}/target-population/edit-tp/${targetPopulation.id}`}
@@ -80,9 +78,9 @@ export const OpenTargetPopulationHeaderButtons = ({
       {canEdit && (
         <Box m={2}>
           <Button
-            data-cy='button-rebuild'
-            variant='outlined'
-            color='primary'
+            data-cy="button-rebuild"
+            variant="outlined"
+            color="primary"
             disabled={rebuildTargetPopulationLoading || !isActiveProgram}
             startIcon={<RefreshRounded />}
             onClick={() =>
@@ -98,10 +96,10 @@ export const OpenTargetPopulationHeaderButtons = ({
       {canLock && (
         <Box m={2}>
           <Button
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             onClick={() => setOpenLock(true)}
-            data-cy='button-target-population-lock'
+            data-cy="button-target-population-lock"
             disabled={!isActiveProgram}
           >
             Lock

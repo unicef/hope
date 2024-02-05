@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '../../../../utils/utils';
@@ -38,7 +38,7 @@ export const PaymentPlanDetails = ({
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container>
@@ -90,9 +90,9 @@ export const PaymentPlanDetails = ({
                 </LabelizedField>
               </Grid>
             </Grid>
-            <Grid container direction='column' item xs={3} spacing={6}>
+            <Grid container direction="column" item xs={3} spacing={6}>
               <Grid item xs={12}>
-                <FieldBorder color='#84A1CA'>
+                <FieldBorder color="#84A1CA">
                   <RelatedFollowUpPaymentPlans
                     followUps={followUps}
                     baseUrl={baseUrl}

@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -67,9 +67,9 @@ export function RequestedHouseholdDataChange({
       return (
         <Button
           onClick={submitForm}
-          variant='contained'
-          color='primary'
-          data-cy='button-approve'
+          variant="contained"
+          color="primary"
+          data-cy="button-approve"
           disabled={
             ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
             !isActiveProgram
@@ -89,9 +89,9 @@ export function RequestedHouseholdDataChange({
             submitForm();
           })
         }
-        variant='contained'
-        color='primary'
-        data-cy='button-approve'
+        variant="contained"
+        color="primary"
+        data-cy="button-approve"
         title={t(
           'Program has to be active to create a Linked Ticket to Feedback',
         )}
@@ -151,14 +151,14 @@ export function RequestedHouseholdDataChange({
       {({ submitForm, setFieldValue, values }) => (
         <ApproveBox>
           <Title>
-            <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>Requested Data Change</Typography>
+            <Box display="flex" justifyContent="space-between">
+              <Typography variant="h6">Requested Data Change</Typography>
               {shouldShowEditButton(values) ? (
                 <Button
                   onClick={() => setEdit(true)}
-                  variant='outlined'
-                  color='primary'
-                  data-cy='button-edit'
+                  variant="outlined"
+                  color="primary"
+                  data-cy="button-edit"
                   disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                 >
                   {t('EDIT')}

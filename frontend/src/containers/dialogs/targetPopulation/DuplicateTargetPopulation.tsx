@@ -1,4 +1,4 @@
-import { Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Button, DialogContent, DialogTitle } from '@mui/material';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,8 +48,8 @@ export const DuplicateTargetPopulation = ({
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <Formik
         validationSchema={validationSchema}
@@ -86,26 +86,26 @@ export const DuplicateTargetPopulation = ({
                 )}
               </DialogDescription>
               <Field
-                name='name'
+                name="name"
                 fullWidth
                 label={t('Name Copy of Target Population')}
                 required
-                variant='outlined'
+                variant="outlined"
                 component={FormikTextField}
               />
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <Button data-cy='button-cancel' onClick={() => setOpen(false)}>
+                <Button data-cy="button-cancel" onClick={() => setOpen(false)}>
                   {t('CANCEL')}
                 </Button>
                 <LoadingButton
                   loading={loading}
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-target-population-duplicate'
+                  data-cy="button-target-population-duplicate"
                 >
                   {t('Save')}
                 </LoadingButton>

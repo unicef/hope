@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
@@ -66,12 +66,13 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   return existingTickets.length ? (
     <ApproveBox>
       <Title>
-        <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
+        <Typography variant="h6">{t('Other Related Tickets')}</Typography>
       </Title>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <LabelizedField
-          label={`${t('For Household')} ${values?.selectedHousehold?.unicefId ||
-            '-'} `}
+          label={`${t('For Household')} ${
+            values?.selectedHousehold?.unicefId || '-'
+          } `}
         >
           <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
@@ -86,8 +87,9 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t('For Household')} ${values?.selectedHousehold
-                ?.unicefId || '-'} `}
+              label={`${t('For Household')} ${
+                values?.selectedHousehold?.unicefId || '-'
+              } `}
             >
               <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>

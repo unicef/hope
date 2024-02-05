@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
@@ -57,7 +57,7 @@ export function AdminAreaAutocompleteMultiple({
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       <FieldLabel>{t('Administrative Level 2')}</FieldLabel>
       <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
         open={open}
@@ -95,8 +95,8 @@ export function AdminAreaAutocompleteMultiple({
               placeholder={
                 newValue.length > 0 ? null : t('Administrative Level 2')
               }
-              variant='outlined'
-              margin='dense'
+              variant="outlined"
+              margin="dense"
               value={inputValue}
               onChange={(e) => setInputTextChange(e.target.value)}
             />

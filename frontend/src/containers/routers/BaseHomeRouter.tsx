@@ -1,4 +1,4 @@
-import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
+import { makeStyles, Snackbar, SnackbarContent } from '@mui/material';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
@@ -39,23 +39,19 @@ export const BaseHomeRouter = ({ children }): React.ReactElement => {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
-  const {
-    data: businessAreaData,
-    loading: businessAreaLoading,
-  } = useAllBusinessAreasQuery({
-    variables: {
-      slug: businessArea,
-    },
-    fetchPolicy: 'cache-first',
-  });
+  const { data: businessAreaData, loading: businessAreaLoading } =
+    useAllBusinessAreasQuery({
+      variables: {
+        slug: businessArea,
+      },
+      fetchPolicy: 'cache-first',
+    });
 
-  const {
-    data: programsData,
-    loading: programsLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, first: 100 },
-    fetchPolicy: 'cache-first',
-  });
+  const { data: programsData, loading: programsLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, first: 100 },
+      fetchPolicy: 'cache-first',
+    });
 
   if (!businessAreaData) {
     return null;
@@ -78,7 +74,7 @@ export const BaseHomeRouter = ({ children }): React.ReactElement => {
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
 
   if (!isBusinessAreaValid) {
-    return <Redirect to='/' noThrow />;
+    return <Redirect to="/" noThrow />;
   }
 
   return (
@@ -89,9 +85,9 @@ export const BaseHomeRouter = ({ children }): React.ReactElement => {
         open={open}
         handleDrawerClose={handleDrawerClose}
         currentLocation={location.pathname}
-        dataCy='side-nav'
+        dataCy="side-nav"
       />
-      <MainContent data-cy='main-content'>
+      <MainContent data-cy="main-content">
         <div className={classes.appBarSpacer} />
         {children}
       </MainContent>

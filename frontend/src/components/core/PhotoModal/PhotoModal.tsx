@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, IconButton } from '@material-ui/core';
+import { Box, Button, DialogContent, IconButton } from '@mui/material';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import CloseIcon from '@material-ui/icons/Close';
 import React, { useState } from 'react';
@@ -62,8 +62,8 @@ export const PhotoModal = ({
       case 'picture':
         element = (
           <MiniImage
-            data-cy='mini-image'
-            alt='photo'
+            data-cy="mini-image"
+            alt="photo"
             src={src}
             onClick={() => setDialogOpen(true)}
           />
@@ -72,9 +72,9 @@ export const PhotoModal = ({
       case 'button':
         element = (
           <Button
-            data-cy='button-show-photo'
-            color='primary'
-            variant='outlined'
+            data-cy="button-show-photo"
+            color="primary"
+            variant="outlined"
             onClick={() => {
               setDialogOpen(true);
             }}
@@ -86,7 +86,7 @@ export const PhotoModal = ({
       case 'link':
         element = (
           <StyledLink
-            data-cy='link-show-photo'
+            data-cy="link-show-photo"
             onClick={() => {
               setDialogOpen(true);
             }}
@@ -97,14 +97,14 @@ export const PhotoModal = ({
         break;
       case 'pictureClose':
         element = (
-          <Box display='flex' alignItems='center'>
+          <Box display="flex" alignItems="center">
             <MiniImage
-              data-cy='mini-image-close'
-              alt='photo'
+              data-cy="mini-image-close"
+              alt="photo"
               src={src}
               onClick={() => setDialogOpen(true)}
             />
-            <IconButton data-cy='close-icon' onClick={() => closeHandler()}>
+            <IconButton data-cy="close-icon" onClick={() => closeHandler()}>
               <CloseIcon />
             </IconButton>
           </Box>
@@ -113,8 +113,8 @@ export const PhotoModal = ({
       default:
         element = (
           <MiniImage
-            data-cy='mini-image'
-            alt='photo'
+            data-cy="mini-image"
+            alt="photo"
             src={src}
             onClick={() => setDialogOpen(true)}
           />
@@ -129,7 +129,7 @@ export const PhotoModal = ({
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        aria-labelledby='form-dialog-title'
+        aria-labelledby="form-dialog-title"
       >
         <PhotoModalHeader
           title={title}
@@ -141,7 +141,7 @@ export const PhotoModal = ({
           <Box p={3}>
             <TransformWrapper>
               <TransformComponent>
-                <StyledImage id='modalImg' alt='photo' src={src} />
+                <StyledImage id="modalImg" alt="photo" src={src} />
               </TransformComponent>
             </TransformWrapper>
           </Box>

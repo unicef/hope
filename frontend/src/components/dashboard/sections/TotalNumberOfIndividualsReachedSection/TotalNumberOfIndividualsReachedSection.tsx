@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, Grid } from '@material-ui/core';
+import { Box, Button, DialogContent, Grid } from '@mui/material';
 import PersonIcon from '@material-ui/icons/Person';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,17 +42,17 @@ export const TotalNumberOfIndividualsReachedSection = ({
 
   return (
     <>
-      <DashboardCard color='#345DA0'>
+      <DashboardCard color="#345DA0">
         <CardTitle>{t('TOTAL NUMBER OF INDIVIDUALS REACHED')}</CardTitle>
-        <Grid container justifyContent='space-between' alignItems='center'>
+        <Grid container justifyContent="space-between" alignItems="center">
           <Grid item>
             <CardAmountLink onClick={() => setDialogOpen(true)}>
               {formatNumber(data?.total)}
             </CardAmountLink>
           </Grid>
           <Grid item>
-            <IconContainer bg='#D9E2EF' color='#023F90'>
-              <PersonIcon fontSize='inherit' />
+            <IconContainer bg="#D9E2EF" color="#023F90">
+              <PersonIcon fontSize="inherit" />
             </IconContainer>
           </Grid>
         </Grid>
@@ -60,10 +60,10 @@ export const TotalNumberOfIndividualsReachedSection = ({
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
         fullWidth
-        maxWidth='md'
+        maxWidth="md"
       >
         <DialogContent>
           <DialogContainer>

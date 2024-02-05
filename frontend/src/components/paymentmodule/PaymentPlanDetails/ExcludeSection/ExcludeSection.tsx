@@ -5,7 +5,7 @@ import {
   FormHelperText,
   Grid,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +24,7 @@ import { StyledTextField } from '../../../../shared/StyledTextField';
 import { ButtonTooltip } from '../../../core/ButtonTooltip';
 import { GreyText } from '../../../core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { useProgramContext } from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';
 
 interface ExcludeSectionProps {
@@ -123,7 +123,8 @@ export const ExcludeSection = ({
   };
 
   const handleApply = (): void => {
-    const idRegex = /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
+    const idRegex =
+      /^(\s*HH-\d{2}-\d{4}\.\d{4}\s*)(,\s*HH-\d{2}-\d{4}\.\d{4}\s*)*$/;
     const ids = idsValue.trim().split(/,\s*|\s+/);
     const invalidIds: string[] = [];
     const alreadyExcludedIds: string[] = [];
@@ -203,16 +204,21 @@ export const ExcludeSection = ({
 
     if (editMode) {
       return (
-        <Box display='flex' alignItems='center' justifyContent='center'>
+        <Box display="flex" alignItems="center" justifyContent="center">
           <Box mr={2}>
-            <Button variant='text' color='primary' data-cy='button-cancel-exclusions' onClick={resetExclusions}>
+            <Button
+              variant="text"
+              color="primary"
+              data-cy="button-cancel-exclusions"
+              onClick={resetExclusions}
+            >
               {t('Cancel')}
             </Button>
           </Box>
           <ButtonTooltip
             title={getTooltipText()}
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             disabled={saveExclusionsDisabled}
             onClick={saveExclusions}
             data-cy="button-save-exclusions"
@@ -226,8 +232,8 @@ export const ExcludeSection = ({
     if (previewMode) {
       return (
         <Button
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           onClick={() => {
             setExclusionsOpen(true);
             setEdit(false);
@@ -241,18 +247,18 @@ export const ExcludeSection = ({
 
     if (isExclusionsOpen) {
       return (
-        <Box display='flex' alignItems='center' justifyContent='center'>
+        <Box display="flex" alignItems="center" justifyContent="center">
           <Box mr={2}>
-            <Button variant='text' color='primary' onClick={resetExclusions}>
+            <Button variant="text" color="primary" onClick={resetExclusions}>
               {t('Close')}
             </Button>
           </Box>
           {hasExcludePermission && (
             <ButtonTooltip
-              color='primary'
+              color="primary"
               title={getTooltipText()}
               disabled={editExclusionsDisabled}
-              variant='contained'
+              variant="contained"
               onClick={() => setEdit(true)}
               data-cy="button-edit-exclusions"
             >
@@ -266,8 +272,8 @@ export const ExcludeSection = ({
     if (noExclusions && !deletedIds.length) {
       return (
         <Button
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           data-cy="button-create-exclusions"
           onClick={() => {
             setExclusionsOpen(true);
@@ -289,14 +295,14 @@ export const ExcludeSection = ({
 
     if (isEdit || numberOfExcluded === 0) {
       return (
-        <Box mt={2} display='flex' alignItems='center'>
-          <Grid alignItems='flex-start' container spacing={3}>
+        <Box mt={2} display="flex" alignItems="center">
+          <Grid alignItems="flex-start" container spacing={3}>
             <Grid item xs={12}>
               <Field
-                name='exclusionReason'
+                name="exclusionReason"
                 fullWidth
                 multiline
-                variant='outlined'
+                variant="outlined"
                 label={t('Reason')}
                 component={FormikTextField}
               />
@@ -315,8 +321,8 @@ export const ExcludeSection = ({
             <Grid item>
               <ButtonTooltip
                 title={getTooltipText()}
-                variant='contained'
-                color='primary'
+                variant="contained"
+                color="primary"
                 disabled={!idsValue || applyDisabled}
                 data-cy="button-apply-exclusions"
                 onClick={() => {
@@ -354,8 +360,8 @@ export const ExcludeSection = ({
         return (
           <Form>
             <PaperContainer>
-              <Box display='flex' justifyContent='space-between'>
-                <Typography variant='h6'>{t('Exclude')}</Typography>
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="h6">{t('Exclude')}</Typography>
                 {renderButtons(submitForm, values, resetForm)}
               </Box>
               {!isExclusionsOpen && numberOfExcluded > 0 ? (
@@ -366,13 +372,13 @@ export const ExcludeSection = ({
                 </Box>
               ) : null}
               <Collapse in={isExclusionsOpen}>
-                <Box display='flex' flexDirection='column'>
+                <Box display="flex" flexDirection="column">
                   {isExclusionsOpen && exclusionReason && !isEdit ? (
                     <Grid container>
                       <Grid item xs={8}>
-                        <Box display='flex' flexDirection='column'>
+                        <Box display="flex" flexDirection="column">
                           <Box
-                            display='flex'
+                            display="flex"
                             alignItems={
                               exclusionReason.length > 100
                                 ? 'flex-start'
@@ -387,7 +393,7 @@ export const ExcludeSection = ({
                             <Typography>{exclusionReason}</Typography>
                           </Box>
                           {excludeHouseholdError && (
-                            <Box display='flex' flexDirection='column' mt={2}>
+                            <Box display="flex" flexDirection="column" mt={2}>
                               {formatErrorToArray(excludeHouseholdError).map(
                                 (el) => (
                                   <FormHelperText error>{el}</FormHelperText>
@@ -407,7 +413,7 @@ export const ExcludeSection = ({
                       </Grid>
                     ))}
                   </Grid>
-                  <Grid container direction='column' item xs={3}>
+                  <Grid container direction="column" item xs={3}>
                     {excludedIds.map((id) => (
                       <Grid item xs={12}>
                         <ExcludedItem

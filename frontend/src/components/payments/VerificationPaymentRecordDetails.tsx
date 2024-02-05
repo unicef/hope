@@ -1,4 +1,4 @@
-import { Grid, Paper, Typography } from '@material-ui/core';
+import { Grid, Paper, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -47,7 +47,7 @@ export function VerificationPaymentRecordDetails({
     <>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Payment Record Details')}</Typography>
+          <Typography variant="h6">{t('Payment Record Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -84,7 +84,7 @@ export function VerificationPaymentRecordDetails({
       </ContainerColumnWithBorder>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Verification Details')}</Typography>
+          <Typography variant="h6">{t('Verification Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -108,7 +108,7 @@ export function VerificationPaymentRecordDetails({
       </ContainerColumnWithBorder>
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Household')}</Typography>
+          <Typography variant="h6">{t('Household')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>
@@ -151,7 +151,7 @@ export function VerificationPaymentRecordDetails({
       </Overview>
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Entitlement Details')}</Typography>
+          <Typography variant="h6">{t('Entitlement Details')}</Typography>
         </Title>
         <Grid container spacing={3}>
           <Grid item xs={3}>

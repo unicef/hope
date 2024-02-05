@@ -5,7 +5,7 @@ import {
   MenuItem,
   InputLabel,
   Select,
-} from '@material-ui/core';
+} from '@mui/material';
 import get from 'lodash/get';
 
 const toExternalValue = (internalValue): boolean | null => {
@@ -62,8 +62,8 @@ export const FormikBoolFieldGrievances = ({
     <>
       <FormControl
         required={required}
-        variant='outlined'
-        margin='dense'
+        variant="outlined"
+        margin="dense"
         fullWidth
         {...otherProps}
       >

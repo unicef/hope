@@ -1,4 +1,4 @@
-import { Tab, Tabs, Typography } from '@material-ui/core';
+import { Tab, Tabs, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -56,11 +56,11 @@ export const DashboardPage = (): React.ReactElement => {
       onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
         setSelectedTab(newValue);
       }}
-      indicatorColor='primary'
-      textColor='primary'
-      variant='scrollable'
-      scrollButtons='auto'
-      aria-label='tabs'
+      indicatorColor="primary"
+      textColor="primary"
+      variant="scrollable"
+      scrollButtons="auto"
+      aria-label="tabs"
     >
       {mappedTabs}
     </Tabs>
@@ -83,8 +83,8 @@ export const DashboardPage = (): React.ReactElement => {
               setAppliedFilter={setAppliedFilter}
             />
           ) : (
-            <DashboardPaper noMarginTop extraPaddingLeft color='#6f6f6f'>
-              <Typography variant='body2'>
+            <DashboardPaper noMarginTop extraPaddingLeft color="#6f6f6f">
+              <Typography variant="body2">
                 {t(
                   'All charts below show total numbers for the selected year.',
                 )}

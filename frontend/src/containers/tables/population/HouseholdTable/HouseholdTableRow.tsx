@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,11 +46,11 @@ export const HouseholdTableRow = ({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={household.unicefId}
-      data-cy='household-table-row'
+      data-cy="household-table-row"
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         <>
           <Box mr={2}>
             {household.hasDuplicates && (
@@ -75,28 +75,28 @@ export const HouseholdTableRow = ({
           </Box>
         </>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={household.status}
           statusToColor={householdStatusToColor}
         />
       </TableCell>
       <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
-      <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household.admin2?.name || '-'}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{household.size}</TableCell>
+      <TableCell align="left">{household.admin2?.name || '-'}</TableCell>
+      <TableCell align="left">
         {residenceStatusChoiceDict[household.residenceStatus]}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           household.totalCashReceived,
           household.currency,
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

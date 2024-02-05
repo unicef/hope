@@ -1,4 +1,4 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '../../containers/dialogs/Dialog';
@@ -40,10 +40,10 @@ export function ForceFailedButton({
     <Box>
       <Box p={2}>
         <Button
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           onClick={() => setOpenModal(true)}
-          data-cy='button-mark-as-failed'
+          data-cy="button-mark-as-failed"
           disabled={disabled}
         >
           {t('Mark as failed')}
@@ -52,9 +52,9 @@ export function ForceFailedButton({
       <Dialog
         open={isOpenModal}
         onClose={() => setOpenModal(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Mark as failed')}</DialogTitle>
@@ -70,11 +70,11 @@ export function ForceFailedButton({
           <DialogActions>
             <Button onClick={() => setOpenModal(false)}>{t('CANCEL')}</Button>
             <Button
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => submit()}
-              data-cy='button-submit'
+              data-cy="button-submit"
               disabled={loading}
             >
               {t('Mark as failed')}

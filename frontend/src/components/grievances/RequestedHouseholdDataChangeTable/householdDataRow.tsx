@@ -1,4 +1,4 @@
-import { Checkbox, TableCell, TableRow } from '@material-ui/core';
+import { Checkbox, TableCell, TableRow } from '@mui/material';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
@@ -48,36 +48,36 @@ export const householdDataRow = (
       ? previousValue
       : householdValue;
   return (
-    <TableRow role='checkbox' aria-checked={isItemSelected} key={fieldName}>
+    <TableRow role="checkbox" aria-checked={isItemSelected} key={fieldName}>
       <TableCell>
         {isEdit ? (
           <Checkbox
-            data-cy='checkbox-household-data'
+            data-cy="checkbox-household-data"
             onChange={(event) =>
               handleSelectBioData(fieldName, event.target.checked)
             }
-            color='primary'
+            color="primary"
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             checked={isItemSelected}
             inputProps={{ 'aria-labelledby': labelId }}
           />
         ) : (
           isItemSelected && (
-            <GreenIcon data-cy='green-tick'>
+            <GreenIcon data-cy="green-tick">
               <CheckCircleIcon />
             </GreenIcon>
           )
         )}
       </TableCell>
-      <TableCell id={labelId} scope='row' align='left'>
+      <TableCell id={labelId} scope="row" align="left">
         <Capitalize>
           {row[0].replaceAll('_h_f', '').replaceAll('_', ' ')}
         </Capitalize>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <CurrentValue field={field} value={currentValue} />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <NewValue field={field} value={valueDetails.value} />
       </TableCell>
     </TableRow>

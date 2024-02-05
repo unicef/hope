@@ -4,7 +4,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
-} from '@material-ui/core';
+} from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFullNodeFromEdgesById } from '../../utils/utils';
@@ -43,7 +43,7 @@ export const FormikSelectFieldConfirmProgram = ({
   );
 
   return (
-    <FormControl variant='outlined' margin='dense' fullWidth {...otherProps}>
+    <FormControl variant="outlined" margin="dense" fullWidth {...otherProps}>
       <InputLabel>{otherProps.label}</InputLabel>
       <Select
         {...field}

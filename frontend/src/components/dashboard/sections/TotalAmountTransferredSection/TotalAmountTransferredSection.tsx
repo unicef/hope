@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,20 +21,20 @@ export const TotalAmountTransferredSection = ({
   const { t } = useTranslation();
   if (!data) return null;
   return (
-    <DashboardCard color='#1E877D'>
-      <Grid container justifyContent='space-between' alignItems='center'>
+    <DashboardCard color="#1E877D">
+      <Grid container justifyContent="space-between" alignItems="center">
         <Grid item>
           <CardTitle>{t('TOTAL AMOUNT TRANSFERRED')}</CardTitle>
           <CardTextLight>{t('IN USD')}</CardTextLight>
         </Grid>
         <Grid item>
-          <Grid container spacing={3} alignItems='center'>
+          <Grid container spacing={3} alignItems="center">
             <Grid item>
               <CardAmount>{formatCurrencyWithSymbol(data?.total)}</CardAmount>
             </Grid>
             <Grid item>
-              <IconContainer bg='#d9eceb' color='#03867b'>
-                <AccountBalanceWalletIcon fontSize='inherit' />
+              <IconContainer bg="#d9eceb" color="#03867b">
+                <AccountBalanceWalletIcon fontSize="inherit" />
               </IconContainer>
             </Grid>
           </Grid>

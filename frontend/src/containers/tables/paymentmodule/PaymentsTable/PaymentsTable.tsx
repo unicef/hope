@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from '@material-ui/core';
+import { Box, Paper, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -47,8 +47,8 @@ export const PaymentsTable = ({
     <>
       <TableWrapper>
         <Paper>
-          <StyledBox p={6} display='flex' justifyContent='space-between'>
-            <Typography data-cy='table-title' variant='h6'>
+          <StyledBox p={6} display="flex" justifyContent="space-between">
+            <Typography data-cy="table-title" variant="h6">
               {t('Payee List')}
             </Typography>
             {(paymentPlan.status === PaymentPlanStatus.Accepted ||
@@ -67,10 +67,10 @@ export const PaymentsTable = ({
             headCells={headCells}
             query={useAllPaymentsForTableQuery}
             rowsPerPageOptions={[10, 25, 50]}
-            queriedObjectName='allPayments'
+            queriedObjectName="allPayments"
             initialVariables={initialVariables}
-            defaultOrderBy='createdAt'
-            defaultOrderDirection='desc'
+            defaultOrderBy="createdAt"
+            defaultOrderDirection="desc"
             renderRow={(row) => (
               <PaymentsTableRow
                 key={row.id}

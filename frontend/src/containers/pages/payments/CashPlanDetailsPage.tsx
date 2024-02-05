@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,20 +35,16 @@ export const CashPlanDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { baseUrl, isAllPrograms, businessArea } = useBaseUrl();
-  const {
-    data: businessAreaData,
-    loading: businessAreaDataLoading,
-  } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
+  const { data: businessAreaData, loading: businessAreaDataLoading } =
+    useBusinessAreaDataQuery({
+      variables: { businessAreaSlug: businessArea },
+    });
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: caData,
-    loading: caPrefixLoading,
-  } = useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
+  const { data: caData, loading: caPrefixLoading } =
+    useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
   if (loading || caPrefixLoading || businessAreaDataLoading)
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
@@ -85,11 +81,11 @@ export const CashPlanDetailsPage = (): React.ReactElement => {
       >
         {!businessAreaData.businessArea.isPaymentPlanApplicable && (
           <Button
-            variant='contained'
-            color='primary'
-            component='a'
+            variant="contained"
+            color="primary"
+            component="a"
             disabled={!data.cashPlan.caHashId}
-            target='_blank'
+            target="_blank"
             href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_cashplan&id=${data.cashPlan.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
           >

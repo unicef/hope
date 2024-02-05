@@ -1,6 +1,6 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableRow } from '@mui/material';
 import { EnhancedTableHead } from '../../../../../components/core/Table/EnhancedTableHead';
 import { getComparator, stableSort } from '../../../../../utils/utils';
 import { AllFieldsAttributesQuery } from '../../../../../__generated__/graphql';
@@ -60,7 +60,7 @@ export const FlexFieldsTable = ({
   };
 
   return (
-    <Table aria-label='simple table'>
+    <Table aria-label="simple table">
       <EnhancedTableHead
         order={order as Order}
         headCells={headCells}

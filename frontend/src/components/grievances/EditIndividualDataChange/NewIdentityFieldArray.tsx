@@ -1,4 +1,4 @@
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid } from '@mui/material';
 import { AddCircleOutline } from '@material-ui/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from 'react-router-dom';
@@ -24,7 +24,7 @@ export function NewIdentityFieldArray({
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name='individualDataUpdateFieldsIdentities'
+        name="individualDataUpdateFieldsIdentities"
         render={(arrayHelpers) => {
           return (
             <>
@@ -45,7 +45,7 @@ export function NewIdentityFieldArray({
                     identityTypeChoices={
                       addIndividualFieldsData.identityTypeChoices
                     }
-                    baseName='individualDataUpdateFieldsIdentities'
+                    baseName="individualDataUpdateFieldsIdentities"
                     values={values}
                   />
                 );
@@ -54,7 +54,7 @@ export function NewIdentityFieldArray({
               <Grid item xs={8} />
               <Grid item xs={12}>
                 <Button
-                  color='primary'
+                  color="primary"
                   onClick={() => {
                     arrayHelpers.push({
                       id: uuidv4(),

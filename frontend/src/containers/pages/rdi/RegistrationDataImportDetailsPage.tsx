@@ -1,4 +1,4 @@
-import { Tab, Typography } from '@material-ui/core';
+import { Tab, Typography } from '@mui/material';
 import Tabs from '@material-ui/core/Tabs';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,20 +62,13 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const permissions = usePermissions();
   const { businessArea } = useBaseUrl();
-  const {
-    data,
-    loading,
-    error,
-    stopPolling,
-    startPolling,
-  } = useRegistrationDataImportQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-  });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data, loading, error, stopPolling, startPolling } =
+    useRegistrationDataImportQuery({
+      variables: { id },
+      fetchPolicy: 'cache-and-network',
+    });
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -119,7 +112,7 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
           <TableWrapper>
             <ContainerColumnWithBorder>
               <Title>
-                <Typography variant='h6'>
+                <Typography variant="h6">
                   {isMerged ? t('Population Preview') : t('Import Preview')}
                 </Typography>
               </Title>
@@ -129,10 +122,10 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
                   onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
                     setSelectedTab(newValue)
                   }
-                  indicatorColor='primary'
-                  textColor='primary'
-                  variant='fullWidth'
-                  aria-label='full width tabs example'
+                  indicatorColor="primary"
+                  textColor="primary"
+                  variant="fullWidth"
+                  aria-label="full width tabs example"
                 >
                   <Tab label={t('Households')} />
                   <Tab label={t('Individuals')} />

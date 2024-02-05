@@ -1,4 +1,4 @@
-import { MenuItem, Select } from '@material-ui/core';
+import { MenuItem, Select } from '@mui/material';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -53,7 +53,7 @@ export function BusinessAreaSelect(): React.ReactElement {
     return null;
   }
   return (
-    <CountrySelect variant='filled' value={businessArea} onChange={onChange}>
+    <CountrySelect variant="filled" value={businessArea} onChange={onChange}>
       {data.me.businessAreas.edges.map((each) => (
         <MenuItem key={each.node.slug} value={each.node.slug}>
           {each.node.name}

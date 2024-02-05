@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import snakeCase from 'lodash/snakeCase';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -164,13 +164,13 @@ export function DeleteIndividualGrievanceDetails({
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">
             {t('Individual to be withdrawn')}
           </Typography>
           {canApproveDataChange && (
             <Button
-              data-cy='button-approve'
+              data-cy="button-approve"
               onClick={() =>
                 confirm({
                   title: t('Warning'),
@@ -180,8 +180,8 @@ export function DeleteIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.deleteIndividualTicketDetails
-                          ?.approveStatus,
+                        approveStatus:
+                          !ticket.deleteIndividualTicketDetails?.approveStatus,
                       },
                       refetchQueries: () => [
                         {
@@ -206,7 +206,7 @@ export function DeleteIndividualGrievanceDetails({
                   ? 'outlined'
                   : 'contained'
               }
-              color='primary'
+              color="primary"
               disabled={!approveEnabled}
             >
               {ticket.deleteIndividualTicketDetails?.approveStatus

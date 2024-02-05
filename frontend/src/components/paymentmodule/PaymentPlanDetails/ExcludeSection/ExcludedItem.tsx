@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, IconButton } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import React from 'react';
 import styled from 'styled-components';
@@ -33,9 +33,9 @@ export const ExcludedItem = ({
 
   return (
     <StyledBox
-      display='flex'
-      alignItems='center'
-      justifyContent='space-between'
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
       pl={8}
       pr={8}
       pt={4}
@@ -45,7 +45,7 @@ export const ExcludedItem = ({
       <IdDiv isDeleted={isDeleted}>{id}</IdDiv>
       {isEdit &&
         (isDeleted ? (
-          <Button variant='text' color='primary' onClick={onUndo}>
+          <Button variant="text" color="primary" onClick={onUndo}>
             {t('Undo')}
           </Button>
         ) : (

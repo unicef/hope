@@ -6,7 +6,7 @@ import {
   Grid,
   IconButton,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import styled from 'styled-components';
 import Edit from '@material-ui/icons/Edit';
 import { Field, Formik } from 'formik';
@@ -46,10 +46,8 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
   const { showMessage } = useSnackbar();
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-  const {
-    approveStatus,
-    reasonHousehold,
-  } = ticket.deleteHouseholdTicketDetails;
+  const { approveStatus, reasonHousehold } =
+    ticket.deleteHouseholdTicketDetails;
 
   const validationSchema = Yup.object().shape({
     reasonHhId: Yup.string().when('withdrawReason', (withdrawReasonValue) => {
@@ -124,17 +122,17 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
           <Box p={2}>
             {type === 'edit' ? (
               <IconButton
-                data-cy='edit-button'
+                data-cy="edit-button"
                 onClick={() => setDialogOpen(true)}
               >
                 <EditIcon />
               </IconButton>
             ) : (
               <Button
-                data-cy='button-approve'
+                data-cy="button-approve"
                 onClick={() => setDialogOpen(true)}
                 variant={approveStatus ? 'outlined' : 'contained'}
-                color='primary'
+                color="primary"
                 disabled={!isForApproval}
               >
                 {approveStatus ? t('Disapprove') : t('Approve')}
@@ -144,18 +142,18 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
           <Dialog
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-            maxWidth='md'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
+            maxWidth="md"
           >
             <DialogTitleWrapper>
               <DialogTitle>{matchDialogTitle()}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
-                <Box display='flex' flexDirection='column'>
+                <Box display="flex" flexDirection="column">
                   <Box mt={2}>
-                    <Typography variant='body2'>
+                    <Typography variant="body2">
                       {showWithdraw()
                         ? t(
                             'Please provide the reason of withdrawal of this household.',
@@ -168,12 +166,11 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                   {showWithdraw() && (
                     <Box>
                       <Field
-                        name='withdrawReason'
+                        name="withdrawReason"
                         choices={[
                           {
                             value: 'duplicate',
-                            name:
-                              'This household is a duplicate of another household',
+                            name: 'This household is a duplicate of another household',
                           },
                         ]}
                         component={FormikRadioGroup}
@@ -183,9 +180,9 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                         <Grid container>
                           <Grid item xs={6}>
                             <Field
-                              name='reasonHhId'
+                              name="reasonHhId"
                               fullWidth
-                              variant='outlined'
+                              variant="outlined"
                               label={t('Household Unicef Id')}
                               component={FormikTextField}
                               required
@@ -194,7 +191,7 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                         </Grid>
                       )}
                       <Field
-                        name='withdrawReason'
+                        name="withdrawReason"
                         choices={[{ value: 'other', name: 'Other' }]}
                         component={FormikRadioGroup}
                         noMargin
@@ -215,11 +212,11 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                   {t('CANCEL')}
                 </Button>
                 <Button
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {t('Confirm')}
                 </Button>

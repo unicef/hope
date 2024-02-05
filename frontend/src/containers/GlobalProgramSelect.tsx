@@ -1,4 +1,4 @@
-import { MenuItem, Select } from '@material-ui/core';
+import { MenuItem, Select } from '@mui/material';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -85,13 +85,8 @@ export const GlobalProgramSelect = (): React.ReactElement => {
       const program = getCurrentProgram();
       if (!selectedProgram || selectedProgram?.id !== programId) {
         if (program && isMounted.current) {
-          const {
-            id,
-            name,
-            status,
-            individualDataNeeded,
-            dataCollectingType,
-          } = program;
+          const { id, name, status, individualDataNeeded, dataCollectingType } =
+            program;
 
           setSelectedProgram({
             id,
@@ -149,12 +144,12 @@ export const GlobalProgramSelect = (): React.ReactElement => {
 
   return (
     <CountrySelect
-      data-cy='global-program-filter'
-      variant='filled'
+      data-cy="global-program-filter"
+      variant="filled"
       value={programId}
       onChange={onChange}
     >
-      <MenuItem key='all' value='all'>
+      <MenuItem key="all" value="all">
         All Programmes
       </MenuItem>
       {data.allPrograms.edges

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -107,24 +107,24 @@ export function CreateImportFromKoboForm({
     <div>
       <FormikProvider value={formik}>
         <Field
-          name='onlyActiveSubmissions'
+          name="onlyActiveSubmissions"
           label={t('Only approved submissions')}
-          color='primary'
+          color="primary"
           component={FormikCheckboxField}
         />
         <Field
-          name='pullPictures'
+          name="pullPictures"
           label={t('Pull pictures')}
-          color='primary'
+          color="primary"
           component={FormikCheckboxField}
         />
         <KoboProjectSelect />
         <Field
-          name='name'
+          name="name"
           fullWidth
           label={t('Title')}
           required
-          variant='outlined'
+          variant="outlined"
           component={FormikTextField}
         />
         <ScreenBeneficiaryField />

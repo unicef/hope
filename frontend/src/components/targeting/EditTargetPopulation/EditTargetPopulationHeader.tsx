@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,13 +41,13 @@ export const EditTargetPopulationHeader = ({
       title={
         isTitleEditable() ? (
           <Field
-            name='name'
+            name="name"
             label={t('Enter Target Population Name')}
-            type='text'
+            type="text"
             fullWidth
             required
             component={FormikTextField}
-            data-cy='target-population-name'
+            data-cy="target-population-name"
           />
         ) : (
           values.name
@@ -60,10 +60,10 @@ export const EditTargetPopulationHeader = ({
         {values.name && (
           <Box m={2}>
             <Button
-              variant='outlined'
-              color='primary'
+              variant="outlined"
+              color="primary"
               component={Link}
-              data-cy='button-cancel'
+              data-cy="button-cancel"
               to={`/${baseUrl}/target-population/${targetPopulation.id}`}
             >
               {t('Cancel')}
@@ -72,11 +72,11 @@ export const EditTargetPopulationHeader = ({
         )}
         <Box m={2}>
           <LoadingButton
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             onClick={handleSubmit}
             loading={loading}
-            data-cy='button-save'
+            data-cy="button-save"
             disabled={
               values.targetingCriteria?.length === 0 || !values.name || loading
             }

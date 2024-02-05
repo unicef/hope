@@ -4,7 +4,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import MessageIcon from '@material-ui/icons/Message';
@@ -53,25 +53,25 @@ export const MessageDialog = ({
   const [MessageDialogOpen, setMessageDialogOpen] = useState(false);
   return (
     <>
-      <IconButton size='small' onClick={() => setMessageDialogOpen(true)}>
+      <IconButton size="small" onClick={() => setMessageDialogOpen(true)}>
         <MessageIconContainer>
-          <MessageIcon fontSize='inherit' />
+          <MessageIcon fontSize="inherit" />
         </MessageIconContainer>
       </IconButton>
       <Dialog
         open={MessageDialogOpen}
         onClose={() => setMessageDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Comment')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box display='flex' flexDirection='column'>
-              <Box mt={2} display='flex'>
+            <Box display="flex" flexDirection="column">
+              <Box mt={2} display="flex">
                 {renderUserName(author)}{' '}
                 <GreyText>
                   <Box ml={1}>
@@ -87,8 +87,8 @@ export const MessageDialog = ({
         <DialogFooter>
           <DialogActions>
             <Button
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               onClick={() => setMessageDialogOpen(false)}
             >
               {t('Close')}

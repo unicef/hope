@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
@@ -77,10 +77,8 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useCashPlanVerificationSamplingChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useCashPlanVerificationSamplingChoicesQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
@@ -150,8 +148,8 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
         {isFinished &&
           (isAllPrograms ? (
             <Button
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               component={Link}
               to={`/${baseUrl}/grievance/payment-verification/${decodeIdString(
                 cashPlan.id,

@@ -8,7 +8,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -66,8 +66,8 @@ export const PaymentGrievanceDetails = ({
   return (
     <StyledBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Payment Details')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Payment Details')}</Typography>
           {ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS ? (
             <VerifyPaymentGrievance ticket={ticket} />
           ) : null}
@@ -104,7 +104,7 @@ export const PaymentGrievanceDetails = ({
                 })
               }
               variant={approveStatus ? 'outlined' : 'contained'}
-              color='primary'
+              color="primary"
               disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             >
               {approveStatus ? t('Disapprove') : t('Approve')}
@@ -115,11 +115,11 @@ export const PaymentGrievanceDetails = ({
       <StyledTable>
         <TableHead>
           <TableRow>
-            <TableCell align='right' />
-            <TableCell align='right'>{t('Entitlement Value')} ($)</TableCell>
-            <TableCell align='right'>{t('Delivered Value')} ($)</TableCell>
-            <TableCell align='right'>{t('Received Value')} ($)</TableCell>
-            <TableCell align='right'>{t('New Verified Value')} ($)</TableCell>
+            <TableCell align="right" />
+            <TableCell align="right">{t('Entitlement Value')} ($)</TableCell>
+            <TableCell align="right">{t('Delivered Value')} ($)</TableCell>
+            <TableCell align="right">{t('Received Value')} ($)</TableCell>
+            <TableCell align="right">{t('New Verified Value')} ($)</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -131,12 +131,12 @@ export const PaymentGrievanceDetails = ({
                 </GreenIcon>
               ) : null}
             </TableCell>
-            <TableCell align='right'>{entitlementQuantity}</TableCell>
-            <TableCell align='right'>{deliveredQuantity}</TableCell>
-            <TableCell align='right'>
+            <TableCell align="right">{entitlementQuantity}</TableCell>
+            <TableCell align="right">{deliveredQuantity}</TableCell>
+            <TableCell align="right">
               {oldReceivedAmount == null ? receivedAmount : oldReceivedAmount}
             </TableCell>
-            <TableCell align='right'>{newReceivedAmount ?? 0}</TableCell>
+            <TableCell align="right">{newReceivedAmount ?? 0}</TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>

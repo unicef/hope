@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -40,12 +40,12 @@ export const UsersPage = (): React.ReactElement => {
       <PageHeader title={t('Programme Users')}>
         <>
           <Button
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             onClick={() => null}
-            component='a'
+            component="a"
             href={`/api/download-exported-users/${businessArea}`}
-            data-cy='button-target-population-create-new'
+            data-cy="button-target-population-create-new"
           >
             Export
           </Button>

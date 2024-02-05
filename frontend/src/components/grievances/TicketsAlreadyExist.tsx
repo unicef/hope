@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import WarningIcon from '@material-ui/icons/Warning';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -67,19 +67,19 @@ export const TicketsAlreadyExist = ({ values }): React.ReactElement => {
     <Grid item xs={6}>
       <StyledBox>
         <OrangeTitle>
-          <Typography variant='h6'>
+          <Typography variant="h6">
             <WarnIcon />
             {edges.length === 1
               ? t('Ticket already exists')
               : t('Tickets already exist')}
           </Typography>
         </OrangeTitle>
-        <Typography variant='body2'>
+        <Typography variant="body2">
           {t(
             'There is an open ticket(s) in the same category for the related entity. Please review them before proceeding.',
           )}
         </Typography>
-        <Box mt={3} display='flex' flexDirection='column'>
+        <Box mt={3} display="flex" flexDirection="column">
           {mappedTickets}
         </Box>
       </StyledBox>

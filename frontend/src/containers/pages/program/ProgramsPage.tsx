@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
@@ -22,7 +22,7 @@ const initialFilter = {
   numberOfHouseholdsMax: '',
   budgetMin: '',
   budgetMax: '',
-  dataCollectingType: ''
+  dataCollectingType: '',
 };
 
 export const ProgramsPage = (): React.ReactElement => {
@@ -55,11 +55,11 @@ export const ProgramsPage = (): React.ReactElement => {
   const toolbar = (
     <PageHeader title={t('Programme Management')}>
       <Button
-        variant='contained'
-        color='primary'
+        variant="contained"
+        color="primary"
         component={Link}
         to={`/${baseUrl}/create`}
-        data-cy='button-new-program'
+        data-cy="button-new-program"
       >
         {t('Create Programme')}
       </Button>

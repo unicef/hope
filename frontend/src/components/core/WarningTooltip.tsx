@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Tooltip, TooltipProps } from '@material-ui/core';
+import { Tooltip, TooltipProps } from '@mui/material';
 import WarningIcon from '@material-ui/icons/Warning';
 
 const StyledWarning = styled(WarningIcon)`

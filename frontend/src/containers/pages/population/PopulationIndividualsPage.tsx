@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -35,10 +35,8 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
   const location = useLocation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
-  const {
-    data: householdChoicesData,
-    loading: householdChoicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: householdChoicesData, loading: householdChoicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -47,10 +45,8 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const {
-    data: individualChoicesData,
-    loading: individualChoicesLoading,
-  } = useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
   if (householdChoicesLoading || individualChoicesLoading)
     return <LoadingComponent />;
@@ -75,9 +71,9 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
         setAppliedFilter={setAppliedFilter}
       />
       <Box
-        display='flex'
-        flexDirection='column'
-        data-cy='page-details-container'
+        display="flex"
+        flexDirection="column"
+        data-cy="page-details-container"
       >
         <IndividualsListTable
           filter={appliedFilter}

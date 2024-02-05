@@ -1,11 +1,11 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
-import { useProgramContext } from "../../../../../programContext";
+import { useProgramContext } from '../../../../../programContext';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -23,12 +23,10 @@ export const LockedFspPaymentPlanHeaderButtons = ({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  const {
-    mutatePaymentPlanAction: unlock,
-    loading: loadingUnlock,
-  } = usePaymentPlanAction(Action.UnlockFsp, id, () =>
-    showMessage(t('Payment Plan FSPs have been unlocked.')),
-  );
+  const { mutatePaymentPlanAction: unlock, loading: loadingUnlock } =
+    usePaymentPlanAction(Action.UnlockFsp, id, () =>
+      showMessage(t('Payment Plan FSPs have been unlocked.')),
+    );
   const {
     mutatePaymentPlanAction: sendForApproval,
     loading: loadingSendForApproval,
@@ -37,13 +35,13 @@ export const LockedFspPaymentPlanHeaderButtons = ({
   );
 
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canUnlock && (
         <Box m={2}>
           <LoadingButton
             loading={loadingUnlock}
-            variant='outlined'
-            color='primary'
+            variant="outlined"
+            color="primary"
             onClick={() => unlock()}
             disabled={!isActiveProgram}
           >
@@ -55,10 +53,10 @@ export const LockedFspPaymentPlanHeaderButtons = ({
         <Box m={2}>
           <LoadingButton
             loading={loadingSendForApproval}
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             onClick={() => sendForApproval()}
-            data-cy='button-send-for-approval'
+            data-cy="button-send-for-approval"
             disabled={!isActiveProgram}
           >
             {t('Send For Approval')}

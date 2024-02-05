@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import InfoIcon from '@material-ui/icons/Info';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,10 +32,8 @@ export const DeleteHouseholdGrievanceDetails = ({
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   if (choicesLoading) return <LoadingComponent />;
   if (!choicesData) return null;
@@ -49,11 +47,11 @@ export const DeleteHouseholdGrievanceDetails = ({
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between' alignItems='center'>
-          <Typography variant='h6'>{t('Household to be withdrawn')}</Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6">{t('Household to be withdrawn')}</Typography>
           {approveStatus &&
             ticket.deleteHouseholdTicketDetails.reasonHousehold && (
-              <Box display='flex' alignItems='center'>
+              <Box display="flex" alignItems="center">
                 <Info />
                 <Box mr={2}>
                   <p>This household is a duplicate of a household ID:</p>
@@ -77,7 +75,7 @@ export const DeleteHouseholdGrievanceDetails = ({
                 )}
                 {canApproveDataChange && (
                   <ApproveDeleteHouseholdGrievanceDetails
-                    type='edit'
+                    type="edit"
                     ticket={ticket}
                   />
                 )}
@@ -85,7 +83,7 @@ export const DeleteHouseholdGrievanceDetails = ({
             )}
           {canApproveDataChange && (
             <ApproveDeleteHouseholdGrievanceDetails
-              type='button'
+              type="button"
               ticket={ticket}
             />
           )}

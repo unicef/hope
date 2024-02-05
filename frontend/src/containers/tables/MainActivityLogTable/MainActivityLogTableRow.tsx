@@ -1,5 +1,5 @@
 /* eslint-disable prefer-template */
-import { IconButton, makeStyles } from '@material-ui/core';
+import { IconButton, makeStyles } from '@mui/material';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import clsx from 'clsx';
@@ -118,7 +118,7 @@ export function MainActivityLogTableRow({
   const { length } = keys;
   if (length <= 1) {
     return (
-      <Row role='checkbox'>
+      <Row role="checkbox">
         <Cell weight={headCells[0].weight}>
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>

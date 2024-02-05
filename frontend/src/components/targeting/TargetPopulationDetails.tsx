@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { targetPopulationStatusToColor } from '../../utils/utils';
@@ -17,13 +17,8 @@ interface ProgramDetailsProps {
 export function TargetPopulationDetails({
   targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
-  const {
-    createdBy,
-    finalizedBy,
-    changeDate,
-    finalizedAt,
-    program,
-  } = targetPopulation;
+  const { createdBy, finalizedBy, changeDate, finalizedAt, program } =
+    targetPopulation;
   const { t } = useTranslation();
   const closeDate = changeDate ? (
     <UniversalMoment>{changeDate}</UniversalMoment>
@@ -40,16 +35,16 @@ export function TargetPopulationDetails({
   );
   const programName = program?.name ? program.name : '-';
   return (
-    <ContainerColumnWithBorder data-cy='target-population-details-container'>
-      <Title data-cy='details-title'>
-        <Typography variant='h6'>{t('Details')}</Typography>
+    <ContainerColumnWithBorder data-cy="target-population-details-container">
+      <Title data-cy="details-title">
+        <Typography variant="h6">{t('Details')}</Typography>
       </Title>
       <OverviewContainer>
-        <Grid data-cy='details-grid' container spacing={6}>
+        <Grid data-cy="details-grid" container spacing={6}>
           <Grid item xs={4}>
             <LabelizedField label={t('Status')}>
               <StatusBox
-                dataCy='target-population-status'
+                dataCy="target-population-status"
                 status={targetPopulation.status}
                 statusToColor={targetPopulationStatusToColor}
               />
@@ -57,35 +52,35 @@ export function TargetPopulationDetails({
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              dataCy='created-by'
+              dataCy="created-by"
               label={t('created by')}
               value={`${createdBy.firstName} ${createdBy.lastName}`}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              dataCy='close-date'
+              dataCy="close-date"
               label={t('Programme population close date')}
               value={closeDate}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              dataCy='program-name'
+              dataCy="program-name"
               label={t('Programme')}
               value={programName}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              dataCy='send-by'
+              dataCy="send-by"
               label={t('Send by')}
               value={sendBy}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
-              dataCy='send-date'
+              dataCy="send-date"
               label={t('Send date')}
               value={sendDate}
             />

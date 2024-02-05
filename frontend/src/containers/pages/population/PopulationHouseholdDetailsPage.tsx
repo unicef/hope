@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import Paper from '@material-ui/core/Paper';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -69,18 +69,12 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: flexFieldsData,
-    loading: flexFieldsDataLoading,
-  } = useAllHouseholdsFlexFieldsAttributesQuery();
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
-  const {
-    data: grievancesChoices,
-    loading: grievancesChoicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
+    useAllHouseholdsFlexFieldsAttributesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
+  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   if (
     loading ||
@@ -196,7 +190,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
         />
         <Overview>
           <Title>
-            <Typography variant='h6'>{t('Registration Details')}</Typography>
+            <Typography variant="h6">{t('Registration Details')}</Typography>
           </Title>
           <Grid container spacing={6}>
             <Grid item xs={3}>
@@ -227,7 +221,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
           {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
             <>
               <hr />
-              <SubTitle variant='h6'>{t('Data Collection')}</SubTitle>
+              <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
               <Grid container spacing={6}>
                 <Grid item xs={3}>
                   <LabelizedField label={t('Start time')}>

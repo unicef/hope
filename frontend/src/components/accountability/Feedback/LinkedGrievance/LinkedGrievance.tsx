@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FeedbackQuery } from '../../../../__generated__/graphql';
@@ -30,7 +30,7 @@ export const LinkedGrievance = ({
         <Box p={3}>
           <ContainerColumnWithBorder>
             <Title>
-              <Typography variant='h6'>{t('Linked Grievance')}</Typography>
+              <Typography variant="h6">{t('Linked Grievance')}</Typography>
             </Title>
             <OverviewContainer>
               <LabelizedField label={t('Ticket Id')}>

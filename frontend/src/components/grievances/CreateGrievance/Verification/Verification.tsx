@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +38,7 @@ export const Verification = ({
         )} */}
         {values.selectedHousehold && (
           <Box py={4}>
-            <Typography variant='subtitle2'>
+            <Typography variant="subtitle2">
               {t('Household Questionnaire')}
             </Typography>
             <Box py={4}>
@@ -48,7 +48,7 @@ export const Verification = ({
         )}
         {values.selectedIndividual && (
           <>
-            <Typography variant='subtitle2'>
+            <Typography variant="subtitle2">
               {t('Individual Questionnaire')}
             </Typography>
             <Box py={4}>
@@ -60,9 +60,9 @@ export const Verification = ({
       </>
       <Consent />
       <Field
-        name='consent'
+        name="consent"
         label={t('Received Consent*')}
-        color='primary'
+        color="primary"
         fullWidth
         container={false}
         component={FormikCheckboxField}

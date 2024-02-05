@@ -10,7 +10,7 @@ import {
   StepLabel,
   Stepper,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -143,30 +143,24 @@ export const CreateSurveyPage = (): React.ReactElement => {
   const [formValues, setFormValues] = useState(initialValues);
   const [validateData, setValidateData] = useState(false);
 
-  const {
-    data: adminAreasData,
-    loading: adminAreasLoading,
-  } = useAllAdminAreasQuery({
-    variables: {
-      first: 100,
-      businessArea,
-    },
-  });
+  const { data: adminAreasData, loading: adminAreasLoading } =
+    useAllAdminAreasQuery({
+      variables: {
+        first: 100,
+        businessArea,
+      },
+    });
 
-  const [
-    loadSampleSize,
-    { data: sampleSizesData },
-  ] = useAccountabilitySampleSizeLazyQuery({
-    variables: prepareVariables(selectedSampleSizeType, formValues),
-    fetchPolicy: 'network-only',
-  });
+  const [loadSampleSize, { data: sampleSizesData }] =
+    useAccountabilitySampleSizeLazyQuery({
+      variables: prepareVariables(selectedSampleSizeType, formValues),
+      fetchPolicy: 'network-only',
+    });
 
-  const [
-    loadAvailableFlows,
-    { data: flowsData, loading: flowsLoading },
-  ] = useSurveyAvailableFlowsLazyQuery({
-    fetchPolicy: 'network-only',
-  });
+  const [loadAvailableFlows, { data: flowsData, loading: flowsLoading }] =
+    useSurveyAvailableFlowsLazyQuery({
+      fetchPolicy: 'network-only',
+    });
 
   useEffect(() => {
     if (category === SurveyCategory.RapidPro) {
@@ -403,7 +397,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                   onChange={() => setFormValues(values)}
                 />
                 {activeStep === SurveySteps.LookUp && (
-                  <Box display='flex' flexDirection='column'>
+                  <Box display="flex" flexDirection="column">
                     <LookUpSelectionSurveys
                       businessArea={businessArea}
                       values={values}
@@ -416,15 +410,15 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 )}
                 {activeStep === SurveySteps.SampleSize && (
                   <Box px={8}>
-                    <Box display='flex' alignItems='center'>
-                      <Box pr={5} fontWeight='500' fontSize='medium'>
+                    <Box display="flex" alignItems="center">
+                      <Box pr={5} fontWeight="500" fontSize="medium">
                         {t('Sample Size')}:
                       </Box>
                       <RadioGroup
-                        aria-labelledby='selection-radio-buttons-group'
+                        aria-labelledby="selection-radio-buttons-group"
                         value={selectedSampleSizeType}
                         row
-                        name='radio-buttons-group'
+                        name="radio-buttons-group"
                       >
                         {sampleSizeTabs.map((tab, index) => (
                           <FormControlLabel
@@ -435,7 +429,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                               setSelectedSampleSizeType(index);
                             }}
                             key={tab}
-                            control={<Radio color='primary' />}
+                            control={<Radio color="primary" />}
                             label={tab}
                           />
                         ))}
@@ -444,9 +438,9 @@ export const CreateSurveyPage = (): React.ReactElement => {
                     <TabPanel value={selectedSampleSizeType} index={0}>
                       {mappedAdminAreas && (
                         <Field
-                          name='excludedAdminAreasFull'
+                          name="excludedAdminAreasFull"
                           choices={mappedAdminAreas}
-                          variant='outlined'
+                          variant="outlined"
                           label={t('Filter Out Administrative Level Areas')}
                           component={FormikMultiSelectField}
                         />
@@ -456,7 +450,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                           pb={3}
                           pt={3}
                           fontSize={16}
-                          fontWeight='fontWeightBold'
+                          fontWeight="fontWeightBold"
                         >
                           Sample size:{' '}
                           {
@@ -475,47 +469,47 @@ export const CreateSurveyPage = (): React.ReactElement => {
                     <TabPanel value={selectedSampleSizeType} index={1}>
                       <Box pt={3}>
                         <Field
-                          name='confidenceInterval'
+                          name="confidenceInterval"
                           label={t('Confidence Interval')}
                           min={90}
                           max={99}
                           component={FormikSliderField}
-                          suffix='%'
+                          suffix="%"
                         />
                         <Field
-                          name='marginOfError'
+                          name="marginOfError"
                           label={t('Margin of Error')}
                           min={0}
                           max={9}
                           component={FormikSliderField}
-                          suffix='%'
+                          suffix="%"
                         />
-                        <Typography variant='caption'>
+                        <Typography variant="caption">
                           {t('Cluster Filters')}
                         </Typography>
-                        <Box flexDirection='column' display='flex'>
-                          <Box display='flex'>
+                        <Box flexDirection="column" display="flex">
+                          <Box display="flex">
                             <Field
-                              name='adminCheckbox'
+                              name="adminCheckbox"
                               label={t('Administrative Level')}
                               component={FormikCheckboxField}
                             />
                             <Field
-                              name='ageCheckbox'
+                              name="ageCheckbox"
                               label={t('Age of HoH')}
                               component={FormikCheckboxField}
                             />
                             <Field
-                              name='sexCheckbox'
+                              name="sexCheckbox"
                               label={t('Gender of HoH')}
                               component={FormikCheckboxField}
                             />
                           </Box>
                           {values.adminCheckbox && (
                             <Field
-                              name='excludedAdminAreasRandom'
+                              name="excludedAdminAreasRandom"
                               choices={mappedAdminAreas}
-                              variant='outlined'
+                              variant="outlined"
                               label={t('Filter Out Administrative Level Areas')}
                               component={FormikMultiSelectField}
                             />
@@ -527,19 +521,19 @@ export const CreateSurveyPage = (): React.ReactElement => {
                                 <Grid container>
                                   <Grid item xs={4}>
                                     <Field
-                                      name='filterAgeMin'
+                                      name="filterAgeMin"
                                       label={t('Minimum Age')}
-                                      type='number'
-                                      color='primary'
+                                      type="number"
+                                      color="primary"
                                       component={FormikTextField}
                                     />
                                   </Grid>
                                   <Grid item xs={4}>
                                     <Field
-                                      name='filterAgeMax'
+                                      name="filterAgeMax"
                                       label={t('Maximum Age')}
-                                      type='number'
-                                      color='primary'
+                                      type="number"
+                                      color="primary"
                                       component={FormikTextField}
                                     />
                                   </Grid>
@@ -549,9 +543,9 @@ export const CreateSurveyPage = (): React.ReactElement => {
                             {values.sexCheckbox && (
                               <Grid item xs={5}>
                                 <Field
-                                  name='filterSex'
+                                  name="filterSex"
                                   label={t('Gender')}
-                                  color='primary'
+                                  color="primary"
                                   choices={[
                                     { value: 'FEMALE', name: t('Female') },
                                     { value: 'MALE', name: t('Male') },
@@ -566,7 +560,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                           pb={3}
                           pt={3}
                           fontSize={16}
-                          fontWeight='fontWeightBold'
+                          fontWeight="fontWeightBold"
                         >
                           Sample size:{' '}
                           {
@@ -591,23 +585,23 @@ export const CreateSurveyPage = (): React.ReactElement => {
                       <Grid item xs={12}>
                         {category === SurveyCategory.RapidPro ? (
                           <Field
-                            name='title'
+                            name="title"
                             label={t('Title')}
-                            color='primary'
+                            color="primary"
                             choices={mappedFlows}
                             component={FormikSelectField}
                             required
-                            data-cy='input-title'
+                            data-cy="input-title"
                           />
                         ) : (
                           <Field
-                            name='title'
+                            name="title"
                             label={t('Title')}
                             fullWidth
                             required
-                            variant='outlined'
+                            variant="outlined"
                             component={FormikTextField}
-                            data-cy='input-title'
+                            data-cy="input-title"
                           />
                         )}
                       </Grid>
@@ -616,14 +610,14 @@ export const CreateSurveyPage = (): React.ReactElement => {
                       <Box my={3}>
                         <Grid item xs={12}>
                           <Field
-                            name='body'
+                            name="body"
                             required
                             multiline
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Message')}
                             component={FormikTextField}
-                            data-cy='input-message'
+                            data-cy="input-message"
                           />
                         </Grid>
                       </Box>
@@ -633,7 +627,7 @@ export const CreateSurveyPage = (): React.ReactElement => {
                         pb={3}
                         pt={3}
                         fontSize={16}
-                        fontWeight='fontWeightBold'
+                        fontWeight="fontWeightBold"
                       >
                         {t('Number of selected recipients')}:{' '}
                         {sampleSizesData?.accountabilitySampleSize?.sampleSize}
@@ -643,30 +637,30 @@ export const CreateSurveyPage = (): React.ReactElement => {
                 )}
                 {dataChangeErrors(errors)}
               </Form>
-              <Box pt={3} display='flex' flexDirection='row'>
+              <Box pt={3} display="flex" flexDirection="row">
                 <Box mr={3}>
                   <Button
                     component={Link}
-                    data-cy='button-cancel'
+                    data-cy="button-cancel"
                     to={`/${baseUrl}/accountability/surveys`}
                   >
                     {t('Cancel')}
                   </Button>
                 </Box>
-                <Box display='flex' ml='auto'>
+                <Box display="flex" ml="auto">
                   <Button
                     disabled={activeStep === SurveySteps.LookUp}
                     onClick={handleBack}
-                    data-cy='button-back'
+                    data-cy="button-back"
                   >
                     {t('Back')}
                   </Button>
                   <LoadingButton
                     loading={loading}
-                    color='primary'
-                    variant='contained'
+                    color="primary"
+                    variant="contained"
                     onClick={submitForm}
-                    data-cy='button-submit'
+                    data-cy="button-submit"
                   >
                     {t(
                       activeStep === steps.length - 1

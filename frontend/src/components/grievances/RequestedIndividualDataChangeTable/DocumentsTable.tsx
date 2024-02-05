@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -58,17 +58,17 @@ export const DocumentsTable = ({
   const documentsTableHead = (
     <TableHead>
       <TableRow>
-        <TableCell align='left' />
-        <TableCell data-cy='table-cell-id-type' align='left'>
+        <TableCell align="left" />
+        <TableCell data-cy="table-cell-id-type" align="left">
           {t('ID Type')}
         </TableCell>
-        <TableCell data-cy='table-cell-country' align='left'>
+        <TableCell data-cy="table-cell-country" align="left">
           {t('Country')}
         </TableCell>
-        <TableCell data-cy='table-cell-number' align='left'>
+        <TableCell data-cy="table-cell-number" align="left">
           {t('Number')}
         </TableCell>
-        <TableCell data-cy='table-cell-photo' align='left'>
+        <TableCell data-cy="table-cell-photo" align="left">
           {t('Photo')}
         </TableCell>
       </TableRow>
@@ -77,8 +77,8 @@ export const DocumentsTable = ({
   return (
     <>
       <TableTitle>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Documents to be added')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Documents to be added')}</Typography>
         </Box>
       </TableTitle>
       <StyledTable>
@@ -87,11 +87,11 @@ export const DocumentsTable = ({
           {documents?.map((row, index) => {
             return (
               <TableRow key={`${row.value.type}-${row.value.country}`}>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {isEdit ? (
                     <Checkbox
-                      color='primary'
-                      data-cy='checkbox-document'
+                      color="primary"
+                      data-cy="checkbox-document"
                       onChange={(): void => {
                         handleSelectDocument(index);
                       }}
@@ -103,20 +103,20 @@ export const DocumentsTable = ({
                     />
                   ) : (
                     selectedDocuments.includes(index) && (
-                      <GreenIcon data-cy='green-check-icon'>
+                      <GreenIcon data-cy="green-check-icon">
                         <CheckCircleIcon />
                       </GreenIcon>
                     )
                   )}
                 </TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {documentTypeDict[row.value.key]}
                 </TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {countriesDict[row.value.country]}
                 </TableCell>
-                <TableCell align='left'>{row.value.number}</TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">{row.value.number}</TableCell>
+                <TableCell align="left">
                   {row.value.photo ? <PhotoModal src={row.value.photo} /> : '-'}
                 </TableCell>
               </TableRow>

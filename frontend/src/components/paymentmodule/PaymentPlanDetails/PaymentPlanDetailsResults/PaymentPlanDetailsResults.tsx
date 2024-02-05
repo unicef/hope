@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@mui/material';
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
@@ -67,12 +67,12 @@ export const PaymentPlanDetailsResults = ({
     <>
       <PaperContainer>
         <Title>
-          <Typography variant='h6'>{t('Results')}</Typography>
+          <Typography variant="h6">{t('Results')}</Typography>
         </Title>
         <ContentWrapper>
           <Grid container>
             <Grid item xs={4}>
-              <Grid container spacing={3} justifyContent='flex-start'>
+              <Grid container spacing={3} justifyContent="flex-start">
                 <Grid item xs={6}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
@@ -111,11 +111,11 @@ export const PaymentPlanDetailsResults = ({
               <Grid
                 container
                 spacing={0}
-                justifyContent='flex-start'
-                alignItems='center'
+                justifyContent="flex-start"
+                alignItems="center"
               >
                 <Grid item xs={4}>
-                  <ChartContainer data-cy='chart-container'>
+                  <ChartContainer data-cy="chart-container">
                     <Pie
                       width={100}
                       height={100}
@@ -154,7 +154,7 @@ export const PaymentPlanDetailsResults = ({
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <Grid container spacing={0} justifyContent='flex-end'>
+              <Grid container spacing={0} justifyContent="flex-end">
                 <Grid item xs={6}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of Households')}>

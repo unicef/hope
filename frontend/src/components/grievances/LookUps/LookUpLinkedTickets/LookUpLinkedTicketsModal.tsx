@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -45,10 +45,8 @@ export const LookUpLinkedTicketsModal = ({
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
   if (!choicesData) return null;
   if (choicesLoading) {
     return <LoadingComponent />;
@@ -63,12 +61,12 @@ export const LookUpLinkedTicketsModal = ({
     >
       {({ submitForm, setFieldValue }) => (
         <Dialog
-          maxWidth='lg'
+          maxWidth="lg"
           fullWidth
           open={lookUpDialogOpen}
           onClose={() => setLookUpDialogOpen(false)}
-          scroll='paper'
-          aria-labelledby='form-dialog-title'
+          scroll="paper"
+          aria-labelledby="form-dialog-title"
         >
           {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
@@ -93,17 +91,17 @@ export const LookUpLinkedTicketsModal = ({
           <DialogFooter>
             <DialogActions>
               <Button
-                data-cy='button-cancel'
+                data-cy="button-cancel"
                 onClick={() => setLookUpDialogOpen(false)}
               >
                 {t('CANCEL')}
               </Button>
               <Button
-                type='submit'
-                color='primary'
-                variant='contained'
+                type="submit"
+                color="primary"
+                variant="contained"
                 onClick={submitForm}
-                data-cy='button-submit'
+                data-cy="button-submit"
               >
                 {t('SAVE')}
               </Button>

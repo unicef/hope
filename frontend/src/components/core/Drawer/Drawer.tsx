@@ -4,7 +4,7 @@ import {
   ListItemIcon,
   ListItemText,
   makeStyles,
-} from '@material-ui/core';
+} from '@mui/material';
 import Divider from '@material-ui/core/Divider';
 import DrawerMaterial from '@material-ui/core/Drawer';
 import IconButton from '@material-ui/core/IconButton';
@@ -153,7 +153,7 @@ export const Drawer = ({
   }, [backendVersion, frontendVersion, showMismatchedDialog]);
   return (
     <DrawerMaterial
-      variant='permanent'
+      variant="permanent"
       classes={{
         paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
       }}
@@ -190,10 +190,10 @@ export const Drawer = ({
           <ListItem button key={item.name + item.href}>
             <StyledLink
               data-cy={`nav-resources-${item.name}`}
-              target='_blank'
+              target="_blank"
               href={item.href}
             >
-              <Box display='flex'>
+              <Box display="flex">
                 <Icon>{item.icon}</Icon>
                 <Text primary={item.name} />
               </Box>

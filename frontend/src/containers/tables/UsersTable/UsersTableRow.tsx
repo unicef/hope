@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { Box, Collapse, IconButton, TableRow } from '@material-ui/core';
+import { Box, Collapse, IconButton, TableRow } from '@mui/material';
 import { UserNode } from '../../../__generated__/graphql';
 import { UniversalMoment } from '../../../components/core/UniversalMoment';
 import { StatusBox } from '../../../components/core/StatusBox';
@@ -31,29 +31,29 @@ export function UsersTableRow({
       <TableRow key={user.id}>
         <TableCell>
           <IconButton
-            aria-label='expand row'
-            size='small'
+            aria-label="expand row"
+            size="small"
             onClick={() => setOpen(!open)}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell align='left'>{`${user.firstName} ${user.lastName}`}</TableCell>
-        <TableCell align='left'>
+        <TableCell align="left">{`${user.firstName} ${user.lastName}`}</TableCell>
+        <TableCell align="left">
           <StatusBox status={user.status} statusToColor={userStatusToColor} />
         </TableCell>
-        <TableCell align='left'>{user.partner?.name || '-'}</TableCell>
-        <TableCell align='left'>{user.email}</TableCell>
-        <TableCell align='left'>
+        <TableCell align="left">{user.partner?.name || '-'}</TableCell>
+        <TableCell align="left">{user.email}</TableCell>
+        <TableCell align="left">
           <UniversalMoment>{user.lastLogin}</UniversalMoment>
         </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={1}>
-          <Collapse in={open} timeout='auto' unmountOnExit />
+          <Collapse in={open} timeout="auto" unmountOnExit />
         </TableCell>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={2}>
-          <Collapse in={open} timeout='auto' unmountOnExit>
+          <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1}>
               <GreyText>Country / Role</GreyText>
             </Box>

@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -39,9 +39,9 @@ export const PaymentIds = ({
   return (
     <ApproveBox>
       <Title>
-        <Typography variant='h6'>{t('Payment Ids')}</Typography>
+        <Typography variant="h6">{t('Payment Ids')}</Typography>
       </Title>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         {mappedIds}
       </Box>
     </ApproveBox>

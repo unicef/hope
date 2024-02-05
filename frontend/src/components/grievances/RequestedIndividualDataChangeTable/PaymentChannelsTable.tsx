@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -54,17 +54,17 @@ export const PaymentChannelsTable = ({
   const paymentChannelsTableHead = (
     <TableHead>
       <TableRow>
-        <TableCell align='left' />
-        <TableCell data-cy='table-cell-bank-name' align='left'>
+        <TableCell align="left" />
+        <TableCell data-cy="table-cell-bank-name" align="left">
           {t('Bank Name')}
         </TableCell>
-        <TableCell data-cy='table-cell-bank-account-number' align='left'>
+        <TableCell data-cy="table-cell-bank-account-number" align="left">
           {t('Bank Account Number')}
         </TableCell>
-        <TableCell data-cy='table-cell-bank-account-holder-name' align='left'>
+        <TableCell data-cy="table-cell-bank-account-holder-name" align="left">
           {t('Bank Account Holder Name')}
         </TableCell>
-        <TableCell data-cy='table-cell-bank-branch-name' align='left'>
+        <TableCell data-cy="table-cell-bank-branch-name" align="left">
           {t('Bank Branch Name')}
         </TableCell>
       </TableRow>
@@ -74,8 +74,8 @@ export const PaymentChannelsTable = ({
   return (
     <>
       <TableTitle>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">
             {t('Payment channels to be added')}
           </Typography>
         </Box>
@@ -88,11 +88,11 @@ export const PaymentChannelsTable = ({
               <TableRow
                 key={`${row.value.bankName}-${row.value.bankAccountNumber}`}
               >
-                <TableCell align='left'>
+                <TableCell align="left">
                   {isEdit ? (
                     <Checkbox
-                      data-cy='checkbox-payment-channel'
-                      color='primary'
+                      data-cy="checkbox-payment-channel"
+                      color="primary"
                       onChange={(): void => {
                         handleSelectPaymentChannel(index);
                       }}
@@ -104,20 +104,20 @@ export const PaymentChannelsTable = ({
                     />
                   ) : (
                     selectedPaymentChannels.includes(index) && (
-                      <GreenIcon data-cy='green-check'>
+                      <GreenIcon data-cy="green-check">
                         <CheckCircleIcon />
                       </GreenIcon>
                     )
                   )}
                 </TableCell>
-                <TableCell align='left'>{row.value.bank_name}</TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">{row.value.bank_name}</TableCell>
+                <TableCell align="left">
                   {row.value.bank_account_number}
                 </TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {row.value.account_holder_name}
                 </TableCell>
-                <TableCell align='left'>{row.value.bank_branch_name}</TableCell>
+                <TableCell align="left">{row.value.bank_branch_name}</TableCell>
               </TableRow>
             );
           })}

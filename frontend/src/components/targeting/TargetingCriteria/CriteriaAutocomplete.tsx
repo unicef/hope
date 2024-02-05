@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { TextField, Paper } from '@material-ui/core';
+import { TextField, Paper } from '@mui/material';
 import styled from 'styled-components';
 import get from 'lodash/get';
 
@@ -49,8 +49,8 @@ export function CriteriaAutocomplete({
         <TextField
           {...params}
           {...otherProps}
-          variant='outlined'
-          margin='dense'
+          variant="outlined"
+          margin="dense"
           fullWidth
           helperText={isInvalid && get(otherProps.form.errors, field.name)}
           error={isInvalid}
@@ -65,14 +65,14 @@ export function CriteriaAutocomplete({
           }}
         />
       )}
-      data-cy='autocomplete-target-criteria'
+      data-cy="autocomplete-target-criteria"
       PaperComponent={React.forwardRef((props, ref) => (
         <Paper
           {...{
             ...props,
             ref,
           }}
-          data-cy='autocomplete-target-criteria-options'
+          data-cy="autocomplete-target-criteria-options"
         />
       ))}
     />

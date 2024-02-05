@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { GetApp } from '@material-ui/icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,8 +11,8 @@ import {
 } from '../../../../../__generated__/graphql';
 import { LoadingButton } from '../../../../core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import { useProgramContext } from "../../../../../programContext";
-import {usePaymentPlanAction} from "../../../../../hooks/usePaymentPlanAction";
+import { useProgramContext } from '../../../../../programContext';
+import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
@@ -31,29 +31,26 @@ export const AcceptedPaymentPlanHeaderButtons = ({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  const [
-    mutateExport,
-    { loading: loadingExport },
-  ] = useExportXlsxPpListPerFspMutation();
+  const [mutateExport, { loading: loadingExport }] =
+    useExportXlsxPpListPerFspMutation();
 
   const {
     mutatePaymentPlanAction: sendToPaymentGateway,
     loading: LoadingSendToPaymentGateway,
-  } = usePaymentPlanAction(
-    Action.SendToPaymentGateway,
-    paymentPlan.id,
-    () => showMessage(t('Sending to Payment Gateway started')),
+  } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () =>
+    showMessage(t('Sending to Payment Gateway started')),
   );
 
   const shouldDisableExportXlsx =
     loadingExport ||
     !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
     !canExportXlsx ||
-    paymentPlan?.backgroundActionStatus === PaymentPlanBackgroundActionStatus.XlsxExporting ||
+    paymentPlan?.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting ||
     !isActiveProgram;
 
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       <>
         {paymentPlan.canCreateFollowUp && (
           <Box p={2}>
@@ -65,10 +62,10 @@ export const AcceptedPaymentPlanHeaderButtons = ({
             <LoadingButton
               loading={loadingExport}
               disabled={shouldDisableExportXlsx}
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               startIcon={<GetApp />}
-              data-cy='button-export-xlsx'
+              data-cy="button-export-xlsx"
               onClick={async () => {
                 try {
                   await mutateExport({
@@ -89,10 +86,10 @@ export const AcceptedPaymentPlanHeaderButtons = ({
         {paymentPlan.hasPaymentListExportFile && (
           <Box m={2}>
             <Button
-              color='primary'
-              component='a'
-              variant='contained'
-              data-cy='button-download-xlsx'
+              color="primary"
+              component="a"
+              variant="contained"
+              data-cy="button-download-xlsx"
               download
               href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
               disabled={
@@ -106,15 +103,15 @@ export const AcceptedPaymentPlanHeaderButtons = ({
         )}
         <Box m={2}>
           <Button
-              type='button'
-              color='primary'
-              variant='contained'
-              onClick={() => sendToPaymentGateway()}
-              data-cy='button-send-to-payment-gateway'
-              disabled={!canSendToPaymentGateway || LoadingSendToPaymentGateway}
-            >
-                {t('Send to FSP')}
-            </Button>
+            type="button"
+            color="primary"
+            variant="contained"
+            onClick={() => sendToPaymentGateway()}
+            data-cy="button-send-to-payment-gateway"
+            disabled={!canSendToPaymentGateway || LoadingSendToPaymentGateway}
+          >
+            {t('Send to FSP')}
+          </Button>
         </Box>
       </>
     </Box>

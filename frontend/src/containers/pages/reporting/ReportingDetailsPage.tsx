@@ -1,4 +1,4 @@
-import { Button, Grid, Typography } from '@material-ui/core';
+import { Button, Grid, Typography } from '@mui/material';
 import { GetApp } from '@material-ui/icons';
 import CheckIcon from '@material-ui/icons/Check';
 import EmailIcon from '@material-ui/icons/Email';
@@ -55,18 +55,14 @@ export const ReportingDetailsPage = (): React.ReactElement => {
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
-  const [
-    mutate,
-    { loading: restartReportLoading },
-  ] = useRestartCreateReportMutation();
+  const [mutate, { loading: restartReportLoading }] =
+    useRestartCreateReportMutation();
 
   const { data, loading, startPolling, stopPolling } = useReportQuery({
     variables: { id },
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useReportChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
 
   useEffect(() => {
     if (data.report.status === REPORTING_STATES.PROCESSING) {
@@ -211,8 +207,8 @@ export const ReportingDetailsPage = (): React.ReactElement => {
         <>
           {report.fileUrl && (
             <Button
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               startIcon={<GetApp />}
               href={report.fileUrl}
             >
@@ -228,8 +224,8 @@ export const ReportingDetailsPage = (): React.ReactElement => {
               </span>
               &emsp;
               <LoadingButton
-                color='primary'
-                variant='contained'
+                color="primary"
+                variant="contained"
                 loading={restartReportLoading}
                 onClick={() => {
                   reGenerateReport();
@@ -243,7 +239,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       </PageHeader>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>
@@ -259,10 +255,10 @@ export const ReportingDetailsPage = (): React.ReactElement => {
         <>
           <IconsContainer>
             <IconContainer>
-              <EmailIcon fontSize='inherit' />
+              <EmailIcon fontSize="inherit" />
             </IconContainer>
             <IconContainer>
-              <CheckIcon fontSize='inherit' />
+              <CheckIcon fontSize="inherit" />
             </IconContainer>
           </IconsContainer>
           <GreyText>

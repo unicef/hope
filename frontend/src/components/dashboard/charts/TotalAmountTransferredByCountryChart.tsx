@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import React, { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
@@ -111,17 +111,17 @@ export const TotalAmountTransferredByCountryChart = ({
   };
 
   return (
-    <Box flexDirection='column'>
+    <Box flexDirection="column">
       <HorizontalBar
         data={chartData}
         options={options}
         plugins={[ChartDataLabels]}
       />
       {data.labels.length > lessDataCount ? (
-        <Box textAlign='center' mt={4} ml={2} mr={2} letterSpacing={1.75}>
+        <Box textAlign="center" mt={4} ml={2} mr={2} letterSpacing={1.75}>
           <Button
-            variant='outlined'
-            color='primary'
+            variant="outlined"
+            color="primary"
             onClick={() => setShowAll(!showAll)}
             fullWidth
           >

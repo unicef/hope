@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputAdornment, Tooltip } from '@material-ui/core';
+import { InputAdornment, Tooltip } from '@mui/material';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import get from 'lodash/get';
@@ -26,9 +26,9 @@ export const FormikDateField = ({
       {...field}
       {...otherProps}
       name={field.name}
-      variant='inline'
-      inputVariant='outlined'
-      margin='dense'
+      variant="inline"
+      inputVariant="outlined"
+      margin="dense"
       value={formattedValue || null}
       error={isInvalid}
       onBlur={null}
@@ -52,10 +52,10 @@ export const FormikDateField = ({
       format={dateFormat}
       InputProps={{
         startAdornment: decoratorStart && (
-          <InputAdornment position='start'>{decoratorStart}</InputAdornment>
+          <InputAdornment position="start">{decoratorStart}</InputAdornment>
         ),
         endAdornment: decoratorEnd && (
-          <InputAdornment position='end'>{decoratorEnd}</InputAdornment>
+          <InputAdornment position="end">{decoratorEnd}</InputAdornment>
         ),
       }}
       // https://github.com/mui-org/material-ui/issues/12805

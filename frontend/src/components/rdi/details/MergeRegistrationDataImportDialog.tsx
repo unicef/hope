@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,8 +46,8 @@ export function MergeRegistrationDataImportDialog({
     <span>
       <Button
         startIcon={<MergeTypeRoundedIcon />}
-        color='primary'
-        variant='contained'
+        color="primary"
+        variant="contained"
         onClick={() => setOpen(true)}
         disabled={!isActiveProgram}
       >
@@ -56,8 +56,8 @@ export function MergeRegistrationDataImportDialog({
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Merge Import')}</DialogTitle>
@@ -80,9 +80,9 @@ export function MergeRegistrationDataImportDialog({
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
               loading={loading}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={merge}
             >
               {t('MERGE')}

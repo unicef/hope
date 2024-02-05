@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
@@ -28,15 +28,15 @@ export function CommunicationMessageDetails({
       <Box p={5}>
         <StyledBox>
           <Title>
-            <Typography variant='h6'>{t('Message')}</Typography>
+            <Typography variant="h6">{t('Message')}</Typography>
           </Title>
           <OverviewContainer>
             <Grid container spacing={6}>
-              <Grid item container justifyContent='space-between' xs={12}>
-                <Typography variant='subtitle2'>
+              <Grid item container justifyContent="space-between" xs={12}>
+                <Typography variant="subtitle2">
                   {renderUserName(message.createdBy)}
                 </Typography>
-                <Typography color='textSecondary'>
+                <Typography color="textSecondary">
                   <UniversalMoment withTime>
                     {message.createdAt}
                   </UniversalMoment>

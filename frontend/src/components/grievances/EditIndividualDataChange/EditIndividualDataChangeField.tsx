@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useLocation } from 'react-router-dom';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
@@ -72,7 +72,7 @@ export const EditIndividualDataChangeField = ({
       fieldProps = {
         component: FormikDateField,
         fullWidth: true,
-        decoratorEnd: <CalendarTodayRoundedIcon color='disabled' />,
+        decoratorEnd: <CalendarTodayRoundedIcon color="disabled" />,
       };
       break;
 
@@ -99,7 +99,7 @@ export const EditIndividualDataChangeField = ({
       <Grid item xs={4}>
         <Field
           name={name}
-          variant='outlined'
+          variant="outlined"
           label={field.labelEn}
           required={field.required}
           data-cy={`input-individual-data-${field.labelEn}`}

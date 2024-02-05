@@ -1,6 +1,6 @@
 import React from 'react';
 import RotateRightIcon from '@material-ui/icons/RotateRight';
-import { IconButton } from '@material-ui/core';
+import { IconButton } from '@mui/material';
 
 export const RotateImg = ({
   turnAngle,
@@ -17,7 +17,7 @@ export const RotateImg = ({
   };
 
   return (
-    <IconButton data-cy='button-rotate-image' onClick={() => handleRotateImg()}>
+    <IconButton data-cy="button-rotate-image" onClick={() => handleRotateImg()}>
       <RotateRightIcon />
     </IconButton>
   );

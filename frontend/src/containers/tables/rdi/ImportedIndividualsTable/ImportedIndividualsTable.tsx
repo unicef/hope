@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Grid } from '@material-ui/core';
+import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import {
   AllImportedIndividualsQueryVariables,
@@ -47,68 +47,68 @@ export function ImportedIndividualsTable({
   };
 
   return (
-    <div data-cy='imported-individuals-table'>
+    <div data-cy="imported-individuals-table">
       {showCheckbox && (
-        <Grid container justifyContent='flex-end' spacing={3}>
+        <Grid container justifyContent="flex-end" spacing={3}>
           <Grid item>
             <Box p={3}>
               <FormControlLabel
                 control={
                   <Checkbox
-                    color='primary'
+                    color="primary"
                     checked={showDuplicates}
                     onChange={() => setShowDuplicates(!showDuplicates)}
                   />
                 }
-                label='Show duplicates only'
+                label="Show duplicates only"
               />
             </Box>
           </Grid>
         </Grid>
       )}
-      {isMerged ?
-          <UniversalTable<
-            MergedIndividualMinimalFragment,
-            AllMergedIndividualsQueryVariables
-          >
-            title={title}
-            headCells={mergedIndividualHeadCells}
-            query={useAllMergedIndividualsQuery}
-            queriedObjectName='allMergedIndividuals'
-            rowsPerPageOptions={rowsPerPageOptions}
-            initialVariables={initialVariables}
-            isOnPaper={isOnPaper}
-            renderRow={(row) => (
-              <ImportedIndividualsTableRow
-                choices={choicesData}
-                key={row.id}
-                isMerged={isMerged}
-                individual={row}
-              />
-            )}
-          />
-        :
-          <UniversalTable<
-        ImportedIndividualMinimalFragment,
-        AllImportedIndividualsQueryVariables
-      >
-        title={title}
-        headCells={importedIndividualHeadCells}
-        query={useAllImportedIndividualsQuery}
-        queriedObjectName='allImportedIndividuals'
-        rowsPerPageOptions={rowsPerPageOptions}
-        initialVariables={initialVariables}
-        isOnPaper={isOnPaper}
-        renderRow={(row) => (
-          <ImportedIndividualsTableRow
-            choices={choicesData}
-            key={row.id}
-            isMerged={isMerged}
-            individual={row}
-          />
-        )}
-      />
-      }
+      {isMerged ? (
+        <UniversalTable<
+          MergedIndividualMinimalFragment,
+          AllMergedIndividualsQueryVariables
+        >
+          title={title}
+          headCells={mergedIndividualHeadCells}
+          query={useAllMergedIndividualsQuery}
+          queriedObjectName="allMergedIndividuals"
+          rowsPerPageOptions={rowsPerPageOptions}
+          initialVariables={initialVariables}
+          isOnPaper={isOnPaper}
+          renderRow={(row) => (
+            <ImportedIndividualsTableRow
+              choices={choicesData}
+              key={row.id}
+              isMerged={isMerged}
+              individual={row}
+            />
+          )}
+        />
+      ) : (
+        <UniversalTable<
+          ImportedIndividualMinimalFragment,
+          AllImportedIndividualsQueryVariables
+        >
+          title={title}
+          headCells={importedIndividualHeadCells}
+          query={useAllImportedIndividualsQuery}
+          queriedObjectName="allImportedIndividuals"
+          rowsPerPageOptions={rowsPerPageOptions}
+          initialVariables={initialVariables}
+          isOnPaper={isOnPaper}
+          renderRow={(row) => (
+            <ImportedIndividualsTableRow
+              choices={choicesData}
+              key={row.id}
+              isMerged={isMerged}
+              individual={row}
+            />
+          )}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button, Grid } from '@mui/material';
 import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -34,19 +34,19 @@ export const ClearApplyButtons = ({
   }, [handleKeyPress]);
 
   return (
-    <Grid container justifyContent='flex-end' spacing={3}>
+    <Grid container justifyContent="flex-end" spacing={3}>
       <Box mt={4}>
         <Button
-          color='primary'
-          data-cy='button-filters-clear'
+          color="primary"
+          data-cy="button-filters-clear"
           onClick={clearHandler}
         >
           {t('Clear')}
         </Button>
         <Button
-          color='primary'
-          variant='outlined'
-          data-cy='button-filters-apply'
+          color="primary"
+          variant="outlined"
+          data-cy="button-filters-apply"
           onClick={applyHandler}
         >
           {t('Apply')}

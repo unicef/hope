@@ -1,4 +1,4 @@
-import { Grid, IconButton } from '@material-ui/core';
+import { Grid, IconButton } from '@mui/material';
 import camelCase from 'lodash/camelCase';
 import { Delete } from '@material-ui/icons';
 import { useLocation } from 'react-router-dom';
@@ -47,8 +47,8 @@ export const EditIndividualDataChangeFieldRow = ({
         <Field
           name={`individualDataUpdateFields[${index}].fieldName`}
           fullWidth
-          variant='outlined'
-          label='Field'
+          variant="outlined"
+          label="Field"
           required
           disabled={isEditTicket}
           component={FormikSelectField}

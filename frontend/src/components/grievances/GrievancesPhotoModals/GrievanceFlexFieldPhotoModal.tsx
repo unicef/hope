@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -39,7 +39,7 @@ export const GrievanceFlexFieldPhotoModal = ({
   return picUrl ? (
     <PhotoModal src={picUrl} />
   ) : (
-    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+    <Box style={{ height: '100%' }} display="flex" alignItems="center">
       -
     </Box>
   );

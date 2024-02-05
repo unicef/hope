@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -45,9 +45,9 @@ export const BaseSection = ({
   return (
     <Container>
       <Box p={p}>
-        <Box display='flex' justifyContent='space-between' alignItems='center'>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           {typeof title === 'string' ? (
-            <Typography variant='h6'>{t(title)}</Typography>
+            <Typography variant="h6">{t(title)}</Typography>
           ) : (
             title
           )}

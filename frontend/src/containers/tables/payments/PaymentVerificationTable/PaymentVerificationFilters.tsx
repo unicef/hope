@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@mui/material';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -25,19 +25,16 @@ export const PaymentVerificationFilters = ({
 }: PaymentVerificationFiltersProps): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -47,9 +44,8 @@ export const PaymentVerificationFilters = ({
     clearFilter();
   };
 
-  const {
-    data: statusChoicesData,
-  } = useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } =
+    useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) {
     return null;
@@ -64,8 +60,8 @@ export const PaymentVerificationFilters = ({
         <Grid item xs={3}>
           <SearchTextField
             value={filter.search}
-            data-cy='filter-search'
-            label='Payment Plan ID'
+            data-cy="filter-search"
+            label="Payment Plan ID"
             onChange={(e) => handleFilterChange('search', e.target.value)}
             fullWidth
           />
@@ -75,10 +71,10 @@ export const PaymentVerificationFilters = ({
             onChange={(e) =>
               handleFilterChange('verificationStatus', e.target.value)
             }
-            label='Status'
+            label="Status"
             multiple
             fullWidth
-            data-cy='filter-status'
+            data-cy="filter-status"
             value={filter.verificationStatus}
           >
             {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => {
@@ -93,8 +89,8 @@ export const PaymentVerificationFilters = ({
         <Grid item xs={3}>
           <SearchTextField
             value={filter.serviceProvider}
-            data-cy='filter-fsp'
-            label='FSP'
+            data-cy="filter-fsp"
+            label="FSP"
             fullWidth
             onChange={(e) =>
               handleFilterChange('serviceProvider', e.target.value)
@@ -104,8 +100,8 @@ export const PaymentVerificationFilters = ({
         <Grid item xs={3}>
           <SelectFilter
             onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
-            label='Delivery Mechanism'
-            data-cy='filter-Modality'
+            label="Delivery Mechanism"
+            data-cy="filter-Modality"
             multiple
             value={filter.deliveryType}
             fullWidth
@@ -120,18 +116,18 @@ export const PaymentVerificationFilters = ({
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
-            label='Start Date'
+            label="Start Date"
             fullWidth
-            data-cy='filter-start-date'
+            data-cy="filter-start-date"
             onChange={(date) => handleFilterChange('startDate', date)}
             value={filter.startDate}
           />
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
-            label='End Date'
+            label="End Date"
             fullWidth
-            data-cy='filter-end-date'
+            data-cy="filter-end-date"
             onChange={(date) => handleFilterChange('endDate', date)}
             value={filter.endDate}
           />

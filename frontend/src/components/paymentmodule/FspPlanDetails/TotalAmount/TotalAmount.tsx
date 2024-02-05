@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
@@ -12,7 +12,7 @@ export function TotalAmount(): React.ReactElement {
       <ContainerColumnWithBorder>
         <Box mt={4}>
           <Title>
-            <Typography variant='h6'>
+            <Typography variant="h6">
               {t('Total Amount')}(PLN) {t('per FSP')}
             </Typography>
           </Title>

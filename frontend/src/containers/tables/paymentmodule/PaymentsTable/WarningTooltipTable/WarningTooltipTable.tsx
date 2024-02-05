@@ -11,7 +11,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
-} from '@material-ui/core';
+} from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -68,7 +68,7 @@ export const WarningTooltipTable = ({
 
     const renderRow = (row: PaymentConflictDataNode): React.ReactElement => (
       <ClickableTableRow hover>
-        <TableCell align='left'>
+        <TableCell align="left">
           {canViewDetails ? (
             <BlackLink
               to={`/${baseUrl}/payment-module/payment-plans/${row.paymentPlanId}`}
@@ -79,19 +79,19 @@ export const WarningTooltipTable = ({
             row.paymentPlanUnicefId
           )}
         </TableCell>
-        <TableCell align='left'>
+        <TableCell align="left">
           <UniversalMoment>{row.paymentPlanStartDate}</UniversalMoment>
         </TableCell>
-        <TableCell align='left'>
+        <TableCell align="left">
           <UniversalMoment>{row.paymentPlanEndDate}</UniversalMoment>
         </TableCell>
-        <TableCell align='left'>
+        <TableCell align="left">
           <StatusBox
             status={row.paymentPlanStatus}
             statusToColor={paymentPlanStatusToColor}
           />
         </TableCell>
-        <TableCell align='left'>{row.paymentUnicefId}</TableCell>
+        <TableCell align="left">{row.paymentUnicefId}</TableCell>
       </ClickableTableRow>
     );
 
@@ -108,15 +108,15 @@ export const WarningTooltipTable = ({
     <Dialog
       open={!!payment}
       onClose={() => setDialogOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
-      maxWidth='md'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
+      maxWidth="md"
     >
       <DialogTitleWrapper>
         <DialogTitle>{t('Warning')}</DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
-        <Box mt={4} mb={2} display='flex'>
+        <Box mt={4} mb={2} display="flex">
           {t('Payment Plan ID')} <Bold>{paymentPlan.unicefId}</Bold>{' '}
           {t('details')}:
         </Box>
@@ -134,18 +134,18 @@ export const WarningTooltipTable = ({
             </Grid>
           </Grid>
         </GreyBox>
-        <Box mt={10} mb={10} display='flex'>
+        <Box mt={10} mb={10} display="flex">
           {t('Household ID')} <Bold>{payment.household?.unicefId}</Bold>{' '}
           {t('is also included in the following Payment Plans')}:
         </Box>
         <StyledTable>
           <TableHead>
             <TableRow>
-              <TableCell align='left'>{t('Payment Plan ID')}</TableCell>
-              <TableCell align='left'>{t('Start Date')}</TableCell>
-              <TableCell align='left'>{t('End Date')}</TableCell>
-              <TableCell align='left'>{t('Status')}</TableCell>
-              <TableCell align='left'>{t('Payment ID')}</TableCell>
+              <TableCell align="left">{t('Payment Plan ID')}</TableCell>
+              <TableCell align="left">{t('Start Date')}</TableCell>
+              <TableCell align="left">{t('End Date')}</TableCell>
+              <TableCell align="left">{t('Status')}</TableCell>
+              <TableCell align="left">{t('Payment ID')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>{mappedPaymentPlanRows()}</TableBody>

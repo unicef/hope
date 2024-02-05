@@ -1,4 +1,4 @@
-import { Radio } from '@material-ui/core';
+import { Radio } from '@mui/material';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import {
@@ -43,42 +43,42 @@ export const LookUpProgrammesTableRowSurveys = ({
     <ClickableTableRow
       hover
       onClick={handleClick}
-      role='checkbox'
+      role="checkbox"
       key={program.id}
     >
-      <TableCell padding='checkbox'>
+      <TableCell padding="checkbox">
         <Radio
-          color='primary'
+          color="primary"
           checked={selectedProgram === program.id}
           onChange={() => {
             radioChangeHandler(program.id);
           }}
           value={program.id}
-          name='radio-button-program'
+          name="radio-button-program"
           inputProps={{ 'aria-label': program.id }}
-          data-cy='input-radio-program'
+          data-cy="input-radio-program"
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <BlackLink to={programDetailsPath}>{program.name}</BlackLink>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={program.status}
           statusToColor={programStatusToColor}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
         <UniversalMoment>{program.endDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {programSectorChoiceDict[program.sector]}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {program.totalNumberOfHouseholdsWithTpInProgram}
       </TableCell>
-      <TableCell align='right'>{formatCurrency(program.budget)}</TableCell>
+      <TableCell align="right">{formatCurrency(program.budget)}</TableCell>
     </ClickableTableRow>
   );
 };

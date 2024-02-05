@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,16 +42,16 @@ export const FeedbackDetailsToolbar = ({
       title={`Feedback ID: ${feedback.unicefId}`}
       breadCrumbs={breadCrumbsItems}
     >
-      <Box display='flex' alignItems='center'>
+      <Box display="flex" alignItems="center">
         {canEdit && (
           <Box mr={3}>
             <ButtonTooltip
-              color='primary'
-              variant='outlined'
+              color="primary"
+              variant="outlined"
               component={Link}
               to={`/${baseUrl}/grievance/feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
-              data-cy='button-edit'
+              data-cy="button-edit"
               title={t('Program has to be active to edit a Feedback')}
               disabled={!isActiveProgram}
             >
@@ -73,9 +73,9 @@ export const FeedbackDetailsToolbar = ({
                   },
                 })
               }
-              variant='contained'
-              color='primary'
-              data-cy='button-create-linked-ticket'
+              variant="contained"
+              color="primary"
+              data-cy="button-create-linked-ticket"
               title={t(
                 'Program has to be active to create a Linked Ticket to Feedback',
               )}

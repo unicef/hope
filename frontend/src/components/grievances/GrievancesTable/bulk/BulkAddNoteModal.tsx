@@ -1,4 +1,4 @@
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -62,12 +62,12 @@ export const BulkAddNoteModal = ({
         disabledSave={!value}
       >
         <TextField
-          variant='outlined'
+          variant="outlined"
           label={t('Note')}
           fullWidth
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          margin='dense'
+          margin="dense"
         />
       </BulkBaseModal>
     </>

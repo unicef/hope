@@ -1,4 +1,4 @@
-import { Grid, MenuItem } from '@material-ui/core';
+import { Grid, MenuItem } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -29,19 +29,16 @@ export const LookUpLinkedTicketsFilters = ({
   const { t } = useTranslation();
   const location = useLocation();
   const history = useHistory();
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      history,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -56,13 +53,13 @@ export const LookUpLinkedTicketsFilters = ({
       applyHandler={handleApplyFilter}
       isOnPaper={false}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy='filters-search'
+            data-cy="filters-search"
           />
         </Grid>
         <Grid item xs={3}>
@@ -70,7 +67,7 @@ export const LookUpLinkedTicketsFilters = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status || null}
-            data-cy='filters-status'
+            data-cy="filters-status"
           >
             {choicesData.grievanceTicketStatusChoices.map((item) => {
               return (
@@ -86,16 +83,16 @@ export const LookUpLinkedTicketsFilters = ({
             label={t('FSP')}
             value={filter.fsp}
             onChange={(e) => handleFilterChange('fsp', e.target.value)}
-            data-cy='filters-fsp'
+            data-cy="filters-fsp"
           />
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
-            label='From'
+            label="From"
             onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
-            data-cy='filters-creation-date-from'
+            data-cy="filters-creation-date-from"
           />
         </Grid>
         <Grid item xs={3}>
@@ -103,19 +100,19 @@ export const LookUpLinkedTicketsFilters = ({
             label={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
-            data-cy='filters-creation-date-to'
+            data-cy="filters-creation-date-to"
           />
         </Grid>
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            name='admin2'
+            name="admin2"
             value={filter.admin2}
             setFilter={setFilter}
             filter={filter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            dataCy='filters-admin'
+            dataCy="filters-admin"
           />
         </Grid>
       </Grid>

@@ -1,4 +1,4 @@
-import { Checkbox, Radio } from '@material-ui/core';
+import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
@@ -61,44 +61,44 @@ export const LookUpHouseholdTableRowCommunication = ({
         handleClick(event);
       }}
       hover
-      role='checkbox'
+      role="checkbox"
       key={household.id}
-      data-cy='household-table-row'
+      data-cy="household-table-row"
     >
-      <TableCell padding='checkbox'>
+      <TableCell padding="checkbox">
         {householdMultiSelect ? (
           <Checkbox
-            color='primary'
+            color="primary"
             onClick={(event) => checkboxClickHandler(event, household.id)}
             checked={isItemSelected}
-            data-cy='input-checkbox-household'
+            data-cy="input-checkbox-household"
             inputProps={{ 'aria-labelledby': household.id }}
             disabled={isSelectionDisabled}
           />
         ) : (
           <Radio
-            color='primary'
+            color="primary"
             checked={selectedHousehold?.id === household.id}
             onChange={() => {
               radioChangeHandler(household);
             }}
             value={household.id}
-            name='radio-button-household'
+            name="radio-button-household"
             inputProps={{ 'aria-label': household.id }}
-            data-cy='input-radio-household'
+            data-cy="input-radio-household"
             disabled={isSelectionDisabled}
           />
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <BlackLink to={`/${businessArea}/population/household/${household.id}`}>
           {household.unicefId}
         </BlackLink>
       </TableCell>
-      <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
-      <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household?.admin2?.name || '-'}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{household.headOfHousehold.fullName}</TableCell>
+      <TableCell align="left">{household.size}</TableCell>
+      <TableCell align="left">{household?.admin2?.name || '-'}</TableCell>
+      <TableCell align="left">
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

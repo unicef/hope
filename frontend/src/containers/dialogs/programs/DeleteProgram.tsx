@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -77,15 +77,15 @@ export const DeleteProgram = ({
       <RemoveButton
         startIcon={<CloseIcon />}
         onClick={() => setOpen(true)}
-        data-cy='button-remove-program'
+        data-cy="button-remove-program"
       >
         {t('REMOVE')}
       </RemoveButton>
       <MidDialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Remove Programme')}</DialogTitle>
@@ -97,15 +97,15 @@ export const DeleteProgram = ({
         </DialogContent>
         <DialogFooter>
           <DialogActions>
-            <Button data-cy='button-cancel' onClick={() => setOpen(false)}>
+            <Button data-cy="button-cancel" onClick={() => setOpen(false)}>
               {t('CANCEL')}
             </Button>
             <RemoveModalButton
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={deleteProgram}
-              data-cy='button-remove-program'
+              data-cy="button-remove-program"
             >
               {t('REMOVE')}
             </RemoveModalButton>

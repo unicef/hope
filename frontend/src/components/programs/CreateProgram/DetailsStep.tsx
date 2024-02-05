@@ -1,4 +1,4 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -32,18 +32,18 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({
     <BaseSection title={title} description={description}>
       <>
         <ProgramForm values={values} />
-        <Box display='flex' justifyContent='space-between'>
+        <Box display="flex" justifyContent="space-between">
           <Button
-            data-cy='button-cancel'
+            data-cy="button-cancel"
             component={Link}
             to={`/${baseUrl}/list`}
           >
             {t('Cancel')}
           </Button>
           <Button
-            variant='contained'
-            color='primary'
-            data-cy='button-next'
+            variant="contained"
+            color="primary"
+            data-cy="button-next"
             onClick={handleNextClick}
           >
             {t('Next')}

@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
@@ -104,11 +104,11 @@ export function NeedsAdjudicationDetailsOld({
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">
             {t('Needs Adjudication Details')}
           </Typography>
-          <Box gridGap={24} display='flex'>
+          <Box gridGap={24} display="flex">
             <Button
               onClick={() =>
                 history.push({
@@ -116,17 +116,17 @@ export function NeedsAdjudicationDetailsOld({
                   state: { linkedTicketId: ticket.id },
                 })
               }
-              variant='outlined'
-              color='primary'
-              data-cy='button-create-linked-ticket'
+              variant="outlined"
+              color="primary"
+              data-cy="button-create-linked-ticket"
             >
               {t('Create Linked Ticket')}
             </Button>
             {!isEditable && (
               <Button
-                variant='outlined'
-                color='primary'
-                data-cy='button-edit'
+                variant="outlined"
+                color="primary"
+                data-cy="button-edit"
                 disabled={
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                 }
@@ -142,7 +142,7 @@ export function NeedsAdjudicationDetailsOld({
                   !isActiveProgram ||
                   selectedDuplicate === details?.selectedIndividual?.id
                 }
-                data-cy='button-mark-duplicate'
+                data-cy="button-mark-duplicate"
                 onClick={() =>
                   confirm({
                     content: confirmationText,
@@ -156,8 +156,8 @@ export function NeedsAdjudicationDetailsOld({
                     setIsEditMode(false);
                   })
                 }
-                variant='outlined'
-                color='primary'
+                variant="outlined"
+                color="primary"
               >
                 {t('Mark Duplicate')}
               </Button>
@@ -168,48 +168,48 @@ export function NeedsAdjudicationDetailsOld({
       <StyledTable>
         <TableHead>
           <TableRow>
-            <TableCell align='left' />
-            <TableCell data-cy='table-cell-individual-id' align='left'>
+            <TableCell align="left" />
+            <TableCell data-cy="table-cell-individual-id" align="left">
               {t('Individual ID')}
             </TableCell>
-            <TableCell data-cy='table-cell-household-id' align='left'>
+            <TableCell data-cy="table-cell-household-id" align="left">
               {t('Household ID')}
             </TableCell>
-            <TableCell data-cy='table-cell-full-name' align='left'>
+            <TableCell data-cy="table-cell-full-name" align="left">
               {t('Full Name')}
             </TableCell>
-            <TableCell data-cy='table-cell-gender' align='left'>
+            <TableCell data-cy="table-cell-gender" align="left">
               {t('Gender')}
             </TableCell>
-            <TableCell data-cy='table-cell-date-of-birth' align='left'>
+            <TableCell data-cy="table-cell-date-of-birth" align="left">
               {t('Date of Birth')}
             </TableCell>
-            <TableCell data-cy='table-cell-similarity-score' align='left'>
+            <TableCell data-cy="table-cell-similarity-score" align="left">
               {t('Similarity Score')}
             </TableCell>
-            <TableCell data-cy='table-cell-last-registration-date' align='left'>
+            <TableCell data-cy="table-cell-last-registration-date" align="left">
               {t('Last Registration Date')}
             </TableCell>
-            <TableCell data-cy='table-cell-doc-type' align='left'>
+            <TableCell data-cy="table-cell-doc-type" align="left">
               {t('Doc Type')}
             </TableCell>
-            <TableCell data-cy='table-cell-doc-number' align='left'>
+            <TableCell data-cy="table-cell-doc-number" align="left">
               {t('Doc #')}
             </TableCell>
-            <TableCell data-cy='table-cell-admin-level2' align='left'>
+            <TableCell data-cy="table-cell-admin-level2" align="left">
               {t('Admin Level 2')}
             </TableCell>
-            <TableCell data-cy='table-cell-village' align='left'>
+            <TableCell data-cy="table-cell-village" align="left">
               {t('Village')}
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           <TableRow>
-            <TableCell align='left'>
+            <TableCell align="left">
               <Checkbox
-                color='primary'
-                data-cy='checkbox-individual'
+                color="primary"
+                data-cy="checkbox-individual"
                 disabled={
                   !isEditable ||
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
@@ -226,7 +226,7 @@ export function NeedsAdjudicationDetailsOld({
               />
             </TableCell>
 
-            <TableCell align='left'>
+            <TableCell align="left">
               {!isAllPrograms ? (
                 <BlackLink
                   to={`/${baseUrl}/population/individuals/${details.goldenRecordsIndividual?.id}`}
@@ -237,7 +237,7 @@ export function NeedsAdjudicationDetailsOld({
                 <span>{details.goldenRecordsIndividual?.unicefId}</span>
               )}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {!isAllPrograms ? (
                 <BlackLink
                   to={`/${baseUrl}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
@@ -250,46 +250,46 @@ export function NeedsAdjudicationDetailsOld({
                 </span>
               )}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.goldenRecordsIndividual?.fullName}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.goldenRecordsIndividual?.sex}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               <UniversalMoment>
                 {details.goldenRecordsIndividual?.birthDate}
               </UniversalMoment>
             </TableCell>
-            <TableCell align='left'>{getGoldenRecordSimilarity()}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{getGoldenRecordSimilarity()}</TableCell>
+            <TableCell align="left">
               <UniversalMoment>
                 {details.goldenRecordsIndividual?.lastRegistrationDate}
               </UniversalMoment>
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {
                 details.goldenRecordsIndividual?.documents?.edges[0]?.node.type
                   .label
               }
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {
                 details.goldenRecordsIndividual?.documents?.edges[0]?.node
                   .documentNumber
               }
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.goldenRecordsIndividual?.household?.admin2?.name}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.goldenRecordsIndividual?.household?.village}
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left'>
+            <TableCell align="left">
               <Checkbox
-                color='primary'
+                color="primary"
                 disabled={
                   !isEditable ||
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
@@ -303,7 +303,7 @@ export function NeedsAdjudicationDetailsOld({
                 }
               />
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {!isAllPrograms ? (
                 <BlackLink
                   to={`/${baseUrl}/population/individuals/${details.possibleDuplicate?.id}`}
@@ -314,7 +314,7 @@ export function NeedsAdjudicationDetailsOld({
                 <span>{details.possibleDuplicate?.unicefId}</span>
               )}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {!isAllPrograms ? (
                 <BlackLink
                   to={`/${baseUrl}/population/household/${details.possibleDuplicate?.household?.id}`}
@@ -327,36 +327,36 @@ export function NeedsAdjudicationDetailsOld({
                 </span>
               )}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.possibleDuplicate?.fullName}
             </TableCell>
-            <TableCell align='left'>{details.possibleDuplicate?.sex}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{details.possibleDuplicate?.sex}</TableCell>
+            <TableCell align="left">
               <UniversalMoment>
                 {details.possibleDuplicate?.birthDate}
               </UniversalMoment>
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {getPossibleDuplicateSimilarity()}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               <UniversalMoment>
                 {details.possibleDuplicate?.lastRegistrationDate}
               </UniversalMoment>
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.possibleDuplicate?.documents?.edges[0]?.node.type.label}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {
                 details.possibleDuplicate?.documents?.edges[0]?.node
                   .documentNumber
               }
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.possibleDuplicate?.household?.admin2?.name}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {details.possibleDuplicate?.household?.village}
             </TableCell>
           </TableRow>

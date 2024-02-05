@@ -1,4 +1,4 @@
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
@@ -113,8 +113,8 @@ export const GlobalProgramAutocomplete = ({
         <TextField
           {...params}
           placeholder={t('Programme')}
-          variant='outlined'
-          margin='dense'
+          variant="outlined"
+          margin="dense"
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
@@ -122,7 +122,7 @@ export const GlobalProgramAutocomplete = ({
             endAdornment: (
               <>
                 {loading ? (
-                  <CircularProgress color='inherit' size={20} />
+                  <CircularProgress color="inherit" size={20} />
                 ) : null}
                 {params.InputProps.endAdornment}
               </>

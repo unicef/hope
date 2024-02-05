@@ -5,7 +5,7 @@ import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
-import { Checkbox } from '@material-ui/core';
+import { Checkbox } from '@mui/material';
 
 type Order = 'asc' | 'desc';
 
@@ -74,19 +74,18 @@ export function EnhancedTableHead<T>(
     numSelected = 0,
     data = [],
   } = props;
-  const createSortHandler = (property: keyof T | string) => (
-    event: React.MouseEvent<unknown>,
-  ) => {
-    onRequestSort(event, property);
-  };
+  const createSortHandler =
+    (property: keyof T | string) => (event: React.MouseEvent<unknown>) => {
+      onRequestSort(event, property);
+    };
   const classes = useStyles();
   return (
     <TableHead>
       <TableRow>
         {onSelectAllClick && data.length ? (
-          <TableCell padding='checkbox'>
+          <TableCell padding="checkbox">
             <Checkbox
-              color='primary'
+              color="primary"
               indeterminate={numSelected > 0 && numSelected < rowCount}
               checked={rowCount > 0 && numSelected === rowCount}
               onChange={(event) => onSelectAllClick(event, data)}
@@ -104,7 +103,7 @@ export function EnhancedTableHead<T>(
           >
             {allowSort && !headCell.disableSort ? (
               <TableSortLabelStyled
-                data-cy='table-label'
+                data-cy="table-label"
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
@@ -119,7 +118,7 @@ export function EnhancedTableHead<T>(
                 )}
               </TableSortLabelStyled>
             ) : (
-              <StyledLabel data-cy='table-label'>{headCell.label}</StyledLabel>
+              <StyledLabel data-cy="table-label">{headCell.label}</StyledLabel>
             )}
           </TableCell>
         ))}

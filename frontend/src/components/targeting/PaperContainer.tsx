@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Paper } from '@material-ui/core';
+import { Paper } from '@mui/material';
 
 export const PaperContainer = styled(Paper)`
   display: flex;

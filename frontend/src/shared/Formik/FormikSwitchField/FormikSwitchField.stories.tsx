@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider } from '@material-ui/core';
+import { ThemeProvider } from '@mui/material';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { theme } from '../../../theme';
 import { Field, Form, Formik } from 'formik';
@@ -29,9 +29,9 @@ export const SwitchField = () => {
             <Form>
               <FieldWrapper>
                 <Field
-                  name='switchField'
-                  label='Switch field'
-                  color='primary'
+                  name="switchField"
+                  label="Switch field"
+                  color="primary"
                   component={FormikSwitchField}
                 />
               </FieldWrapper>

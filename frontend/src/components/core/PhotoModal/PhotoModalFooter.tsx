@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import React from 'react';
 import { DialogActions } from '../../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
@@ -14,7 +14,7 @@ export const PhotoModalFooter = ({
     <DialogFooter>
       <DialogActions>
         <Button
-          data-cy='button-cancel'
+          data-cy="button-cancel"
           onClick={() => {
             setDialogOpen(false);
             setTurnAngle(90);

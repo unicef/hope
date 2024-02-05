@@ -1,4 +1,4 @@
-import { Paper } from '@material-ui/core';
+import { Paper } from '@mui/material';
 import Button from '@material-ui/core/Button';
 import Collapse from '@material-ui/core/Collapse';
 import TablePagination from '@material-ui/core/TablePagination';
@@ -66,10 +66,10 @@ export const ActivityLogTablePaymentVerification = ({
   return (
     <PaperContainer>
       <Toolbar>
-        <Typography variant='h6'>{t('Activity Log')}</Typography>
+        <Typography variant="h6">{t('Activity Log')}</Typography>
         <Button
-          variant='outlined'
-          color='primary'
+          variant="outlined"
+          color="primary"
           endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
           onClick={() => setExpanded(!expanded)}
         >
@@ -94,7 +94,7 @@ export const ActivityLogTablePaymentVerification = ({
         </Table>
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
-          component='div'
+          component="div"
           count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}

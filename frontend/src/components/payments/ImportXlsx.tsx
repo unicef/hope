@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-} from '@material-ui/core';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@material-ui/icons';
 import get from 'lodash/get';
 import React, { ReactElement, useState } from 'react';
@@ -47,15 +41,11 @@ export function ImportXlsx({
 
   const { t } = useTranslation();
 
-  const [
-    mutate,
-    { data: uploadData, loading: fileLoading, error },
-  ] = useImportXlsxPaymentVerificationPlanFileMutation();
+  const [mutate, { data: uploadData, loading: fileLoading, error }] =
+    useImportXlsxPaymentVerificationPlanFileMutation();
 
-  const xlsxErrors: ImportXlsxPaymentVerificationPlanFileMutation['importXlsxPaymentVerificationPlanFile']['errors'] = get(
-    uploadData,
-    'importXlsxPaymentVerificationPlanFile.errors',
-  );
+  const xlsxErrors: ImportXlsxPaymentVerificationPlanFileMutation['importXlsxPaymentVerificationPlanFile']['errors'] =
+    get(uploadData, 'importXlsxPaymentVerificationPlanFile.errors');
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -84,12 +74,12 @@ export function ImportXlsx({
 
   return (
     <>
-      <Box key='import'>
+      <Box key="import">
         <StyledButton
           startIcon={<Publish />}
-          color='primary'
-          variant='outlined'
-          data-cy='button-import'
+          color="primary"
+          variant="outlined"
+          data-cy="button-import"
           onClick={() => setOpenImport(true)}
         >
           {t('Import XLSX')}
@@ -98,8 +88,8 @@ export function ImportXlsx({
       <Dialog
         open={open}
         onClose={() => setOpenImport(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Select File to Import')}</DialogTitle>
@@ -146,11 +136,11 @@ export function ImportXlsx({
             <LoadingButton
               loading={fileLoading}
               disabled={!fileToImport}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => handleImport()}
-              data-cy='button-import-entitlement'
+              data-cy="button-import-entitlement"
             >
               {t('IMPORT')}
             </LoadingButton>

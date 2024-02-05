@@ -1,4 +1,4 @@
-import { FormHelperText, Grid } from '@material-ui/core';
+import { FormHelperText, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
@@ -20,7 +20,7 @@ export const ExistingDocumentationFieldArray = ({
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name='documentationToUpdate'
+        name="documentationToUpdate"
         render={(arrayHelpers) => {
           return (
             <>

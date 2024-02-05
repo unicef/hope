@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import Collapse from '@material-ui/core/Collapse';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -130,10 +130,8 @@ export const DrawerItems = ({
 
   const preparedMenuItems = prepareMenuItems(menuItems);
 
-  const {
-    isPaymentPlanApplicable,
-    isAccountabilityApplicable,
-  } = businessAreaData.businessArea;
+  const { isPaymentPlanApplicable, isAccountabilityApplicable } =
+    businessAreaData.businessArea;
   const flags = {
     isPaymentPlanApplicable,
     isAccountabilityApplicable,
@@ -199,7 +197,7 @@ export const DrawerItems = ({
                 )}
               </ListItem>
               <Collapse in={expandedItem !== null && expandedItem === index}>
-                <SubList open={open} component='div'>
+                <SubList open={open} component="div">
                   {item.secondaryActions &&
                     item.secondaryActions.map(
                       (secondary) =>
@@ -234,8 +232,8 @@ export const DrawerItems = ({
             button
             key={item?.name + item.href}
           >
-            <StyledLink target='_blank' href={item.href}>
-              <Box display='flex'>
+            <StyledLink target="_blank" href={item.href}>
+              <Box display="flex">
                 <Icon>{item.icon}</Icon>
                 <Text primary={item?.name} />
               </Box>

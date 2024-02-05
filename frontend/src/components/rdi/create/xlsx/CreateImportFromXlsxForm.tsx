@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -109,11 +109,11 @@ export function CreateImportFromXlsxForm({
       <FormikProvider value={formik}>
         <DropzoneField loading={saveXlsxLoading} />
         <Field
-          name='name'
+          name="name"
           fullWidth
           label={t('Title')}
           required
-          variant='outlined'
+          variant="outlined"
           component={FormikTextField}
         />
         <ScreenBeneficiaryField />

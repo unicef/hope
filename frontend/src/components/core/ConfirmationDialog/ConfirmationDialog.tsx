@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
@@ -41,26 +41,26 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
   const { t } = useTranslation();
 
   return (
-    <Dialog fullWidth scroll='paper' open={open}>
+    <Dialog fullWidth scroll="paper" open={open}>
       <DialogTitleWrapper>
         <DialogTitle>{title || t('Confirmation')}</DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
         {extraContent ? (
-          <Typography variant='body2' style={{ marginBottom: '16px' }}>
+          <Typography variant="body2" style={{ marginBottom: '16px' }}>
             {extraContent}
           </Typography>
         ) : null}
         <Typography
-          variant='body2'
+          variant="body2"
           style={{ marginBottom: warningContent ? '16px' : 'inherit' }}
         >
           {content}
         </Typography>
         {warningContent ? (
           <Typography
-            color='primary'
-            variant='body2'
+            color="primary"
+            variant="body2"
             style={{ fontWeight: 'bold' }}
           >
             {warningContent}
@@ -70,19 +70,19 @@ export const ConfirmationDialog: FC<ConfirmationDialogProps> = ({
       <DialogFooter>
         <DialogActions>
           <Button
-            data-cy='button-cancel'
-            color='primary'
+            data-cy="button-cancel"
+            color="primary"
             onClick={onClose}
             autoFocus
           >
             {t('Cancel')}
           </Button>
           <Button
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             disabled={disabled}
             onClick={onSubmit}
-            data-cy='button-confirm'
+            data-cy="button-confirm"
           >
             {continueText || t('Continue')}
           </Button>

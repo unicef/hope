@@ -1,4 +1,4 @@
-import { Box, Tab, Tabs } from '@material-ui/core';
+import { Box, Tab, Tabs } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -74,10 +74,8 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     programState: 'active',
   };
 
-  const {
-    data: householdChoicesData,
-    loading: householdChoicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: householdChoicesData, loading: householdChoicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [filterIND, setFilterIND] = useState(
     getFilterFromQueryParams(location, initialFilterIND),
@@ -93,18 +91,14 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     getFilterFromQueryParams(location, initialFilterHH),
   );
 
-  const {
-    data: individualChoicesData,
-    loading: individualChoicesLoading,
-  } = useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
-  const {
-    data: programsData,
-    loading: programsLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, first: 100 },
-    fetchPolicy: 'cache-first',
-  });
+  const { data: programsData, loading: programsLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, first: 100 },
+      fetchPolicy: 'cache-first',
+    });
 
   if (householdChoicesLoading || individualChoicesLoading || programsLoading)
     return <LoadingComponent />;
@@ -123,16 +117,16 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   return (
     <>
       <Box>
-        <Box id='scroll-dialog-title'>
+        <Box id="scroll-dialog-title">
           <StyledTabs
             value={selectedTab}
             onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
               setSelectedTab(newValue);
             }}
-            indicatorColor='primary'
-            textColor='primary'
-            variant='fullWidth'
-            aria-label='look up tabs'
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+            aria-label="look up tabs"
           >
             <Tab label={t('LOOK UP HOUSEHOLD')} />
             <Tab

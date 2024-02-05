@@ -5,7 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +21,7 @@ import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { ErrorButton } from '../../../core/ErrorButton';
 import { GreyText } from '../../../core/GreyText';
 import { LoadingButton } from '../../../core/LoadingButton';
-import { useProgramContext } from "../../../../programContext";
+import { useProgramContext } from '../../../../programContext';
 
 export interface RejectPaymentPlanProps {
   paymentPlanId: string;
@@ -34,24 +34,20 @@ export const RejectPaymentPlan = ({
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const {
-    mutatePaymentPlanAction: reject,
-    loading: loadingReject,
-  } = usePaymentPlanAction(
-    Action.Reject,
-    paymentPlanId,
-    () => showMessage(t('Payment Plan has been rejected.')),
-    () => setRejectDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: reject, loading: loadingReject } =
+    usePaymentPlanAction(
+      Action.Reject,
+      paymentPlanId,
+      () => showMessage(t('Payment Plan has been rejected.')),
+      () => setRejectDialogOpen(false),
+    );
 
   const initialValues = {
     comment: '',
   };
 
   const validationSchema = Yup.object().shape({
-    comment: Yup.string()
-      .min(4, 'Too short')
-      .max(255, 'Too long'),
+    comment: Yup.string().min(4, 'Too short').max(255, 'Too long'),
   });
 
   return (
@@ -75,9 +71,9 @@ export const RejectPaymentPlan = ({
           <Dialog
             open={rejectDialogOpen}
             onClose={() => setRejectDialogOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-            maxWidth='md'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
+            maxWidth="md"
           >
             <DialogTitleWrapper>
               <DialogTitle>{t('Reject Payment Plan')}</DialogTitle>
@@ -96,11 +92,11 @@ export const RejectPaymentPlan = ({
                 </Box>
                 <Form>
                   <Field
-                    name='comment'
+                    name="comment"
                     multiline
                     fullWidth
-                    variant='filled'
-                    label='Comment (optional)'
+                    variant="filled"
+                    label="Comment (optional)"
                     component={FormikTextField}
                   />
                 </Form>
@@ -113,11 +109,11 @@ export const RejectPaymentPlan = ({
                 </Button>
                 <LoadingButton
                   loading={loadingReject}
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                   disabled={!isActiveProgram}
                 >
                   {t('Reject')}

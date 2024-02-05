@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import {
@@ -75,7 +75,7 @@ export const GrievancesSidebar = ({
       ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     )
       return (
-        <Box display='flex' flexDirection='column'>
+        <Box display="flex" flexDirection="column">
           <Box mt={3}>
             {ticket.paymentVerificationTicketDetails
               ?.hasMultiplePaymentVerifications ? (
@@ -99,7 +99,7 @@ export const GrievancesSidebar = ({
     if (shouldShowReassignBoxDataChange()) {
       return (
         <Box p={3}>
-          <Box display='flex' flexDirection='column'>
+          <Box display="flex" flexDirection="column">
             <ReassignRoleBox
               shouldDisplayButton
               shouldDisableButton={
@@ -115,7 +115,7 @@ export const GrievancesSidebar = ({
     if (shouldShowReassignMultipleBoxDataChange()) {
       return (
         <Box p={3}>
-          <Box display='flex' flexDirection='column'>
+          <Box display="flex" flexDirection="column">
             <ReassignMultipleRoleBox ticket={ticket} />
           </Box>
         </Box>
@@ -124,7 +124,7 @@ export const GrievancesSidebar = ({
 
     return (
       <Box p={3}>
-        <Box display='flex' flexDirection='column'>
+        <Box display="flex" flexDirection="column">
           <OtherRelatedTickets ticket={ticket} />
         </Box>
       </Box>

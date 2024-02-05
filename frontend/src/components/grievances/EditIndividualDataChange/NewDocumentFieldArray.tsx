@@ -1,4 +1,4 @@
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from 'react-router-dom';
 import { AddCircleOutline } from '@material-ui/icons';
@@ -26,7 +26,7 @@ export function NewDocumentFieldArray({
   return (
     <Grid container spacing={3}>
       <FieldArray
-        name='individualDataUpdateFieldsDocuments'
+        name="individualDataUpdateFieldsDocuments"
         render={(arrayHelpers) => {
           return (
             <>
@@ -47,7 +47,7 @@ export function NewDocumentFieldArray({
                     documentTypeChoices={
                       addIndividualFieldsData.documentTypeChoices
                     }
-                    baseName='individualDataUpdateFieldsDocuments'
+                    baseName="individualDataUpdateFieldsDocuments"
                     setFieldValue={setFieldValue}
                     values={values}
                   />
@@ -57,7 +57,7 @@ export function NewDocumentFieldArray({
               <Grid item xs={8} />
               <Grid item xs={12}>
                 <Button
-                  color='primary'
+                  color="primary"
                   disabled={isEditTicket}
                   onClick={() => {
                     arrayHelpers.push({

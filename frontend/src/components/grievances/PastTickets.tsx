@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -20,7 +20,7 @@ export function PastTickets({ tickets }): React.ReactElement {
     <PastContainer>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>
+          <Typography variant="h6">
             {t('Past tickets')} <Missing />
           </Typography>
         </Title>

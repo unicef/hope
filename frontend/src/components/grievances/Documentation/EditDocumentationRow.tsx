@@ -1,4 +1,4 @@
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
+import { Box, Button, Grid, IconButton } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import Edit from '@material-ui/icons/Edit';
 import React, { useState } from 'react';
@@ -39,7 +39,7 @@ export function EditDocumentationRow({
         index={index}
         key={`${index}-documentation-file`}
         onDelete={() => arrayHelpers.remove(index)}
-        baseName='documentationToUpdate'
+        baseName="documentationToUpdate"
         setFieldValue={setFieldValue}
         isEdited={isEdited}
       />
@@ -76,7 +76,7 @@ export function EditDocumentationRow({
       )}
       <Grid item xs={1}>
         {!removed ? (
-          <Box ml={2} display='flex' align-items='center'>
+          <Box ml={2} display="flex" align-items="center">
             <IconButton
               onClick={() => {
                 arrayHelpers.replace(index, {
@@ -102,7 +102,7 @@ export function EditDocumentationRow({
             </IconButton>
           </Box>
         ) : (
-          <Box display='flex' alignItems='center' height={48} color='red'>
+          <Box display="flex" alignItems="center" height={48} color="red">
             {t('REMOVED')}
           </Box>
         )}

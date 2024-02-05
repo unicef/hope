@@ -4,7 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,13 +35,13 @@ export const DeleteProgramPartner = ({
   return (
     <>
       <ErrorButton
-        data-cy='button-delete'
+        data-cy="button-delete"
         onClick={() => setOpen(true)}
         disabled={!canDeleteProgramPartner}
       >
         <Delete />
       </ErrorButton>
-      <Dialog open={open} onClose={() => setOpen(false)} scroll='paper'>
+      <Dialog open={open} onClose={() => setOpen(false)} scroll="paper">
         <DialogTitleWrapper>
           <DialogTitle>
             {t(
@@ -60,10 +60,10 @@ export const DeleteProgramPartner = ({
             <LoadingButton
               //TODO: fix this
               loading={false}
-              type='submit'
-              variant='contained'
+              type="submit"
+              variant="contained"
               onClick={() => handleDeleteProgramPartner()}
-              data-cy='button-delete'
+              data-cy="button-delete"
               endIcon={<WhiteDeleteIcon />}
             >
               {t('Delete')}

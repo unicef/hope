@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
@@ -48,12 +48,12 @@ export const DashboardFilters = ({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         {isAllPrograms && (
           <Grid item xs={5}>
             <ProgramAutocomplete
               filter={filter}
-              name='program'
+              name="program"
               value={filter.program}
               setFilter={setFilter}
               initialFilter={initialFilter}
@@ -64,14 +64,14 @@ export const DashboardFilters = ({
         )}
         <Grid item xs={3}>
           <AdminAreaAutocomplete
-            name='administrativeArea'
+            name="administrativeArea"
             value={filter.administrativeArea}
             filter={filter}
             setFilter={setFilter}
             initialFilter={initialFilter}
             appliedFilter={appliedFilter}
             setAppliedFilter={setAppliedFilter}
-            dataCy='filter-administrative-area'
+            dataCy="filter-administrative-area"
           />
         </Grid>
       </Grid>

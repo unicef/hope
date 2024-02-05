@@ -1,4 +1,4 @@
-import { Box, DialogTitle } from '@material-ui/core';
+import { Box, DialogTitle } from '@mui/material';
 import React from 'react';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { RotateImg } from './RotateImg';
@@ -17,7 +17,7 @@ export const PhotoModalHeader = ({
   return (
     <DialogTitleWrapper>
       <DialogTitle>
-        <Box display='flex' justifyContent='space-between' alignItems='center'>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           <span>{title}</span>
           {showRotate ? (
             <RotateImg turnAngle={turnAngle} setTurnAngle={setTurnAngle} />

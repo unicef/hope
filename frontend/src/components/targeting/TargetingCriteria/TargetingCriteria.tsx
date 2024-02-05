@@ -6,7 +6,7 @@ import {
   Grid,
   Paper,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { AddCircleOutline } from '@material-ui/icons';
 import { Field } from 'formik';
 import React, { Fragment, useState } from 'react';
@@ -162,19 +162,19 @@ export function TargetingCriteria({
   if (householdFiltersAvailable || individualFiltersAvailable) {
     return (
       <PaperContainer>
-        <Box display='flex' flexDirection='column'>
+        <Box display="flex" flexDirection="column">
           <Title>
-            <Typography data-cy='title-targeting-criteria' variant='h6'>
+            <Typography data-cy="title-targeting-criteria" variant="h6">
               {t('Targeting Criteria')}
             </Typography>
             {isEdit && (
               <>
                 {!!rules.length && (
                   <Button
-                    variant='outlined'
-                    color='primary'
+                    variant="outlined"
+                    color="primary"
                     onClick={() => setOpen(true)}
-                    data-cy='button-target-population-add-criteria'
+                    data-cy="button-target-population-add-criteria"
                   >
                     {t('Add')} &apos;Or&apos; {t('Filter')}
                   </Button>
@@ -194,8 +194,8 @@ export function TargetingCriteria({
             householdFiltersAvailable={householdFiltersAvailable}
           />
           <ContentWrapper>
-            <Box display='flex' flexDirection='column'>
-              <Box display='flex' flexWrap='wrap'>
+            <Box display="flex" flexDirection="column">
+              <Box display="flex" flexWrap="wrap">
                 {rules.length ? (
                   rules.map((criteria, index) => {
                     return (
@@ -224,7 +224,7 @@ export function TargetingCriteria({
                 ) : (
                   <AddCriteria
                     onClick={() => setOpen(true)}
-                    data-cy='button-target-population-add-criteria'
+                    data-cy="button-target-population-add-criteria"
                   >
                     <AddCircleOutline />
                     <p>{t('Add Filter')}</p>
@@ -240,9 +240,9 @@ export function TargetingCriteria({
                           disabled
                           control={
                             <Checkbox
-                              color='primary'
-                              name='flagExcludeIfActiveAdjudicationTicket'
-                              data-cy='checkbox-exclude-if-active-adjudication-ticket'
+                              color="primary"
+                              name="flagExcludeIfActiveAdjudicationTicket"
+                              data-cy="checkbox-exclude-if-active-adjudication-ticket"
                               checked={Boolean(
                                 targetPopulation?.targetingCriteria
                                   ?.flagExcludeIfActiveAdjudicationTicket,
@@ -260,9 +260,9 @@ export function TargetingCriteria({
                             disabled
                             control={
                               <Checkbox
-                                data-cy='checkbox-exclude-if-on-sanction-list'
-                                color='primary'
-                                name='flagExcludeIfOnSanctionList'
+                                data-cy="checkbox-exclude-if-on-sanction-list"
+                                color="primary"
+                                name="flagExcludeIfOnSanctionList"
                               />
                             }
                             checked={Boolean(
@@ -282,25 +282,25 @@ export function TargetingCriteria({
                     <Grid container spacing={3}>
                       <Grid item xs={6}>
                         <Field
-                          name='flagExcludeIfActiveAdjudicationTicket'
+                          name="flagExcludeIfActiveAdjudicationTicket"
                           label={t(
                             'Exclude Households with Active Adjudication Ticket',
                           )}
-                          color='primary'
+                          color="primary"
                           component={FormikCheckboxField}
-                          data-cy='input-active-adjudication-ticket'
+                          data-cy="input-active-adjudication-ticket"
                         />
                       </Grid>
                       {screenBeneficiary && (
                         <Grid item xs={6}>
                           <Field
-                            name='flagExcludeIfOnSanctionList'
+                            name="flagExcludeIfOnSanctionList"
                             label={t(
                               'Exclude Households with an active sanction screen flag',
                             )}
-                            color='primary'
+                            color="primary"
                             component={FormikCheckboxField}
-                            data-cy='input-active-sanction-flag'
+                            data-cy="input-active-sanction-flag"
                           />
                         </Grid>
                       )}

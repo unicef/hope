@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Grid } from '@material-ui/core';
+import { Box, Button, Divider, Grid } from '@mui/material';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -33,13 +33,9 @@ import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 
 export const validationSchema = Yup.object().shape({
-  issueType: Yup.string()
-    .required('Issue Type is required')
-    .nullable(),
+  issueType: Yup.string().required('Issue Type is required').nullable(),
   admin2: Yup.string().nullable(),
-  description: Yup.string()
-    .nullable()
-    .required('Description is required'),
+  description: Yup.string().nullable().required('Description is required'),
   consent: Yup.bool(),
   area: Yup.string().nullable(),
   language: Yup.string().nullable(),
@@ -63,20 +59,16 @@ export const EditFeedbackPage = (): React.ReactElement => {
     variables: { businessArea, first: 1000 },
   });
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useFeedbackIssueTypeChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useFeedbackIssueTypeChoicesQuery();
 
-  const {
-    data: programsData,
-    loading: programsDataLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: {
-      first: 100,
-      businessArea,
-    },
-  });
+  const { data: programsData, loading: programsDataLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: {
+        first: 100,
+        businessArea,
+      },
+    });
 
   const [mutate, { loading }] = useUpdateFeedbackTicketMutation();
 
@@ -175,7 +167,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
                   : null
               }
             >
-              <Box display='flex' alignContent='center'>
+              <Box display="flex" alignContent="center">
                 <Box mr={3}>
                   <Button
                     component={Link}
@@ -186,10 +178,10 @@ export const EditFeedbackPage = (): React.ReactElement => {
                 </Box>
                 <LoadingButton
                   loading={loading}
-                  color='primary'
-                  variant='contained'
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {t('Save')}
                 </LoadingButton>
@@ -262,10 +254,10 @@ export const EditFeedbackPage = (): React.ReactElement => {
                       <Grid container spacing={3}>
                         <Grid item xs={12}>
                           <Field
-                            name='description'
+                            name="description"
                             multiline
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Description')}
                             required
                             component={FormikTextField}
@@ -273,47 +265,47 @@ export const EditFeedbackPage = (): React.ReactElement => {
                         </Grid>
                         <Grid item xs={12}>
                           <Field
-                            name='comments'
+                            name="comments"
                             multiline
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Comments')}
                             component={FormikTextField}
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Field
-                            name='admin2'
-                            variant='outlined'
+                            name="admin2"
+                            variant="outlined"
                             component={FormikAdminAreaAutocomplete}
                             disabled={Boolean(feedback.admin2?.id)}
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Field
-                            name='area'
+                            name="area"
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Area / Village / Pay point')}
                             component={FormikTextField}
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Field
-                            name='language'
+                            name="language"
                             multiline
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Languages Spoken')}
                             component={FormikTextField}
                           />
                         </Grid>
                         <Grid item xs={3}>
                           <Field
-                            name='program'
+                            name="program"
                             label={t('Programme Name')}
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             choices={mappedProgramChoices}
                             component={FormikSelectField}
                             disabled={

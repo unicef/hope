@@ -1,4 +1,4 @@
-import { Grid, IconButton } from '@material-ui/core';
+import { Grid, IconButton } from '@mui/material';
 import { Delete } from '@material-ui/icons';
 import { useLocation } from 'react-router-dom';
 import { Field, useField } from 'formik';
@@ -51,7 +51,7 @@ export const EditHouseholdDataChangeFieldRow = ({
         <Field
           name={`householdDataUpdateFields[${index}].fieldName`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Field')}
           required
           component={FormikSelectField}

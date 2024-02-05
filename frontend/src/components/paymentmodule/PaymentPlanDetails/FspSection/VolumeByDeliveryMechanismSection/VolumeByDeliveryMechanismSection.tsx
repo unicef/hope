@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
@@ -91,21 +91,21 @@ export const VolumeByDeliveryMechanismSection = ({
   };
 
   return (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       <Title>
-        <Typography variant='h6'>
+        <Typography variant="h6">
           {t('Volume by Delivery Mechanism')}
         </Typography>{' '}
       </Title>
       <ContentWrapper>
-        <Grid container spacing={0} justifyContent='flex-start'>
+        <Grid container spacing={0} justifyContent="flex-start">
           {mappedDeliveryMechanism}
         </Grid>
         <Grid
           container
           spacing={0}
-          justifyContent='flex-start'
-          alignItems='center'
+          justifyContent="flex-start"
+          alignItems="center"
         >
           <Grid item xs={4}>
             <ChartContainer>

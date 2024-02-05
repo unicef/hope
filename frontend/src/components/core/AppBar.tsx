@@ -1,4 +1,4 @@
-import { Box, Button, makeStyles } from '@material-ui/core';
+import { Box, Button, makeStyles } from '@mui/material';
 import MuiAppBar from '@material-ui/core/AppBar';
 import IconButton from '@material-ui/core/IconButton';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -78,12 +78,12 @@ export const AppBar = ({ open, handleDrawerOpen }): React.ReactElement => {
   return (
     <MuiAppBar className={clsx(classes.appBar, open && classes.appBarShift)}>
       <StyledToolbar>
-        <Box display='flex' alignItems='center' justifyContent='center'>
+        <Box display="flex" alignItems="center" justifyContent="center">
           <Box ml={1}>
             <IconButton
-              edge='start'
-              color='inherit'
-              aria-label='open drawer'
+              edge="start"
+              color="inherit"
+              aria-label="open drawer"
               onClick={handleDrawerOpen}
               className={clsx(
                 classes.menuButton,
@@ -93,18 +93,18 @@ export const AppBar = ({ open, handleDrawerOpen }): React.ReactElement => {
               <MenuIcon />
             </IconButton>
           </Box>
-          <Box display='flex' alignItems='center'>
-            <Box ml={6} data-cy='business-area-container'>
+          <Box display="flex" alignItems="center">
+            <Box ml={6} data-cy="business-area-container">
               <BusinessAreaSelect />
             </Box>
-            <Box ml={6} data-cy='global-program-filter-container'>
+            <Box ml={6} data-cy="global-program-filter-container">
               <GlobalProgramSelect />
             </Box>
           </Box>
         </Box>
-        <Box display='flex' justifyContent='flex-end'>
+        <Box display="flex" justifyContent="flex-end">
           <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
-            <StyledLink target='_blank' href={servicenow}>
+            <StyledLink target="_blank" href={servicenow}>
               Support
             </StyledLink>
           </Button>

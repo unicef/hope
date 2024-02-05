@@ -1,9 +1,4 @@
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import { Button, DialogContent, DialogTitle, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -49,12 +44,12 @@ export const FinalizeTargetPopulationPaymentPlan = ({
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <DialogTitleWrapper>
         <DialogTitle>
-          <Typography variant='h6'>{t('Mark Ready')}</Typography>
+          <Typography variant="h6">{t('Mark Ready')}</Typography>
         </DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
@@ -70,11 +65,11 @@ export const FinalizeTargetPopulationPaymentPlan = ({
           <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
           <LoadingButton
             onClick={() => onSubmit(targetPopulationId)}
-            color='primary'
-            variant='contained'
+            color="primary"
+            variant="contained"
             loading={loading}
             disabled={loading || !totalHouseholds}
-            data-cy='button-target-population-modal-send-to-hope'
+            data-cy="button-target-population-modal-send-to-hope"
           >
             {t('Mark Ready')}
           </LoadingButton>

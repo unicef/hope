@@ -1,4 +1,4 @@
-import { Box, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
+import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -43,7 +43,7 @@ export const LookUpSelectionSurveys = ({
     numberOfHouseholdsMax: '',
     budgetMin: '',
     budgetMax: '',
-    dataCollectingType: ''
+    dataCollectingType: '',
   };
 
   const [filterP, setFilterP] = useState(
@@ -71,12 +71,10 @@ export const LookUpSelectionSurveys = ({
 
   const { t } = useTranslation();
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useProgrammeChoiceDataQuery({
-    variables: { businessArea },
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useProgrammeChoiceDataQuery({
+      variables: { businessArea },
+    });
 
   const handleChange = (type: number, value: string): void => {
     setValues({
@@ -99,18 +97,18 @@ export const LookUpSelectionSurveys = ({
       <BoxWithBorderBottom
         p={4}
         m={4}
-        display='flex'
-        alignItems='center'
-        bgcolor='#F5F5F5'
+        display="flex"
+        alignItems="center"
+        bgcolor="#F5F5F5"
       >
-        <Box pr={5} fontWeight='500' fontSize='medium'>
+        <Box pr={5} fontWeight="500" fontSize="medium">
           {t('Look up for')}
         </Box>
         <RadioGroup
-          aria-labelledby='selection-radio-buttons-group'
+          aria-labelledby="selection-radio-buttons-group"
           value={selectedTab}
           row
-          name='radio-buttons-group'
+          name="radio-buttons-group"
         >
           {surveysTabs.map((tab, index) => (
             <FormControlLabel
@@ -118,7 +116,7 @@ export const LookUpSelectionSurveys = ({
               onChange={() => {
                 setSelectedTab(index);
               }}
-              control={<Radio color='primary' />}
+              control={<Radio color="primary" />}
               label={tab}
               key={tab}
             />

@@ -1,4 +1,4 @@
-import { Button, Typography } from '@material-ui/core';
+import { Button, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -58,9 +58,9 @@ export function LoginPage(): React.ReactElement {
         <SubTitle>{t('Login via Active Directory')}</SubTitle>
         <LoginButtonContainer>
           <LoginButton
-            variant='contained'
-            size='large'
-            component='a'
+            variant="contained"
+            size="large"
+            component="a"
             href={
               next
                 ? `${LOGIN_URL}?next=/accounts/profile%3Fnext%3D${next}`

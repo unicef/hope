@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { IconButton, Collapse } from '@material-ui/core';
+import { IconButton, Collapse } from '@mui/material';
 import { ExpandLessRounded, ExpandMoreRounded } from '@material-ui/icons';
 import { XlsxErrorNode } from '../../../../../__generated__/graphql';
 
@@ -25,16 +25,16 @@ export function ImportErrors({
   }
   return (
     <>
-      <ErrorsContainer data-cy='errors-container'>
+      <ErrorsContainer data-cy="errors-container">
         <IconButton
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
-          aria-label='show more'
+          aria-label="show more"
         >
           {expanded ? <ExpandLessRounded /> : <ExpandMoreRounded />}
         </IconButton>
       </ErrorsContainer>
-      <Collapse in={expanded} timeout='auto' unmountOnExit>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
         {errors.map((item) => (
           <Error>
             <strong>

@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LabelizedField } from '../../core/LabelizedField';
@@ -21,16 +21,16 @@ export const GrievanceDashboardCard = ({
 }: GrievanceDashboardCardProps): React.ReactElement => {
   const { t } = useTranslation();
   return (
-    <DashboardCard color='#FFF'>
+    <DashboardCard color="#FFF">
       <CardTitle>{topLabel}</CardTitle>
-      <Grid container alignItems='center'>
+      <Grid container alignItems="center">
         <Grid item>
           <CardAmountSmaller data-cy={`${dataCy}-top-number`}>
             {topNumber}
           </CardAmountSmaller>
         </Grid>
       </Grid>
-      <Grid container alignItems='center'>
+      <Grid container alignItems="center">
         <Grid xs={6} item>
           <LabelizedField
             data-cy={`${dataCy}-system-generated`}

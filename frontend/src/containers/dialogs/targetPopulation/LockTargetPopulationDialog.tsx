@@ -1,4 +1,4 @@
-import { Button, DialogContent, DialogTitle } from '@material-ui/core';
+import { Button, DialogContent, DialogTitle } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -30,8 +30,8 @@ export function LockTargetPopulationDialog({
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <>
         <DialogTitleWrapper>
@@ -53,8 +53,8 @@ export function LockTargetPopulationDialog({
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               loading={loading}
               onClick={() => {
                 mutate({
@@ -66,7 +66,7 @@ export function LockTargetPopulationDialog({
                   });
                 });
               }}
-              data-cy='button-target-population-modal-lock'
+              data-cy="button-target-population-modal-lock"
             >
               {t('Lock')}
             </LoadingButton>

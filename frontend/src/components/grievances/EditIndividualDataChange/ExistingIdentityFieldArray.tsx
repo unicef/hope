@@ -1,4 +1,4 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -27,7 +27,7 @@ export function ExistingIdentityFieldArray({
   return individual?.identities?.edges?.length > 0 ? (
     <Grid container spacing={3}>
       <FieldArray
-        name='individualDataUpdateIdentitiesToEdit'
+        name="individualDataUpdateIdentitiesToEdit"
         render={(arrayHelpers) => {
           return (
             <>

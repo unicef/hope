@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import styled from 'styled-components';
 import { Field } from 'formik';
 import get from 'lodash/get';
@@ -41,23 +41,23 @@ export const PaymentPlanTargeting = ({
   return (
     <PaperContainer>
       <Title>
-        <Typography variant='h6'>{t('Targeting')}</Typography>
+        <Typography variant="h6">{t('Targeting')}</Typography>
       </Title>
       <OverviewContainer>
-        <StyledBox display='flex' flexDirection='column'>
+        <StyledBox display="flex" flexDirection="column">
           <GreyText>{t('Select Target Population')}</GreyText>
           <Grid container>
             <Grid item xs={6}>
               <Field
-                name='targetingId'
+                name="targetingId"
                 label={t('Target Population')}
                 fullWidth
-                variant='outlined'
+                variant="outlined"
                 required
                 choices={mappedTargetPopulations}
                 component={FormikSelectField}
                 disabled={disabled}
-                data-cy='input-target-population'
+                data-cy="input-target-population"
               />
             </Grid>
           </Grid>

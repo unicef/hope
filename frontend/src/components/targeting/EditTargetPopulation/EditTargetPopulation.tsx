@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -52,13 +52,11 @@ export const EditTargetPopulation = ({
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const {
-    data: allProgramsData,
-    loading: loadingPrograms,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, status: [ProgramStatus.Active] },
+      fetchPolicy: 'cache-and-network',
+    });
 
   if (loadingPrograms) {
     return <LoadingComponent />;
@@ -152,7 +150,7 @@ export const EditTargetPopulation = ({
               targetPopulation={targetPopulation}
             />
             <FieldArray
-              name='targetingCriteria'
+              name="targetingCriteria"
               render={(arrayHelpers) => (
                 <TargetingCriteria
                   helpers={arrayHelpers}
@@ -165,7 +163,7 @@ export const EditTargetPopulation = ({
             />
             <Exclusions initialOpen={Boolean(values.excludedIds)} />
             <PaperContainer>
-              <Typography variant='h6'>
+              <Typography variant="h6">
                 {t('Save to see the list of households')}
               </Typography>
               <Label>

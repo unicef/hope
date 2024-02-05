@@ -1,4 +1,4 @@
-import { Box, Button, FormHelperText, Grid } from '@material-ui/core';
+import { Box, Button, FormHelperText, Grid } from '@mui/material';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -125,30 +125,24 @@ export const CreateGrievancePage = (): React.ReactElement => {
     variables: { businessArea, first: 1000 },
   });
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
-  const {
-    data: programsData,
-    loading: programsDataLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: {
-      first: 100,
-      businessArea,
-    },
-  });
+  const { data: programsData, loading: programsDataLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: {
+        first: 100,
+        businessArea,
+      },
+    });
 
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const {
-    data: householdFieldsData,
-    loading: householdFieldsLoading,
-  } = useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, loading: householdFieldsLoading } =
+    useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -319,7 +313,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
           <>
             <AutoSubmitFormOnEnter />
             <PageHeader
-              title='New Ticket'
+              title="New Ticket"
               breadCrumbs={
                 hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)
                   ? breadCrumbsItems
@@ -349,7 +343,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
                         <BoxWithBorders>
-                          <Box display='flex' flexDirection='column'>
+                          <Box display="flex" flexDirection="column">
                             <LookUpHouseholdIndividualSelection
                               values={values}
                               onValueChange={setFieldValue}
@@ -388,7 +382,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         </>
                       )}
                       {dataChangeErrors(errors)}
-                      <Box pt={3} display='flex' flexDirection='row'>
+                      <Box pt={3} display="flex" flexDirection="row">
                         <Box mr={3}>
                           <Button
                             component={Link}
@@ -397,7 +391,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             {t('Cancel')}
                           </Button>
                         </Box>
-                        <Box display='flex' ml='auto'>
+                        <Box display="flex" ml="auto">
                           <Button
                             disabled={activeStep === 0}
                             onClick={handleBack}
@@ -406,10 +400,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           </Button>
                           <LoadingButton
                             loading={loading}
-                            color='primary'
-                            variant='contained'
+                            color="primary"
+                            variant="contained"
                             onClick={submitForm}
-                            data-cy='button-submit'
+                            data-cy="button-submit"
                           >
                             {activeStep === GrievanceSteps.Description
                               ? t('Save')

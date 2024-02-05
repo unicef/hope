@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form } from 'formik';
 import React, { ReactElement } from 'react';
@@ -21,149 +21,149 @@ interface ProgramFormPropTypes {
 export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
-  const {
-    data: dataCollectionTypeChoicesData,
-  } = useDataCollectionTypeChoiceDataQuery();
+  const { data: dataCollectionTypeChoicesData } =
+    useDataCollectionTypeChoiceDataQuery();
 
   if (!data || !dataCollectionTypeChoicesData) return null;
 
-  const filteredDataCollectionTypeChoicesData = dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
-    (el) => el.name !== '',
-  );
+  const filteredDataCollectionTypeChoicesData =
+    dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
+      (el) => el.name !== '',
+    );
 
   return (
     <Form>
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <Field
-            name='name'
+            name="name"
             label={t('Programme Name')}
-            type='text'
+            type="text"
             fullWidth
             required
-            variant='outlined'
+            variant="outlined"
             component={FormikTextField}
-            data-cy='input-programme-name'
+            data-cy="input-programme-name"
           />
         </Grid>
         <Grid item xs={6} />
         <Grid item xs={6}>
           <Field
-            name='startDate'
+            name="startDate"
             label={t('Start Date')}
             component={FormikDateField}
             required
             fullWidth
-            decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-            data-cy='input-start-date'
+            decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
+            data-cy="input-start-date"
           />
         </Grid>
         <Grid item xs={6}>
           <Field
-            name='endDate'
+            name="endDate"
             label={t('End Date')}
             component={FormikDateField}
             required
             disabled={!values.startDate}
             initialFocusedDate={values.startDate}
             fullWidth
-            decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+            decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
             minDate={today}
-            data-cy='input-end-date'
+            data-cy="input-end-date"
           />
         </Grid>
         <Grid item xs={6}>
           <Field
-            name='sector'
+            name="sector"
             label={t('Sector')}
             fullWidth
             required
-            variant='outlined'
+            variant="outlined"
             choices={data.programSectorChoices}
             component={FormikSelectField}
-            data-cy='input-sector'
+            data-cy="input-sector"
           />
         </Grid>
         <Grid item xs={6} />
         <Grid item xs={6}>
           <Field
-            name='dataCollectingTypeCode'
+            name="dataCollectingTypeCode"
             label={t('Data Collecting Type')}
             fullWidth
-            variant='outlined'
+            variant="outlined"
             required
             choices={filteredDataCollectionTypeChoicesData || []}
             component={FormikSelectField}
-            data-cy='input-data-collecting-type'
+            data-cy="input-data-collecting-type"
           />
         </Grid>
         <Grid item xs={6} />
         <Grid item xs={12}>
           <Field
-            name='description'
+            name="description"
             label={t('Description')}
-            type='text'
+            type="text"
             fullWidth
             multiline
-            variant='outlined'
+            variant="outlined"
             component={FormikTextField}
-            data-cy='input-description'
+            data-cy="input-description"
           />
         </Grid>
         <Grid item xs={6}>
           <Field
-            name='budget'
+            name="budget"
             label={t('Budget (USD)')}
-            type='number'
+            type="number"
             fullWidth
             precision={2}
-            variant='outlined'
+            variant="outlined"
             component={FormikTextField}
-            data-cy='input-budget'
+            data-cy="input-budget"
           />
         </Grid>
         <Grid item xs={6} />
         <Grid item xs={12}>
           <Field
-            name='administrativeAreasOfImplementation'
+            name="administrativeAreasOfImplementation"
             label={t('Administrative Areas of Implementation')}
-            type='text'
+            type="text"
             fullWidth
-            variant='outlined'
+            variant="outlined"
             component={FormikTextField}
-            data-cy='input-admin-area'
+            data-cy="input-admin-area"
           />
         </Grid>
         <Grid item xs={6}>
           <Field
-            name='populationGoal'
+            name="populationGoal"
             label={t('Population Goal (# of Individuals)')}
-            type='number'
+            type="number"
             fullWidth
-            variant='outlined'
+            variant="outlined"
             component={FormikTextField}
-            data-cy='input-population-goal'
+            data-cy="input-population-goal"
           />
         </Grid>
         <Grid item xs={6} />
         <Grid item xs={6}>
           <Field
-            name='cashPlus'
+            name="cashPlus"
             label={t('Cash+')}
-            color='primary'
+            color="primary"
             component={FormikCheckboxField}
-            data-cy='input-cash-plus'
+            data-cy="input-cash-plus"
           />
         </Grid>
         <Grid item xs={6} />
         <Grid item xs={6}>
           <Field
-            name='frequencyOfPayments'
+            name="frequencyOfPayments"
             label={t('Frequency of Payment')}
             choices={data.programFrequencyOfPaymentsChoices}
             component={FormikRadioGroup}
-            data-cy='input-frequency-of-payment'
-            alignItems='center'
+            data-cy="input-frequency-of-payment"
+            alignItems="center"
           />
         </Grid>
       </Grid>

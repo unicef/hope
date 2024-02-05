@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider } from '@material-ui/core';
+import { ThemeProvider } from '@mui/material';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { theme } from '../../../theme';
 import { Field, Form, Formik } from 'formik';
@@ -15,7 +15,10 @@ const FieldWrapper = styled.div`
   width: 300px;
 `;
 
-const choices = [{name: 'Sample choice', value: 'SAMPLE'}, {name: 'Sample choice 2', value: 'ANOTHER_SAMPLE'}]
+const choices = [
+  { name: 'Sample choice', value: 'SAMPLE' },
+  { name: 'Sample choice 2', value: 'ANOTHER_SAMPLE' },
+];
 
 export const SelectField = () => {
   return (
@@ -31,8 +34,8 @@ export const SelectField = () => {
             <Form>
               <FieldWrapper>
                 <Field
-                  name='selectField'
-                  label='Select field'
+                  name="selectField"
+                  label="Select field"
                   fullWidth
                   required
                   choices={choices}

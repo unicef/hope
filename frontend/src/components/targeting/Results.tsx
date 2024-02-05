@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@mui/material';
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
@@ -64,12 +64,12 @@ export function Results({
     <div>
       <PaperContainer>
         <Title>
-          <Typography variant='h6'>{t('Results')}</Typography>
+          <Typography variant="h6">{t('Results')}</Typography>
         </Title>
         <ContentWrapper>
           <Grid container>
             <Grid item xs={4}>
-              <Grid container spacing={0} justifyContent='flex-start'>
+              <Grid container spacing={0} justifyContent="flex-start">
                 <Grid item xs={6}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
@@ -108,8 +108,8 @@ export function Results({
               <Grid
                 container
                 spacing={0}
-                justifyContent='flex-start'
-                alignItems='center'
+                justifyContent="flex-start"
+                alignItems="center"
               >
                 <Grid item xs={4}>
                   <ChartContainer>
@@ -151,7 +151,7 @@ export function Results({
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <Grid container spacing={0} justifyContent='flex-end'>
+              <Grid container spacing={0} justifyContent="flex-end">
                 <Grid item xs={6}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of Households')}>

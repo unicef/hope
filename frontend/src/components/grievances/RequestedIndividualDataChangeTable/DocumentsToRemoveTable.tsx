@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,14 +47,14 @@ export const DocumentsToRemoveTable = ({
   const documentsTableHead = (
     <TableHead>
       <TableRow>
-        <TableCell align='left' />
-        <TableCell data-cy='table-cell-id-type' align='left'>
+        <TableCell align="left" />
+        <TableCell data-cy="table-cell-id-type" align="left">
           {t('ID Type')}
         </TableCell>
-        <TableCell data-cy='table-cell-id-country' align='left'>
+        <TableCell data-cy="table-cell-id-country" align="left">
           {t('Country')}
         </TableCell>
-        <TableCell data-cy='table-cell-id-type' align='left'>
+        <TableCell data-cy="table-cell-id-type" align="left">
           {t('Number')}
         </TableCell>
       </TableRow>
@@ -73,8 +73,8 @@ export const DocumentsToRemoveTable = ({
   return (
     <>
       <TableTitle>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Documents to be removed')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Documents to be removed')}</Typography>
         </Box>
       </TableTitle>
       <StyledTable>
@@ -84,14 +84,14 @@ export const DocumentsToRemoveTable = ({
             const document = previousDocuments[row.value];
             return (
               <TableRow key={`${document.label}-${document.country}`}>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {isEdit ? (
                     <Checkbox
-                      data-cy='checkbox-remove-document'
+                      data-cy="checkbox-remove-document"
                       onChange={(): void => {
                         handleSelectDocumentToRemove(index);
                       }}
-                      color='primary'
+                      color="primary"
                       disabled={
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
@@ -100,17 +100,17 @@ export const DocumentsToRemoveTable = ({
                     />
                   ) : (
                     selectedDocumentsToRemove.includes(index) && (
-                      <GreenIcon data-cy='green-check'>
+                      <GreenIcon data-cy="green-check">
                         <CheckCircleIcon />
                       </GreenIcon>
                     )
                   )}
                 </TableCell>
-                <TableCell align='left'>{document?.key || '-'}</TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">{document?.key || '-'}</TableCell>
+                <TableCell align="left">
                   {countriesDict[document?.country] || '-'}
                 </TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {document?.document_number || '-'}
                 </TableCell>
               </TableRow>

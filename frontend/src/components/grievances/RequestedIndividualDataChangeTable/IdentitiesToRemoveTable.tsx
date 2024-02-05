@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,14 +48,14 @@ export const IdentitiesToRemoveTable = ({
   const identitiesTableHead = (
     <TableHead>
       <TableRow>
-        <TableCell align='left' />
-        <TableCell data-cy='table-cell-partner' align='left'>
+        <TableCell align="left" />
+        <TableCell data-cy="table-cell-partner" align="left">
           {t('Partner')}
         </TableCell>
-        <TableCell data-cy='table-cell-country' align='left'>
+        <TableCell data-cy="table-cell-country" align="left">
           {t('Country')}
         </TableCell>
-        <TableCell data-cy='table-cell-number' align='left'>
+        <TableCell data-cy="table-cell-number" align="left">
           {t('Number')}
         </TableCell>
       </TableRow>
@@ -73,8 +73,8 @@ export const IdentitiesToRemoveTable = ({
   return (
     <>
       <TableTitle>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Identities to be removed')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Identities to be removed')}</Typography>
         </Box>
       </TableTitle>
       <StyledTable>
@@ -84,14 +84,14 @@ export const IdentitiesToRemoveTable = ({
             const identity = previousIdentities[row.value];
             return (
               <TableRow key={`${identity.number}-${identity.country}`}>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {isEdit ? (
                     <Checkbox
-                      data-cy='checkbox-identity-to-remove'
+                      data-cy="checkbox-identity-to-remove"
                       onChange={(): void => {
                         handleSelectIdentityToRemove(index);
                       }}
-                      color='primary'
+                      color="primary"
                       disabled={
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
@@ -100,17 +100,17 @@ export const IdentitiesToRemoveTable = ({
                     />
                   ) : (
                     selectedIdentitiesToRemove.includes(index) && (
-                      <GreenIcon data-cy='green-check'>
+                      <GreenIcon data-cy="green-check">
                         <CheckCircleIcon />
                       </GreenIcon>
                     )
                   )}
                 </TableCell>
-                <TableCell align='left'>{identity?.partner || '-'}</TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">{identity?.partner || '-'}</TableCell>
+                <TableCell align="left">
                   {countriesDict[identity?.country] || '-'}
                 </TableCell>
-                <TableCell align='left'>{identity?.number || '-'}</TableCell>
+                <TableCell align="left">{identity?.number || '-'}</TableCell>
               </TableRow>
             );
           })}

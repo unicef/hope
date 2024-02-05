@@ -1,4 +1,4 @@
-import { TableRow } from '@material-ui/core';
+import { TableRow } from '@mui/material';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { BlackLink } from '../../../../components/core/BlackLink';
@@ -33,8 +33,8 @@ export function VerificationRecordsTableRow({
   }/${paymentVerification.payment.id}`;
 
   return (
-    <TableRow hover role='checkbox' key={paymentVerification.id}>
-      <TableCell align='left'>
+    <TableRow hover role="checkbox" key={paymentVerification.id}>
+      <TableCell align="left">
         {canViewRecordDetails ? (
           <BlackLink to={linkPath}>
             {paymentVerification.payment?.unicefId}
@@ -43,13 +43,13 @@ export function VerificationRecordsTableRow({
           <span>{paymentVerification.payment?.unicefId}</span>
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {paymentVerification.paymentVerificationPlan.verificationChannel}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {paymentVerification.paymentVerificationPlan.unicefId}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={paymentVerification.status}
           statusToColor={verificationRecordsStatusToColor}
@@ -58,33 +58,33 @@ export function VerificationRecordsTableRow({
       <AnonTableCell>
         {paymentVerification.payment.household.headOfHousehold.fullName}
       </AnonTableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {paymentVerification.payment.household.unicefId}
       </TableCell>
       {showStatusColumn && (
-        <TableCell align='left'>
+        <TableCell align="left">
           <StatusBox
             status={paymentVerification.payment.household.status}
             statusToColor={householdStatusToColor}
           />
         </TableCell>
       )}
-      <TableCell align='right'>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentVerification.payment.deliveredQuantity,
           paymentVerification.payment.currency,
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentVerification.receivedAmount,
           paymentVerification.payment.currency,
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {paymentVerification.payment.household.headOfHousehold.phoneNo}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {paymentVerification.payment.household.headOfHousehold
           .phoneNoAlternative || '-'}
       </TableCell>

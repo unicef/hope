@@ -1,4 +1,4 @@
-import { Box, Radio, RadioGroup, Typography } from '@material-ui/core';
+import { Box, Radio, RadioGroup, Typography } from '@mui/material';
 import React from 'react';
 import styled from 'styled-components';
 import { GreyBox } from '../../../components/core/GreyBox';
@@ -33,7 +33,7 @@ export const FormikRadioGroup = ({
     <>
       <Box mt={otherProps.noMargin ? 0 : 6} mb={otherProps.noMargin ? 0 : 2}>
         <FormLabelContainer>
-          <Typography variant='caption'>{otherProps.label}</Typography>
+          <Typography variant="caption">{otherProps.label}</Typography>
         </FormLabelContainer>
         <RadioGroup
           {...field}
@@ -51,9 +51,9 @@ export const FormikRadioGroup = ({
               name: string;
             }) => (
               <Box p={2} mb={2} key={each.value}>
-                <Box display='flex' alignItems={alignItems}>
+                <Box display="flex" alignItems={alignItems}>
                   <Radio
-                    color='primary'
+                    color="primary"
                     value={each.value}
                     checked={field.value === each.value}
                   />

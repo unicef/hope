@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,14 +60,14 @@ export const IdentitiesTable = ({
   const identitiesTableHead = (
     <TableHead>
       <TableRow>
-        <TableCell align='left' />
-        <TableCell data-cy='table-cell-partner' align='left'>
+        <TableCell align="left" />
+        <TableCell data-cy="table-cell-partner" align="left">
           {t('Partner')}
         </TableCell>
-        <TableCell data-cy='table-cell-country' align='left'>
+        <TableCell data-cy="table-cell-country" align="left">
           {t('Country')}
         </TableCell>
-        <TableCell data-cy='table-cell-number' align='left'>
+        <TableCell data-cy="table-cell-number" align="left">
           {t('Number')}
         </TableCell>
       </TableRow>
@@ -77,8 +77,8 @@ export const IdentitiesTable = ({
   return (
     <>
       <TableTitle>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Identities to be added')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Identities to be added')}</Typography>
         </Box>
       </TableTitle>
       <StyledTable>
@@ -87,10 +87,10 @@ export const IdentitiesTable = ({
           {identities?.map((row, index) => {
             return (
               <TableRow key={`${row.value.partner}-${row.value.partner}`}>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {isEdit ? (
                     <Checkbox
-                      color='primary'
+                      color="primary"
                       onChange={(): void => {
                         handleSelectIdentity(index);
                       }}
@@ -99,23 +99,23 @@ export const IdentitiesTable = ({
                       }
                       checked={selectedIdentities.includes(index)}
                       inputProps={{ 'aria-labelledby': 'selected' }}
-                      data-cy='checkbox-identity'
+                      data-cy="checkbox-identity"
                     />
                   ) : (
                     selectedIdentities.includes(index) && (
-                      <GreenIcon data-cy='green-check'>
+                      <GreenIcon data-cy="green-check">
                         <CheckCircleIcon />
                       </GreenIcon>
                     )
                   )}
                 </TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {identityTypeDict[row.value.partner]}
                 </TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {countriesDict[row.value.country]}
                 </TableCell>
-                <TableCell align='left'>{row.value.number}</TableCell>
+                <TableCell align="left">{row.value.number}</TableCell>
               </TableRow>
             );
           })}

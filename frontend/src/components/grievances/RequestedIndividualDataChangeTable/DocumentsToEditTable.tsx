@@ -7,7 +7,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -79,18 +79,18 @@ export const DocumentsToEditTable = ({
   return (
     <div key={document.previous_value.number}>
       <TableTitle>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>{t('Document to be edited')}</Typography>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">{t('Document to be edited')}</Typography>
         </Box>
       </TableTitle>
       <StyledTable>
         <TableHead>
           <TableRow>
-            <TableCell align='left'>
+            <TableCell align="left">
               {isEdit ? (
                 <Checkbox
-                  color='primary'
-                  data-cy='checkbox-document-to-edit'
+                  color="primary"
+                  data-cy="checkbox-document-to-edit"
                   onChange={(): void => {
                     handleSelectDocumentToEdit(index);
                   }}
@@ -102,19 +102,19 @@ export const DocumentsToEditTable = ({
                 />
               ) : (
                 selectedDocumentsToEdit.includes(index) && (
-                  <GreenIcon data-cy='green-check'>
+                  <GreenIcon data-cy="green-check">
                     <CheckCircleIcon />
                   </GreenIcon>
                 )
               )}
             </TableCell>
-            <TableCell data-cy='table-cell-field' align='left'>
+            <TableCell data-cy="table-cell-field" align="left">
               {t('Field')}
             </TableCell>
-            <TableCell data-cy='table-cell-current-value' align='left'>
+            <TableCell data-cy="table-cell-current-value" align="left">
               {t('Current Value')}
             </TableCell>
-            <TableCell data-cy='table-cell-new-value' align='left'>
+            <TableCell data-cy="table-cell-new-value" align="left">
               {t('New Value')}
             </TableCell>
           </TableRow>
@@ -122,11 +122,11 @@ export const DocumentsToEditTable = ({
         <TableBody>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Country')}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{t('Country')}</TableCell>
+            <TableCell align="left">
               {countriesDict[document.previous_value.country]}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {renderNewOrNotUpdated(
                 countriesDict[document.previous_value.country],
                 countriesDict[document.value?.country],
@@ -135,11 +135,11 @@ export const DocumentsToEditTable = ({
           </TableRow>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Document Type')}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{t('Document Type')}</TableCell>
+            <TableCell align="left">
               {documentTypeDict[document.previous_value.key]}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               {renderNewOrNotUpdated(
                 documentTypeDict[document.previous_value.key],
                 documentTypeDict[document.value.key],
@@ -149,9 +149,9 @@ export const DocumentsToEditTable = ({
           <TableRow>
             <TableCell />
 
-            <TableCell align='left'>{t('Document Number')}</TableCell>
-            <TableCell align='left'>{document.previous_value.number}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{t('Document Number')}</TableCell>
+            <TableCell align="left">{document.previous_value.number}</TableCell>
+            <TableCell align="left">
               {renderNewOrNotUpdated(
                 document.previous_value.number,
                 document.value.number,
@@ -160,15 +160,15 @@ export const DocumentsToEditTable = ({
           </TableRow>
           <TableRow>
             <TableCell />
-            <TableCell align='left'>{t('Photo')}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{t('Photo')}</TableCell>
+            <TableCell align="left">
               {document.previous_value?.photo ? (
                 <PhotoModal src={document.previous_value.photo} />
               ) : (
                 '-'
               )}
             </TableCell>
-            <TableCell align='left'>{renderCurrentPhoto(document)}</TableCell>
+            <TableCell align="left">{renderCurrentPhoto(document)}</TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>
