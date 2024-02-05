@@ -1,7 +1,7 @@
 import React from 'react';
-import { InputAdornment, TextField } from '@material-ui/core';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import { TextField, InputAdornment } from '@mui/material';
 
 const StyledTextField = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -43,20 +43,20 @@ export const FormikDecimalField = ({
         {...otherProps}
         name={field.name}
         id={`textField-${field.name}`}
-        margin='dense'
+        margin="dense"
         value={field.value}
         onChange={handleChange}
         error={isInvalid}
-        autoComplete='off'
-        type='number'
+        autoComplete="off"
+        type="number"
         helperText={isInvalid && get(form.errors, field.name)}
         InputProps={{
           onKeyPress: handleKeyPress,
           startAdornment: decoratorStart && (
-            <InputAdornment position='start'>{decoratorStart}</InputAdornment>
+            <InputAdornment position="start">{decoratorStart}</InputAdornment>
           ),
           endAdornment: decoratorEnd && (
-            <InputAdornment position='end'>{decoratorEnd}</InputAdornment>
+            <InputAdornment position="end">{decoratorEnd}</InputAdornment>
           ),
         }}
         // https://github.com/mui-org/material-ui/issues/12805

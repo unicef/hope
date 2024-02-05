@@ -1,6 +1,6 @@
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/lab/Autocomplete';
 import React, { useEffect, useState } from 'react';
-import { TextField } from '@material-ui/core';
+import { TextField } from '@mui/material';
 
 export const FormikAsyncAutocomplete = ({
   field,
@@ -27,11 +27,11 @@ export const FormikAsyncAutocomplete = ({
 
   useEffect(() => {
     if (fetchData(data)) {
-      setOptions(fetchData(data));
+      setOptions(fetchData(data))
     }
   }, [data, fetchData]);
 
-  const handleChange = (event, newValue): void => {
+  const handleChange = (_, newValue): void => {
     setValue(newValue);
     if (!newValue) {
       form.setFieldValue(field.name, null);
@@ -40,7 +40,7 @@ export const FormikAsyncAutocomplete = ({
     }
   };
 
-  const handleInputChange = (event, newInputValue): void => {
+  const handleInputChange = (_, newInputValue): void => {
     setInputValue(newInputValue);
   };
 
@@ -53,7 +53,7 @@ export const FormikAsyncAutocomplete = ({
       autoComplete
       noOptionsText='No results'
       options={options}
-      getOptionSelected={(option, selectedValue) => {
+      isOptionEqualToValue={(option, selectedValue) => {
         return option.value === selectedValue.value;
       }}
       getOptionLabel={(choice) => choice.labelEn}

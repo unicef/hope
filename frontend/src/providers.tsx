@@ -1,42 +1,40 @@
-import { ApolloProvider } from '@apollo/react-hooks';
-import MomentUtils from '@date-io/moment';
-import { ThemeProvider } from '@material-ui/core';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import { ApolloProvider } from '@apollo/client';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import ApolloClient from 'apollo-client';
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
+import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { getClient } from './apollo/client';
 import { ConfirmationDialogProvider } from './components/core/ConfirmationDialog';
 import { theme } from './theme';
-import { ProgramProvider } from "./programContext";
+import { ProgramProvider } from './programContext';
 
-export const Providers: React.FC = ({ children }) => {
+interface ProvidersProps {
+  children: ReactNode;
+}
+
+export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
-    ApolloClient<NormalizedCacheObject>
+    ApolloClient<NormalizedCacheObject> | undefined
   >();
+
   useEffect(() => {
     getClient().then((client) => {
       setApolloClient(client);
     });
   }, []);
+
   if (!apolloClient) {
     return null;
   }
+
   return (
     <ApolloProvider client={apolloClient}>
       <ThemeProvider theme={theme}>
         <StyledThemeProvider theme={theme}>
-          <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils}>
-            <ConfirmationDialogProvider>
-              <CssBaseline />
-              <ProgramProvider>
-                {children}
-              </ProgramProvider>
-            </ConfirmationDialogProvider>
-          </MuiPickersUtilsProvider>
+          <ConfirmationDialogProvider>
+            <CssBaseline />
+            <ProgramProvider>{children}</ProgramProvider>
+          </ConfirmationDialogProvider>
         </StyledThemeProvider>
       </ThemeProvider>
     </ApolloProvider>
