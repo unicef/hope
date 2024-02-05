@@ -2,7 +2,7 @@ import { Grid, Typography } from '@mui/material';
 import { Field } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { FormikDateField } from '../../../../shared/Formik/FormikDateField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { PaperContainer } from '../../../targeting/PaperContainer';
@@ -53,7 +53,7 @@ export const PaymentPlanParameters = ({
               }
               disabled={!data || loading || Boolean(paymentPlan?.isFollowUp)}
               fullWidth
-              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
+              decoratorEnd={<CalendarTodayRounded color="disabled" />}
               data-cy="input-start-date"
               tooltip={t(
                 'The first day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
@@ -71,7 +71,7 @@ export const PaymentPlanParameters = ({
               disabled={!values.startDate || Boolean(paymentPlan?.isFollowUp)}
               initialFocusedDate={values.startDate}
               fullWidth
-              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
+              decoratorEnd={<CalendarTodayRounded color="disabled" />}
               data-cy="input-end-date"
               tooltip={t(
                 'The last day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
@@ -94,7 +94,7 @@ export const PaymentPlanParameters = ({
               required
               disabled={!data || loading}
               fullWidth
-              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
+              decoratorEnd={<CalendarTodayRounded color="disabled" />}
               data-cy="input-dispersion-start-date"
               tooltip={t(
                 'The first day from which payments could be delivered.',
@@ -111,7 +111,7 @@ export const PaymentPlanParameters = ({
               disabled={!values.dispersionStartDate}
               initialFocusedDate={values.dispersionStartDate}
               fullWidth
-              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
+              decoratorEnd={<CalendarTodayRounded color="disabled" />}
               data-cy="input-dispersion-end-date"
               tooltip={t('The last day on which payments could be delivered.')}
             />

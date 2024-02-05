@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import PeopleIcon from '@material-ui/icons/People';
+import PeopleIcon from '@mui/icons-material/People';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '../../../../utils/utils';

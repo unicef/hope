@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';
+import MergeTypeRoundedIcon from '@mui/icons-material/MergeTypeRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
@@ -45,7 +45,7 @@ export function MergeRegistrationDataImportDialog({
   return (
     <span>
       <Button
-        startIcon={<MergeTypeRoundedIcon />}
+        startIcon={<MergeTypeRounded />}
         color="primary"
         variant="contained"
         onClick={() => setOpen(true)}

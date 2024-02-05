@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import WarningIcon from '@material-ui/icons/Warning';
+import WarningIcon from '@mui/icons-material/Warning';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

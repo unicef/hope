@@ -8,7 +8,7 @@ import {
   Grid,
   Typography,
 } from '@mui/material';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
 import React, { useState } from 'react';

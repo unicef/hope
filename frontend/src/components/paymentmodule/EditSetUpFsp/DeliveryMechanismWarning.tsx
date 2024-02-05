@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import React from 'react';
 import styled from 'styled-components';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 const WarningBox = styled(Box)`
   width: 70%;

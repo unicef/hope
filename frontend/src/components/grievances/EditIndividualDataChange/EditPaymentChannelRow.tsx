@@ -1,8 +1,8 @@
 import { Box, Grid, IconButton } from '@mui/material';
-import { Delete } from '@material-ui/icons';
-import Close from '@material-ui/icons/Close';
+import { Delete } from '@mui/icons-material';
+import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
-import Edit from '@material-ui/icons/Edit';
+import Edit from '@mui/icons-material/Edit';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

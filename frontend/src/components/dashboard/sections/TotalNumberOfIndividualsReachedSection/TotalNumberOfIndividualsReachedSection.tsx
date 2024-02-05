@@ -1,5 +1,5 @@
 import { Box, Button, DialogContent, Grid } from '@mui/material';
-import PersonIcon from '@material-ui/icons/Person';
+import PersonIcon from '@mui/icons-material/Person';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

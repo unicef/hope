@@ -8,7 +8,7 @@ import {
   Tabs,
   Typography,
 } from '@mui/material';
-import EditIcon from '@material-ui/icons/EditRounded';
+import EditIcon from '@mui/icons-material/EditRounded';
 import { Field, Form, Formik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

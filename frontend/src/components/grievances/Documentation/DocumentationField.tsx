@@ -1,5 +1,5 @@
 import { Box, Grid, IconButton } from '@mui/material';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

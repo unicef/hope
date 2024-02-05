@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrencyWithSymbol } from '../../../../utils/utils';

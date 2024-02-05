@@ -8,7 +8,7 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import get from 'lodash/get';
 import React from 'react';
 import styled from 'styled-components';

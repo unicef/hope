@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import ChildCareIcon from '@material-ui/icons/ChildCare';
+import ChildCareIcon from '@mui/icons-material/ChildCare';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '../../../../utils/utils';

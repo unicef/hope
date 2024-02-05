@@ -1,5 +1,5 @@
 import { IconButton } from '@mui/material';
-import { Info } from '@material-ui/icons';
+import { Info } from '@mui/icons-material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';

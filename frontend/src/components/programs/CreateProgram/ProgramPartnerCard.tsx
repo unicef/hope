@@ -1,7 +1,7 @@
 import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
-import { ArrowDropDown, ArrowRight } from '@material-ui/icons';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TreeItem, TreeView } from '@material-ui/lab';
 import { Field } from 'formik';
 import React, { useState } from 'react';

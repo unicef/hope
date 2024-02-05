@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Typography, Paper, Tooltip } from '@mui/material';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline } from '@mui/icons-material';
 
 const PaperContainer = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(3)}px

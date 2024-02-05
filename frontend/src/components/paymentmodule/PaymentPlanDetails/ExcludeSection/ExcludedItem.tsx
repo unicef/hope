@@ -1,5 +1,5 @@
 import { Box, Button, IconButton } from '@mui/material';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';

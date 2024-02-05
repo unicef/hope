@@ -1,5 +1,5 @@
 import React from 'react';
-import FlagIcon from '@material-ui/icons/Flag';
+import FlagIcon from '@mui/icons-material/Flag';
 import { Tooltip } from '@mui/material';
 import styled from 'styled-components';
 

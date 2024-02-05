@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import ChevronRightRoundedIcon from '@material-ui/icons/ChevronRightRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import { Box } from '@mui/material';
 
 const BreadCrumbsLink = styled(Link)`

@@ -1,5 +1,5 @@
 import React from 'react';
-import RotateRightIcon from '@material-ui/icons/RotateRight';
+import RotateRightIcon from '@mui/icons-material/RotateRight';
 import { IconButton } from '@mui/material';
 
 export const RotateImg = ({

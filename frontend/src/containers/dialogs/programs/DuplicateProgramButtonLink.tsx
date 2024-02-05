@@ -1,5 +1,5 @@
 import { IconButton } from '@mui/material';
-import { FileCopy } from '@material-ui/icons';
+import { FileCopy } from '@mui/icons-material';
 import React, { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import { ProgramQuery } from '../../../__generated__/graphql';

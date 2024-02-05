@@ -1,6 +1,6 @@
 import { IconButton, makeStyles } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import clsx from 'clsx';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
@@ -83,7 +83,7 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
             })}
             onClick={() => setExpanded(!expanded)}
           >
-            <ExpandMore />
+            <ExpandMoreIcon />
           </IconButton>
         </ButtonContainer>
       </Row>

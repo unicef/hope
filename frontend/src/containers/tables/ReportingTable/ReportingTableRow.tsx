@@ -1,5 +1,5 @@
 import { TableCell, TableRow } from '@mui/material';
-import { GetApp } from '@material-ui/icons';
+import { GetApp } from '@mui/icons-material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';

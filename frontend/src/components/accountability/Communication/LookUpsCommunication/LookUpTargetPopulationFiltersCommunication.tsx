@@ -1,5 +1,5 @@
 import { Grid, MenuItem } from '@mui/material';
-import { Group, Person } from '@material-ui/icons';
+import { Group, Person } from '@mui/icons-material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';

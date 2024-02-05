@@ -1,6 +1,6 @@
 import { Box, Button } from '@mui/material';
-import { FileCopy } from '@material-ui/icons';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
+import { FileCopy } from '@mui/icons-material';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
@@ -58,7 +58,7 @@ export const FinalizedTargetPopulationHeaderButtons = ({
             disabled={!targetPopulation.caHashId}
             target="_blank"
             href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
-            startIcon={<OpenInNewRoundedIcon />}
+            startIcon={<OpenInNewRounded />}
           >
             Open in CashAssist
           </Button>

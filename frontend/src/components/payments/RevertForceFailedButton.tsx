@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
@@ -99,7 +99,7 @@ export function RevertForceFailedButton({
                   component={FormikDateField}
                   required
                   fullWidth
-                  decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
+                  decoratorEnd={<CalendarTodayRounded color="disabled" />}
                 />
               </Form>
             </DialogContent>

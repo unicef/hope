@@ -1,5 +1,5 @@
 import { Grid, MenuItem } from '@mui/material';
-import GroupIcon from '@material-ui/icons/Group';
+import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';

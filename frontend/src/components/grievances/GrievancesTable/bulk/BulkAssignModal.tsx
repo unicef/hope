@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
@@ -33,7 +33,8 @@ export const BulkAssignModal = ({
 }: BulkAssignModalProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] = React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
+  const [value, setValue] =
+    React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
   const [inputValue, setInputValue] = useState('');
   const { data: usersData } = useAllUsersForFiltersQuery({
@@ -50,8 +51,7 @@ export const BulkAssignModal = ({
       setValue(data);
     }
   };
-  const onSave = async (
-  ): Promise<void> => {
+  const onSave = async (): Promise<void> => {
     try {
       await mutate({
         variables: {

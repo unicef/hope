@@ -1,5 +1,5 @@
 import { InputAdornment } from '@mui/material';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
 import get from 'lodash/get';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';

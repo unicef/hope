@@ -1,6 +1,6 @@
 import { Box, Button } from '@mui/material';
-import { Refresh } from '@material-ui/icons';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { Refresh } from '@mui/icons-material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';

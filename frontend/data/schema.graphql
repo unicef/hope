@@ -1221,6 +1221,7 @@ type FinancialServiceProviderNode implements Node {
   communicationChannel: FinancialServiceProviderCommunicationChannel!
   dataTransferConfiguration: JSONString
   xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
+  paymentGatewayId: String
   financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!

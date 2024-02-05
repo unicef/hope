@@ -1,5 +1,5 @@
 import { Grid, MenuItem } from '@mui/material';
-import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
+import ViewModuleRoundedIcon from '@mui/icons-material/ViewModuleRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
