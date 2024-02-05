@@ -1,5 +1,5 @@
-import { red } from '@material-ui/core/colors';
-import { createTheme } from '@material-ui/core/styles';
+import { red } from '@mui/material/colors';
+import { createTheme } from '@mui/material/styles';
 import { css } from 'styled-components';
 import { DARK_GRAY, NAVY_BLUE } from './config/colors';
 

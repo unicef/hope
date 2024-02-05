@@ -18,6 +18,7 @@ export const AutoLogout = (): React.ReactElement => {
   };
 
   return (
+    // @ts-ignore
     <IdleTimer
       ref={idleTimer}
       onAction={onAction}
