@@ -569,7 +569,7 @@ SOCIAL_AUTH_AZUREAD_B2C_OAUTH2_SCOPE = [
 SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = env.bool("SOCIAL_AUTH_REDIRECT_IS_HTTPS", default=True)
 
-LOGIN_URL = "/api/login/azuread-tenant-oauth2"
+LOGIN_URL = "/api/login/azuread-tenant-oauth2/"
 
 TEST_RUNNER = "hct_mis_api.apps.core.mis_test_runner.PostgresTestRunner"
 
