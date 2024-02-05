@@ -131,9 +131,13 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
+        household_one = HouseholdFactory.build(
+            id="07a901ed-d2a5-422a-b962-3570da1d5d07",
+            program=program_one,
+        )
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
 
@@ -155,7 +159,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         ]
 
         cls.individuals = [
-            IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
+            IndividualFactory(household=household_one, program=program_one, **individual)
+            for individual in cls.individuals_to_create
         ]
         first_individual = cls.individuals[0]
         national_id_type = DocumentType.objects.get(
