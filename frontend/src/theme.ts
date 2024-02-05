@@ -76,4 +76,5 @@ export const theme = {
     `,
   },
 };
+
 export type MiśTheme = typeof theme;
