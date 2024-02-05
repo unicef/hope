@@ -122,6 +122,6 @@ urlpatterns = (
     + staticfiles_urlpatterns()
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + [
-        re_path(r"^.*$", react_main, name="react-main"),
+        re_path(r"^(?!api/).*$", react_main, name="react-main"),
     ]
 )
