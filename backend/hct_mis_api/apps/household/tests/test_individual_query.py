@@ -95,9 +95,10 @@ class TestIndividualQuery(APITestCase):
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program_draft)
 
-        cls.household_one = HouseholdFactory.build(business_area=cls.business_area)
+        cls.household_one = HouseholdFactory.build(business_area=cls.business_area, program=cls.program)
         cls.household_one.household_collection.save()
         cls.household_one.registration_data_import.imported_by.save()
+        cls.household_one.registration_data_import.program = cls.program
         cls.household_one.registration_data_import.save()
 
         cls.individuals_to_create = [
@@ -108,7 +109,6 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
                 "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
-                "program": cls.program,
                 "registration_id": 1,
             },
             {
@@ -118,7 +118,6 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
                 "id": "8ef39244-2884-459b-ad14-8d63a6fe4a4a",
-                "program": cls.program,
             },
             {
                 "full_name": "Timothy Perry",
@@ -127,7 +126,6 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "(548)313-1700-902",
                 "birth_date": "1983-12-21",
                 "id": "badd2d2d-7ea0-46f1-bb7a-69f385bacdcd",
-                "program": cls.program,
             },
             {
                 "full_name": "Eric Torres",
@@ -136,7 +134,6 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "(228)231-5473",
                 "birth_date": "1973-03-23",
                 "id": "2c1a26a3-2827-4a99-9000-a88091bf017c",
-                "program": cls.program,
             },
             {
                 "full_name": "Jenna Franklin",
@@ -145,7 +142,6 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "001-296-358-5428-607",
                 "birth_date": "1969-11-29",
                 "id": "0fc995cc-ea72-4319-9bfe-9c9fda3ec191",
-                "program": cls.program,
             },
             {
                 "full_name": "James Bond",
@@ -154,7 +150,6 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "(007)682-4596",
                 "birth_date": "1965-06-26",
                 "id": "972fdac5-d1bf-44ed-a4a5-14805b5dc606",
-                "program": cls.program,
             },
             {
                 "full_name": "Peter Parker",
@@ -163,16 +158,14 @@ class TestIndividualQuery(APITestCase):
                 "phone_no": "(666)682-2345",
                 "birth_date": "1978-01-02",
                 "id": "430924a6-273e-4018-95e7-b133afa5e1b9",
-                "program": cls.program,
             },
         ]
 
         cls.individuals = [
-            IndividualFactory(household=cls.household_one, **individual)
+            IndividualFactory(household=cls.household_one, program=cls.program, **individual)
             for index, individual in enumerate(cls.individuals_to_create)
         ]
         cls.household_one.head_of_household = cls.individuals[0]
-        cls.household_one.program = cls.program
         cls.individuals_from_hh_one = [ind for ind in cls.individuals if ind.household == cls.household_one]
         # cls.individuals_from_hh_two = [ind for ind in cls.individuals if ind.household == household_two]
         cls.household_one.head_of_household = cls.individuals_from_hh_one[0]
@@ -211,34 +204,42 @@ class TestIndividualQuery(APITestCase):
             document_number="123-456-789",
             type=DocumentType.objects.get(key="national_id"),
             individual=cls.individuals[0],
+            program=cls.individuals[0].program,
         )
 
         cls.national_passport = DocumentFactory(
             document_number="111-222-333",
             type=DocumentTypeFactory(key="national_passport"),
             individual=cls.individuals[1],
+            program=cls.individuals[1].program,
         )
 
         cls.birth_certificate = DocumentFactory(
             document_number="111222333",
             type=DocumentType.objects.get(key="birth_certificate"),
             individual=cls.individuals[4],
+            program=cls.individuals[4].program,
         )
 
         cls.disability_card = DocumentFactory(
             document_number="10000000000",
             type=DocumentType.objects.get(key="disability_card"),
             individual=cls.individuals[6],
+            program=cls.individuals[6].program,
         )
 
         cls.drivers_license = DocumentFactory(
             document_number="1234567890",
             type=DocumentType.objects.get(key="drivers_license"),
             individual=cls.individuals[0],
+            program=cls.individuals[0].program,
         )
 
         cls.tax_id = DocumentFactory(
-            document_number="666-777-888", type=DocumentType.objects.get(key="tax_id"), individual=cls.individuals[2]
+            document_number="666-777-888",
+            type=DocumentType.objects.get(key="tax_id"),
+            individual=cls.individuals[2],
+            program=cls.individuals[2].program,
         )
 
         area_type_level_1 = AreaTypeFactory(
