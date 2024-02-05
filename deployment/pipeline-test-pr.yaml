@@ -67,7 +67,7 @@ stages:
                 -t $(Docker.url)/$(Docker.backend.repository):latest \
                 --push \
                 -f ./docker/Dockerfile \
-                ./backend
+                ./
             displayName: Docker build dist image
           - script: |
               docker buildx create --use
@@ -81,7 +81,7 @@ stages:
                 -t $(Docker.url)/$(Docker.backend.repository):dev-latest \
                 --push --target dev \
                 -f ./docker/Dockerfile \
-                ./backend
+                ./
             displayName: Docker build dev image
 
   - stage: build_and_push_cypress
