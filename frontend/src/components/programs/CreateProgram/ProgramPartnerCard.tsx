@@ -2,7 +2,7 @@ import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TreeItem, TreeView } from '@material-ui/lab';
+import { TreeItem, TreeView } from '@mui/lab';
 import { Field } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';

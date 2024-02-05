@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/lab/Autocomplete';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

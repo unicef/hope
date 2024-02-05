@@ -1,5 +1,5 @@
 import CircularProgress from '@mui/material/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

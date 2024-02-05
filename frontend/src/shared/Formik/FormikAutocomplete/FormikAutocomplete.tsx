@@ -1,4 +1,4 @@
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/lab/Autocomplete';
 import { Box, TextField } from '@mui/material';
 import React from 'react';
 

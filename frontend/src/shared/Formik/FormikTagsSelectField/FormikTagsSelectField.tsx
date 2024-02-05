@@ -1,6 +1,6 @@
 import React from 'react';
 import { TextField } from '@mui/material';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/lab/Autocomplete';
 
 export const FormikTagsSelectField = ({
   field,

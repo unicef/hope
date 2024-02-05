@@ -1,6 +1,6 @@
 import { TextField } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@mui/lab/Autocomplete';
 import get from 'lodash/get';
 import { useHistory } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
