@@ -1,4 +1,4 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
@@ -109,8 +109,8 @@ export const AdminAreaFixedAutocomplete = ({
               ? t('Administrative Level 1')
               : t('Administrative Level 2')
           }
-          variant='outlined'
-          margin='dense'
+          variant="outlined"
+          margin="dense"
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
           InputProps={{
@@ -118,7 +118,7 @@ export const AdminAreaFixedAutocomplete = ({
             endAdornment: (
               <>
                 {loading ? (
-                  <CircularProgress color='inherit' size={20} />
+                  <CircularProgress color="inherit" size={20} />
                 ) : null}
                 {params.InputProps.endAdornment}
               </>

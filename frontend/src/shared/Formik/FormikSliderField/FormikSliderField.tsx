@@ -1,7 +1,7 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Slider from '@material-ui/core/Slider';
+import { makeStyles } from '@mui/material/styles';
+import Grid from '@mui/material/Grid';
+import Slider from '@mui/material/Slider';
 import { Typography } from '@mui/material';
 
 const useStyles = makeStyles({

@@ -1,6 +1,6 @@
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
 import CancelIcon from '@material-ui/icons/Cancel';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +18,13 @@ interface AcceptanceProcessStepperProps {
 export const AcceptanceProcessStepper = ({
   acceptanceProcess,
 }: AcceptanceProcessStepperProps): React.ReactElement => {
-  const { rejectedOn, actions, approvalNumberRequired, authorizationNumberRequired, financeReleaseNumberRequired } = acceptanceProcess;
+  const {
+    rejectedOn,
+    actions,
+    approvalNumberRequired,
+    authorizationNumberRequired,
+    financeReleaseNumberRequired,
+  } = acceptanceProcess;
   const { t } = useTranslation();
   const steps = [
     {

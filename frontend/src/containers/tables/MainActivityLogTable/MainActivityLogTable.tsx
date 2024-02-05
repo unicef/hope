@@ -1,8 +1,8 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import Collapse from '@material-ui/core/Collapse';
+import Collapse from '@mui/material/Collapse';
 import { Paper } from '@mui/material';
-import TablePagination from '@material-ui/core/TablePagination';
+import TablePagination from '@mui/material/TablePagination';
 import {
   AllLogEntriesQuery,
   LogEntryNode,

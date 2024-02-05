@@ -1,5 +1,5 @@
 import { Checkbox, Radio } from '@mui/material';
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import {
   AllHouseholdsForPopulationTableQuery,

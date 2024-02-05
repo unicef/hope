@@ -1,5 +1,5 @@
 import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import {
   FeedbackIssueType,
@@ -40,22 +40,22 @@ export const FeedbackTableRow = ({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={feedback.unicefId}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={feedbackDetailsPath}>{feedback.unicefId}</BlackLink>
         ) : (
           feedback.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {feedback.issueType === FeedbackIssueType.PositiveFeedback
           ? 'Positive Feedback'
           : 'Negative Feedback'}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {feedback.householdLookup?.id && !isAllPrograms ? (
           <BlackLink to={householdDetailsPath}>
             {feedback.householdLookup?.unicefId}
@@ -64,7 +64,7 @@ export const FeedbackTableRow = ({
           renderSomethingOrDash(feedback.householdLookup?.unicefId)
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {feedback.linkedGrievance?.id ? (
           <BlackLink to={grievanceDetailsPath}>
             {feedback.linkedGrievance?.unicefId}
@@ -73,12 +73,12 @@ export const FeedbackTableRow = ({
           renderSomethingOrDash(feedback.linkedGrievance?.unicefId)
         )}
       </TableCell>
-      <TableCell align='left'>{renderUserName(feedback.createdBy)}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{renderUserName(feedback.createdBy)}</TableCell>
+      <TableCell align="left">
         <UniversalMoment>{feedback.createdAt}</UniversalMoment>
       </TableCell>
       {isAllPrograms && (
-        <TableCell align='left'>
+        <TableCell align="left">
           {feedback.program?.id ? (
             <BlackLink
               key={feedback.program?.id}

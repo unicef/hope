@@ -1,8 +1,8 @@
 import { Paper } from '@mui/material';
-import Button from '@material-ui/core/Button';
-import Collapse from '@material-ui/core/Collapse';
-import TablePagination from '@material-ui/core/TablePagination';
-import Typography from '@material-ui/core/Typography';
+import Button from '@mui/material/Button';
+import Collapse from '@mui/material/Collapse';
+import TablePagination from '@mui/material/TablePagination';
+import Typography from '@mui/material/Typography';
 import ExpandLess from '@material-ui/icons/ExpandLessRounded';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import React, { ReactElement, useState } from 'react';

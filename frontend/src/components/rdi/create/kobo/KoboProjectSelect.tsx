@@ -9,7 +9,7 @@ import {
   Select,
 } from '@mui/material';
 import styled from 'styled-components';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useAllKoboProjectsQuery } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 

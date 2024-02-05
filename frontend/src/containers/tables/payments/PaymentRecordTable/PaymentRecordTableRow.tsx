@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { BlackLink } from '../../../../components/core/BlackLink';
@@ -38,13 +38,13 @@ export function PaymentRecordTableRow({
     <ClickableTableRow
       hover
       onClick={handleClick}
-      role='checkbox'
+      role="checkbox"
       key={paymentRecord.id}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         <BlackLink to={paymentRecordPath}>{paymentRecord.caId}</BlackLink>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={paymentRecord.status}
           statusToColor={paymentRecordStatusToColor}
@@ -52,27 +52,27 @@ export function PaymentRecordTableRow({
         />
       </TableCell>
       <AnonTableCell>{paymentRecord.headOfHousehold?.fullName}</AnonTableCell>
-      <TableCell align='left'>{paymentRecord.household.unicefId}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{paymentRecord.household.unicefId}</TableCell>
+      <TableCell align="left">
         <StatusBox
           status={paymentRecord.household.status}
           statusToColor={householdStatusToColor}
         />
       </TableCell>
-      <TableCell align='left'>{paymentRecord.household.size}</TableCell>
-      <TableCell align='right'>
+      <TableCell align="left">{paymentRecord.household.size}</TableCell>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentRecord.entitlementQuantity,
           paymentRecord.currency,
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentRecord.deliveredQuantity,
           paymentRecord.currency,
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

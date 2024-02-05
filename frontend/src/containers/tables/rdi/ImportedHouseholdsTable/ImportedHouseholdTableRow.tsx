@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
@@ -50,26 +50,26 @@ export const ImportedHouseholdTableRow = ({
     <ClickableTableRow
       hover
       onClick={handleClick}
-      role='checkbox'
+      role="checkbox"
       key={household.id}
-      data-cy='imported-households-row'
+      data-cy="imported-households-row"
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {household.hasDuplicates && (
           <WarningTooltip confirmed message={t('Household has Duplicates')} />
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StyledLink onClick={() => handleClick()}>
           {isMerged ? household.unicefId : household.importId}
         </StyledLink>
       </TableCell>
       <AnonTableCell>{household?.headOfHousehold?.fullName}</AnonTableCell>
-      <TableCell align='right'>{household.size}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="right">{household.size}</TableCell>
+      <TableCell align="left">
         {isMerged ? household.admin2?.name : household.admin2Title}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{household.firstRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { BlackLink } from '../../../../components/core/BlackLink';
@@ -30,21 +30,21 @@ export const SurveysTableRow = ({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={survey.unicefId}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={surveyDetailsPath}>{survey.unicefId}</BlackLink>
         ) : (
           survey.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>{survey.title}</TableCell>
-      <TableCell align='left'>{categoryDict[survey.category]}</TableCell>
-      <TableCell align='left'>{survey.numberOfRecipients}</TableCell>
-      <TableCell align='left'>{renderUserName(survey.createdBy)}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{survey.title}</TableCell>
+      <TableCell align="left">{categoryDict[survey.category]}</TableCell>
+      <TableCell align="left">{survey.numberOfRecipients}</TableCell>
+      <TableCell align="left">{renderUserName(survey.createdBy)}</TableCell>
+      <TableCell align="left">
         <UniversalMoment>{survey.createdAt}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

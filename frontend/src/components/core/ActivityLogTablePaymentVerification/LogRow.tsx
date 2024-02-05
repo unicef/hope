@@ -1,5 +1,5 @@
 import { IconButton, makeStyles } from '@mui/material';
-import Collapse from '@material-ui/core/Collapse';
+import Collapse from '@mui/material/Collapse';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import clsx from 'clsx';
 import moment from 'moment';

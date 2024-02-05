@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { IconButton, makeStyles } from '@mui/material';
 import clsx from 'clsx';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
-import Collapse from '@material-ui/core/Collapse';
+import Collapse from '@mui/material/Collapse';
 import { LogEntryNode } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
 import { headCells } from './headCells';

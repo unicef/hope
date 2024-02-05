@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
@@ -45,24 +45,24 @@ export const ImportedIndividualsTableRow = ({
     <ClickableTableRow
       hover
       onClick={(e) => handleClick(e)}
-      role='checkbox'
+      role="checkbox"
       key={individual.id}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         <BlackLink to={url}>
           {isMerged ? individual.unicefId : individual.importId}
         </BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
-      <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{roleChoicesDict[individual.role]}</TableCell>
+      <TableCell align="left">
         {relationshipChoicesDict[individual.relationship]}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{individual.birthDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
+      <TableCell align="left">
         {individual.deduplicationBatchResults.length ? (
           <>
             <DedupeResults
@@ -78,7 +78,7 @@ export const ImportedIndividualsTableRow = ({
           `${deduplicationBatchDict[individual.deduplicationBatchStatus]}`
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {individual.deduplicationGoldenRecordResults.length ? (
           <DedupeResults
             status={
