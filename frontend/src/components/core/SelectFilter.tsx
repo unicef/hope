@@ -1,5 +1,5 @@
 import { Box, IconButton, InputAdornment } from '@mui/material';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@mui/material/styles';
 import { Close } from '@material-ui/icons';
 import React from 'react';
 import styled from 'styled-components';

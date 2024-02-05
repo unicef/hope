@@ -1,5 +1,5 @@
 import { makeStyles, Snackbar, SnackbarContent } from '@mui/material';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import CssBaseline from '@mui/material/CssBaseline';
 import React from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import styled from 'styled-components';

@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -80,12 +80,8 @@ export const PaymentsTableRow = ({
   };
 
   const renderDeliveredQuantity = (): React.ReactElement => {
-    const {
-      deliveredQuantity,
-      currency,
-      deliveredQuantityUsd,
-      status,
-    } = payment;
+    const { deliveredQuantity, currency, deliveredQuantityUsd, status } =
+      payment;
     if (status === PaymentStatus.TransactionErroneous) {
       return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
     }
@@ -116,8 +112,8 @@ export const PaymentsTableRow = ({
   };
 
   return (
-    <ClickableTableRow hover role='checkbox' key={payment.id}>
-      <TableCell align='left'>
+    <ClickableTableRow hover role="checkbox" key={payment.id}>
+      <TableCell align="left">
         {(payment.paymentPlanHardConflicted ||
           payment.paymentPlanSoftConflicted) && (
           <WarningTooltip
@@ -129,14 +125,14 @@ export const PaymentsTableRow = ({
           />
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={paymentDetailsPath}>{payment.unicefId}</BlackLink>
         ) : (
           payment.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={householdDetailsPath}>
             {payment.household.unicefId}
@@ -145,11 +141,11 @@ export const PaymentsTableRow = ({
           payment.household.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>{payment.household.size}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{payment.household.size}</TableCell>
+      <TableCell align="left">
         {renderSomethingOrDash(payment.household.admin2?.name)}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={collectorDetailsPath}>
             {payment.collector.fullName}
@@ -158,12 +154,12 @@ export const PaymentsTableRow = ({
           payment.collector.fullName
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {payment.financialServiceProvider
           ? payment.financialServiceProvider.name
           : '-'}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {payment.entitlementQuantity != null && payment.entitlementQuantity >= 0
           ? `${formatCurrencyWithSymbol(
               payment.entitlementQuantity,
@@ -174,7 +170,7 @@ export const PaymentsTableRow = ({
             )})`
           : '-'}
       </TableCell>
-      <TableCell data-cy='delivered-quantity-cell' align='left'>
+      <TableCell data-cy="delivered-quantity-cell" align="left">
         {renderDeliveredQuantity()}
       </TableCell>
       <TableCell>{renderMark()}</TableCell>

@@ -1,5 +1,5 @@
 import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import {
   CashPlanAndPaymentPlanNode,
@@ -32,9 +32,8 @@ export const PaymentVerificationTableRow = ({
   const handleClick = (): void => {
     history.push(planVerificationPath);
   };
-  const {
-    data: statusChoicesData,
-  } = useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } =
+    useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
 
@@ -42,31 +41,31 @@ export const PaymentVerificationTableRow = ({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={plan.id}
-      data-cy='cash-plan-table-row'
+      data-cy="cash-plan-table-row"
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={planVerificationPath}>{plan.unicefId}</BlackLink>
         ) : (
           plan.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={plan.verificationStatus}
           statusToColor={paymentVerificationStatusToColor}
         />
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
         <UniversalMoment>{plan.endDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{plan.updatedAt}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

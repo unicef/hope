@@ -1,5 +1,5 @@
 import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
@@ -28,10 +28,10 @@ export function TargetPopulationHouseholdTableRow({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={household.id}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={householdDetailsPath}>{household.unicefId}</BlackLink>
         ) : (
@@ -39,9 +39,9 @@ export function TargetPopulationHouseholdTableRow({
         )}
       </TableCell>
       <AnonTableCell>{household.headOfHousehold?.fullName}</AnonTableCell>
-      <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household.adminArea?.name || '-'}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{household.size}</TableCell>
+      <TableCell align="left">{household.adminArea?.name || '-'}</TableCell>
+      <TableCell align="left">
         {household.selection?.vulnerabilityScore == null
           ? '-'
           : household.selection?.vulnerabilityScore}

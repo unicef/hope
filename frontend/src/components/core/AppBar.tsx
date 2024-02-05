@@ -1,7 +1,7 @@
 import { Box, Button, makeStyles } from '@mui/material';
-import MuiAppBar from '@material-ui/core/AppBar';
-import IconButton from '@material-ui/core/IconButton';
-import Toolbar from '@material-ui/core/Toolbar';
+import MuiAppBar from '@mui/material/AppBar';
+import IconButton from '@mui/material/IconButton';
+import Toolbar from '@mui/material/Toolbar';
 import MenuIcon from '@material-ui/icons/Menu';
 import TextsmsIcon from '@material-ui/icons/Textsms';
 import clsx from 'clsx';

@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -40,28 +40,28 @@ export const ProgrammesTableRow = ({
     <ClickableTableRow
       hover
       onClick={handleClick}
-      role='checkbox'
+      role="checkbox"
       key={program.id}
       data-cy={`table-row-${program.name}`}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         <BlackLink to={programDetailsPath}>{program.name}</BlackLink>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={program.status}
           statusToColor={programStatusToColor}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
         <UniversalMoment>{program.endDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {programSectorChoiceDict[program.sector]}
       </TableCell>
-      <TableCell align='right'>{program.totalNumberOfHouseholds}</TableCell>
-      <TableCell align='right'>{formatCurrency(program.budget)}</TableCell>
+      <TableCell align="right">{program.totalNumberOfHouseholds}</TableCell>
+      <TableCell align="right">{formatCurrency(program.budget)}</TableCell>
     </ClickableTableRow>
   );
 };

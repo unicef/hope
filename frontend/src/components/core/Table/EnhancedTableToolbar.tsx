@@ -1,12 +1,7 @@
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 import React from 'react';
-import {
-  createStyles,
-  lighten,
-  makeStyles,
-  Theme,
-} from '@material-ui/core/styles';
+import { createStyles, lighten, makeStyles, Theme } from '@mui/material/styles';
 
 interface EnhancedTableToolbarProps {
   title: string;
@@ -41,7 +36,7 @@ export function EnhancedTableToolbar({
 
   return (
     <Toolbar className={classes.root}>
-      <Typography data-cy='table-title' className={classes.title} variant='h6'>
+      <Typography data-cy="table-title" className={classes.title} variant="h6">
         {title}
       </Typography>
     </Toolbar>

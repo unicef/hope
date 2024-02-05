@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import Paper from '@material-ui/core/Paper';
+import Paper from '@mui/material/Paper';
 import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

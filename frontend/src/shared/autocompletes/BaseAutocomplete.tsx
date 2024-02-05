@@ -1,4 +1,4 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import React, { useEffect, useRef } from 'react';
 import TextField from '../TextField';
 import { StyledAutocomplete } from './StyledAutocomplete';
@@ -97,8 +97,8 @@ export const BaseAutocomplete = ({
         <TextField
           {...params}
           label={label}
-          variant='outlined'
-          margin='dense'
+          variant="outlined"
+          margin="dense"
           data-cy={`${label}-input`}
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
@@ -108,7 +108,7 @@ export const BaseAutocomplete = ({
             endAdornment: (
               <>
                 {loading ? (
-                  <CircularProgress color='inherit' size={20} />
+                  <CircularProgress color="inherit" size={20} />
                 ) : null}
                 {params.InputProps.endAdornment}
               </>

@@ -1,5 +1,5 @@
 import { Checkbox } from '@mui/material';
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';

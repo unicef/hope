@@ -1,10 +1,10 @@
 import React from 'react';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
 import styled from 'styled-components';
-import TableSortLabel from '@material-ui/core/TableSortLabel';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import { createStyles, makeStyles } from '@mui/material/styles';
 import { Checkbox } from '@mui/material';
 
 type Order = 'asc' | 'desc';

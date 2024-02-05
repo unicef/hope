@@ -1,11 +1,11 @@
 import React from 'react';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import Chip from '@material-ui/core/Chip';
+import { makeStyles, useTheme } from '@mui/material/styles';
+import Input from '@mui/material/Input';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import Chip from '@mui/material/Chip';
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -64,15 +64,15 @@ export const FormikMultiSelectField = ({
   }
   return (
     <FormControl className={classes.formControl}>
-      <InputLabel id='mutiple-chip-label'>{label}</InputLabel>
+      <InputLabel id="mutiple-chip-label">{label}</InputLabel>
       <Select
-        labelId='mutiple-chip-label'
-        id='mutiple-chip'
+        labelId="mutiple-chip-label"
+        id="mutiple-chip"
         multiple
         data-cy={`select-${field.name}`}
         value={field.value}
         onChange={handleChange}
-        input={<Input id='select-multiple-chip' />}
+        input={<Input id="select-multiple-chip" />}
         renderValue={(selected: string[]) => (
           <div className={classes.chips}>
             {selected.map((value) => (

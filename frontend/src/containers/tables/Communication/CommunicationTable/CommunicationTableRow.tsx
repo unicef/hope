@@ -1,5 +1,5 @@
 import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../../../components/core/UniversalMoment';
@@ -27,20 +27,20 @@ export function CommunicationTableRow({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={message.unicefId}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={messageDetailsPath}>{message.unicefId}</BlackLink>
         ) : (
           message.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>{message.title}</TableCell>
-      <TableCell align='left'>{message.numberOfRecipients}</TableCell>
-      <TableCell align='left'>{renderUserName(message.createdBy)}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{message.title}</TableCell>
+      <TableCell align="left">{message.numberOfRecipients}</TableCell>
+      <TableCell align="left">{renderUserName(message.createdBy)}</TableCell>
+      <TableCell align="left">
         <UniversalMoment>{message.createdAt}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

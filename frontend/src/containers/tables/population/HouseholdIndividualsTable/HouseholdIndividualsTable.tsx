@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React, { ReactElement, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { BlackLink } from '../../../../components/core/BlackLink';
@@ -107,7 +107,7 @@ export function HouseholdIndividualsTable({
   const totalCount = allIndividuals.length;
   return (
     <TableComponent<IndividualNode>
-      title='Individuals in Household'
+      title="Individuals in Household"
       data={allIndividuals.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
@@ -118,31 +118,31 @@ export function HouseholdIndividualsTable({
           <ClickableTableRow
             hover
             onClick={() => handleClick(row)}
-            role='checkbox'
+            role="checkbox"
             key={row.id}
           >
-            <TableCell align='left'>
+            <TableCell align="left">
               <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
                 {row.unicefId}
               </BlackLink>
             </TableCell>
-            <TableCell align='left'>{row.fullName}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{row.fullName}</TableCell>
+            <TableCell align="left">
               <StatusBox
                 status={row.status}
                 statusToColor={populationStatusToColor}
               />
             </TableCell>
-            <TableCell align='left'>{roleChoicesDict[row.role]}</TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
+            <TableCell align="left">
               {household?.id === row?.household?.id
                 ? relationshipChoicesDict[row.relationship]
                 : relationshipChoicesDict.NON_BENEFICIARY}
             </TableCell>
-            <TableCell align='left'>
+            <TableCell align="left">
               <UniversalMoment>{row.birthDate}</UniversalMoment>
             </TableCell>
-            <TableCell align='left'>{sexToCapitalize(row.sex)}</TableCell>
+            <TableCell align="left">{sexToCapitalize(row.sex)}</TableCell>
           </ClickableTableRow>
         );
       }}

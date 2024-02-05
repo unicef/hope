@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
@@ -43,37 +43,37 @@ export function PaymentRecordAndPaymentHouseholdTableRow({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={paymentRecordOrPayment.id}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={detailsPath}>{paymentRecordOrPayment.caId}</BlackLink>
         ) : (
           paymentRecordOrPayment.caId
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={paymentRecordOrPayment.status}
           statusToColor={paymentRecordStatusToColor}
           statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
-      <TableCell align='left'>{paymentRecordOrPayment.fullName}</TableCell>
-      <TableCell align='right'>
+      <TableCell align="left">{paymentRecordOrPayment.fullName}</TableCell>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentRecordOrPayment.entitlementQuantity,
           paymentRecordOrPayment.currency,
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentRecordOrPayment.deliveredQuantity,
           paymentRecordOrPayment.currency,
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         <UniversalMoment>{paymentRecordOrPayment.deliveryDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import FormControl from '@material-ui/core/FormControl';
+import FormControl from '@mui/material/FormControl';
 
 export const StyledFormControl = styled(FormControl)`
   width: ${(props) => (props.fullWidth ? '100%' : '260px')};

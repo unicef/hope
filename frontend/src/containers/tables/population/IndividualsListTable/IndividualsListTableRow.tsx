@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -39,26 +39,26 @@ export const IndividualsListTableRow = ({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={individual.id}
-      data-cy='individual-table-row'
+      data-cy="individual-table-row"
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         <IndividualFlags individual={individual} />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <BlackLink to={individualDetailsPath}>{individual.unicefId}</BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {individual.household ? individual.household.unicefId : ''}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {relationshipChoicesDict[individual.relationship]}
       </TableCell>
-      <TableCell align='right'>{individual.age}</TableCell>
-      <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>{individual.household?.admin2?.name}</TableCell>
+      <TableCell align="right">{individual.age}</TableCell>
+      <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
+      <TableCell align="left">{individual.household?.admin2?.name}</TableCell>
     </ClickableTableRow>
   );
 };

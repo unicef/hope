@@ -1,4 +1,4 @@
-import TableCell from '@material-ui/core/TableCell';
+import TableCell from '@mui/material/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { CashPlanAndPaymentPlanNode } from '../../../../__generated__/graphql';
@@ -33,11 +33,11 @@ export const CashPlanTableRow = ({
     <ClickableTableRow
       hover={!isAllPrograms}
       onClick={!isAllPrograms ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={cashAndPaymentPlan.id}
-      data-cy='cash-plan-table-row'
+      data-cy="cash-plan-table-row"
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {!isAllPrograms ? (
           <BlackLink to={objectPath}>
             <div>{cashAndPaymentPlan.unicefId}</div>
@@ -46,17 +46,17 @@ export const CashPlanTableRow = ({
           <div>{cashAndPaymentPlan.unicefId}</div>
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={cashAndPaymentPlan.status}
           statusToColor={paymentPlanStatusToColor}
         />
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {cashAndPaymentPlan.totalNumberOfHouseholds}
       </TableCell>
-      <TableCell align='left'>{cashAndPaymentPlan.currency}</TableCell>
-      <TableCell align='right'>
+      <TableCell align="left">{cashAndPaymentPlan.currency}</TableCell>
+      <TableCell align="right">
         {renderSomethingOrDash(
           cashAndPaymentPlan?.totalEntitledQuantity?.toLocaleString('en-US', {
             minimumFractionDigits: 2,
@@ -64,7 +64,7 @@ export const CashPlanTableRow = ({
           }),
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {renderSomethingOrDash(
           cashAndPaymentPlan?.totalDeliveredQuantity?.toLocaleString('en-US', {
             minimumFractionDigits: 2,
@@ -72,7 +72,7 @@ export const CashPlanTableRow = ({
           }),
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {renderSomethingOrDash(
           cashAndPaymentPlan?.totalUndeliveredQuantity?.toLocaleString(
             'en-US',
@@ -83,7 +83,7 @@ export const CashPlanTableRow = ({
           ),
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{cashAndPaymentPlan.dispersionDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
