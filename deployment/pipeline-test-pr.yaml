@@ -66,7 +66,7 @@ stages:
                 -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
                 -t $(Docker.url)/$(Docker.backend.repository):latest \
                 --push \
-                -f ./backend/docker/Dockerfile \
+                -f ./backend/Dockerfile \
                 ./backend
             displayName: Docker build dist image
           - script: |
@@ -80,7 +80,7 @@ stages:
                 -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
                 -t $(Docker.url)/$(Docker.backend.repository):dev-latest \
                 --push --target dev \
-                -f ./backend/docker/Dockerfile \
+                -f ./backend/Dockerfile \
                 ./backend
             displayName: Docker build dev image
 
