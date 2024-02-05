@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.9.2",
+    "@mui/lab": "^5.0.0-alpha.163",
     "@mui/material": "^5.15.7",
     "@mui/styled-engine-sc": "^6.0.0-alpha.14",
     "@sentry/react": "^7.99.0",
