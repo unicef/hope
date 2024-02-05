@@ -1,5 +1,5 @@
 import { InputAdornment } from '@mui/material';
-import SearchIcon from '@material-ui/icons/Search';
+import SearchIcon from '@mui/icons-material/Search';
 import styled from 'styled-components';
 import React from 'react';
 import TextField from '../../shared/TextField';

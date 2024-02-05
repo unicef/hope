@@ -1,5 +1,5 @@
 import { Grid, IconButton } from '@mui/material';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
 import React from 'react';

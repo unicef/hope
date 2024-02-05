@@ -1,7 +1,7 @@
 import { Grid, MenuItem } from '@mui/material';
-import CakeIcon from '@material-ui/icons/Cake';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
-import WcIcon from '@material-ui/icons/Wc';
+import CakeIcon from '@mui/icons-material/Cake';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import WcIcon from '@mui/icons-material/Wc';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';

@@ -1,7 +1,7 @@
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
-import CancelIcon from '@material-ui/icons/Cancel';
+import CancelIcon from '@mui/icons-material/Cancel';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

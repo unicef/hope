@@ -7,7 +7,7 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray, Formik } from 'formik';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';

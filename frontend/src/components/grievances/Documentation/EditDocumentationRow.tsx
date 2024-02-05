@@ -1,6 +1,6 @@
 import { Box, Button, Grid, IconButton } from '@mui/material';
-import { Delete } from '@material-ui/icons';
-import Edit from '@material-ui/icons/Edit';
+import { Delete } from '@mui/icons-material';
+import Edit from '@mui/icons-material/Edit';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

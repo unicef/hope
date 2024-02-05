@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material';
-import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
+import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';

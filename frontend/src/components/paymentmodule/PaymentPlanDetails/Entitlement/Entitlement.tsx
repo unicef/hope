@@ -8,8 +8,8 @@ import {
   Select,
   Typography,
 } from '@mui/material';
-import { GetApp } from '@material-ui/icons';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
+import { GetApp } from '@mui/icons-material';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

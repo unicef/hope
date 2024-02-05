@@ -1,6 +1,6 @@
 import { Button, Grid } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import React from 'react';

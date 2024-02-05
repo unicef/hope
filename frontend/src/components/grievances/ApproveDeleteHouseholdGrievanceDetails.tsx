@@ -8,7 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import styled from 'styled-components';
-import Edit from '@material-ui/icons/Edit';
+import Edit from '@mui/icons-material/Edit';
 import { Field, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';

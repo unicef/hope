@@ -2,7 +2,7 @@ import { TextField } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import CommentIcon from '@material-ui/icons/Comment';
+import CommentIcon from '@mui/icons-material/Comment';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,

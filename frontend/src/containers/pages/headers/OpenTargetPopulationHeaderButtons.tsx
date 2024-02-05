@@ -6,7 +6,7 @@ import {
   Delete,
   FileCopy,
   RefreshRounded,
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 import {
   TargetPopulationQuery,
   useRebuildTpMutation,

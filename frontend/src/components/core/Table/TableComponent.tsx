@@ -9,7 +9,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import FindInPageIcon from '@material-ui/icons/FindInPage';
+import FindInPageIcon from '@mui/icons-material/FindInPage';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';

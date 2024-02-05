@@ -10,9 +10,9 @@
     "preview": "vite preview",
     "download-dev-schema": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql",
     "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:8080/api/graphql/schema.graphql",
-    "generate-apollo-schema": "apollo schema:download data/schema.json",
-    "generate-types": "yarn download-dev-schema&&yarn generate-apollo-schema&&graphql-codegen --config codegen.yml --debug",
-    "generate-types-local": "yarn download-local-schema&&yarn generate-apollo-schema&&graphql-codegen --config codegen.yml --debug"
+    "generate-apollo-schema": "apollo client:download-schema data/schema.json",
+    "generate-types": "yarn download-dev-schema && yarn generate-apollo-schema && graphql-codegen --config codegen.yml --debug",
+    "generate-types-local": "yarn download-local-schema && yarn generate-apollo-schema && graphql-codegen --config codegen.yml --debug"
   },
   "dependencies": {
     "@apollo/client": "^3.9.2",
@@ -20,6 +20,7 @@
     "@apollo/react-hooks": "^4.0.0",
     "@date-io/moment": "^3.0.0",
     "@material-ui/lab": "^4.0.0-alpha.61",
+    "@mui/icons-material": "^5.15.7",
     "@mui/lab": "^5.0.0-alpha.163",
     "@mui/material": "^5.15.7",
     "@mui/styled-engine-sc": "^6.0.0-alpha.14",

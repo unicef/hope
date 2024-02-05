@@ -1,6 +1,6 @@
 import { Box, Button, Collapse, Grid, Typography } from '@mui/material';
-import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
-import KeyboardArrowUp from '@material-ui/icons/KeyboardArrowUp';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import { Field } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';

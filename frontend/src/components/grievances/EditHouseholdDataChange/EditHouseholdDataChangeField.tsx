@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field } from 'formik';
 import React from 'react';
 import { useLocation } from 'react-router-dom';

@@ -1,5 +1,5 @@
 import { Grid, MenuItem } from '@mui/material';
-import { AccountBalance } from '@material-ui/icons';
+import { AccountBalance } from '@mui/icons-material';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';

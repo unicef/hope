@@ -6,7 +6,7 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import moment from 'moment';
@@ -282,7 +282,7 @@ export const NewReportForm = (): React.ReactElement => {
                             required
                             fullWidth
                             decoratorEnd={
-                              <CalendarTodayRoundedIcon color="disabled" />
+                              <CalendarTodayRounded color="disabled" />
                             }
                           />
                         </Grid>
@@ -296,7 +296,7 @@ export const NewReportForm = (): React.ReactElement => {
                             initialFocusedDate={values.dateFrom}
                             fullWidth
                             decoratorEnd={
-                              <CalendarTodayRoundedIcon color="disabled" />
+                              <CalendarTodayRounded color="disabled" />
                             }
                             minDate={values.dateFrom}
                           />

@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material';
-import { EditRounded } from '@material-ui/icons';
+import { EditRounded } from '@mui/icons-material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';

@@ -7,7 +7,7 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline } from '@mui/icons-material';
 import { Field } from 'formik';
 import React, { Fragment, useState } from 'react';
 import { useLocation } from 'react-router-dom';

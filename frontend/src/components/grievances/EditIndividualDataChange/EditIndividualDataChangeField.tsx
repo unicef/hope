@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useLocation } from 'react-router-dom';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import React from 'react';
 import { FormikDateField } from '../../../shared/Formik/FormikDateField';
 import { FormikDecimalField } from '../../../shared/Formik/FormikDecimalField';

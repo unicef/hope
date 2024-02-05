@@ -2,7 +2,7 @@ import { MenuItem, Select } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import AlarmAddIcon from '@material-ui/icons/AlarmAdd';
+import AlarmAddIcon from '@mui/icons-material/AlarmAdd';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,

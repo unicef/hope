@@ -1,6 +1,6 @@
 import { Box, Button } from '@mui/material';
-import { Refresh } from '@material-ui/icons';
-import DashboardIcon from '@material-ui/icons/Dashboard';
+import { Refresh } from '@mui/icons-material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';

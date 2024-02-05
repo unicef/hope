@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, IconButton, Tab, Tabs } from '@mui/material';
-import { Close } from '@material-ui/icons';
+import { Close } from '@mui/icons-material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

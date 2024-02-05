@@ -1,5 +1,5 @@
 import { Box, Grid, Typography } from '@mui/material';
-import InfoIcon from '@material-ui/icons/Info';
+import InfoIcon from '@mui/icons-material/Info';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

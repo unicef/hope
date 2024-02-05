@@ -8,7 +8,7 @@ import {
   MenuItem,
   Select,
 } from '@mui/material';
-import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
+import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -58,7 +58,7 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
     <ButtonTooltip
       variant="contained"
       color="primary"
-      startIcon={<ExitToAppRoundedIcon />}
+      startIcon={<ExitToAppRounded />}
       onClick={() => setOpen(true)}
       data-cy="button-import"
       title={t(

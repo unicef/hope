@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
-import { Publish } from '@material-ui/icons';
+import { Publish } from '@mui/icons-material';
 import get from 'lodash/get';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';

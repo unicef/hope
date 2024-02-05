@@ -1,7 +1,7 @@
 import { Grid, MenuItem } from '@mui/material';
-import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
-import GroupIcon from '@material-ui/icons/Group';
+import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import GroupIcon from '@mui/icons-material/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -124,7 +124,7 @@ export const HouseholdFilters = ({
             label={t('Residence Status')}
             fullWidth
             value={filter.residenceStatus}
-            icon={<AssignmentIndRoundedIcon />}
+            icon={<AssignmentIndRounded />}
             data-cy="hh-filters-residence-status"
           >
             {choicesData.residenceStatusChoices?.map((status) => (

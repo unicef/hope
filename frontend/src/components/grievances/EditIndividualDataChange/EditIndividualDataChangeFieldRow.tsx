@@ -1,6 +1,6 @@
 import { Grid, IconButton } from '@mui/material';
 import camelCase from 'lodash/camelCase';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { useField, Field } from 'formik';
 import React, { useEffect } from 'react';

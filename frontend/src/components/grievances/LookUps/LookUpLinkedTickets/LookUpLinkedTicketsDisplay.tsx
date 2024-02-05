@@ -1,7 +1,7 @@
 import { Box, Grid } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useLocation } from 'react-router-dom';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BlueText, StyledBox, LightGrey, DarkGrey } from '../LookUpStyles';

@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import MessageIcon from '@material-ui/icons/Message';
+import MessageIcon from '@mui/icons-material/Message';
 import styled from 'styled-components';
 import { Dialog } from '../../../../containers/dialogs/Dialog';
 import { DialogActions } from '../../../../containers/dialogs/DialogActions';

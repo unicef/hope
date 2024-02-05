@@ -1,5 +1,5 @@
 import { Grid, MenuItem } from '@mui/material';
-import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';

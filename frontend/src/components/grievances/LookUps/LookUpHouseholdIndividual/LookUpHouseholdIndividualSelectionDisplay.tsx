@@ -1,5 +1,5 @@
 import { Box, Grid } from '@mui/material';
-import DeleteIcon from '@material-ui/icons/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';

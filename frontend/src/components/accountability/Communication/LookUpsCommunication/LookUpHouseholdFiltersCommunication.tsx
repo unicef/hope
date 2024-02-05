@@ -1,6 +1,6 @@
 import { Grid, MenuItem } from '@mui/material';
-import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
-import GroupIcon from '@material-ui/icons/Group';
+import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
+import GroupIcon from '@mui/icons-material/Group';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';

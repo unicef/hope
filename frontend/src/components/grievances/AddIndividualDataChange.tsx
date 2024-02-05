@@ -1,8 +1,8 @@
 import { Button, Grid, Typography } from '@mui/material';
-import { AddCircleOutline } from '@material-ui/icons';
+import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, FieldArray } from 'formik';
 import camelCase from 'lodash/camelCase';
 import React from 'react';
@@ -73,7 +73,7 @@ export const AddIndividualDataChangeField = ({
     case 'DATE':
       fieldProps = {
         component: FormikDateField,
-        decoratorEnd: <CalendarTodayRoundedIcon color="disabled" />,
+        decoratorEnd: <CalendarTodayRounded color="disabled" />,
       };
       break;
 
