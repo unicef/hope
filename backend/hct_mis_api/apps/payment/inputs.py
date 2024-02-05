@@ -70,6 +70,7 @@ class CreatePaymentPlanInput(graphene.InputObjectType):
     dispersion_start_date = graphene.Date(required=True)
     dispersion_end_date = graphene.Date(required=True)
     currency = graphene.String(required=True)
+    name = graphene.String(required=True)
 
 
 class UpdatePaymentPlanInput(graphene.InputObjectType):
