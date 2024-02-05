@@ -28,6 +28,7 @@
     "@testing-library/react": "^14.2.1",
     "@testing-library/user-event": "^14.5.2",
     "@types/apollo-upload-client": "^18.0.0",
+    "@types/chart.js": "^2.9.41",
     "apollo-cache-persist": "^0.1.1",
     "apollo-upload-client": "^17.0.0",
     "camelcase": "^8.0.0",
@@ -76,7 +77,7 @@
     "jest-environment-jsdom-fourteen": "^1.0.1",
     "jest-resolve": "^29.7.0",
     "jest-watch-typeahead": "^2.2.2",
-    "typescript": "^5.2.2",
+    "typescript": "^5.3.3",
     "vite": "^5.0.8"
   }
 }

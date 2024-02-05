@@ -1,20 +1,19 @@
-import React from "react";
-import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
-import { AutoLogout } from "./components/core/AutoLogout";
-import { SentryRoute } from "./components/core/SentryRoute";
-import { DefaultRoute } from "./containers/DefaultRoute";
-import { LoginPage } from "./containers/pages/core/LoginPage";
-import { ProfilePage } from "./containers/pages/core/ProfilePage";
-import { MaintenancePage } from "./containers/pages/maintenance/MaintenancePage";
-import { AllProgramsRoutesSwitch } from "./containers/routers/AllProgramsRoutesSwitch";
-import { BaseHomeRouter } from "./containers/routers/BaseHomeRouter";
-import { SelectedProgramRoutesSwitch } from "./containers/routers/SelectedProgramRoutesSwitch";
-import { Providers } from "./providers";
-import { SanctionList } from "./containers/pages/core/SanctionList";
-import { ProtectedRoute } from "./components/core/ProtectedRoute";
-import { PageNotFound } from "./containers/pages/404/PageNotFound";
-import { AccessDenied } from "./containers/pages/accessDenied/AccessDenied";
-import { SomethingWentWrong } from "./containers/pages/somethingWentWrong/SomethingWentWrong";
+import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
+import { AutoLogout } from './components/core/AutoLogout';
+import { SentryRoute } from './components/core/SentryRoute';
+import { DefaultRoute } from './containers/DefaultRoute';
+import { LoginPage } from './containers/pages/core/LoginPage';
+import { ProfilePage } from './containers/pages/core/ProfilePage';
+import { MaintenancePage } from './containers/pages/maintenance/MaintenancePage';
+import { AllProgramsRoutesSwitch } from './containers/routers/AllProgramsRoutesSwitch';
+import { BaseHomeRouter } from './containers/routers/BaseHomeRouter';
+import { SelectedProgramRoutesSwitch } from './containers/routers/SelectedProgramRoutesSwitch';
+import { Providers } from './providers';
+import { SanctionList } from './containers/pages/core/SanctionList';
+import { ProtectedRoute } from './components/core/ProtectedRoute';
+import { PageNotFound } from './containers/pages/404/PageNotFound';
+import { AccessDenied } from './containers/pages/accessDenied/AccessDenied';
+import { SomethingWentWrong } from './containers/pages/somethingWentWrong/SomethingWentWrong';
 
 export const App: React.FC = () => {
   return (
@@ -41,7 +40,7 @@ export const App: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                throw new Error("Am I working?");
+                throw new Error('Am I working?');
               }}
             >
               Throw new error

@@ -1,30 +1,31 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
 import React from 'react';
 import ReactDOM from 'react-dom';
+import './index.css';
 import * as Sentry from '@sentry/react';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import Chart from 'chart.js';
+import Chart from 'chart.js/auto'; // Import Chart.js correctly
 import packageJson from '../package.json';
 import setupInternalization from './i18n';
-import { App } from './App';
 import * as serviceWorker from './serviceWorker';
 import { FONT } from './theme';
+import { App } from './App';
 
-Chart.plugins.unregister(ChartDataLabels);
-Chart.defaults.global.defaultFontFamily = FONT;
-Chart.defaults.global.tooltips.xPadding = 12;
-Chart.defaults.global.tooltips.yPadding = 12;
-Chart.defaults.global.tooltips.cornerRadius = 2;
-Chart.defaults.global.tooltips.mode = 'point';
-Chart.defaults.global.legend.position = 'bottom';
-Chart.defaults.global.legend.labels.usePointStyle = true;
-Chart.defaults.global.legend.labels.boxWidth = 8;
+Chart.register(ChartDataLabels); // Register the plugin
 
-Chart.defaults.global.plugins.datalabels.font.family = FONT;
-Chart.defaults.global.plugins.datalabels.font.weight = 'bold';
+Chart.defaults.font.family = FONT;
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.cornerRadius = 2;
+Chart.defaults.plugins.tooltip.mode = 'point';
+Chart.defaults.plugins.legend.position = 'bottom';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.boxWidth = 8;
+
+Chart.defaults.plugins.datalabels.font = {
+  family: FONT,
+};
+Chart.defaults.plugins.datalabels.font = () => ({
+  weight: 'bold',
+});
 
 setupInternalization();
 if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN)
@@ -35,12 +36,12 @@ if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN)
     ignoreErrors: ['Permission Denied'],
   });
 
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-)
+  document.getElementById('root'),
+);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

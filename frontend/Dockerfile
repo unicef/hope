@@ -5,7 +5,7 @@ RUN --mount=type=cache,target=/root/.cache,sharing=private \
     yarn install --frozen-lockfile
 COPY . /code/
 EXPOSE 3000
-CMD ["yarn", "start"]
+CMD ["yarn", "dev"]
 
 FROM node:13-alpine as dist-builder
 WORKDIR /code
