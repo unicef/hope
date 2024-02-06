@@ -12,7 +12,8 @@ class CreateProgramTests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
-        cls.url = reverse("api:program-create", args=[cls.business_area.slug])
+        cls.create_url = reverse("api:program-create", args=[cls.business_area.slug])
+        cls.list_url = reverse("api:program-list", args=[cls.business_area.slug])
 
     def test_create_program(self) -> None:
         data = {
@@ -25,7 +26,7 @@ class CreateProgramTests(HOPEApiTestCase):
             "cash_plus": True,
             "population_goal": 101,
         }
-        response = self.client.post(self.url, data, format="json")
+        response = self.client.post(self.create_url, data, format="json")
         data = response.json()
         if not (program := Program.objects.filter(name="Program #1").first()):
             self.fail("Program was not present")
@@ -46,3 +47,21 @@ class CreateProgramTests(HOPEApiTestCase):
         )
 
         self.assertEqual(program.business_area, self.business_area)
+
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 1)
+        self.assertDictEqual(
+            response.json()[0],
+            {
+                "budget": "10000.00",
+                "cash_plus": True,
+                "end_date": "2022-09-27",
+                "frequency_of_payments": "ONE_OFF",
+                "id": str(program.id),
+                "name": "Program #1",
+                "population_goal": 101,
+                "sector": "CHILD_PROTECTION",
+                "start_date": "2022-09-27",
+            },
+        )
