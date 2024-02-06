@@ -34,7 +34,6 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
     # memory optimization
     paginator = Paginator(households_ids, 200)
 
-    # with configure_scope() as scope:
     with disable_concurrency(Household), disable_concurrency(Individual):
         with transaction.atomic():
             for page in paginator.page_range:
