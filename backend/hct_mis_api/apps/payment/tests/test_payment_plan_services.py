@@ -71,7 +71,7 @@ class TestPaymentPlanServices(APITestCase):
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
-            name="paymentPlanName",
+            name="paymentPlanName"
         )
 
         with self.assertRaisesMessage(GraphQLError, "PaymentPlan can not be created in provided Business Area"):
