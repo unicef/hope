@@ -38,8 +38,10 @@ class TestFilterIndividualsByProgram(APITestCase):
         household_one = HouseholdFactory.build(business_area=cls.business_area, program=cls.program1)
         household_two = HouseholdFactory.build(business_area=cls.business_area, program=cls.program2)
         household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = cls.program1
         household_one.registration_data_import.save()
         household_two.registration_data_import.imported_by.save()
+        household_two.registration_data_import.program = cls.program2
         household_two.registration_data_import.save()
 
         individuals_to_create = [

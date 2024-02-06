@@ -74,11 +74,12 @@ class TestCloseGrievanceTicketAndDisableDeduplication(BaseElasticSearchTestCase,
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example")
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
         household_one.program = program_one
         household_one.programs.add(program_one)
 
-        cls.individual = IndividualFactory(household=household_one)
+        cls.individual = IndividualFactory(household=household_one, program=program_one)
         national_id_type = DocumentType.objects.get(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
         )
@@ -86,10 +87,18 @@ class TestCloseGrievanceTicketAndDisableDeduplication(BaseElasticSearchTestCase,
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
         )
         cls.national_id = DocumentFactory(
-            type=national_id_type, document_number="789-789-645", individual=cls.individual, country=country
+            type=national_id_type,
+            document_number="789-789-645",
+            individual=cls.individual,
+            country=country,
+            program=program_one,
         )
         cls.birth_certificate = DocumentFactory(
-            type=birth_certificate_type, document_number="ITY8456", individual=cls.individual, country=country
+            type=birth_certificate_type,
+            document_number="ITY8456",
+            individual=cls.individual,
+            country=country,
+            program=program_one,
         )
         household_one.head_of_household = cls.individual
         household_one.save()

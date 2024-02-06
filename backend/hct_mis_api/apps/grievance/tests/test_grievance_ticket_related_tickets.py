@@ -43,9 +43,10 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build()
+        household_one = HouseholdFactory.build(program=program_one)
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
 
@@ -56,6 +57,7 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
             "phone_no": "(953)682-4596",
             "birth_date": "1943-07-30",
             "household": household_one,
+            "program": program_one,
         }
 
         individual = IndividualFactory(**individual_data)
@@ -73,6 +75,7 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
             type=national_id_type,
             document_number="789-789-645",
             individual=individual,
+            program=individual.program,
         )
         DocumentFactory(
             id="8ad5e3b8-4c4d-4c10-8756-118d86095dd0",
@@ -80,6 +83,7 @@ class TestGrievanceTicketRelatedTickets(APITestCase):
             type=birth_certificate_type,
             document_number="ITY8456",
             individual=individual,
+            program=individual.program,
         )
         household_one.head_of_household = individual
         household_one.save()

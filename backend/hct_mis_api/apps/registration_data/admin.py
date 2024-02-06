@@ -102,6 +102,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
                 registration_data_import_id=str(rdi_datahub_obj.id),
                 import_data_id=str(rdi_datahub_obj.import_data.id),
                 business_area_id=str(business_area.id),
+                program_id=str(obj.program_id),
             )
 
             self.message_user(request, "RDI task has started")
