@@ -71,6 +71,7 @@ class TestPaymentPlanServices(APITestCase):
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
+            name="paymentPlanName",
         )
 
         with self.assertRaisesMessage(GraphQLError, "PaymentPlan can not be created in provided Business Area"):
@@ -129,6 +130,7 @@ class TestPaymentPlanServices(APITestCase):
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",
+            name="paymentPlanName",
         )
 
         with mock.patch(
@@ -174,6 +176,7 @@ class TestPaymentPlanServices(APITestCase):
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-09-11"),
             currency="USD",
+            name="paymentPlanName",
         )
 
         with self.assertRaisesMessage(GraphQLError, "Only Payment Plan in Open status can be edited"):
