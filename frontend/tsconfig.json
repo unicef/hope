@@ -20,7 +20,7 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "__tests__", "jest", "vite.config.ts"],
+  "include": ["src", "__tests__", "jest", "vite.config.ts", "tsconfig.json"],
   "exclude": ["node_modules"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
