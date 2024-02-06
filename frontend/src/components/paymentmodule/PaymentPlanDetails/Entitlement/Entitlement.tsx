@@ -167,7 +167,7 @@ export function Entitlement({
                   value={steficonRuleValue}
                   data-cy="input-entitlement-formula"
                   labelWidth={180}
-                  onChange={(event) => setSteficonRuleValue(event.target.value as string)}
+                  onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
                   {steficonData.allSteficonRules.edges.map((each, index) => (
                     <MenuItem
