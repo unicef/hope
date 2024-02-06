@@ -21,7 +21,7 @@ export interface EditIndividualDataChangeFieldRowProps {
   onDelete: () => {};
   values;
 }
-export const EditIndividualDataChangeFieldRow = ({
+export function EditIndividualDataChangeFieldRow({
   fields,
   individual,
   index,
@@ -29,11 +29,11 @@ export const EditIndividualDataChangeFieldRow = ({
   notAvailableFields,
   onDelete,
   values,
-}: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
+}: EditIndividualDataChangeFieldRowProps): React.ReactElement {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const field = fields.find((item) => item.name === itemValue.fieldName);
-  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [fieldNotUsed, metaNotUsed, helpers] = useField(
     `individualDataUpdateFields[${index}].isFlexField`,
   );
@@ -54,9 +54,8 @@ export const EditIndividualDataChangeFieldRow = ({
           component={FormikSelectField}
           choices={fields
             .filter(
-              (item) =>
-                !notAvailableFields.includes(item.name) ||
-                item.name === itemValue?.fieldName,
+              (item) => !notAvailableFields.includes(item.name)
+                || item.name === itemValue?.fieldName,
             )
             .map((item) => ({
               value: item.name,
@@ -91,4 +90,4 @@ export const EditIndividualDataChangeFieldRow = ({
       )}
     </>
   );
-};
+}

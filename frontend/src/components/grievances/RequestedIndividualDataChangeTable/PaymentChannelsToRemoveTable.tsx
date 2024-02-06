@@ -33,14 +33,14 @@ export interface PaymentChannelsToRemoveTableProps {
   previousPaymentChannels;
 }
 
-export const PaymentChannelsToRemoveTable = ({
+export function PaymentChannelsToRemoveTable({
   values,
   isEdit,
   ticket,
   paymentChannelsToRemove,
   previousPaymentChannels,
   setFieldValue,
-}: PaymentChannelsToRemoveTableProps): React.ReactElement => {
+}: PaymentChannelsToRemoveTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedPaymentChannelsToRemove } = values;
   const paymentChannelsTableHead = (
@@ -118,4 +118,4 @@ export const PaymentChannelsToRemoveTable = ({
       </StyledTable>
     </>
   );
-};
+}

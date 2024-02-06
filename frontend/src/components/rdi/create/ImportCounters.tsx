@@ -13,16 +13,18 @@ export function ImportCounters({
   const { t } = useTranslation();
   return (
     <>
-      <div data-cy='number-of-households'>
-        {numberOfHouseholds}{' '}
+      <div data-cy="number-of-households">
+        {numberOfHouseholds}
+        {' '}
         {t(
           'Household'
             .concat(numberOfHouseholds > 1 ? 's' : '')
             .concat(' available to import'),
         )}
       </div>
-      <div data-cy='number-of-individuals'>
-        {numberOfIndividuals}{' '}
+      <div data-cy="number-of-individuals">
+        {numberOfIndividuals}
+        {' '}
         {t(
           'Individual'
             .concat(numberOfIndividuals > 1 ? 's' : '')

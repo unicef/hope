@@ -1,4 +1,6 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import {
+  Box, Grid, Paper, Typography,
+} from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -38,13 +40,13 @@ interface IndividualBioDataProps {
   choicesData: HouseholdChoiceDataQuery;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
-export const IndividualBioData = ({
+export function IndividualBioData({
   individual,
   baseUrl,
   businessArea,
   choicesData,
   grievancesChoices,
-}: IndividualBioDataProps): React.ReactElement => {
+}: IndividualBioDataProps): React.ReactElement {
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
@@ -102,10 +104,13 @@ export const IndividualBioData = ({
       <LabelizedField label={t('Linked Households')}>
         {individual?.householdsAndRoles?.length
           ? individual?.householdsAndRoles?.map((item) => (
-              <Box key={item.id}>
-                {item.household.unicefId} - {roleChoicesDict[item.role]}
-              </Box>
-            ))
+            <Box key={item.id}>
+              {item.household.unicefId}
+              {' '}
+              -
+              {roleChoicesDict[item.role]}
+            </Box>
+          ))
           : '-'}
       </LabelizedField>
     </Grid>
@@ -283,12 +288,12 @@ export const IndividualBioData = ({
               : 'Not Disabled'}
           </LabelizedField>
         </Grid>
-        {!mappedIndividualDocuments?.length &&
-        !mappedIdentities?.length ? null : (
+        {!mappedIndividualDocuments?.length
+        && !mappedIdentities?.length ? null : (
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
-        )}
+          )}
         {mappedIndividualDocuments}
         {mappedIdentities}
         <Grid item xs={12}>
@@ -338,4 +343,4 @@ export const IndividualBioData = ({
       </Grid>
     </Overview>
   );
-};
+}

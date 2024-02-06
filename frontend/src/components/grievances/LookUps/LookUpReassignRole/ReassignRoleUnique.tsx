@@ -24,12 +24,12 @@ const ReassignRoleButton = styled.button`
   background: #fff;
 `;
 
-export const ReassignRoleUnique = ({
+export function ReassignRoleUnique({
   individualRole,
   ticket,
   household,
   individual,
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { showMessage } = useSnackbar();
@@ -67,15 +67,15 @@ export const ReassignRoleUnique = ({
     >
       {({ submitForm }) => (
         <ReassignRoleButton
-          type='submit'
-          color='primary'
-          variant='contained'
+          type="submit"
+          color="primary"
+          variant="contained"
           onClick={submitForm}
-          data-cy='button-submit'
+          data-cy="button-submit"
         >
           {t('Reassign To Unique Individual')}
         </ReassignRoleButton>
       )}
     </Formik>
   );
-};
+}

@@ -16,12 +16,12 @@ import { RegistrationRoutes } from './RegistrationRoutes';
 import { TargetingRoutes } from './TargetingRoutes';
 import { AccountabilityRoutes } from './AccountabilityRoutes';
 
-export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
+export function SelectedProgramRoutesSwitch(): React.ReactElement {
   const { path } = useRouteMatch();
   return (
     <>
       <Switch>
-        <SentryRoute label='/ - Dashboard' path={`${path}/country-dashboard`}>
+        <SentryRoute label="/ - Dashboard" path={`${path}/country-dashboard`}>
           <DashboardPage />
         </SentryRoute>
         <SentryRoute path={`${path}/payment-records/:id`}>
@@ -50,4 +50,4 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
       <GrievanceRoutes />
     </>
   );
-};
+}

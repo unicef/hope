@@ -50,9 +50,9 @@ export const getDeliveryMechanismColor = (
   return '#CCC';
 };
 
-export const VolumeByDeliveryMechanismSection = ({
+export function VolumeByDeliveryMechanismSection({
   paymentPlan,
-}: VolumeByDeliveryMechanismSectionProps): React.ReactElement => {
+}: VolumeByDeliveryMechanismSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const { volumeByDeliveryMechanism } = paymentPlan;
 
@@ -83,9 +83,7 @@ export const VolumeByDeliveryMechanismSection = ({
   const chartData = volumeByDeliveryMechanism.map((el) => el.volumeUsd);
 
   const chartColors = (): string[] => {
-    const defaultColorsArray = volumeByDeliveryMechanism.map((el) =>
-      getDeliveryMechanismColor(el.deliveryMechanism.name),
-    );
+    const defaultColorsArray = volumeByDeliveryMechanism.map((el) => getDeliveryMechanismColor(el.deliveryMechanism.name));
 
     return defaultColorsArray;
   };
@@ -95,7 +93,8 @@ export const VolumeByDeliveryMechanismSection = ({
       <Title>
         <Typography variant="h6">
           {t('Volume by Delivery Mechanism')}
-        </Typography>{' '}
+        </Typography>
+        {' '}
       </Title>
       <ContentWrapper>
         <Grid container spacing={0} justifyContent="flex-start">
@@ -133,4 +132,4 @@ export const VolumeByDeliveryMechanismSection = ({
       </ContentWrapper>
     </Box>
   );
-};
+}

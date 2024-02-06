@@ -42,8 +42,7 @@ export function DropzoneField({
     accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     onDrop,
   });
-  const acceptedFilename =
-    acceptedFiles.length > 0 ? acceptedFiles[0].name : null;
+  const acceptedFilename = acceptedFiles.length > 0 ? acceptedFiles[0].name : null;
   return (
     <Box display="flex" justifyContent="center" p={5}>
       <DropzoneContainer {...getRootProps()} disabled={loading}>

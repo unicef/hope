@@ -6,7 +6,7 @@ import { PopulationHouseholdPage } from '../pages/population/PopulationHousehold
 import { PopulationIndividualsDetailsPage } from '../pages/population/PopulationIndividualsDetailsPage';
 import { PopulationIndividualsPage } from '../pages/population/PopulationIndividualsPage';
 
-export const PopulationRoutes = (): React.ReactElement => {
+export function PopulationRoutes(): React.ReactElement {
   const { path } = useRouteMatch();
 
   const populationRoutes = [
@@ -37,4 +37,4 @@ export const PopulationRoutes = (): React.ReactElement => {
       ))}
     </Switch>
   );
-};
+}

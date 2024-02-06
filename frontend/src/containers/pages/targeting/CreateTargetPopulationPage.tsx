@@ -29,7 +29,7 @@ const Label = styled.p`
   color: #b1b1b5;
 `;
 
-export const CreateTargetPopulationPage = (): React.ReactElement => {
+export function CreateTargetPopulationPage(): React.ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialValues = {
@@ -50,17 +50,15 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
     variables: { businessAreaSlug: businessArea },
   });
 
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, status: [ProgramStatus.Active] },
-      fetchPolicy: 'network-only',
-    });
+  const { data: allProgramsData, loading: loadingPrograms } = useAllProgramsForChoicesQuery({
+    variables: { businessArea, status: [ProgramStatus.Active] },
+    fetchPolicy: 'network-only',
+  });
 
   if (loadingPrograms) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!allProgramsData || !businessAreaData) return null;
-  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions)) return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
@@ -74,9 +72,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
           return true;
         }
         const idsArr = ids.split(',');
-        return idsArr.every((el) =>
-          /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
-        );
+        return idsArr.every((el) => /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
       },
     ),
     exclusionReason: Yup.string().max(500, t('Too long')),
@@ -155,4 +151,4 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
       )}
     </Formik>
   );
-};
+}

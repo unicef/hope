@@ -20,12 +20,12 @@ interface LookUpTargetPopulationTableRowCommunicationProps {
   radioChangeHandler?: (id: string) => void;
 }
 
-export const LookUpTargetPopulationTableRowCommunication = ({
+export function LookUpTargetPopulationTableRowCommunication({
   targetPopulation,
   canViewDetails,
   radioChangeHandler,
   selectedTargetPopulation,
-}: LookUpTargetPopulationTableRowCommunicationProps): React.ReactElement => {
+}: LookUpTargetPopulationTableRowCommunicationProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
@@ -86,9 +86,10 @@ export const LookUpTargetPopulationTableRowCommunication = ({
         <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        {targetPopulation.createdBy?.firstName}{' '}
+        {targetPopulation.createdBy?.firstName}
+        {' '}
         {targetPopulation.createdBy?.lastName}
       </TableCell>
     </ClickableTableRow>
   );
-};
+}

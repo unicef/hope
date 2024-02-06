@@ -1,6 +1,5 @@
 import { ActionPpDocument, Action } from '../../src/__generated__/graphql';
 
-
 export const fakeActionPpMutation = [
   {
     request: {

@@ -22,11 +22,11 @@ export interface DeleteTargetPopulation {
   setOpen: Function;
 }
 
-export const DeleteTargetPopulation = ({
+export function DeleteTargetPopulation({
   open,
   setOpen,
   targetPopulationId,
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const [mutate, { loading }] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
@@ -86,4 +86,4 @@ export const DeleteTargetPopulation = ({
       </Formik>
     </Dialog>
   );
-};
+}

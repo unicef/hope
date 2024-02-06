@@ -30,13 +30,12 @@ const initialFilter = {
   lastRegistrationDateMax: '',
 };
 
-export const PopulationIndividualsPage = (): React.ReactElement => {
+export function PopulationIndividualsPage(): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
-  const { data: householdChoicesData, loading: householdChoicesLoading } =
-    useHouseholdChoiceDataQuery();
+  const { data: householdChoicesData, loading: householdChoicesLoading } = useHouseholdChoiceDataQuery();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -45,19 +44,15 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } = useIndividualChoiceDataQuery();
 
-  if (householdChoicesLoading || individualChoicesLoading)
-    return <LoadingComponent />;
+  if (householdChoicesLoading || individualChoicesLoading) return <LoadingComponent />;
 
-  if (!individualChoicesData || !householdChoicesData || permissions === null)
-    return null;
+  if (!individualChoicesData || !householdChoicesData || permissions === null) return null;
 
   if (
     !hasPermissions(PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions)
-  )
-    return <PermissionDenied />;
+  ) return <PermissionDenied />;
 
   return (
     <>
@@ -87,4 +82,4 @@ export const PopulationIndividualsPage = (): React.ReactElement => {
       </Box>
     </>
   );
-};
+}

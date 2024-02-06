@@ -24,7 +24,7 @@ const initialFilter = {
   createdAtRangeMax: '',
 };
 
-export const TargetPopulationsPage = (): React.ReactElement => {
+export function TargetPopulationsPage(): React.ReactElement {
   const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -43,8 +43,7 @@ export const TargetPopulationsPage = (): React.ReactElement => {
 
   const canCreate = hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions);
 
-  if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions)) return <PermissionDenied />;
 
   return (
     <>
@@ -92,4 +91,4 @@ export const TargetPopulationsPage = (): React.ReactElement => {
       />
     </>
   );
-};
+}

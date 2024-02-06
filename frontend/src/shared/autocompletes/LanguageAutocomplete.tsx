@@ -1,5 +1,7 @@
 import get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useLanguageAutocompleteLazyQuery } from '../../__generated__/graphql';
@@ -12,7 +14,7 @@ import {
 } from '../../utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const LanguageAutocomplete = ({
+export function LanguageAutocomplete({
   disabled,
   name,
   filter,
@@ -32,7 +34,7 @@ export const LanguageAutocomplete = ({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const history = useHistory();
@@ -103,16 +105,12 @@ export const LanguageAutocomplete = ({
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option?.node?.code, value1)
-      }
-      handleOptionLabel={(option) =>
-        getAutocompleteOptionLabel(option, allEdges, inputValue, 'language')
-      }
+      handleOptionSelected={(option, value1) => handleOptionSelected(option?.node?.code, value1)}
+      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue, 'language')}
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
     />
   );
-};
+}

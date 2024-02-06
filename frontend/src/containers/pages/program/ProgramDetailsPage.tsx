@@ -51,7 +51,7 @@ const NoCashPlansSubTitle = styled.div`
   text-align: center;
 `;
 
-export const ProgramDetailsPage = (): React.ReactElement => {
+export function ProgramDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { data, loading, error } = useProgramQuery({
@@ -71,13 +71,11 @@ export const ProgramDetailsPage = (): React.ReactElement => {
   } = useProgrammeChoiceDataQuery();
   const permissions = usePermissions();
 
-  if (loading || choicesLoading || businessAreaDataLoading)
-    return <LoadingComponent />;
+  if (loading || choicesLoading || businessAreaDataLoading) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data?.program || !choices || !businessAreaData || permissions === null)
-    return null;
+  if (!data?.program || !choices || !businessAreaData || permissions === null) return null;
 
   const { program } = data;
   return (
@@ -123,4 +121,4 @@ export const ProgramDetailsPage = (): React.ReactElement => {
       </Container>
     </div>
   );
-};
+}

@@ -20,30 +20,28 @@ interface FeedbackFiltersProps {
   setAppliedFilter: (filter) => void;
   filter;
 }
-export const FeedbackFilters = ({
+export function FeedbackFilters({
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
   filter,
-}: FeedbackFiltersProps): React.ReactElement => {
+}: FeedbackFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } =
-    useFeedbackIssueTypeChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } = useFeedbackIssueTypeChoicesQuery();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -129,9 +127,7 @@ export const FeedbackFilters = ({
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('programState', e.target.value)
-              }
+              onChange={(e) => handleFilterChange('programState', e.target.value)}
               label={t('Programme State')}
               value={filter.programState}
               fullWidth
@@ -146,4 +142,4 @@ export const FeedbackFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

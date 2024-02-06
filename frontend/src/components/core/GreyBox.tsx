@@ -7,11 +7,11 @@ const StyledGreyBox = styled(Box)`
   width: 100%;
 `;
 
-export const GreyBox = ({
+export function GreyBox({
   children,
   ...props
 }: React.PropsWithChildren<
-  React.ComponentProps<typeof Box>
->): React.ReactElement => {
+React.ComponentProps<typeof Box>
+>): React.ReactElement {
   return <StyledGreyBox {...props}>{children}</StyledGreyBox>;
-};
+}

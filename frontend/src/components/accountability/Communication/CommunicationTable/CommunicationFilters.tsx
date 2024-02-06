@@ -15,26 +15,25 @@ interface CommunicationFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const CommunicationFilters = ({
+export function CommunicationFilters({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: CommunicationFiltersProps): React.ReactElement => {
+}: CommunicationFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -96,4 +95,4 @@ export const CommunicationFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

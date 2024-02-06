@@ -23,27 +23,28 @@ import { isPermissionDeniedError } from '../../../utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 
-export const PaymentPlanDetailsPage = (): React.ReactElement => {
+export function PaymentPlanDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data, loading, startPolling, stopPolling, error } =
-    usePaymentPlanQuery({
-      variables: {
-        id,
-      },
-      fetchPolicy: 'cache-and-network',
-    });
+  const {
+    data, loading, startPolling, stopPolling, error,
+  } = usePaymentPlanQuery({
+    variables: {
+      id,
+    },
+    fetchPolicy: 'cache-and-network',
+  });
 
   const status = data?.paymentPlan?.status;
   const backgroundActionStatus = data?.paymentPlan?.backgroundActionStatus;
 
   useEffect(() => {
     if (
-      PaymentPlanStatus.Preparing === status ||
-      (backgroundActionStatus !== null &&
-        backgroundActionStatus !==
-          PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
+      PaymentPlanStatus.Preparing === status
+      || (backgroundActionStatus !== null
+        && backgroundActionStatus
+          !== PaymentPlanBackgroundActionStatus.ExcludeBeneficiariesError)
     ) {
       startPolling(3000);
     } else {
@@ -56,18 +57,15 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
   if (permissions === null || !data) return null;
 
   if (
-    !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
-    isPermissionDeniedError(error)
-  )
-    return <PermissionDenied />;
+    !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)
+    || isPermissionDeniedError(error)
+  ) return <PermissionDenied />;
 
-  const shouldDisplayEntitlement =
-    status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
+  const shouldDisplayEntitlement = status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
 
   const shouldDisplayFsp = status !== PaymentPlanStatus.Open;
-  const shouldDisplayReconciliationSummary =
-    status === PaymentPlanStatus.Accepted ||
-    status === PaymentPlanStatus.Finished;
+  const shouldDisplayReconciliationSummary = status === PaymentPlanStatus.Accepted
+    || status === PaymentPlanStatus.Finished;
 
   const { paymentPlan } = data;
 
@@ -107,4 +105,4 @@ export const PaymentPlanDetailsPage = (): React.ReactElement => {
       )}
     </Box>
   );
-};
+}

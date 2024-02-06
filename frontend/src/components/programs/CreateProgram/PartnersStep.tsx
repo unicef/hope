@@ -34,9 +34,8 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
     'Provide info about Programme Partner and set Area Access',
   );
 
-  const addPartnerDisabled =
-    partnerChoices.every((choice) => choice.disabled) ||
-    values.partners.some((partner) => !partner.id);
+  const addPartnerDisabled = partnerChoices.every((choice) => choice.disabled)
+    || values.partners.some((partner) => !partner.id);
 
   let tooltipText = '';
   if (addPartnerDisabled) {
@@ -84,9 +83,7 @@ export const PartnersStep: React.FC<PartnersStepProps> = ({
                     disabled={addPartnerDisabled}
                     data-cy="button-add-partner"
                     title={tooltipText}
-                    onClick={() =>
-                      arrayHelpers.push({ id: '', areaAccess: 'BUSINESS_AREA' })
-                    }
+                    onClick={() => arrayHelpers.push({ id: '', areaAccess: 'BUSINESS_AREA' })}
                     variant="outlined"
                     color="primary"
                     endIcon={<AddIcon />}

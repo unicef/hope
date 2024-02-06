@@ -33,10 +33,10 @@ interface PaymentRecordDetailsProps {
   canViewActivityLog: boolean;
 }
 
-export const PaymentRecordDetails = ({
+export function PaymentRecordDetails({
   paymentRecord,
   canViewActivityLog,
-}: PaymentRecordDetailsProps): React.ReactElement => {
+}: PaymentRecordDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   let paymentVerification: PaymentVerificationNode = null;
@@ -203,11 +203,11 @@ export const PaymentRecordDetails = ({
           <Grid item xs={3}>
             <LabelizedField
               label={t('ENTITLEMENT CARD ISSUE DATE')}
-              value={
+              value={(
                 <UniversalMoment>
                   {paymentRecord.entitlementCardIssueDate}
                 </UniversalMoment>
-              }
+              )}
             />
           </Grid>
           <Grid item xs={3}>
@@ -223,4 +223,4 @@ export const PaymentRecordDetails = ({
       ) : null}
     </>
   );
-};
+}

@@ -30,8 +30,7 @@ export function validate(
           .filter((el) => el)
           .forEach((doc) => {
             if (!doc.country || !doc.type || !doc.number) {
-              errors.individualData =
-                'Document type, country and number are required';
+              errors.individualData = 'Document type, country and number are required';
             }
           });
       }
@@ -41,15 +40,15 @@ export function validate(
         errors.selectedHousehold = 'Household is Required';
       }
       if (
-        //xD
-        values.selectedHousehold &&
-        !values.householdDataUpdateFields?.[0]?.fieldName
+        // xD
+        values.selectedHousehold
+        && !values.householdDataUpdateFields?.[0]?.fieldName
       ) {
         errors.householdDataUpdateFields = 'Household Data Change is Required';
       }
       if (
-        values.householdDataUpdateFields?.length &&
-        values.householdDataUpdateFields?.[0]?.fieldName
+        values.householdDataUpdateFields?.length
+        && values.householdDataUpdateFields?.[0]?.fieldName
       ) {
         values.householdDataUpdateFields.forEach((el) => {
           if (el?.fieldName) {
@@ -57,8 +56,7 @@ export function validate(
             if (el.fieldValue === 0) {
               delete errors.householdDataUpdateFields;
             } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
-              errors.householdDataUpdateFields =
-                'Field and field value are required';
+              errors.householdDataUpdateFields = 'Field and field value are required';
             }
           }
         });
@@ -79,20 +77,19 @@ export function validate(
         errors.selectedIndividual = 'Individual is Required';
       }
       if (
-        values.selectedIndividual &&
-        !values.individualDataUpdateFields[0]?.fieldName &&
-        !values.individualDataUpdateFieldsDocuments?.length &&
-        !values.individualDataUpdateDocumentsToRemove?.length &&
-        !values.individualDataUpdateFieldsIdentities?.length &&
-        !values.individualDataUpdateIdentitiesToRemove?.length &&
-        !values.individualDataUpdateDocumentsToEdit?.length &&
-        !values.individualDataUpdateIdentitiesToEdit?.length &&
-        !values.individualDataUpdateFieldsPaymentChannels?.length &&
-        !values.individualDataUpdatePaymentChannelsToRemove?.length &&
-        !values.individualDataUpdatePaymentChannelsToEdit?.length
+        values.selectedIndividual
+        && !values.individualDataUpdateFields[0]?.fieldName
+        && !values.individualDataUpdateFieldsDocuments?.length
+        && !values.individualDataUpdateDocumentsToRemove?.length
+        && !values.individualDataUpdateFieldsIdentities?.length
+        && !values.individualDataUpdateIdentitiesToRemove?.length
+        && !values.individualDataUpdateDocumentsToEdit?.length
+        && !values.individualDataUpdateIdentitiesToEdit?.length
+        && !values.individualDataUpdateFieldsPaymentChannels?.length
+        && !values.individualDataUpdatePaymentChannelsToRemove?.length
+        && !values.individualDataUpdatePaymentChannelsToEdit?.length
       ) {
-        errors.individualDataUpdateFields =
-          'Individual Data Change is Required';
+        errors.individualDataUpdateFields = 'Individual Data Change is Required';
       }
       if (values.individualDataUpdateFields?.length) {
         values.individualDataUpdateFields.forEach((el) => {
@@ -102,11 +99,10 @@ export function validate(
               if (el.fieldValue === 0) {
                 delete errors.individualDataUpdateFields;
               } else if (
-                !el.fieldName ||
-                (isEmpty(el.fieldValue) && required)
+                !el.fieldName
+                || (isEmpty(el.fieldValue) && required)
               ) {
-                errors.individualDataUpdateFields =
-                  'Field and field value are required';
+                errors.individualDataUpdateFields = 'Field and field value are required';
               }
             }
           }
@@ -118,8 +114,7 @@ export function validate(
           .filter((el) => el)
           .forEach((doc) => {
             if (!doc.country || !doc.type || !doc.number) {
-              errors.individualDataUpdateFieldsDocuments =
-                'Document type, country and number are required';
+              errors.individualDataUpdateFieldsDocuments = 'Document type, country and number are required';
             }
           });
       }
@@ -128,8 +123,7 @@ export function validate(
           .filter((el) => el)
           .forEach((doc) => {
             if (!doc.country || !doc.type || !doc.number) {
-              errors.individualDataUpdateFieldsDocumentsToEdit =
-                'Document type, country and number are required';
+              errors.individualDataUpdateFieldsDocumentsToEdit = 'Document type, country and number are required';
             }
           });
       }
@@ -138,8 +132,7 @@ export function validate(
           .filter((el) => el)
           .forEach((doc) => {
             if (!doc.country || !doc.partner || !doc.number) {
-              errors.individualDataUpdateFieldsIdentities =
-                'Identity partner, country and number are required';
+              errors.individualDataUpdateFieldsIdentities = 'Identity partner, country and number are required';
             }
           });
       }
@@ -148,8 +141,7 @@ export function validate(
           .filter((el) => el)
           .forEach((doc) => {
             if (!doc.country || !doc.partner || !doc.number) {
-              errors.individualDataUpdateFieldsIdentitiesToEdit =
-                'Identity partner, country and number are required';
+              errors.individualDataUpdateFieldsIdentitiesToEdit = 'Identity partner, country and number are required';
             }
           });
       }
@@ -158,8 +150,7 @@ export function validate(
           .filter((el) => el)
           .forEach((doc) => {
             if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannelsToEdit =
-                'Bank name and bank account number are required';
+              errors.individualDataUpdateFieldsPaymentChannelsToEdit = 'Bank name and bank account number are required';
             }
           });
       }
@@ -168,17 +159,16 @@ export function validate(
           .filter((el) => el)
           .forEach((doc) => {
             if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannels =
-                'Bank name and bank account number are required';
+              errors.individualDataUpdateFieldsPaymentChannels = 'Bank name and bank account number are required';
             }
           });
       }
     }
   }
   if (
-    category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
+    category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE
+    || category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    || category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   ) {
     if (!issueType) {
       errors.issueType = 'Issue Type is required';
@@ -186,17 +176,17 @@ export function validate(
   }
 
   if (
-    category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+    category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    && issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
   ) {
     const individualDataErrors = {};
     const individualData = values.individualData || {};
     for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
       const fieldName = camelCase(field.name);
       if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
+        field.required
+        && (individualData[fieldName] === null
+          || individualData[fieldName] === undefined)
       ) {
         individualDataErrors[fieldName] = 'Field Required';
       }
@@ -220,8 +210,7 @@ export function validate(
       .filter((el) => el)
       .forEach((doc) => {
         if (!doc.name || !doc.file) {
-          errors.documentationToUpdate =
-            'Documentation name and file are required';
+          errors.documentationToUpdate = 'Documentation name and file are required';
         }
       });
   }
@@ -241,7 +230,7 @@ export function validateUsingSteps(
   const issueType = values.issueType?.toString();
   const errors: { [key: string]: string | { [key: string]: string } } = {};
 
-  //TODO: enable this when questionnaire verification is required
+  // TODO: enable this when questionnaire verification is required
   // const verficationStepFields = [
   //   'size',
   //   'maleChildrenCount',
@@ -274,16 +263,16 @@ export function validateUsingSteps(
         errors.selectedHousehold = 'Household is Required';
       }
       if (
-        //xD
-        values.selectedHousehold &&
-        !values.householdDataUpdateFields?.[0]?.fieldName &&
-        activeStep === GrievanceSteps.Description
+        // xD
+        values.selectedHousehold
+        && !values.householdDataUpdateFields?.[0]?.fieldName
+        && activeStep === GrievanceSteps.Description
       ) {
         errors.householdDataUpdateFields = 'Household Data Change is Required';
       }
       if (
-        values.householdDataUpdateFields?.length &&
-        values.householdDataUpdateFields?.[0]?.fieldName
+        values.householdDataUpdateFields?.length
+        && values.householdDataUpdateFields?.[0]?.fieldName
       ) {
         values.householdDataUpdateFields.forEach((el) => {
           if (el?.fieldName) {
@@ -291,8 +280,7 @@ export function validateUsingSteps(
             if (el.fieldValue === 0) {
               delete errors.householdDataUpdateFields;
             } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
-              errors.householdDataUpdateFields =
-                'Field and field value are required';
+              errors.householdDataUpdateFields = 'Field and field value are required';
             }
           }
         });
@@ -310,22 +298,21 @@ export function validateUsingSteps(
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
       if (
-        values.selectedIndividual &&
-        values.individualDataUpdateFields?.length &&
-        !values.individualDataUpdateFields[0]?.fieldName &&
-        !values.individualDataUpdateFieldsDocuments?.length &&
-        !values.individualDataUpdateDocumentsToRemove?.length &&
-        !values.individualDataUpdateFieldsIdentities?.length &&
-        !values.individualDataUpdateIdentitiesToRemove?.length &&
-        !values.individualDataUpdateDocumentsToEdit?.length &&
-        !values.individualDataUpdateIdentitiesToEdit?.length &&
-        !values.individualDataUpdateFieldsPaymentChannels?.length &&
-        !values.individualDataUpdatePaymentChannelsToRemove?.length &&
-        !values.individualDataUpdatePaymentChannelsToEdit?.length &&
-        activeStep === GrievanceSteps.Description
+        values.selectedIndividual
+        && values.individualDataUpdateFields?.length
+        && !values.individualDataUpdateFields[0]?.fieldName
+        && !values.individualDataUpdateFieldsDocuments?.length
+        && !values.individualDataUpdateDocumentsToRemove?.length
+        && !values.individualDataUpdateFieldsIdentities?.length
+        && !values.individualDataUpdateIdentitiesToRemove?.length
+        && !values.individualDataUpdateDocumentsToEdit?.length
+        && !values.individualDataUpdateIdentitiesToEdit?.length
+        && !values.individualDataUpdateFieldsPaymentChannels?.length
+        && !values.individualDataUpdatePaymentChannelsToRemove?.length
+        && !values.individualDataUpdatePaymentChannelsToEdit?.length
+        && activeStep === GrievanceSteps.Description
       ) {
-        errors.individualDataUpdateFields =
-          'Individual Data Change is Required';
+        errors.individualDataUpdateFields = 'Individual Data Change is Required';
       }
       if (values.individualDataUpdateFields?.length) {
         values.individualDataUpdateFields.forEach((el) => {
@@ -335,11 +322,10 @@ export function validateUsingSteps(
               if (el.fieldValue === 0) {
                 delete errors.individualDataUpdateFields;
               } else if (
-                !el.fieldName ||
-                (isEmpty(el.fieldValue) && required)
+                !el.fieldName
+                || (isEmpty(el.fieldValue) && required)
               ) {
-                errors.individualDataUpdateFields =
-                  'Field and field value are required';
+                errors.individualDataUpdateFields = 'Field and field value are required';
               }
             }
           }
@@ -350,8 +336,7 @@ export function validateUsingSteps(
         values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
           const doc = values.individualDataUpdateFieldsDocuments[index];
           if (!doc.country || !doc.key || !doc.number) {
-            errors.individualDataUpdateFieldsDocuments =
-              'Document type, country and number are required';
+            errors.individualDataUpdateFieldsDocuments = 'Document type, country and number are required';
           }
         });
       }
@@ -360,8 +345,7 @@ export function validateUsingSteps(
           (el, index) => {
             const doc = values.individualDataUpdateFieldsDocumentsToEdit[index];
             if (!doc.country || !doc.key || !doc.number) {
-              errors.individualDataUpdateFieldsDocumentsToEdit =
-                'Document type, country and number are required';
+              errors.individualDataUpdateFieldsDocumentsToEdit = 'Document type, country and number are required';
             }
           },
         );
@@ -371,20 +355,17 @@ export function validateUsingSteps(
           const doc = values.individualDataUpdateFieldsIdentities[index];
           const partner = doc.partner || doc.partner; // For backward compatibility
           if (!doc.country || !partner || !doc.number) {
-            errors.individualDataUpdateFieldsIdentities =
-              'Identity partner, country and number are required';
+            errors.individualDataUpdateFieldsIdentities = 'Identity partner, country and number are required';
           }
         });
       }
       if (values.individualDataUpdateFieldsIdentitiesToEdit?.length) {
         values.individualDataUpdateFieldsIdentitiesToEdit.forEach(
           (el, index) => {
-            const doc =
-              values.individualDataUpdateFieldsIdentitiesToEdit[index];
+            const doc = values.individualDataUpdateFieldsIdentitiesToEdit[index];
             const partner = doc.partner || doc.partner; // For backward compatibility
             if (!doc.country || !partner || !doc.number) {
-              errors.individualDataUpdateFieldsIdentitiesToEdit =
-                'Identity partner, country and number are required';
+              errors.individualDataUpdateFieldsIdentitiesToEdit = 'Identity partner, country and number are required';
             }
           },
         );
@@ -392,11 +373,9 @@ export function validateUsingSteps(
       if (values.individualDataUpdateFieldsPaymentChannelsToEdit?.length) {
         values.individualDataUpdateFieldsPaymentChannelsToEdit.forEach(
           (el, index) => {
-            const doc =
-              values.individualDataUpdateFieldsPaymentChannelsToEdit[index];
+            const doc = values.individualDataUpdateFieldsPaymentChannelsToEdit[index];
             if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannelsToEdit =
-                'Bank name and bank account number are required';
+              errors.individualDataUpdateFieldsPaymentChannelsToEdit = 'Bank name and bank account number are required';
             }
           },
         );
@@ -406,8 +385,7 @@ export function validateUsingSteps(
           (el, index) => {
             const doc = values.individualDataUpdateFieldsPaymentChannels[index];
             if (!doc.bankName || !doc.bankAccountNumber) {
-              errors.individualDataUpdateFieldsPaymentChannels =
-                'Bank name and bank account number are required';
+              errors.individualDataUpdateFieldsPaymentChannels = 'Bank name and bank account number are required';
             }
           },
         );
@@ -415,9 +393,9 @@ export function validateUsingSteps(
     }
   }
   if (
-    category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
+    category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE
+    || category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    || category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
   ) {
     if (!issueType) {
       errors.issueType = 'Issue Type is required';
@@ -425,9 +403,9 @@ export function validateUsingSteps(
   }
 
   if (
-    category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
-    activeStep === GrievanceSteps.Description
+    category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    && issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+    && activeStep === GrievanceSteps.Description
   ) {
     const individualDataErrors = {};
     const individualData = values.individualData || {};
@@ -435,9 +413,9 @@ export function validateUsingSteps(
     for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
       const fieldName = camelCase(field.name);
       if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
+        field.required
+        && (individualData[fieldName] === null
+          || individualData[fieldName] === undefined)
       ) {
         individualDataErrors[fieldName] = 'Field Required';
       }
@@ -450,8 +428,7 @@ export function validateUsingSteps(
       individualData.documents.forEach((_el, index) => {
         const doc = values.individualData.documents[index];
         if (!doc.country || !doc.key || !doc.number) {
-          errors.individualDataUpdateFieldsDocuments =
-            'Document type, country and number are required';
+          errors.individualDataUpdateFieldsDocuments = 'Document type, country and number are required';
         }
       });
     }
@@ -460,8 +437,7 @@ export function validateUsingSteps(
       individualData.identities.forEach((_el, index) => {
         const doc = values.individualData.identities[index];
         if (!doc.country || !doc.partner || !doc.number) {
-          errors.individualDataUpdateFieldsIdentities =
-            'Identity partner, country and number are required';
+          errors.individualDataUpdateFieldsIdentities = 'Identity partner, country and number are required';
         }
       });
     }
@@ -471,9 +447,9 @@ export function validateUsingSteps(
     GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT,
   ];
   if (
-    activeStep === GrievanceSteps.Lookup &&
-    !values.selectedHousehold &&
-    householdRequiredGrievanceTypes.includes(values.issueType)
+    activeStep === GrievanceSteps.Lookup
+    && !values.selectedHousehold
+    && householdRequiredGrievanceTypes.includes(values.issueType)
   ) {
     errors.selectedHousehold = 'Household is Required';
   }
@@ -499,13 +475,13 @@ export function validateUsingSteps(
     }
   }
   if (
-    activeStep === GrievanceSteps.Verification &&
-    (values.selectedHousehold ||
-      (values.selectedIndividual && !values.verificationRequired))
+    activeStep === GrievanceSteps.Verification
+    && (values.selectedHousehold
+      || (values.selectedIndividual && !values.verificationRequired))
   ) {
     // const MIN_SELECTED_ITEMS = 5;
     // const selectedItems = verficationStepFields.filter((item) => values[item]);
-    //TODO: enable this when questionnaire verification is required
+    // TODO: enable this when questionnaire verification is required
     // if (selectedItems.length < MIN_SELECTED_ITEMS) {
     //   setValidateData(true);
     //   errors.verificationRequired = 'Select correctly minimum 5 questions';
@@ -513,13 +489,13 @@ export function validateUsingSteps(
   }
   if (activeStep === GrievanceSteps.Description) {
     if (
-      values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT &&
-      !Object.keys(values.selectedPaymentRecords).length
+      values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT
+      && !Object.keys(values.selectedPaymentRecords).length
     ) {
       errors.selectedPaymentRecords = 'Payment Records are required';
     } else if (
-      values.issueType === GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT &&
-      !values.partner
+      values.issueType === GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT
+      && !values.partner
     ) {
       errors.partner = 'Partner is required';
     }

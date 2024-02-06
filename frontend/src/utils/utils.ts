@@ -219,8 +219,7 @@ export function registrationDataImportStatusToColor(
   }
 }
 
-export const registrationDataImportErasedColor = (): string =>
-  themeObj.palette.error.main;
+export const registrationDataImportErasedColor = (): string => themeObj.palette.error.main;
 
 export function targetPopulationStatusToColor(
   theme: typeof themeObj,
@@ -628,9 +627,9 @@ export function thingForSpecificGrievanceType(
   }
   const categoryThing = thingDict[category];
   if (
-    categoryWithIssueTypeDict[category] === 'IGNORE' ||
-    (!categoryWithIssueTypeDict[category] &&
-      (issueType === null || issueType === undefined))
+    categoryWithIssueTypeDict[category] === 'IGNORE'
+    || (!categoryWithIssueTypeDict[category]
+      && (issueType === null || issueType === undefined))
   ) {
     return categoryThing;
   }
@@ -640,21 +639,19 @@ export function thingForSpecificGrievanceType(
   return categoryThing[issueType];
 }
 
-export const isInvalid = (fieldname: string, errors, touched): boolean =>
-  errors[fieldname] && touched[fieldname];
+export const isInvalid = (fieldname: string, errors, touched): boolean => errors[fieldname] && touched[fieldname];
 
 export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
   if (!inputStr) return null;
   return shouldAnonymize
     ? inputStr
-        .split(' ')
-        .map((el) => el.substring(0, 2) + '*'.repeat(3))
-        .join(' ')
+      .split(' ')
+      .map((el) => el.substring(0, 2) + '*'.repeat(3))
+      .join(' ')
     : inputStr;
 };
 
-export const isPermissionDeniedError = (error): boolean =>
-  error?.message.includes('Permission Denied');
+export const isPermissionDeniedError = (error): boolean => error?.message.includes('Permission Denied');
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const getFullNodeFromEdgesById = (edges, id) => {
@@ -666,14 +663,11 @@ export const getFlexFieldTextValue = (_key, value, fieldAttribute): string => {
   let textValue = value;
   if (!fieldAttribute) return textValue;
   if (fieldAttribute.type === 'SELECT_ONE') {
-    textValue =
-      fieldAttribute.choices.find((item) => item.value === value)?.labelEn ||
-      value;
+    textValue = fieldAttribute.choices.find((item) => item.value === value)?.labelEn
+      || value;
   }
   if (fieldAttribute.type === 'SELECT_MANY') {
-    const values = fieldAttribute.choices.filter((item) =>
-      value.includes(item.value),
-    );
+    const values = fieldAttribute.choices.filter((item) => value.includes(item.value));
     textValue = values.map((item) => item.labelEn).join(', ');
   }
 
@@ -732,9 +726,7 @@ export const formatAge = (age): string | number => {
   return '<1';
 };
 
-export const renderIndividualName = (individual): string => {
-  return individual?.fullName;
-};
+export const renderIndividualName = (individual): string => individual?.fullName;
 
 export async function clearCache(apolloClient = null): Promise<void> {
   if (apolloClient) apolloClient.resetStore();
@@ -742,9 +734,7 @@ export async function clearCache(apolloClient = null): Promise<void> {
   await localForage.clear();
 }
 
-export const round = (value: number, decimals = 2): number => {
-  return Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
-};
+export const round = (value: number, decimals = 2): number => Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
 
 type Location = ReturnType<typeof useLocation>;
 type FilterValue = string | string[] | boolean | null | undefined;
@@ -763,8 +753,7 @@ export const getFilterFromQueryParams = (
         const values = value.split(',');
         filter[key] = [...existingValue, ...values];
       } else {
-        filter[key] =
-          value !== 'true' && value !== 'false' ? value : value === 'true';
+        filter[key] = value !== 'true' && value !== 'false' ? value : value === 'true';
       }
     }
   }
@@ -807,8 +796,7 @@ export const setFilterToQueryParams = (
           }
         });
       } else {
-        const paramValue =
-          typeof value === 'boolean' ? value.toString() : value;
+        const paramValue = typeof value === 'boolean' ? value.toString() : value;
         params.set(key, paramValue);
       }
     } else {
@@ -837,11 +825,10 @@ export const createHandleFilterChange = (
     onFilterChange(newFilter);
 
     const params = new URLSearchParams(location.search);
-    const isEmpty = (v: FilterValue): boolean =>
-      v === '' ||
-      v === null ||
-      v === undefined ||
-      (Array.isArray(v) && v.length === 0);
+    const isEmpty = (v: FilterValue): boolean => v === ''
+      || v === null
+      || v === undefined
+      || (Array.isArray(v) && v.length === 0);
 
     if (isEmpty(value)) {
       params.delete(key);
@@ -905,8 +892,7 @@ export const createHandleApplyFilterChange = (
             }
           });
         } else {
-          const paramValue =
-            typeof value === 'boolean' ? value.toString() : value;
+          const paramValue = typeof value === 'boolean' ? value.toString() : value;
           params.set(key, paramValue);
         }
       } else {
@@ -967,7 +953,7 @@ export const dateToIsoString = (date: Date, type: DateType): string => {
   throw new Error('Invalid type specified');
 };
 
-//autocompletes utils
+// autocompletes utils
 export const handleAutocompleteChange = (
   name,
   value,
@@ -1063,6 +1049,4 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const arraysHaveSameContent = (a: any[], b: any[]): boolean => {
-  return a.length === b.length && a.every((val, index) => val === b[index]);
-};
+export const arraysHaveSameContent = (a: any[], b: any[]): boolean => a.length === b.length && a.every((val, index) => val === b[index]);

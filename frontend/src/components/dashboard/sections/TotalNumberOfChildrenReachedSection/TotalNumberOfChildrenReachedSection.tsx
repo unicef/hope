@@ -15,9 +15,9 @@ interface TotalNumberOfChildrenReachedSectionProps {
   data: AllChartsQuery['sectionChildReached'];
 }
 
-export const TotalNumberOfChildrenReachedSection = ({
+export function TotalNumberOfChildrenReachedSection({
   data,
-}: TotalNumberOfChildrenReachedSectionProps): React.ReactElement => {
+}: TotalNumberOfChildrenReachedSectionProps): React.ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
   return (
@@ -35,4 +35,4 @@ export const TotalNumberOfChildrenReachedSection = ({
       </Grid>
     </DashboardCard>
   );
-};
+}

@@ -14,10 +14,10 @@ interface PaymentRecordTableProps {
   cashPlan: CashPlanNode;
   openInNewTab?: boolean;
 }
-export const PaymentRecordTable = ({
+export function PaymentRecordTable({
   cashPlan,
   openInNewTab = false,
-}: PaymentRecordTableProps): ReactElement => {
+}: PaymentRecordTableProps): ReactElement {
   const { t } = useTranslation();
   const initialVariables: AllPaymentRecordsQueryVariables = {
     parent: cashPlan.id,
@@ -27,7 +27,7 @@ export const PaymentRecordTable = ({
       title={t('Payment Records')}
       headCells={headCells}
       query={useAllPaymentRecordsQuery}
-      queriedObjectName='allPaymentRecords'
+      queriedObjectName="allPaymentRecords"
       initialVariables={initialVariables}
       renderRow={(row) => (
         <PaymentRecordTableRow
@@ -38,4 +38,4 @@ export const PaymentRecordTable = ({
       )}
     />
   );
-};
+}

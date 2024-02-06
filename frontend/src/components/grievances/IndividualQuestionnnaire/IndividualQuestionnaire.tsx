@@ -10,13 +10,12 @@ interface IndividualQuestionnaireProps {
   values;
 }
 
-export const IndividualQuestionnaire = ({
+export function IndividualQuestionnaire({
   values,
-}: IndividualQuestionnaireProps): React.ReactElement => {
+}: IndividualQuestionnaireProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-  const selectedIndividualData =
-    values.selectedIndividual || values.selectedHousehold.headOfHousehold;
+  const selectedIndividualData = values.selectedIndividual || values.selectedHousehold.headOfHousehold;
   return (
     <Grid container spacing={6}>
       {[
@@ -70,4 +69,4 @@ export const IndividualQuestionnaire = ({
       ))}
     </Grid>
   );
-};
+}

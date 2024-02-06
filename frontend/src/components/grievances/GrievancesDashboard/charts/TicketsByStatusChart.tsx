@@ -7,9 +7,9 @@ interface TicketsByStatusChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
 }
 
-export const TicketsByStatusChart = ({
+export function TicketsByStatusChart({
   data,
-}: TicketsByStatusChartProps): React.ReactElement => {
+}: TicketsByStatusChartProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -46,4 +46,4 @@ export const TicketsByStatusChart = ({
       <Doughnut data={chartData} options={options} />
     </Box>
   );
-};
+}

@@ -12,9 +12,9 @@ interface VerificationPlansSummaryProps {
   planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
-export const VerificationPlansSummary = ({
+export function VerificationPlansSummary({
   planNode,
-}: VerificationPlansSummaryProps): React.ReactElement => {
+}: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <Grid container>
@@ -74,4 +74,4 @@ export const VerificationPlansSummary = ({
       </Grid>
     </Grid>
   );
-};
+}

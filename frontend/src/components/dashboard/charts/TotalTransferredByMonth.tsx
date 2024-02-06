@@ -10,9 +10,9 @@ import { AllChartsQuery } from '../../../__generated__/graphql';
 interface TotalTransferredByMonthProps {
   data: AllChartsQuery['chartTotalTransferredByMonth'];
 }
-export const TotalTransferredByMonth = ({
+export function TotalTransferredByMonth({
   data,
-}: TotalTransferredByMonthProps): React.ReactElement => {
+}: TotalTransferredByMonthProps): React.ReactElement {
   if (!data) return null;
 
   const chartdata = {
@@ -62,8 +62,8 @@ export const TotalTransferredByMonth = ({
             tooltipData.datasets[tooltipItem.datasetIndex].label
           }: ${formatCurrencyWithSymbol(tooltipItem.yLabel)} (${getPercentage(
             tooltipItem.yLabel,
-            tooltipData.datasets[1].data[tooltipItem.index] +
-              tooltipData.datasets[2].data[tooltipItem.index],
+            tooltipData.datasets[1].data[tooltipItem.index]
+              + tooltipData.datasets[2].data[tooltipItem.index],
           )})`;
         },
       },
@@ -93,4 +93,4 @@ export const TotalTransferredByMonth = ({
   };
 
   return <Bar data={chartdata} options={options} />;
-};
+}

@@ -1,11 +1,9 @@
-import { Box } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
-import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../TextField';
 import {
   AllAdminAreasQuery,
   useAllAdminAreasQuery,
@@ -72,9 +70,7 @@ export function AdminAreaAutocompleteMultiple({
         onClose={() => {
           setOpen(false);
         }}
-        getOptionSelected={(option, value1) => {
-          return value1?.node?.id === option.node.id;
-        }}
+        getOptionSelected={(option, value1) => value1?.node?.id === option.node.id}
         getOptionLabel={(option) => {
           if (!option.node) {
             return '';
@@ -84,24 +80,22 @@ export function AdminAreaAutocompleteMultiple({
         disabled={disabled}
         options={get(data, 'allAdminAreas.edges', [])}
         loading={loading}
-        renderInput={(params) => {
-          return (
-            <TextField
-              {...params}
-              inputProps={{
-                ...params.inputProps,
-                value: inputValue,
-              }}
-              placeholder={
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            inputProps={{
+              ...params.inputProps,
+              value: inputValue,
+            }}
+            placeholder={
                 newValue.length > 0 ? null : t('Administrative Level 2')
               }
-              variant="outlined"
-              margin="dense"
-              value={inputValue}
-              onChange={(e) => setInputTextChange(e.target.value)}
-            />
-          );
-        }}
+            variant="outlined"
+            margin="dense"
+            value={inputValue}
+            onChange={(e) => setInputTextChange(e.target.value)}
+          />
+        )}
       />
     </Box>
   );

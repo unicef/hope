@@ -15,10 +15,10 @@ interface FeedbackDetailsToolbarProps {
   canEdit: boolean;
 }
 
-export const FeedbackDetailsToolbar = ({
+export function FeedbackDetailsToolbar({
   feedback,
   canEdit,
-}: FeedbackDetailsToolbarProps): React.ReactElement => {
+}: FeedbackDetailsToolbarProps): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
@@ -62,17 +62,15 @@ export const FeedbackDetailsToolbar = ({
         {!hasLinkedGrievance && (
           <Box mr={3}>
             <ButtonTooltip
-              onClick={() =>
-                history.push({
-                  pathname: `/${baseUrl}/grievance/new-ticket`,
-                  state: {
-                    selectedHousehold: feedback?.householdLookup,
-                    selectedIndividual: feedback?.individualLookup,
-                    linkedFeedbackId: id,
-                    isFeedbackWithHouseholdOnly,
-                  },
-                })
-              }
+              onClick={() => history.push({
+                pathname: `/${baseUrl}/grievance/new-ticket`,
+                state: {
+                  selectedHousehold: feedback?.householdLookup,
+                  selectedIndividual: feedback?.individualLookup,
+                  linkedFeedbackId: id,
+                  isFeedbackWithHouseholdOnly,
+                },
+              })}
               variant="contained"
               color="primary"
               data-cy="button-create-linked-ticket"
@@ -88,4 +86,4 @@ export const FeedbackDetailsToolbar = ({
       </Box>
     </PageHeader>
   );
-};
+}

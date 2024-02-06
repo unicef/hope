@@ -21,19 +21,18 @@ export interface LockPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const LockPaymentPlan = ({
+export function LockPaymentPlan({
   paymentPlan,
-}: LockPaymentPlanProps): React.ReactElement => {
+}: LockPaymentPlanProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
-  const { mutatePaymentPlanAction: lock, loading: loadingLock } =
-    usePaymentPlanAction(
-      Action.Lock,
-      paymentPlan.id,
-      () => showMessage(t('Payment Plan has been locked.')),
-      () => setLockDialogOpen(false),
-    );
+  const { mutatePaymentPlanAction: lock, loading: loadingLock } = usePaymentPlanAction(
+    Action.Lock,
+    paymentPlan.id,
+    () => showMessage(t('Payment Plan has been locked.')),
+    () => setLockDialogOpen(false),
+  );
 
   return (
     <>
@@ -67,14 +66,18 @@ export const LockPaymentPlan = ({
             {paymentPlan.paymentsConflictsCount > 0 && (
               <Box p={5}>
                 <GreyText>
-                  {t('Note:')}{' '}
+                  {t('Note:')}
+                  {' '}
                   {paymentPlan.paymentsConflictsCount === 1
                     ? t('There is')
-                    : t('There are')}{' '}
-                  {paymentPlan.paymentsConflictsCount}{' '}
+                    : t('There are')}
+                  {' '}
+                  {paymentPlan.paymentsConflictsCount}
+                  {' '}
                   {paymentPlan.paymentsConflictsCount === 1
                     ? t('household')
-                    : t('households')}{' '}
+                    : t('households')}
+                  {' '}
                   {t('that will be ignored in this Payment Plan.')}
                 </GreyText>
               </Box>
@@ -99,4 +102,4 @@ export const LockPaymentPlan = ({
       </Dialog>
     </>
   );
-};
+}

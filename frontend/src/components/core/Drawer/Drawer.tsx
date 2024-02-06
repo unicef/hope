@@ -130,12 +130,12 @@ interface Props {
   dataCy: string;
 }
 
-export const Drawer = ({
+export function Drawer({
   open,
   handleDrawerClose,
   currentLocation,
   dataCy,
-}: Props): React.ReactElement => {
+}: Props): React.ReactElement {
   const classes = useStyles({});
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
@@ -143,10 +143,10 @@ export const Drawer = ({
   const frontendVersion = useFrontendVersion();
   useEffect(() => {
     if (
-      !showMismatchedDialog &&
-      backendVersion &&
-      frontendVersion &&
-      backendVersion !== frontendVersion
+      !showMismatchedDialog
+      && backendVersion
+      && frontendVersion
+      && backendVersion !== frontendVersion
     ) {
       setShowMismatchedDialog(true);
     }
@@ -202,8 +202,14 @@ export const Drawer = ({
         ))}
         {open && (
           <div className={classes.version}>
-            <div>Backend Version: {backendVersion}</div>
-            <div>Frontend Version: {frontendVersion}</div>
+            <div>
+              Backend Version:
+              {backendVersion}
+            </div>
+            <div>
+              Frontend Version:
+              {frontendVersion}
+            </div>
           </div>
         )}
       </ToolbarScrollBox>
@@ -213,4 +219,4 @@ export const Drawer = ({
       />
     </DrawerMaterial>
   );
-};
+}

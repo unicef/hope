@@ -1,4 +1,6 @@
-import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
+import {
+  Box, FormControlLabel, Radio, RadioGroup,
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -17,7 +19,7 @@ const BoxWithBorderBottom = styled(Box)`
   padding: 15px 0;
 `;
 
-export const LookUpSelectionSurveys = ({
+export function LookUpSelectionSurveys({
   businessArea,
   onValueChange,
   setValues,
@@ -31,7 +33,7 @@ export const LookUpSelectionSurveys = ({
   values;
   selectedTab;
   setSelectedTab;
-}): React.ReactElement => {
+}): React.ReactElement {
   const location = useLocation();
   const initialFilterP = {
     search: '',
@@ -71,10 +73,9 @@ export const LookUpSelectionSurveys = ({
 
   const { t } = useTranslation();
 
-  const { data: choicesData, loading: choicesLoading } =
-    useProgrammeChoiceDataQuery({
-      variables: { businessArea },
-    });
+  const { data: choicesData, loading: choicesLoading } = useProgrammeChoiceDataQuery({
+    variables: { businessArea },
+  });
 
   const handleChange = (type: number, value: string): void => {
     setValues({
@@ -158,4 +159,4 @@ export const LookUpSelectionSurveys = ({
       />
     </Box>
   );
-};
+}

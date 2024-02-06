@@ -53,22 +53,22 @@ function TabPanel({
   const style = {};
   if (index !== value) {
     // eslint-disable-next-line dot-notation
-    style['display'] = 'none';
+    style.display = 'none';
   }
   return <div style={style}>{children}</div>;
 }
-export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
+export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const { businessArea } = useBaseUrl();
-  const { data, loading, error, stopPolling, startPolling } =
-    useRegistrationDataImportQuery({
-      variables: { id },
-      fetchPolicy: 'cache-and-network',
-    });
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+  const {
+    data, loading, error, stopPolling, startPolling,
+  } = useRegistrationDataImportQuery({
+    variables: { id },
+    fetchPolicy: 'cache-and-network',
+  });
+  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery();
 
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -97,14 +97,13 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
     return null;
   }
 
-  const isMerged =
-    RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
+  const isMerged = RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
 
-  const RegistrationContainer = ({
+  function RegistrationContainer({
     isErased,
   }: {
     isErased: boolean;
-  }): React.ReactElement => {
+  }): React.ReactElement {
     return (
       <Container>
         <RegistrationDetails registration={data.registrationDataImport} />
@@ -119,9 +118,7 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
               <TabsContainer>
                 <StyledTabs
                   value={selectedTab}
-                  onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
-                    setSelectedTab(newValue)
-                  }
+                  onChange={(event: React.ChangeEvent<{}>, newValue: number) => setSelectedTab(newValue)}
                   indicatorColor="primary"
                   textColor="primary"
                   variant="fullWidth"
@@ -154,7 +151,7 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
         )}
       </Container>
     );
-  };
+  }
 
   return (
     <div>
@@ -171,4 +168,4 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
       <RegistrationContainer isErased={data.registrationDataImport.erased} />
     </div>
   );
-};
+}

@@ -17,13 +17,13 @@ interface EditTargetPopulationProps {
   loading: boolean;
 }
 
-export const EditTargetPopulationHeader = ({
+export function EditTargetPopulationHeader({
   handleSubmit,
   values,
   baseUrl,
   targetPopulation,
   loading,
-}: EditTargetPopulationProps): React.ReactElement => {
+}: EditTargetPopulationProps): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
 
@@ -87,4 +87,4 @@ export const EditTargetPopulationHeader = ({
       </>
     </PageHeader>
   );
-};
+}

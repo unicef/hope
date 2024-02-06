@@ -37,14 +37,14 @@ export interface PaymentChannelsToEditTableProps {
   paymentChannel;
 }
 
-export const PaymentChannelsToEditTable = ({
+export function PaymentChannelsToEditTable({
   values,
   isEdit,
   ticket,
   setFieldValue,
   index,
   paymentChannel,
-}: PaymentChannelsToEditTableProps): React.ReactElement => {
+}: PaymentChannelsToEditTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedPaymentChannelsToEdit } = values;
   const handleSelectPaymentChannelToEdit = (paymentChannelIndex): void => {
@@ -158,4 +158,4 @@ export const PaymentChannelsToEditTable = ({
       </StyledTable>
     </>
   );
-};
+}

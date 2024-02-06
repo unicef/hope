@@ -8,6 +8,6 @@ const FieldBorderDiv = styled.div`
   border-left-style: solid;
 `;
 
-export const FieldBorder = ({ color, children }): React.ReactElement => {
+export function FieldBorder({ color, children }): React.ReactElement {
   return <FieldBorderDiv color={color}>{children}</FieldBorderDiv>;
-};
+}

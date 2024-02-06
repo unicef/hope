@@ -7,9 +7,9 @@ import { AllChartsQuery } from '../../../__generated__/graphql';
 interface GrievancesChartProps {
   data: AllChartsQuery['chartGrievances'];
 }
-export const GrievancesChart = ({
+export function GrievancesChart({
   data,
-}: GrievancesChartProps): React.ReactElement => {
+}: GrievancesChartProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -41,14 +41,12 @@ export const GrievancesChart = ({
     tooltips: {
       mode: 'point',
       callbacks: {
-        label: (tooltipItem, tooltipData) => {
-          return ` ${tooltipData.labels[tooltipItem.index]}: ${formatNumber(
-            tooltipData.datasets[0].data[tooltipItem.index],
-          )} (${getPercentage(
-            tooltipData.datasets[0].data[tooltipItem.index],
-            tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
-          )})`;
-        },
+        label: (tooltipItem, tooltipData) => ` ${tooltipData.labels[tooltipItem.index]}: ${formatNumber(
+          tooltipData.datasets[0].data[tooltipItem.index],
+        )} (${getPercentage(
+          tooltipData.datasets[0].data[tooltipItem.index],
+          tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
+        )})`,
       },
     },
   };
@@ -58,4 +56,4 @@ export const GrievancesChart = ({
       <Doughnut data={chartData} options={options} />
     </Box>
   );
-};
+}

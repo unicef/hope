@@ -7,7 +7,7 @@ describe('components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader', () => {
   it('should render', () => {
     const { container } = render(
       <EditSetUpFspHeader
-        businessArea='afghanistan'
+        businessArea="afghanistan"
         permissions={[PERMISSIONS.PM_VIEW_LIST]}
       />,
     );

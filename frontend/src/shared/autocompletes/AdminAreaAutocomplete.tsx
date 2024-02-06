@@ -1,5 +1,7 @@
 import { get } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllAdminAreasLazyQuery } from '../../__generated__/graphql';
@@ -14,7 +16,7 @@ import {
 } from '../../utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const AdminAreaAutocomplete = ({
+export function AdminAreaAutocomplete({
   disabled,
   name,
   filter,
@@ -34,7 +36,7 @@ export const AdminAreaAutocomplete = ({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
@@ -103,19 +105,13 @@ export const AdminAreaAutocomplete = ({
       }}
       handleOpen={() => setOpen(true)}
       open={open}
-      handleClose={(_, reason) =>
-        handleAutocompleteClose(setOpen, onInputTextChange, reason)
-      }
-      handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option?.node?.id, value1)
-      }
-      handleOptionLabel={(option) =>
-        getAutocompleteOptionLabel(option, allEdges, inputValue)
-      }
+      handleClose={(_, reason) => handleAutocompleteClose(setOpen, onInputTextChange, reason)}
+      handleOptionSelected={(option, value1) => handleOptionSelected(option?.node?.id, value1)}
+      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue)}
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
     />
   );
-};
+}

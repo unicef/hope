@@ -21,28 +21,27 @@ interface LookUpTargetPopulationFiltersCommunicationProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const LookUpTargetPopulationFiltersCommunication = ({
+export function LookUpTargetPopulationFiltersCommunication({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpTargetPopulationFiltersCommunicationProps): React.ReactElement => {
+}: LookUpTargetPopulationFiltersCommunicationProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -93,12 +92,10 @@ export const LookUpTargetPopulationFiltersCommunication = ({
             topLabel={t('Num. of Recipients')}
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
             placeholder={t('From')}
-            onChange={(e) =>
-              handleFilterChange(
-                'totalHouseholdsCountWithValidPhoneNoMin',
-                e.target.value,
-              )
-            }
+            onChange={(e) => handleFilterChange(
+              'totalHouseholdsCountWithValidPhoneNoMin',
+              e.target.value,
+            )}
             icon={<Group />}
             data-cy="filters-total-households-count-min"
           />
@@ -107,12 +104,10 @@ export const LookUpTargetPopulationFiltersCommunication = ({
           <NumberTextField
             value={filter.totalHouseholdsCountWithValidPhoneNoMax}
             placeholder={t('To')}
-            onChange={(e) =>
-              handleFilterChange(
-                'totalHouseholdsCountWithValidPhoneNoMax',
-                e.target.value,
-              )
-            }
+            onChange={(e) => handleFilterChange(
+              'totalHouseholdsCountWithValidPhoneNoMax',
+              e.target.value,
+            )}
             icon={<Group />}
             data-cy="filters-total-households-count-max"
           />
@@ -135,4 +130,4 @@ export const LookUpTargetPopulationFiltersCommunication = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

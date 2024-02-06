@@ -28,7 +28,7 @@ export interface EntriesTableProps {
   setFieldValue;
 }
 
-export const EntriesTable = ({
+export function EntriesTable({
   values,
   isEdit,
   fieldsDict,
@@ -36,14 +36,12 @@ export const EntriesTable = ({
   entries,
   entriesFlexFields,
   setFieldValue,
-}: EntriesTableProps): React.ReactElement => {
+}: EntriesTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedFlexFields } = values;
   const selectedBioData = values.selected;
-  const isSelected = (name: string): boolean =>
-    selectedBioData.includes(camelCase(name));
-  const isSelectedFlexfields = (name: string): boolean =>
-    selectedFlexFields.includes(name);
+  const isSelected = (name: string): boolean => selectedBioData.includes(camelCase(name));
+  const isSelectedFlexfields = (name: string): boolean => selectedFlexFields.includes(name);
   const handleSelectBioData = (name): void => {
     handleSelected(camelCase(name), 'selected', selectedBioData, setFieldValue);
   };
@@ -67,7 +65,8 @@ export const EntriesTable = ({
           <TableCell data-cy="table-cell-previous-current-value" align="left">
             {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
               ? t('Previous')
-              : t('Current')}{' '}
+              : t('Current')}
+            {' '}
             {t('Value')}
           </TableCell>
           <TableCell data-cy="table-cell-new-value" align="left">
@@ -76,29 +75,25 @@ export const EntriesTable = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) => {
-          return individualDataRow(
-            row,
-            isSelected,
-            index,
-            ticket,
-            fieldsDict,
-            isEdit,
-            handleSelectBioData,
-          );
-        })}
-        {entriesFlexFields.map((row, index) => {
-          return individualDataRow(
-            row,
-            isSelectedFlexfields,
-            index,
-            ticket,
-            fieldsDict,
-            isEdit,
-            handleFlexFields,
-          );
-        })}
+        {entries.map((row, index) => individualDataRow(
+          row,
+          isSelected,
+          index,
+          ticket,
+          fieldsDict,
+          isEdit,
+          handleSelectBioData,
+        ))}
+        {entriesFlexFields.map((row, index) => individualDataRow(
+          row,
+          isSelectedFlexfields,
+          index,
+          ticket,
+          fieldsDict,
+          isEdit,
+          handleFlexFields,
+        ))}
       </TableBody>
     </StyledTable>
   );
-};
+}

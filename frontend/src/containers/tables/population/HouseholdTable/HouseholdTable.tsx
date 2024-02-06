@@ -20,12 +20,12 @@ interface HouseholdTableProps {
   canViewDetails: boolean;
 }
 
-export const HouseholdTable = ({
+export function HouseholdTable({
   businessArea,
   filter,
   choicesData,
   canViewDetails,
-}: HouseholdTableProps): React.ReactElement => {
+}: HouseholdTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
@@ -59,7 +59,7 @@ export const HouseholdTable = ({
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllHouseholdsForPopulationTableQuery}
-        queriedObjectName='allHouseholds'
+        queriedObjectName="allHouseholds"
         initialVariables={initialVariables}
         allowSort={false}
         filterOrderBy={filter.orderBy}
@@ -74,4 +74,4 @@ export const HouseholdTable = ({
       />
     </TableWrapper>
   );
-};
+}

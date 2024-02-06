@@ -11,10 +11,10 @@ export interface GrievanceFlexFieldPhotoModalNewHouseholdProps {
   householdId: string;
 }
 
-export const GrievanceFlexFieldPhotoModalNewHousehold = ({
+export function GrievanceFlexFieldPhotoModalNewHousehold({
   flexField,
   householdId,
-}: GrievanceFlexFieldPhotoModalNewHouseholdProps): React.ReactElement => {
+}: GrievanceFlexFieldPhotoModalNewHouseholdProps): React.ReactElement {
   const { data } = useHouseholdFlexFieldsQuery({
     variables: { id: householdId },
     fetchPolicy: 'network-only',
@@ -38,4 +38,4 @@ export const GrievanceFlexFieldPhotoModalNewHousehold = ({
       )}
     </Box>
   );
-};
+}

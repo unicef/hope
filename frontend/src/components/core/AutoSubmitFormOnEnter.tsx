@@ -1,7 +1,7 @@
 import { useFormikContext } from 'formik';
 import React, { useEffect } from 'react';
 
-export const AutoSubmitFormOnEnter = (): React.ReactElement => {
+export function AutoSubmitFormOnEnter(): React.ReactElement {
   const { submitForm } = useFormikContext();
   useEffect(() => {
     const handleEnter = (e: KeyboardEvent): void => {
@@ -15,4 +15,4 @@ export const AutoSubmitFormOnEnter = (): React.ReactElement => {
     };
   }, [submitForm]);
   return <></>;
-};
+}

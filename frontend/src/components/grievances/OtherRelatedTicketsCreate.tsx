@@ -24,43 +24,42 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
     variables: {
       businessArea,
       household:
-        //TODO Janek to jeszcze kiedyś wymyśli
-        decodeIdString(values?.selectedHousehold?.id) ||
-        '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
-      //adding some random ID to get 0 results if there is no household id.
+        // TODO Janek to jeszcze kiedyś wymyśli
+        decodeIdString(values?.selectedHousehold?.id)
+        || '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
+      // adding some random ID to get 0 results if there is no household id.
     },
   });
   if (loading) return <LoadingComponent />;
   if (!data) return null;
 
   const existingTickets = data.existingGrievanceTickets.edges;
-  const renderIds = (tickets): React.ReactElement =>
-    tickets.length
-      ? tickets.map((edge) => {
-          const grievanceDetailsPath = getGrievanceDetailsPath(
-            edge.node.id,
-            edge.node.category,
-            baseUrl,
-          );
-          return (
-            <Box key={edge.node.id} mb={1}>
-              <ContentLink href={grievanceDetailsPath}>
-                {edge.node.unicefId}
-              </ContentLink>
-            </Box>
-          );
-        })
-      : '-';
+  const renderIds = (tickets): React.ReactElement => (tickets.length
+    ? tickets.map((edge) => {
+      const grievanceDetailsPath = getGrievanceDetailsPath(
+        edge.node.id,
+        edge.node.category,
+        baseUrl,
+      );
+      return (
+        <Box key={edge.node.id} mb={1}>
+          <ContentLink href={grievanceDetailsPath}>
+            {edge.node.unicefId}
+          </ContentLink>
+        </Box>
+      );
+    })
+    : '-');
 
   const openExistingTickets = existingTickets.length
     ? existingTickets.filter(
-        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
-      )
+      (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+    )
     : [];
   const closedExistingTickets = existingTickets.length
     ? existingTickets.filter(
-        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
-      )
+      (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+    )
     : [];
 
   return existingTickets.length ? (
@@ -79,7 +78,11 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
         {!show && closedExistingTickets.length ? (
           <Box mt={3}>
             <BlueBold onClick={() => setShow(true)}>
-              {t('SHOW CLOSED TICKETS')} ({closedExistingTickets.length})
+              {t('SHOW CLOSED TICKETS')}
+              {' '}
+              (
+              {closedExistingTickets.length}
+              )
             </BlueBold>
           </Box>
         ) : null}
@@ -97,7 +100,11 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
         )}
         {show && closedExistingTickets.length ? (
           <BlueBold onClick={() => setShow(false)}>
-            {t('HIDE CLOSED TICKETS')} ({closedExistingTickets.length})
+            {t('HIDE CLOSED TICKETS')}
+            {' '}
+            (
+            {closedExistingTickets.length}
+            )
           </BlueBold>
         ) : null}
       </Box>

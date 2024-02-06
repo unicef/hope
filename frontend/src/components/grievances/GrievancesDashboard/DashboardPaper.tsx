@@ -12,7 +12,9 @@ interface DashboardPaperProps {
 }
 const StyledPaper = styled(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ({ noMarginTop, extraPaddingLeft, color, ...props }) => <Paper {...props} />,
+  ({
+    noMarginTop, extraPaddingLeft, color, ...props
+  }) => <Paper {...props} />,
 )`
   padding: 18px 24px;
   padding-left: ${(props) => (props.extraPaddingLeft ? '46px' : '24px')}
@@ -23,14 +25,14 @@ const StyledPaper = styled(
     color: ${(props) => props.color || 'inherit'}
   }
 `;
-export const DashboardPaper = ({
+export function DashboardPaper({
   title,
   children,
   noMarginTop,
   extraPaddingLeft,
   extraPaddingTitle = true,
   color,
-}: DashboardPaperProps): React.ReactElement => {
+}: DashboardPaperProps): React.ReactElement {
   return (
     <StyledPaper
       noMarginTop={noMarginTop}
@@ -41,4 +43,4 @@ export const DashboardPaper = ({
       {children}
     </StyledPaper>
   );
-};
+}

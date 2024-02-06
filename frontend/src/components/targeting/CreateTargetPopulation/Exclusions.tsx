@@ -1,4 +1,6 @@
-import { Box, Button, Collapse, Grid, Typography } from '@mui/material';
+import {
+  Box, Button, Collapse, Grid, Typography,
+} from '@mui/material';
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import { Field } from 'formik';

@@ -37,7 +37,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export const GlobalProgramAutocomplete = ({
+export function GlobalProgramAutocomplete({
   disabled,
   fullWidth,
   onFilterChange,
@@ -49,7 +49,7 @@ export const GlobalProgramAutocomplete = ({
   onFilterChange;
   name?;
   value?;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
@@ -102,9 +102,7 @@ export const GlobalProgramAutocomplete = ({
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      getOptionSelected={(option, value1) => {
-        return value1?.node?.id === option.node.id;
-      }}
+      getOptionSelected={(option, value1) => value1?.node?.id === option.node.id}
       getOptionLabel={(option) => option.node.name}
       disabled={disabled}
       options={programsOptions}
@@ -132,4 +130,4 @@ export const GlobalProgramAutocomplete = ({
       )}
     />
   );
-};
+}

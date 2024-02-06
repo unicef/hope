@@ -59,7 +59,7 @@ export function TargetingCriteriaFilter({
         baseName={`filters[${index}]`}
       />
       {each.fieldName && (
-        <div data-cy='autocomplete-target-criteria-values'>
+        <div data-cy="autocomplete-target-criteria-values">
           <SubField field={each} index={index} baseName={`filters[${index}]`} />
         </div>
       )}

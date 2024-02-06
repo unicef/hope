@@ -19,21 +19,19 @@ export interface HeadCell<T> {
   disableSort?: boolean;
 }
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    visuallyHidden: {
-      border: 0,
-      clip: 'rect(0 0 0 0)',
-      height: 1,
-      margin: -1,
-      overflow: 'hidden',
-      padding: 0,
-      position: 'absolute',
-      top: 20,
-      width: 1,
-    },
-  }),
-);
+const useStyles = makeStyles(() => createStyles({
+  visuallyHidden: {
+    border: 0,
+    clip: 'rect(0 0 0 0)',
+    height: 1,
+    margin: -1,
+    overflow: 'hidden',
+    padding: 0,
+    position: 'absolute',
+    top: 20,
+    width: 1,
+  },
+}));
 
 const TableSortLabelStyled = styled(TableSortLabel)`
   & {
@@ -74,10 +72,9 @@ export function EnhancedTableHead<T>(
     numSelected = 0,
     data = [],
   } = props;
-  const createSortHandler =
-    (property: keyof T | string) => (event: React.MouseEvent<unknown>) => {
-      onRequestSort(event, property);
-    };
+  const createSortHandler = (property: keyof T | string) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, property);
+  };
   const classes = useStyles();
   return (
     <TableHead>

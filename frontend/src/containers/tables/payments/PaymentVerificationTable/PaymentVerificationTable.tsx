@@ -16,11 +16,11 @@ interface PaymentVerificationTableProps {
   businessArea: string;
   canViewDetails: boolean;
 }
-export const PaymentVerificationTable = ({
+export function PaymentVerificationTable({
   filter,
   canViewDetails,
   businessArea,
-}: PaymentVerificationTableProps): ReactElement => {
+}: PaymentVerificationTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
@@ -36,13 +36,13 @@ export const PaymentVerificationTable = ({
   };
   return (
     <UniversalTable<
-      CashPlanAndPaymentPlanNode,
-      AllCashPlansAndPaymentPlansQueryVariables
+    CashPlanAndPaymentPlanNode,
+    AllCashPlansAndPaymentPlansQueryVariables
     >
       title={t('List of Payment Plans')}
       headCells={headCells}
       query={useAllCashPlansAndPaymentPlansQuery}
-      queriedObjectName='allCashPlansAndPaymentPlans'
+      queriedObjectName="allCashPlansAndPaymentPlans"
       initialVariables={initialVariables}
       renderRow={(cashPlanAndPaymentPlanNode) => (
         <PaymentVerificationTableRow
@@ -53,4 +53,4 @@ export const PaymentVerificationTable = ({
       )}
     />
   );
-};
+}

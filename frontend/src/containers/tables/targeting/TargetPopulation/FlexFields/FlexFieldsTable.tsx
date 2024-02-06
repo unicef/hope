@@ -1,6 +1,8 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import { Table, TableBody, TableCell, TableRow } from '@mui/material';
+import {
+  Table, TableBody, TableCell, TableRow,
+} from '@mui/material';
 import { EnhancedTableHead } from '../../../../../components/core/Table/EnhancedTableHead';
 import { getComparator, stableSort } from '../../../../../utils/utils';
 import { AllFieldsAttributesQuery } from '../../../../../__generated__/graphql';
@@ -12,12 +14,12 @@ const StyledCell = styled(TableCell)`
 
 type Order = 'asc' | 'desc';
 
-export const FlexFieldsTable = ({
+export function FlexFieldsTable({
   fields,
   selectedOption,
   searchValue,
   selectedFieldType,
-}): ReactElement => {
+}): ReactElement {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('');
 
@@ -41,12 +43,12 @@ export const FlexFieldsTable = ({
       filteredByFieldType = fields.filter((el) => el.isFlexField === false);
     }
     return filteredByFieldType.filter((each) => {
-      //eslint-disable-next-line
+      // eslint-disable-next-line
       for (const key in filters) {
         if (
-          each[key] === undefined ||
-          (each[key] !== filters[key] &&
-            !each[key].toLowerCase().includes(filters[key].toLowerCase()))
+          each[key] === undefined
+          || (each[key] !== filters[key]
+            && !each[key].toLowerCase().includes(filters[key].toLowerCase()))
         ) {
           return false;
         }
@@ -55,9 +57,7 @@ export const FlexFieldsTable = ({
     });
   };
   type orderedType = () => AllFieldsAttributesQuery['allFieldsAttributes'];
-  const orderResults: orderedType = () => {
-    return stableSort(filterTable(), getComparator(order, orderBy));
-  };
+  const orderResults: orderedType = () => stableSort(filterTable(), getComparator(order, orderBy));
 
   return (
     <Table aria-label="simple table">
@@ -81,4 +81,4 @@ export const FlexFieldsTable = ({
       </TableBody>
     </Table>
   );
-};
+}

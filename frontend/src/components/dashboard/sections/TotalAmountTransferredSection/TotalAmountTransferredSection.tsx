@@ -15,9 +15,9 @@ import {
 interface TotalAmountTransferredSectionProps {
   data: AllChartsQuery['sectionTotalTransferred'];
 }
-export const TotalAmountTransferredSection = ({
+export function TotalAmountTransferredSection({
   data,
-}: TotalAmountTransferredSectionProps): React.ReactElement => {
+}: TotalAmountTransferredSectionProps): React.ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
   return (
@@ -42,4 +42,4 @@ export const TotalAmountTransferredSection = ({
       </Grid>
     </DashboardCard>
   );
-};
+}

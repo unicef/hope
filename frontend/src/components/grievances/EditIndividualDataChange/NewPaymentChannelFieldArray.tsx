@@ -22,48 +22,44 @@ export function NewPaymentChannelFieldArray({
     <Grid container spacing={3}>
       <FieldArray
         name="individualDataUpdateFieldsPaymentChannels"
-        render={(arrayHelpers) => {
-          return (
-            <>
-              {values.individualDataUpdateFieldsPaymentChannels?.map((item) => {
-                const existingOrNewId = item.node?.id || item.id;
-                return (
-                  <PaymentChannelField
-                    id={existingOrNewId}
-                    key={existingOrNewId}
-                    onDelete={() =>
-                      removeItemById(
-                        values.individualDataUpdateFieldsPaymentChannels,
-                        existingOrNewId,
-                        arrayHelpers,
-                      )
-                    }
-                    baseName="individualDataUpdateFieldsPaymentChannels"
-                    values={values}
-                  />
-                );
-              })}
-              <Grid item xs={8} />
-              <Grid item xs={12}>
-                <Button
-                  color="primary"
-                  onClick={() => {
-                    arrayHelpers.push({
-                      id: uuidv4(),
-                      bankName: null,
-                      bankAccountNumber: null,
-                      type: 'BANK_TRANSFER',
-                    });
-                  }}
-                  disabled={isEditTicket}
-                  startIcon={<AddCircleOutline />}
-                >
-                  {t('Add Payment Channel')}
-                </Button>
-              </Grid>
-            </>
-          );
-        }}
+        render={(arrayHelpers) => (
+          <>
+            {values.individualDataUpdateFieldsPaymentChannels?.map((item) => {
+              const existingOrNewId = item.node?.id || item.id;
+              return (
+                <PaymentChannelField
+                  id={existingOrNewId}
+                  key={existingOrNewId}
+                  onDelete={() => removeItemById(
+                    values.individualDataUpdateFieldsPaymentChannels,
+                    existingOrNewId,
+                    arrayHelpers,
+                  )}
+                  baseName="individualDataUpdateFieldsPaymentChannels"
+                  values={values}
+                />
+              );
+            })}
+            <Grid item xs={8} />
+            <Grid item xs={12}>
+              <Button
+                color="primary"
+                onClick={() => {
+                  arrayHelpers.push({
+                    id: uuidv4(),
+                    bankName: null,
+                    bankAccountNumber: null,
+                    type: 'BANK_TRANSFER',
+                  });
+                }}
+                disabled={isEditTicket}
+                startIcon={<AddCircleOutline />}
+              >
+                {t('Add Payment Channel')}
+              </Button>
+            </Grid>
+          </>
+        )}
       />
     </Grid>
   );

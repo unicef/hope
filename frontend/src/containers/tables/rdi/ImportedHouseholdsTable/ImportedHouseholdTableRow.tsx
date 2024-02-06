@@ -23,11 +23,11 @@ interface ImportedHouseholdTableRowProps {
   rdi;
 }
 
-export const ImportedHouseholdTableRow = ({
+export function ImportedHouseholdTableRow({
   isMerged,
   household,
   rdi,
-}: ImportedHouseholdTableRowProps): React.ReactElement => {
+}: ImportedHouseholdTableRowProps): React.ReactElement {
   const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const history = useHistory();
@@ -74,4 +74,4 @@ export const ImportedHouseholdTableRow = ({
       </TableCell>
     </ClickableTableRow>
   );
-};
+}

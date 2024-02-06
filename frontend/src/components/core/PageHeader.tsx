@@ -67,7 +67,7 @@ interface Props {
   handleBack?: () => void;
 }
 
-export const PageHeader = ({
+export function PageHeader({
   title,
   children,
   breadCrumbs = null,
@@ -75,7 +75,7 @@ export const PageHeader = ({
   hasInputComponent,
   flags,
   handleBack,
-}: Props): React.ReactElement => {
+}: Props): React.ReactElement {
   return (
     <Wrapper data-cy="page-header-container">
       <Container>
@@ -113,4 +113,4 @@ export const PageHeader = ({
       <TabsWrapper>{tabs}</TabsWrapper>
     </Wrapper>
   );
-};
+}

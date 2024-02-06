@@ -37,12 +37,11 @@ export function RegistrationIndividualVulnerabilities({
     '*',
   );
 
-  const getLabelOrDash = (choices, value): string =>
-    choices.find((item) => item.value === value)?.labelEn || '-';
+  const getLabelOrDash = (choices, value): string => choices.find((item) => item.value === value)?.labelEn || '-';
 
   const fields = Object.entries(individual.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
-      if (key in flexAttributesDict === false)
+      if (key in flexAttributesDict === false) {
         return (
           <Grid item xs={4} key={key}>
             <LabelizedField label={key} value={value}>
@@ -50,6 +49,7 @@ export function RegistrationIndividualVulnerabilities({
             </LabelizedField>
           </Grid>
         );
+      }
       const { type, choices } = flexAttributesDict[key];
       const label = key.replaceAll('_i_f', '').replace(/_/g, ' ');
       let newValue;

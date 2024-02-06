@@ -29,7 +29,7 @@ interface HouseholdFiltersProps {
   isOnPaper?: boolean;
 }
 
-export const HouseholdFilters = ({
+export function HouseholdFilters({
   filter,
   programs,
   choicesData,
@@ -38,21 +38,20 @@ export const HouseholdFilters = ({
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
-}: HouseholdFiltersProps): React.ReactElement => {
+}: HouseholdFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -118,9 +117,7 @@ export const HouseholdFilters = ({
         )}
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('residenceStatus', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('residenceStatus', e.target.value)}
             label={t('Residence Status')}
             fullWidth
             value={filter.residenceStatus}
@@ -153,9 +150,7 @@ export const HouseholdFilters = ({
             placeholder={t('From')}
             icon={<GroupIcon />}
             fullWidth
-            onChange={(e) =>
-              handleFilterChange('householdSizeMin', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('householdSizeMin', e.target.value)}
             data-cy="hh-filters-household-size-from"
           />
         </Grid>
@@ -165,9 +160,7 @@ export const HouseholdFilters = ({
             placeholder={t('To')}
             icon={<GroupIcon />}
             fullWidth
-            onChange={(e) =>
-              handleFilterChange('householdSizeMax', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('householdSizeMax', e.target.value)}
             data-cy="hh-filters-household-size-to"
           />
         </Grid>
@@ -207,9 +200,7 @@ export const HouseholdFilters = ({
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('programState', e.target.value)
-              }
+              onChange={(e) => handleFilterChange('programState', e.target.value)}
               label={t('Programme State')}
               value={filter.programState}
               fullWidth
@@ -224,4 +215,4 @@ export const HouseholdFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

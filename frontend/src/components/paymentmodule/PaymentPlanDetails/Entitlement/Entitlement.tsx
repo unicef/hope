@@ -93,10 +93,10 @@ interface EntitlementProps {
   permissions: string[];
 }
 
-export const Entitlement = ({
+export function Entitlement({
   paymentPlan,
   permissions,
-}: EntitlementProps): React.ReactElement => {
+}: EntitlementProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
@@ -115,15 +115,13 @@ export const Entitlement = ({
     ],
   };
 
-  const [setSteficonRule, { loading: loadingSetSteficonRule }] =
-    useSetSteficonRuleOnPpListMutation(options);
+  const [setSteficonRule, { loading: loadingSetSteficonRule }] = useSetSteficonRuleOnPpListMutation(options);
 
   const { data: steficonData, loading } = useAllSteficonRulesQuery({
     variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
     fetchPolicy: 'network-only',
   });
-  const [mutateExport, { loading: loadingExport }] =
-    useExportXlsxPpListMutation();
+  const [mutateExport, { loading: loadingExport }] = useExportXlsxPpListMutation();
 
   if (!steficonData) {
     return null;
@@ -137,20 +135,17 @@ export const Entitlement = ({
     permissions,
   );
 
-  const shouldDisableEntitlementSelect =
-    !canApplySteficonRule ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
-    !isActiveProgram;
+  const shouldDisableEntitlementSelect = !canApplySteficonRule
+    || paymentPlan.status !== PaymentPlanStatus.Locked
+    || !isActiveProgram;
 
-  const shouldDisableDownloadTemplate =
-    paymentPlan.status !== PaymentPlanStatus.Locked || !isActiveProgram;
+  const shouldDisableDownloadTemplate = paymentPlan.status !== PaymentPlanStatus.Locked || !isActiveProgram;
 
-  const shouldDisableExportXlsx =
-    loadingExport ||
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
-    paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting ||
-    !isActiveProgram;
+  const shouldDisableExportXlsx = loadingExport
+    || paymentPlan.status !== PaymentPlanStatus.Locked
+    || paymentPlan?.backgroundActionStatus
+      === PaymentPlanBackgroundActionStatus.XlsxExporting
+    || !isActiveProgram;
 
   return (
     <Box m={5}>
@@ -172,9 +167,7 @@ export const Entitlement = ({
                   value={steficonRuleValue}
                   data-cy="input-entitlement-formula"
                   labelWidth={180}
-                  onChange={(event) =>
-                    setSteficonRuleValue(event.target.value as string)
-                  }
+                  onChange={(event) => setSteficonRuleValue(event.target.value as string)}
                 >
                   {steficonData.allSteficonRules.edges.map((each, index) => (
                     <MenuItem
@@ -194,12 +187,12 @@ export const Entitlement = ({
                   variant="contained"
                   color="primary"
                   disabled={
-                    loadingSetSteficonRule ||
-                    !steficonRuleValue ||
-                    paymentPlan.status !== PaymentPlanStatus.Locked ||
-                    paymentPlan.backgroundActionStatus ===
-                      PaymentPlanBackgroundActionStatus.RuleEngineRun ||
-                    !isActiveProgram
+                    loadingSetSteficonRule
+                    || !steficonRuleValue
+                    || paymentPlan.status !== PaymentPlanStatus.Locked
+                    || paymentPlan.backgroundActionStatus
+                      === PaymentPlanBackgroundActionStatus.RuleEngineRun
+                    || !isActiveProgram
                   }
                   data-cy="button-apply-steficon"
                   onClick={async () => {
@@ -336,4 +329,4 @@ export const Entitlement = ({
       </ContainerColumnWithBorder>
     </Box>
   );
-};
+}

@@ -18,12 +18,12 @@ interface ReportingTableProps {
   choicesData: ReportChoiceDataQuery;
   meData: MeQuery;
 }
-export const ReportingTable = ({
+export function ReportingTable({
   businessArea,
   filter,
   choicesData,
   meData,
-}: ReportingTableProps): React.ReactElement => {
+}: ReportingTableProps): React.ReactElement {
   const initialVariables = {
     businessArea,
     createdFrom: dateToIsoString(filter.createdFrom, 'startOfDay'),
@@ -44,7 +44,7 @@ export const ReportingTable = ({
       <UniversalTable<ReportNode, AllReportsQueryVariables>
         headCells={headCells}
         query={useAllReportsQuery}
-        queriedObjectName='allReports'
+        queriedObjectName="allReports"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <ReportingTableRow
@@ -57,4 +57,4 @@ export const ReportingTable = ({
       />
     </TableWrapper>
   );
-};
+}

@@ -19,27 +19,26 @@ interface LookUpProgrammesFiltersSurveysProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const LookUpProgrammesFiltersSurveys = ({
+export function LookUpProgrammesFiltersSurveys({
   filter,
   choicesData,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpProgrammesFiltersSurveysProps): React.ReactElement => {
+}: LookUpProgrammesFiltersSurveysProps): React.ReactElement {
   const history = useHistory();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -71,25 +70,21 @@ export const LookUpProgrammesFiltersSurveys = ({
             value={filter.status}
             data-cy="filters-status"
           >
-            {choicesData.programStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.programStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
             label="Start Date"
             dataCy="filters-start-date"
-            onChange={(date) =>
-              handleFilterChange(
-                'startDate',
-                date ? moment(date).format('YYYY-MM-DD') : '',
-              )
-            }
+            onChange={(date) => handleFilterChange(
+              'startDate',
+              date ? moment(date).format('YYYY-MM-DD') : '',
+            )}
             value={filter.startDate}
           />
         </Grid>
@@ -97,12 +92,10 @@ export const LookUpProgrammesFiltersSurveys = ({
           <DatePickerFilter
             label="End Date"
             dataCy="filters-end-date"
-            onChange={(date) =>
-              handleFilterChange(
-                'endDate',
-                date ? moment(date).format('YYYY-MM-DD') : '',
-              )
-            }
+            onChange={(date) => handleFilterChange(
+              'endDate',
+              date ? moment(date).format('YYYY-MM-DD') : '',
+            )}
             value={filter.endDate}
           />
         </Grid>
@@ -114,13 +107,11 @@ export const LookUpProgrammesFiltersSurveys = ({
             value={filter.sector}
             multiple
           >
-            {choicesData.programSectorChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.programSectorChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
@@ -129,9 +120,7 @@ export const LookUpProgrammesFiltersSurveys = ({
             placeholder="From"
             data-cy="filters-number-of-households-min"
             value={filter.numberOfHouseholdsMin}
-            onChange={(e) =>
-              handleFilterChange('numberOfHouseholdsMin', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('numberOfHouseholdsMin', e.target.value)}
             icon={<GroupIcon />}
           />
         </Grid>
@@ -140,9 +129,7 @@ export const LookUpProgrammesFiltersSurveys = ({
             data-cy="filters-number-of-households-max"
             value={filter.numberOfHouseholdsMax}
             placeholder="To"
-            onChange={(e) =>
-              handleFilterChange('numberOfHouseholdsMax', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('numberOfHouseholdsMax', e.target.value)}
             icon={<GroupIcon />}
           />
         </Grid>
@@ -165,23 +152,19 @@ export const LookUpProgrammesFiltersSurveys = ({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('dataCollectingType', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('dataCollectingType', e.target.value)}
             label="Data Collecting Type"
             value={filter.dataCollectingType}
             data-cy="filters-data-collecting-type"
           >
-            {choicesData.dataCollectingTypeChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.dataCollectingTypeChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
       </Grid>
     </FiltersSection>
   );
-};
+}

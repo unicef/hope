@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+
 export const ApproveDeleteHouseholdDataChange = gql`
   mutation ApproveDeleteHouseholdDataChange(
     $grievanceTicketId: ID!

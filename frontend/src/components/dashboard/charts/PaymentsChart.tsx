@@ -7,9 +7,9 @@ import { AllChartsQuery } from '../../../__generated__/graphql';
 interface PaymentsChartProps {
   data: AllChartsQuery['chartPayment'];
 }
-export const PaymentsChart = ({
+export function PaymentsChart({
   data,
-}: PaymentsChartProps): React.ReactElement => {
+}: PaymentsChartProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -37,14 +37,12 @@ export const PaymentsChart = ({
     tooltips: {
       mode: 'point',
       callbacks: {
-        label: (tooltipItem, tooltipData) => {
-          return ` ${tooltipData.labels[tooltipItem.index]}: ${formatNumber(
-            tooltipData.datasets[0].data[tooltipItem.index],
-          )} (${getPercentage(
-            tooltipData.datasets[0].data[tooltipItem.index],
-            tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
-          )})`;
-        },
+        label: (tooltipItem, tooltipData) => ` ${tooltipData.labels[tooltipItem.index]}: ${formatNumber(
+          tooltipData.datasets[0].data[tooltipItem.index],
+        )} (${getPercentage(
+          tooltipData.datasets[0].data[tooltipItem.index],
+          tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
+        )})`,
       },
     },
   };
@@ -54,4 +52,4 @@ export const PaymentsChart = ({
       <Doughnut data={chartData} options={options} />
     </Box>
   );
-};
+}

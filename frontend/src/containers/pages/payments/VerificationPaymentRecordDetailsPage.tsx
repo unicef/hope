@@ -17,7 +17,7 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 
-export const VerificationPaymentRecordDetailsPage = (): React.ReactElement => {
+export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -35,29 +35,29 @@ export const VerificationPaymentRecordDetailsPage = (): React.ReactElement => {
   const { paymentRecord } = data;
   if (!paymentRecord || !choicesData || permissions === null) return null;
 
-  const {verificationPlans} = paymentRecord?.parent
-  const verificationPlansAmount = verificationPlans?.edges.length
-  const verification = verificationPlans.edges[verificationPlansAmount - 1].node
+  const { verificationPlans } = paymentRecord?.parent;
+  const verificationPlansAmount = verificationPlans?.edges.length;
+  const verification = verificationPlans.edges[verificationPlansAmount - 1].node;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
-          {
-            title: t('Payment Verification'),
-            to: `/${baseUrl}/payment-verification`,
-          },
-        ]
+        {
+          title: t('Payment Verification'),
+          to: `/${baseUrl}/payment-verification`,
+        },
+      ]
       : []),
     ...(hasPermissions(
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
       permissions,
     )
       ? [
-          {
-            title: `${t('Payment Plan')} ${paymentRecord.parent.unicefId}`,
-            to: `/${baseUrl}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
-          },
-        ]
+        {
+          title: `${t('Payment Plan')} ${paymentRecord.parent.unicefId}`,
+          to: `/${baseUrl}/payment-verification/cash-plan/${paymentRecord.parent.id}`,
+        },
+      ]
       : []),
   ];
 
@@ -66,14 +66,14 @@ export const VerificationPaymentRecordDetailsPage = (): React.ReactElement => {
       title={`${t('Payment Record ID')} ${paymentRecord.caId}`}
       breadCrumbs={breadCrumbsItems}
     >
-      {verification?.verificationChannel === 'MANUAL' &&
-      hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
-      verification?.status !== PaymentVerificationPlanStatus.Finished ? (
+      {verification?.verificationChannel === 'MANUAL'
+      && hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions)
+      && verification?.status !== PaymentVerificationPlanStatus.Finished ? (
         <VerifyManual
           paymentVerificationId={paymentRecord.verification.id}
           enabled={paymentRecord.verification.isManuallyEditable}
         />
-      ) : null}
+        ) : null}
     </PageHeader>
   );
   return (
@@ -89,4 +89,4 @@ export const VerificationPaymentRecordDetailsPage = (): React.ReactElement => {
       />
     </div>
   );
-};
+}

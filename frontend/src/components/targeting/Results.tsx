@@ -35,8 +35,7 @@ const SummaryBorder = styled.div`
 `;
 
 const SummaryValue = styled.div`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
   color: #253b46;
   font-size: 36px;
   line-height: 32px;

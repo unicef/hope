@@ -13,27 +13,25 @@ export interface CreateGrievanceStepperProps {
   steps: string[];
 }
 
-export const CreateGrievanceStepper = ({
+export function CreateGrievanceStepper({
   activeStep,
   steps,
-}: CreateGrievanceStepperProps): React.ReactElement => {
+}: CreateGrievanceStepperProps): React.ReactElement {
   return (
-    <>
-      <NoRootPadding>
-        <Stepper activeStep={activeStep}>
-          {steps.map((label) => {
-            const stepProps: { completed?: boolean } = {};
-            const labelProps: {
-              optional?: React.ReactNode;
-            } = {};
-            return (
-              <Step key={label} {...stepProps}>
-                <StepLabel {...labelProps}>{label}</StepLabel>
-              </Step>
-            );
-          })}
-        </Stepper>
-      </NoRootPadding>
-    </>
+    <NoRootPadding>
+      <Stepper activeStep={activeStep}>
+        {steps.map((label) => {
+          const stepProps: { completed?: boolean } = {};
+          const labelProps: {
+            optional?: React.ReactNode;
+          } = {};
+          return (
+            <Step key={label} {...stepProps}>
+              <StepLabel {...labelProps}>{label}</StepLabel>
+            </Step>
+          );
+        })}
+      </Stepper>
+    </NoRootPadding>
   );
-};
+}

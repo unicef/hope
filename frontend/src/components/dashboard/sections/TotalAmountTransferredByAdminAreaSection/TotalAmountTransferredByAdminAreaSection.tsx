@@ -12,11 +12,11 @@ interface TotalAmountTransferredSectionByAdminAreaSectionProps {
   filter;
   businessArea: string;
 }
-export const TotalAmountTransferredSectionByAdminAreaSection = ({
+export function TotalAmountTransferredSectionByAdminAreaSection({
   year,
   filter,
   businessArea,
-}: TotalAmountTransferredSectionByAdminAreaSectionProps): React.ReactElement => {
+}: TotalAmountTransferredSectionByAdminAreaSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const [orderBy, setOrderBy] = useState('totalCashTransferred');
   const [order, setOrder] = useState('desc');
@@ -86,4 +86,4 @@ export const TotalAmountTransferredSectionByAdminAreaSection = ({
       />
     </DashboardPaper>
   );
-};
+}

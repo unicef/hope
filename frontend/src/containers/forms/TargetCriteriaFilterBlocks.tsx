@@ -80,8 +80,7 @@ export function TargetCriteriaFilterBlocks({
   onDelete: () => void;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const shouldShowAndDivider =
-    blockIndex + 1 < values.individualsFiltersBlocks.length;
+  const shouldShowAndDivider = blockIndex + 1 < values.individualsFiltersBlocks.length;
   return (
     <div>
       Set Individual Criteria
@@ -93,9 +92,8 @@ export function TargetCriteriaFilterBlocks({
               {values.individualsFiltersBlocks[
                 blockIndex
               ].individualBlockFilters.map((each, index) => {
-                const shouldShowDivider =
-                  index + 1 <
-                  values.individualsFiltersBlocks[blockIndex]
+                const shouldShowDivider = index + 1
+                  < values.individualsFiltersBlocks[blockIndex]
                     .individualBlockFilters.length;
                 return (
                   <Fragment key={blockIndex + index.toString()}>
@@ -136,11 +134,9 @@ export function TargetCriteriaFilterBlocks({
                   color="primary"
                   variant="outlined"
                   startIcon={<AddCircleOutline />}
-                  onClick={() =>
-                    arrayHelpers.push({
-                      fieldName: '',
-                    })
-                  }
+                  onClick={() => arrayHelpers.push({
+                    fieldName: '',
+                  })}
                   style={{
                     position: 'relative',
                     top: 18,

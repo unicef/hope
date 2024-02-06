@@ -16,11 +16,11 @@ interface LookUpIndividualTableRowProps {
   selectedIndividual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
 }
 
-export const LookUpIndividualTableRow = ({
+export function LookUpIndividualTableRow({
   individual,
   radioChangeHandler,
   selectedIndividual,
-}: LookUpIndividualTableRowProps): React.ReactElement => {
+}: LookUpIndividualTableRowProps): React.ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
 
   return (
@@ -79,4 +79,4 @@ export const LookUpIndividualTableRow = ({
       )}
     </ClickableTableRow>
   );
-};
+}

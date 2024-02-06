@@ -9,15 +9,13 @@ import { removeIdPropertyFromObjects } from './helpers';
 export const selectedIssueType = (
   formValues,
   grievanceTicketIssueTypeChoices,
-): string => {
-  return formValues.issueType
-    ? grievanceTicketIssueTypeChoices
-        .filter((el) => el.category === formValues.category.toString())[0]
-        .subCategories.filter(
-          (el) => el.value === formValues.issueType.toString(),
-        )[0].name
-    : '-';
-};
+): string => (formValues.issueType
+  ? grievanceTicketIssueTypeChoices
+    .filter((el) => el.category === formValues.category.toString())[0]
+    .subCategories.filter(
+      (el) => el.value === formValues.issueType.toString(),
+    )[0].name
+  : '-');
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function preparePositiveFeedbackVariables(requiredVariables, values) {

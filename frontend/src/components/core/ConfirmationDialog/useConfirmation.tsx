@@ -7,9 +7,7 @@ import React, {
 } from 'react';
 import { ConfirmationDialog } from './ConfirmationDialog';
 
-
-const ConfirmationDialogContext = createContext<
-  (options: ConfirmationDialogOptions) => Promise<void>
+const ConfirmationDialogContext = createContext<(options: ConfirmationDialogOptions) => Promise<void>
 >(Promise.reject.bind(Promise));
 
 export interface ConfirmationDialogOptions {
@@ -27,18 +25,18 @@ export const useConfirmation = (): ((
 ) => Promise<void>) => useContext(ConfirmationDialogContext);
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const ConfirmationDialogProvider = ({
+export function ConfirmationDialogProvider({
   children,
 }: {
   children: ReactNode;
-}) => {
+}) {
   const [
     confirmationState,
     setConfirmationState,
   ] = useState<ConfirmationDialogOptions | null>(null);
 
   const awaitingPromiseRef = useRef<{
-    resolve: () => void;
+    resolve:() => void;
     reject: () => void;
   }>();
 
@@ -79,4 +77,4 @@ export const ConfirmationDialogProvider = ({
       />
     </ConfirmationDialogContext.Provider>
   );
-};
+}

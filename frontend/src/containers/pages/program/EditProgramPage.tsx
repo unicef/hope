@@ -1,4 +1,6 @@
-import { Box, Step, StepButton, Stepper } from '@mui/material';
+import {
+  Box, Step, StepButton, Stepper,
+} from '@mui/material';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +25,7 @@ import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 
-export const EditProgramPage = (): ReactElement => {
+export function EditProgramPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -38,8 +40,7 @@ export const EditProgramPage = (): ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
-    useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } = useUserPartnerChoicesQuery();
 
   const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
@@ -61,8 +62,7 @@ export const EditProgramPage = (): ReactElement => {
     },
   });
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
-    return <LoadingComponent />;
+  if (loadingProgram || treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
   if (!data || !treeData || !userPartnerChoicesData) return null;
   const {
     name,
@@ -128,10 +128,8 @@ export const EditProgramPage = (): ReactElement => {
       areaAccess: partner.areaAccess,
     })),
   };
-  initialValues.budget =
-    data.program.budget === '0.00' ? '' : data.program.budget;
-  initialValues.populationGoal =
-    data.program.populationGoal === 0 ? '' : data.program.populationGoal;
+  initialValues.budget = data.program.budget === '0.00' ? '' : data.program.budget;
+  initialValues.populationGoal = data.program.populationGoal === 0 ? '' : data.program.populationGoal;
 
   const stepFields = [
     [
@@ -161,7 +159,9 @@ export const EditProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm, values, validateForm, setFieldTouched,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -239,4 +239,4 @@ export const EditProgramPage = (): ReactElement => {
       }}
     </Formik>
   );
-};
+}

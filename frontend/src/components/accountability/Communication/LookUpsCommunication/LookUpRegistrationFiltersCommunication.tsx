@@ -19,26 +19,25 @@ interface LookUpRegistrationFiltersCommunicationProps {
   setAppliedFilter: (filter) => void;
 }
 
-export const LookUpRegistrationFiltersCommunication = ({
+export function LookUpRegistrationFiltersCommunication({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpRegistrationFiltersCommunicationProps): React.ReactElement => {
+}: LookUpRegistrationFiltersCommunicationProps): React.ReactElement {
   const history = useHistory();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -87,12 +86,10 @@ export const LookUpRegistrationFiltersCommunication = ({
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
             placeholder="From"
             icon={<GroupIcon />}
-            onChange={(e) =>
-              handleFilterChange(
-                'totalHouseholdsCountWithValidPhoneNoMin',
-                e.target.value,
-              )
-            }
+            onChange={(e) => handleFilterChange(
+              'totalHouseholdsCountWithValidPhoneNoMin',
+              e.target.value,
+            )}
             data-cy="filter-size-min"
           />
         </Grid>
@@ -101,12 +98,10 @@ export const LookUpRegistrationFiltersCommunication = ({
             value={filter.totalHouseholdsCountWithValidPhoneNoMax}
             placeholder="To"
             icon={<GroupIcon />}
-            onChange={(e) =>
-              handleFilterChange(
-                'totalHouseholdsCountWithValidPhoneNoMax',
-                e.target.value,
-              )
-            }
+            onChange={(e) => handleFilterChange(
+              'totalHouseholdsCountWithValidPhoneNoMax',
+              e.target.value,
+            )}
             data-cy="filter-size-max"
           />
         </Grid>
@@ -130,4 +125,4 @@ export const LookUpRegistrationFiltersCommunication = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

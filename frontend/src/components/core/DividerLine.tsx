@@ -13,10 +13,10 @@ const Divider = styled.div`
   width: 100%;
 `;
 
-export const DividerLine = (): React.ReactElement => {
+export function DividerLine(): React.ReactElement {
   return (
     <DividerContainer>
       <Divider />
     </DividerContainer>
   );
-};
+}

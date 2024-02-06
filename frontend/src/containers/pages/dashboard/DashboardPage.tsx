@@ -15,7 +15,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { DashboardYearPage } from './DashboardYearPage';
 
-export const DashboardPage = (): React.ReactElement => {
+export function DashboardPage(): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const permissions = usePermissions();
@@ -102,4 +102,4 @@ export const DashboardPage = (): React.ReactElement => {
       )}
     </>
   );
-};
+}

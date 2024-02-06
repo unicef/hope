@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
   appBarSpacer: theme.mixins.toolbar,
 }));
 
-export const BaseHomeRouter = ({ children }): React.ReactElement => {
+export function BaseHomeRouter({ children }): React.ReactElement {
   const [open, setOpen] = React.useState(true);
   const { businessArea } = useBaseUrl();
   const classes = useStyles({});
@@ -39,19 +39,17 @@ export const BaseHomeRouter = ({ children }): React.ReactElement => {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
-  const { data: businessAreaData, loading: businessAreaLoading } =
-    useAllBusinessAreasQuery({
-      variables: {
-        slug: businessArea,
-      },
-      fetchPolicy: 'cache-first',
-    });
+  const { data: businessAreaData, loading: businessAreaLoading } = useAllBusinessAreasQuery({
+    variables: {
+      slug: businessArea,
+    },
+    fetchPolicy: 'cache-first',
+  });
 
-  const { data: programsData, loading: programsLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, first: 100 },
-      fetchPolicy: 'cache-first',
-    });
+  const { data: programsData, loading: programsLoading } = useAllProgramsForChoicesQuery({
+    variables: { businessArea, first: 100 },
+    fetchPolicy: 'cache-first',
+  });
 
   if (!businessAreaData) {
     return null;
@@ -105,4 +103,4 @@ export const BaseHomeRouter = ({ children }): React.ReactElement => {
       )}
     </Root>
   );
-};
+}

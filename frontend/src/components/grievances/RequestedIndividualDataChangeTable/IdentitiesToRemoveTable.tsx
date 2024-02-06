@@ -34,7 +34,7 @@ export interface IdentitiesToRemoveTableProps {
   previousIdentities;
 }
 
-export const IdentitiesToRemoveTable = ({
+export function IdentitiesToRemoveTable({
   values,
   isEdit,
   ticket,
@@ -42,7 +42,7 @@ export const IdentitiesToRemoveTable = ({
   identitiesToRemove,
   previousIdentities,
   setFieldValue,
-}: IdentitiesToRemoveTableProps): React.ReactElement => {
+}: IdentitiesToRemoveTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedIdentitiesToRemove } = values;
   const identitiesTableHead = (
@@ -118,4 +118,4 @@ export const IdentitiesToRemoveTable = ({
       </StyledTable>
     </>
   );
-};
+}

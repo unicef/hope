@@ -94,13 +94,9 @@ export function HouseholdIndividualsTable({
   );
   if (orderBy) {
     if (orderDirection === 'asc') {
-      allIndividuals.sort((a, b) => {
-        return a[orderBy] < b[orderBy] ? 1 : -1;
-      });
+      allIndividuals.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
     } else {
-      allIndividuals.sort((a, b) => {
-        return a[orderBy] > b[orderBy] ? 1 : -1;
-      });
+      allIndividuals.sort((a, b) => (a[orderBy] > b[orderBy] ? 1 : -1));
     }
   }
 
@@ -113,39 +109,37 @@ export function HouseholdIndividualsTable({
         page * rowsPerPage + rowsPerPage,
       )}
       allowSort={false}
-      renderRow={(row) => {
-        return (
-          <ClickableTableRow
-            hover
-            onClick={() => handleClick(row)}
-            role="checkbox"
-            key={row.id}
-          >
-            <TableCell align="left">
-              <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
-                {row.unicefId}
-              </BlackLink>
-            </TableCell>
-            <TableCell align="left">{row.fullName}</TableCell>
-            <TableCell align="left">
-              <StatusBox
-                status={row.status}
-                statusToColor={populationStatusToColor}
-              />
-            </TableCell>
-            <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
-            <TableCell align="left">
-              {household?.id === row?.household?.id
-                ? relationshipChoicesDict[row.relationship]
-                : relationshipChoicesDict.NON_BENEFICIARY}
-            </TableCell>
-            <TableCell align="left">
-              <UniversalMoment>{row.birthDate}</UniversalMoment>
-            </TableCell>
-            <TableCell align="left">{sexToCapitalize(row.sex)}</TableCell>
-          </ClickableTableRow>
-        );
-      }}
+      renderRow={(row) => (
+        <ClickableTableRow
+          hover
+          onClick={() => handleClick(row)}
+          role="checkbox"
+          key={row.id}
+        >
+          <TableCell align="left">
+            <BlackLink to={`/${baseUrl}/population/individuals/${row.id}`}>
+              {row.unicefId}
+            </BlackLink>
+          </TableCell>
+          <TableCell align="left">{row.fullName}</TableCell>
+          <TableCell align="left">
+            <StatusBox
+              status={row.status}
+              statusToColor={populationStatusToColor}
+            />
+          </TableCell>
+          <TableCell align="left">{roleChoicesDict[row.role]}</TableCell>
+          <TableCell align="left">
+            {household?.id === row?.household?.id
+              ? relationshipChoicesDict[row.relationship]
+              : relationshipChoicesDict.NON_BENEFICIARY}
+          </TableCell>
+          <TableCell align="left">
+            <UniversalMoment>{row.birthDate}</UniversalMoment>
+          </TableCell>
+          <TableCell align="left">{sexToCapitalize(row.sex)}</TableCell>
+        </ClickableTableRow>
+      )}
       headCells={headCells}
       rowsPerPageOptions={totalCount < 5 ? [totalCount] : [5, 10, 15]}
       rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount}

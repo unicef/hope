@@ -48,19 +48,17 @@ export function IndividualVulnerabilities({
         );
       }
       if (
-        flexAttributesDict[key]?.type === 'SELECT_MANY' ||
-        flexAttributesDict[key]?.type === 'SELECT_ONE'
+        flexAttributesDict[key]?.type === 'SELECT_MANY'
+        || flexAttributesDict[key]?.type === 'SELECT_ONE'
       ) {
-        let newValue =
-          flexAttributesDict[key].choices.find((item) => item.value === value)
-            ?.labelEn || '-';
+        let newValue = flexAttributesDict[key].choices.find((item) => item.value === value)
+          ?.labelEn || '-';
         if (value instanceof Array) {
           newValue = value
             .map(
-              (choice) =>
-                flexAttributesDict[key].choices.find(
-                  (item) => item.value === choice,
-                )?.labelEn || '-',
+              (choice) => flexAttributesDict[key].choices.find(
+                (item) => item.value === choice,
+              )?.labelEn || '-',
             )
             .join(', ');
         }

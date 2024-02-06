@@ -19,10 +19,10 @@ interface SurveyDetailsProps {
   choicesData: SurveysChoiceDataQuery;
 }
 
-export const SurveyDetails = ({
+export function SurveyDetails({
   survey,
   choicesData,
-}: SurveyDetailsProps): React.ReactElement => {
+}: SurveyDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const {
@@ -96,4 +96,4 @@ export const SurveyDetails = ({
       </OverviewContainer>
     </ContainerColumnWithBorder>
   );
-};
+}

@@ -15,15 +15,13 @@ interface HouseholdQuestionnaireProps {
   values;
 }
 
-export const HouseholdQuestionnaire = ({
+export function HouseholdQuestionnaire({
   values,
-}: HouseholdQuestionnaireProps): React.ReactElement => {
+}: HouseholdQuestionnaireProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
-  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
-    values.selectedHousehold;
-  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
-    useHouseholdLazyQuery({ variables: { id: household?.id } });
+  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] = values.selectedHousehold;
+  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] = useHouseholdLazyQuery({ variables: { id: household?.id } });
 
   useEffect(() => {
     if (values.selectedHousehold) {
@@ -138,4 +136,4 @@ export const HouseholdQuestionnaire = ({
       ))}
     </Grid>
   );
-};
+}

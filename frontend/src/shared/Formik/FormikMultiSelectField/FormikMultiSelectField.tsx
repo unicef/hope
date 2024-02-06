@@ -46,13 +46,13 @@ function getStyles(value, comparedValue, theme): { fontWeight: number } {
   };
 }
 
-export const FormikMultiSelectField = ({
+export function FormikMultiSelectField({
   field,
   form,
   label,
   choices,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const classes = useStyles();
   const theme = useTheme();
 
@@ -99,4 +99,4 @@ export const FormikMultiSelectField = ({
       </Select>
     </FormControl>
   );
-};
+}

@@ -22,18 +22,17 @@ const Info = styled(InfoIcon)`
   margin-right: 10px;
 `;
 
-export const DeleteHouseholdGrievanceDetails = ({
+export function DeleteHouseholdGrievanceDetails({
   ticket,
   canApproveDataChange,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveDataChange: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
 
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery();
 
   if (choicesLoading) return <LoadingComponent />;
   if (!choicesData) return null;
@@ -49,8 +48,8 @@ export const DeleteHouseholdGrievanceDetails = ({
       <Title>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">{t('Household to be withdrawn')}</Typography>
-          {approveStatus &&
-            ticket.deleteHouseholdTicketDetails.reasonHousehold && (
+          {approveStatus
+            && ticket.deleteHouseholdTicketDetails.reasonHousehold && (
               <Box display="flex" alignItems="center">
                 <Info />
                 <Box mr={2}>
@@ -80,7 +79,7 @@ export const DeleteHouseholdGrievanceDetails = ({
                   />
                 )}
               </Box>
-            )}
+          )}
           {canApproveDataChange && (
             <ApproveDeleteHouseholdGrievanceDetails
               type="button"
@@ -155,4 +154,4 @@ export const DeleteHouseholdGrievanceDetails = ({
       </Grid>
     </ApproveBox>
   );
-};
+}

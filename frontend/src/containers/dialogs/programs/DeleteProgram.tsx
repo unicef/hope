@@ -1,4 +1,6 @@
-import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Button, Dialog, DialogContent, DialogTitle,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,9 +41,9 @@ interface DeleteProgramProps {
   program: ProgramQuery['program'];
 }
 
-export const DeleteProgram = ({
+export function DeleteProgram({
   program,
-}: DeleteProgramProps): React.ReactElement => {
+}: DeleteProgramProps): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -114,4 +116,4 @@ export const DeleteProgram = ({
       </MidDialog>
     </span>
   );
-};
+}

@@ -40,7 +40,7 @@ interface GrievancesTableRowProps {
   initialVariables;
 }
 
-export const GrievancesTableRow = ({
+export function GrievancesTableRow({
   ticket,
   statusChoices,
   categoryChoices,
@@ -53,7 +53,7 @@ export const GrievancesTableRow = ({
   optionsData,
   setInputValue,
   initialVariables,
-}: GrievancesTableRowProps): React.ReactElement => {
+}: GrievancesTableRowProps): React.ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const { showMessage } = useSnackbar();
@@ -64,9 +64,9 @@ export const GrievancesTableRow = ({
   );
   const issueType = ticket.issueType
     ? issueTypeChoicesData
-        .find((el) => el.category === ticket.category.toString())
-        .subCategories.find((el) => el.value === ticket.issueType.toString())
-        .name
+      .find((el) => el.category === ticket.category.toString())
+      .subCategories.find((el) => el.value === ticket.issueType.toString())
+      .name
     : '-';
 
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
@@ -213,4 +213,4 @@ export const GrievancesTableRow = ({
       {isAllPrograms && <TableCell align="left">{mappedPrograms}</TableCell>}
     </ClickableTableRow>
   );
-};
+}

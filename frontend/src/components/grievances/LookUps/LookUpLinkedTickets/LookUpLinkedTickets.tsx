@@ -5,7 +5,7 @@ import { LookUpButton } from '../../LookUpButton';
 import { LookUpLinkedTicketsDisplay } from './LookUpLinkedTicketsDisplay';
 import { LookUpLinkedTicketsModal } from './LookUpLinkedTicketsModal';
 
-export const LookUpLinkedTickets = ({
+export function LookUpLinkedTickets({
   onValueChange,
   values,
   disabled,
@@ -13,7 +13,7 @@ export const LookUpLinkedTickets = ({
   onValueChange;
   values;
   disabled?;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
@@ -43,4 +43,4 @@ export const LookUpLinkedTickets = ({
       />
     </>
   );
-};
+}

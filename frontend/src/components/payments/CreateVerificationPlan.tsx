@@ -80,29 +80,29 @@ function prepareVariables(
       fullListArguments:
         selectedTab === 0
           ? {
-              excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
+            excludedAdminAreas: values.excludedAdminAreasFull || [],
+          }
           : null,
       verificationChannel: values.verificationChannel,
       rapidProArguments:
         values.verificationChannel === 'RAPIDPRO'
           ? {
-              flowId: values.rapidProFlow,
-            }
+            flowId: values.rapidProFlow,
+          }
           : null,
       randomSamplingArguments:
         selectedTab === 1
           ? {
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              excludedAdminAreas: values.adminCheckbox
-                ? values.excludedAdminAreasRandom
-                : [],
-              age: values.ageCheckbox
-                ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
+            confidenceInterval: values.confidenceInterval * 0.01,
+            marginOfError: values.marginOfError * 0.01,
+            excludedAdminAreas: values.adminCheckbox
+              ? values.excludedAdminAreasRandom
+              : [],
+            age: values.ageCheckbox
+              ? { min: values.filterAgeMin, max: values.filterAgeMax }
+              : null,
+            sex: values.sexCheckbox ? values.filterSex : null,
+          }
           : null,
       businessAreaSlug: businessArea,
     },
@@ -131,12 +131,11 @@ export function CreateVerificationPlan({
   const { isActiveProgram } = useProgramContext();
   const [formValues, setFormValues] = useState(initialValues);
 
-  const [loadRapidProFlows, { data: rapidProFlows }] =
-    useAllRapidProFlowsLazyQuery({
-      variables: {
-        businessAreaSlug: businessArea,
-      },
-    });
+  const [loadRapidProFlows, { data: rapidProFlows }] = useAllRapidProFlowsLazyQuery({
+    variables: {
+      businessAreaSlug: businessArea,
+    },
+  });
   const { data } = useAllAdminAreasQuery({
     variables: {
       first: 100,
@@ -158,8 +157,8 @@ export function CreateVerificationPlan({
     if (open) {
       loadSampleSize();
       if (
-        formValues.verificationChannel ===
-        PaymentVerificationPlanVerificationChannel.Rapidpro
+        formValues.verificationChannel
+        === PaymentVerificationPlanVerificationChannel.Rapidpro
       ) {
         loadRapidProFlows();
       }
@@ -194,21 +193,19 @@ export function CreateVerificationPlan({
 
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
     ? data.allAdminAreas.edges.map((el) => ({
-        value: el.node.id,
-        name: el.node.name,
-      }))
+      value: el.node.id,
+      name: el.node.name,
+    }))
     : [];
 
   const handleFormChange = (values): void => {
     setFormValues(values);
   };
 
-  const getSampleSizePercentage = (): string => {
-    return `(${getPercentage(
-      sampleSizesData?.sampleSize?.sampleSize,
-      sampleSizesData?.sampleSize?.paymentRecordCount,
-    )})`;
-  };
+  const getSampleSizePercentage = (): string => `(${getPercentage(
+    sampleSizesData?.sampleSize?.sampleSize,
+    sampleSizesData?.sampleSize?.paymentRecordCount,
+  )})`;
 
   const getTooltipTitle = (): string => {
     if (!canCreatePaymentVerificationPlan) {
@@ -225,10 +222,10 @@ export function CreateVerificationPlan({
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => {
-        //Redirect to error page if no flows available
+        // Redirect to error page if no flows available
         if (
-          !rapidProFlows?.allRapidProFlows?.length &&
-          values.verificationChannel === 'RAPIDPRO'
+          !rapidProFlows?.allRapidProFlows?.length
+          && values.verificationChannel === 'RAPIDPRO'
         ) {
           history.push(`/error/${businessArea}`, {
             errorMessage: t(
@@ -308,8 +305,14 @@ export function CreateVerificationPlan({
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
+                        Sample size:
+                        {' '}
+                        {sampleSizesData?.sampleSize?.sampleSize}
+                        {' '}
+                        out of
+                        {' '}
+                        {sampleSizesData?.sampleSize?.paymentRecordCount}
+                        {' '}
                         {getSampleSizePercentage()}
                       </Box>
                       <Box fontSize={12} color="#797979">
@@ -442,8 +445,13 @@ export function CreateVerificationPlan({
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}
+                        Sample size:
+                        {' '}
+                        {sampleSizesData?.sampleSize?.sampleSize}
+                        {' '}
+                        out of
+                        {' '}
+                        {sampleSizesData?.sampleSize?.paymentRecordCount}
                         {getSampleSizePercentage()}
                       </Box>
                       <Field
@@ -465,9 +473,9 @@ export function CreateVerificationPlan({
                           choices={
                             rapidProFlows
                               ? rapidProFlows.allRapidProFlows.map((flow) => ({
-                                  value: flow.id,
-                                  name: flow.name,
-                                }))
+                                value: flow.id,
+                                name: flow.name,
+                              }))
                               : []
                           }
                           component={FormikSelectField}

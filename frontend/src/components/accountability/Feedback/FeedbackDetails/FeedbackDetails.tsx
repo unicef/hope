@@ -20,11 +20,11 @@ interface FeedbackDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export const FeedbackDetails = ({
+export function FeedbackDetails({
   feedback,
   canViewHouseholdDetails,
   canViewIndividualDetails,
-}: FeedbackDetailsProps): React.ReactElement => {
+}: FeedbackDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
 
@@ -57,21 +57,21 @@ export const FeedbackDetails = ({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {feedback.householdLookup?.id &&
-                    canViewHouseholdDetails &&
-                    !isAllPrograms ? (
+                    {feedback.householdLookup?.id
+                    && canViewHouseholdDetails
+                    && !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/household/${feedback.householdLookup?.id}`}
                       >
                         {feedback.householdLookup?.unicefId}
                       </BlackLink>
-                    ) : (
-                      <div>
-                        {feedback.householdLookup?.id
-                          ? feedback.householdLookup?.unicefId
-                          : '-'}
-                      </div>
-                    )}
+                      ) : (
+                        <div>
+                          {feedback.householdLookup?.id
+                            ? feedback.householdLookup?.unicefId
+                            : '-'}
+                        </div>
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -80,21 +80,21 @@ export const FeedbackDetails = ({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {feedback.individualLookup?.id &&
-                    canViewIndividualDetails &&
-                    !isAllPrograms ? (
+                    {feedback.individualLookup?.id
+                    && canViewIndividualDetails
+                    && !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/individuals/${feedback.individualLookup?.id}`}
                       >
                         {feedback.individualLookup?.unicefId}
                       </BlackLink>
-                    ) : (
-                      <div>
-                        {feedback.individualLookup?.id
-                          ? feedback.individualLookup?.unicefId
-                          : '-'}
-                      </div>
-                    )}
+                      ) : (
+                        <div>
+                          {feedback.individualLookup?.id
+                            ? feedback.individualLookup?.unicefId
+                            : '-'}
+                        </div>
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -168,4 +168,4 @@ export const FeedbackDetails = ({
       </ContainerColumnWithBorder>
     </Grid>
   );
-};
+}

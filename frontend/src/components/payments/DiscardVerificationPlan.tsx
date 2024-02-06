@@ -1,4 +1,6 @@
-import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import {
+  Box, Button, DialogContent, DialogTitle,
+} from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -66,7 +68,9 @@ export function DiscardVerificationPlan({
                 {t(
                   'Are you sure you would like to remove payment verification records',
                 )}
-                <br /> {t('and restart the verification process?')}
+                <br />
+                {' '}
+                {t('and restart the verification process?')}
               </div>
             </Box>
           </DialogContainer>

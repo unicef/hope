@@ -1,4 +1,6 @@
-import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
+import {
+  Box, Button, DialogContent, DialogTitle, Grid,
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -25,8 +27,7 @@ export function VerifyManual({
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate, { error }] =
-    useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
+  const [mutate, { error }] = useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
 
   const submit = async (values): Promise<void> => {
     try {

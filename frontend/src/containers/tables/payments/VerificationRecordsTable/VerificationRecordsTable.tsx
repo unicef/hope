@@ -16,12 +16,12 @@ interface VerificationRecordsTableProps {
   businessArea: string;
 }
 
-export const VerificationRecordsTable = ({
+export function VerificationRecordsTable({
   paymentPlanId,
   filter,
   canViewRecordDetails,
   businessArea,
-}: VerificationRecordsTableProps): ReactElement => {
+}: VerificationRecordsTableProps): ReactElement {
   const { t } = useTranslation();
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
@@ -32,13 +32,13 @@ export const VerificationRecordsTable = ({
 
   return (
     <UniversalTable<
-      PaymentVerificationNode,
-      AllPaymentVerificationsQueryVariables
+    PaymentVerificationNode,
+    AllPaymentVerificationsQueryVariables
     >
       title={t('Verification Records')}
       headCells={headCells}
       query={useAllPaymentVerificationsQuery}
-      queriedObjectName='allPaymentVerifications'
+      queriedObjectName="allPaymentVerifications"
       initialVariables={initialVariables}
       renderRow={(paymentVerification) => (
         <VerificationRecordsTableRow
@@ -49,4 +49,4 @@ export const VerificationRecordsTable = ({
       )}
     />
   );
-};
+}

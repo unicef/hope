@@ -58,9 +58,9 @@ const StyledPaper = styled(Paper)`
   border-left: 4px solid ${({ color }) => color};
   padding: 20px 24px;
 `;
-export const DashboardCard = ({
+export function DashboardCard({
   color,
   children,
-}: DashboardCardProps): React.ReactElement => {
+}: DashboardCardProps): React.ReactElement {
   return <StyledPaper color={color}>{children}</StyledPaper>;
-};
+}

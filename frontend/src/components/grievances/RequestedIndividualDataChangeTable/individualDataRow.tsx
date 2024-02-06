@@ -37,20 +37,17 @@ export const individualDataRow = (
   const individualValue = field.isFlexField
     ? ticket.individualDataUpdateTicketDetails?.individual?.flexFields[row[0]]
     : ticket.individualDataUpdateTicketDetails?.individual[
-        camelCase(fieldName)
-      ];
-  const currentValue =
-    ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
-      ? valueDetails.previousValue
-      : individualValue;
+      camelCase(fieldName)
+    ];
+  const currentValue = ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+    ? valueDetails.previousValue
+    : individualValue;
   return (
     <TableRow role="checkbox" aria-checked={isItemSelected} key={fieldName}>
       <TableCell>
         {isEdit ? (
           <Checkbox
-            onChange={(event) =>
-              handleSelectBioData(row[0], event.target.checked)
-            }
+            onChange={(event) => handleSelectBioData(row[0], event.target.checked)}
             color="primary"
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             checked={isItemSelected}

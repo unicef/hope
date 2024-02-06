@@ -43,7 +43,7 @@ const StyledMenuItem = withStyles((theme) => ({
   },
 }))(MenuItem);
 
-export const CreateSurveyMenu = (): React.ReactElement => {
+export function CreateSurveyMenu(): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
@@ -132,4 +132,4 @@ export const CreateSurveyMenu = (): React.ReactElement => {
       </StyledMenu>
     </>
   );
-};
+}

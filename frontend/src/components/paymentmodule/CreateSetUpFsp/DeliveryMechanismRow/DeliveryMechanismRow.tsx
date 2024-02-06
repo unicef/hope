@@ -15,13 +15,13 @@ interface DeliveryMechanismRowProps {
   permissions: string[];
 }
 
-export const DeliveryMechanismRow = ({
+export function DeliveryMechanismRow({
   index,
   step,
   values,
   deliveryMechanismsChoices,
   fspsChoices,
-}: DeliveryMechanismRowProps): React.ReactElement => {
+}: DeliveryMechanismRowProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <Box flexDirection="column">
@@ -76,4 +76,4 @@ export const DeliveryMechanismRow = ({
       </Grid>
     </Box>
   );
-};
+}

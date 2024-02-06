@@ -37,9 +37,9 @@ function filtersToVariables(filters) {
   }
 
   if (
-    filters.search !== '' &&
-    filters.search !== null &&
-    filters.search !== undefined
+    filters.search !== ''
+    && filters.search !== null
+    && filters.search !== undefined
   ) {
     variables.search = filters.search;
   } else {
@@ -48,7 +48,7 @@ function filtersToVariables(filters) {
   return variables;
 }
 
-export const ActivityLogPage = (): React.ReactElement => {
+export function ActivityLogPage(): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const [page, setPage] = useState(0);
@@ -81,8 +81,8 @@ export const ActivityLogPage = (): React.ReactElement => {
     // we need to check for permission before refetch, otherwise returned permission denied error
     // breaks the page
     if (
-      permissions &&
-      hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)
+      permissions
+      && hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)
     ) {
       setPage(0);
       refetch({
@@ -97,8 +97,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   }, [appliedFilter, businessArea, refetch, permissions, rowsPerPage]);
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)) return <PermissionDenied />;
 
   if (!data && !loading) {
     return <EmptyTable />;
@@ -162,4 +161,4 @@ export const ActivityLogPage = (): React.ReactElement => {
       </StyledPaper>
     </>
   );
-};
+}

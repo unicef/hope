@@ -29,9 +29,9 @@ describe('containers/tables/population/IndividualsListTable', () => {
         mocks={fakeApolloAllIndividualsForPopulationTable}
       >
         <IndividualsListTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
-          canViewDetails={true}
+          canViewDetails
           choicesData={fakeHouseholdChoices}
         />
       </MockedProvider>,
@@ -49,9 +49,9 @@ describe('containers/tables/population/IndividualsListTable', () => {
         mocks={fakeApolloAllIndividualsForPopulationTable}
       >
         <IndividualsListTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
-          canViewDetails={true}
+          canViewDetails
           choicesData={fakeHouseholdChoices}
         />
       </MockedProvider>,

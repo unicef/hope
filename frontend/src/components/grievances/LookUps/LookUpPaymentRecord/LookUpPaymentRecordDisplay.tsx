@@ -3,9 +3,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BlueText, DarkGrey, LightGrey, StyledBox } from '../LookUpStyles';
+import {
+  BlueText, DarkGrey, LightGrey, StyledBox,
+} from '../LookUpStyles';
 
-export const LookUpPaymentRecordDisplay = ({
+export function LookUpPaymentRecordDisplay({
   values,
   setLookUpDialogOpen,
   onValueChange,
@@ -15,7 +17,7 @@ export const LookUpPaymentRecordDisplay = ({
   setLookUpDialogOpen;
   onValueChange;
   disabled?;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const handleRemove = (): void => {
     onValueChange('selectedPaymentRecords', []);
@@ -33,7 +35,9 @@ export const LookUpPaymentRecordDisplay = ({
       <Grid container>
         <Grid item>
           <Box display="flex" flexDirection="column">
-            {t('Payment ID')}:{renderPaymentRecords()}
+            {t('Payment ID')}
+            :
+            {renderPaymentRecords()}
           </Box>
         </Grid>
         {disabled || (
@@ -65,4 +69,4 @@ export const LookUpPaymentRecordDisplay = ({
       </Grid>
     </StyledBox>
   );
-};
+}

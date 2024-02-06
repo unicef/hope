@@ -26,9 +26,9 @@ interface CashPlanDetailsSectionProps {
   planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
-export const CashPlanDetailsSection = ({
+export function CashPlanDetailsSection({
   planNode,
-}: CashPlanDetailsSectionProps): React.ReactElement => {
+}: CashPlanDetailsSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
@@ -90,10 +90,16 @@ export const CashPlanDetailsSection = ({
             <Grid item xs={3}>
               <Grid container direction="column">
                 <LabelizedField label={t('SUCCESSFUL')}>
-                  <p>{bankReconciliationSuccessPercentage}%</p>
+                  <p>
+                    {bankReconciliationSuccessPercentage}
+                    %
+                  </p>
                 </LabelizedField>
                 <LabelizedField label={t('ERRONEOUS')}>
-                  <p>{bankReconciliationErrorPercentage}%</p>
+                  <p>
+                    {bankReconciliationErrorPercentage}
+                    %
+                  </p>
                 </LabelizedField>
               </Grid>
             </Grid>
@@ -128,4 +134,4 @@ export const CashPlanDetailsSection = ({
       </Grid>
     </Grid>
   );
-};
+}

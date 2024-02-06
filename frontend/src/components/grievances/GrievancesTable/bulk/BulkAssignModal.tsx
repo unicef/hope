@@ -26,15 +26,14 @@ interface BulkAssignModalProps {
   setSelected;
 }
 
-export const BulkAssignModal = ({
+export function BulkAssignModal({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkAssignModalProps): React.ReactElement => {
+}: BulkAssignModalProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] =
-    React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
+  const [value, setValue] = React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
   const [inputValue, setInputValue] = useState('');
   const { data: usersData } = useAllUsersForFiltersQuery({
@@ -70,22 +69,20 @@ export const BulkAssignModal = ({
   };
 
   return (
-    <>
-      <BulkBaseModal
-        selectedTickets={selectedTickets}
-        title={t('Assign')}
-        buttonTitle={t('Assign')}
-        onSave={onSave}
-        icon={<AssignmentIndIcon />}
-      >
-        <AssignedToDropdown
-          optionsData={optionsData}
-          onFilterChange={onFilterChange}
-          setInputValue={setInputValue}
-          label={t('Assignee')}
-          fullWidth
-        />
-      </BulkBaseModal>
-    </>
+    <BulkBaseModal
+      selectedTickets={selectedTickets}
+      title={t('Assign')}
+      buttonTitle={t('Assign')}
+      onSave={onSave}
+      icon={<AssignmentIndIcon />}
+    >
+      <AssignedToDropdown
+        optionsData={optionsData}
+        onFilterChange={onFilterChange}
+        setInputValue={setInputValue}
+        label={t('Assignee')}
+        fullWidth
+      />
+    </BulkBaseModal>
   );
-};
+}

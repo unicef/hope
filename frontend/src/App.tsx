@@ -15,65 +15,63 @@ import { PageNotFound } from './containers/pages/404/PageNotFound';
 import { AccessDenied } from './containers/pages/accessDenied/AccessDenied';
 import { SomethingWentWrong } from './containers/pages/somethingWentWrong/SomethingWentWrong';
 
-export const App: React.FC = () => {
-  return (
-    <Providers>
-      <AutoLogout />
-      <Router>
-        <Switch>
-          <SentryRoute path="/login">
-            <LoginPage />
-          </SentryRoute>
-          <SentryRoute path="/maintenance">
-            <MaintenancePage />
-          </SentryRoute>
-          <SentryRoute path="/404">
-            <PageNotFound />
-          </SentryRoute>
-          <SentryRoute path="/error">
-            <SomethingWentWrong />
-          </SentryRoute>
-          <SentryRoute path="/access-denied">
-            <AccessDenied />
-          </SentryRoute>
-          <SentryRoute path="/sentry-check">
-            <button
-              type="button"
-              onClick={() => {
-                throw new Error('Am I working?');
-              }}
-            >
-              Throw new error
-            </button>
-          </SentryRoute>
+export const App: React.FC = () => (
+  <Providers>
+    <AutoLogout />
+    <Router>
+      <Switch>
+        <SentryRoute path="/login">
+          <LoginPage />
+        </SentryRoute>
+        <SentryRoute path="/maintenance">
+          <MaintenancePage />
+        </SentryRoute>
+        <SentryRoute path="/404">
+          <PageNotFound />
+        </SentryRoute>
+        <SentryRoute path="/error">
+          <SomethingWentWrong />
+        </SentryRoute>
+        <SentryRoute path="/access-denied">
+          <AccessDenied />
+        </SentryRoute>
+        <SentryRoute path="/sentry-check">
+          <button
+            type="button"
+            onClick={() => {
+              throw new Error('Am I working?');
+            }}
+          >
+            Throw new error
+          </button>
+        </SentryRoute>
+        <ProtectedRoute
+          path="/sanction-list"
+          component={SanctionList}
+          location={window.location}
+        />
+        <SentryRoute path="/accounts/profile/">
+          <ProfilePage />
+        </SentryRoute>
+        <Route path="/:businessArea/programs/all">
+          <BaseHomeRouter>
+            <AllProgramsRoutesSwitch />
+          </BaseHomeRouter>
+        </Route>
+        <Route path="/:businessArea/programs/:programId">
+          <BaseHomeRouter>
+            <SelectedProgramRoutesSwitch />
+          </BaseHomeRouter>
           <ProtectedRoute
             path="/sanction-list"
             component={SanctionList}
             location={window.location}
           />
-          <SentryRoute path="/accounts/profile/">
-            <ProfilePage />
-          </SentryRoute>
-          <Route path="/:businessArea/programs/all">
-            <BaseHomeRouter>
-              <AllProgramsRoutesSwitch />
-            </BaseHomeRouter>
-          </Route>
-          <Route path="/:businessArea/programs/:programId">
-            <BaseHomeRouter>
-              <SelectedProgramRoutesSwitch />
-            </BaseHomeRouter>
-            <ProtectedRoute
-              path="/sanction-list"
-              component={SanctionList}
-              location={window.location}
-            />
-          </Route>
-          <Route path="/">
-            <DefaultRoute />
-          </Route>
-        </Switch>
-      </Router>
-    </Providers>
-  );
-};
+        </Route>
+        <Route path="/">
+          <DefaultRoute />
+        </Route>
+      </Switch>
+    </Router>
+  </Providers>
+);

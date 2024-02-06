@@ -8,11 +8,11 @@ interface GrievanceDocumentPhotoModalProps {
   fieldName;
 }
 
-export const GrievanceDocumentPhotoModalEditable = ({
+export function GrievanceDocumentPhotoModalEditable({
   photoSrc,
   setFieldValue,
   fieldName,
-}: GrievanceDocumentPhotoModalProps): React.ReactElement => {
+}: GrievanceDocumentPhotoModalProps): React.ReactElement {
   const [isEdited, setEdit] = useState(false);
   const picUrl = photoSrc;
 
@@ -41,4 +41,4 @@ export const GrievanceDocumentPhotoModalEditable = ({
       )}
     </Box>
   );
-};
+}

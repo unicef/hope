@@ -48,7 +48,7 @@ const CountrySelect = styled(Select)`
   }
 `;
 
-export const GlobalProgramSelect = (): React.ReactElement => {
+export function GlobalProgramSelect(): React.ReactElement {
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
   const history = useHistory();
@@ -67,15 +67,13 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   }, []);
 
   const isOneOfAvailableProgramsId = useCallback(
-    (id: string): boolean => {
-      return data?.allPrograms.edges.some((each) => each.node.id === id);
-    },
+    (id: string): boolean => data?.allPrograms.edges.some((each) => each.node.id === id),
     [data],
   );
 
   const getCurrentProgram = useCallback(():
-    | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
-    | null => {
+  | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
+  | null => {
     const obj = data?.allPrograms.edges.find((el) => el.node.id === programId);
     return obj ? obj.node : null;
   }, [data, programId]);
@@ -85,8 +83,9 @@ export const GlobalProgramSelect = (): React.ReactElement => {
       const program = getCurrentProgram();
       if (!selectedProgram || selectedProgram?.id !== programId) {
         if (program && isMounted.current) {
-          const { id, name, status, individualDataNeeded, dataCollectingType } =
-            program;
+          const {
+            id, name, status, individualDataNeeded, dataCollectingType,
+          } = program;
 
           setSelectedProgram({
             id,
@@ -114,11 +113,11 @@ export const GlobalProgramSelect = (): React.ReactElement => {
   useEffect(() => {
     // If the programId is not in a valid format or not one of the available programs, redirect to the access denied page
     if (
-      programId &&
-      !loading &&
-      (!isProgramNodeUuidFormat(programId) ||
-        !isOneOfAvailableProgramsId(programId)) &&
-      programId !== 'all'
+      programId
+      && !loading
+      && (!isProgramNodeUuidFormat(programId)
+        || !isOneOfAvailableProgramsId(programId))
+      && programId !== 'all'
     ) {
       history.push(`/access-denied/${businessArea}`);
     }
@@ -161,4 +160,4 @@ export const GlobalProgramSelect = (): React.ReactElement => {
         ))}
     </CountrySelect>
   );
-};
+}

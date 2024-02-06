@@ -13,7 +13,7 @@ import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
 const ButtonContainer = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
-//random color chosen by Przemek
+// random color chosen by Przemek
 const CollapseContainer = styled(Collapse)`
   background-color: #fafafa;
 `;
@@ -99,22 +99,20 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
       </Row>
 
       <CollapseContainer in={expanded}>
-        {keys.map((key) => {
-          return (
-            <Row key={logEntry + key}>
-              <Cell weight={headCells[0].weight} />
-              <Cell weight={headCells[1].weight} />
-              <Cell weight={headCells[2].weight}>{key}</Cell>
-              <Cell weight={headCells[3].weight}>
-                {formatted(changes[key].from)}
-              </Cell>
-              <Cell weight={headCells[4].weight}>
-                {formatted(changes[key].to)}
-              </Cell>
-              <ButtonPlaceHolder />
-            </Row>
-          );
-        })}
+        {keys.map((key) => (
+          <Row key={logEntry + key}>
+            <Cell weight={headCells[0].weight} />
+            <Cell weight={headCells[1].weight} />
+            <Cell weight={headCells[2].weight}>{key}</Cell>
+            <Cell weight={headCells[3].weight}>
+              {formatted(changes[key].from)}
+            </Cell>
+            <Cell weight={headCells[4].weight}>
+              {formatted(changes[key].to)}
+            </Cell>
+            <ButtonPlaceHolder />
+          </Row>
+        ))}
       </CollapseContainer>
     </>
   );

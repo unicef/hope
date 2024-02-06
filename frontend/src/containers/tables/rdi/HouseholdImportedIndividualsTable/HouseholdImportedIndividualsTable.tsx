@@ -58,10 +58,10 @@ const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   },
 ];
 
-export const HouseholdImportedIndividualsTable = ({
+export function HouseholdImportedIndividualsTable({
   household,
   choicesData,
-}): ReactElement => {
+}): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
@@ -69,34 +69,28 @@ export const HouseholdImportedIndividualsTable = ({
   const allIndividuals = household.individuals.edges.map((edge) => edge.node);
   if (orderBy) {
     if (orderDirection === 'asc') {
-      allIndividuals.sort((a, b) => {
-        return a[orderBy] < b[orderBy] ? 1 : -1;
-      });
+      allIndividuals.sort((a, b) => (a[orderBy] < b[orderBy] ? 1 : -1));
     } else {
-      allIndividuals.sort((a, b) => {
-        return a[orderBy] > b[orderBy] ? 1 : -1;
-      });
+      allIndividuals.sort((a, b) => (a[orderBy] > b[orderBy] ? 1 : -1));
     }
   }
 
   const totalCount = allIndividuals.length;
   return (
     <TableComponent<ImportedIndividualMinimalFragment>
-      title='Individuals in Household'
+      title="Individuals in Household"
       data={allIndividuals.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
       )}
       allowSort={false}
-      renderRow={(row) => {
-        return (
-          <ImportedIndividualsTableRow
-            key={row.id}
-            choices={choicesData}
-            individual={row}
-          />
-        );
-      }}
+      renderRow={(row) => (
+        <ImportedIndividualsTableRow
+          key={row.id}
+          choices={choicesData}
+          individual={row}
+        />
+      )}
       headCells={headCells}
       rowsPerPageOptions={totalCount < 5 ? [totalCount] : [5, 10, 15]}
       rowsPerPage={totalCount > 5 ? rowsPerPage : totalCount}
@@ -121,4 +115,4 @@ export const HouseholdImportedIndividualsTable = ({
       order={orderDirection as Order}
     />
   );
-};
+}

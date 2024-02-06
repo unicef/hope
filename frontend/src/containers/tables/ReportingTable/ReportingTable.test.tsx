@@ -13,7 +13,7 @@ describe('containers/tables/ReportingTable', () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllReports}>
         <ReportingTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={{}}
           choicesData={fakeReportChoiceData}
           meData={fakeMe}
@@ -33,7 +33,7 @@ describe('containers/tables/ReportingTable', () => {
         mocks={fakeApolloAllReports}
       >
         <ReportingTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={{}}
           choicesData={fakeReportChoiceData}
           meData={fakeMe}

@@ -17,7 +17,7 @@ import {
 } from '../../../utils/constants';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 
-export const GrievancesTablePage = (): React.ReactElement => {
+export function GrievancesTablePage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
@@ -63,8 +63,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
+  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
   const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;
@@ -98,8 +97,7 @@ export const GrievancesTablePage = (): React.ReactElement => {
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
-    return <PermissionDenied />;
+  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)) return <PermissionDenied />;
   if (!choicesData) return null;
 
   return (
@@ -117,4 +115,4 @@ export const GrievancesTablePage = (): React.ReactElement => {
       <GrievancesTable filter={appliedFilter} selectedTab={selectedTab} />
     </>
   );
-};
+}

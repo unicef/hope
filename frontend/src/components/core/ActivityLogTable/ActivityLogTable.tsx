@@ -50,14 +50,14 @@ interface ActivityLogTableProps {
   onChangePage: (event: unknown, newPage: number) => void;
   onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
-export const ActivityLogTable = ({
+export function ActivityLogTable({
   logEntries,
   totalCount,
   rowsPerPage,
   page,
   onChangePage,
   onChangeRowsPerPage,
-}: ActivityLogTableProps): ReactElement => {
+}: ActivityLogTableProps): ReactElement {
   const [expanded, setExpanded] = useState(false);
   const { t } = useTranslation();
 
@@ -77,13 +77,11 @@ export const ActivityLogTable = ({
       <Collapse in={expanded}>
         <Table>
           <Row>
-            {headCells.map((item) => {
-              return (
-                <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
-                  {item.label}
-                </HeadingCell>
-              );
-            })}
+            {headCells.map((item) => (
+              <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
+                {item.label}
+              </HeadingCell>
+            ))}
             <ButtonPlaceHolder />
           </Row>
           {logEntries.map((value) => (
@@ -102,4 +100,4 @@ export const ActivityLogTable = ({
       </Collapse>
     </PaperContainer>
   );
-};
+}

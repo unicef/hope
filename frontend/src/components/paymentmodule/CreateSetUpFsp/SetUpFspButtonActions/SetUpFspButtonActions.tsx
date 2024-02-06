@@ -11,13 +11,13 @@ interface SetUpFspButtonActionsProps {
   handleBackStep: () => void;
 }
 
-export const SetUpFspButtonActions = ({
+export function SetUpFspButtonActions({
   step,
   submitForm,
   baseUrl,
   paymentPlanId,
   handleBackStep,
-}: SetUpFspButtonActionsProps): React.ReactElement => {
+}: SetUpFspButtonActionsProps): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isFollowUp = location.pathname.indexOf('followup') !== -1;
@@ -47,4 +47,4 @@ export const SetUpFspButtonActions = ({
       </Button>
     </Box>
   );
-};
+}

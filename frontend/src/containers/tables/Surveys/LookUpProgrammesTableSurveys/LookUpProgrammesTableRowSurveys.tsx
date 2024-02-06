@@ -23,12 +23,12 @@ interface LookUpProgrammesTableRowSurveysProps {
   selectedProgram: string;
 }
 
-export const LookUpProgrammesTableRowSurveys = ({
+export function LookUpProgrammesTableRowSurveys({
   program,
   choicesData,
   radioChangeHandler,
   selectedProgram,
-}: LookUpProgrammesTableRowSurveysProps): React.ReactElement => {
+}: LookUpProgrammesTableRowSurveysProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const programDetailsPath = `/${baseUrl}/details/${program.id}`;
   const handleClick = (): void => {
@@ -69,7 +69,10 @@ export const LookUpProgrammesTableRowSurveys = ({
         />
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
+        <UniversalMoment>{program.startDate}</UniversalMoment>
+        {' '}
+        -
+        {' '}
         <UniversalMoment>{program.endDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
@@ -81,4 +84,4 @@ export const LookUpProgrammesTableRowSurveys = ({
       <TableCell align="right">{formatCurrency(program.budget)}</TableCell>
     </ClickableTableRow>
   );
-};
+}

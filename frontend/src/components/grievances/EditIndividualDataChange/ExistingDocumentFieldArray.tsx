@@ -27,25 +27,21 @@ export function ExistingDocumentFieldArray({
     <Grid container spacing={3}>
       <FieldArray
         name="individualDataUpdateDocumentsToEdit"
-        render={(arrayHelpers) => {
-          return (
-            <>
-              {individual.documents.edges.map((item) => {
-                return (
-                  <EditDocumentRow
-                    key={item.node.id}
-                    setFieldValue={setFieldValue}
-                    values={values}
-                    document={item}
-                    id={item.node.id}
-                    arrayHelpers={arrayHelpers}
-                    addIndividualFieldsData={addIndividualFieldsData}
-                  />
-                );
-              })}
-            </>
-          );
-        }}
+        render={(arrayHelpers) => (
+          <>
+            {individual.documents.edges.map((item) => (
+              <EditDocumentRow
+                key={item.node.id}
+                setFieldValue={setFieldValue}
+                values={values}
+                document={item}
+                id={item.node.id}
+                arrayHelpers={arrayHelpers}
+                addIndividualFieldsData={addIndividualFieldsData}
+              />
+            ))}
+          </>
+        )}
       />
     </Grid>
   ) : (

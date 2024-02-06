@@ -16,13 +16,13 @@ export interface GrievanceFlexFieldPhotoModalEditableProps {
   form;
 }
 
-export const GrievanceFlexFieldPhotoModalEditable = ({
+export function GrievanceFlexFieldPhotoModalEditable({
   isCurrent,
   isIndividual,
   field,
   form,
   flexField,
-}: GrievanceFlexFieldPhotoModalEditableProps): React.ReactElement => {
+}: GrievanceFlexFieldPhotoModalEditableProps): React.ReactElement {
   const [isEdited, setEdit] = useState(false);
   const { id } = useParams();
   const { data } = useGrievanceTicketFlexFieldsQuery({
@@ -36,9 +36,9 @@ export const GrievanceFlexFieldPhotoModalEditable = ({
 
   const flexFields = isIndividual
     ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-        ?.flex_fields
+      ?.flex_fields
     : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-        ?.flex_fields;
+      ?.flex_fields;
 
   const picUrl: string = isCurrent
     ? flexFields[flexField.name]?.previous_value
@@ -59,4 +59,4 @@ export const GrievanceFlexFieldPhotoModalEditable = ({
       )}
     </Box>
   );
-};
+}

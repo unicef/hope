@@ -12,7 +12,7 @@ describe('containers/tables/rdi/ImportedHouseholdTable', () => {
     const { container } = render(
       <MockedProvider mocks={fakeApolloAllImportedHouseholds}>
         <ImportedHouseholdTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           rdi={fakeRegistrationDetailedFragment}
           isMerged={false}
         />
@@ -30,7 +30,7 @@ describe('containers/tables/rdi/ImportedHouseholdTable', () => {
         mocks={fakeApolloAllImportedHouseholds}
       >
         <ImportedHouseholdTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           rdi={fakeRegistrationDetailedFragment}
           isMerged={false}
         />

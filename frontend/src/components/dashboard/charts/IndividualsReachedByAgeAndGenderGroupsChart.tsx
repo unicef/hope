@@ -6,9 +6,9 @@ interface IndividualsReachedByAgeAndGenderGroupsChartProps {
   data: AllChartsQuery['chartIndividualsReachedByAgeAndGender'];
 }
 
-export const IndividualsReachedByAgeAndGenderGroupsChart = ({
+export function IndividualsReachedByAgeAndGenderGroupsChart({
   data,
-}: IndividualsReachedByAgeAndGenderGroupsChartProps): React.ReactElement => {
+}: IndividualsReachedByAgeAndGenderGroupsChartProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -45,4 +45,4 @@ export const IndividualsReachedByAgeAndGenderGroupsChart = ({
   };
 
   return <Doughnut data={chartData} options={options} />;
-};
+}

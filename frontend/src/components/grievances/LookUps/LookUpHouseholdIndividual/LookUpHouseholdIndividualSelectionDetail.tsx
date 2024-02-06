@@ -25,7 +25,7 @@ const StyledTabs = styled(Tabs)`
   }
 `;
 
-export const LookUpHouseholdIndividualSelectionDetail = ({
+export function LookUpHouseholdIndividualSelectionDetail({
   onValueChange,
   initialValues,
   selectedIndividual,
@@ -43,7 +43,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   setSelectedHousehold;
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
@@ -74,8 +74,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     programState: 'active',
   };
 
-  const { data: householdChoicesData, loading: householdChoicesLoading } =
-    useHouseholdChoiceDataQuery();
+  const { data: householdChoicesData, loading: householdChoicesLoading } = useHouseholdChoiceDataQuery();
 
   const [filterIND, setFilterIND] = useState(
     getFilterFromQueryParams(location, initialFilterIND),
@@ -91,17 +90,14 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     getFilterFromQueryParams(location, initialFilterHH),
   );
 
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } = useIndividualChoiceDataQuery();
 
-  const { data: programsData, loading: programsLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, first: 100 },
-      fetchPolicy: 'cache-first',
-    });
+  const { data: programsData, loading: programsLoading } = useAllProgramsForChoicesQuery({
+    variables: { businessArea, first: 100 },
+    fetchPolicy: 'cache-first',
+  });
 
-  if (householdChoicesLoading || individualChoicesLoading || programsLoading)
-    return <LoadingComponent />;
+  if (householdChoicesLoading || individualChoicesLoading || programsLoading) return <LoadingComponent />;
 
   if (!individualChoicesData || !householdChoicesData || !programsData) {
     return null;
@@ -131,11 +127,11 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
             <Tab label={t('LOOK UP HOUSEHOLD')} />
             <Tab
               disabled={
-                initialValues.issueType ===
-                  GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL ||
-                initialValues.issueType ===
-                  GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
-                initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
+                initialValues.issueType
+                  === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+                || initialValues.issueType
+                  === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD
+                || initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
               }
               label={t('LOOK UP INDIVIDUAL')}
             />
@@ -195,4 +191,4 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
       </Box>
     </>
   );
-};
+}

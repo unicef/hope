@@ -14,20 +14,17 @@ export interface LockedPaymentPlanHeaderButtonsProps {
   permissions: string[];
 }
 
-export const LockedPaymentPlanHeaderButtons = ({
+export function LockedPaymentPlanHeaderButtons({
   paymentPlan,
   canUnlock,
   permissions,
-}: LockedPaymentPlanHeaderButtonsProps): React.ReactElement => {
+}: LockedPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
   const { id } = paymentPlan;
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  const { mutatePaymentPlanAction: unlock, loading: loadingUnlock } =
-    usePaymentPlanAction(Action.Unlock, id, () =>
-      showMessage(t('Payment Plan has been unlocked.')),
-    );
+  const { mutatePaymentPlanAction: unlock, loading: loadingUnlock } = usePaymentPlanAction(Action.Unlock, id, () => showMessage(t('Payment Plan has been unlocked.')));
 
   return (
     <Box display="flex" alignItems="center">
@@ -47,4 +44,4 @@ export const LockedPaymentPlanHeaderButtons = ({
       <LockFspPaymentPlan paymentPlan={paymentPlan} permissions={permissions} />
     </Box>
   );
-};
+}

@@ -17,10 +17,10 @@ interface AcceptanceProcessRowProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const AcceptanceProcessRow = ({
+export function AcceptanceProcessRow({
   acceptanceProcess,
   paymentPlan,
-}: AcceptanceProcessRowProps): React.ReactElement => {
+}: AcceptanceProcessRowProps): React.ReactElement {
   const { t } = useTranslation();
   const {
     actions,
@@ -121,4 +121,4 @@ export const AcceptanceProcessRow = ({
       {approvalProcess.totalCount > 1 && <DividerLine />}
     </StyledBox>
   );
-};
+}

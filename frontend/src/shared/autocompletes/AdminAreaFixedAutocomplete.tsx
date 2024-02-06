@@ -1,11 +1,9 @@
-import CircularProgress from '@mui/material/CircularProgress';
 import Autocomplete from '@mui/lab/Autocomplete';
-import get from 'lodash/get';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { TextField } from '@mui/material';
 import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../TextField';
 import {
   AllAdminAreasQuery,
   useAllAdminAreasQuery,
@@ -18,7 +16,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export const AdminAreaFixedAutocomplete = ({
+export function AdminAreaFixedAutocomplete({
   value,
   onChange,
   disabled,
@@ -28,7 +26,7 @@ export const AdminAreaFixedAutocomplete = ({
   additionalOnChange,
   dataCy,
 }: {
-  value;
+  value: string | AllAdminAreasQuery['allAdminAreas']['edges'][number];
   onChange;
   disabled?;
   level?;
@@ -36,7 +34,7 @@ export const AdminAreaFixedAutocomplete = ({
   onClear?: () => void;
   additionalOnChange?: () => void;
   dataCy?: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [inputValue, onInputTextChange] = React.useState('');
@@ -89,9 +87,7 @@ export const AdminAreaFixedAutocomplete = ({
         if (value || reason === 'select-option') return;
         onInputTextChange(null);
       }}
-      getOptionSelected={(option, selectedValue) => {
-        return selectedValue?.node?.id === option.node.id;
-      }}
+      getOptionSelected={(option, selectedValue) => selectedValue?.node?.id === option.node.id}
       getOptionLabel={(option) => {
         if (!option.node) {
           return '';
@@ -128,4 +124,4 @@ export const AdminAreaFixedAutocomplete = ({
       )}
     />
   );
-};
+}

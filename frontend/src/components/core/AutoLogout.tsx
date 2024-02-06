@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import IdleTimer from 'react-idle-timer';
 import { AUTO_LOGOUT_MILLIS } from '../../config';
 
-export const AutoLogout = (): React.ReactElement => {
+export function AutoLogout(): React.ReactElement {
   const idleTimer = useRef(null);
 
   const onIdle = (): void => {
@@ -27,4 +27,4 @@ export const AutoLogout = (): React.ReactElement => {
       timeout={AUTO_LOGOUT_MILLIS}
     />
   );
-};
+}

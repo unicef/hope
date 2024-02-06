@@ -33,11 +33,11 @@ interface PaymentPlanDetailsHeaderProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const PaymentPlanDetailsHeader = ({
+export function PaymentPlanDetailsHeader({
   baseUrl,
   permissions,
   paymentPlan,
-}: PaymentPlanDetailsHeaderProps): React.ReactElement => {
+}: PaymentPlanDetailsHeaderProps): React.ReactElement {
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -74,16 +74,15 @@ export const PaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
     permissions,
   );
-  const canSendToPaymentGateway =
-    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-    paymentPlan.status === PaymentPlanStatus.Accepted &&
-    paymentPlan.deliveryMechanisms.some((deliveryMechanism) => {
+  const canSendToPaymentGateway = hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions)
+    && paymentPlan.status === PaymentPlanStatus.Accepted
+    && paymentPlan.deliveryMechanisms.some((deliveryMechanism) => {
       const { sentToPaymentGateway, fsp } = deliveryMechanism;
       const { communicationChannel } = fsp;
       return (
-        !sentToPaymentGateway &&
-        communicationChannel ===
-          FinancialServiceProviderCommunicationChannel.Api
+        !sentToPaymentGateway
+        && communicationChannel
+          === FinancialServiceProviderCommunicationChannel.Api
       );
     });
 
@@ -179,9 +178,12 @@ export const PaymentPlanDetailsHeader = ({
 
   return (
     <PageHeader
-      title={
+      title={(
         <Box display="flex" alignItems="center">
-          {t('Payment Plan')} ID:{' '}
+          {t('Payment Plan')}
+          {' '}
+          ID:
+          {' '}
           <Box ml={1}>
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
@@ -200,7 +202,7 @@ export const PaymentPlanDetailsHeader = ({
             </StatusWrapper>
           )}
         </Box>
-      }
+      )}
       breadCrumbs={
         hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)
           ? breadCrumbsItems
@@ -210,4 +212,4 @@ export const PaymentPlanDetailsHeader = ({
       {buttons}
     </PageHeader>
   );
-};
+}

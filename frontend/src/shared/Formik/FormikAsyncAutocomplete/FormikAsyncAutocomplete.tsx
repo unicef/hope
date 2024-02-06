@@ -2,14 +2,14 @@ import Autocomplete from '@mui/lab/Autocomplete';
 import React, { useEffect, useState } from 'react';
 import { TextField } from '@mui/material';
 
-export const FormikAsyncAutocomplete = ({
+export function FormikAsyncAutocomplete({
   field,
   form,
   label,
   query,
   fetchData,
   variables,
-}): React.ReactElement => {
+}): React.ReactElement {
   const [value, setValue] = useState(null);
   const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState([]);
@@ -27,7 +27,7 @@ export const FormikAsyncAutocomplete = ({
 
   useEffect(() => {
     if (fetchData(data)) {
-      setOptions(fetchData(data))
+      setOptions(fetchData(data));
     }
   }, [data, fetchData]);
 
@@ -47,19 +47,17 @@ export const FormikAsyncAutocomplete = ({
   return (
     <Autocomplete
       renderInput={(params) => (
-        <TextField {...params} label={label} variant='outlined' />
+        <TextField {...params} label={label} variant="outlined" />
       )}
       filterOptions={(option) => option}
       autoComplete
-      noOptionsText='No results'
+      noOptionsText="No results"
       options={options}
-      isOptionEqualToValue={(option, selectedValue) => {
-        return option.value === selectedValue.value;
-      }}
+      isOptionEqualToValue={(option, selectedValue) => option.value === selectedValue.value}
       getOptionLabel={(choice) => choice.labelEn}
       value={value}
       onChange={handleChange}
       onInputChange={handleInputChange}
     />
   );
-};
+}

@@ -1,10 +1,15 @@
-import { Box, IconButton, InputAdornment } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  Select,
+} from '@mui/material';
 import { makeStyles } from '@mui/material/styles';
 import { Close } from '@mui/icons-material';
 import React from 'react';
 import styled from 'styled-components';
-import InputLabel from '../../shared/InputLabel';
-import Select from '../../shared/Select';
+
 import { StyledFormControl } from '../StyledFormControl';
 
 const StartInputAdornment = styled(InputAdornment)`
@@ -33,7 +38,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const SelectFilter = ({
+export function SelectFilter({
   label,
   children,
   onChange,
@@ -42,7 +47,7 @@ export const SelectFilter = ({
   fullWidth = true,
   disableClearable = false,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const classes = useStyles();
 
   const checkValue = (value): boolean => {
@@ -104,4 +109,4 @@ export const SelectFilter = ({
       </StyledFormControl>
     </div>
   );
-};
+}

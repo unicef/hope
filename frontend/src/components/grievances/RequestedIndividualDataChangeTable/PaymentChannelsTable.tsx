@@ -33,13 +33,13 @@ export interface PaymentChannelsTableProps {
   paymentChannels;
 }
 
-export const PaymentChannelsTable = ({
+export function PaymentChannelsTable({
   values,
   isEdit,
   ticket,
   setFieldValue,
   paymentChannels,
-}: PaymentChannelsTableProps): React.ReactElement => {
+}: PaymentChannelsTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedPaymentChannels } = values;
 
@@ -83,46 +83,44 @@ export const PaymentChannelsTable = ({
       <StyledTable>
         {paymentChannelsTableHead}
         <TableBody>
-          {paymentChannels?.map((row, index) => {
-            return (
-              <TableRow
-                key={`${row.value.bankName}-${row.value.bankAccountNumber}`}
-              >
-                <TableCell align="left">
-                  {isEdit ? (
-                    <Checkbox
-                      data-cy="checkbox-payment-channel"
-                      color="primary"
-                      onChange={(): void => {
-                        handleSelectPaymentChannel(index);
-                      }}
-                      disabled={
+          {paymentChannels?.map((row, index) => (
+            <TableRow
+              key={`${row.value.bankName}-${row.value.bankAccountNumber}`}
+            >
+              <TableCell align="left">
+                {isEdit ? (
+                  <Checkbox
+                    data-cy="checkbox-payment-channel"
+                    color="primary"
+                    onChange={(): void => {
+                      handleSelectPaymentChannel(index);
+                    }}
+                    disabled={
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
-                      checked={selectedPaymentChannels.includes(index)}
-                      inputProps={{ 'aria-labelledby': 'selected' }}
-                    />
-                  ) : (
-                    selectedPaymentChannels.includes(index) && (
-                      <GreenIcon data-cy="green-check">
-                        <CheckCircleIcon />
-                      </GreenIcon>
-                    )
-                  )}
-                </TableCell>
-                <TableCell align="left">{row.value.bank_name}</TableCell>
-                <TableCell align="left">
-                  {row.value.bank_account_number}
-                </TableCell>
-                <TableCell align="left">
-                  {row.value.account_holder_name}
-                </TableCell>
-                <TableCell align="left">{row.value.bank_branch_name}</TableCell>
-              </TableRow>
-            );
-          })}
+                    checked={selectedPaymentChannels.includes(index)}
+                    inputProps={{ 'aria-labelledby': 'selected' }}
+                  />
+                ) : (
+                  selectedPaymentChannels.includes(index) && (
+                  <GreenIcon data-cy="green-check">
+                    <CheckCircleIcon />
+                  </GreenIcon>
+                  )
+                )}
+              </TableCell>
+              <TableCell align="left">{row.value.bank_name}</TableCell>
+              <TableCell align="left">
+                {row.value.bank_account_number}
+              </TableCell>
+              <TableCell align="left">
+                {row.value.account_holder_name}
+              </TableCell>
+              <TableCell align="left">{row.value.bank_branch_name}</TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </StyledTable>
     </>
   );
-};
+}

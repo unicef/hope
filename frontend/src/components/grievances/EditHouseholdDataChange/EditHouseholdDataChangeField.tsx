@@ -22,10 +22,10 @@ export interface EditHouseholdDataChangeField {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   name: string;
 }
-export const EditHouseholdDataChangeField = ({
+export function EditHouseholdDataChangeField({
   name,
   field,
-}: EditHouseholdDataChangeField): React.ReactElement => {
+}: EditHouseholdDataChangeField): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
@@ -59,11 +59,10 @@ export const EditHouseholdDataChangeField = ({
         fieldProps = {
           component: FormikAsyncAutocomplete,
           query: useAllAdminAreasLazyQuery,
-          fetchData: (data) =>
-            data?.allAdminAreas?.edges?.map(({ node }) => ({
-              labelEn: `${node.name} - ${node.pCode}`,
-              value: node.pCode,
-            })),
+          fetchData: (data) => data?.allAdminAreas?.edges?.map(({ node }) => ({
+            labelEn: `${node.name} - ${node.pCode}`,
+            value: node.pCode,
+          })),
           variables: {
             businessArea,
           },
@@ -113,18 +112,16 @@ export const EditHouseholdDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <>
-      <Grid item xs={4}>
-        <Field
-          name={name}
-          fullWidth
-          variant="outlined"
-          label={field.labelEn}
-          required={field.required}
-          disabled={isEditTicket}
-          {...fieldProps}
-        />
-      </Grid>
-    </>
+    <Grid item xs={4}>
+      <Field
+        name={name}
+        fullWidth
+        variant="outlined"
+        label={field.labelEn}
+        required={field.required}
+        disabled={isEditTicket}
+        {...fieldProps}
+      />
+    </Grid>
   );
-};
+}

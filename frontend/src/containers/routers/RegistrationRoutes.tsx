@@ -6,7 +6,7 @@ import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportP
 import { RegistrationHouseholdDetailsPage } from '../pages/rdi/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from '../pages/rdi/RegistrationIndividualDetailsPage';
 
-export const RegistrationRoutes = (): React.ReactElement => {
+export function RegistrationRoutes(): React.ReactElement {
   const { path } = useRouteMatch();
 
   const registrationRoutes = [
@@ -37,4 +37,4 @@ export const RegistrationRoutes = (): React.ReactElement => {
       ))}
     </Switch>
   );
-};
+}

@@ -6,9 +6,9 @@ import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/grap
 interface TicketsByCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
 }
-export const TicketsByCategoryChart = ({
+export function TicketsByCategoryChart({
   data,
-}: TicketsByCategoryChartProps): React.ReactElement => {
+}: TicketsByCategoryChartProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -57,4 +57,4 @@ export const TicketsByCategoryChart = ({
   };
 
   return <HorizontalBar data={chartData} options={options} />;
-};
+}

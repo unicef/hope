@@ -2,7 +2,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Button, Box, Paper, SnackbarContent, Snackbar } from '@mui/material';
+import {
+  Button, Box, Paper, SnackbarContent, Snackbar,
+} from '@mui/material';
 import * as Sentry from '@sentry/react';
 import { useCheckAgainstSanctionListUploadMutation } from '../../../__generated__/graphql';
 import { DropzoneField } from '../../../components/core/DropzoneField';
@@ -21,8 +23,7 @@ export function SanctionList(): React.ReactElement {
     setSnackbarMessage(message);
     setSnackbarShow(true);
   };
-  const [checkAgainstSanctionMutate, { loading: fileLoading }] =
-    useCheckAgainstSanctionListUploadMutation();
+  const [checkAgainstSanctionMutate, { loading: fileLoading }] = useCheckAgainstSanctionListUploadMutation();
 
   const { t } = useTranslation();
 
@@ -42,26 +43,24 @@ export function SanctionList(): React.ReactElement {
 
   let importFile = null;
   importFile = (
-    <>
-      <DropzoneField
-        loading={fileLoading}
-        dontShowFilename={!fileToImport}
-        onChange={(files) => {
-          if (files.length === 0) {
-            return;
-          }
-          const file = files[0];
-          const fileSizeMB = file.size / (1024 * 1024);
-          if (fileSizeMB > 200) {
-            showMessage(
-              `File size is too big. It should be under 200MB, File size is ${fileSizeMB}MB`,
-            );
-            return;
-          }
-          setFileToImport(file);
-        }}
-      />
-    </>
+    <DropzoneField
+      loading={fileLoading}
+      dontShowFilename={!fileToImport}
+      onChange={(files) => {
+        if (files.length === 0) {
+          return;
+        }
+        const file = files[0];
+        const fileSizeMB = file.size / (1024 * 1024);
+        if (fileSizeMB > 200) {
+          showMessage(
+            `File size is too big. It should be under 200MB, File size is ${fileSizeMB}MB`,
+          );
+          return;
+        }
+        setFileToImport(file);
+      }}
+    />
   );
 
   return (

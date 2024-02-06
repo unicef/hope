@@ -23,8 +23,7 @@ const NumberOfHouseHolds = styled.div`
   border-left-style: solid;
 `;
 const NumberOfHouseHoldsValue = styled.div`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
@@ -40,10 +39,10 @@ interface ProgramDetailsProps {
   choices: ProgrammeChoiceDataQuery;
 }
 
-export const ProgramDetails = ({
+export function ProgramDetails({
   program,
   choices,
-}: ProgramDetailsProps): React.ReactElement => {
+}: ProgramDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
   const programFrequencyOfPaymentsChoicesDict = choicesToDict(
@@ -160,4 +159,4 @@ export const ProgramDetails = ({
       )}
     </ContainerColumnWithBorder>
   );
-};
+}

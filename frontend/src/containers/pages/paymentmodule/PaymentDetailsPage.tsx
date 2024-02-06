@@ -19,7 +19,7 @@ import { RevertForceFailedButton } from '../../../components/paymentmodule/Rever
 import { ForceFailedButton } from '../../../components/paymentmodule/ForceFailedButton';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-export const PaymentDetailsPage = (): React.ReactElement => {
+export function PaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
@@ -35,8 +35,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   if (loading || caLoading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)) return <PermissionDenied />;
 
   if (!data || !caData) return null;
   const { payment } = data;
@@ -57,14 +56,13 @@ export const PaymentDetailsPage = (): React.ReactElement => {
 
   const renderButton = (): React.ReactElement | null => {
     if (
-      (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
-        paymentPlanStatus === PaymentPlanStatus.Accepted) ||
-      paymentPlanStatus === PaymentPlanStatus.Finished
+      (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions)
+        && paymentPlanStatus === PaymentPlanStatus.Accepted)
+      || paymentPlanStatus === PaymentPlanStatus.Finished
     ) {
-      const ButtonComponent =
-        payment.status === PaymentStatus.ForceFailed
-          ? RevertForceFailedButton
-          : ForceFailedButton;
+      const ButtonComponent = payment.status === PaymentStatus.ForceFailed
+        ? RevertForceFailedButton
+        : ForceFailedButton;
       return <ButtonComponent paymentId={payment.id} />;
     }
     return null;
@@ -95,4 +93,4 @@ export const PaymentDetailsPage = (): React.ReactElement => {
       </Box>
     </>
   );
-};
+}

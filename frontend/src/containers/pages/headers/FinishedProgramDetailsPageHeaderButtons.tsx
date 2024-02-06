@@ -16,12 +16,12 @@ export interface FinishedProgramDetailsPageHeaderPropTypes {
   isPaymentPlanApplicable: boolean;
 }
 
-export const FinishedProgramDetailsPageHeaderButtons = ({
+export function FinishedProgramDetailsPageHeaderButtons({
   program,
   canActivate,
   canDuplicate,
   isPaymentPlanApplicable,
-}: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+}: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
@@ -55,4 +55,4 @@ export const FinishedProgramDetailsPageHeaderButtons = ({
       )}
     </Box>
   );
-};
+}

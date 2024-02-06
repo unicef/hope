@@ -59,8 +59,7 @@ export function FinishVerificationPlan({
   const grievanceTickets = (): number => {
     if (verificationPlan?.sampleSize) {
       const notReceivedTicketsCount = verificationPlan?.notReceivedCount;
-      const receivedWithProblemsTicketsCount =
-        verificationPlan?.receivedWithProblemsCount;
+      const receivedWithProblemsTicketsCount = verificationPlan?.receivedWithProblemsCount;
 
       return notReceivedTicketsCount + receivedWithProblemsTicketsCount;
     }
@@ -119,8 +118,12 @@ export function FinishVerificationPlan({
                   style={{ marginTop: '20px', marginBottom: '20px' }}
                   variant="body2"
                 >
-                  {t('Closing this verification will generate')}{' '}
-                  {grievanceTickets()} {t('grievance tickets')}.
+                  {t('Closing this verification will generate')}
+                  {' '}
+                  {grievanceTickets()}
+                  {' '}
+                  {t('grievance tickets')}
+                  .
                 </Typography>
               ) : null}
             </Box>

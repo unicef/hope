@@ -1,4 +1,6 @@
-import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
+import {
+  Box, FormHelperText, Grid, GridSize, Typography,
+} from '@mui/material';
 import { Field } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -50,7 +52,7 @@ export interface DescriptionProps {
   permissions: string[];
 }
 
-export const Description = ({
+export function Description({
   values,
   showIssueType,
   selectedIssueType,
@@ -60,7 +62,7 @@ export const Description = ({
   setFieldValue,
   errors,
   permissions,
-}: DescriptionProps): React.ReactElement => {
+}: DescriptionProps): React.ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
   const { data: partnerChoicesData } = usePartnerForGrievanceChoicesQuery({
@@ -93,8 +95,7 @@ export const Description = ({
     (element) => ({ name: element.node.name, value: element.node.id }),
   );
 
-  const isAnonymousTicket =
-    !values.selectedHousehold?.id && !values.selectedIndividual?.id;
+  const isAnonymousTicket = !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 
   return (
     <>
@@ -116,17 +117,17 @@ export const Description = ({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {values.selectedHousehold?.id &&
-                    canViewHouseholdDetails &&
-                    !isAllPrograms ? (
+                    {values.selectedHousehold?.id
+                    && canViewHouseholdDetails
+                    && !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/household/${values.selectedHousehold.id}`}
                       >
                         {values.selectedHousehold.unicefId}
                       </BlackLink>
-                    ) : (
-                      <div>{values.selectedHousehold?.unicefId || '-'}</div>
-                    )}
+                      ) : (
+                        <div>{values.selectedHousehold?.unicefId || '-'}</div>
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -135,17 +136,17 @@ export const Description = ({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {values.selectedIndividual?.id &&
-                    canViewIndividualDetails &&
-                    !isAllPrograms ? (
+                    {values.selectedIndividual?.id
+                    && canViewIndividualDetails
+                    && !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/individuals/${values.selectedIndividual.id}`}
                       >
                         {values.selectedIndividual.unicefId}
                       </BlackLink>
-                    ) : (
-                      <div>{values.selectedIndividual?.unicefId || '-'}</div>
-                    )}
+                      ) : (
+                        <div>{values.selectedIndividual?.unicefId || '-'}</div>
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -181,8 +182,8 @@ export const Description = ({
               fullWidth
               variant="outlined"
               label={
-                values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
-                values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+                values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD
+                || values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
                   ? t('Withdrawal Reason*')
                   : t('Description*')
               }
@@ -271,8 +272,8 @@ export const Description = ({
                   />
                 </Box>
               </Grid>
-              {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
-                values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
+              {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT
+                || values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                 <Grid item xs={6}>
                   <Box py={3}>
                     <LookUpPaymentRecord
@@ -305,4 +306,4 @@ export const Description = ({
       )}
     </>
   );
-};
+}

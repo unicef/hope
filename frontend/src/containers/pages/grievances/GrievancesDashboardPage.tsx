@@ -14,7 +14,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { useAllGrievanceDashboardChartsQuery } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-export const GrievancesDashboardPage = (): React.ReactElement => {
+export function GrievancesDashboardPage(): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -25,8 +25,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
 
   if (!data || permissions === null) return null;
   if (loading) return <LoadingComponent />;
-  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
-    return <PermissionDenied />;
+  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)) return <PermissionDenied />;
 
   const {
     ticketsByCategory,
@@ -43,12 +42,9 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
   } = data;
 
   // use weighted average to calculate average resolution time
-  const userWeightedTime =
-    userGeneratedAvgResolution * closedUserGeneratedCount;
-  const systemWeightedTime =
-    systemGeneratedAvgResolution * closedSystemGeneratedCount;
-  const numberOfClosedTickets =
-    closedUserGeneratedCount + closedSystemGeneratedCount;
+  const userWeightedTime = userGeneratedAvgResolution * closedUserGeneratedCount;
+  const systemWeightedTime = systemGeneratedAvgResolution * closedSystemGeneratedCount;
+  const numberOfClosedTickets = closedUserGeneratedCount + closedSystemGeneratedCount;
 
   return (
     <>
@@ -80,9 +76,9 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 topNumber={`${
                   numberOfClosedTickets > 0
                     ? (
-                        (userWeightedTime + systemWeightedTime) /
-                        numberOfClosedTickets
-                      ).toFixed(2)
+                      (userWeightedTime + systemWeightedTime)
+                        / numberOfClosedTickets
+                    ).toFixed(2)
                     : 0
                 } days`}
                 systemGenerated={`${systemGeneratedAvgResolution} days`}
@@ -108,4 +104,4 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
       </TableWrapper>
     </>
   );
-};
+}

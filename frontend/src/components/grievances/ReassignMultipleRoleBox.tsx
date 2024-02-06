@@ -33,135 +33,131 @@ const WarnIcon = styled(WarningIcon)`
   margin-right: 10px;
 `;
 
-export const ReassignMultipleRoleBox = ({
+export function ReassignMultipleRoleBox({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
-  const selectedIndividualsToReassign =
-    ticket.needsAdjudicationTicketDetails.selectedIndividuals?.filter(
-      (el) =>
-        el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
-    );
+  const selectedIndividualsToReassign = ticket.needsAdjudicationTicketDetails.selectedIndividuals?.filter(
+    (el) => el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+  );
 
-  const mappedReassignLookups = (): React.ReactElement => {
-    return (
-      <>
-        {selectedIndividualsToReassign.map((selectedIndividualToReassign) => {
-          const { household } = selectedIndividualToReassign;
+  const mappedReassignLookups = (): React.ReactElement => (
+    <>
+      {selectedIndividualsToReassign.map((selectedIndividualToReassign) => {
+        const { household } = selectedIndividualToReassign;
 
-          const householdsAndRoles =
-            selectedIndividualToReassign?.householdsAndRoles;
+        const householdsAndRoles = selectedIndividualToReassign?.householdsAndRoles;
 
-          const shouldShowReassignHoH =
-            selectedIndividualToReassign?.id === household?.headOfHousehold?.id;
+        const shouldShowReassignHoH = selectedIndividualToReassign?.id === household?.headOfHousehold?.id;
 
-          const mappedLookUpsForExternalHouseholds = householdsAndRoles
-            .filter((element) => element.role !== 'NO_ROLE')
-            .map((householdAndRole) => {
-              return (
-                <Box mb={2} mt={2} key={householdAndRole.id}>
-                  <Box mb={2}>
-                    <LabelizedField label={t('ROLE')}>
-                      <>{capitalize(householdAndRole.role)} Collector</>
-                    </LabelizedField>
-                    <LabelizedField label={t('INDIVIDUAL ID')}>
-                      <ContentLink
-                        href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}
-                      >
-                        {householdAndRole.individual.unicefId}
-                      </ContentLink>{' '}
-                      {householdAndRole.individual.fullName}
-                    </LabelizedField>
-                    <LabelizedField label={t('HOUSEHOLD ID')}>
-                      <ContentLink
-                        href={`/${baseUrl}/population/household/${householdAndRole.household.id}`}
-                      >
-                        {householdAndRole.household.unicefId}
-                      </ContentLink>
-                    </LabelizedField>
-                  </Box>
-                  <LookUpReassignRole
-                    shouldDisableButton={false}
-                    individualRole={{
-                      role: householdAndRole.role,
-                      id: householdAndRole.id,
-                    }}
-                    ticket={ticket}
-                    household={householdAndRole.household}
-                    individual={selectedIndividualToReassign}
-                  />
-                </Box>
-              );
-            });
-
-          return (
-            <Box
-              key={household.unicefId}
-              mt={3}
-              display="flex"
-              flexDirection="column"
-            >
-              {shouldShowReassignHoH && (
-                <Box mb={2} mt={2}>
-                  <Box mb={2}>
-                    <LabelizedField label={t('ROLE')}>
-                      <>{t('Head of Household')}</>
-                    </LabelizedField>
-                    <LabelizedField label={t('INDIVIDUAL ID')}>
-                      <ContentLink
-                        href={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
-                      >
-                        {ticket.individual.unicefId}
-                      </ContentLink>{' '}
-                      {ticket.individual.fullName}
-                    </LabelizedField>
-                    <LabelizedField label={t('HOUSEHOLD ID')}>
-                      <ContentLink
-                        href={`/${baseUrl}/population/household/${ticket?.household.id}`}
-                      >
-                        {household.unicefId}
-                      </ContentLink>
-                    </LabelizedField>
-                  </Box>
-                  <LookUpReassignRole
-                    shouldDisableButton={false}
-                    individualRole={{ role: 'HEAD', id: 'HEAD' }}
-                    ticket={ticket}
-                    household={household}
-                    individual={selectedIndividualToReassign}
-                  />
-                </Box>
-              )}
-              {mappedLookUpsForExternalHouseholds}
+        const mappedLookUpsForExternalHouseholds = householdsAndRoles
+          .filter((element) => element.role !== 'NO_ROLE')
+          .map((householdAndRole) => (
+            <Box mb={2} mt={2} key={householdAndRole.id}>
+              <Box mb={2}>
+                <LabelizedField label={t('ROLE')}>
+                  <>
+                    {capitalize(householdAndRole.role)}
+                    {' '}
+                    Collector
+                  </>
+                </LabelizedField>
+                <LabelizedField label={t('INDIVIDUAL ID')}>
+                  <ContentLink
+                    href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}
+                  >
+                    {householdAndRole.individual.unicefId}
+                  </ContentLink>
+                  {' '}
+                  {householdAndRole.individual.fullName}
+                </LabelizedField>
+                <LabelizedField label={t('HOUSEHOLD ID')}>
+                  <ContentLink
+                    href={`/${baseUrl}/population/household/${householdAndRole.household.id}`}
+                  >
+                    {householdAndRole.household.unicefId}
+                  </ContentLink>
+                </LabelizedField>
+              </Box>
+              <LookUpReassignRole
+                shouldDisableButton={false}
+                individualRole={{
+                  role: householdAndRole.role,
+                  id: householdAndRole.id,
+                }}
+                ticket={ticket}
+                household={householdAndRole.household}
+                individual={selectedIndividualToReassign}
+              />
             </Box>
-          );
-        })}
-      </>
-    );
-  };
+          ));
+
+        return (
+          <Box
+            key={household.unicefId}
+            mt={3}
+            display="flex"
+            flexDirection="column"
+          >
+            {shouldShowReassignHoH && (
+            <Box mb={2} mt={2}>
+              <Box mb={2}>
+                <LabelizedField label={t('ROLE')}>
+                  <>{t('Head of Household')}</>
+                </LabelizedField>
+                <LabelizedField label={t('INDIVIDUAL ID')}>
+                  <ContentLink
+                    href={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
+                  >
+                    {ticket.individual.unicefId}
+                  </ContentLink>
+                  {' '}
+                  {ticket.individual.fullName}
+                </LabelizedField>
+                <LabelizedField label={t('HOUSEHOLD ID')}>
+                  <ContentLink
+                    href={`/${baseUrl}/population/household/${ticket?.household.id}`}
+                  >
+                    {household.unicefId}
+                  </ContentLink>
+                </LabelizedField>
+              </Box>
+              <LookUpReassignRole
+                shouldDisableButton={false}
+                individualRole={{ role: 'HEAD', id: 'HEAD' }}
+                ticket={ticket}
+                household={household}
+                individual={selectedIndividualToReassign}
+              />
+            </Box>
+            )}
+            {mappedLookUpsForExternalHouseholds}
+          </Box>
+        );
+      })}
+    </>
+  );
 
   return selectedIndividualsToReassign.length ? (
-    <>
-      <StyledBox>
-        <OrangeTitle>
-          <Typography variant="h6">
-            <WarnIcon />
-            {t('Individual is the HOH or the collector for the household')}
-          </Typography>
-        </OrangeTitle>
-        <Typography variant="body2">
-          {t(
-            'Upon removing you will need to select new individual(s) for this role.',
-          )}
+    <StyledBox>
+      <OrangeTitle>
+        <Typography variant="h6">
+          <WarnIcon />
+          {t('Individual is the HOH or the collector for the household')}
         </Typography>
-        <Box mt={3} display="flex" flexDirection="column">
-          {mappedReassignLookups()}
-        </Box>
-      </StyledBox>
-    </>
+      </OrangeTitle>
+      <Typography variant="body2">
+        {t(
+          'Upon removing you will need to select new individual(s) for this role.',
+        )}
+      </Typography>
+      <Box mt={3} display="flex" flexDirection="column">
+        {mappedReassignLookups()}
+      </Box>
+    </StyledBox>
   ) : null;
-};
+}

@@ -11,53 +11,51 @@ export interface NewDocumentationFieldArrayProps {
   errors;
 }
 
-export const NewDocumentationFieldArray = ({
+export function NewDocumentationFieldArray({
   values,
   setFieldValue,
   errors,
-}: NewDocumentationFieldArrayProps): React.ReactElement => {
+}: NewDocumentationFieldArrayProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <Grid container spacing={3}>
       <FieldArray
         name="documentation"
-        render={(arrayHelpers) => {
-          return (
-            <>
-              {values.documentation?.map((_item, index) => (
-                <DocumentationField
-                  index={index}
-                  key={`${index}-documentation-file`}
-                  onDelete={() => arrayHelpers.remove(index)}
-                  baseName="documentation"
-                  setFieldValue={setFieldValue}
-                />
-              ))}
-              <Grid item xs={12}>
-                <Button
-                  color="primary"
-                  onClick={() => {
-                    arrayHelpers.push({
-                      name: '',
-                      file: null,
-                    });
-                  }}
-                  startIcon={<AddCircleOutline />}
-                >
-                  {t(
-                    values.documentation?.length > 0
-                      ? 'Add more documentation'
-                      : 'Add documentation',
-                  )}
-                </Button>
-              </Grid>
-              {errors?.documentation && (
-                <FormHelperText error>{errors?.documentation}</FormHelperText>
-              )}
-            </>
-          );
-        }}
+        render={(arrayHelpers) => (
+          <>
+            {values.documentation?.map((_item, index) => (
+              <DocumentationField
+                index={index}
+                key={`${index}-documentation-file`}
+                onDelete={() => arrayHelpers.remove(index)}
+                baseName="documentation"
+                setFieldValue={setFieldValue}
+              />
+            ))}
+            <Grid item xs={12}>
+              <Button
+                color="primary"
+                onClick={() => {
+                  arrayHelpers.push({
+                    name: '',
+                    file: null,
+                  });
+                }}
+                startIcon={<AddCircleOutline />}
+              >
+                {t(
+                  values.documentation?.length > 0
+                    ? 'Add more documentation'
+                    : 'Add documentation',
+                )}
+              </Button>
+            </Grid>
+            {errors?.documentation && (
+            <FormHelperText error>{errors?.documentation}</FormHelperText>
+            )}
+          </>
+        )}
       />
     </Grid>
   );
-};
+}

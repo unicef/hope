@@ -22,7 +22,7 @@ describe('containers/tables/rdi/RegistrationDataImportTable', () => {
       <MockedProvider mocks={fakeApolloAllRegistrationDataImports}>
         <RegistrationDataImportTable
           filter={initialFilter}
-          canViewDetails={true}
+          canViewDetails
         />
       </MockedProvider>,
     );
@@ -39,7 +39,7 @@ describe('containers/tables/rdi/RegistrationDataImportTable', () => {
       >
         <RegistrationDataImportTable
           filter={initialFilter}
-          canViewDetails={true}
+          canViewDetails
         />
       </MockedProvider>,
     );

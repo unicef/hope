@@ -12,7 +12,7 @@ import { usePermissions } from '../../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../../utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 
-export const FeedbackDetailsPage = (): React.ReactElement => {
+export function FeedbackDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
 
@@ -57,4 +57,4 @@ export const FeedbackDetailsPage = (): React.ReactElement => {
       )}
     </>
   );
-};
+}

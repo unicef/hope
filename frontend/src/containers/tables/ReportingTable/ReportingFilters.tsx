@@ -1,4 +1,6 @@
-import { Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
+import {
+  Checkbox, FormControlLabel, Grid, MenuItem,
+} from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -16,28 +18,27 @@ interface ReportingFiltersProps {
   setAppliedFilter: (filter) => void;
 }
 
-export const ReportingFilters = ({
+export function ReportingFilters({
   filter,
   choicesData,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: ReportingFiltersProps): React.ReactElement => {
+}: ReportingFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -59,13 +60,11 @@ export const ReportingFilters = ({
             onChange={(e) => handleFilterChange('type', e.target.value)}
             value={filter.type}
           >
-            {choicesData.reportTypesChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.reportTypesChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
@@ -89,31 +88,27 @@ export const ReportingFilters = ({
             onChange={(e) => handleFilterChange('status', e.target.value)}
             value={filter.status}
           >
-            {choicesData.reportStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.reportStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={12}>
           <FormControlLabel
-            control={
+            control={(
               <Checkbox
                 checked={filter.onlyMy}
-                onChange={(_e, checked) =>
-                  handleFilterChange('onlyMy', checked)
-                }
+                onChange={(_e, checked) => handleFilterChange('onlyMy', checked)}
                 value={filter.onlyMy}
                 color="primary"
               />
-            }
+            )}
             label="See my reports only"
           />
         </Grid>
       </Grid>
     </FiltersSection>
   );
-};
+}

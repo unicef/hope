@@ -8,7 +8,7 @@ import { CreateSurveyPage } from '../pages/accountability/surveys/CreateSurveyPa
 import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetailsPage';
 import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
 
-export const AccountabilityRoutes = (): React.ReactElement => {
+export function AccountabilityRoutes(): React.ReactElement {
   const { path } = useRouteMatch();
 
   const accountabilityRoutes = [
@@ -49,4 +49,4 @@ export const AccountabilityRoutes = (): React.ReactElement => {
       ))}
     </Switch>
   );
-};
+}

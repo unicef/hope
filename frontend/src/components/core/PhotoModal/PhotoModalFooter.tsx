@@ -3,13 +3,13 @@ import React from 'react';
 import { DialogActions } from '../../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
 
-export const PhotoModalFooter = ({
+export function PhotoModalFooter({
   setTurnAngle,
   setDialogOpen,
 }: {
   setTurnAngle: React.Dispatch<React.SetStateAction<number>>;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <DialogFooter>
       <DialogActions>
@@ -25,4 +25,4 @@ export const PhotoModalFooter = ({
       </DialogActions>
     </DialogFooter>
   );
-};
+}

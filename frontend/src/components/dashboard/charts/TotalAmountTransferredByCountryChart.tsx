@@ -14,9 +14,9 @@ interface TotalAmountTransferredByCountryChartProps {
   data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];
 }
 
-export const TotalAmountTransferredByCountryChart = ({
+export function TotalAmountTransferredByCountryChart({
   data,
-}: TotalAmountTransferredByCountryChartProps): React.ReactElement => {
+}: TotalAmountTransferredByCountryChartProps): React.ReactElement {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
   const { t } = useTranslation();
@@ -25,9 +25,7 @@ export const TotalAmountTransferredByCountryChart = ({
 
   const matchDataSize = (
     dataToSlice: number[] | string[],
-  ): number[] | string[] => {
-    return showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount);
-  };
+  ): number[] | string[] => (showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount));
 
   const chartData = {
     labels: matchDataSize(data.labels),
@@ -60,14 +58,12 @@ export const TotalAmountTransferredByCountryChart = ({
     tooltips: {
       mode: 'point',
       callbacks: {
-        label: (tooltipItem, tooltipData) => {
-          return ` ${
-            tooltipData.datasets[tooltipItem.datasetIndex].label
-          }: ${formatCurrencyWithSymbol(tooltipItem.xLabel)} (${getPercentage(
-            tooltipItem.xLabel,
-            data.datasets[2].data[tooltipItem.index],
-          )})`;
-        },
+        label: (tooltipItem, tooltipData) => ` ${
+          tooltipData.datasets[tooltipItem.datasetIndex].label
+        }: ${formatCurrencyWithSymbol(tooltipItem.xLabel)} (${getPercentage(
+          tooltipItem.xLabel,
+          data.datasets[2].data[tooltipItem.index],
+        )})`,
       },
     },
     scales: {
@@ -131,4 +127,4 @@ export const TotalAmountTransferredByCountryChart = ({
       ) : null}
     </Box>
   );
-};
+}

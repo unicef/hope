@@ -16,7 +16,7 @@ const propsData = [
   { title: 'Payment Record', to: '/third-url' },
 ];
 
-export const BreadCrumb = () => {
+export function BreadCrumb() {
   return (
     <ThemeProvider theme={theme}>
       <StyledThemeProvider theme={theme}>
@@ -26,4 +26,4 @@ export const BreadCrumb = () => {
       </StyledThemeProvider>
     </ThemeProvider>
   );
-};
+}

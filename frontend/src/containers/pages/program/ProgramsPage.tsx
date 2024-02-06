@@ -25,7 +25,7 @@ const initialFilter = {
   dataCollectingType: '',
 };
 
-export const ProgramsPage = (): React.ReactElement => {
+export function ProgramsPage(): React.ReactElement {
   const location = useLocation();
 
   const [filter, setFilter] = useState(
@@ -49,8 +49,7 @@ export const ProgramsPage = (): React.ReactElement => {
       ],
       permissions,
     )
-  )
-    return <PermissionDenied />;
+  ) return <PermissionDenied />;
 
   const toolbar = (
     <PageHeader title={t('Programme Management')}>
@@ -84,4 +83,4 @@ export const ProgramsPage = (): React.ReactElement => {
       />
     </div>
   );
-};
+}

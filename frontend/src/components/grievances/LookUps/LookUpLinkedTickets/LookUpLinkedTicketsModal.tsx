@@ -19,12 +19,12 @@ import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpLinkedTicketsFilters } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsFilters';
 import { LookUpLinkedTicketsTable } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsTable';
 
-export const LookUpLinkedTicketsModal = ({
+export function LookUpLinkedTicketsModal({
   onValueChange,
   initialValues,
   lookUpDialogOpen,
   setLookUpDialogOpen,
-}): React.ReactElement => {
+}): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const location = useLocation();
@@ -45,8 +45,7 @@ export const LookUpLinkedTicketsModal = ({
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery();
   if (!choicesData) return null;
   if (choicesLoading) {
     return <LoadingComponent />;
@@ -111,4 +110,4 @@ export const LookUpLinkedTicketsModal = ({
       )}
     </Formik>
   );
-};
+}

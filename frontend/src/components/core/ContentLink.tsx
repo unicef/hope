@@ -3,8 +3,7 @@ import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
 
 const Link = styled.a`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
   color: #000;
   font-size: 14px;
   line-height: 19px;
@@ -12,7 +11,7 @@ const Link = styled.a`
   overflow-wrap: break-word;
 `;
 
-export const ContentLink = ({
+export function ContentLink({
   href,
   children,
   download = false,
@@ -22,10 +21,10 @@ export const ContentLink = ({
   children: string;
   download?: boolean;
   fullWidth?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <Link download={download} href={href} fullWidth={fullWidth}>
       {children}
     </Link>
   );
-};
+}

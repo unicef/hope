@@ -15,10 +15,10 @@ interface RecipientsTableProps {
   canViewDetails: boolean;
 }
 
-export const RecipientsTable = ({
+export function RecipientsTable({
   id,
   canViewDetails,
-}: RecipientsTableProps): React.ReactElement => {
+}: RecipientsTableProps): React.ReactElement {
   const { t } = useTranslation();
   const initialVariables: AllAccountabilityCommunicationMessageRecipientsQueryVariables = {
     messageId: id,
@@ -27,14 +27,14 @@ export const RecipientsTable = ({
   return (
     <TableWrapper>
       <UniversalTable<
-        CommunicationMessageRecipientMapNode,
-        AllAccountabilityCommunicationMessageRecipientsQueryVariables
+      CommunicationMessageRecipientMapNode,
+      AllAccountabilityCommunicationMessageRecipientsQueryVariables
       >
         title={t('Recipients')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllAccountabilityCommunicationMessageRecipientsQuery}
-        queriedObjectName='allAccountabilityCommunicationMessageRecipients'
+        queriedObjectName="allAccountabilityCommunicationMessageRecipients"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <RecipientsTableRow
@@ -47,4 +47,4 @@ export const RecipientsTable = ({
       />
     </TableWrapper>
   );
-};
+}

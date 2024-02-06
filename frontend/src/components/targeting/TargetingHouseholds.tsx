@@ -13,7 +13,7 @@ export function TargetingHouseholds({
     <TargetPopulationHouseholdTable
       id={id}
       query={useTargetPopulationHouseholdsQuery}
-      queryObjectName='targetPopulationHouseholds'
+      queryObjectName="targetPopulationHouseholds"
       canViewDetails={canViewDetails}
       variables={{ businessArea }}
     />

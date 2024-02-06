@@ -41,7 +41,7 @@ export interface ProgramDetailsPageHeaderPropTypes {
   canSend: boolean;
 }
 
-export const TargetPopulationPageHeader = ({
+export function TargetPopulationPageHeader({
   targetPopulation,
   canEdit,
   canRemove,
@@ -49,7 +49,7 @@ export const TargetPopulationPageHeader = ({
   canLock,
   canUnlock,
   canSend,
-}: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
   const {
@@ -97,7 +97,7 @@ export const TargetPopulationPageHeader = ({
       );
       break;
     default:
-      //Ready for Cash Assist, Processing, Ready, Accepted
+      // Ready for Cash Assist, Processing, Ready, Accepted
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
@@ -108,26 +108,24 @@ export const TargetPopulationPageHeader = ({
       break;
   }
   return (
-    <>
-      <PageHeader
-        title={
-          <HeaderWrapper>
-            {t(`${targetPopulation.name}`)}
-            {targetPopulation.buildStatus !==
-              TargetPopulationBuildStatus.Ok && (
+    <PageHeader
+      title={(
+        <HeaderWrapper>
+          {t(`${targetPopulation.name}`)}
+          {targetPopulation.buildStatus
+              !== TargetPopulationBuildStatus.Ok && (
               <StatusWrapper>
                 <StatusBox
                   status={targetPopulation.buildStatus}
                   statusToColor={targetPopulationBuildStatusToColor}
                 />
               </StatusWrapper>
-            )}
-          </HeaderWrapper>
-        }
-        breadCrumbs={breadCrumbsItems}
-      >
-        {buttons}
-      </PageHeader>
-    </>
+          )}
+        </HeaderWrapper>
+        )}
+      breadCrumbs={breadCrumbsItems}
+    >
+      {buttons}
+    </PageHeader>
   );
-};
+}

@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+
 export const ApproveDeleteIndividualDataChange = gql`
   mutation ApproveSystemFlagging(
     $grievanceTicketId: ID!

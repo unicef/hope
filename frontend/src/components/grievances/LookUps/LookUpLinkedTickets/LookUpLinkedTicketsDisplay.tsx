@@ -4,10 +4,12 @@ import { useLocation } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BlueText, StyledBox, LightGrey, DarkGrey } from '../LookUpStyles';
+import {
+  BlueText, StyledBox, LightGrey, DarkGrey,
+} from '../LookUpStyles';
 import { LinkedTicketIdDisplay } from './LinkedTicketIdDisplay';
 
-export const LookUpLinkedTicketsDisplay = ({
+export function LookUpLinkedTicketsDisplay({
   values,
   setLookUpDialogOpen,
   onValueChange,
@@ -17,7 +19,7 @@ export const LookUpLinkedTicketsDisplay = ({
   setLookUpDialogOpen;
   onValueChange;
   disabled?;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -38,7 +40,9 @@ export const LookUpLinkedTicketsDisplay = ({
       <Grid container justifyContent="space-between">
         <Grid item>
           <Box display="flex" flexDirection="column">
-            {t('Ticket ID')}:{renderLinkedTickets()}
+            {t('Ticket ID')}
+            :
+            {renderLinkedTickets()}
           </Box>
         </Grid>
         {!isEditTicket && (
@@ -72,4 +76,4 @@ export const LookUpLinkedTicketsDisplay = ({
       </Grid>
     </StyledBox>
   );
-};
+}

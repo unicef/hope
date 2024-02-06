@@ -49,7 +49,7 @@ const countApprovedAndUnapproved = (
   return { approved, notApproved };
 };
 
-export const GrievanceDetailsToolbar = ({
+export function GrievanceDetailsToolbar({
   ticket,
   canEdit,
   canSetInProgress,
@@ -67,7 +67,7 @@ export const GrievanceDetailsToolbar = ({
   canSendBack: boolean;
   canClose: boolean;
   canAssign: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
@@ -91,89 +91,77 @@ export const GrievanceDetailsToolbar = ({
   const isClosed = ticket.status === GRIEVANCE_TICKET_STATES.CLOSED;
   const isEditable = !isClosed;
 
-  const isFeedbackType =
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
+  const isFeedbackType = ticket.category.toString() === GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK
+    || ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK
+    || ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
-  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
-    (): string => {
-      const householdData =
-        ticket.householdDataUpdateTicketDetails?.householdData || {};
-      const individualData =
-        ticket.individualDataUpdateTicketDetails?.individualData || {};
-      const allData = {
-        ...householdData,
-        ...individualData,
-        ...householdData?.flex_fields,
-        ...individualData?.flex_fields,
-      };
-      const excludedKeys = [
-        'previous_documents',
-        'previous_identities',
-        'previous_payment_channels',
-        'flex_fields',
-      ];
-
-      const filteredData = Object.keys(allData)
-        .filter((key) => !excludedKeys.includes(key))
-        .reduce((obj, key) => {
-          return {
-            ...obj,
-            [key]: allData[key],
-          };
-        }, {});
-
-      const { approved, notApproved } = countApprovedAndUnapproved(
-        Object.values(filteredData),
-      );
-
-      if (!notApproved) {
-        return '';
-      }
-
-      if (!approved) {
-        return t(
-          `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
-        );
-      }
-
-      const approvedText = `${approved} change${approved > 1 ? 's' : ''}`;
-      return `You approved ${approvedText}. Remaining change requests (${notApproved}) will be automatically rejected.`;
+  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange = (): string => {
+    const householdData = ticket.householdDataUpdateTicketDetails?.householdData || {};
+    const individualData = ticket.individualDataUpdateTicketDetails?.individualData || {};
+    const allData = {
+      ...householdData,
+      ...individualData,
+      ...householdData?.flex_fields,
+      ...individualData?.flex_fields,
     };
+    const excludedKeys = [
+      'previous_documents',
+      'previous_identities',
+      'previous_payment_channels',
+      'flex_fields',
+    ];
+
+    const filteredData = Object.keys(allData)
+      .filter((key) => !excludedKeys.includes(key))
+      .reduce((obj, key) => ({
+        ...obj,
+        [key]: allData[key],
+      }), {});
+
+    const { approved, notApproved } = countApprovedAndUnapproved(
+      Object.values(filteredData),
+    );
+
+    if (!notApproved) {
+      return '';
+    }
+
+    if (!approved) {
+      return t(
+        'You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.',
+      );
+    }
+
+    const approvedText = `${approved} change${approved > 1 ? 's' : ''}`;
+    return `You approved ${approvedText}. Remaining change requests (${notApproved}) will be automatically rejected.`;
+  };
 
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
-    const hasApproveOption =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION ||
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
+    const hasApproveOption = ticket.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE
+      || ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+      || ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
 
     if (!hasApproveOption) {
       return '';
     }
 
-    const notApprovedDeleteIndividualChanges =
-      ticket.issueType?.toString() ===
-        GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
-      ticket.deleteIndividualTicketDetails?.approveStatus === false;
+    const notApprovedDeleteIndividualChanges = ticket.issueType?.toString()
+        === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+      && ticket.deleteIndividualTicketDetails?.approveStatus === false;
 
-    const notApprovedAddIndividualChanges =
-      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
-      ticket.addIndividualTicketDetails?.approveStatus === false;
+    const notApprovedAddIndividualChanges = ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+      && ticket.addIndividualTicketDetails?.approveStatus === false;
 
-    const notApprovedSystemFlaggingChanges =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
-      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+    const notApprovedSystemFlaggingChanges = ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
+      && ticket.systemFlaggingTicketDetails?.approveStatus === false;
 
-    const noDuplicatesFound =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-      !ticket.needsAdjudicationTicketDetails?.selectedIndividual &&
-      !ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
+    const noDuplicatesFound = ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+      && !ticket.needsAdjudicationTicketDetails?.selectedIndividual
+      && !ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion;
 
-    const noDuplicatesFoundMultiple =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-      ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
-      !ticket.needsAdjudicationTicketDetails?.selectedIndividuals.length;
+    const noDuplicatesFoundMultiple = ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+      && ticket.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion
+      && !ticket.needsAdjudicationTicketDetails?.selectedIndividuals.length;
 
     // added msg handling for
     let confirmationMessage = '';
@@ -213,12 +201,11 @@ export const GrievanceDetailsToolbar = ({
     'Are you sure you want to close the ticket?',
   );
 
-  const closingWarningText =
-    ticket?.businessArea.postponeDeduplication === true
-      ? t(
-          'This ticket will be closed without running the deduplication process.',
-        )
-      : null;
+  const closingWarningText = ticket?.businessArea.postponeDeduplication === true
+    ? t(
+      'This ticket will be closed without running the deduplication process.',
+    )
+    : null;
 
   const changeState = async (status): Promise<void> => {
     try {
@@ -238,9 +225,8 @@ export const GrievanceDetailsToolbar = ({
       return getClosingConfirmationExtraText();
     }
     let additionalContent = '';
-    const notApprovedSystemFlaggingChanges =
-      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
-      ticket.systemFlaggingTicketDetails?.approveStatus === false;
+    const notApprovedSystemFlaggingChanges = ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
+      && ticket.systemFlaggingTicketDetails?.approveStatus === false;
 
     if (notApprovedSystemFlaggingChanges) {
       additionalContent = t(
@@ -248,8 +234,7 @@ export const GrievanceDetailsToolbar = ({
       );
     }
 
-    const householdHasOneIndividual =
-      ticket.household?.activeIndividualsCount === 1;
+    const householdHasOneIndividual = ticket.household?.activeIndividualsCount === 1;
     if (householdHasOneIndividual) {
       additionalContent = t(
         ' When you close this ticket, the household that this Individual is a member of will be deactivated.',
@@ -263,24 +248,22 @@ export const GrievanceDetailsToolbar = ({
       loading={loading}
       color="primary"
       variant="contained"
-      onClick={() =>
-        confirm({
-          title: t('Close ticket'),
-          extraContent:
+      onClick={() => confirm({
+        title: t('Close ticket'),
+        extraContent:
             ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
               ? closingConfirmationText
               : getClosingConfirmationExtraText(),
-          content: getClosingConfirmationText(),
-          warningContent: closingWarningText,
-          continueText: t('close ticket'),
-        }).then(async () => {
-          try {
-            await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
-          } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
-          }
-        })
-      }
+        content: getClosingConfirmationText(),
+        warningContent: closingWarningText,
+        continueText: t('close ticket'),
+      }).then(async () => {
+        try {
+          await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
+      })}
       data-cy="button-close-ticket"
       disabled={!isActiveProgram}
     >
@@ -288,10 +271,10 @@ export const GrievanceDetailsToolbar = ({
     </LoadingButton>
   );
   if (
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
-    !ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
-    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividual
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+    && ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument
+    && !ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion
+    && !!ticket?.needsAdjudicationTicketDetails?.selectedIndividual
   ) {
     closeButton = (
       <ButtonDialog
@@ -305,10 +288,10 @@ export const GrievanceDetailsToolbar = ({
   }
 
   if (
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
-    ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion &&
-    !!ticket?.needsAdjudicationTicketDetails?.selectedIndividuals.length
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+    && ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument
+    && ticket?.needsAdjudicationTicketDetails?.isMultipleDuplicatesVersion
+    && !!ticket?.needsAdjudicationTicketDetails?.selectedIndividuals.length
   ) {
     closeButton = (
       <ButtonDialog
@@ -321,12 +304,10 @@ export const GrievanceDetailsToolbar = ({
     );
   }
 
-  const canCreateDataChange = (): boolean => {
-    return [
-      GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT,
-      GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT,
-    ].includes(ticket.issueType?.toString());
-  };
+  const canCreateDataChange = (): boolean => [
+    GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT,
+    GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT,
+  ].includes(ticket.issueType?.toString());
 
   const grievanceEditPath = getGrievanceEditPath(
     ticket.id,
@@ -357,18 +338,16 @@ export const GrievanceDetailsToolbar = ({
         )}
         {isNew && canEdit && canAssign && <Separator />}
         {isNew && canEdit && canAssign && (
-          <>
-            <LoadingButton
-              loading={loading}
-              color="primary"
-              variant="contained"
-              onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
-              data-cy="button-assign-to-me"
-              disabled={!isActiveProgram}
-            >
+          <LoadingButton
+            loading={loading}
+            color="primary"
+            variant="contained"
+            onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
+            data-cy="button-assign-to-me"
+            disabled={!isActiveProgram}
+          >
               {t('ASSIGN TO ME')}
-            </LoadingButton>
-          </>
+          </LoadingButton>
         )}
         {isAssigned && canSetInProgress && (
           <Box mr={3}>
@@ -408,9 +387,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
-                  onClick={() =>
-                    changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
-                  }
+                  onClick={() => changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)}
                   data-cy="button-send-for-approval"
                   disabled={!isActiveProgram}
                 >
@@ -422,12 +399,10 @@ export const GrievanceDetailsToolbar = ({
               <Button
                 color="primary"
                 variant="contained"
-                onClick={() =>
-                  confirm({
-                    content: closingConfirmationText,
-                    continueText: 'close ticket',
-                  }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
-                }
+                onClick={() => confirm({
+                  content: closingConfirmationText,
+                  continueText: 'close ticket',
+                }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))}
                 data-cy="button-close-ticket"
                 disabled={!isActiveProgram}
               >
@@ -444,9 +419,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
-                  onClick={() =>
-                    changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
-                  }
+                  onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
                   data-cy="button-set-to-in-progress"
                   disabled={!isActiveProgram}
                 >
@@ -460,9 +433,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
-                  onClick={() =>
-                    changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
-                  }
+                  onClick={() => changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)}
                   data-cy="button-send-for-approval"
                   disabled={!isActiveProgram}
                 >
@@ -475,12 +446,10 @@ export const GrievanceDetailsToolbar = ({
                 loading={loading}
                 color="primary"
                 variant="contained"
-                onClick={() =>
-                  confirm({
-                    content: closingConfirmationText,
-                    continueText: 'close ticket',
-                  }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
-                }
+                onClick={() => confirm({
+                  content: closingConfirmationText,
+                  continueText: 'close ticket',
+                }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))}
                 data-cy="button-close-ticket"
                 disabled={!isActiveProgram}
               >
@@ -497,9 +466,7 @@ export const GrievanceDetailsToolbar = ({
                   loading={loading}
                   color="primary"
                   variant="contained"
-                  onClick={() =>
-                    changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
-                  }
+                  onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
                   data-cy="button-send-back"
                   disabled={!isActiveProgram}
                 >
@@ -510,17 +477,15 @@ export const GrievanceDetailsToolbar = ({
             {canCreateDataChange() && (
               <Box mr={3}>
                 <Button
-                  onClick={() =>
-                    history.push({
-                      pathname: `/${baseUrl}/grievance/new-ticket`,
-                      state: {
-                        category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
-                        selectedIndividual: ticket.individual,
-                        selectedHousehold: ticket.household,
-                        linkedTicketId: ticket.id,
-                      },
-                    })
-                  }
+                  onClick={() => history.push({
+                    pathname: `/${baseUrl}/grievance/new-ticket`,
+                    state: {
+                      category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
+                      selectedIndividual: ticket.individual,
+                      selectedHousehold: ticket.household,
+                      linkedTicketId: ticket.id,
+                    },
+                  })}
                   variant="outlined"
                   color="primary"
                   data-cy="button-create-data-change"
@@ -536,4 +501,4 @@ export const GrievanceDetailsToolbar = ({
       </Box>
     </PageHeader>
   );
-};
+}

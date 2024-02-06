@@ -26,6 +26,7 @@ describe(
 
       await act(() => wait(0)); // wait for the mutation to complete
 
-    expect(container).toMatchSnapshot();
-  });
-});
+      expect(container).toMatchSnapshot();
+    });
+  },
+);

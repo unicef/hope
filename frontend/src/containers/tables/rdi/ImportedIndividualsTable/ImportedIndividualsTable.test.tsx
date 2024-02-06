@@ -12,9 +12,9 @@ describe('containers/tables/rdi/ImportedIndividualsTable', () => {
     const { container } = render(
       <MockedProvider mocks={fakeApolloAllImportedIndividuals}>
         <ImportedIndividualsTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           choicesData={fakeHouseholdChoices}
-          rdiId='UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl'
+          rdiId="UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl"
         />
       </MockedProvider>,
     );
@@ -30,9 +30,9 @@ describe('containers/tables/rdi/ImportedIndividualsTable', () => {
         mocks={fakeApolloAllImportedIndividuals}
       >
         <ImportedIndividualsTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           choicesData={fakeHouseholdChoices}
-          rdiId='UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl'
+          rdiId="UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl"
         />
       </MockedProvider>,
     );

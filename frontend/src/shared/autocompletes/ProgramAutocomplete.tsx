@@ -1,7 +1,9 @@
 import { InputAdornment } from '@mui/material';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
@@ -15,7 +17,7 @@ import {
 } from '../../utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const ProgramAutocomplete = ({
+export function ProgramAutocomplete({
   disabled,
   name,
   filter,
@@ -34,7 +36,7 @@ export const ProgramAutocomplete = ({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -103,21 +105,17 @@ export const ProgramAutocomplete = ({
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option?.node?.id, value1)
-      }
-      handleOptionLabel={(option) =>
-        getAutocompleteOptionLabel(option, allEdges, inputValue)
-      }
+      handleOptionSelected={(option, value1) => handleOptionSelected(option?.node?.id, value1)}
+      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue)}
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
-      startAdornment={
+      startAdornment={(
         <InputAdornment position="start">
           <FlashOnIcon />
         </InputAdornment>
-      }
+      )}
     />
   );
-};
+}

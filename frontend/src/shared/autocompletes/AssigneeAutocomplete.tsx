@@ -1,5 +1,7 @@
 import get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
@@ -13,7 +15,7 @@ import {
 } from '../../utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const AssigneeAutocomplete = ({
+export function AssigneeAutocomplete({
   disabled,
   name,
   filter,
@@ -35,7 +37,7 @@ export const AssigneeAutocomplete = ({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const history = useHistory();
   const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
@@ -103,19 +105,13 @@ export const AssigneeAutocomplete = ({
       }}
       handleOpen={() => setOpen(true)}
       open={open}
-      handleClose={(_, reason) =>
-        handleAutocompleteClose(setOpen, onInputTextChange, reason)
-      }
-      handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option.node?.id, value1)
-      }
-      handleOptionLabel={(option) =>
-        getAutocompleteOptionLabel(option, allEdges, inputValue, 'individual')
-      }
+      handleClose={(_, reason) => handleAutocompleteClose(setOpen, onInputTextChange, reason)}
+      handleOptionSelected={(option, value1) => handleOptionSelected(option.node?.id, value1)}
+      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue, 'individual')}
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
     />
   );
-};
+}

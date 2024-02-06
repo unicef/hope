@@ -1,4 +1,6 @@
-import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
+import {
+  Box, Checkbox, FormControlLabel, Grid, MenuItem,
+} from '@mui/material';
 import moment from 'moment';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,14 +17,14 @@ import { SelectFilter } from '../../../../components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '../../../../utils/utils';
 
 export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'isFollowUp'
+AllPaymentPlansForTableQueryVariables,
+| 'search'
+| 'status'
+| 'totalEntitledQuantityFrom'
+| 'totalEntitledQuantityTo'
+| 'dispersionStartDate'
+| 'dispersionEndDate'
+| 'isFollowUp'
 >;
 
 interface PaymentPlansFiltersProps {
@@ -32,27 +34,26 @@ interface PaymentPlansFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const PaymentPlansFilters = ({
+export function PaymentPlansFilters({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: PaymentPlansFiltersProps): React.ReactElement => {
+}: PaymentPlansFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -91,13 +92,11 @@ export const PaymentPlansFilters = ({
             value={filter.status}
             fullWidth
           >
-            {statusChoicesData.paymentPlanStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {statusChoicesData.paymentPlanStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
@@ -106,9 +105,7 @@ export const PaymentPlansFilters = ({
             topLabel={t('Entitled Quantity')}
             value={filter.totalEntitledQuantityFrom}
             placeholder={t('From')}
-            onChange={(e) =>
-              handleFilterChange('totalEntitledQuantityFrom', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('totalEntitledQuantityFrom', e.target.value)}
             data-cy="filters-total-entitled-quantity-from"
           />
         </Grid>
@@ -117,14 +114,12 @@ export const PaymentPlansFilters = ({
             id="totalEntitledQuantityToFilter"
             value={filter.totalEntitledQuantityTo}
             placeholder={t('To')}
-            onChange={(e) =>
-              handleFilterChange('totalEntitledQuantityTo', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('totalEntitledQuantityTo', e.target.value)}
             error={Boolean(
-              filter.totalEntitledQuantityFrom &&
-                filter.totalEntitledQuantityTo &&
-                filter.totalEntitledQuantityFrom >
-                  filter.totalEntitledQuantityTo,
+              filter.totalEntitledQuantityFrom
+                && filter.totalEntitledQuantityTo
+                && filter.totalEntitledQuantityFrom
+                  > filter.totalEntitledQuantityTo,
             )}
             data-cy="filters-total-entitled-quantity-to"
           />
@@ -135,8 +130,8 @@ export const PaymentPlansFilters = ({
             placeholder={t('From')}
             onChange={(date) => {
               if (
-                filter.dispersionEndDate &&
-                moment(date).isAfter(filter.dispersionEndDate)
+                filter.dispersionEndDate
+                && moment(date).isAfter(filter.dispersionEndDate)
               ) {
                 handleFilterChange(
                   'dispersionStartDate',
@@ -156,12 +151,10 @@ export const PaymentPlansFilters = ({
         <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
-            onChange={(date) =>
-              handleFilterChange(
-                'dispersionEndDate',
-                date ? moment(date).format('YYYY-MM-DD') : '',
-              )
-            }
+            onChange={(date) => handleFilterChange(
+              'dispersionEndDate',
+              date ? moment(date).format('YYYY-MM-DD') : '',
+            )}
             value={filter.dispersionEndDate}
             minDate={filter.dispersionStartDate}
             minDateMessage={<span />}
@@ -170,7 +163,7 @@ export const PaymentPlansFilters = ({
         <Grid item xs={12}>
           <Box ml={2}>
             <FormControlLabel
-              control={
+              control={(
                 <Checkbox
                   checked={Boolean(filter.isFollowUp)}
                   value={filter.isFollowUp}
@@ -183,7 +176,7 @@ export const PaymentPlansFilters = ({
                     }
                   }}
                 />
-              }
+              )}
               label={t('Show only Follow-up plans')}
             />
           </Box>
@@ -191,4 +184,4 @@ export const PaymentPlansFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

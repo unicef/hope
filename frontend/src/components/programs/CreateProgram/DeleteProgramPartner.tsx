@@ -25,10 +25,10 @@ interface DeleteProgramPartnerProps {
   handleDeleteProgramPartner;
 }
 
-export const DeleteProgramPartner = ({
+export function DeleteProgramPartner({
   canDeleteProgramPartner,
   handleDeleteProgramPartner,
-}: DeleteProgramPartnerProps): React.ReactElement => {
+}: DeleteProgramPartnerProps): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
@@ -58,7 +58,7 @@ export const DeleteProgramPartner = ({
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
-              //TODO: fix this
+              // TODO: fix this
               loading={false}
               type="submit"
               variant="contained"
@@ -73,4 +73,4 @@ export const DeleteProgramPartner = ({
       </Dialog>
     </>
   );
-};
+}

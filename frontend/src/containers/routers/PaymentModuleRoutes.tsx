@@ -12,7 +12,7 @@ import { PaymentModulePage } from '../pages/paymentmodule/PaymentModulePage';
 import { PaymentPlanDetailsPage } from '../pages/paymentmodule/PaymentPlanDetailsPage';
 import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
 
-export const PaymentModuleRoutes = (): React.ReactElement => {
+export function PaymentModuleRoutes(): React.ReactElement {
   const { path } = useRouteMatch();
 
   const paymentModuleRoutes = [
@@ -72,4 +72,4 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
       ))}
     </Switch>
   );
-};
+}

@@ -13,7 +13,7 @@ export function TabPanel({
   const style = {};
   if (index !== value) {
     // eslint-disable-next-line dot-notation
-    style['display'] = 'none';
+    style.display = 'none';
   }
   return <div style={style}>{children}</div>;
 }

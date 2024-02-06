@@ -29,13 +29,13 @@ export function PaymentRecordHouseholdTable({
   };
   return (
     <UniversalTable<
-      PaymentRecordAndPaymentNode,
-      AllPaymentRecordsAndPaymentsQueryVariables
+    PaymentRecordAndPaymentNode,
+    AllPaymentRecordsAndPaymentsQueryVariables
     >
       title={t('Payment Records')}
       headCells={headCells}
       query={useAllPaymentRecordsAndPaymentsQuery}
-      queriedObjectName='allPaymentRecordsAndPayments'
+      queriedObjectName="allPaymentRecordsAndPayments"
       initialVariables={initialVariables}
       renderRow={(row) => (
         <PaymentRecordAndPaymentHouseholdTableRow

@@ -8,7 +8,7 @@ export function DefaultRoute(): React.ReactElement {
     return null;
   }
   if (data.me.businessAreas.edges.length < 1) {
-    return <Redirect to='/access-denied' />;
+    return <Redirect to="/access-denied" />;
   }
   return (
     <Redirect

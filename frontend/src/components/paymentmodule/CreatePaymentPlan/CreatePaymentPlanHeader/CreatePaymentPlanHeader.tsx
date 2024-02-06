@@ -14,12 +14,12 @@ interface CreatePaymentPlanHeaderProps {
   loadingCreate: boolean;
 }
 
-export const CreatePaymentPlanHeader = ({
+export function CreatePaymentPlanHeader({
   handleSubmit,
   baseUrl,
   permissions,
   loadingCreate,
-}: CreatePaymentPlanHeaderProps): React.ReactElement => {
+}: CreatePaymentPlanHeaderProps): React.ReactElement {
   const { t } = useTranslation();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -56,4 +56,4 @@ export const CreatePaymentPlanHeader = ({
       </Box>
     </PageHeader>
   );
-};
+}

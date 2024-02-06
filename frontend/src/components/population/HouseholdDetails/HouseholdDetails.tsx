@@ -1,4 +1,6 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import {
+  Box, Grid, Paper, Typography,
+} from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -53,13 +55,13 @@ interface HouseholdDetailsProps {
   businessArea: string;
   grievancesChoices: GrievancesChoiceDataQuery;
 }
-export const HouseholdDetails = ({
+export function HouseholdDetails({
   household,
   choicesData,
   baseUrl,
   businessArea,
   grievancesChoices,
-}: HouseholdDetailsProps): React.ReactElement => {
+}: HouseholdDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
@@ -211,13 +213,13 @@ export const HouseholdDetails = ({
                           >
                             {item.currency === 'USD'
                               ? formatCurrencyWithSymbol(
-                                  item.totalDeliveredQuantity,
-                                  item.currency,
-                                )
+                                item.totalDeliveredQuantity,
+                                item.currency,
+                              )
                               : `(${formatCurrencyWithSymbol(
-                                  item.totalDeliveredQuantity,
-                                  item.currency,
-                                )})`}
+                                item.totalDeliveredQuantity,
+                                item.currency,
+                              )})`}
                           </Box>
                         ))}
                       </Box>
@@ -245,4 +247,4 @@ export const HouseholdDetails = ({
       </OverviewPaper>
     </>
   );
-};
+}

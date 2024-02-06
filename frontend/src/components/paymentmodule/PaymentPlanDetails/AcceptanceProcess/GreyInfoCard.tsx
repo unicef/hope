@@ -30,20 +30,24 @@ interface GreyInfoCardProps {
   approvals: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][number]['node']['actions']['approval'];
 }
 
-export const GreyInfoCard = ({
+export function GreyInfoCard({
   topMessage,
   topDate,
   approvals,
-}: GreyInfoCardProps): React.ReactElement => {
+}: GreyInfoCardProps): React.ReactElement {
   const mappedApprovals = approvals.map((action) => {
-    const { info, createdAt, comment, createdBy } = action;
+    const {
+      info, createdAt, comment, createdBy,
+    } = action;
     return (
       info && (
         <Box alignItems="center" display="flex" key={createdAt}>
           {info}
           <Box ml={1}>
             <GreyText>
-              on <UniversalMoment>{createdAt}</UniversalMoment>
+              on
+              {' '}
+              <UniversalMoment>{createdAt}</UniversalMoment>
             </GreyText>
           </Box>
           <Box p={1} ml={1}>
@@ -66,7 +70,10 @@ export const GreyInfoCard = ({
     <Box display="flex" flexDirection="column">
       <Box p={3}>
         <GreyTitle>
-          {topMessage} on <UniversalMoment>{topDate}</UniversalMoment>
+          {topMessage}
+          {' '}
+          on
+          <UniversalMoment>{topDate}</UniversalMoment>
         </GreyTitle>
       </Box>
       <GreyBox
@@ -81,4 +88,4 @@ export const GreyInfoCard = ({
       </GreyBox>
     </Box>
   );
-};
+}

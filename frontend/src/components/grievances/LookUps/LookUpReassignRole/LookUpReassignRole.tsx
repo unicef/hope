@@ -16,25 +16,25 @@ import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
 
 interface LookUpReassignRoleProps {
   household?:
-    | GrievanceTicketQuery['grievanceTicket']['household']
-    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
+  | GrievanceTicketQuery['grievanceTicket']['household']
+  | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
   individual: GrievanceTicketQuery['grievanceTicket']['individual'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
 }
 
-export const LookUpReassignRole = ({
+export function LookUpReassignRole({
   household,
   ticket,
   individualRole,
   shouldDisableButton,
   individual,
-}: LookUpReassignRoleProps): React.ReactElement => {
+}: LookUpReassignRoleProps): React.ReactElement {
   const { t } = useTranslation();
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState<boolean>(false);
   const [selectedHousehold, setSelectedHousehold] = useState<
-    LookUpReassignRoleProps['household']
+  LookUpReassignRoleProps['household']
   >(null);
   const [selectedIndividual, setSelectedIndividual] = useState(null);
   const [reAssigneeRole, setReAssigneeRole] = useState<{
@@ -76,23 +76,19 @@ export const LookUpReassignRole = ({
     switch (category) {
       case GRIEVANCE_CATEGORIES.DATA_CHANGE:
         if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
-          roleReassignData =
-            ticket?.deleteIndividualTicketDetails?.roleReassignData;
+          roleReassignData = ticket?.deleteIndividualTicketDetails?.roleReassignData;
         } else if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-          roleReassignData =
-            ticket?.individualDataUpdateTicketDetails?.roleReassignData;
+          roleReassignData = ticket?.individualDataUpdateTicketDetails?.roleReassignData;
         }
         break;
       case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
-        roleReassignData =
-          ticket?.systemFlaggingTicketDetails?.roleReassignData;
+        roleReassignData = ticket?.systemFlaggingTicketDetails?.roleReassignData;
         break;
       case GRIEVANCE_CATEGORIES.DEDUPLICATION:
-        roleReassignData =
-          ticket?.needsAdjudicationTicketDetails?.roleReassignData;
+        roleReassignData = ticket?.needsAdjudicationTicketDetails?.roleReassignData;
         setShouldUseMultiple(
-          ticket?.needsAdjudicationTicketDetails?.selectedIndividuals?.length >
-            0,
+          ticket?.needsAdjudicationTicketDetails?.selectedIndividuals?.length
+            > 0,
         );
         break;
       default:
@@ -154,4 +150,4 @@ export const LookUpReassignRole = ({
       )}
     </Formik>
   );
-};
+}

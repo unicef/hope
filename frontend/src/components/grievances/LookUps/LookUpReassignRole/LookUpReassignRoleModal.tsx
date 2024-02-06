@@ -26,7 +26,7 @@ import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
-export const LookUpReassignRoleModal = ({
+export function LookUpReassignRoleModal({
   onValueChange,
   initialValues,
   lookUpDialogOpen,
@@ -52,7 +52,7 @@ export const LookUpReassignRoleModal = ({
   shouldUseMultiple;
   individual;
   household?;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { id } = useParams();
@@ -84,8 +84,7 @@ export const LookUpReassignRoleModal = ({
   );
 
   const { businessArea } = useBaseUrl();
-  const { data: individualChoicesData, loading: individualChoicesLoading } =
-    useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } = useIndividualChoiceDataQuery();
 
   if (individualChoicesLoading) return <LoadingComponent />;
 
@@ -204,4 +203,4 @@ export const LookUpReassignRoleModal = ({
       )}
     </Formik>
   );
-};
+}

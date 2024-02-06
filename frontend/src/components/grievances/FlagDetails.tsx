@@ -26,13 +26,13 @@ import { UniversalMoment } from '../core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
 
-export const FlagDetails = ({
+export function FlagDetails({
   ticket,
   canApproveFlag,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveFlag: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const confirm = useConfirmation();
   const useStyles = makeStyles(() => ({
@@ -69,18 +69,14 @@ export const FlagDetails = ({
                 disabled={
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                 }
-                onClick={() =>
-                  confirm({
-                    content: isFlagConfirmed ? removalText : confirmationText,
-                  }).then(() =>
-                    approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !details.approveStatus,
-                      },
-                    }),
-                  )
-                }
+                onClick={() => confirm({
+                  content: isFlagConfirmed ? removalText : confirmationText,
+                }).then(() => approve({
+                  variables: {
+                    grievanceTicketId: ticket.id,
+                    approveStatus: !details.approveStatus,
+                  },
+                }))}
                 variant="outlined"
                 color="primary"
               >
@@ -154,4 +150,4 @@ export const FlagDetails = ({
       </Table>
     </ApproveBox>
   );
-};
+}

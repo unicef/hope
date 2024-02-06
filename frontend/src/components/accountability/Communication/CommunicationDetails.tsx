@@ -15,9 +15,9 @@ interface CommunicationDetailsProps {
   message: AccountabilityCommunicationMessageQuery['accountabilityCommunicationMessage'];
 }
 
-export const CommunicationDetails = ({
+export function CommunicationDetails({
   message,
-}: CommunicationDetailsProps): React.ReactElement => {
+}: CommunicationDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   return (
@@ -64,4 +64,4 @@ export const CommunicationDetails = ({
       </OverviewContainer>
     </ContainerColumnWithBorder>
   );
-};
+}

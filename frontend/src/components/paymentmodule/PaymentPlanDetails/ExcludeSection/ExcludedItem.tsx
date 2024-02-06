@@ -22,13 +22,13 @@ interface ExcludedItemProps {
   isEdit: boolean;
 }
 
-export const ExcludedItem = ({
+export function ExcludedItem({
   id,
   onDelete,
   onUndo,
   isDeleted,
   isEdit,
-}: ExcludedItemProps): React.ReactElement => {
+}: ExcludedItemProps): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -43,8 +43,8 @@ export const ExcludedItem = ({
       mt={2}
     >
       <IdDiv isDeleted={isDeleted}>{id}</IdDiv>
-      {isEdit &&
-        (isDeleted ? (
+      {isEdit
+        && (isDeleted ? (
           <Button variant="text" color="primary" onClick={onUndo}>
             {t('Undo')}
           </Button>
@@ -55,4 +55,4 @@ export const ExcludedItem = ({
         ))}
     </StyledBox>
   );
-};
+}

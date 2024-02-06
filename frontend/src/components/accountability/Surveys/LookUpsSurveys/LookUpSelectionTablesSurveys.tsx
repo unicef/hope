@@ -16,7 +16,7 @@ interface LookUpSelectionTablesSurveysProps {
   onValueChange;
   handleChange;
 }
-export const LookUpSelectionTablesSurveys = ({
+export function LookUpSelectionTablesSurveys({
   selectedTab,
   choicesData,
   values,
@@ -25,7 +25,7 @@ export const LookUpSelectionTablesSurveys = ({
   businessArea,
   onValueChange,
   handleChange,
-}: LookUpSelectionTablesSurveysProps): React.ReactElement => {
+}: LookUpSelectionTablesSurveysProps): React.ReactElement {
   const permissions = usePermissions();
 
   return (
@@ -60,4 +60,4 @@ export const LookUpSelectionTablesSurveys = ({
       )}
     </>
   );
-};
+}

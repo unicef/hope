@@ -33,7 +33,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export const LookUpHouseholdTable = ({
+export function LookUpHouseholdTable({
   businessArea,
   filter,
   choicesData,
@@ -45,7 +45,7 @@ export const LookUpHouseholdTable = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
-}: LookUpHouseholdTableProps): React.ReactElement => {
+}: LookUpHouseholdTableProps): React.ReactElement {
   const { isAllPrograms, programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
@@ -78,8 +78,8 @@ export const LookUpHouseholdTable = ({
 
   const handleCheckboxClick = (
     _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -138,45 +138,43 @@ export const LookUpHouseholdTable = ({
     ? headCellsWithProgramColumn
     : headCells;
 
-  const renderTable = (): React.ReactElement => {
-    return (
-      <UniversalTable<
-        AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
-        AllHouseholdsForPopulationTableQueryVariables
-      >
-        headCells={
+  const renderTable = (): React.ReactElement => (
+    <UniversalTable<
+    AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
+    AllHouseholdsForPopulationTableQueryVariables
+    >
+      headCells={
           householdMultiSelect ? preparedHeadcells.slice(1) : preparedHeadcells
         }
-        rowsPerPageOptions={[5, 10, 15, 20]}
-        query={useAllHouseholdsForPopulationTableQuery}
-        queriedObjectName='allHouseholds'
-        initialVariables={initialVariables}
-        allowSort={false}
-        filterOrderBy={filter.orderBy}
-        onSelectAllClick={
+      rowsPerPageOptions={[5, 10, 15, 20]}
+      query={useAllHouseholdsForPopulationTableQuery}
+      queriedObjectName="allHouseholds"
+      initialVariables={initialVariables}
+      allowSort={false}
+      filterOrderBy={filter.orderBy}
+      onSelectAllClick={
           householdMultiSelect && handleSelectAllCheckboxesClick
         }
-        numSelected={householdMultiSelect && selected.length}
-        renderRow={(row) => (
-          <LookUpHouseholdTableRow
-            key={row.id}
-            household={row}
-            radioChangeHandler={handleRadioChange}
-            selectedHousehold={selectedHousehold}
-            choicesData={choicesData}
-            checkboxClickHandler={handleCheckboxClick}
-            selected={selected}
-            householdMultiSelect={householdMultiSelect}
-            redirectedFromRelatedTicket={redirectedFromRelatedTicket}
-            isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
-          />
-        )}
-      />
-    );
-  };
+      numSelected={householdMultiSelect && selected.length}
+      renderRow={(row) => (
+        <LookUpHouseholdTableRow
+          key={row.id}
+          household={row}
+          radioChangeHandler={handleRadioChange}
+          selectedHousehold={selectedHousehold}
+          choicesData={choicesData}
+          checkboxClickHandler={handleCheckboxClick}
+          selected={selected}
+          householdMultiSelect={householdMultiSelect}
+          redirectedFromRelatedTicket={redirectedFromRelatedTicket}
+          isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
+        />
+      )}
+    />
+  );
   return noTableStyling ? (
     <NoTableStyling>{renderTable()}</NoTableStyling>
   ) : (
     <TableWrapper>{renderTable()}</TableWrapper>
   );
-};
+}

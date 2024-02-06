@@ -1,6 +1,7 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
+
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -71,7 +72,7 @@ export enum Action {
   SendForApproval = 'SEND_FOR_APPROVAL',
   SendToPaymentGateway = 'SEND_TO_PAYMENT_GATEWAY',
   Unlock = 'UNLOCK',
-  UnlockFsp = 'UNLOCK_FSP'
+  UnlockFsp = 'UNLOCK_FSP',
 }
 
 export type ActionPaymentPlanInput = {
@@ -210,7 +211,6 @@ export type AreaNode = Node & {
   validUntil?: Maybe<Scalars['DateTime']['output']>;
 };
 
-
 export type AreaNodeAreaSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -220,7 +220,6 @@ export type AreaNodeAreaSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type AreaNodeFeedbackSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -228,7 +227,6 @@ export type AreaNodeFeedbackSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type AreaNodeGrievanceticketSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -238,7 +236,6 @@ export type AreaNodeGrievanceticketSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type AreaNodeHouseholdSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -246,7 +243,6 @@ export type AreaNodeHouseholdSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type AreaNodeProgramsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -256,7 +252,6 @@ export type AreaNodeProgramsArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type AreaNodeReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -308,7 +303,6 @@ export type AreaTypeNode = Node & {
   validUntil?: Maybe<Scalars['DateTime']['output']>;
 };
 
-
 export type AreaTypeNodeAreaSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -317,7 +311,6 @@ export type AreaTypeNodeAreaSetArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type AreaTypeNodeAreatypeSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -374,7 +367,6 @@ export type BankAccountInfoNode = Node & {
   type?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
 };
-
 
 export type BankAccountInfoNodeCopiedToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -481,7 +473,6 @@ export type BusinessAreaNode = Node & {
   userRoles: Array<UserRoleNode>;
 };
 
-
 export type BusinessAreaNodeCashplanSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -489,7 +480,6 @@ export type BusinessAreaNodeCashplanSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type BusinessAreaNodeChildrenArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -500,7 +490,6 @@ export type BusinessAreaNodeChildrenArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type BusinessAreaNodeDataCollectingTypesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -508,7 +497,6 @@ export type BusinessAreaNodeDataCollectingTypesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type BusinessAreaNodeFeedbackSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -518,7 +506,6 @@ export type BusinessAreaNodeFeedbackSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type BusinessAreaNodeHouseholdSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -526,7 +513,6 @@ export type BusinessAreaNodeHouseholdSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type BusinessAreaNodeIndividualSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -536,7 +522,6 @@ export type BusinessAreaNodeIndividualSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type BusinessAreaNodeLogentrySetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -544,7 +529,6 @@ export type BusinessAreaNodeLogentrySetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type BusinessAreaNodeMessageSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -554,7 +538,6 @@ export type BusinessAreaNodeMessageSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type BusinessAreaNodePaymentSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -562,7 +545,6 @@ export type BusinessAreaNodePaymentSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type BusinessAreaNodePaymentplanSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -572,7 +554,6 @@ export type BusinessAreaNodePaymentplanSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type BusinessAreaNodePaymentrecordSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -580,7 +561,6 @@ export type BusinessAreaNodePaymentrecordSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type BusinessAreaNodeProgramSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -591,7 +571,6 @@ export type BusinessAreaNodeProgramSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type BusinessAreaNodeRegistrationdataimportSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -599,7 +578,6 @@ export type BusinessAreaNodeRegistrationdataimportSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type BusinessAreaNodeReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -609,7 +587,6 @@ export type BusinessAreaNodeReportsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type BusinessAreaNodeServiceproviderSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -618,7 +595,6 @@ export type BusinessAreaNodeServiceproviderSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type BusinessAreaNodeSurveySetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -626,7 +602,6 @@ export type BusinessAreaNodeSurveySetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type BusinessAreaNodeTargetpopulationSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -657,7 +632,6 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
   updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
-
 
 export type BusinessAreaNodeTicketsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -760,7 +734,6 @@ export type CashPlanNode = Node & {
   visionId?: Maybe<Scalars['String']['output']>;
 };
 
-
 export type CashPlanNodePaymentItemsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -768,7 +741,6 @@ export type CashPlanNodePaymentItemsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type CashPlanNodeVerificationPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -797,7 +769,7 @@ export enum CashPlanStatus {
   DistributionCompleted = 'DISTRIBUTION_COMPLETED',
   DistributionCompletedWithErrors = 'DISTRIBUTION_COMPLETED_WITH_ERRORS',
   TransactionCompleted = 'TRANSACTION_COMPLETED',
-  TransactionCompletedWithErrors = 'TRANSACTION_COMPLETED_WITH_ERRORS'
+  TransactionCompletedWithErrors = 'TRANSACTION_COMPLETED_WITH_ERRORS',
 }
 
 export type CategoryExtrasInput = {
@@ -891,7 +863,6 @@ export type CommunicationMessageNode = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-
 export type CommunicationMessageNodeCopiedToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -899,7 +870,6 @@ export type CommunicationMessageNodeCopiedToArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type CommunicationMessageNodeHouseholdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -958,7 +928,6 @@ export type ContentTypeObjectType = {
   ticketsensitivedetailsSet: TicketSensitiveDetailsNodeConnection;
 };
 
-
 export type ContentTypeObjectTypeLogEntriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -966,7 +935,6 @@ export type ContentTypeObjectTypeLogEntriesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ContentTypeObjectTypePaymentverificationSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -976,7 +944,6 @@ export type ContentTypeObjectTypePaymentverificationSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ContentTypeObjectTypePaymentverificationplanSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -984,7 +951,6 @@ export type ContentTypeObjectTypePaymentverificationplanSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ContentTypeObjectTypePaymentverificationsummarySetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -994,7 +960,6 @@ export type ContentTypeObjectTypePaymentverificationsummarySetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ContentTypeObjectTypeTicketcomplaintdetailsSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1002,7 +967,6 @@ export type ContentTypeObjectTypeTicketcomplaintdetailsSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ContentTypeObjectTypeTicketsensitivedetailsSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -1299,7 +1263,6 @@ export type DataCollectingTypeNode = Node & {
   weight: Scalars['Int']['output'];
 };
 
-
 export type DataCollectingTypeNodeCompatibleTypesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1307,7 +1270,6 @@ export type DataCollectingTypeNodeCompatibleTypesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type DataCollectingTypeNodeDatacollectingtypeSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -1317,7 +1279,6 @@ export type DataCollectingTypeNodeDatacollectingtypeSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type DataCollectingTypeNodeLimitToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1326,7 +1287,6 @@ export type DataCollectingTypeNodeLimitToArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type DataCollectingTypeNodeProgramsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -1353,7 +1313,7 @@ export type DataCollectingTypeNodeEdge = {
 
 export enum DataCollectingTypeType {
   Social = 'SOCIAL',
-  Standard = 'STANDARD'
+  Standard = 'STANDARD',
 }
 
 export type DeduplicationResultNode = {
@@ -1452,7 +1412,7 @@ export enum DeliveryMechanismPerPaymentPlanDeliveryMechanism {
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
-  Voucher = 'VOUCHER'
+  Voucher = 'VOUCHER',
 }
 
 export type DiscardPaymentVerificationPlan = {
@@ -1509,7 +1469,6 @@ export type DocumentNode = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-
 export type DocumentNodeCopiedToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1536,7 +1495,7 @@ export enum DocumentStatus {
   Invalid = 'INVALID',
   NeedInvestigation = 'NEED_INVESTIGATION',
   Pending = 'PENDING',
-  Valid = 'VALID'
+  Valid = 'VALID',
 }
 
 export type DocumentTypeNode = {
@@ -1551,7 +1510,6 @@ export type DocumentTypeNode = {
   updatedAt: Scalars['DateTime']['output'];
   validForDeduplication: Scalars['Boolean']['output'];
 };
-
 
 export type DocumentTypeNodeDocumentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -1644,7 +1602,7 @@ export type FspToDeliveryMechanismMappingInput = {
 
 export enum FeedbackIssueType {
   NegativeFeedback = 'NEGATIVE_FEEDBACK',
-  PositiveFeedback = 'POSITIVE_FEEDBACK'
+  PositiveFeedback = 'POSITIVE_FEEDBACK',
 }
 
 export type FeedbackMessageNode = Node & {
@@ -1697,7 +1655,6 @@ export type FeedbackNode = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-
 export type FeedbackNodeCopiedToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1705,7 +1662,6 @@ export type FeedbackNodeCopiedToArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type FeedbackNodeFeedbackMessagesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -1759,7 +1715,7 @@ export type FinalizeTargetPopulationMutation = {
 export enum FinancialServiceProviderCommunicationChannel {
   Api = 'API',
   Sftp = 'SFTP',
-  Xlsx = 'XLSX'
+  Xlsx = 'XLSX',
 }
 
 export type FinancialServiceProviderNode = Node & {
@@ -1781,7 +1737,6 @@ export type FinancialServiceProviderNode = Node & {
   xlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection;
 };
 
-
 export type FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1789,7 +1744,6 @@ export type FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -1799,7 +1753,6 @@ export type FinancialServiceProviderNodeFinancialserviceproviderxlsxreportSetArg
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type FinancialServiceProviderNodePaymentSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -1807,7 +1760,6 @@ export type FinancialServiceProviderNodePaymentSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type FinancialServiceProviderNodeXlsxTemplatesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -1866,7 +1818,6 @@ export type FinancialServiceProviderXlsxTemplateNode = Node & {
   name: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
-
 
 export type FinancialServiceProviderXlsxTemplateNodeFinancialServiceProvidersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -1941,7 +1892,6 @@ export type GenericPaymentPlanNode = {
   totalUndeliveredQuantity?: Maybe<Scalars['Float']['output']>;
   verificationPlans?: Maybe<PaymentVerificationPlanNodeConnection>;
 };
-
 
 export type GenericPaymentPlanNodeVerificationPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2093,7 +2043,6 @@ export type GrievanceTicketNode = Node & {
   version: Scalars['BigInt']['output'];
 };
 
-
 export type GrievanceTicketNodeCopiedToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2102,7 +2051,6 @@ export type GrievanceTicketNodeCopiedToArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type GrievanceTicketNodeSupportDocumentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2110,7 +2058,6 @@ export type GrievanceTicketNodeSupportDocumentsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type GrievanceTicketNodeTicketNotesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2143,7 +2090,6 @@ export type GroupAttributeNode = {
   name: Scalars['String']['output'];
 };
 
-
 export type GroupAttributeNodeFlexAttributesArgs = {
   flexField?: InputMaybe<Scalars['Boolean']['input']>;
 };
@@ -2153,7 +2099,7 @@ export enum HouseholdCollectIndividualData {
   A_0 = 'A_0',
   A_1 = 'A_1',
   A_2 = 'A_2',
-  A_3 = 'A_3'
+  A_3 = 'A_3',
 }
 
 export type HouseholdDataChangeApproveMutation = {
@@ -2287,7 +2233,6 @@ export type HouseholdNode = Node & {
   zipCode?: Maybe<Scalars['String']['output']>;
 };
 
-
 export type HouseholdNodeAddIndividualTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2295,7 +2240,6 @@ export type HouseholdNodeAddIndividualTicketDetailsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type HouseholdNodeComplaintTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2305,7 +2249,6 @@ export type HouseholdNodeComplaintTicketDetailsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type HouseholdNodeCopiedToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2313,7 +2256,6 @@ export type HouseholdNodeCopiedToArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type HouseholdNodeDeleteHouseholdTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2323,7 +2265,6 @@ export type HouseholdNodeDeleteHouseholdTicketDetailsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type HouseholdNodeFeedbacksArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2332,7 +2273,6 @@ export type HouseholdNodeFeedbacksArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type HouseholdNodeHouseholdDataUpdateTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2340,7 +2280,6 @@ export type HouseholdNodeHouseholdDataUpdateTicketDetailsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type HouseholdNodeIndividualsArgs = {
   admin2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
@@ -2370,7 +2309,6 @@ export type HouseholdNodeIndividualsArgs = {
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-
 export type HouseholdNodeMessagesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2378,7 +2316,6 @@ export type HouseholdNodeMessagesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type HouseholdNodeNegativeFeedbackTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2388,7 +2325,6 @@ export type HouseholdNodeNegativeFeedbackTicketDetailsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type HouseholdNodePaymentSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2396,7 +2332,6 @@ export type HouseholdNodePaymentSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type HouseholdNodePaymentrecordSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2406,7 +2341,6 @@ export type HouseholdNodePaymentrecordSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type HouseholdNodePositiveFeedbackTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2414,7 +2348,6 @@ export type HouseholdNodePositiveFeedbackTicketDetailsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type HouseholdNodeProgramsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2425,7 +2358,6 @@ export type HouseholdNodeProgramsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type HouseholdNodeReferralTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2433,7 +2365,6 @@ export type HouseholdNodeReferralTicketDetailsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type HouseholdNodeRepresentativesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2443,7 +2374,6 @@ export type HouseholdNodeRepresentativesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type HouseholdNodeSensitiveTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2452,7 +2382,6 @@ export type HouseholdNodeSensitiveTicketDetailsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type HouseholdNodeSurveysArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2460,7 +2389,6 @@ export type HouseholdNodeSurveysArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type HouseholdNodeTargetPopulationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -2510,13 +2438,13 @@ export type HouseholdNodeEdge = {
 export enum HouseholdOrgEnumerator {
   A = 'A_',
   Partner = 'PARTNER',
-  Unicef = 'UNICEF'
+  Unicef = 'UNICEF',
 }
 
 export enum HouseholdRegistrationMethod {
   A = 'A_',
   Community = 'COMMUNITY',
-  HhRegistration = 'HH_REGISTRATION'
+  HhRegistration = 'HH_REGISTRATION',
 }
 
 export type HouseholdSelectionNode = {
@@ -2581,7 +2509,7 @@ export type HouseholdUpdateDataObjectType = {
 export enum ImportDataDataType {
   Flex = 'FLEX',
   Json = 'JSON',
-  Xlsx = 'XLSX'
+  Xlsx = 'XLSX',
 }
 
 export type ImportDataNode = Node & {
@@ -2608,7 +2536,7 @@ export enum ImportDataStatus {
   Finished = 'FINISHED',
   Pending = 'PENDING',
   Running = 'RUNNING',
-  ValidationError = 'VALIDATION_ERROR'
+  ValidationError = 'VALIDATION_ERROR',
 }
 
 export type ImportXlsxPaymentPlanPaymentListMutation = {
@@ -2669,7 +2597,6 @@ export type ImportedDocumentTypeNode = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-
 export type ImportedDocumentTypeNodeDocumentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2682,7 +2609,7 @@ export enum ImportedHouseholdCollectIndividualData {
   A = 'A_',
   A_0 = 'A_0',
   A_1 = 'A_1',
-  A_2 = 'A_2'
+  A_2 = 'A_2',
 }
 
 export enum ImportedHouseholdConsentSharing {
@@ -2690,7 +2617,7 @@ export enum ImportedHouseholdConsentSharing {
   GovernmentPartner = 'GOVERNMENT_PARTNER',
   HumanitarianPartner = 'HUMANITARIAN_PARTNER',
   PrivatePartner = 'PRIVATE_PARTNER',
-  Unicef = 'UNICEF'
+  Unicef = 'UNICEF',
 }
 
 export enum ImportedHouseholdCurrency {
@@ -2855,7 +2782,7 @@ export enum ImportedHouseholdCurrency {
   Yer = 'YER',
   Zar = 'ZAR',
   Zmw = 'ZMW',
-  Zwl = 'ZWL'
+  Zwl = 'ZWL',
 }
 
 export type ImportedHouseholdNode = Node & {
@@ -2934,7 +2861,6 @@ export type ImportedHouseholdNode = Node & {
   zipCode?: Maybe<Scalars['String']['output']>;
 };
 
-
 export type ImportedHouseholdNodeIndividualsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -2960,13 +2886,13 @@ export type ImportedHouseholdNodeEdge = {
 export enum ImportedHouseholdOrgEnumerator {
   A = 'A_',
   Partner = 'PARTNER',
-  Unicef = 'UNICEF'
+  Unicef = 'UNICEF',
 }
 
 export enum ImportedHouseholdRegistrationMethod {
   A = 'A_',
   Community = 'COMMUNITY',
-  HhRegistration = 'HH_REGISTRATION'
+  HhRegistration = 'HH_REGISTRATION',
 }
 
 export enum ImportedHouseholdResidenceStatus {
@@ -2976,14 +2902,14 @@ export enum ImportedHouseholdResidenceStatus {
   NonHost = 'NON_HOST',
   OthersOfConcern = 'OTHERS_OF_CONCERN',
   Refugee = 'REFUGEE',
-  Returnee = 'RETURNEE'
+  Returnee = 'RETURNEE',
 }
 
 export enum ImportedIndividualDeduplicationBatchStatus {
   DuplicateInBatch = 'DUPLICATE_IN_BATCH',
   NotProcessed = 'NOT_PROCESSED',
   SimilarInBatch = 'SIMILAR_IN_BATCH',
-  UniqueInBatch = 'UNIQUE_IN_BATCH'
+  UniqueInBatch = 'UNIQUE_IN_BATCH',
 }
 
 export enum ImportedIndividualDeduplicationGoldenRecordStatus {
@@ -2991,12 +2917,12 @@ export enum ImportedIndividualDeduplicationGoldenRecordStatus {
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
   NotProcessed = 'NOT_PROCESSED',
   Postpone = 'POSTPONE',
-  Unique = 'UNIQUE'
+  Unique = 'UNIQUE',
 }
 
 export enum ImportedIndividualDisability {
   Disabled = 'DISABLED',
-  NotDisabled = 'NOT_DISABLED'
+  NotDisabled = 'NOT_DISABLED',
 }
 
 export type ImportedIndividualIdentityNode = Node & {
@@ -3028,7 +2954,7 @@ export enum ImportedIndividualMaritalStatus {
   Married = 'MARRIED',
   Separated = 'SEPARATED',
   Single = 'SINGLE',
-  Widowed = 'WIDOWED'
+  Widowed = 'WIDOWED',
 }
 
 export type ImportedIndividualNode = Node & {
@@ -3089,7 +3015,6 @@ export type ImportedIndividualNode = Node & {
   workStatus: Scalars['String']['output'];
 };
 
-
 export type ImportedIndividualNodeDocumentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3097,7 +3022,6 @@ export type ImportedIndividualNodeDocumentsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ImportedIndividualNodeIdentitiesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3123,7 +3047,7 @@ export type ImportedIndividualNodeEdge = {
 
 export enum ImportedIndividualSex {
   Female = 'FEMALE',
-  Male = 'MALE'
+  Male = 'MALE',
 }
 
 export type IndividualDataChangeApproveMutation = {
@@ -3140,7 +3064,7 @@ export enum IndividualDeduplicationBatchStatus {
   DuplicateInBatch = 'DUPLICATE_IN_BATCH',
   NotProcessed = 'NOT_PROCESSED',
   SimilarInBatch = 'SIMILAR_IN_BATCH',
-  UniqueInBatch = 'UNIQUE_IN_BATCH'
+  UniqueInBatch = 'UNIQUE_IN_BATCH',
 }
 
 export enum IndividualDeduplicationGoldenRecordStatus {
@@ -3148,7 +3072,7 @@ export enum IndividualDeduplicationGoldenRecordStatus {
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
   NotProcessed = 'NOT_PROCESSED',
   Postpone = 'POSTPONE',
-  Unique = 'UNIQUE'
+  Unique = 'UNIQUE',
 }
 
 export type IndividualDeleteIssueTypeExtras = {
@@ -3157,7 +3081,7 @@ export type IndividualDeleteIssueTypeExtras = {
 
 export enum IndividualDisability {
   Disabled = 'DISABLED',
-  NotDisabled = 'NOT_DISABLED'
+  NotDisabled = 'NOT_DISABLED',
 }
 
 export type IndividualDocumentObjectType = {
@@ -3184,7 +3108,6 @@ export type IndividualIdentityNode = Node & {
   number: Scalars['String']['output'];
   partner?: Maybe<Scalars['String']['output']>;
 };
-
 
 export type IndividualIdentityNodeCopiedToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3220,7 +3143,7 @@ export enum IndividualMaritalStatus {
   Married = 'MARRIED',
   Separated = 'SEPARATED',
   Single = 'SINGLE',
-  Widowed = 'WIDOWED'
+  Widowed = 'WIDOWED',
 }
 
 export type IndividualNode = Node & {
@@ -3326,7 +3249,6 @@ export type IndividualNode = Node & {
   workStatus: Scalars['String']['output'];
 };
 
-
 export type IndividualNodeCollectorPaymentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3334,7 +3256,6 @@ export type IndividualNodeCollectorPaymentsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type IndividualNodeComplaintTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3344,7 +3265,6 @@ export type IndividualNodeComplaintTicketDetailsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type IndividualNodeCopiedToArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3352,7 +3272,6 @@ export type IndividualNodeCopiedToArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type IndividualNodeDeleteIndividualTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3362,7 +3281,6 @@ export type IndividualNodeDeleteIndividualTicketDetailsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type IndividualNodeDocumentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3370,7 +3288,6 @@ export type IndividualNodeDocumentsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type IndividualNodeFeedbacksArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3380,7 +3297,6 @@ export type IndividualNodeFeedbacksArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type IndividualNodeIdentitiesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3388,7 +3304,6 @@ export type IndividualNodeIdentitiesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type IndividualNodeIndividualDataUpdateTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3398,7 +3313,6 @@ export type IndividualNodeIndividualDataUpdateTicketDetailsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type IndividualNodeNegativeFeedbackTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3406,7 +3320,6 @@ export type IndividualNodeNegativeFeedbackTicketDetailsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type IndividualNodePaymentSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3416,7 +3329,6 @@ export type IndividualNodePaymentSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type IndividualNodePaymentrecordSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3424,7 +3336,6 @@ export type IndividualNodePaymentrecordSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type IndividualNodePositiveFeedbackTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3434,7 +3345,6 @@ export type IndividualNodePositiveFeedbackTicketDetailsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type IndividualNodeReferralTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3442,7 +3352,6 @@ export type IndividualNodeReferralTicketDetailsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type IndividualNodeRepresentedHouseholdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3452,7 +3361,6 @@ export type IndividualNodeRepresentedHouseholdsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type IndividualNodeSensitiveTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3460,7 +3368,6 @@ export type IndividualNodeSensitiveTicketDetailsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type IndividualNodeTicketDuplicatesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3470,7 +3377,6 @@ export type IndividualNodeTicketDuplicatesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type IndividualNodeTicketGoldenRecordsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3479,7 +3385,6 @@ export type IndividualNodeTicketGoldenRecordsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type IndividualNodeTicketSelectedArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -3487,7 +3392,6 @@ export type IndividualNodeTicketSelectedArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type IndividualNodeTicketsystemflaggingdetailsSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3529,7 +3433,7 @@ export enum IndividualRelationship {
   SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
   SonDaughter = 'SON_DAUGHTER',
   Unknown = 'UNKNOWN',
-  WifeHusband = 'WIFE_HUSBAND'
+  WifeHusband = 'WIFE_HUSBAND',
 }
 
 export type IndividualRoleInHouseholdNode = {
@@ -3552,12 +3456,12 @@ export type IndividualRoleInHouseholdNode = {
 export enum IndividualRoleInHouseholdRole {
   Alternate = 'ALTERNATE',
   NoRole = 'NO_ROLE',
-  Primary = 'PRIMARY'
+  Primary = 'PRIMARY',
 }
 
 export enum IndividualSex {
   Female = 'FEMALE',
-  Male = 'MALE'
+  Male = 'MALE',
 }
 
 export type IndividualUpdateDataObjectType = {
@@ -3709,7 +3613,7 @@ export enum LogEntryAction {
   Create = 'CREATE',
   Delete = 'DELETE',
   SoftDelete = 'SOFT_DELETE',
-  Update = 'UPDATE'
+  Update = 'UPDATE',
 }
 
 export type LogEntryNode = Node & {
@@ -3726,7 +3630,6 @@ export type LogEntryNode = Node & {
   timestamp?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<UserNode>;
 };
-
 
 export type LogEntryNodeProgramsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -3768,7 +3671,7 @@ export type MergeRegistrationDataImportMutation = {
 
 export enum MessageSamplingType {
   FullList = 'FULL_LIST',
-  Random = 'RANDOM'
+  Random = 'RANDOM',
 }
 
 export type Mutations = {
@@ -3853,24 +3756,20 @@ export type Mutations = {
   uploadImportDataXlsxFileAsync?: Maybe<UploadImportDataXlsxFileAsync>;
 };
 
-
 export type MutationsActionPaymentPlanMutationArgs = {
   input: ActionPaymentPlanInput;
 };
-
 
 export type MutationsActivatePaymentVerificationPlanArgs = {
   paymentVerificationPlanId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsApproveAddIndividualArgs = {
   approveStatus: Scalars['Boolean']['input'];
   grievanceTicketId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
-
 
 export type MutationsApproveDeleteHouseholdArgs = {
   approveStatus: Scalars['Boolean']['input'];
@@ -3879,13 +3778,11 @@ export type MutationsApproveDeleteHouseholdArgs = {
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsApproveDeleteIndividualArgs = {
   approveStatus: Scalars['Boolean']['input'];
   grievanceTicketId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
-
 
 export type MutationsApproveHouseholdDataChangeArgs = {
   flexFieldsApproveData?: InputMaybe<Scalars['JSONString']['input']>;
@@ -3893,7 +3790,6 @@ export type MutationsApproveHouseholdDataChangeArgs = {
   householdApproveData?: InputMaybe<Scalars['JSONString']['input']>;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
-
 
 export type MutationsApproveIndividualDataChangeArgs = {
   approvedDocumentsToCreate?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
@@ -3911,7 +3807,6 @@ export type MutationsApproveIndividualDataChangeArgs = {
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsApproveNeedsAdjudicationArgs = {
   grievanceTicketId: Scalars['ID']['input'];
   selectedIndividualId?: InputMaybe<Scalars['ID']['input']>;
@@ -3919,13 +3814,11 @@ export type MutationsApproveNeedsAdjudicationArgs = {
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsApprovePaymentDetailsArgs = {
   approveStatus: Scalars['Boolean']['input'];
   grievanceTicketId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
-
 
 export type MutationsApproveSystemFlaggingArgs = {
   approveStatus: Scalars['Boolean']['input'];
@@ -3933,11 +3826,9 @@ export type MutationsApproveSystemFlaggingArgs = {
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsAssignFspToDeliveryMechanismArgs = {
   input: AssignFspToDeliveryMechanismInput;
 };
-
 
 export type MutationsBulkGrievanceAddNoteArgs = {
   businessAreaSlug: Scalars['String']['input'];
@@ -3945,13 +3836,11 @@ export type MutationsBulkGrievanceAddNoteArgs = {
   note: Scalars['String']['input'];
 };
 
-
 export type MutationsBulkUpdateGrievanceAssigneeArgs = {
   assignedTo: Scalars['String']['input'];
   businessAreaSlug: Scalars['String']['input'];
   grievanceTicketIds: Array<InputMaybe<Scalars['ID']['input']>>;
 };
-
 
 export type MutationsBulkUpdateGrievancePriorityArgs = {
   businessAreaSlug: Scalars['String']['input'];
@@ -3959,53 +3848,43 @@ export type MutationsBulkUpdateGrievancePriorityArgs = {
   priority: Scalars['Int']['input'];
 };
 
-
 export type MutationsBulkUpdateGrievanceUrgencyArgs = {
   businessAreaSlug: Scalars['String']['input'];
   grievanceTicketIds: Array<InputMaybe<Scalars['ID']['input']>>;
   urgency: Scalars['Int']['input'];
 };
 
-
 export type MutationsCheckAgainstSanctionListArgs = {
   file: Scalars['Upload']['input'];
 };
-
 
 export type MutationsChooseDeliveryMechanismsForPaymentPlanArgs = {
   input: ChooseDeliveryMechanismsForPaymentPlanInput;
 };
 
-
 export type MutationsCopyProgramArgs = {
   programData: CopyProgramInput;
 };
-
 
 export type MutationsCopyTargetPopulationArgs = {
   input: CopyTargetPopulationMutationInput;
 };
 
-
 export type MutationsCreateAccountabilityCommunicationMessageArgs = {
   input: CreateAccountabilityCommunicationMessageInput;
 };
-
 
 export type MutationsCreateDashboardReportArgs = {
   reportData: CreateDashboardReportInput;
 };
 
-
 export type MutationsCreateFeedbackArgs = {
   input: CreateFeedbackInput;
 };
 
-
 export type MutationsCreateFeedbackMessageArgs = {
   input: CreateFeedbackMessageInput;
 };
-
 
 export type MutationsCreateFollowUpPaymentPlanArgs = {
   dispersionEndDate: Scalars['Date']['input'];
@@ -4013,92 +3892,75 @@ export type MutationsCreateFollowUpPaymentPlanArgs = {
   paymentPlanId: Scalars['ID']['input'];
 };
 
-
 export type MutationsCreateGrievanceTicketArgs = {
   input: CreateGrievanceTicketInput;
 };
 
-
 export type MutationsCreatePaymentPlanArgs = {
   input: CreatePaymentPlanInput;
 };
-
 
 export type MutationsCreatePaymentVerificationPlanArgs = {
   input: CreatePaymentVerificationInput;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsCreateProgramArgs = {
   programData: CreateProgramInput;
 };
-
 
 export type MutationsCreateReportArgs = {
   reportData: CreateReportInput;
 };
 
-
 export type MutationsCreateSurveyArgs = {
   input: CreateSurveyInput;
 };
 
-
 export type MutationsCreateTargetPopulationArgs = {
   input: CreateTargetPopulationInput;
 };
-
 
 export type MutationsCreateTicketNoteArgs = {
   noteInput: CreateTicketNoteInput;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsDeletePaymentPlanArgs = {
   paymentPlanId: Scalars['ID']['input'];
 };
-
 
 export type MutationsDeletePaymentVerificationPlanArgs = {
   paymentVerificationPlanId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsDeleteProgramArgs = {
   programId: Scalars['String']['input'];
 };
-
 
 export type MutationsDeleteRegistrationDataImportArgs = {
   registrationDataImportId: Scalars['String']['input'];
 };
 
-
 export type MutationsDeleteTargetPopulationArgs = {
   input: DeleteTargetPopulationMutationInput;
 };
-
 
 export type MutationsDiscardPaymentVerificationPlanArgs = {
   paymentVerificationPlanId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsEditPaymentVerificationPlanArgs = {
   input: EditPaymentVerificationInput;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsEraseRegistrationDataImportArgs = {
   id: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
-
 
 export type MutationsExcludeHouseholdsArgs = {
   excludedHouseholdsIds: Array<InputMaybe<Scalars['String']['input']>>;
@@ -4106,43 +3968,35 @@ export type MutationsExcludeHouseholdsArgs = {
   paymentPlanId: Scalars['ID']['input'];
 };
 
-
 export type MutationsExportPdfPaymentPlanSummaryArgs = {
   paymentPlanId: Scalars['ID']['input'];
 };
-
 
 export type MutationsExportSurveySampleArgs = {
   surveyId: Scalars['ID']['input'];
 };
 
-
 export type MutationsExportXlsxPaymentPlanPaymentListArgs = {
   paymentPlanId: Scalars['ID']['input'];
 };
-
 
 export type MutationsExportXlsxPaymentPlanPaymentListPerFspArgs = {
   paymentPlanId: Scalars['ID']['input'];
 };
 
-
 export type MutationsExportXlsxPaymentVerificationPlanFileArgs = {
   paymentVerificationPlanId: Scalars['ID']['input'];
 };
-
 
 export type MutationsFinalizeTargetPopulationArgs = {
   id: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsFinishPaymentVerificationPlanArgs = {
   paymentVerificationPlanId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
-
 
 export type MutationsGrievanceStatusChangeArgs = {
   grievanceTicketId?: InputMaybe<Scalars['ID']['input']>;
@@ -4150,52 +4004,43 @@ export type MutationsGrievanceStatusChangeArgs = {
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsImportXlsxPaymentPlanPaymentListArgs = {
   file: Scalars['Upload']['input'];
   paymentPlanId: Scalars['ID']['input'];
 };
-
 
 export type MutationsImportXlsxPaymentPlanPaymentListPerFspArgs = {
   file: Scalars['Upload']['input'];
   paymentPlanId: Scalars['ID']['input'];
 };
 
-
 export type MutationsImportXlsxPaymentVerificationPlanFileArgs = {
   file: Scalars['Upload']['input'];
   paymentVerificationPlanId: Scalars['ID']['input'];
 };
-
 
 export type MutationsInvalidPaymentVerificationPlanArgs = {
   paymentVerificationPlanId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsLockTargetPopulationArgs = {
   id: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsMarkPaymentAsFailedArgs = {
   paymentId: Scalars['ID']['input'];
 };
-
 
 export type MutationsMarkPaymentRecordAsFailedArgs = {
   paymentRecordId: Scalars['ID']['input'];
 };
 
-
 export type MutationsMergeRegistrationDataImportArgs = {
   id: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
-
 
 export type MutationsReassignRoleArgs = {
   grievanceTicketId: Scalars['ID']['input'];
@@ -4208,34 +4053,28 @@ export type MutationsReassignRoleArgs = {
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsRefuseRegistrationDataImportArgs = {
   id: Scalars['ID']['input'];
   refuseReason?: InputMaybe<Scalars['String']['input']>;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsRegistrationKoboImportArgs = {
   registrationDataImportData: RegistrationKoboImportMutationInput;
 };
 
-
 export type MutationsRegistrationXlsxImportArgs = {
   registrationDataImportData: RegistrationXlsxImportMutationInput;
 };
-
 
 export type MutationsRerunDedupeArgs = {
   registrationDataImportDatahubId: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsRestartCreateReportArgs = {
   reportData: RestartCreateReportInput;
 };
-
 
 export type MutationsRevertMarkPaymentAsFailedArgs = {
   deliveredQuantity: Scalars['Decimal']['input'];
@@ -4243,13 +4082,11 @@ export type MutationsRevertMarkPaymentAsFailedArgs = {
   paymentId: Scalars['ID']['input'];
 };
 
-
 export type MutationsRevertMarkPaymentRecordAsFailedArgs = {
   deliveredQuantity: Scalars['Decimal']['input'];
   deliveryDate: Scalars['Date']['input'];
   paymentRecordId: Scalars['ID']['input'];
 };
-
 
 export type MutationsSaveKoboImportDataAsyncArgs = {
   businessAreaSlug: Scalars['String']['input'];
@@ -4257,44 +4094,36 @@ export type MutationsSaveKoboImportDataAsyncArgs = {
   uid: Scalars['Upload']['input'];
 };
 
-
 export type MutationsSetSteficonRuleOnPaymentPlanPaymentListArgs = {
   paymentPlanId: Scalars['ID']['input'];
   steficonRuleId: Scalars['ID']['input'];
 };
 
-
 export type MutationsSetSteficonRuleOnTargetPopulationArgs = {
   input: SetSteficonRuleOnTargetPopulationMutationInput;
 };
 
-
 export type MutationsTargetPopulationRebuildArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type MutationsUnlockTargetPopulationArgs = {
   id: Scalars['ID']['input'];
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsUpdateFeedbackArgs = {
   input: UpdateFeedbackInput;
 };
-
 
 export type MutationsUpdateGrievanceTicketArgs = {
   input: UpdateGrievanceTicketInput;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsUpdatePaymentPlanArgs = {
   input: UpdatePaymentPlanInput;
 };
-
 
 export type MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs = {
   paymentVerificationId: Scalars['ID']['input'];
@@ -4303,7 +4132,6 @@ export type MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs = {
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
   paymentVerificationId: Scalars['ID']['input'];
   receivedAmount: Scalars['Decimal']['input'];
@@ -4311,18 +4139,15 @@ export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsUpdateProgramArgs = {
   programData?: InputMaybe<UpdateProgramInput>;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
-
 export type MutationsUpdateTargetPopulationArgs = {
   input: UpdateTargetPopulationInput;
   version?: InputMaybe<Scalars['BigInt']['input']>;
 };
-
 
 export type MutationsUploadImportDataXlsxFileAsyncArgs = {
   businessAreaSlug: Scalars['String']['input'];
@@ -4393,7 +4218,6 @@ export type PartnerNodeForProgram = {
   userSet: UserNodeConnection;
 };
 
-
 export type PartnerNodeForProgramGrievanceticketSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4402,7 +4226,6 @@ export type PartnerNodeForProgramGrievanceticketSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type PartnerNodeForProgramIndividualIdentitiesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4410,7 +4233,6 @@ export type PartnerNodeForProgramIndividualIdentitiesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type PartnerNodeForProgramUserSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -4443,7 +4265,6 @@ export type PartnerType = {
   userSet: UserNodeConnection;
 };
 
-
 export type PartnerTypeGrievanceticketSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4452,7 +4273,6 @@ export type PartnerTypeGrievanceticketSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type PartnerTypeIndividualIdentitiesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4460,7 +4280,6 @@ export type PartnerTypeIndividualIdentitiesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type PartnerTypeUserSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -4492,7 +4311,7 @@ export enum PaymentDeliveryType {
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
-  Voucher = 'VOUCHER'
+  Voucher = 'VOUCHER',
 }
 
 export type PaymentDetailsApproveMutation = {
@@ -4567,7 +4386,6 @@ export type PaymentNode = Node & {
   verification?: Maybe<PaymentVerificationNode>;
 };
 
-
 export type PaymentNodeFollowUpsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4601,7 +4419,7 @@ export enum PaymentPlanBackgroundActionStatus {
   XlsxExportError = 'XLSX_EXPORT_ERROR',
   XlsxImportingEntitlements = 'XLSX_IMPORTING_ENTITLEMENTS',
   XlsxImportingReconciliation = 'XLSX_IMPORTING_RECONCILIATION',
-  XlsxImportError = 'XLSX_IMPORT_ERROR'
+  XlsxImportError = 'XLSX_IMPORT_ERROR',
 }
 
 export enum PaymentPlanCurrency {
@@ -4766,7 +4584,7 @@ export enum PaymentPlanCurrency {
   Yer = 'YER',
   Zar = 'ZAR',
   Zmw = 'ZMW',
-  Zwl = 'ZWL'
+  Zwl = 'ZWL',
 }
 
 export type PaymentPlanNode = Node & {
@@ -4834,7 +4652,6 @@ export type PaymentPlanNode = Node & {
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>;
 };
 
-
 export type PaymentPlanNodeApprovalProcessArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4842,7 +4659,6 @@ export type PaymentPlanNodeApprovalProcessArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type PaymentPlanNodeFollowUpsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -4852,7 +4668,6 @@ export type PaymentPlanNodeFollowUpsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type PaymentPlanNodePaymentItemsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -4860,7 +4675,6 @@ export type PaymentPlanNodePaymentItemsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type PaymentPlanNodeVerificationPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -4894,7 +4708,7 @@ export enum PaymentPlanStatus {
   Locked = 'LOCKED',
   LockedFsp = 'LOCKED_FSP',
   Open = 'OPEN',
-  Preparing = 'PREPARING'
+  Preparing = 'PREPARING',
 }
 
 export type PaymentRecordAndPaymentNode = {
@@ -4924,12 +4738,12 @@ export enum PaymentRecordDeliveryType {
   Referral = 'REFERRAL',
   Transfer = 'TRANSFER',
   TransferToAccount = 'TRANSFER_TO_ACCOUNT',
-  Voucher = 'VOUCHER'
+  Voucher = 'VOUCHER',
 }
 
 export enum PaymentRecordEntitlementCardStatus {
   Active = 'ACTIVE',
-  Inactive = 'INACTIVE'
+  Inactive = 'INACTIVE',
 }
 
 export type PaymentRecordNode = Node & {
@@ -4990,7 +4804,7 @@ export enum PaymentRecordStatus {
   PartiallyDistributed = 'PARTIALLY_DISTRIBUTED',
   Pending = 'PENDING',
   TransactionErroneous = 'TRANSACTION_ERRONEOUS',
-  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL'
+  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
 }
 
 export type PaymentRecordsAndPaymentsEdges = {
@@ -5006,7 +4820,7 @@ export enum PaymentStatus {
   PartiallyDistributed = 'PARTIALLY_DISTRIBUTED',
   Pending = 'PENDING',
   TransactionErroneous = 'TRANSACTION_ERRONEOUS',
-  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL'
+  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
 }
 
 export type PaymentVerificationLogEntryNode = Node & {
@@ -5024,7 +4838,6 @@ export type PaymentVerificationLogEntryNode = Node & {
   timestamp?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<UserNode>;
 };
-
 
 export type PaymentVerificationLogEntryNodeProgramsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5068,7 +4881,6 @@ export type PaymentVerificationNode = Node & {
   version: Scalars['BigInt']['output'];
 };
 
-
 export type PaymentVerificationNodeTicketDetailArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5076,7 +4888,6 @@ export type PaymentVerificationNodeTicketDetailArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type PaymentVerificationNodeTicketDetailsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5135,7 +4946,6 @@ export type PaymentVerificationPlanNode = Node & {
   xlsxFileWasDownloaded?: Maybe<Scalars['Boolean']['output']>;
 };
 
-
 export type PaymentVerificationPlanNodePaymentRecordVerificationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5160,7 +4970,7 @@ export type PaymentVerificationPlanNodeEdge = {
 
 export enum PaymentVerificationPlanSampling {
   FullList = 'FULL_LIST',
-  Random = 'RANDOM'
+  Random = 'RANDOM',
 }
 
 export enum PaymentVerificationPlanStatus {
@@ -5168,27 +4978,27 @@ export enum PaymentVerificationPlanStatus {
   Finished = 'FINISHED',
   Invalid = 'INVALID',
   Pending = 'PENDING',
-  RapidProError = 'RAPID_PRO_ERROR'
+  RapidProError = 'RAPID_PRO_ERROR',
 }
 
 export enum PaymentVerificationPlanVerificationChannel {
   Manual = 'MANUAL',
   Rapidpro = 'RAPIDPRO',
-  Xlsx = 'XLSX'
+  Xlsx = 'XLSX',
 }
 
 export enum PaymentVerificationStatus {
   NotReceived = 'NOT_RECEIVED',
   Pending = 'PENDING',
   Received = 'RECEIVED',
-  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
+  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES',
 }
 
 export enum PaymentVerificationStatusForUpdate {
   NotReceived = 'NOT_RECEIVED',
   Pending = 'PENDING',
   Received = 'RECEIVED',
-  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
+  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES',
 }
 
 export type PaymentVerificationSummaryNode = Node & {
@@ -5220,7 +5030,7 @@ export type PaymentVerificationSummaryNodeEdge = {
 export enum PaymentVerificationSummaryStatus {
   Active = 'ACTIVE',
   Finished = 'FINISHED',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
 }
 
 export type PositiveFeedbackTicketExtras = {
@@ -5230,7 +5040,7 @@ export type PositiveFeedbackTicketExtras = {
 
 export enum ProgramFrequencyOfPayments {
   OneOff = 'ONE_OFF',
-  Regular = 'REGULAR'
+  Regular = 'REGULAR',
 }
 
 export type ProgramNode = Node & {
@@ -5284,7 +5094,6 @@ export type ProgramNode = Node & {
   version: Scalars['BigInt']['output'];
 };
 
-
 export type ProgramNodeActivityLogsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5292,7 +5101,6 @@ export type ProgramNodeActivityLogsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ProgramNodeAdminAreasArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5303,7 +5111,6 @@ export type ProgramNodeAdminAreasArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ProgramNodeCashplanSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5311,7 +5118,6 @@ export type ProgramNodeCashplanSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ProgramNodeFeedbackSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5321,7 +5127,6 @@ export type ProgramNodeFeedbackSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ProgramNodeGrievanceTicketsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5329,7 +5134,6 @@ export type ProgramNodeGrievanceTicketsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ProgramNodeHouseholdSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5339,7 +5143,6 @@ export type ProgramNodeHouseholdSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ProgramNodeHouseholdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5347,7 +5150,6 @@ export type ProgramNodeHouseholdsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ProgramNodeIndividualsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5357,7 +5159,6 @@ export type ProgramNodeIndividualsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ProgramNodeMessagesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5365,7 +5166,6 @@ export type ProgramNodeMessagesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ProgramNodePaymentSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5375,7 +5175,6 @@ export type ProgramNodePaymentSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ProgramNodePaymentplanSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5383,7 +5182,6 @@ export type ProgramNodePaymentplanSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ProgramNodeRegistrationImportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5393,7 +5191,6 @@ export type ProgramNodeRegistrationImportsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ProgramNodeReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5402,7 +5199,6 @@ export type ProgramNodeReportsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ProgramNodeSurveysArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5410,7 +5206,6 @@ export type ProgramNodeSurveysArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ProgramNodeTargetpopulationSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5458,7 +5253,7 @@ export type ProgramNodeEdge = {
 
 export enum ProgramScope {
   ForPartners = 'FOR_PARTNERS',
-  Unicef = 'UNICEF'
+  Unicef = 'UNICEF',
 }
 
 export enum ProgramSector {
@@ -5468,13 +5263,13 @@ export enum ProgramSector {
   MultiPurpose = 'MULTI_PURPOSE',
   Nutrition = 'NUTRITION',
   SocialPolicy = 'SOCIAL_POLICY',
-  Wash = 'WASH'
+  Wash = 'WASH',
 }
 
 export enum ProgramStatus {
   Active = 'ACTIVE',
   Draft = 'DRAFT',
-  Finished = 'FINISHED'
+  Finished = 'FINISHED',
 }
 
 export type Query = {
@@ -5643,26 +5438,21 @@ export type Query = {
   workStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>;
 };
 
-
 export type QueryAccountabilityCommunicationMessageArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryAccountabilityCommunicationMessageSampleSizeArgs = {
   input?: InputMaybe<GetAccountabilityCommunicationMessageSampleSizeInput>;
 };
 
-
 export type QueryAccountabilitySampleSizeArgs = {
   input?: InputMaybe<AccountabilitySampleSizeInput>;
 };
 
-
 export type QueryAdminAreaArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryAllAccountabilityCommunicationMessageRecipientsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5677,7 +5467,6 @@ export type QueryAllAccountabilityCommunicationMessageRecipientsArgs = {
   recipientId?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllAccountabilityCommunicationMessagesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5698,7 +5487,6 @@ export type QueryAllAccountabilityCommunicationMessagesArgs = {
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllActiveProgramsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5717,7 +5505,6 @@ export type QueryAllActiveProgramsArgs = {
   startDate?: InputMaybe<Scalars['Date']['input']>;
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
-
 
 export type QueryAllActiveTargetPopulationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5749,7 +5536,6 @@ export type QueryAllActiveTargetPopulationsArgs = {
   updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-
 export type QueryAllAdminAreasArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5763,11 +5549,9 @@ export type QueryAllAdminAreasArgs = {
   parentId?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllAreasTreeArgs = {
   businessArea: Scalars['String']['input'];
 };
-
 
 export type QueryAllBusinessAreasArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5778,7 +5562,6 @@ export type QueryAllBusinessAreasArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllCashPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5804,7 +5587,6 @@ export type QueryAllCashPlansArgs = {
   verificationStatus?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-
 export type QueryAllCashPlansAndPaymentPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5822,7 +5604,6 @@ export type QueryAllCashPlansAndPaymentPlansArgs = {
   verificationStatus?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-
 export type QueryAllFeedbacksArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5839,12 +5620,10 @@ export type QueryAllFeedbacksArgs = {
   program?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllFieldsAttributesArgs = {
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
   flexField?: InputMaybe<Scalars['Boolean']['input']>;
 };
-
 
 export type QueryAllFinancialServiceProviderXlsxReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5856,7 +5635,6 @@ export type QueryAllFinancialServiceProviderXlsxReportsArgs = {
   status?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllFinancialServiceProviderXlsxTemplatesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5867,7 +5645,6 @@ export type QueryAllFinancialServiceProviderXlsxTemplatesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllFinancialServiceProvidersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5884,7 +5661,6 @@ export type QueryAllFinancialServiceProvidersArgs = {
   visionVendorNumber?: InputMaybe<Scalars['String']['input']>;
   xlsxTemplates?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
 };
-
 
 export type QueryAllGrievanceTicketArgs = {
   admin2?: InputMaybe<Scalars['ID']['input']>;
@@ -5925,7 +5701,6 @@ export type QueryAllGrievanceTicketArgs = {
   urgency?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllHouseholdsArgs = {
   address?: InputMaybe<Scalars['String']['input']>;
   address_Startswith?: InputMaybe<Scalars['String']['input']>;
@@ -5956,7 +5731,6 @@ export type QueryAllHouseholdsArgs = {
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-
 export type QueryAllImportedHouseholdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -5967,7 +5741,6 @@ export type QueryAllImportedHouseholdsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   rdiId?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllImportedIndividualsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -5981,7 +5754,6 @@ export type QueryAllImportedIndividualsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   rdiId?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllIndividualsArgs = {
   admin2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
@@ -6011,7 +5783,6 @@ export type QueryAllIndividualsArgs = {
   withdrawn?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-
 export type QueryAllKoboProjectsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6021,7 +5792,6 @@ export type QueryAllKoboProjectsArgs = {
   onlyDeployed?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-
 export type QueryAllLanguagesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6029,7 +5799,6 @@ export type QueryAllLanguagesArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type QueryAllLogEntriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6046,7 +5815,6 @@ export type QueryAllLogEntriesArgs = {
   userId?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllMergedHouseholdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6057,7 +5825,6 @@ export type QueryAllMergedHouseholdsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   rdiId?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllMergedIndividualsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6071,7 +5838,6 @@ export type QueryAllMergedIndividualsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   rdiId?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllPaymentPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6092,7 +5858,6 @@ export type QueryAllPaymentPlansArgs = {
   totalEntitledQuantityTo?: InputMaybe<Scalars['Float']['input']>;
 };
 
-
 export type QueryAllPaymentRecordsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6107,7 +5872,6 @@ export type QueryAllPaymentRecordsArgs = {
   programId?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllPaymentRecordsAndPaymentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6118,7 +5882,6 @@ export type QueryAllPaymentRecordsAndPaymentsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
   program?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllPaymentVerificationLogEntriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6136,7 +5899,6 @@ export type QueryAllPaymentVerificationLogEntriesArgs = {
   userId?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllPaymentVerificationPlanArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6145,7 +5907,6 @@ export type QueryAllPaymentVerificationPlanArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   programId?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllPaymentVerificationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6162,7 +5923,6 @@ export type QueryAllPaymentVerificationsArgs = {
   verificationChannel?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllPaymentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6174,7 +5934,6 @@ export type QueryAllPaymentsArgs = {
   paymentPlanId: Scalars['String']['input'];
   programId?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type QueryAllProgramsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6195,11 +5954,9 @@ export type QueryAllProgramsArgs = {
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-
 export type QueryAllRapidProFlowsArgs = {
   businessAreaSlug: Scalars['String']['input'];
 };
-
 
 export type QueryAllRegistrationDataImportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6221,7 +5978,6 @@ export type QueryAllRegistrationDataImportsArgs = {
   totalHouseholdsCountWithValidPhoneNoMin?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type QueryAllRegistrationDataImportsDatahubArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6229,7 +5985,6 @@ export type QueryAllRegistrationDataImportsDatahubArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type QueryAllReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6246,7 +6001,6 @@ export type QueryAllReportsArgs = {
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-
 export type QueryAllSanctionListIndividualsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6260,7 +6014,6 @@ export type QueryAllSanctionListIndividualsArgs = {
   referenceNumber?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type QueryAllSteficonRulesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6271,7 +6024,6 @@ export type QueryAllSteficonRulesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   type: Scalars['String']['input'];
 };
-
 
 export type QueryAllSurveysArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6287,7 +6039,6 @@ export type QueryAllSurveysArgs = {
   search?: InputMaybe<Scalars['String']['input']>;
   targetPopulation?: InputMaybe<Scalars['ID']['input']>;
 };
-
 
 export type QueryAllTargetPopulationArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6319,7 +6070,6 @@ export type QueryAllTargetPopulationArgs = {
   updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-
 export type QueryAllTicketNotesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6329,7 +6079,6 @@ export type QueryAllTicketNotesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   ticket: Scalars['UUID']['input'];
 };
-
 
 export type QueryAllUsersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6349,28 +6098,23 @@ export type QueryAllUsersArgs = {
   status?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-
 export type QueryAvailableFspsForDeliveryMechanismsArgs = {
   input?: InputMaybe<AvailableFspsForDeliveryMechanismsInput>;
 };
-
 
 export type QueryBusinessAreaArgs = {
   businessAreaSlug: Scalars['String']['input'];
 };
 
-
 export type QueryCashPlanArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryChartGrievancesArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
   year: Scalars['Int']['input'];
 };
-
 
 export type QueryChartIndividualsReachedByAgeAndGenderArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
@@ -6379,14 +6123,12 @@ export type QueryChartIndividualsReachedByAgeAndGenderArgs = {
   year: Scalars['Int']['input'];
 };
 
-
 export type QueryChartIndividualsWithDisabilityReachedByAgeArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
   program?: InputMaybe<Scalars['String']['input']>;
   year: Scalars['Int']['input'];
 };
-
 
 export type QueryChartPaymentArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
@@ -6395,14 +6137,12 @@ export type QueryChartPaymentArgs = {
   year: Scalars['Int']['input'];
 };
 
-
 export type QueryChartPaymentVerificationArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
   program?: InputMaybe<Scalars['String']['input']>;
   year: Scalars['Int']['input'];
 };
-
 
 export type QueryChartProgrammesBySectorArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
@@ -6411,7 +6151,6 @@ export type QueryChartProgrammesBySectorArgs = {
   year: Scalars['Int']['input'];
 };
 
-
 export type QueryChartTotalTransferredByMonthArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
@@ -6419,11 +6158,9 @@ export type QueryChartTotalTransferredByMonthArgs = {
   year: Scalars['Int']['input'];
 };
 
-
 export type QueryChartTotalTransferredCashByCountryArgs = {
   year: Scalars['Int']['input'];
 };
-
 
 export type QueryChartVolumeByDeliveryMechanismArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
@@ -6432,21 +6169,17 @@ export type QueryChartVolumeByDeliveryMechanismArgs = {
   year: Scalars['Int']['input'];
 };
 
-
 export type QueryDashboardReportTypesChoicesArgs = {
   businessAreaSlug: Scalars['String']['input'];
 };
-
 
 export type QueryDashboardYearsChoicesArgs = {
   businessAreaSlug: Scalars['String']['input'];
 };
 
-
 export type QueryDataCollectingTypeArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryExistingGrievanceTicketsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6465,108 +6198,87 @@ export type QueryExistingGrievanceTicketsArgs = {
   permissions?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
-
 export type QueryFeedbackArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryFinancialServiceProviderArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryFinancialServiceProviderXlsxReportArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryFinancialServiceProviderXlsxTemplateArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryGrievanceTicketArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryHasAvailableUsersToExportArgs = {
   businessAreaSlug: Scalars['String']['input'];
 };
 
-
 export type QueryHouseholdArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryImportDataArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryImportedHouseholdArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryImportedIndividualArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryIndividualArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryKoboImportDataArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryKoboProjectArgs = {
   businessAreaSlug: Scalars['String']['input'];
   uid: Scalars['String']['input'];
 };
 
-
 export type QueryPartnerForGrievanceChoicesArgs = {
   householdId?: InputMaybe<Scalars['ID']['input']>;
   individualId?: InputMaybe<Scalars['ID']['input']>;
 };
 
-
 export type QueryPaymentArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryPaymentPlanArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryPaymentRecordArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryPaymentRecordVerificationArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryPaymentVerificationPlanArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryProgramArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryRecipientsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6578,31 +6290,25 @@ export type QueryRecipientsArgs = {
   survey: Scalars['String']['input'];
 };
 
-
 export type QueryRegistrationDataImportArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryRegistrationDataImportDatahubArgs = {
   id: Scalars['ID']['input'];
 };
 
-
 export type QueryReportArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QuerySampleSizeArgs = {
   input?: InputMaybe<GetCashplanVerificationSampleSizeInput>;
 };
 
-
 export type QuerySanctionListIndividualArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QuerySectionChildReachedArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
@@ -6611,14 +6317,12 @@ export type QuerySectionChildReachedArgs = {
   year: Scalars['Int']['input'];
 };
 
-
 export type QuerySectionHouseholdsReachedArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
   program?: InputMaybe<Scalars['String']['input']>;
   year: Scalars['Int']['input'];
 };
-
 
 export type QuerySectionIndividualsReachedArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
@@ -6627,7 +6331,6 @@ export type QuerySectionIndividualsReachedArgs = {
   year: Scalars['Int']['input'];
 };
 
-
 export type QuerySectionTotalTransferredArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
   businessAreaSlug: Scalars['String']['input'];
@@ -6635,11 +6338,9 @@ export type QuerySectionTotalTransferredArgs = {
   year: Scalars['Int']['input'];
 };
 
-
 export type QuerySurveyArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryTableTotalCashTransferredByAdministrativeAreaArgs = {
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
@@ -6650,11 +6351,9 @@ export type QueryTableTotalCashTransferredByAdministrativeAreaArgs = {
   year: Scalars['Int']['input'];
 };
 
-
 export type QueryTargetPopulationArgs = {
   id: Scalars['ID']['input'];
 };
-
 
 export type QueryTargetPopulationHouseholdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6667,21 +6366,17 @@ export type QueryTargetPopulationHouseholdsArgs = {
   targetPopulation: Scalars['ID']['input'];
 };
 
-
 export type QueryTicketsByCategoryArgs = {
   businessAreaSlug: Scalars['String']['input'];
 };
-
 
 export type QueryTicketsByLocationAndCategoryArgs = {
   businessAreaSlug: Scalars['String']['input'];
 };
 
-
 export type QueryTicketsByStatusArgs = {
   businessAreaSlug: Scalars['String']['input'];
 };
-
 
 export type QueryTicketsByTypeArgs = {
   businessAreaSlug: Scalars['String']['input'];
@@ -6794,14 +6489,14 @@ export enum RegistrationDataImportDataSource {
   Edopomoga = 'EDOPOMOGA',
   FlexRegistration = 'FLEX_REGISTRATION',
   Kobo = 'KOBO',
-  Xls = 'XLS'
+  Xls = 'XLS',
 }
 
 export enum RegistrationDataImportDatahubImportDone {
   Done = 'DONE',
   Loading = 'LOADING',
   NotStarted = 'NOT_STARTED',
-  Started = 'STARTED'
+  Started = 'STARTED',
 }
 
 export type RegistrationDataImportDatahubNode = Node & {
@@ -6819,7 +6514,6 @@ export type RegistrationDataImportDatahubNode = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-
 export type RegistrationDataImportDatahubNodeHouseholdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6827,7 +6521,6 @@ export type RegistrationDataImportDatahubNodeHouseholdsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type RegistrationDataImportDatahubNodeIndividualsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6893,7 +6586,6 @@ export type RegistrationDataImportNode = Node & {
   version: Scalars['BigInt']['output'];
 };
 
-
 export type RegistrationDataImportNodeGrievanceticketSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6901,7 +6593,6 @@ export type RegistrationDataImportNodeGrievanceticketSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type RegistrationDataImportNodeHouseholdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6911,7 +6602,6 @@ export type RegistrationDataImportNodeHouseholdsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type RegistrationDataImportNodeIndividualsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -6919,7 +6609,6 @@ export type RegistrationDataImportNodeIndividualsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type RegistrationDataImportNodeMessagesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -6955,7 +6644,7 @@ export enum RegistrationDataImportStatus {
   MergeError = 'MERGE_ERROR',
   MergeScheduled = 'MERGE_SCHEDULED',
   Merging = 'MERGING',
-  Refused = 'REFUSED'
+  Refused = 'REFUSED',
 }
 
 export type RegistrationDeduplicationMutation = {
@@ -7010,7 +6699,6 @@ export type ReportNode = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-
 export type ReportNodeAdminAreaArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7020,7 +6708,6 @@ export type ReportNodeAdminAreaArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type ReportNodeAdminArea1Args = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7029,7 +6716,6 @@ export type ReportNodeAdminArea1Args = {
   name?: InputMaybe<Scalars['String']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ReportNodeAdminArea2Args = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7095,11 +6781,11 @@ export enum RoleSubsystem {
   Api = 'API',
   Ca = 'CA',
   Hope = 'HOPE',
-  Kobo = 'KOBO'
+  Kobo = 'KOBO',
 }
 
 export enum RuleCommitLanguage {
-  Python = 'PYTHON'
+  Python = 'PYTHON',
 }
 
 export type RuleCommitNode = Node & {
@@ -7120,7 +6806,6 @@ export type RuleCommitNode = Node & {
   updatedBy?: Maybe<UserNode>;
 };
 
-
 export type RuleCommitNodePaymentPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7128,7 +6813,6 @@ export type RuleCommitNodePaymentPlansArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type RuleCommitNodeTargetPopulationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7175,23 +6859,23 @@ export type RuleCommitNodeEdge = {
 };
 
 export enum RuleLanguage {
-  Python = 'PYTHON'
+  Python = 'PYTHON',
 }
 
 export enum RuleSecurity {
   A_0 = 'A_0',
   A_2 = 'A_2',
-  A_4 = 'A_4'
+  A_4 = 'A_4',
 }
 
 export enum RuleType {
   PaymentPlan = 'PAYMENT_PLAN',
-  Targeting = 'TARGETING'
+  Targeting = 'TARGETING',
 }
 
 export enum SamplingChoices {
   FullList = 'FULL_LIST',
-  Random = 'RANDOM'
+  Random = 'RANDOM',
 }
 
 export type SanctionListIndividualAliasNameNode = Node & {
@@ -7340,7 +7024,6 @@ export type SanctionListIndividualNode = Node & {
   versionNum: Scalars['Int']['output'];
 };
 
-
 export type SanctionListIndividualNodeAliasNamesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7348,7 +7031,6 @@ export type SanctionListIndividualNodeAliasNamesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type SanctionListIndividualNodeCountriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7358,7 +7040,6 @@ export type SanctionListIndividualNodeCountriesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type SanctionListIndividualNodeDatesOfBirthArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7367,7 +7048,6 @@ export type SanctionListIndividualNodeDatesOfBirthArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type SanctionListIndividualNodeDocumentsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7375,7 +7055,6 @@ export type SanctionListIndividualNodeDocumentsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type SanctionListIndividualNodeNationalitiesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7430,7 +7109,6 @@ export type ServiceProviderNode = Node & {
   visionId?: Maybe<Scalars['String']['output']>;
 };
 
-
 export type ServiceProviderNodeCashPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7438,7 +7116,6 @@ export type ServiceProviderNodeCashPlansArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type ServiceProviderNodePaymentrecordSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7504,7 +7181,6 @@ export type SteficonRuleNode = Node & {
   updatedBy?: Maybe<UserNode>;
 };
 
-
 export type SteficonRuleNodeHistoryArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7530,7 +7206,7 @@ export type SteficonRuleNodeEdge = {
 export enum SurveyCategory {
   Manual = 'MANUAL',
   RapidPro = 'RAPID_PRO',
-  Sms = 'SMS'
+  Sms = 'SMS',
 }
 
 export type SurveyNode = Node & {
@@ -7561,7 +7237,6 @@ export type SurveyNode = Node & {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-
 export type SurveyNodeRecipientsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7586,7 +7261,7 @@ export type SurveyNodeEdge = {
 
 export enum SurveySamplingType {
   FullList = 'FULL_LIST',
-  Random = 'RANDOM'
+  Random = 'RANDOM',
 }
 
 export type TableTotalCashTransferred = {
@@ -7598,7 +7273,7 @@ export enum TargetPopulationBuildStatus {
   Building = 'BUILDING',
   Failed = 'FAILED',
   Ok = 'OK',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
 }
 
 export type TargetPopulationNode = Node & {
@@ -7646,7 +7321,6 @@ export type TargetPopulationNode = Node & {
   vulnerabilityScoreMin?: Maybe<Scalars['Float']['output']>;
 };
 
-
 export type TargetPopulationNodeHouseholdListArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7656,7 +7330,6 @@ export type TargetPopulationNodeHouseholdListArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
 };
-
 
 export type TargetPopulationNodeHouseholdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7668,7 +7341,6 @@ export type TargetPopulationNodeHouseholdsArgs = {
   orderBy?: InputMaybe<Scalars['String']['input']>;
 };
 
-
 export type TargetPopulationNodeMessagesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7676,7 +7348,6 @@ export type TargetPopulationNodeMessagesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type TargetPopulationNodePaymentPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7686,7 +7357,6 @@ export type TargetPopulationNodePaymentPlansArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type TargetPopulationNodePaymentRecordsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -7694,7 +7364,6 @@ export type TargetPopulationNodePaymentRecordsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type TargetPopulationNodeSurveysArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -7729,7 +7398,7 @@ export enum TargetPopulationStatus {
   SteficonCompleted = 'STEFICON_COMPLETED',
   SteficonError = 'STEFICON_ERROR',
   SteficonRun = 'STEFICON_RUN',
-  SteficonWait = 'STEFICON_WAIT'
+  SteficonWait = 'STEFICON_WAIT',
 }
 
 export type TargetingCriteriaNode = {
@@ -7757,7 +7426,7 @@ export enum TargetingCriteriaRuleFilterComparisonMethod {
   NotContains = 'NOT_CONTAINS',
   NotEquals = 'NOT_EQUALS',
   NotInRange = 'NOT_IN_RANGE',
-  Range = 'RANGE'
+  Range = 'RANGE',
 }
 
 export type TargetingCriteriaRuleFilterNode = {
@@ -7803,7 +7472,7 @@ export enum TargetingIndividualBlockRuleFilterComparisonMethod {
   NotContains = 'NOT_CONTAINS',
   NotEquals = 'NOT_EQUALS',
   NotInRange = 'NOT_IN_RANGE',
-  Range = 'RANGE'
+  Range = 'RANGE',
 }
 
 export type TargetingIndividualBlockRuleFilterNode = {
@@ -8085,7 +7754,7 @@ export enum TicketPaymentVerificationDetailsNewStatus {
   NotReceived = 'NOT_RECEIVED',
   Pending = 'PENDING',
   Received = 'RECEIVED',
-  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
+  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES',
 }
 
 export type TicketPaymentVerificationDetailsNode = Node & {
@@ -8102,7 +7771,6 @@ export type TicketPaymentVerificationDetailsNode = Node & {
   paymentVerifications: PaymentVerificationNodeConnection;
   updatedAt: Scalars['DateTime']['output'];
 };
-
 
 export type TicketPaymentVerificationDetailsNodePaymentVerificationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8130,7 +7798,7 @@ export enum TicketPaymentVerificationDetailsPaymentVerificationStatus {
   NotReceived = 'NOT_RECEIVED',
   Pending = 'PENDING',
   Received = 'RECEIVED',
-  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
+  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES',
 }
 
 export type TicketPositiveFeedbackDetailsNode = Node & {
@@ -8429,7 +8097,6 @@ export type UserBusinessAreaNode = Node & {
   userRoles: Array<UserRoleNode>;
 };
 
-
 export type UserBusinessAreaNodeCashplanSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8437,7 +8104,6 @@ export type UserBusinessAreaNodeCashplanSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserBusinessAreaNodeChildrenArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8448,7 +8114,6 @@ export type UserBusinessAreaNodeChildrenArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserBusinessAreaNodeDataCollectingTypesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8456,7 +8121,6 @@ export type UserBusinessAreaNodeDataCollectingTypesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserBusinessAreaNodeFeedbackSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8466,7 +8130,6 @@ export type UserBusinessAreaNodeFeedbackSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserBusinessAreaNodeHouseholdSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8474,7 +8137,6 @@ export type UserBusinessAreaNodeHouseholdSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserBusinessAreaNodeIndividualSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8484,7 +8146,6 @@ export type UserBusinessAreaNodeIndividualSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserBusinessAreaNodeLogentrySetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8492,7 +8153,6 @@ export type UserBusinessAreaNodeLogentrySetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserBusinessAreaNodeMessageSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8502,7 +8162,6 @@ export type UserBusinessAreaNodeMessageSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserBusinessAreaNodePaymentSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8510,7 +8169,6 @@ export type UserBusinessAreaNodePaymentSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserBusinessAreaNodePaymentplanSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8520,7 +8178,6 @@ export type UserBusinessAreaNodePaymentplanSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserBusinessAreaNodePaymentrecordSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8528,7 +8185,6 @@ export type UserBusinessAreaNodePaymentrecordSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserBusinessAreaNodeProgramSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8539,7 +8195,6 @@ export type UserBusinessAreaNodeProgramSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8547,7 +8202,6 @@ export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserBusinessAreaNodeReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8557,7 +8211,6 @@ export type UserBusinessAreaNodeReportsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserBusinessAreaNodeServiceproviderSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8566,7 +8219,6 @@ export type UserBusinessAreaNodeServiceproviderSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserBusinessAreaNodeSurveySetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8574,7 +8226,6 @@ export type UserBusinessAreaNodeSurveySetArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8605,7 +8256,6 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
   updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
-
 
 export type UserBusinessAreaNodeTicketsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8674,7 +8324,6 @@ export type UserNode = Node & {
   username: Scalars['String']['output'];
 };
 
-
 export type UserNodeAssignedTicketsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8682,7 +8331,6 @@ export type UserNodeAssignedTicketsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserNodeBusinessAreasArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8692,7 +8340,6 @@ export type UserNodeBusinessAreasArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserNodeChangedTargetPopulationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8724,7 +8371,6 @@ export type UserNodeChangedTargetPopulationsArgs = {
   updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-
 export type UserNodeCreatedDeliveryMechanismsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8732,7 +8378,6 @@ export type UserNodeCreatedDeliveryMechanismsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserNodeCreatedFinancialServiceProviderXlsxTemplatesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8742,7 +8387,6 @@ export type UserNodeCreatedFinancialServiceProviderXlsxTemplatesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserNodeCreatedFinancialServiceProvidersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8750,7 +8394,6 @@ export type UserNodeCreatedFinancialServiceProvidersArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserNodeCreatedPaymentPlansArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8760,7 +8403,6 @@ export type UserNodeCreatedPaymentPlansArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserNodeCreatedTicketsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8768,7 +8410,6 @@ export type UserNodeCreatedTicketsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserNodeDocumentSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8778,7 +8419,6 @@ export type UserNodeDocumentSetArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserNodeFeedbackMessagesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8787,7 +8427,6 @@ export type UserNodeFeedbackMessagesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserNodeFeedbacksArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8795,7 +8434,6 @@ export type UserNodeFeedbacksArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserNodeFinalizedTargetPopulationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8827,7 +8465,6 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-
 export type UserNodeLogsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8835,7 +8472,6 @@ export type UserNodeLogsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserNodeMessagesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8845,7 +8481,6 @@ export type UserNodeMessagesArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserNodeRegistrationDataImportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8853,7 +8488,6 @@ export type UserNodeRegistrationDataImportsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserNodeReportsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8863,7 +8497,6 @@ export type UserNodeReportsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserNodeSentDeliveryMechanismsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8872,7 +8505,6 @@ export type UserNodeSentDeliveryMechanismsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
-
 export type UserNodeSurveysArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8880,7 +8512,6 @@ export type UserNodeSurveysArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 };
-
 
 export type UserNodeTargetPopulationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8911,7 +8542,6 @@ export type UserNodeTargetPopulationsArgs = {
   updatedAt_Gte?: InputMaybe<Scalars['DateTime']['input']>;
   updatedAt_Lte?: InputMaybe<Scalars['DateTime']['input']>;
 };
-
 
 export type UserNodeTicketNotesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8946,7 +8576,7 @@ export type UserRoleNode = {
 export enum UserStatus {
   Active = 'ACTIVE',
   Inactive = 'INACTIVE',
-  Invited = 'INVITED'
+  Invited = 'INVITED',
 }
 
 export type VolumeByDeliveryMechanismNode = Node & {
@@ -9026,13 +8656,11 @@ export type CreateFeedbackTicketMutationVariables = Exact<{
   input: CreateFeedbackInput;
 }>;
 
-
 export type CreateFeedbackTicketMutation = { __typename?: 'Mutations', createFeedback?: { __typename?: 'CreateFeedbackMutation', feedback?: { __typename?: 'FeedbackNode', id: string } | null } | null };
 
 export type CreateFeedbackMsgMutationVariables = Exact<{
   input: CreateFeedbackMessageInput;
 }>;
-
 
 export type CreateFeedbackMsgMutation = { __typename?: 'Mutations', createFeedbackMessage?: { __typename?: 'CreateFeedbackMessageMutation', feedbackMessage?: { __typename?: 'FeedbackMessageNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string } | null } | null } | null };
 
@@ -9040,13 +8668,11 @@ export type CreateSurveyAccountabilityMutationVariables = Exact<{
   input: CreateSurveyInput;
 }>;
 
-
 export type CreateSurveyAccountabilityMutation = { __typename?: 'Mutations', createSurvey?: { __typename?: 'CreateSurveyMutation', survey?: { __typename?: 'SurveyNode', id: string } | null } | null };
 
 export type ExportSurveySampleMutationVariables = Exact<{
   surveyId: Scalars['ID']['input'];
 }>;
-
 
 export type ExportSurveySampleMutation = { __typename?: 'Mutations', exportSurveySample?: { __typename?: 'ExportSurveySampleMutationMutation', survey?: { __typename?: 'SurveyNode', id: string } | null } | null };
 
@@ -9054,13 +8680,11 @@ export type UpdateFeedbackTicketMutationVariables = Exact<{
   input: UpdateFeedbackInput;
 }>;
 
-
 export type UpdateFeedbackTicketMutation = { __typename?: 'Mutations', updateFeedback?: { __typename?: 'UpdateFeedbackMutation', feedback?: { __typename?: 'FeedbackNode', id: string, unicefId?: string | null, issueType: FeedbackIssueType, createdAt: any, updatedAt: any, area: string, language: string, description: string, comments?: string | null, householdLookup?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string } } | null, individualLookup?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, linkedGrievance?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null } | null } | null } | null };
 
 export type CreateAccountabilityCommunicationMessageMutationVariables = Exact<{
   input: CreateAccountabilityCommunicationMessageInput;
 }>;
-
 
 export type CreateAccountabilityCommunicationMessageMutation = { __typename?: 'Mutations', createAccountabilityCommunicationMessage?: { __typename?: 'CreateCommunicationMessageMutation', message?: { __typename?: 'CommunicationMessageNode', id: string } | null } | null };
 
@@ -9068,14 +8692,12 @@ export type CheckAgainstSanctionListUploadMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
 }>;
 
-
 export type CheckAgainstSanctionListUploadMutation = { __typename?: 'Mutations', checkAgainstSanctionList?: { __typename?: 'CheckAgainstSanctionListMutation', errors?: Array<{ __typename?: 'XlsxRowErrorNode', header?: string | null, message?: string | null, rowNumber?: number | null } | null> | null } | null };
 
 export type ApproveAddIndividualDataChangeMutationVariables = Exact<{
   grievanceTicketId: Scalars['ID']['input'];
   approveStatus: Scalars['Boolean']['input'];
 }>;
-
 
 export type ApproveAddIndividualDataChangeMutation = { __typename?: 'Mutations', approveAddIndividual?: { __typename?: 'SimpleApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number } | null } | null };
 
@@ -9085,14 +8707,12 @@ export type ApproveDeleteHouseholdDataChangeMutationVariables = Exact<{
   reasonHhId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type ApproveDeleteHouseholdDataChangeMutation = { __typename?: 'Mutations', approveDeleteHousehold?: { __typename?: 'DeleteHouseholdApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number } | null } | null };
 
 export type ApproveDeleteIndividualDataChangeMutationVariables = Exact<{
   grievanceTicketId: Scalars['ID']['input'];
   approveStatus: Scalars['Boolean']['input'];
 }>;
-
 
 export type ApproveDeleteIndividualDataChangeMutation = { __typename?: 'Mutations', approveDeleteIndividual?: { __typename?: 'SimpleApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number } | null } | null };
 
@@ -9101,7 +8721,6 @@ export type ApproveHouseholdDataChangeMutationVariables = Exact<{
   householdApproveData?: InputMaybe<Scalars['JSONString']['input']>;
   flexFieldsApproveData?: InputMaybe<Scalars['JSONString']['input']>;
 }>;
-
 
 export type ApproveHouseholdDataChangeMutation = { __typename?: 'Mutations', approveHouseholdDataChange?: { __typename?: 'HouseholdDataChangeApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, id: string, status?: string | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null } | null } | null } | null };
 
@@ -9120,7 +8739,6 @@ export type ApproveIndividualDataChangeMutationVariables = Exact<{
   approvedPaymentChannelsToRemove?: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>> | InputMaybe<Scalars['Int']['input']>>;
 }>;
 
-
 export type ApproveIndividualDataChangeMutation = { __typename?: 'Mutations', approveIndividualDataChange?: { __typename?: 'IndividualDataChangeApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null } | null } | null } | null };
 
 export type ApproveNeedsAdjudicationMutationVariables = Exact<{
@@ -9129,7 +8747,6 @@ export type ApproveNeedsAdjudicationMutationVariables = Exact<{
   selectedIndividualIds?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
 }>;
 
-
 export type ApproveNeedsAdjudicationMutation = { __typename?: 'Mutations', approveNeedsAdjudication?: { __typename?: 'NeedsAdjudicationApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number } | null } | null };
 
 export type ApprovePaymentDetailsMutationVariables = Exact<{
@@ -9137,14 +8754,12 @@ export type ApprovePaymentDetailsMutationVariables = Exact<{
   approveStatus: Scalars['Boolean']['input'];
 }>;
 
-
 export type ApprovePaymentDetailsMutation = { __typename?: 'Mutations', approvePaymentDetails?: { __typename?: 'PaymentDetailsApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number, paymentVerificationTicketDetails?: { __typename?: 'TicketPaymentVerificationDetailsNode', id: string, approveStatus: boolean } | null } | null } | null };
 
 export type ApproveSystemFlaggingMutationVariables = Exact<{
   grievanceTicketId: Scalars['ID']['input'];
   approveStatus: Scalars['Boolean']['input'];
 }>;
-
 
 export type ApproveSystemFlaggingMutation = { __typename?: 'Mutations', approveSystemFlagging?: { __typename?: 'SimpleApproveMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, status: number } | null } | null };
 
@@ -9154,7 +8769,6 @@ export type BulkUpdateGrievanceAddNoteMutationVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
 }>;
 
-
 export type BulkUpdateGrievanceAddNoteMutation = { __typename?: 'Mutations', bulkGrievanceAddNote?: { __typename?: 'BulkGrievanceAddNoteMutation', grievanceTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string } | null> | null } | null };
 
 export type BulkUpdateGrievanceAssigneeMutationVariables = Exact<{
@@ -9162,7 +8776,6 @@ export type BulkUpdateGrievanceAssigneeMutationVariables = Exact<{
   assignedTo: Scalars['String']['input'];
   businessAreaSlug: Scalars['String']['input'];
 }>;
-
 
 export type BulkUpdateGrievanceAssigneeMutation = { __typename?: 'Mutations', bulkUpdateGrievanceAssignee?: { __typename?: 'BulkUpdateGrievanceTicketsAssigneesMutation', grievanceTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null };
 
@@ -9172,7 +8785,6 @@ export type BulkUpdateGrievancePriorityMutationVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
 }>;
 
-
 export type BulkUpdateGrievancePriorityMutation = { __typename?: 'Mutations', bulkUpdateGrievancePriority?: { __typename?: 'BulkUpdateGrievanceTicketsPriorityMutation', grievanceTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, priority?: number | null } | null> | null } | null };
 
 export type BulkUpdateGrievanceUrgencyMutationVariables = Exact<{
@@ -9181,13 +8793,11 @@ export type BulkUpdateGrievanceUrgencyMutationVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
 }>;
 
-
 export type BulkUpdateGrievanceUrgencyMutation = { __typename?: 'Mutations', bulkUpdateGrievanceUrgency?: { __typename?: 'BulkUpdateGrievanceTicketsUrgencyMutation', grievanceTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, urgency?: number | null } | null> | null } | null };
 
 export type CreateGrievanceMutationVariables = Exact<{
   input: CreateGrievanceTicketInput;
 }>;
-
 
 export type CreateGrievanceMutation = { __typename?: 'Mutations', createGrievanceTicket?: { __typename?: 'CreateGrievanceTicketMutation', grievanceTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, category: number } | null> | null } | null };
 
@@ -9195,14 +8805,12 @@ export type CreateGrievanceTicketNoteMutationVariables = Exact<{
   noteInput: CreateTicketNoteInput;
 }>;
 
-
 export type CreateGrievanceTicketNoteMutation = { __typename?: 'Mutations', createTicketNote?: { __typename?: 'CreateTicketNoteMutation', grievanceTicketNote?: { __typename?: 'TicketNoteNode', id: string, createdAt: any, updatedAt: any, createdBy?: { __typename?: 'UserNode', firstName: string, lastName: string, username: string, email: string } | null } | null } | null };
 
 export type GrievanceTicketStatusChangeMutationVariables = Exact<{
   grievanceTicketId?: InputMaybe<Scalars['ID']['input']>;
   status?: InputMaybe<Scalars['Int']['input']>;
 }>;
-
 
 export type GrievanceTicketStatusChangeMutation = { __typename?: 'Mutations', grievanceStatusChange?: { __typename?: 'GrievanceStatusChangeMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, category: number, consent: boolean, createdAt: any, updatedAt: any, description: string, language: string, admin?: string | null, area: string, issueType?: number | null, priority?: number | null, urgency?: number | null, comments?: string | null, partner?: { __typename?: 'PartnerType', id: string, name: string } | null, businessArea: { __typename?: 'UserBusinessAreaNode', postponeDeduplication: boolean }, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, id: string, status?: string | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null, paymentRecord?: { __typename?: 'PaymentRecordAndPaymentNode', id?: string | null, caId?: string | null, deliveredQuantity?: number | null, entitlementQuantity?: number | null, objType?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, unicefId?: string | null, objType?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null, relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, linkedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, existingTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, category: number, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, addIndividualTicketDetails?: { __typename?: 'TicketAddIndividualDetailsNode', id: string, individualData?: any | null, approveStatus: boolean, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null, roleReassignData: any, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null } | null, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, id: string, status?: string | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null } | null, deleteIndividualTicketDetails?: { __typename?: 'TicketDeleteIndividualDetailsNode', id: string, roleReassignData: any, approveStatus: boolean } | null, deleteHouseholdTicketDetails?: { __typename?: 'TicketDeleteHouseholdDetailsNode', id: string, approveStatus: boolean, reasonHousehold?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, systemFlaggingTicketDetails?: { __typename?: 'TicketSystemFlaggingDetailsNode', id: string, approveStatus: boolean, roleReassignData: any, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, fullName: string, birthDate: any, lastRegistrationDate: any, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, documentNumber: string, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> } }, sanctionListIndividual: { __typename?: 'SanctionListIndividualNode', id: string, fullName: string, referenceNumber: string, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> }, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string } | null } | null> } } } | null, paymentVerificationTicketDetails?: { __typename?: 'TicketPaymentVerificationDetailsNode', id: string, newStatus?: TicketPaymentVerificationDetailsNewStatus | null, oldReceivedAmount?: number | null, newReceivedAmount?: number | null, approveStatus: boolean, paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus, hasMultiplePaymentVerifications?: boolean | null, paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null, paymentVerifications: { __typename?: 'PaymentVerificationNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationNodeEdge', node?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null> } } | null, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, activeIndividualsCount?: number | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null, selectedIndividuals?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, activeIndividualsCount?: number | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null> | null } | null, ticketNotes: { __typename?: 'TicketNoteNodeConnection', edges: Array<{ __typename?: 'TicketNoteNodeEdge', node?: { __typename?: 'TicketNoteNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> }, programs?: Array<{ __typename?: 'ProgramNode', name: string, id: string } | null> | null, documentation?: Array<{ __typename?: 'GrievanceDocumentNode', id: string, createdAt: any, updatedAt: any, name?: string | null, fileSize?: number | null, contentType: string, filePath?: string | null, fileName?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null };
 
@@ -9214,13 +8822,11 @@ export type ReassignRoleGrievanceMutationVariables = Exact<{
   role: Scalars['String']['input'];
 }>;
 
-
 export type ReassignRoleGrievanceMutation = { __typename?: 'Mutations', reassignRole?: { __typename?: 'ReassignRoleMutation', household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null, individual?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null } | null };
 
 export type UpdateGrievanceMutationVariables = Exact<{
   input: UpdateGrievanceTicketInput;
 }>;
-
 
 export type UpdateGrievanceMutation = { __typename?: 'Mutations', updateGrievanceTicket?: { __typename?: 'UpdateGrievanceTicketMutation', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string } | null } | null };
 
@@ -9228,20 +8834,17 @@ export type ActionPpMutationVariables = Exact<{
   input: ActionPaymentPlanInput;
 }>;
 
-
 export type ActionPpMutation = { __typename?: 'Mutations', actionPaymentPlanMutation?: { __typename?: 'ActionPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus } | null } | null };
 
 export type AssignFspToDeliveryMechMutationVariables = Exact<{
   input: AssignFspToDeliveryMechanismInput;
 }>;
 
-
 export type AssignFspToDeliveryMechMutation = { __typename?: 'Mutations', assignFspToDeliveryMechanism?: { __typename?: 'AssignFspToDeliveryMechanismMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null> | null } | null } | null };
 
 export type ChooseDeliveryMechForPaymentPlanMutationVariables = Exact<{
   input: ChooseDeliveryMechanismsForPaymentPlanInput;
 }>;
-
 
 export type ChooseDeliveryMechForPaymentPlanMutation = { __typename?: 'Mutations', chooseDeliveryMechanismsForPaymentPlan?: { __typename?: 'ChooseDeliveryMechanismsForPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null> | null } | null } | null };
 
@@ -9251,13 +8854,11 @@ export type CreateFollowUpPpMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
 }>;
 
-
 export type CreateFollowUpPpMutation = { __typename?: 'Mutations', createFollowUpPaymentPlan?: { __typename?: 'CreateFollowUpPaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null } | null };
 
 export type CreatePpMutationVariables = Exact<{
   input: CreatePaymentPlanInput;
 }>;
-
 
 export type CreatePpMutation = { __typename?: 'Mutations', createPaymentPlan?: { __typename?: 'CreatePaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string } | null } | null };
 
@@ -9265,13 +8866,11 @@ export type DeletePpMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
 }>;
 
-
 export type DeletePpMutation = { __typename?: 'Mutations', deletePaymentPlan?: { __typename?: 'DeletePaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus } | null } | null };
 
 export type UpdatePpMutationVariables = Exact<{
   input: UpdatePaymentPlanInput;
 }>;
-
 
 export type UpdatePpMutation = { __typename?: 'Mutations', updatePaymentPlan?: { __typename?: 'UpdatePaymentPlanMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string } | null } | null };
 
@@ -9281,13 +8880,11 @@ export type ExcludeHouseholdsPpMutationVariables = Exact<{
   exclusionReason?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type ExcludeHouseholdsPpMutation = { __typename?: 'Mutations', excludeHouseholds?: { __typename?: 'ExcludeHouseholdsMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, excludeHouseholdError: string, exclusionReason: string, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null } | null } | null };
 
 export type ExportPdfPpSummaryMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
 }>;
-
 
 export type ExportPdfPpSummaryMutation = { __typename?: 'Mutations', exportPdfPaymentPlanSummary?: { __typename?: 'ExportPDFPaymentPlanSummaryMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string } | null } | null };
 
@@ -9295,13 +8892,11 @@ export type ExportXlsxPpListMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
 }>;
 
-
 export type ExportXlsxPpListMutation = { __typename?: 'Mutations', exportXlsxPaymentPlanPaymentList?: { __typename?: 'ExportXLSXPaymentPlanPaymentListMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null } | null } | null };
 
 export type ExportXlsxPpListPerFspMutationVariables = Exact<{
   paymentPlanId: Scalars['ID']['input'];
 }>;
-
 
 export type ExportXlsxPpListPerFspMutation = { __typename?: 'Mutations', exportXlsxPaymentPlanPaymentListPerFsp?: { __typename?: 'ExportXLSXPaymentPlanPaymentListPerFSPMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null } | null } | null };
 
@@ -9310,7 +8905,6 @@ export type ImportXlsxPpListMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
 }>;
 
-
 export type ImportXlsxPpListMutation = { __typename?: 'Mutations', importXlsxPaymentPlanPaymentList?: { __typename?: 'ImportXLSXPaymentPlanPaymentListMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus } | null, errors?: Array<{ __typename?: 'XlsxErrorNode', sheet?: string | null, coordinates?: string | null, message?: string | null } | null> | null } | null };
 
 export type ImportXlsxPpListPerFspMutationVariables = Exact<{
@@ -9318,13 +8912,11 @@ export type ImportXlsxPpListPerFspMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
 }>;
 
-
 export type ImportXlsxPpListPerFspMutation = { __typename?: 'Mutations', importXlsxPaymentPlanPaymentListPerFsp?: { __typename?: 'ImportXLSXPaymentPlanPaymentListPerFSPMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus } | null, errors?: Array<{ __typename?: 'XlsxErrorNode', sheet?: string | null, coordinates?: string | null, message?: string | null } | null> | null } | null };
 
 export type MarkPayAsFailedMutationVariables = Exact<{
   paymentId: Scalars['ID']['input'];
 }>;
-
 
 export type MarkPayAsFailedMutation = { __typename?: 'Mutations', markPaymentAsFailed?: { __typename?: 'MarkPaymentAsFailedMutation', payment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, statusDate: any, deliveredQuantity?: number | null, deliveryDate?: any | null } | null } | null };
 
@@ -9334,7 +8926,6 @@ export type RevertMarkPayAsFailedMutationVariables = Exact<{
   deliveryDate: Scalars['Date']['input'];
 }>;
 
-
 export type RevertMarkPayAsFailedMutation = { __typename?: 'Mutations', revertMarkPaymentAsFailed?: { __typename?: 'RevertMarkPaymentAsFailedMutation', payment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, statusDate: any, deliveredQuantity?: number | null, deliveryDate?: any | null } | null } | null };
 
 export type SetSteficonRuleOnPpListMutationVariables = Exact<{
@@ -9342,13 +8933,11 @@ export type SetSteficonRuleOnPpListMutationVariables = Exact<{
   steficonRuleId: Scalars['ID']['input'];
 }>;
 
-
 export type SetSteficonRuleOnPpListMutation = { __typename?: 'Mutations', setSteficonRuleOnPaymentPlanPaymentList?: { __typename?: 'SetSteficonRuleOnPaymentPlanPaymentListMutation', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null } | null } | null };
 
 export type ActivatePaymentVerificationPlanMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
 }>;
-
 
 export type ActivatePaymentVerificationPlanMutation = { __typename?: 'Mutations', activatePaymentVerificationPlan?: { __typename?: 'ActivatePaymentVerificationPlan', validationErrors?: any | null, paymentPlan?: { __typename?: 'GenericPaymentPlanNode', id?: string | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, activationDate?: any | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, status: PaymentVerificationSummaryStatus, activationDate?: any | null } | null } | null } | null };
 
@@ -9357,13 +8946,11 @@ export type CreatePaymentVerificationPlanMutationVariables = Exact<{
   version?: InputMaybe<Scalars['BigInt']['input']>;
 }>;
 
-
 export type CreatePaymentVerificationPlanMutation = { __typename?: 'Mutations', createPaymentVerificationPlan?: { __typename?: 'CreateVerificationPlanMutation', paymentPlan?: { __typename?: 'GenericPaymentPlanNode', id?: string | null } | null } | null };
 
 export type DeletePaymentVerificationPlanMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
 }>;
-
 
 export type DeletePaymentVerificationPlanMutation = { __typename?: 'Mutations', deletePaymentVerificationPlan?: { __typename?: 'DeletePaymentVerificationPlan', paymentPlan?: { __typename?: 'GenericPaymentPlanNode', id?: string | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, receivedWithProblemsCount?: number | null, activationDate?: any | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, status: PaymentVerificationSummaryStatus } | null } | null } | null };
 
@@ -9371,13 +8958,11 @@ export type DiscardPaymentVerificationPlanMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
 }>;
 
-
 export type DiscardPaymentVerificationPlanMutation = { __typename?: 'Mutations', discardPaymentVerificationPlan?: { __typename?: 'DiscardPaymentVerificationPlan', paymentPlan?: { __typename?: 'GenericPaymentPlanNode', id?: string | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, receivedWithProblemsCount?: number | null, activationDate?: any | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, status: PaymentVerificationSummaryStatus } | null } | null } | null };
 
 export type EditPaymentVerificationPlanMutationVariables = Exact<{
   input: EditPaymentVerificationInput;
 }>;
-
 
 export type EditPaymentVerificationPlanMutation = { __typename?: 'Mutations', editPaymentVerificationPlan?: { __typename?: 'EditPaymentVerificationMutation', paymentPlan?: { __typename?: 'GenericPaymentPlanNode', id?: string | null } | null } | null };
 
@@ -9385,13 +8970,11 @@ export type ExportXlsxPaymentVerificationPlanFileMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
 }>;
 
-
 export type ExportXlsxPaymentVerificationPlanFileMutation = { __typename?: 'Mutations', exportXlsxPaymentVerificationPlanFile?: { __typename?: 'ExportXlsxPaymentVerificationPlanFile', paymentPlan?: { __typename?: 'GenericPaymentPlanNode', id?: string | null } | null } | null };
 
 export type FinishPaymentVerificationPlanMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
 }>;
-
 
 export type FinishPaymentVerificationPlanMutation = { __typename?: 'Mutations', finishPaymentVerificationPlan?: { __typename?: 'FinishPaymentVerificationPlan', paymentPlan?: { __typename?: 'GenericPaymentPlanNode', id?: string | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, completionDate?: any | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, status: PaymentVerificationSummaryStatus } | null } | null } | null };
 
@@ -9400,20 +8983,17 @@ export type ImportXlsxPaymentVerificationPlanFileMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
 }>;
 
-
 export type ImportXlsxPaymentVerificationPlanFileMutation = { __typename?: 'Mutations', importXlsxPaymentVerificationPlanFile?: { __typename?: 'ImportXlsxPaymentVerificationPlanFile', paymentPlan?: { __typename?: 'GenericPaymentPlanNode', id?: string | null } | null, errors?: Array<{ __typename?: 'XlsxErrorNode', sheet?: string | null, coordinates?: string | null, message?: string | null } | null> | null } | null };
 
 export type InvalidPaymentVerificationPlanMutationVariables = Exact<{
   paymentVerificationPlanId: Scalars['ID']['input'];
 }>;
 
-
 export type InvalidPaymentVerificationPlanMutation = { __typename?: 'Mutations', invalidPaymentVerificationPlan?: { __typename?: 'InvalidPaymentVerificationPlan', paymentPlan?: { __typename?: 'GenericPaymentPlanNode', id?: string | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean } | null } | null> } | null } | null } | null };
 
 export type MarkPrAsFailedMutationVariables = Exact<{
   paymentRecordId: Scalars['ID']['input'];
 }>;
-
 
 export type MarkPrAsFailedMutation = { __typename?: 'Mutations', markPaymentRecordAsFailed?: { __typename?: 'MarkPaymentRecordAsFailedMutation', paymentRecord?: { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, deliveryType?: PaymentRecordDeliveryType | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } } | null } | null };
 
@@ -9423,7 +9003,6 @@ export type RevertMarkPrAsFailedMutationVariables = Exact<{
   deliveryDate: Scalars['Date']['input'];
 }>;
 
-
 export type RevertMarkPrAsFailedMutation = { __typename?: 'Mutations', revertMarkPaymentRecordAsFailed?: { __typename?: 'RevertMarkPaymentRecordAsFailedMutation', paymentRecord?: { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, deliveryType?: PaymentRecordDeliveryType | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, transactionReferenceId?: string | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null } | null, household: { __typename?: 'HouseholdNode', id: string, status?: string | null, size?: number | null, unicefId?: string | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, parent?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } } | null } | null };
 
 export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables = Exact<{
@@ -9431,7 +9010,6 @@ export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables 
   receivedAmount: Scalars['Decimal']['input'];
   received: Scalars['Boolean']['input'];
 }>;
-
 
 export type UpdatePaymentVerificationReceivedAndReceivedAmountMutation = { __typename?: 'Mutations', updatePaymentVerificationReceivedAndReceivedAmount?: { __typename?: 'UpdatePaymentVerificationReceivedAndReceivedAmount', paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, receivedAmount?: number | null, paymentVerificationPlan: { __typename?: 'PaymentVerificationPlanNode', id: string, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, receivedWithProblemsCount?: number | null } } | null } | null };
 
@@ -9441,13 +9019,11 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables = 
   status?: InputMaybe<PaymentVerificationStatusForUpdate>;
 }>;
 
-
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutation = { __typename?: 'Mutations', updatePaymentVerificationStatusAndReceivedAmount?: { __typename?: 'UpdatePaymentVerificationStatusAndReceivedAmount', paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, receivedAmount?: number | null } | null } | null };
 
 export type CopyProgramMutationVariables = Exact<{
   programData: CopyProgramInput;
 }>;
-
 
 export type CopyProgramMutation = { __typename?: 'Mutations', copyProgram?: { __typename?: 'CopyProgram', program?: { __typename?: 'ProgramNode', id: string } | null } | null };
 
@@ -9455,13 +9031,11 @@ export type CreateProgramMutationVariables = Exact<{
   programData: CreateProgramInput;
 }>;
 
-
 export type CreateProgramMutation = { __typename?: 'Mutations', createProgram?: { __typename?: 'CreateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, caId?: string | null, budget?: any | null, description: string, frequencyOfPayments: ProgramFrequencyOfPayments, sector: ProgramSector, scope?: ProgramScope | null, cashPlus: boolean, populationGoal: number, individualDataNeeded?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean } | null } | null } | null };
 
 export type DeleteProgramMutationVariables = Exact<{
   programId: Scalars['String']['input'];
 }>;
-
 
 export type DeleteProgramMutation = { __typename?: 'Mutations', deleteProgram?: { __typename?: 'DeleteProgram', ok?: boolean | null } | null };
 
@@ -9470,13 +9044,11 @@ export type UpdateProgramMutationVariables = Exact<{
   version: Scalars['BigInt']['input'];
 }>;
 
-
 export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean } | null } | null } | null };
 
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
 }>;
-
 
 export type CreateRegistrationKoboImportMutation = { __typename?: 'Mutations', registrationKoboImport?: { __typename?: 'RegistrationKoboImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, datahubId?: any | null, screenBeneficiary: boolean } | null } | null };
 
@@ -9484,20 +9056,17 @@ export type CreateRegistrationXlsxImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationXlsxImportMutationInput;
 }>;
 
-
 export type CreateRegistrationXlsxImportMutation = { __typename?: 'Mutations', registrationXlsxImport?: { __typename?: 'RegistrationXlsxImportMutation', validationErrors?: any | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string, dataSource: RegistrationDataImportDataSource, datahubId?: any | null, screenBeneficiary: boolean } | null } | null };
 
 export type EraseRdiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type EraseRdiMutation = { __typename?: 'Mutations', eraseRegistrationDataImport?: { __typename?: 'EraseRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, status: RegistrationDataImportStatus, erased: boolean } | null } | null };
 
 export type MergeRdiMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type MergeRdiMutation = { __typename?: 'Mutations', mergeRegistrationDataImport?: { __typename?: 'MergeRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null };
 
@@ -9506,13 +9075,11 @@ export type RefuseRdiMutationVariables = Exact<{
   refuseReason?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type RefuseRdiMutation = { __typename?: 'Mutations', refuseRegistrationDataImport?: { __typename?: 'RefuseRegistrationDataImportMutation', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, status: RegistrationDataImportStatus, refuseReason?: string | null } | null } | null };
 
 export type RerunDedupeMutationVariables = Exact<{
   registrationDataImportDatahubId: Scalars['ID']['input'];
 }>;
-
 
 export type RerunDedupeMutation = { __typename?: 'Mutations', rerunDedupe?: { __typename?: 'RegistrationDeduplicationMutation', ok?: boolean | null } | null };
 
@@ -9522,7 +9089,6 @@ export type SaveKoboImportDataMutationVariables = Exact<{
   onlyActiveSubmissions: Scalars['Boolean']['input'];
 }>;
 
-
 export type SaveKoboImportDataMutation = { __typename?: 'Mutations', saveKoboImportDataAsync?: { __typename?: 'SaveKoboProjectImportDataAsync', importData?: { __typename?: 'KoboImportDataNode', id: string } | null } | null };
 
 export type SaveKoboImportDataAsyncMutationVariables = Exact<{
@@ -9531,7 +9097,6 @@ export type SaveKoboImportDataAsyncMutationVariables = Exact<{
   onlyActiveSubmissions: Scalars['Boolean']['input'];
 }>;
 
-
 export type SaveKoboImportDataAsyncMutation = { __typename?: 'Mutations', saveKoboImportDataAsync?: { __typename?: 'SaveKoboProjectImportDataAsync', importData?: { __typename?: 'KoboImportDataNode', id: string, status: ImportDataStatus } | null } | null };
 
 export type UploadImportDataXlsxFileAsyncMutationVariables = Exact<{
@@ -9539,13 +9104,11 @@ export type UploadImportDataXlsxFileAsyncMutationVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
 }>;
 
-
 export type UploadImportDataXlsxFileAsyncMutation = { __typename?: 'Mutations', uploadImportDataXlsxFileAsync?: { __typename?: 'UploadImportDataXLSXFileAsync', errors?: Array<{ __typename?: 'XlsxRowErrorNode', header?: string | null, message?: string | null, rowNumber?: number | null } | null> | null, importData?: { __typename?: 'ImportDataNode', id: string, numberOfIndividuals?: number | null, numberOfHouseholds?: number | null, registrationDataImport?: { __typename?: 'RegistrationDataImportDatahubNode', id: string } | null } | null } | null };
 
 export type CreateDashboardReportMutationVariables = Exact<{
   reportData: CreateDashboardReportInput;
 }>;
-
 
 export type CreateDashboardReportMutation = { __typename?: 'Mutations', createDashboardReport?: { __typename?: 'CreateDashboardReport', success?: boolean | null } | null };
 
@@ -9553,13 +9116,11 @@ export type CreateReportMutationVariables = Exact<{
   reportData: CreateReportInput;
 }>;
 
-
 export type CreateReportMutation = { __typename?: 'Mutations', createReport?: { __typename?: 'CreateReport', report?: { __typename?: 'ReportNode', id: string, status: number, reportType: number, createdAt: any, dateFrom: any, dateTo: any, fileUrl?: string | null, createdBy: { __typename?: 'UserNode', firstName: string, lastName: string }, adminArea: { __typename?: 'AreaNodeConnection', edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', name: string } | null } | null> }, program?: { __typename?: 'ProgramNode', name: string } | null } | null } | null };
 
 export type RestartCreateReportMutationVariables = Exact<{
   reportData: RestartCreateReportInput;
 }>;
-
 
 export type RestartCreateReportMutation = { __typename?: 'Mutations', restartCreateReport?: { __typename?: 'RestartCreateReport', report?: { __typename?: 'ReportNode', id: string, status: number, reportType: number, createdAt: any, dateFrom: any, dateTo: any, fileUrl?: string | null, createdBy: { __typename?: 'UserNode', firstName: string, lastName: string }, adminArea: { __typename?: 'AreaNodeConnection', edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', name: string } | null } | null> }, program?: { __typename?: 'ProgramNode', name: string } | null } | null } | null };
 
@@ -9567,13 +9128,11 @@ export type CreateTpMutationVariables = Exact<{
   input: CreateTargetPopulationInput;
 }>;
 
-
 export type CreateTpMutation = { __typename?: 'Mutations', createTargetPopulation?: { __typename?: 'CreateTargetPopulationMutation', validationErrors?: any | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, status: TargetPopulationStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null } | null } | null };
 
 export type DeleteTargetPopulationMutationVariables = Exact<{
   input: DeleteTargetPopulationMutationInput;
 }>;
-
 
 export type DeleteTargetPopulationMutation = { __typename?: 'Mutations', deleteTargetPopulation?: { __typename?: 'DeleteTargetPopulationMutationPayload', clientMutationId?: string | null } | null };
 
@@ -9581,13 +9140,11 @@ export type CopyTargetPopulationMutationVariables = Exact<{
   input: CopyTargetPopulationMutationInput;
 }>;
 
-
 export type CopyTargetPopulationMutation = { __typename?: 'Mutations', copyTargetPopulation?: { __typename?: 'CopyTargetPopulationMutationPayload', clientMutationId?: string | null, validationErrors?: any | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string } | null } | null };
 
 export type FinalizeTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type FinalizeTpMutation = { __typename?: 'Mutations', finalizeTargetPopulation?: { __typename?: 'FinalizeTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
@@ -9595,13 +9152,11 @@ export type LockTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type LockTpMutation = { __typename?: 'Mutations', lockTargetPopulation?: { __typename?: 'LockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type RebuildTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type RebuildTpMutation = { __typename?: 'Mutations', targetPopulationRebuild?: { __typename?: 'RebuildTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
@@ -9609,13 +9164,11 @@ export type SetSteficonRuleOnTargetPopulationMutationVariables = Exact<{
   input: SetSteficonRuleOnTargetPopulationMutationInput;
 }>;
 
-
 export type SetSteficonRuleOnTargetPopulationMutation = { __typename?: 'Mutations', setSteficonRuleOnTargetPopulation?: { __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
 export type UnlockTpMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type UnlockTpMutation = { __typename?: 'Mutations', unlockTargetPopulation?: { __typename?: 'UnlockTargetPopulationMutation', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null } | null };
 
@@ -9623,13 +9176,11 @@ export type UpdateTpMutationVariables = Exact<{
   input: UpdateTargetPopulationInput;
 }>;
 
-
 export type UpdateTpMutation = { __typename?: 'Mutations', updateTargetPopulation?: { __typename?: 'UpdateTargetPopulationMutation', validationErrors?: any | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, status: TargetPopulationStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null } | null } | null };
 
 export type AccountabilityCommunicationMessageQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type AccountabilityCommunicationMessageQuery = { __typename?: 'Query', accountabilityCommunicationMessage?: { __typename?: 'CommunicationMessageNode', id: string, unicefId?: string | null, createdAt: any, title: string, body: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null } | null };
 
@@ -9637,13 +9188,11 @@ export type AccountabilityCommunicationMessageSampleSizeQueryVariables = Exact<{
   input: GetAccountabilityCommunicationMessageSampleSizeInput;
 }>;
 
-
 export type AccountabilityCommunicationMessageSampleSizeQuery = { __typename?: 'Query', accountabilityCommunicationMessageSampleSize?: { __typename?: 'GetCommunicationMessageSampleSizeNode', numberOfRecipients?: number | null, sampleSize?: number | null } | null };
 
 export type AccountabilitySampleSizeQueryVariables = Exact<{
   input: AccountabilitySampleSizeInput;
 }>;
-
 
 export type AccountabilitySampleSizeQuery = { __typename?: 'Query', accountabilitySampleSize?: { __typename?: 'AccountabilitySampleSizeNode', numberOfRecipients?: number | null, sampleSize?: number | null } | null };
 
@@ -9660,7 +9209,6 @@ export type AllAccountabilityCommunicationMessageRecipientsQueryVariables = Exac
   sex?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllAccountabilityCommunicationMessageRecipientsQuery = { __typename?: 'Query', allAccountabilityCommunicationMessageRecipients?: { __typename?: 'CommunicationMessageRecipientMapNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'CommunicationMessageRecipientMapNodeEdge', cursor: string, node?: { __typename?: 'CommunicationMessageRecipientMapNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, status?: string | null, residenceStatus?: string | null, lastRegistrationDate: any, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null } } | null } | null> } | null };
 
@@ -9683,7 +9231,6 @@ export type AllAccountabilityCommunicationMessagesQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllAccountabilityCommunicationMessagesQuery = { __typename?: 'Query', allAccountabilityCommunicationMessages?: { __typename?: 'CommunicationMessageNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'CommunicationMessageNodeEdge', cursor: string, node?: { __typename?: 'CommunicationMessageNode', id: string, unicefId?: string | null, title: string, numberOfRecipients: number, createdAt: any, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> } | null };
 
 export type AllAdminAreasQueryVariables = Exact<{
@@ -9694,20 +9241,17 @@ export type AllAdminAreasQueryVariables = Exact<{
   parentId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllAdminAreasQuery = { __typename?: 'Query', allAdminAreas?: { __typename?: 'AreaNodeConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null } | null> } | null };
 
 export type AllAreasTreeQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
 }>;
 
-
 export type AllAreasTreeQuery = { __typename?: 'Query', allAreasTree?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null, areas?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null, areas?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null, areas?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null } | null> | null } | null> | null } | null> | null } | null> | null };
 
 export type AllBusinessAreasQueryVariables = Exact<{
   slug?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllBusinessAreasQuery = { __typename?: 'Query', allBusinessAreas?: { __typename?: 'BusinessAreaNodeConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'BusinessAreaNodeEdge', node?: { __typename?: 'BusinessAreaNode', id: string, name: string, slug: string } | null } | null> } | null };
 
@@ -9724,7 +9268,6 @@ export type AllLogEntriesQueryVariables = Exact<{
   programId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllLogEntriesQuery = { __typename?: 'Query', allLogEntries?: { __typename?: 'LogEntryNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'LogEntryNodeEdge', cursor: string, node?: { __typename?: 'LogEntryNode', id: string, action: LogEntryAction, changes?: any | null, objectRepr: string, objectId?: any | null, timestamp?: any | null, isUserGenerated?: boolean | null, contentType?: { __typename?: 'ContentTypeObjectType', id: string, appLabel: string, model: string, name?: string | null } | null, user?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string } | null } | null } | null> } | null, logEntryActionChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type AllSanctionListIndividualsQueryVariables = Exact<{
@@ -9736,7 +9279,6 @@ export type AllSanctionListIndividualsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
   fullNameContains?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllSanctionListIndividualsQuery = { __typename?: 'Query', allSanctionListIndividuals?: { __typename?: 'SanctionListIndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'SanctionListIndividualNodeEdge', cursor: string, node?: { __typename?: 'SanctionListIndividualNode', id: string, referenceNumber: string, fullName: string, listedOn: any, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string, issuingCountry?: string | null } | null } | null> }, aliasNames: { __typename?: 'SanctionListIndividualAliasNameNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualAliasNameNodeEdge', node?: { __typename?: 'SanctionListIndividualAliasNameNode', id: string, name: string } | null } | null> }, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> } } | null } | null> } | null };
 
@@ -9752,7 +9294,6 @@ export type AllUsersQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
   orderBy?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllUsersQuery = { __typename?: 'Query', allUsers?: { __typename?: 'UserNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'UserNodeEdge', cursor: string, node?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string, isActive: boolean, lastLogin?: any | null, status: UserStatus, partner?: { __typename?: 'PartnerNodeForProgram', name?: string | null } | null, userRoles: Array<{ __typename?: 'UserRoleNode', businessArea: { __typename?: 'UserBusinessAreaNode', name: string }, role: { __typename?: 'RoleNode', name: string, permissions?: Array<string> | null } }> } | null } | null> } | null };
 
@@ -9770,75 +9311,61 @@ export type AllUsersForFiltersQueryVariables = Exact<{
   isFeedbackCreator?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
-
 export type AllUsersForFiltersQuery = { __typename?: 'Query', allUsers?: { __typename?: 'UserNodeConnection', edges: Array<{ __typename?: 'UserNodeEdge', node?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> } | null };
 
 export type BusinessAreaDataQueryVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
 }>;
 
-
 export type BusinessAreaDataQuery = { __typename?: 'Query', businessArea?: { __typename?: 'BusinessAreaNode', id: string, screenBeneficiary: boolean, isPaymentPlanApplicable: boolean, isAccountabilityApplicable?: boolean | null } | null };
 
 export type CashAssistUrlPrefixQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type CashAssistUrlPrefixQuery = { __typename?: 'Query', cashAssistUrlPrefix?: string | null };
 
 export type CurrencyChoicesQueryVariables = Exact<{ [key: string]: never; }>;
 
-
 export type CurrencyChoicesQuery = { __typename?: 'Query', currencyChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type DataCollectionTypeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type DataCollectionTypeChoiceDataQuery = { __typename?: 'Query', dataCollectionTypeChoices?: Array<{ __typename?: 'DataCollectingTypeChoiceObject', name?: string | null, value?: string | null, description?: string | null } | null> | null };
 
 export type LoggedCheckerQueryVariables = Exact<{ [key: string]: never; }>;
 
-
 export type LoggedCheckerQuery = { __typename?: 'Query', me?: { __typename?: 'UserNode', id: string } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'UserNode', id: string, username: string, email: string, firstName: string, lastName: string, businessAreas?: { __typename?: 'UserBusinessAreaNodeConnection', edges: Array<{ __typename?: 'UserBusinessAreaNodeEdge', node?: { __typename?: 'UserBusinessAreaNode', id: string, name: string, slug: string, permissions?: Array<string | null> | null } | null } | null> } | null } | null };
 
 export type UserChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
-
 export type UserChoiceDataQuery = { __typename?: 'Query', userRolesChoices?: Array<{ __typename?: 'RoleChoiceObject', name?: string | null, value?: string | null, subsystem?: string | null } | null> | null, userStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, userPartnerChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type AllAddIndividualFieldsQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type AllAddIndividualFieldsQuery = { __typename?: 'Query', allAddIndividualsFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null, countriesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, documentTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, identityTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type AllEditHouseholdFieldsQueryVariables = Exact<{ [key: string]: never; }>;
 
-
 export type AllEditHouseholdFieldsQuery = { __typename?: 'Query', allEditHouseholdFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null, countriesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type AllHouseholdsFlexFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type AllHouseholdsFlexFieldsAttributesQuery = { __typename?: 'Query', allHouseholdsFlexFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
 
 export type AllIndividualsFlexFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
 
-
 export type AllIndividualsFlexFieldsAttributesQuery = { __typename?: 'Query', allIndividualsFlexFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, required?: boolean | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
 
 export type FlexFieldsQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type FlexFieldsQuery = { __typename?: 'Query', allGroupsWithFields?: Array<{ __typename?: 'GroupAttributeNode', name: string, labelEn?: string | null, flexAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, labelEn?: string | null, associatedWith?: string | null } | null> | null } | null> | null };
 
 export type ImportedIndividualFieldsQueryVariables = Exact<{
   businessAreaSlug?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type ImportedIndividualFieldsQuery = { __typename?: 'Query', allFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', isFlexField?: boolean | null, id?: string | null, type?: string | null, name?: string | null, associatedWith?: string | null, labelEn?: string | null, hint?: string | null, labels?: Array<{ __typename?: 'LabelNode', language?: string | null, label?: string | null } | null> | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', labelEn?: string | null, value?: string | null, admin?: string | null, listName?: string | null, labels?: Array<{ __typename?: 'LabelNode', label?: string | null, language?: string | null } | null> | null } | null> | null } | null> | null };
 
@@ -9857,25 +9384,21 @@ export type AllFeedbacksQueryVariables = Exact<{
   isActiveProgram?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllFeedbacksQuery = { __typename?: 'Query', allFeedbacks?: { __typename?: 'FeedbackNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'FeedbackNodeEdge', cursor: string, node?: { __typename?: 'FeedbackNode', id: string, unicefId?: string | null, issueType: FeedbackIssueType, createdAt: any, householdLookup?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, linkedGrievance?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type FeedbackQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type FeedbackQuery = { __typename?: 'Query', feedback?: { __typename?: 'FeedbackNode', id: string, unicefId?: string | null, issueType: FeedbackIssueType, createdAt: any, updatedAt: any, area: string, language: string, description: string, comments?: string | null, householdLookup?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string } } | null, individualLookup?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, linkedGrievance?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number } | null, feedbackMessages: { __typename?: 'FeedbackMessageNodeConnection', edges: Array<{ __typename?: 'FeedbackMessageNodeEdge', node?: { __typename?: 'FeedbackMessageNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string } | null } | null } | null> } } | null };
 
 export type FeedbackIssueTypeChoicesQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type FeedbackIssueTypeChoicesQuery = { __typename?: 'Query', feedbackIssueTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type AllGrievanceDashboardChartsQueryVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
 }>;
-
 
 export type AllGrievanceDashboardChartsQuery = { __typename?: 'Query', ticketsByType?: { __typename?: 'TicketByType', userGeneratedCount?: number | null, systemGeneratedCount?: number | null, closedUserGeneratedCount?: number | null, closedSystemGeneratedCount?: number | null, userGeneratedAvgResolution?: number | null, systemGeneratedAvgResolution?: number | null } | null, ticketsByStatus?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, ticketsByCategory?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, ticketsByLocationAndCategory?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
 
@@ -9912,11 +9435,9 @@ export type AllGrievanceTicketQueryVariables = Exact<{
   isCrossArea?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
-
 export type AllGrievanceTicketQuery = { __typename?: 'Query', allGrievanceTicket?: { __typename?: 'GrievanceTicketNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'GrievanceTicketNodeEdge', cursor: string, node?: { __typename?: 'GrievanceTicketNode', id: string, status: number, category: number, issueType?: number | null, createdAt: any, userModified?: any | null, admin?: string | null, unicefId?: string | null, priority?: number | null, urgency?: number | null, updatedAt: any, totalDays?: string | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, createdBy?: { __typename?: 'UserNode', id: string } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string } | null, relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string } | null> | null, programs?: Array<{ __typename?: 'ProgramNode', id: string, name: string } | null> | null } | null } | null> } | null };
 
 export type GrievanceTicketAreaScopeQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type GrievanceTicketAreaScopeQuery = { __typename?: 'Query', crossAreaFilterAvailable?: boolean | null };
 
@@ -9935,13 +9456,11 @@ export type ExistingGrievanceTicketsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type ExistingGrievanceTicketsQuery = { __typename?: 'Query', existingGrievanceTickets?: { __typename?: 'GrievanceTicketNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'GrievanceTicketNodeEdge', cursor: string, node?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, category: number, createdAt: any, issueType?: number | null, userModified?: any | null, admin?: string | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string } | null, individual?: { __typename?: 'IndividualNode', unicefId?: string | null, id: string } | null } | null } | null> } | null };
 
 export type GrievanceTicketQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type GrievanceTicketQuery = { __typename?: 'Query', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, category: number, consent: boolean, createdAt: any, updatedAt: any, description: string, language: string, admin?: string | null, area: string, issueType?: number | null, priority?: number | null, urgency?: number | null, comments?: string | null, partner?: { __typename?: 'PartnerType', id: string, name: string } | null, businessArea: { __typename?: 'UserBusinessAreaNode', postponeDeduplication: boolean }, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, pCode?: string | null } | null, assignedTo?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, id: string, status?: string | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null, paymentRecord?: { __typename?: 'PaymentRecordAndPaymentNode', id?: string | null, caId?: string | null, deliveredQuantity?: number | null, entitlementQuantity?: number | null, objType?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, unicefId?: string | null, objType?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null, relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, linkedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null, category: number, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, existingTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, category: number, unicefId?: string | null, status: number, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null> | null, addIndividualTicketDetails?: { __typename?: 'TicketAddIndividualDetailsNode', id: string, individualData?: any | null, approveStatus: boolean, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null, roleReassignData: any, individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null } | null, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null, household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, id: string, status?: string | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null } | null, deleteIndividualTicketDetails?: { __typename?: 'TicketDeleteIndividualDetailsNode', id: string, roleReassignData: any, approveStatus: boolean } | null, deleteHouseholdTicketDetails?: { __typename?: 'TicketDeleteHouseholdDetailsNode', id: string, approveStatus: boolean, reasonHousehold?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null } | null, systemFlaggingTicketDetails?: { __typename?: 'TicketSystemFlaggingDetailsNode', id: string, approveStatus: boolean, roleReassignData: any, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, fullName: string, birthDate: any, lastRegistrationDate: any, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, documentNumber: string, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> } }, sanctionListIndividual: { __typename?: 'SanctionListIndividualNode', id: string, fullName: string, referenceNumber: string, datesOfBirth: { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDateOfBirthNodeEdge', node?: { __typename?: 'SanctionListIndividualDateOfBirthNode', id: string, date: any } | null } | null> }, documents: { __typename?: 'SanctionListIndividualDocumentNodeConnection', edges: Array<{ __typename?: 'SanctionListIndividualDocumentNodeEdge', node?: { __typename?: 'SanctionListIndividualDocumentNode', id: string, documentNumber: string, typeOfDocument: string } | null } | null> } } } | null, paymentVerificationTicketDetails?: { __typename?: 'TicketPaymentVerificationDetailsNode', id: string, newStatus?: TicketPaymentVerificationDetailsNewStatus | null, oldReceivedAmount?: number | null, newReceivedAmount?: number | null, approveStatus: boolean, paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus, hasMultiplePaymentVerifications?: boolean | null, paymentVerification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null, paymentVerifications: { __typename?: 'PaymentVerificationNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationNodeEdge', node?: { __typename?: 'PaymentVerificationNode', id: string } | null } | null> } } | null, needsAdjudicationTicketDetails?: { __typename?: 'TicketNeedsAdjudicationDetailsNode', id: string, hasDuplicatedDocument?: boolean | null, isMultipleDuplicatesVersion: boolean, roleReassignData: any, extraData?: { __typename?: 'TicketNeedsAdjudicationDetailsExtraDataNode', goldenRecords?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null, possibleDuplicate?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, goldenRecordsIndividual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, birthDate: any, lastRegistrationDate: any, sex: IndividualSex, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null }, possibleDuplicate?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null, possibleDuplicates?: Array<{ __typename?: 'IndividualNode', id: string, unicefId?: string | null, lastRegistrationDate: any, fullName: string, birthDate: any, sex: IndividualSex, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', unicefId?: string | null, id: string, village: string, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, proximityToScore?: number | null, score?: number | null } | null> | null } | null> | null, selectedIndividual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, activeIndividualsCount?: number | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null, selectedIndividuals?: Array<{ __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, activeIndividualsCount?: number | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, individual: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string }, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null> | null } | null, ticketNotes: { __typename?: 'TicketNoteNodeConnection', edges: Array<{ __typename?: 'TicketNoteNodeEdge', node?: { __typename?: 'TicketNoteNode', id: string, createdAt: any, updatedAt: any, description: string, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> }, programs?: Array<{ __typename?: 'ProgramNode', name: string, id: string } | null> | null, documentation?: Array<{ __typename?: 'GrievanceDocumentNode', id: string, createdAt: any, updatedAt: any, name?: string | null, fileSize?: number | null, contentType: string, filePath?: string | null, fileName?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null };
 
@@ -9949,18 +9468,15 @@ export type GrievanceTicketFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type GrievanceTicketFlexFieldsQuery = { __typename?: 'Query', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, individualDataUpdateTicketDetails?: { __typename?: 'TicketIndividualDataUpdateDetailsNode', id: string, individualData?: any | null } | null, householdDataUpdateTicketDetails?: { __typename?: 'TicketHouseholdDataUpdateDetailsNode', id: string, householdData?: any | null } | null } | null };
 
 export type GrievanceTicketUnicefIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type GrievanceTicketUnicefIdQuery = { __typename?: 'Query', grievanceTicket?: { __typename?: 'GrievanceTicketNode', id: string, unicefId?: string | null } | null };
 
 export type GrievancesChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type GrievancesChoiceDataQuery = { __typename?: 'Query', grievanceTicketStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketManualCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketSystemCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, grievanceTicketPriorityChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketUrgencyChoices?: Array<{ __typename?: 'ChoiceObjectInt', name?: string | null, value?: number | null } | null> | null, grievanceTicketIssueTypeChoices?: Array<{ __typename?: 'IssueTypesObject', category?: string | null, label?: string | null, subCategories?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null } | null> | null, grievanceTicketSearchTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -9969,18 +9485,15 @@ export type PartnerForGrievanceChoicesQueryVariables = Exact<{
   individualId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
-
 export type PartnerForGrievanceChoicesQuery = { __typename?: 'Query', partnerForGrievanceChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type RelatedGrievanceTicketsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type RelatedGrievanceTicketsQuery = { __typename?: 'Query', grievanceTicket?: { __typename?: 'GrievanceTicketNode', relatedTickets?: Array<{ __typename?: 'GrievanceTicketNode', id: string, status: number, category: number, issueType?: number | null, unicefId?: string | null } | null> | null } | null };
 
 export type AllDeliveryMechanismsQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type AllDeliveryMechanismsQuery = { __typename?: 'Query', allDeliveryMechanisms?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10001,13 +9514,11 @@ export type AllPaymentPlansForTableQueryVariables = Exact<{
   program?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllPaymentPlansForTableQuery = { __typename?: 'Query', allPaymentPlans?: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', cursor: string, node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, isFollowUp: boolean, status: PaymentPlanStatus, currency: PaymentPlanCurrency, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null } | null> }, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program: { __typename?: 'ProgramNode', id: string, name: string }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string } } | null } | null> } | null };
 
 export type AvailableFspsForDeliveryMechanismsQueryVariables = Exact<{
   input: AvailableFspsForDeliveryMechanismsInput;
 }>;
-
 
 export type AvailableFspsForDeliveryMechanismsQuery = { __typename?: 'Query', availableFspsForDeliveryMechanisms?: Array<{ __typename?: 'FspChoices', deliveryMechanism?: string | null, fsps?: Array<{ __typename?: 'FspChoice', id?: string | null, name?: string | null } | null> | null } | null> | null };
 
@@ -10015,13 +9526,11 @@ export type PaymentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type PaymentQuery = { __typename?: 'Query', payment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, distributionModality?: string | null, status: PaymentStatus, statusDate: any, snapshotCollectorBankName?: string | null, snapshotCollectorBankAccountNumber?: string | null, debitCardNumber?: string | null, debitCardIssuer?: string | null, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveryDate?: any | null, deliveredQuantityUsd?: number | null, deliveryType?: PaymentDeliveryType | null, transactionReferenceId?: string | null, additionalCollectorName?: string | null, additionalDocumentType?: string | null, additionalDocumentNumber?: string | null, reasonForUnsuccessfulPayment?: string | null, snapshotCollectorFullName?: string | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null, sourcePayment?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null, isManuallyEditable?: boolean | null } | null, household: { __typename?: 'HouseholdNode', id: string, size?: number | null, status?: string | null, unicefId?: string | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null, fullName: string } }, collector: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, fullName: string, email: string, phoneNo: string, phoneNoValid?: boolean | null, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null }, parent: { __typename?: 'PaymentPlanNode', id: string, status: PaymentPlanStatus, isFollowUp: boolean, unicefId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null }, serviceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, fullName?: string | null } | null } | null };
 
 export type PaymentPlanQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type PaymentPlanQuery = { __typename?: 'Query', paymentPlan?: { __typename?: 'PaymentPlanNode', id: string, version: any, unicefId?: string | null, status: PaymentPlanStatus, canCreateFollowUp?: boolean | null, backgroundActionStatus?: PaymentPlanBackgroundActionStatus | null, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, currency: PaymentPlanCurrency, currencyName?: string | null, startDate?: any | null, endDate?: any | null, dispersionStartDate?: any | null, dispersionEndDate?: any | null, femaleChildrenCount: number, femaleAdultsCount: number, maleChildrenCount: number, maleAdultsCount: number, totalHouseholdsCount: number, totalIndividualsCount: number, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, totalWithdrawnHouseholdsCount?: number | null, hasPaymentListExportFile?: boolean | null, hasFspDeliveryMechanismXlsxTemplate?: boolean | null, importedFileDate?: any | null, importedFileName?: string | null, totalEntitledQuantityUsd?: number | null, paymentsConflictsCount?: number | null, exclusionReason: string, excludeHouseholdError: string, isFollowUp: boolean, unsuccessfulPaymentsCount?: number | null, createdBy: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string }, program: { __typename?: 'ProgramNode', id: string, name: string, caId?: string | null }, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, approvalProcess: { __typename?: 'ApprovalProcessNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'ApprovalProcessNodeEdge', node?: { __typename?: 'ApprovalProcessNode', id: string, sentForApprovalDate?: any | null, sentForAuthorizationDate?: any | null, sentForFinanceReleaseDate?: any | null, approvalNumberRequired: number, authorizationNumberRequired: number, financeReleaseNumberRequired: number, rejectedOn?: string | null, sentForApprovalBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForAuthorizationBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, sentForFinanceReleaseBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, actions?: { __typename?: 'FilteredActionsListNode', approval?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, authorization?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, financeRelease?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null, reject?: Array<{ __typename?: 'ApprovalNode', createdAt: any, comment?: string | null, info?: string | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null> | null } | null } | null } | null> }, steficonRule?: { __typename?: 'RuleCommitNode', id: string, rule?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null, deliveryMechanisms?: Array<{ __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, order?: number | null, sentToPaymentGateway: boolean, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string, communicationChannel: FinancialServiceProviderCommunicationChannel } | null } | null> | null, volumeByDeliveryMechanism?: Array<{ __typename?: 'VolumeByDeliveryMechanismNode', volume?: number | null, volumeUsd?: number | null, deliveryMechanism?: { __typename?: 'DeliveryMechanismNode', id: string, name?: string | null, order?: number | null, fsp?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentNodeEdge', node?: { __typename?: 'PaymentNode', id: string, status: PaymentStatus } | null } | null> }, reconciliationSummary?: { __typename?: 'ReconciliationSummaryNode', deliveredFully?: number | null, deliveredPartially?: number | null, notDelivered?: number | null, unsuccessful?: number | null, pending?: number | null, numberOfPayments?: number | null, reconciled?: number | null } | null, excludedHouseholds?: Array<{ __typename?: 'HouseholdNode', id: string, unicefId?: string | null } | null> | null, followUps: { __typename?: 'PaymentPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentPlanNodeEdge', node?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null, createdAt: any, paymentItems: { __typename?: 'PaymentNodeConnection', totalCount?: number | null } } | null } | null> }, sourcePaymentPlan?: { __typename?: 'PaymentPlanNode', id: string, unicefId?: string | null } | null } | null };
 
@@ -10040,7 +9549,6 @@ export type AllCashPlansQueryVariables = Exact<{
   endDateLte?: InputMaybe<Scalars['DateTime']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllCashPlansQuery = { __typename?: 'Query', allCashPlans?: { __typename?: 'CashPlanNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'CashPlanNodeEdge', cursor: string, node?: { __typename?: 'CashPlanNode', id: string, caId?: string | null, assistanceThrough: string, totalNumberOfHouseholds?: number | null, deliveryType?: string | null, startDate: any, endDate: any, totalPersonsCovered: number, dispersionDate: any, assistanceMeasurement: string, status: CashPlanStatus, currency?: string | null, totalEntitledQuantity?: number | null, totalDeliveredQuantity?: number | null, totalUndeliveredQuantity?: number | null, updatedAt: any, serviceProvider?: { __typename?: 'ServiceProviderNode', id: string, caId: string, fullName?: string | null } | null, program: { __typename?: 'ProgramNode', id: string, name: string }, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, status: PaymentVerificationSummaryStatus } | null } | null } | null> } | null };
 
@@ -10061,7 +9569,6 @@ export type AllCashPlansAndPaymentPlansQueryVariables = Exact<{
   isPaymentVerificationPage?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
-
 export type AllCashPlansAndPaymentPlansQuery = { __typename?: 'Query', allCashPlansAndPaymentPlans?: { __typename?: 'PaginatedCashPlanAndPaymentPlanNode', totalCount?: number | null, pageInfo?: { __typename?: 'PageInfoNode', startCursor?: string | null, endCursor?: string | null, hasNextPage?: boolean | null, hasPreviousPage?: boolean | null } | null, edges?: Array<{ __typename?: 'CashPlanAndPaymentPlanEdges', cursor?: string | null, node?: { __typename?: 'CashPlanAndPaymentPlanNode', objType?: string | null, id?: string | null, unicefId?: string | null, verificationStatus?: string | null, status?: string | null, currency?: string | null, totalDeliveredQuantity?: number | null, startDate?: string | null, endDate?: string | null, programName?: string | null, updatedAt?: string | null, totalNumberOfHouseholds?: number | null, assistanceMeasurement?: string | null, totalEntitledQuantity?: number | null, totalUndeliveredQuantity?: number | null, dispersionDate?: string | null, serviceProviderFullName?: string | null, verificationPlans?: Array<{ __typename?: 'PaymentVerificationPlanNode', id: string, createdAt: any, unicefId?: string | null } | null> | null } | null } | null> | null } | null };
 
 export type AllPaymentRecordsQueryVariables = Exact<{
@@ -10075,7 +9582,6 @@ export type AllPaymentRecordsQueryVariables = Exact<{
   businessArea?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllPaymentRecordsQuery = { __typename?: 'Query', allPaymentRecords?: { __typename?: 'PaymentRecordNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentRecordNodeEdge', cursor: string, node?: { __typename?: 'PaymentRecordNode', id: string, createdAt: any, updatedAt: any, fullName: string, statusDate: any, status: PaymentRecordStatus, caId?: string | null, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: any | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null }, headOfHousehold?: { __typename?: 'IndividualNode', id: string, fullName: string } | null, parent?: { __typename?: 'CashPlanNode', id: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> } | null };
 
 export type AllPaymentRecordsAndPaymentsQueryVariables = Exact<{
@@ -10087,7 +9593,6 @@ export type AllPaymentRecordsAndPaymentsQueryVariables = Exact<{
   last?: InputMaybe<Scalars['Int']['input']>;
   businessArea: Scalars['String']['input'];
 }>;
-
 
 export type AllPaymentRecordsAndPaymentsQuery = { __typename?: 'Query', allPaymentRecordsAndPayments?: { __typename?: 'PaginatedPaymentRecordsAndPaymentsNode', totalCount?: number | null, pageInfo?: { __typename?: 'PageInfoNode', hasNextPage?: boolean | null, hasPreviousPage?: boolean | null, startCursor?: string | null, endCursor?: string | null } | null, edges?: Array<{ __typename?: 'PaymentRecordsAndPaymentsEdges', cursor?: string | null, node?: { __typename?: 'PaymentRecordAndPaymentNode', objType?: string | null, id?: string | null, fullName?: string | null, status?: string | null, caId?: string | null, currency?: string | null, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, deliveryDate?: string | null, parent?: { __typename?: 'CashPlanAndPaymentPlanNode', id?: string | null, programName?: string | null } | null, verification?: { __typename?: 'PaymentVerificationNode', id: string, receivedAmount?: number | null } | null } | null } | null> | null } | null };
 
@@ -10101,13 +9606,11 @@ export type AllPaymentsForTableQueryVariables = Exact<{
   paymentPlanId: Scalars['String']['input'];
 }>;
 
-
 export type AllPaymentsForTableQuery = { __typename?: 'Query', allPayments?: { __typename?: 'PaymentNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentNodeEdge', cursor: string, node?: { __typename?: 'PaymentNode', id: string, unicefId?: string | null, status: PaymentStatus, entitlementQuantity?: number | null, entitlementQuantityUsd?: number | null, currency: string, deliveredQuantity?: number | null, deliveredQuantityUsd?: number | null, paymentPlanHardConflicted?: boolean | null, paymentPlanSoftConflicted?: boolean | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null }, paymentPlanHardConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, paymentPlanSoftConflictedData?: Array<{ __typename?: 'PaymentConflictDataNode', paymentPlanUnicefId?: string | null, paymentPlanId?: string | null, paymentPlanStartDate?: string | null, paymentPlanEndDate?: string | null, paymentPlanStatus?: string | null, paymentId?: string | null, paymentUnicefId?: string | null } | null> | null, collector: { __typename?: 'IndividualNode', id: string, fullName: string }, financialServiceProvider?: { __typename?: 'FinancialServiceProviderNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type CashPlanQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type CashPlanQuery = { __typename?: 'Query', cashPlan?: { __typename?: 'CashPlanNode', id: string, version: any, canCreatePaymentVerificationPlan?: boolean | null, availablePaymentRecordsCount?: number | null, name: string, startDate: any, endDate: any, updatedAt: any, status: CashPlanStatus, deliveryType?: string | null, fundsCommitment?: string | null, downPayment?: string | null, dispersionDate: any, assistanceThrough: string, caId?: string | null, caHashId?: any | null, bankReconciliationSuccess?: number | null, bankReconciliationError?: number | null, totalNumberOfHouseholds?: number | null, serviceProvider?: { __typename?: 'ServiceProviderNode', id: string, caId: string, fullName?: string | null } | null, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, status: PaymentVerificationPlanStatus, sampleSize?: number | null, receivedCount?: number | null, notReceivedCount?: number | null, respondedCount?: number | null, verificationChannel: PaymentVerificationPlanVerificationChannel, sampling: PaymentVerificationPlanSampling, receivedWithProblemsCount?: number | null, rapidProFlowId: string, confidenceInterval?: number | null, marginOfError?: number | null, activationDate?: any | null, completionDate?: any | null, excludedAdminAreasFilter?: Array<string | null> | null, sexFilter?: string | null, xlsxFileExporting: boolean, hasXlsxFile?: boolean | null, xlsxFileWasDownloaded?: boolean | null, xlsxFileImported: boolean, ageFilter?: { __typename?: 'AgeFilterObject', min?: number | null, max?: number | null } | null } | null } | null> } | null, paymentVerificationSummary?: { __typename?: 'PaymentVerificationSummaryNode', id: string, createdAt: any, updatedAt: any, status: PaymentVerificationSummaryStatus, activationDate?: any | null, completionDate?: any | null } | null, program: { __typename?: 'ProgramNode', id: string, name: string, caId?: string | null }, paymentItems: { __typename?: 'PaymentRecordNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string } } | null } | null> } } | null };
 
@@ -10115,13 +9618,11 @@ export type IndividualPhotosQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type IndividualPhotosQuery = { __typename?: 'Query', individual?: { __typename?: 'IndividualNode', id: string, photo?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, documentNumber: string, photo?: string | null } | null } | null> } } | null };
 
 export type ImportedIndividualPhotosQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type ImportedIndividualPhotosQuery = { __typename?: 'Query', importedIndividual?: { __typename?: 'ImportedIndividualNode', id: string, photo: string, documents: { __typename?: 'ImportedDocumentNodeConnection', edges: Array<{ __typename?: 'ImportedDocumentNodeEdge', node?: { __typename?: 'ImportedDocumentNode', id: string, photo?: string | null } | null } | null> } } | null };
 
@@ -10136,13 +9637,11 @@ export type LookUpPaymentRecordsQueryVariables = Exact<{
   businessArea?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type LookUpPaymentRecordsQuery = { __typename?: 'Query', allPaymentRecords?: { __typename?: 'PaymentRecordNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentRecordNodeEdge', cursor: string, node?: { __typename?: 'PaymentRecordNode', id: string, caId?: string | null, deliveredQuantity?: number | null, parent?: { __typename?: 'CashPlanNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type PaymentRecordQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type PaymentRecordQuery = { __typename?: 'Query', paymentRecord?: { __typename?: 'PaymentRecordNode', id: string, status: PaymentRecordStatus, statusDate: any, caId?: string | null, caHashId?: any | null, registrationCaId?: string | null, fullName: string, distributionModality: string, totalPersonsCovered: number, currency: string, entitlementQuantity?: number | null, deliveredQuantity?: number | null, deliveryDate?: any | null, entitlementCardIssueDate?: any | null, entitlementCardNumber?: string | null, deliveredQuantityUsd?: number | null, deliveryType?: PaymentRecordDeliveryType | null, transactionReferenceId?: string | null, targetPopulation: { __typename?: 'TargetPopulationNode', id: string, name: string }, verification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null, isManuallyEditable?: boolean | null } | null, household: { __typename?: 'HouseholdNode', id: string, size?: number | null, status?: string | null, unicefId?: string | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null } }, parent?: { __typename?: 'CashPlanNode', id: string, unicefId?: string | null, caId?: string | null, program: { __typename?: 'ProgramNode', id: string, name: string }, verificationPlans?: { __typename?: 'PaymentVerificationPlanNodeConnection', edges: Array<{ __typename?: 'PaymentVerificationPlanNodeEdge', node?: { __typename?: 'PaymentVerificationPlanNode', id: string, status: PaymentVerificationPlanStatus, verificationChannel: PaymentVerificationPlanVerificationChannel } | null } | null> } | null } | null, serviceProvider: { __typename?: 'ServiceProviderNode', id: string, fullName?: string | null, shortName?: string | null } } | null };
 
@@ -10157,7 +9656,6 @@ export type AllPaymentVerificationLogEntriesQueryVariables = Exact<{
   search?: InputMaybe<Scalars['String']['input']>;
   module?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllPaymentVerificationLogEntriesQuery = { __typename?: 'Query', allPaymentVerificationLogEntries?: { __typename?: 'PaymentVerificationLogEntryNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentVerificationLogEntryNodeEdge', cursor: string, node?: { __typename?: 'PaymentVerificationLogEntryNode', id: string, action: LogEntryAction, changes?: any | null, objectRepr: string, objectId?: any | null, timestamp?: any | null, contentType?: { __typename?: 'ContentTypeObjectType', id: string, appLabel: string, model: string, name?: string | null } | null, user?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string } | null, contentObject?: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null } | null } | null } | null> } | null, logEntryActionChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10175,13 +9673,11 @@ export type AllPaymentVerificationsQueryVariables = Exact<{
   paymentPlanId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllPaymentVerificationsQuery = { __typename?: 'Query', allPaymentVerifications?: { __typename?: 'PaymentVerificationNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'PaymentVerificationNodeEdge', cursor: string, node?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, receivedAmount?: number | null, paymentVerificationPlan: { __typename?: 'PaymentVerificationPlanNode', id: string, unicefId?: string | null, verificationChannel: PaymentVerificationPlanVerificationChannel }, payment?: { __typename?: 'GenericPaymentNode', id?: string | null, unicefId?: string | null, deliveredQuantity?: number | null, currency?: string | null, household?: { __typename?: 'HouseholdNode', status?: string | null, unicefId?: string | null, id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, familyName: string, phoneNo: string, phoneNoAlternative: string } } | null } | null } | null } | null> } | null };
 
 export type AllRapidProFlowsQueryVariables = Exact<{
   businessAreaSlug: Scalars['String']['input'];
 }>;
-
 
 export type AllRapidProFlowsQuery = { __typename?: 'Query', allRapidProFlows?: Array<{ __typename?: 'RapidProFlow', id?: string | null, name?: string | null } | null> | null };
 
@@ -10189,16 +9685,13 @@ export type PaymentVerificationPlanQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type PaymentVerificationPlanQuery = { __typename?: 'Query', paymentVerificationPlan?: { __typename?: 'PaymentVerificationPlanNode', id: string } | null };
 
 export type CashPlanVerificationStatusChoicesQueryVariables = Exact<{ [key: string]: never; }>;
 
-
 export type CashPlanVerificationStatusChoicesQuery = { __typename?: 'Query', cashPlanVerificationStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, paymentRecordDeliveryTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type PaymentPlanStatusChoicesQueryQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type PaymentPlanStatusChoicesQueryQuery = { __typename?: 'Query', paymentPlanStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10206,11 +9699,9 @@ export type PaymentRecordVerificationQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type PaymentRecordVerificationQuery = { __typename?: 'Query', paymentRecordVerification?: { __typename?: 'PaymentVerificationNode', id: string, status: PaymentVerificationStatus, statusDate?: any | null, receivedAmount?: number | null, isManuallyEditable?: boolean | null } | null };
 
 export type PaymentVerificationChoicesQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type PaymentVerificationChoicesQuery = { __typename?: 'Query', paymentVerificationStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, cashPlanVerificationVerificationChannelChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, paymentRecordDeliveryTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10218,11 +9709,9 @@ export type SampleSizeQueryVariables = Exact<{
   input: GetCashplanVerificationSampleSizeInput;
 }>;
 
-
 export type SampleSizeQuery = { __typename?: 'Query', sampleSize?: { __typename?: 'GetCashplanVerificationSampleSizeObject', paymentRecordCount?: number | null, sampleSize?: number | null } | null };
 
 export type CashPlanVerificationSamplingChoicesQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type CashPlanVerificationSamplingChoicesQuery = { __typename?: 'Query', cashPlanVerificationSamplingChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10246,7 +9735,6 @@ export type AllHouseholdsQueryVariables = Exact<{
   program?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
-
 export type AllHouseholdsQuery = { __typename?: 'Query', allHouseholds?: { __typename?: 'HouseholdNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'HouseholdNodeEdge', cursor: string, node?: { __typename?: 'HouseholdNode', id: string, status?: string | null, unicefId?: string | null, hasDuplicates?: boolean | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, size?: number | null, address: string, village: string, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, residenceStatus?: string | null, totalCashReceived?: any | null, currency?: string | null, lastRegistrationDate: any, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, phoneNo: string, birthDate: any, relationship?: IndividualRelationship | null }, admin1?: { __typename?: 'AreaNode', id: string, name: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null> } | null };
 
 export type AllHouseholdsForPopulationTableQueryVariables = Exact<{
@@ -10269,7 +9757,6 @@ export type AllHouseholdsForPopulationTableQueryVariables = Exact<{
   program?: InputMaybe<Scalars['ID']['input']>;
   isActiveProgram?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
-
 
 export type AllHouseholdsForPopulationTableQuery = { __typename?: 'Query', allHouseholds?: { __typename?: 'HouseholdNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'HouseholdNodeEdge', cursor: string, node?: { __typename?: 'HouseholdNode', id: string, status?: string | null, unicefId?: string | null, hasDuplicates?: boolean | null, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, size?: number | null, residenceStatus?: string | null, totalCashReceived?: any | null, currency?: string | null, lastRegistrationDate: any, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string }, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
 
@@ -10295,7 +9782,6 @@ export type AllIndividualsQueryVariables = Exact<{
   admin2?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   flags?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
 }>;
-
 
 export type AllIndividualsQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, phoneNo: string, birthDate: any, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, countryIso3?: string | null, number: string } | null } | null> }, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null } | null } | null> } | null };
 
@@ -10324,18 +9810,15 @@ export type AllIndividualsForPopulationTableQueryVariables = Exact<{
   isActiveProgram?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
-
 export type AllIndividualsForPopulationTableQuery = { __typename?: 'Query', allIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, status?: string | null, sanctionListLastCheck?: any | null, fullName: string, relationship?: IndividualRelationship | null, age?: number | null, sex: IndividualSex, lastRegistrationDate: any, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null } | null> } | null };
 
 export type HouseholdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type HouseholdQuery = { __typename?: 'Query', household?: { __typename?: 'HouseholdNode', activeIndividualsCount?: number | null, countryOrigin?: string | null, country?: string | null, zipCode?: string | null, femaleAgeGroup05Count?: number | null, femaleAgeGroup611Count?: number | null, femaleAgeGroup1217Count?: number | null, femaleAgeGroup1859Count?: number | null, femaleAgeGroup60Count?: number | null, pregnantCount?: number | null, maleAgeGroup05Count?: number | null, maleAgeGroup611Count?: number | null, maleAgeGroup1217Count?: number | null, maleAgeGroup1859Count?: number | null, maleAgeGroup60Count?: number | null, femaleAgeGroup05DisabledCount?: number | null, femaleAgeGroup611DisabledCount?: number | null, femaleAgeGroup1217DisabledCount?: number | null, femaleAgeGroup1859DisabledCount?: number | null, femaleAgeGroup60DisabledCount?: number | null, maleAgeGroup05DisabledCount?: number | null, maleAgeGroup611DisabledCount?: number | null, maleAgeGroup1217DisabledCount?: number | null, maleAgeGroup1859DisabledCount?: number | null, maleAgeGroup60DisabledCount?: number | null, fchildHoh?: boolean | null, childHoh?: boolean | null, start?: any | null, deviceid: string, orgNameEnumerator: string, returnee?: boolean | null, address: string, nameEnumerator: string, lastSyncAt?: any | null, consentSharing?: Array<string | null> | null, orgEnumerator: HouseholdOrgEnumerator, updatedAt: any, consent?: boolean | null, collectIndividualData: HouseholdCollectIndividualData, flexFields?: any | null, id: string, status?: string | null, createdAt: any, residenceStatus?: string | null, maleChildrenCount?: number | null, femaleChildrenCount?: number | null, childrenDisabledCount?: number | null, size?: number | null, totalCashReceived?: any | null, totalCashReceivedUsd?: any | null, currency?: string | null, firstRegistrationDate: any, lastRegistrationDate: any, sanctionListPossibleMatch?: boolean | null, sanctionListConfirmedMatch?: boolean | null, hasDuplicates?: boolean | null, unicefId?: string | null, unhcrId: string, geopoint?: any | null, village: string, adminAreaTitle?: string | null, individuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, edges: Array<{ __typename?: 'IndividualNodeEdge', node?: { __typename?: 'IndividualNode', id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, email: string, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, countryIso3?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> }, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, status?: string | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null } | null } | null> } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> }, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', name: string, dataSource: RegistrationDataImportDataSource, importDate: any, importedBy?: { __typename?: 'UserNode', firstName: string, lastName: string, email: string, username: string } | null } | null, paymentrecordSet: { __typename?: 'PaymentRecordNodeConnection', edges: Array<{ __typename?: 'PaymentRecordNodeEdge', node?: { __typename?: 'PaymentRecordNode', id: string, fullName: string, parent?: { __typename?: 'CashPlanNode', id: string, totalPersonsCovered: number, totalDeliveredQuantity?: number | null, assistanceMeasurement: string, program: { __typename?: 'ProgramNode', id: string, name: string } } | null } | null } | null> }, deliveredQuantities?: Array<{ __typename?: 'DeliveredQuantityNode', totalDeliveredQuantity?: any | null, currency?: string | null } | null> | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin3?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin4?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, givenName: string, familyName: string } } | null };
 
 export type HouseholdChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type HouseholdChoiceDataQuery = { __typename?: 'Query', residenceStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, relationshipChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, roleChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, maritalStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, workStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationBatchStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, deduplicationGoldenRecordStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, observedDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, severityOfDisabilityChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, householdSearchTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10343,25 +9826,21 @@ export type HouseholdFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type HouseholdFlexFieldsQuery = { __typename?: 'Query', household?: { __typename?: 'HouseholdNode', id: string, flexFields?: any | null } | null };
 
 export type IndividualQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type IndividualQuery = { __typename?: 'Query', individual?: { __typename?: 'IndividualNode', givenName: string, familyName: string, estimatedBirthDate?: boolean | null, pregnant?: boolean | null, lastSyncAt?: any | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, disability: IndividualDisability, importedIndividualId?: any | null, commsDisability: string, firstRegistrationDate: any, whoAnswersAltPhone: string, memoryDisability: string, middleName: string, whoAnswersPhone: string, phoneNoAlternative: string, phoneNoAlternativeValid?: boolean | null, email: string, hearingDisability: string, observedDisability?: Array<string | null> | null, individualId: string, seeingDisability: string, physicalDisability: string, selfcareDisability: string, photo?: string | null, workStatus: string, enrolledInNutritionProgramme?: boolean | null, administrationOfRutf?: boolean | null, flexFields?: any | null, preferredLanguage?: string | null, paymentDeliveryPhoneNo?: string | null, id: string, age?: number | null, lastRegistrationDate: any, createdAt: any, updatedAt: any, fullName: string, sex: IndividualSex, unicefId?: string | null, birthDate: any, maritalStatus: IndividualMaritalStatus, phoneNo: string, phoneNoValid?: boolean | null, sanctionListPossibleMatch: boolean, sanctionListConfirmedMatch: boolean, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, sanctionListLastCheck?: any | null, role?: string | null, relationship?: IndividualRelationship | null, status?: string | null, paymentChannels?: Array<{ __typename?: 'BankAccountInfoNode', id: string, bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null> | null, documents: { __typename?: 'DocumentNodeConnection', edges: Array<{ __typename?: 'DocumentNodeEdge', node?: { __typename?: 'DocumentNode', id: string, country?: string | null, photo?: string | null, documentNumber: string, countryIso3?: string | null, type: { __typename?: 'DocumentTypeNode', label: string, key: string } } | null } | null> }, household?: { __typename?: 'HouseholdNode', status?: string | null, id: string, address: string, countryOrigin?: string | null, unicefId?: string | null, adminArea?: { __typename?: 'AreaNode', id: string, name: string, level: number } | null, admin1?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string, level: number, pCode?: string | null } | null, programs: { __typename?: 'ProgramNodeConnection', edges: Array<{ __typename?: 'ProgramNodeEdge', node?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null> } } | null, headingHousehold?: { __typename?: 'HouseholdNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string } } | null, householdsAndRoles: Array<{ __typename?: 'IndividualRoleInHouseholdNode', id: any, role?: IndividualRoleInHouseholdRole | null, household: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null } }>, bankAccountInfo?: { __typename?: 'BankAccountInfoNode', bankName: string, bankAccountNumber: string, accountHolderName: string, bankBranchName: string } | null, identities: { __typename?: 'IndividualIdentityNodeConnection', edges: Array<{ __typename?: 'IndividualIdentityNodeEdge', node?: { __typename?: 'IndividualIdentityNode', id: string, partner?: string | null, country?: string | null, number: string } | null } | null> } } | null };
 
 export type IndividualChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type IndividualChoiceDataQuery = { __typename?: 'Query', flagChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, individualSearchTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type IndividualFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type IndividualFlexFieldsQuery = { __typename?: 'Query', individual?: { __typename?: 'IndividualNode', id: string, flexFields?: any | null } | null };
 
@@ -10382,7 +9861,6 @@ export type AllActiveProgramsQueryVariables = Exact<{
   dataCollectingType?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllActiveProgramsQuery = { __typename?: 'Query', allActivePrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, budget?: any | null } | null } | null> } | null };
 
 export type AllProgramsQueryVariables = Exact<{
@@ -10402,7 +9880,6 @@ export type AllProgramsQueryVariables = Exact<{
   dataCollectingType?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllProgramsQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, populationGoal: number, sector: ProgramSector, totalNumberOfHouseholds?: number | null, individualDataNeeded?: boolean | null, totalNumberOfHouseholdsWithTpInProgram?: number | null } | null } | null> } | null };
 
 export type AllProgramsForChoicesQueryVariables = Exact<{
@@ -10421,23 +9898,19 @@ export type AllProgramsForChoicesQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllProgramsForChoicesQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, individualDataNeeded?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, type?: DataCollectingTypeType | null, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null } | null } | null> } | null };
 
 export type ProgramQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<string | null> | null } | null> | null } | null };
 
 export type ProgrammeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
-
 export type ProgrammeChoiceDataQuery = { __typename?: 'Query', programFrequencyOfPaymentsChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, programScopeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, programSectorChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, programStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, dataCollectingTypeChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
 export type UserPartnerChoicesQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type UserPartnerChoicesQuery = { __typename?: 'Query', userPartnerChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10450,7 +9923,6 @@ export type AllImportedHouseholdsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllImportedHouseholdsQuery = { __typename?: 'Query', allImportedHouseholds?: { __typename?: 'ImportedHouseholdNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'ImportedHouseholdNodeEdge', cursor: string, node?: { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, koboAssetId: string, rowId?: number | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null } | null } | null> } | null };
 
@@ -10466,7 +9938,6 @@ export type AllImportedIndividualsQueryVariables = Exact<{
   businessArea?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllImportedIndividualsQuery = { __typename?: 'Query', allImportedIndividuals?: { __typename?: 'ImportedIndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', cursor: string, node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: ImportedIndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus?: ImportedIndividualDeduplicationBatchStatus | null, deduplicationGoldenRecordStatus?: ImportedIndividualDeduplicationGoldenRecordStatus | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null } } | null } | null> } | null };
 
 export type AllKoboProjectsQueryVariables = Exact<{
@@ -10476,7 +9947,6 @@ export type AllKoboProjectsQueryVariables = Exact<{
   last?: InputMaybe<Scalars['Int']['input']>;
   businessAreaSlug: Scalars['String']['input'];
 }>;
-
 
 export type AllKoboProjectsQuery = { __typename?: 'Query', allKoboProjects?: { __typename?: 'KoboAssetObjectConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'KoboAssetObjectEdge', cursor: string, node?: { __typename?: 'KoboAssetObject', name?: string | null, id?: string | null } | null } | null> } | null };
 
@@ -10489,7 +9959,6 @@ export type AllMergedHouseholdsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllMergedHouseholdsQuery = { __typename?: 'Query', allMergedHouseholds?: { __typename?: 'HouseholdNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'HouseholdNodeEdge', cursor: string, node?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, firstRegistrationDate: any, hasDuplicates?: boolean | null, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string }, admin1?: { __typename?: 'AreaNode', id: string, name: string } | null, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null } | null> } | null };
 
@@ -10504,7 +9973,6 @@ export type AllMergedIndividualsQueryVariables = Exact<{
   duplicatesOnly?: InputMaybe<Scalars['Boolean']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllMergedIndividualsQuery = { __typename?: 'Query', allMergedIndividuals?: { __typename?: 'IndividualNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'IndividualNodeEdge', cursor: string, node?: { __typename?: 'IndividualNode', id: string, unicefId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: IndividualSex, role?: string | null, relationship?: IndividualRelationship | null, deduplicationBatchStatus: IndividualDeduplicationBatchStatus, deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport?: { __typename?: 'RegistrationDataImportNode', id: string, datahubId?: any | null } | null } | null } | null> } | null };
 
@@ -10526,13 +9994,11 @@ export type AllRegistrationDataImportsQueryVariables = Exact<{
   totalHouseholdsCountWithValidPhoneNoMax?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
-
 export type AllRegistrationDataImportsQuery = { __typename?: 'Query', allRegistrationDataImports?: { __typename?: 'RegistrationDataImportNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'RegistrationDataImportNodeEdge', cursor: string, node?: { __typename?: 'RegistrationDataImportNode', id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, numberOfIndividuals: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null } | null> } | null };
 
 export type ImportedHouseholdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type ImportedHouseholdQuery = { __typename?: 'Query', importedHousehold?: { __typename?: 'ImportedHouseholdNode', residenceStatus: ImportedHouseholdResidenceStatus, country?: string | null, countryOrigin?: string | null, id: string, importId?: string | null, size?: number | null, admin1: string, admin1Title: string, admin2: string, admin2Title: string, flexFields?: any | null, deviceid: string, start?: any | null, koboAssetId: string, rowId?: number | null, firstRegistrationDate: any, lastRegistrationDate: any, hasDuplicates?: boolean | null, fchildHoh?: boolean | null, childHoh?: boolean | null, collectIndividualData: ImportedHouseholdCollectIndividualData, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null, name: string }, individuals: { __typename?: 'ImportedIndividualNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualNodeEdge', node?: { __typename?: 'ImportedIndividualNode', id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: ImportedIndividualSex, role?: string | null, relationship?: string | null, deduplicationBatchStatus?: ImportedIndividualDeduplicationBatchStatus | null, deduplicationGoldenRecordStatus?: ImportedIndividualDeduplicationGoldenRecordStatus | null, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null } } | null } | null> }, headOfHousehold?: { __typename?: 'ImportedIndividualNode', id: string, fullName: string } | null } | null };
 
@@ -10540,13 +10006,11 @@ export type ImportedIndividualQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type ImportedIndividualQuery = { __typename?: 'Query', importedIndividual?: { __typename?: 'ImportedIndividualNode', photo: string, givenName: string, familyName: string, middleName: string, estimatedBirthDate?: boolean | null, maritalStatus: ImportedIndividualMaritalStatus, workStatus: string, pregnant?: boolean | null, flexFields?: any | null, observedDisability?: Array<string | null> | null, seeingDisability: string, hearingDisability: string, physicalDisability: string, memoryDisability: string, selfcareDisability: string, commsDisability: string, disability: ImportedIndividualDisability, role?: string | null, relationship?: string | null, phoneNo: string, phoneNoAlternative: string, phoneNoValid?: boolean | null, phoneNoAlternativeValid?: boolean | null, preferredLanguage?: string | null, email?: string | null, id: string, importId?: string | null, age?: number | null, fullName: string, birthDate: any, sex: ImportedIndividualSex, deduplicationBatchStatus?: ImportedIndividualDeduplicationBatchStatus | null, deduplicationGoldenRecordStatus?: ImportedIndividualDeduplicationGoldenRecordStatus | null, documents: { __typename?: 'ImportedDocumentNodeConnection', edges: Array<{ __typename?: 'ImportedDocumentNodeEdge', node?: { __typename?: 'ImportedDocumentNode', id: string, country?: string | null, documentNumber: string, photo?: string | null, type: { __typename?: 'ImportedDocumentTypeNode', label: string, key: string } } | null } | null> }, identities: { __typename?: 'ImportedIndividualIdentityNodeConnection', edges: Array<{ __typename?: 'ImportedIndividualIdentityNodeEdge', node?: { __typename?: 'ImportedIndividualIdentityNode', id: string, documentNumber: string, partner?: string | null, country?: string | null } | null } | null> }, household?: { __typename?: 'ImportedHouseholdNode', id: string, importId?: string | null, admin1: string, admin2: string, address: string } | null, registrationDataImport: { __typename?: 'RegistrationDataImportDatahubNode', id: string, hctId?: any | null, name: string }, deduplicationGoldenRecordResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null, deduplicationBatchResults?: Array<{ __typename?: 'DeduplicationResultNode', hitId?: string | null, fullName?: string | null, score?: number | null, proximityToScore?: number | null, age?: number | null, location?: string | null } | null> | null } | null };
 
 export type ImportedIndividualFlexFieldsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type ImportedIndividualFlexFieldsQuery = { __typename?: 'Query', importedIndividual?: { __typename?: 'ImportedIndividualNode', id: string, flexFields?: any | null } | null };
 
@@ -10554,11 +10018,9 @@ export type KoboImportDataQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type KoboImportDataQuery = { __typename?: 'Query', koboImportData?: { __typename?: 'KoboImportDataNode', id: string, status: ImportDataStatus, numberOfIndividuals?: number | null, numberOfHouseholds?: number | null, error: string, koboValidationErrors?: Array<{ __typename?: 'KoboErrorNode', header?: string | null, message?: string | null } | null> | null } | null };
 
 export type RegistrationChoicesQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type RegistrationChoicesQuery = { __typename?: 'Query', registrationDataStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10566,13 +10028,11 @@ export type RegistrationDataImportQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type RegistrationDataImportQuery = { __typename?: 'Query', registrationDataImport?: { __typename?: 'RegistrationDataImportNode', numberOfIndividuals: number, datahubId?: any | null, errorMessage: string, id: string, createdAt: any, name: string, status: RegistrationDataImportStatus, erased: boolean, importDate: any, dataSource: RegistrationDataImportDataSource, numberOfHouseholds: number, refuseReason?: string | null, totalHouseholdsCountWithValidPhoneNo?: number | null, batchDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, batchUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordUniqueCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, goldenRecordPossibleDuplicatesCountAndPercentage?: { __typename?: 'CountAndPercentageNode', count?: number | null, percentage?: number | null } | null, importedBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus } | null } | null };
 
 export type XlsxImportDataQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type XlsxImportDataQuery = { __typename?: 'Query', importData?: { __typename?: 'ImportDataNode', id: string, status: ImportDataStatus, numberOfIndividuals?: number | null, numberOfHouseholds?: number | null, error: string, xlsxValidationErrors?: Array<{ __typename?: 'XlsxRowErrorNode', rowNumber?: number | null, header?: string | null, message?: string | null } | null> | null } | null };
 
@@ -10590,18 +10050,15 @@ export type AllReportsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllReportsQuery = { __typename?: 'Query', allReports?: { __typename?: 'ReportNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ReportNodeEdge', cursor: string, node?: { __typename?: 'ReportNode', id: string, reportType: number, dateFrom: any, dateTo: any, status: number, createdAt: any, updatedAt: any, fileUrl?: string | null, numberOfRecords?: number | null, createdBy: { __typename?: 'UserNode', firstName: string, lastName: string } } | null } | null> } | null };
 
 export type ReportQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type ReportQuery = { __typename?: 'Query', report?: { __typename?: 'ReportNode', id: string, status: number, reportType: number, createdAt: any, updatedAt: any, dateFrom: any, dateTo: any, fileUrl?: string | null, numberOfRecords?: number | null, createdBy: { __typename?: 'UserNode', firstName: string, lastName: string }, adminArea2?: { __typename?: 'AreaNodeConnection', edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', name: string } | null } | null> } | null, adminArea1?: { __typename?: 'AreaNodeConnection', edges: Array<{ __typename?: 'AreaNodeEdge', node?: { __typename?: 'AreaNode', name: string } | null } | null> } | null, program?: { __typename?: 'ProgramNode', name: string } | null } | null };
 
 export type ReportChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type ReportChoiceDataQuery = { __typename?: 'Query', reportStatusChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null, reportTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10611,7 +10068,6 @@ export type AllChartsQueryVariables = Exact<{
   program?: InputMaybe<Scalars['String']['input']>;
   administrativeArea?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type AllChartsQuery = { __typename?: 'Query', chartProgrammesBySector?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartPaymentVerification?: { __typename?: 'ChartPaymentVerification', labels?: Array<string | null> | null, households?: number | null, averageSampleSize?: number | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', label?: string | null, data?: Array<number | null> | null } | null> | null } | null, chartVolumeByDeliveryMechanism?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartPayment?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartGrievances?: { __typename?: 'ChartGrievanceTicketsNode', labels?: Array<string | null> | null, totalNumberOfGrievances?: number | null, totalNumberOfFeedback?: number | null, totalNumberOfOpenSensitive?: number | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, sectionHouseholdsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionIndividualsReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, sectionChildReached?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartIndividualsReachedByAgeAndGender?: { __typename?: 'ChartDatasetNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DatasetsNode', data?: Array<number | null> | null } | null> | null } | null, chartIndividualsWithDisabilityReachedByAge?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null, sectionTotalTransferred?: { __typename?: 'SectionTotalNode', total?: number | null } | null, chartTotalTransferredByMonth?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
 
@@ -10624,13 +10080,11 @@ export type CountryChartsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type CountryChartsQuery = { __typename?: 'Query', tableTotalCashTransferredByAdministrativeArea?: { __typename?: 'TableTotalCashTransferred', data?: Array<{ __typename?: '_TableTotalCashTransferredDataNode', id?: string | null, admin2?: string | null, totalCashTransferred?: number | null, totalHouseholds?: number | null } | null> | null } | null };
 
 export type DashboardReportChoiceDataQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
 }>;
-
 
 export type DashboardReportChoiceDataQuery = { __typename?: 'Query', dashboardReportTypesChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10638,13 +10092,11 @@ export type DashboardYearsChoiceDataQueryVariables = Exact<{
   businessArea: Scalars['String']['input'];
 }>;
 
-
 export type DashboardYearsChoiceDataQuery = { __typename?: 'Query', dashboardYearsChoices?: Array<string | null> | null };
 
 export type GlobalAreaChartsQueryVariables = Exact<{
   year: Scalars['Int']['input'];
 }>;
-
 
 export type GlobalAreaChartsQuery = { __typename?: 'Query', chartTotalTransferredCashByCountry?: { __typename?: 'ChartDetailedDatasetsNode', labels?: Array<string | null> | null, datasets?: Array<{ __typename?: '_DetailedDatasetsNode', data?: Array<number | null> | null, label?: string | null } | null> | null } | null };
 
@@ -10652,7 +10104,6 @@ export type LanguageAutocompleteQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   code?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type LanguageAutocompleteQuery = { __typename?: 'Query', allLanguages?: { __typename?: 'LanguageObjectConnection', edges: Array<{ __typename?: 'LanguageObjectEdge', cursor: string, node?: { __typename?: 'LanguageObject', english?: string | null, code?: string | null } | null } | null> } | null };
 
@@ -10662,7 +10113,6 @@ export type RdiAutocompleteQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type RdiAutocompleteQuery = { __typename?: 'Query', allRegistrationDataImports?: { __typename?: 'RegistrationDataImportNodeConnection', edges: Array<{ __typename?: 'RegistrationDataImportNodeEdge', cursor: string, node?: { __typename?: 'RegistrationDataImportNode', id: string, name: string } | null } | null> } | null };
 
@@ -10680,11 +10130,9 @@ export type AllSurveysQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllSurveysQuery = { __typename?: 'Query', allSurveys?: { __typename?: 'SurveyNodeConnection', totalCount?: number | null, pageInfo: { __typename?: 'PageInfo', startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'SurveyNodeEdge', cursor: string, node?: { __typename?: 'SurveyNode', id: string, unicefId?: string | null, title: string, category: SurveyCategory, numberOfRecipients: number, createdAt: any, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, email: string } | null } | null } | null> } | null };
 
 export type SurveyAvailableFlowsQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type SurveyAvailableFlowsQuery = { __typename?: 'Query', surveyAvailableFlows?: Array<{ __typename?: 'RapidProFlowNode', id?: string | null, name?: string | null } | null> | null };
 
@@ -10698,18 +10146,15 @@ export type RecipientsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type RecipientsQuery = { __typename?: 'Query', recipients?: { __typename?: 'RecipientNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null }, edges: Array<{ __typename?: 'RecipientNodeEdge', cursor: string, node?: { __typename?: 'RecipientNode', id: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, fullName: string, household?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, status?: string | null, residenceStatus?: string | null, lastRegistrationDate: any, admin2?: { __typename?: 'AreaNode', id: string, name: string } | null } | null } } | null } | null> } | null };
 
 export type SurveyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
-
 export type SurveyQuery = { __typename?: 'Query', survey?: { __typename?: 'SurveyNode', id: string, unicefId?: string | null, category: SurveyCategory, title: string, createdAt: any, body: string, rapidProUrl?: string | null, sampleFilePath?: string | null, hasValidSampleFile?: boolean | null, createdBy?: { __typename?: 'UserNode', id: string, firstName: string, lastName: string, username: string, email: string } | null, targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null, program?: { __typename?: 'ProgramNode', id: string, name: string } | null } | null };
 
 export type SurveysChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type SurveysChoiceDataQuery = { __typename?: 'Query', surveyCategoryChoices?: Array<{ __typename?: 'ChoiceObject', name?: string | null, value?: string | null } | null> | null };
 
@@ -10731,11 +10176,9 @@ export type AllActiveTargetPopulationsQueryVariables = Exact<{
   statusNot?: InputMaybe<Scalars['String']['input']>;
 }>;
 
-
 export type AllActiveTargetPopulationsQuery = { __typename?: 'Query', allActiveTargetPopulations?: { __typename?: 'TargetPopulationNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'TargetPopulationNodeEdge', cursor: string, node?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, totalHouseholdsCount?: number | null, totalHouseholdsCountWithValidPhoneNo?: number | null, createdAt: any, updatedAt: any, program?: { __typename?: 'ProgramNode', id: string, name: string } | null, createdBy?: { __typename?: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null } | null } | null> } | null };
 
 export type AllFieldsAttributesQueryVariables = Exact<{ [key: string]: never; }>;
-
 
 export type AllFieldsAttributesQuery = { __typename?: 'Query', allFieldsAttributes?: Array<{ __typename?: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, associatedWith?: string | null, isFlexField?: boolean | null } | null> | null };
 
@@ -10744,7 +10187,6 @@ export type AllSteficonRulesQueryVariables = Exact<{
   deprecated?: InputMaybe<Scalars['Boolean']['input']>;
   type: Scalars['String']['input'];
 }>;
-
 
 export type AllSteficonRulesQuery = { __typename?: 'Query', allSteficonRules?: { __typename?: 'SteficonRuleNodeConnection', edges: Array<{ __typename?: 'SteficonRuleNodeEdge', node?: { __typename?: 'SteficonRuleNode', id: string, name: string } | null } | null> } | null };
 
@@ -10761,7 +10203,6 @@ export type AllTargetPopulationForChoicesQueryVariables = Exact<{
   businessArea?: InputMaybe<Scalars['String']['input']>;
   program?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
 }>;
-
 
 export type AllTargetPopulationForChoicesQuery = { __typename?: 'Query', allTargetPopulation?: { __typename?: 'TargetPopulationNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'TargetPopulationNodeEdge', cursor: string, node?: { __typename?: 'TargetPopulationNode', id: string, name: string } | null } | null> } | null };
 
@@ -10781,13 +10222,11 @@ export type AllTargetPopulationsQueryVariables = Exact<{
   paymentPlanApplicable?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
-
 export type AllTargetPopulationsQuery = { __typename?: 'Query', allTargetPopulation?: { __typename?: 'TargetPopulationNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'TargetPopulationNodeEdge', cursor: string, node?: { __typename: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, createdAt: any, updatedAt: any, totalHouseholdsCount?: number | null, totalHouseholdsCountWithValidPhoneNo?: number | null, totalIndividualsCount?: number | null, program?: { __typename: 'ProgramNode', id: string, name: string } | null, createdBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null } | null } | null> } | null };
 
 export type TargetPopulationQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
-
 
 export type TargetPopulationQuery = { __typename?: 'Query', targetPopulation?: { __typename?: 'TargetPopulationNode', id: string, name: string, status: TargetPopulationStatus, buildStatus: TargetPopulationBuildStatus, totalHouseholdsCount?: number | null, totalIndividualsCount?: number | null, childMaleCount?: number | null, childFemaleCount?: number | null, adultMaleCount?: number | null, adultFemaleCount?: number | null, caHashId?: string | null, excludedIds: string, exclusionReason: string, vulnerabilityScoreMin?: number | null, vulnerabilityScoreMax?: number | null, changeDate?: any | null, finalizedAt?: any | null, steficonRule?: { __typename: 'RuleCommitNode', id: string, rule?: { __typename: 'SteficonRuleNode', id: string, name: string } | null } | null, finalizedBy?: { __typename: 'UserNode', id: string, firstName: string, lastName: string } | null, program?: { __typename: 'ProgramNode', id: string, name: string, status: ProgramStatus, startDate: any, endDate: any } | null, createdBy?: { __typename: 'UserNode', id: string, email: string, firstName: string, lastName: string } | null, targetingCriteria?: { __typename: 'TargetingCriteriaNode', id: any, flagExcludeIfActiveAdjudicationTicket: boolean, flagExcludeIfOnSanctionList: boolean, rules?: Array<{ __typename: 'TargetingCriteriaRuleNode', id: any, individualsFiltersBlocks?: Array<{ __typename: 'TargetingIndividualRuleFilterBlockNode', individualBlockFilters?: Array<{ __typename: 'TargetingIndividualBlockRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingIndividualBlockRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null, filters?: Array<{ __typename: 'TargetingCriteriaRuleFilterNode', id: any, fieldName: string, isFlexField: boolean, arguments?: Array<any | null> | null, comparisonMethod: TargetingCriteriaRuleFilterComparisonMethod, fieldAttribute?: { __typename: 'FieldAttributeNode', id?: string | null, name?: string | null, labelEn?: string | null, type?: string | null, choices?: Array<{ __typename?: 'CoreFieldChoiceObject', value?: string | null, labelEn?: string | null } | null> | null } | null } | null> | null } | null> | null } | null } | null };
 
@@ -10800,7 +10239,6 @@ export type TargetPopulationHouseholdsQueryVariables = Exact<{
   orderBy?: InputMaybe<Scalars['String']['input']>;
   businessArea?: InputMaybe<Scalars['String']['input']>;
 }>;
-
 
 export type TargetPopulationHouseholdsQuery = { __typename?: 'Query', targetPopulationHouseholds?: { __typename?: 'HouseholdNodeConnection', totalCount?: number | null, edgeCount?: number | null, edges: Array<{ __typename?: 'HouseholdNodeEdge', cursor: string, node?: { __typename?: 'HouseholdNode', id: string, unicefId?: string | null, size?: number | null, updatedAt: any, address: string, headOfHousehold: { __typename?: 'IndividualNode', id: string, givenName: string, familyName: string, fullName: string }, adminArea?: { __typename?: 'AreaNode', id: string, name: string } | null, selection?: { __typename?: 'HouseholdSelectionNode', vulnerabilityScore?: number | null } | null } | null } | null> } | null };
 
@@ -12026,9 +11464,9 @@ export type CreateFeedbackTicketMutationFn = Apollo.MutationFunction<CreateFeedb
  * });
  */
 export function useCreateFeedbackTicketMutation(baseOptions?: Apollo.MutationHookOptions<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>(CreateFeedbackTicketDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>(CreateFeedbackTicketDocument, options);
+}
 export type CreateFeedbackTicketMutationHookResult = ReturnType<typeof useCreateFeedbackTicketMutation>;
 export type CreateFeedbackTicketMutationResult = Apollo.MutationResult<CreateFeedbackTicketMutation>;
 export type CreateFeedbackTicketMutationOptions = Apollo.BaseMutationOptions<CreateFeedbackTicketMutation, CreateFeedbackTicketMutationVariables>;
@@ -12071,9 +11509,9 @@ export type CreateFeedbackMsgMutationFn = Apollo.MutationFunction<CreateFeedback
  * });
  */
 export function useCreateFeedbackMsgMutation(baseOptions?: Apollo.MutationHookOptions<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>(CreateFeedbackMsgDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>(CreateFeedbackMsgDocument, options);
+}
 export type CreateFeedbackMsgMutationHookResult = ReturnType<typeof useCreateFeedbackMsgMutation>;
 export type CreateFeedbackMsgMutationResult = Apollo.MutationResult<CreateFeedbackMsgMutation>;
 export type CreateFeedbackMsgMutationOptions = Apollo.BaseMutationOptions<CreateFeedbackMsgMutation, CreateFeedbackMsgMutationVariables>;
@@ -12106,9 +11544,9 @@ export type CreateSurveyAccountabilityMutationFn = Apollo.MutationFunction<Creat
  * });
  */
 export function useCreateSurveyAccountabilityMutation(baseOptions?: Apollo.MutationHookOptions<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>(CreateSurveyAccountabilityDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>(CreateSurveyAccountabilityDocument, options);
+}
 export type CreateSurveyAccountabilityMutationHookResult = ReturnType<typeof useCreateSurveyAccountabilityMutation>;
 export type CreateSurveyAccountabilityMutationResult = Apollo.MutationResult<CreateSurveyAccountabilityMutation>;
 export type CreateSurveyAccountabilityMutationOptions = Apollo.BaseMutationOptions<CreateSurveyAccountabilityMutation, CreateSurveyAccountabilityMutationVariables>;
@@ -12141,9 +11579,9 @@ export type ExportSurveySampleMutationFn = Apollo.MutationFunction<ExportSurveyS
  * });
  */
 export function useExportSurveySampleMutation(baseOptions?: Apollo.MutationHookOptions<ExportSurveySampleMutation, ExportSurveySampleMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ExportSurveySampleMutation, ExportSurveySampleMutationVariables>(ExportSurveySampleDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ExportSurveySampleMutation, ExportSurveySampleMutationVariables>(ExportSurveySampleDocument, options);
+}
 export type ExportSurveySampleMutationHookResult = ReturnType<typeof useExportSurveySampleMutation>;
 export type ExportSurveySampleMutationResult = Apollo.MutationResult<ExportSurveySampleMutation>;
 export type ExportSurveySampleMutationOptions = Apollo.BaseMutationOptions<ExportSurveySampleMutation, ExportSurveySampleMutationVariables>;
@@ -12215,9 +11653,9 @@ export type UpdateFeedbackTicketMutationFn = Apollo.MutationFunction<UpdateFeedb
  * });
  */
 export function useUpdateFeedbackTicketMutation(baseOptions?: Apollo.MutationHookOptions<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>(UpdateFeedbackTicketDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>(UpdateFeedbackTicketDocument, options);
+}
 export type UpdateFeedbackTicketMutationHookResult = ReturnType<typeof useUpdateFeedbackTicketMutation>;
 export type UpdateFeedbackTicketMutationResult = Apollo.MutationResult<UpdateFeedbackTicketMutation>;
 export type UpdateFeedbackTicketMutationOptions = Apollo.BaseMutationOptions<UpdateFeedbackTicketMutation, UpdateFeedbackTicketMutationVariables>;
@@ -12250,9 +11688,9 @@ export type CreateAccountabilityCommunicationMessageMutationFn = Apollo.Mutation
  * });
  */
 export function useCreateAccountabilityCommunicationMessageMutation(baseOptions?: Apollo.MutationHookOptions<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables>(CreateAccountabilityCommunicationMessageDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables>(CreateAccountabilityCommunicationMessageDocument, options);
+}
 export type CreateAccountabilityCommunicationMessageMutationHookResult = ReturnType<typeof useCreateAccountabilityCommunicationMessageMutation>;
 export type CreateAccountabilityCommunicationMessageMutationResult = Apollo.MutationResult<CreateAccountabilityCommunicationMessageMutation>;
 export type CreateAccountabilityCommunicationMessageMutationOptions = Apollo.BaseMutationOptions<CreateAccountabilityCommunicationMessageMutation, CreateAccountabilityCommunicationMessageMutationVariables>;
@@ -12287,9 +11725,9 @@ export type CheckAgainstSanctionListUploadMutationFn = Apollo.MutationFunction<C
  * });
  */
 export function useCheckAgainstSanctionListUploadMutation(baseOptions?: Apollo.MutationHookOptions<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>(CheckAgainstSanctionListUploadDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>(CheckAgainstSanctionListUploadDocument, options);
+}
 export type CheckAgainstSanctionListUploadMutationHookResult = ReturnType<typeof useCheckAgainstSanctionListUploadMutation>;
 export type CheckAgainstSanctionListUploadMutationResult = Apollo.MutationResult<CheckAgainstSanctionListUploadMutation>;
 export type CheckAgainstSanctionListUploadMutationOptions = Apollo.BaseMutationOptions<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>;
@@ -12327,9 +11765,9 @@ export type ApproveAddIndividualDataChangeMutationFn = Apollo.MutationFunction<A
  * });
  */
 export function useApproveAddIndividualDataChangeMutation(baseOptions?: Apollo.MutationHookOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>(ApproveAddIndividualDataChangeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>(ApproveAddIndividualDataChangeDocument, options);
+}
 export type ApproveAddIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationResult = Apollo.MutationResult<ApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationOptions = Apollo.BaseMutationOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>;
@@ -12369,9 +11807,9 @@ export type ApproveDeleteHouseholdDataChangeMutationFn = Apollo.MutationFunction
  * });
  */
 export function useApproveDeleteHouseholdDataChangeMutation(baseOptions?: Apollo.MutationHookOptions<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables>(ApproveDeleteHouseholdDataChangeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables>(ApproveDeleteHouseholdDataChangeDocument, options);
+}
 export type ApproveDeleteHouseholdDataChangeMutationHookResult = ReturnType<typeof useApproveDeleteHouseholdDataChangeMutation>;
 export type ApproveDeleteHouseholdDataChangeMutationResult = Apollo.MutationResult<ApproveDeleteHouseholdDataChangeMutation>;
 export type ApproveDeleteHouseholdDataChangeMutationOptions = Apollo.BaseMutationOptions<ApproveDeleteHouseholdDataChangeMutation, ApproveDeleteHouseholdDataChangeMutationVariables>;
@@ -12409,9 +11847,9 @@ export type ApproveDeleteIndividualDataChangeMutationFn = Apollo.MutationFunctio
  * });
  */
 export function useApproveDeleteIndividualDataChangeMutation(baseOptions?: Apollo.MutationHookOptions<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>(ApproveDeleteIndividualDataChangeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>(ApproveDeleteIndividualDataChangeDocument, options);
+}
 export type ApproveDeleteIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveDeleteIndividualDataChangeMutation>;
 export type ApproveDeleteIndividualDataChangeMutationResult = Apollo.MutationResult<ApproveDeleteIndividualDataChangeMutation>;
 export type ApproveDeleteIndividualDataChangeMutationOptions = Apollo.BaseMutationOptions<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>;
@@ -12458,9 +11896,9 @@ export type ApproveHouseholdDataChangeMutationFn = Apollo.MutationFunction<Appro
  * });
  */
 export function useApproveHouseholdDataChangeMutation(baseOptions?: Apollo.MutationHookOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>(ApproveHouseholdDataChangeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>(ApproveHouseholdDataChangeDocument, options);
+}
 export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof useApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationResult = Apollo.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = Apollo.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
@@ -12525,9 +11963,9 @@ export type ApproveIndividualDataChangeMutationFn = Apollo.MutationFunction<Appr
  * });
  */
 export function useApproveIndividualDataChangeMutation(baseOptions?: Apollo.MutationHookOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>(ApproveIndividualDataChangeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>(ApproveIndividualDataChangeDocument, options);
+}
 export type ApproveIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveIndividualDataChangeMutation>;
 export type ApproveIndividualDataChangeMutationResult = Apollo.MutationResult<ApproveIndividualDataChangeMutation>;
 export type ApproveIndividualDataChangeMutationOptions = Apollo.BaseMutationOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
@@ -12567,9 +12005,9 @@ export type ApproveNeedsAdjudicationMutationFn = Apollo.MutationFunction<Approve
  * });
  */
 export function useApproveNeedsAdjudicationMutation(baseOptions?: Apollo.MutationHookOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>(ApproveNeedsAdjudicationDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>(ApproveNeedsAdjudicationDocument, options);
+}
 export type ApproveNeedsAdjudicationMutationHookResult = ReturnType<typeof useApproveNeedsAdjudicationMutation>;
 export type ApproveNeedsAdjudicationMutationResult = Apollo.MutationResult<ApproveNeedsAdjudicationMutation>;
 export type ApproveNeedsAdjudicationMutationOptions = Apollo.BaseMutationOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>;
@@ -12611,9 +12049,9 @@ export type ApprovePaymentDetailsMutationFn = Apollo.MutationFunction<ApprovePay
  * });
  */
 export function useApprovePaymentDetailsMutation(baseOptions?: Apollo.MutationHookOptions<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>(ApprovePaymentDetailsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>(ApprovePaymentDetailsDocument, options);
+}
 export type ApprovePaymentDetailsMutationHookResult = ReturnType<typeof useApprovePaymentDetailsMutation>;
 export type ApprovePaymentDetailsMutationResult = Apollo.MutationResult<ApprovePaymentDetailsMutation>;
 export type ApprovePaymentDetailsMutationOptions = Apollo.BaseMutationOptions<ApprovePaymentDetailsMutation, ApprovePaymentDetailsMutationVariables>;
@@ -12651,9 +12089,9 @@ export type ApproveSystemFlaggingMutationFn = Apollo.MutationFunction<ApproveSys
  * });
  */
 export function useApproveSystemFlaggingMutation(baseOptions?: Apollo.MutationHookOptions<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>(ApproveSystemFlaggingDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>(ApproveSystemFlaggingDocument, options);
+}
 export type ApproveSystemFlaggingMutationHookResult = ReturnType<typeof useApproveSystemFlaggingMutation>;
 export type ApproveSystemFlaggingMutationResult = Apollo.MutationResult<ApproveSystemFlaggingMutation>;
 export type ApproveSystemFlaggingMutationOptions = Apollo.BaseMutationOptions<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>;
@@ -12692,9 +12130,9 @@ export type BulkUpdateGrievanceAddNoteMutationFn = Apollo.MutationFunction<BulkU
  * });
  */
 export function useBulkUpdateGrievanceAddNoteMutation(baseOptions?: Apollo.MutationHookOptions<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables>(BulkUpdateGrievanceAddNoteDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables>(BulkUpdateGrievanceAddNoteDocument, options);
+}
 export type BulkUpdateGrievanceAddNoteMutationHookResult = ReturnType<typeof useBulkUpdateGrievanceAddNoteMutation>;
 export type BulkUpdateGrievanceAddNoteMutationResult = Apollo.MutationResult<BulkUpdateGrievanceAddNoteMutation>;
 export type BulkUpdateGrievanceAddNoteMutationOptions = Apollo.BaseMutationOptions<BulkUpdateGrievanceAddNoteMutation, BulkUpdateGrievanceAddNoteMutationVariables>;
@@ -12739,9 +12177,9 @@ export type BulkUpdateGrievanceAssigneeMutationFn = Apollo.MutationFunction<Bulk
  * });
  */
 export function useBulkUpdateGrievanceAssigneeMutation(baseOptions?: Apollo.MutationHookOptions<BulkUpdateGrievanceAssigneeMutation, BulkUpdateGrievanceAssigneeMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<BulkUpdateGrievanceAssigneeMutation, BulkUpdateGrievanceAssigneeMutationVariables>(BulkUpdateGrievanceAssigneeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<BulkUpdateGrievanceAssigneeMutation, BulkUpdateGrievanceAssigneeMutationVariables>(BulkUpdateGrievanceAssigneeDocument, options);
+}
 export type BulkUpdateGrievanceAssigneeMutationHookResult = ReturnType<typeof useBulkUpdateGrievanceAssigneeMutation>;
 export type BulkUpdateGrievanceAssigneeMutationResult = Apollo.MutationResult<BulkUpdateGrievanceAssigneeMutation>;
 export type BulkUpdateGrievanceAssigneeMutationOptions = Apollo.BaseMutationOptions<BulkUpdateGrievanceAssigneeMutation, BulkUpdateGrievanceAssigneeMutationVariables>;
@@ -12781,9 +12219,9 @@ export type BulkUpdateGrievancePriorityMutationFn = Apollo.MutationFunction<Bulk
  * });
  */
 export function useBulkUpdateGrievancePriorityMutation(baseOptions?: Apollo.MutationHookOptions<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>(BulkUpdateGrievancePriorityDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>(BulkUpdateGrievancePriorityDocument, options);
+}
 export type BulkUpdateGrievancePriorityMutationHookResult = ReturnType<typeof useBulkUpdateGrievancePriorityMutation>;
 export type BulkUpdateGrievancePriorityMutationResult = Apollo.MutationResult<BulkUpdateGrievancePriorityMutation>;
 export type BulkUpdateGrievancePriorityMutationOptions = Apollo.BaseMutationOptions<BulkUpdateGrievancePriorityMutation, BulkUpdateGrievancePriorityMutationVariables>;
@@ -12823,9 +12261,9 @@ export type BulkUpdateGrievanceUrgencyMutationFn = Apollo.MutationFunction<BulkU
  * });
  */
 export function useBulkUpdateGrievanceUrgencyMutation(baseOptions?: Apollo.MutationHookOptions<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables>(BulkUpdateGrievanceUrgencyDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables>(BulkUpdateGrievanceUrgencyDocument, options);
+}
 export type BulkUpdateGrievanceUrgencyMutationHookResult = ReturnType<typeof useBulkUpdateGrievanceUrgencyMutation>;
 export type BulkUpdateGrievanceUrgencyMutationResult = Apollo.MutationResult<BulkUpdateGrievanceUrgencyMutation>;
 export type BulkUpdateGrievanceUrgencyMutationOptions = Apollo.BaseMutationOptions<BulkUpdateGrievanceUrgencyMutation, BulkUpdateGrievanceUrgencyMutationVariables>;
@@ -12859,9 +12297,9 @@ export type CreateGrievanceMutationFn = Apollo.MutationFunction<CreateGrievanceM
  * });
  */
 export function useCreateGrievanceMutation(baseOptions?: Apollo.MutationHookOptions<CreateGrievanceMutation, CreateGrievanceMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateGrievanceMutation, CreateGrievanceMutationVariables>(CreateGrievanceDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateGrievanceMutation, CreateGrievanceMutationVariables>(CreateGrievanceDocument, options);
+}
 export type CreateGrievanceMutationHookResult = ReturnType<typeof useCreateGrievanceMutation>;
 export type CreateGrievanceMutationResult = Apollo.MutationResult<CreateGrievanceMutation>;
 export type CreateGrievanceMutationOptions = Apollo.BaseMutationOptions<CreateGrievanceMutation, CreateGrievanceMutationVariables>;
@@ -12902,9 +12340,9 @@ export type CreateGrievanceTicketNoteMutationFn = Apollo.MutationFunction<Create
  * });
  */
 export function useCreateGrievanceTicketNoteMutation(baseOptions?: Apollo.MutationHookOptions<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>(CreateGrievanceTicketNoteDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>(CreateGrievanceTicketNoteDocument, options);
+}
 export type CreateGrievanceTicketNoteMutationHookResult = ReturnType<typeof useCreateGrievanceTicketNoteMutation>;
 export type CreateGrievanceTicketNoteMutationResult = Apollo.MutationResult<CreateGrievanceTicketNoteMutation>;
 export type CreateGrievanceTicketNoteMutationOptions = Apollo.BaseMutationOptions<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>;
@@ -12938,9 +12376,9 @@ export type GrievanceTicketStatusChangeMutationFn = Apollo.MutationFunction<Grie
  * });
  */
 export function useGrievanceTicketStatusChangeMutation(baseOptions?: Apollo.MutationHookOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>(GrievanceTicketStatusChangeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>(GrievanceTicketStatusChangeDocument, options);
+}
 export type GrievanceTicketStatusChangeMutationHookResult = ReturnType<typeof useGrievanceTicketStatusChangeMutation>;
 export type GrievanceTicketStatusChangeMutationResult = Apollo.MutationResult<GrievanceTicketStatusChangeMutation>;
 export type GrievanceTicketStatusChangeMutationOptions = Apollo.BaseMutationOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>;
@@ -12988,9 +12426,9 @@ export type ReassignRoleGrievanceMutationFn = Apollo.MutationFunction<ReassignRo
  * });
  */
 export function useReassignRoleGrievanceMutation(baseOptions?: Apollo.MutationHookOptions<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>(ReassignRoleGrievanceDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>(ReassignRoleGrievanceDocument, options);
+}
 export type ReassignRoleGrievanceMutationHookResult = ReturnType<typeof useReassignRoleGrievanceMutation>;
 export type ReassignRoleGrievanceMutationResult = Apollo.MutationResult<ReassignRoleGrievanceMutation>;
 export type ReassignRoleGrievanceMutationOptions = Apollo.BaseMutationOptions<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>;
@@ -13023,9 +12461,9 @@ export type UpdateGrievanceMutationFn = Apollo.MutationFunction<UpdateGrievanceM
  * });
  */
 export function useUpdateGrievanceMutation(baseOptions?: Apollo.MutationHookOptions<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>(UpdateGrievanceDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>(UpdateGrievanceDocument, options);
+}
 export type UpdateGrievanceMutationHookResult = ReturnType<typeof useUpdateGrievanceMutation>;
 export type UpdateGrievanceMutationResult = Apollo.MutationResult<UpdateGrievanceMutation>;
 export type UpdateGrievanceMutationOptions = Apollo.BaseMutationOptions<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>;
@@ -13059,9 +12497,9 @@ export type ActionPpMutationFn = Apollo.MutationFunction<ActionPpMutation, Actio
  * });
  */
 export function useActionPpMutation(baseOptions?: Apollo.MutationHookOptions<ActionPpMutation, ActionPpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ActionPpMutation, ActionPpMutationVariables>(ActionPpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ActionPpMutation, ActionPpMutationVariables>(ActionPpDocument, options);
+}
 export type ActionPpMutationHookResult = ReturnType<typeof useActionPpMutation>;
 export type ActionPpMutationResult = Apollo.MutationResult<ActionPpMutation>;
 export type ActionPpMutationOptions = Apollo.BaseMutationOptions<ActionPpMutation, ActionPpMutationVariables>;
@@ -13102,9 +12540,9 @@ export type AssignFspToDeliveryMechMutationFn = Apollo.MutationFunction<AssignFs
  * });
  */
 export function useAssignFspToDeliveryMechMutation(baseOptions?: Apollo.MutationHookOptions<AssignFspToDeliveryMechMutation, AssignFspToDeliveryMechMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<AssignFspToDeliveryMechMutation, AssignFspToDeliveryMechMutationVariables>(AssignFspToDeliveryMechDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<AssignFspToDeliveryMechMutation, AssignFspToDeliveryMechMutationVariables>(AssignFspToDeliveryMechDocument, options);
+}
 export type AssignFspToDeliveryMechMutationHookResult = ReturnType<typeof useAssignFspToDeliveryMechMutation>;
 export type AssignFspToDeliveryMechMutationResult = Apollo.MutationResult<AssignFspToDeliveryMechMutation>;
 export type AssignFspToDeliveryMechMutationOptions = Apollo.BaseMutationOptions<AssignFspToDeliveryMechMutation, AssignFspToDeliveryMechMutationVariables>;
@@ -13145,9 +12583,9 @@ export type ChooseDeliveryMechForPaymentPlanMutationFn = Apollo.MutationFunction
  * });
  */
 export function useChooseDeliveryMechForPaymentPlanMutation(baseOptions?: Apollo.MutationHookOptions<ChooseDeliveryMechForPaymentPlanMutation, ChooseDeliveryMechForPaymentPlanMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ChooseDeliveryMechForPaymentPlanMutation, ChooseDeliveryMechForPaymentPlanMutationVariables>(ChooseDeliveryMechForPaymentPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ChooseDeliveryMechForPaymentPlanMutation, ChooseDeliveryMechForPaymentPlanMutationVariables>(ChooseDeliveryMechForPaymentPlanDocument, options);
+}
 export type ChooseDeliveryMechForPaymentPlanMutationHookResult = ReturnType<typeof useChooseDeliveryMechForPaymentPlanMutation>;
 export type ChooseDeliveryMechForPaymentPlanMutationResult = Apollo.MutationResult<ChooseDeliveryMechForPaymentPlanMutation>;
 export type ChooseDeliveryMechForPaymentPlanMutationOptions = Apollo.BaseMutationOptions<ChooseDeliveryMechForPaymentPlanMutation, ChooseDeliveryMechForPaymentPlanMutationVariables>;
@@ -13187,9 +12625,9 @@ export type CreateFollowUpPpMutationFn = Apollo.MutationFunction<CreateFollowUpP
  * });
  */
 export function useCreateFollowUpPpMutation(baseOptions?: Apollo.MutationHookOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>(CreateFollowUpPpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>(CreateFollowUpPpDocument, options);
+}
 export type CreateFollowUpPpMutationHookResult = ReturnType<typeof useCreateFollowUpPpMutation>;
 export type CreateFollowUpPpMutationResult = Apollo.MutationResult<CreateFollowUpPpMutation>;
 export type CreateFollowUpPpMutationOptions = Apollo.BaseMutationOptions<CreateFollowUpPpMutation, CreateFollowUpPpMutationVariables>;
@@ -13222,9 +12660,9 @@ export type CreatePpMutationFn = Apollo.MutationFunction<CreatePpMutation, Creat
  * });
  */
 export function useCreatePpMutation(baseOptions?: Apollo.MutationHookOptions<CreatePpMutation, CreatePpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreatePpMutation, CreatePpMutationVariables>(CreatePpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreatePpMutation, CreatePpMutationVariables>(CreatePpDocument, options);
+}
 export type CreatePpMutationHookResult = ReturnType<typeof useCreatePpMutation>;
 export type CreatePpMutationResult = Apollo.MutationResult<CreatePpMutation>;
 export type CreatePpMutationOptions = Apollo.BaseMutationOptions<CreatePpMutation, CreatePpMutationVariables>;
@@ -13258,9 +12696,9 @@ export type DeletePpMutationFn = Apollo.MutationFunction<DeletePpMutation, Delet
  * });
  */
 export function useDeletePpMutation(baseOptions?: Apollo.MutationHookOptions<DeletePpMutation, DeletePpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeletePpMutation, DeletePpMutationVariables>(DeletePpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<DeletePpMutation, DeletePpMutationVariables>(DeletePpDocument, options);
+}
 export type DeletePpMutationHookResult = ReturnType<typeof useDeletePpMutation>;
 export type DeletePpMutationResult = Apollo.MutationResult<DeletePpMutation>;
 export type DeletePpMutationOptions = Apollo.BaseMutationOptions<DeletePpMutation, DeletePpMutationVariables>;
@@ -13293,9 +12731,9 @@ export type UpdatePpMutationFn = Apollo.MutationFunction<UpdatePpMutation, Updat
  * });
  */
 export function useUpdatePpMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePpMutation, UpdatePpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdatePpMutation, UpdatePpMutationVariables>(UpdatePpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UpdatePpMutation, UpdatePpMutationVariables>(UpdatePpDocument, options);
+}
 export type UpdatePpMutationHookResult = ReturnType<typeof useUpdatePpMutation>;
 export type UpdatePpMutationResult = Apollo.MutationResult<UpdatePpMutation>;
 export type UpdatePpMutationOptions = Apollo.BaseMutationOptions<UpdatePpMutation, UpdatePpMutationVariables>;
@@ -13342,9 +12780,9 @@ export type ExcludeHouseholdsPpMutationFn = Apollo.MutationFunction<ExcludeHouse
  * });
  */
 export function useExcludeHouseholdsPpMutation(baseOptions?: Apollo.MutationHookOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>(ExcludeHouseholdsPpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>(ExcludeHouseholdsPpDocument, options);
+}
 export type ExcludeHouseholdsPpMutationHookResult = ReturnType<typeof useExcludeHouseholdsPpMutation>;
 export type ExcludeHouseholdsPpMutationResult = Apollo.MutationResult<ExcludeHouseholdsPpMutation>;
 export type ExcludeHouseholdsPpMutationOptions = Apollo.BaseMutationOptions<ExcludeHouseholdsPpMutation, ExcludeHouseholdsPpMutationVariables>;
@@ -13377,9 +12815,9 @@ export type ExportPdfPpSummaryMutationFn = Apollo.MutationFunction<ExportPdfPpSu
  * });
  */
 export function useExportPdfPpSummaryMutation(baseOptions?: Apollo.MutationHookOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>(ExportPdfPpSummaryDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>(ExportPdfPpSummaryDocument, options);
+}
 export type ExportPdfPpSummaryMutationHookResult = ReturnType<typeof useExportPdfPpSummaryMutation>;
 export type ExportPdfPpSummaryMutationResult = Apollo.MutationResult<ExportPdfPpSummaryMutation>;
 export type ExportPdfPpSummaryMutationOptions = Apollo.BaseMutationOptions<ExportPdfPpSummaryMutation, ExportPdfPpSummaryMutationVariables>;
@@ -13414,9 +12852,9 @@ export type ExportXlsxPpListMutationFn = Apollo.MutationFunction<ExportXlsxPpLis
  * });
  */
 export function useExportXlsxPpListMutation(baseOptions?: Apollo.MutationHookOptions<ExportXlsxPpListMutation, ExportXlsxPpListMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ExportXlsxPpListMutation, ExportXlsxPpListMutationVariables>(ExportXlsxPpListDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ExportXlsxPpListMutation, ExportXlsxPpListMutationVariables>(ExportXlsxPpListDocument, options);
+}
 export type ExportXlsxPpListMutationHookResult = ReturnType<typeof useExportXlsxPpListMutation>;
 export type ExportXlsxPpListMutationResult = Apollo.MutationResult<ExportXlsxPpListMutation>;
 export type ExportXlsxPpListMutationOptions = Apollo.BaseMutationOptions<ExportXlsxPpListMutation, ExportXlsxPpListMutationVariables>;
@@ -13451,9 +12889,9 @@ export type ExportXlsxPpListPerFspMutationFn = Apollo.MutationFunction<ExportXls
  * });
  */
 export function useExportXlsxPpListPerFspMutation(baseOptions?: Apollo.MutationHookOptions<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>(ExportXlsxPpListPerFspDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>(ExportXlsxPpListPerFspDocument, options);
+}
 export type ExportXlsxPpListPerFspMutationHookResult = ReturnType<typeof useExportXlsxPpListPerFspMutation>;
 export type ExportXlsxPpListPerFspMutationResult = Apollo.MutationResult<ExportXlsxPpListPerFspMutation>;
 export type ExportXlsxPpListPerFspMutationOptions = Apollo.BaseMutationOptions<ExportXlsxPpListPerFspMutation, ExportXlsxPpListPerFspMutationVariables>;
@@ -13493,9 +12931,9 @@ export type ImportXlsxPpListMutationFn = Apollo.MutationFunction<ImportXlsxPpLis
  * });
  */
 export function useImportXlsxPpListMutation(baseOptions?: Apollo.MutationHookOptions<ImportXlsxPpListMutation, ImportXlsxPpListMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ImportXlsxPpListMutation, ImportXlsxPpListMutationVariables>(ImportXlsxPpListDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ImportXlsxPpListMutation, ImportXlsxPpListMutationVariables>(ImportXlsxPpListDocument, options);
+}
 export type ImportXlsxPpListMutationHookResult = ReturnType<typeof useImportXlsxPpListMutation>;
 export type ImportXlsxPpListMutationResult = Apollo.MutationResult<ImportXlsxPpListMutation>;
 export type ImportXlsxPpListMutationOptions = Apollo.BaseMutationOptions<ImportXlsxPpListMutation, ImportXlsxPpListMutationVariables>;
@@ -13538,9 +12976,9 @@ export type ImportXlsxPpListPerFspMutationFn = Apollo.MutationFunction<ImportXls
  * });
  */
 export function useImportXlsxPpListPerFspMutation(baseOptions?: Apollo.MutationHookOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>(ImportXlsxPpListPerFspDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>(ImportXlsxPpListPerFspDocument, options);
+}
 export type ImportXlsxPpListPerFspMutationHookResult = ReturnType<typeof useImportXlsxPpListPerFspMutation>;
 export type ImportXlsxPpListPerFspMutationResult = Apollo.MutationResult<ImportXlsxPpListPerFspMutation>;
 export type ImportXlsxPpListPerFspMutationOptions = Apollo.BaseMutationOptions<ImportXlsxPpListPerFspMutation, ImportXlsxPpListPerFspMutationVariables>;
@@ -13578,9 +13016,9 @@ export type MarkPayAsFailedMutationFn = Apollo.MutationFunction<MarkPayAsFailedM
  * });
  */
 export function useMarkPayAsFailedMutation(baseOptions?: Apollo.MutationHookOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>(MarkPayAsFailedDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>(MarkPayAsFailedDocument, options);
+}
 export type MarkPayAsFailedMutationHookResult = ReturnType<typeof useMarkPayAsFailedMutation>;
 export type MarkPayAsFailedMutationResult = Apollo.MutationResult<MarkPayAsFailedMutation>;
 export type MarkPayAsFailedMutationOptions = Apollo.BaseMutationOptions<MarkPayAsFailedMutation, MarkPayAsFailedMutationVariables>;
@@ -13624,9 +13062,9 @@ export type RevertMarkPayAsFailedMutationFn = Apollo.MutationFunction<RevertMark
  * });
  */
 export function useRevertMarkPayAsFailedMutation(baseOptions?: Apollo.MutationHookOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>(RevertMarkPayAsFailedDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>(RevertMarkPayAsFailedDocument, options);
+}
 export type RevertMarkPayAsFailedMutationHookResult = ReturnType<typeof useRevertMarkPayAsFailedMutation>;
 export type RevertMarkPayAsFailedMutationResult = Apollo.MutationResult<RevertMarkPayAsFailedMutation>;
 export type RevertMarkPayAsFailedMutationOptions = Apollo.BaseMutationOptions<RevertMarkPayAsFailedMutation, RevertMarkPayAsFailedMutationVariables>;
@@ -13670,9 +13108,9 @@ export type SetSteficonRuleOnPpListMutationFn = Apollo.MutationFunction<SetStefi
  * });
  */
 export function useSetSteficonRuleOnPpListMutation(baseOptions?: Apollo.MutationHookOptions<SetSteficonRuleOnPpListMutation, SetSteficonRuleOnPpListMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SetSteficonRuleOnPpListMutation, SetSteficonRuleOnPpListMutationVariables>(SetSteficonRuleOnPpListDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<SetSteficonRuleOnPpListMutation, SetSteficonRuleOnPpListMutationVariables>(SetSteficonRuleOnPpListDocument, options);
+}
 export type SetSteficonRuleOnPpListMutationHookResult = ReturnType<typeof useSetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationResult = Apollo.MutationResult<SetSteficonRuleOnPpListMutation>;
 export type SetSteficonRuleOnPpListMutationOptions = Apollo.BaseMutationOptions<SetSteficonRuleOnPpListMutation, SetSteficonRuleOnPpListMutationVariables>;
@@ -13722,9 +13160,9 @@ export type ActivatePaymentVerificationPlanMutationFn = Apollo.MutationFunction<
  * });
  */
 export function useActivatePaymentVerificationPlanMutation(baseOptions?: Apollo.MutationHookOptions<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>(ActivatePaymentVerificationPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>(ActivatePaymentVerificationPlanDocument, options);
+}
 export type ActivatePaymentVerificationPlanMutationHookResult = ReturnType<typeof useActivatePaymentVerificationPlanMutation>;
 export type ActivatePaymentVerificationPlanMutationResult = Apollo.MutationResult<ActivatePaymentVerificationPlanMutation>;
 export type ActivatePaymentVerificationPlanMutationOptions = Apollo.BaseMutationOptions<ActivatePaymentVerificationPlanMutation, ActivatePaymentVerificationPlanMutationVariables>;
@@ -13758,9 +13196,9 @@ export type CreatePaymentVerificationPlanMutationFn = Apollo.MutationFunction<Cr
  * });
  */
 export function useCreatePaymentVerificationPlanMutation(baseOptions?: Apollo.MutationHookOptions<CreatePaymentVerificationPlanMutation, CreatePaymentVerificationPlanMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreatePaymentVerificationPlanMutation, CreatePaymentVerificationPlanMutationVariables>(CreatePaymentVerificationPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreatePaymentVerificationPlanMutation, CreatePaymentVerificationPlanMutationVariables>(CreatePaymentVerificationPlanDocument, options);
+}
 export type CreatePaymentVerificationPlanMutationHookResult = ReturnType<typeof useCreatePaymentVerificationPlanMutation>;
 export type CreatePaymentVerificationPlanMutationResult = Apollo.MutationResult<CreatePaymentVerificationPlanMutation>;
 export type CreatePaymentVerificationPlanMutationOptions = Apollo.BaseMutationOptions<CreatePaymentVerificationPlanMutation, CreatePaymentVerificationPlanMutationVariables>;
@@ -13815,9 +13253,9 @@ export type DeletePaymentVerificationPlanMutationFn = Apollo.MutationFunction<De
  * });
  */
 export function useDeletePaymentVerificationPlanMutation(baseOptions?: Apollo.MutationHookOptions<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables>(DeletePaymentVerificationPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables>(DeletePaymentVerificationPlanDocument, options);
+}
 export type DeletePaymentVerificationPlanMutationHookResult = ReturnType<typeof useDeletePaymentVerificationPlanMutation>;
 export type DeletePaymentVerificationPlanMutationResult = Apollo.MutationResult<DeletePaymentVerificationPlanMutation>;
 export type DeletePaymentVerificationPlanMutationOptions = Apollo.BaseMutationOptions<DeletePaymentVerificationPlanMutation, DeletePaymentVerificationPlanMutationVariables>;
@@ -13872,9 +13310,9 @@ export type DiscardPaymentVerificationPlanMutationFn = Apollo.MutationFunction<D
  * });
  */
 export function useDiscardPaymentVerificationPlanMutation(baseOptions?: Apollo.MutationHookOptions<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables>(DiscardPaymentVerificationPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables>(DiscardPaymentVerificationPlanDocument, options);
+}
 export type DiscardPaymentVerificationPlanMutationHookResult = ReturnType<typeof useDiscardPaymentVerificationPlanMutation>;
 export type DiscardPaymentVerificationPlanMutationResult = Apollo.MutationResult<DiscardPaymentVerificationPlanMutation>;
 export type DiscardPaymentVerificationPlanMutationOptions = Apollo.BaseMutationOptions<DiscardPaymentVerificationPlanMutation, DiscardPaymentVerificationPlanMutationVariables>;
@@ -13907,9 +13345,9 @@ export type EditPaymentVerificationPlanMutationFn = Apollo.MutationFunction<Edit
  * });
  */
 export function useEditPaymentVerificationPlanMutation(baseOptions?: Apollo.MutationHookOptions<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables>(EditPaymentVerificationPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables>(EditPaymentVerificationPlanDocument, options);
+}
 export type EditPaymentVerificationPlanMutationHookResult = ReturnType<typeof useEditPaymentVerificationPlanMutation>;
 export type EditPaymentVerificationPlanMutationResult = Apollo.MutationResult<EditPaymentVerificationPlanMutation>;
 export type EditPaymentVerificationPlanMutationOptions = Apollo.BaseMutationOptions<EditPaymentVerificationPlanMutation, EditPaymentVerificationPlanMutationVariables>;
@@ -13944,9 +13382,9 @@ export type ExportXlsxPaymentVerificationPlanFileMutationFn = Apollo.MutationFun
  * });
  */
 export function useExportXlsxPaymentVerificationPlanFileMutation(baseOptions?: Apollo.MutationHookOptions<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>(ExportXlsxPaymentVerificationPlanFileDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>(ExportXlsxPaymentVerificationPlanFileDocument, options);
+}
 export type ExportXlsxPaymentVerificationPlanFileMutationHookResult = ReturnType<typeof useExportXlsxPaymentVerificationPlanFileMutation>;
 export type ExportXlsxPaymentVerificationPlanFileMutationResult = Apollo.MutationResult<ExportXlsxPaymentVerificationPlanFileMutation>;
 export type ExportXlsxPaymentVerificationPlanFileMutationOptions = Apollo.BaseMutationOptions<ExportXlsxPaymentVerificationPlanFileMutation, ExportXlsxPaymentVerificationPlanFileMutationVariables>;
@@ -13995,9 +13433,9 @@ export type FinishPaymentVerificationPlanMutationFn = Apollo.MutationFunction<Fi
  * });
  */
 export function useFinishPaymentVerificationPlanMutation(baseOptions?: Apollo.MutationHookOptions<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables>(FinishPaymentVerificationPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables>(FinishPaymentVerificationPlanDocument, options);
+}
 export type FinishPaymentVerificationPlanMutationHookResult = ReturnType<typeof useFinishPaymentVerificationPlanMutation>;
 export type FinishPaymentVerificationPlanMutationResult = Apollo.MutationResult<FinishPaymentVerificationPlanMutation>;
 export type FinishPaymentVerificationPlanMutationOptions = Apollo.BaseMutationOptions<FinishPaymentVerificationPlanMutation, FinishPaymentVerificationPlanMutationVariables>;
@@ -14039,9 +13477,9 @@ export type ImportXlsxPaymentVerificationPlanFileMutationFn = Apollo.MutationFun
  * });
  */
 export function useImportXlsxPaymentVerificationPlanFileMutation(baseOptions?: Apollo.MutationHookOptions<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables>(ImportXlsxPaymentVerificationPlanFileDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables>(ImportXlsxPaymentVerificationPlanFileDocument, options);
+}
 export type ImportXlsxPaymentVerificationPlanFileMutationHookResult = ReturnType<typeof useImportXlsxPaymentVerificationPlanFileMutation>;
 export type ImportXlsxPaymentVerificationPlanFileMutationResult = Apollo.MutationResult<ImportXlsxPaymentVerificationPlanFileMutation>;
 export type ImportXlsxPaymentVerificationPlanFileMutationOptions = Apollo.BaseMutationOptions<ImportXlsxPaymentVerificationPlanFileMutation, ImportXlsxPaymentVerificationPlanFileMutationVariables>;
@@ -14087,9 +13525,9 @@ export type InvalidPaymentVerificationPlanMutationFn = Apollo.MutationFunction<I
  * });
  */
 export function useInvalidPaymentVerificationPlanMutation(baseOptions?: Apollo.MutationHookOptions<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables>(InvalidPaymentVerificationPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables>(InvalidPaymentVerificationPlanDocument, options);
+}
 export type InvalidPaymentVerificationPlanMutationHookResult = ReturnType<typeof useInvalidPaymentVerificationPlanMutation>;
 export type InvalidPaymentVerificationPlanMutationResult = Apollo.MutationResult<InvalidPaymentVerificationPlanMutation>;
 export type InvalidPaymentVerificationPlanMutationOptions = Apollo.BaseMutationOptions<InvalidPaymentVerificationPlanMutation, InvalidPaymentVerificationPlanMutationVariables>;
@@ -14122,9 +13560,9 @@ export type MarkPrAsFailedMutationFn = Apollo.MutationFunction<MarkPrAsFailedMut
  * });
  */
 export function useMarkPrAsFailedMutation(baseOptions?: Apollo.MutationHookOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>(MarkPrAsFailedDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>(MarkPrAsFailedDocument, options);
+}
 export type MarkPrAsFailedMutationHookResult = ReturnType<typeof useMarkPrAsFailedMutation>;
 export type MarkPrAsFailedMutationResult = Apollo.MutationResult<MarkPrAsFailedMutation>;
 export type MarkPrAsFailedMutationOptions = Apollo.BaseMutationOptions<MarkPrAsFailedMutation, MarkPrAsFailedMutationVariables>;
@@ -14163,9 +13601,9 @@ export type RevertMarkPrAsFailedMutationFn = Apollo.MutationFunction<RevertMarkP
  * });
  */
 export function useRevertMarkPrAsFailedMutation(baseOptions?: Apollo.MutationHookOptions<RevertMarkPrAsFailedMutation, RevertMarkPrAsFailedMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RevertMarkPrAsFailedMutation, RevertMarkPrAsFailedMutationVariables>(RevertMarkPrAsFailedDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<RevertMarkPrAsFailedMutation, RevertMarkPrAsFailedMutationVariables>(RevertMarkPrAsFailedDocument, options);
+}
 export type RevertMarkPrAsFailedMutationHookResult = ReturnType<typeof useRevertMarkPrAsFailedMutation>;
 export type RevertMarkPrAsFailedMutationResult = Apollo.MutationResult<RevertMarkPrAsFailedMutation>;
 export type RevertMarkPrAsFailedMutationOptions = Apollo.BaseMutationOptions<RevertMarkPrAsFailedMutation, RevertMarkPrAsFailedMutationVariables>;
@@ -14214,9 +13652,9 @@ export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationFn = Apoll
  * });
  */
 export function useUpdatePaymentVerificationReceivedAndReceivedAmountMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>(UpdatePaymentVerificationReceivedAndReceivedAmountDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>(UpdatePaymentVerificationReceivedAndReceivedAmountDocument, options);
+}
 export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationHookResult = ReturnType<typeof useUpdatePaymentVerificationReceivedAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationResult = Apollo.MutationResult<UpdatePaymentVerificationReceivedAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationOptions = Apollo.BaseMutationOptions<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>;
@@ -14257,9 +13695,9 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountMutationFn = Apollo.
  * });
  */
 export function useUpdatePaymentVerificationStatusAndReceivedAmountMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>(UpdatePaymentVerificationStatusAndReceivedAmountDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>(UpdatePaymentVerificationStatusAndReceivedAmountDocument, options);
+}
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationHookResult = ReturnType<typeof useUpdatePaymentVerificationStatusAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationResult = Apollo.MutationResult<UpdatePaymentVerificationStatusAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationOptions = Apollo.BaseMutationOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>;
@@ -14292,9 +13730,9 @@ export type CopyProgramMutationFn = Apollo.MutationFunction<CopyProgramMutation,
  * });
  */
 export function useCopyProgramMutation(baseOptions?: Apollo.MutationHookOptions<CopyProgramMutation, CopyProgramMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CopyProgramMutation, CopyProgramMutationVariables>(CopyProgramDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CopyProgramMutation, CopyProgramMutationVariables>(CopyProgramDocument, options);
+}
 export type CopyProgramMutationHookResult = ReturnType<typeof useCopyProgramMutation>;
 export type CopyProgramMutationResult = Apollo.MutationResult<CopyProgramMutation>;
 export type CopyProgramMutationOptions = Apollo.BaseMutationOptions<CopyProgramMutation, CopyProgramMutationVariables>;
@@ -14348,9 +13786,9 @@ export type CreateProgramMutationFn = Apollo.MutationFunction<CreateProgramMutat
  * });
  */
 export function useCreateProgramMutation(baseOptions?: Apollo.MutationHookOptions<CreateProgramMutation, CreateProgramMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateProgramMutation, CreateProgramMutationVariables>(CreateProgramDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateProgramMutation, CreateProgramMutationVariables>(CreateProgramDocument, options);
+}
 export type CreateProgramMutationHookResult = ReturnType<typeof useCreateProgramMutation>;
 export type CreateProgramMutationResult = Apollo.MutationResult<CreateProgramMutation>;
 export type CreateProgramMutationOptions = Apollo.BaseMutationOptions<CreateProgramMutation, CreateProgramMutationVariables>;
@@ -14381,9 +13819,9 @@ export type DeleteProgramMutationFn = Apollo.MutationFunction<DeleteProgramMutat
  * });
  */
 export function useDeleteProgramMutation(baseOptions?: Apollo.MutationHookOptions<DeleteProgramMutation, DeleteProgramMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteProgramMutation, DeleteProgramMutationVariables>(DeleteProgramDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<DeleteProgramMutation, DeleteProgramMutationVariables>(DeleteProgramDocument, options);
+}
 export type DeleteProgramMutationHookResult = ReturnType<typeof useDeleteProgramMutation>;
 export type DeleteProgramMutationResult = Apollo.MutationResult<DeleteProgramMutation>;
 export type DeleteProgramMutationOptions = Apollo.BaseMutationOptions<DeleteProgramMutation, DeleteProgramMutationVariables>;
@@ -14442,9 +13880,9 @@ export type UpdateProgramMutationFn = Apollo.MutationFunction<UpdateProgramMutat
  * });
  */
 export function useUpdateProgramMutation(baseOptions?: Apollo.MutationHookOptions<UpdateProgramMutation, UpdateProgramMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateProgramMutation, UpdateProgramMutationVariables>(UpdateProgramDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UpdateProgramMutation, UpdateProgramMutationVariables>(UpdateProgramDocument, options);
+}
 export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
 export type UpdateProgramMutationResult = Apollo.MutationResult<UpdateProgramMutation>;
 export type UpdateProgramMutationOptions = Apollo.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
@@ -14482,9 +13920,9 @@ export type CreateRegistrationKoboImportMutationFn = Apollo.MutationFunction<Cre
  * });
  */
 export function useCreateRegistrationKoboImportMutation(baseOptions?: Apollo.MutationHookOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>(CreateRegistrationKoboImportDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>(CreateRegistrationKoboImportDocument, options);
+}
 export type CreateRegistrationKoboImportMutationHookResult = ReturnType<typeof useCreateRegistrationKoboImportMutation>;
 export type CreateRegistrationKoboImportMutationResult = Apollo.MutationResult<CreateRegistrationKoboImportMutation>;
 export type CreateRegistrationKoboImportMutationOptions = Apollo.BaseMutationOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>;
@@ -14522,9 +13960,9 @@ export type CreateRegistrationXlsxImportMutationFn = Apollo.MutationFunction<Cre
  * });
  */
 export function useCreateRegistrationXlsxImportMutation(baseOptions?: Apollo.MutationHookOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>(CreateRegistrationXlsxImportDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>(CreateRegistrationXlsxImportDocument, options);
+}
 export type CreateRegistrationXlsxImportMutationHookResult = ReturnType<typeof useCreateRegistrationXlsxImportMutation>;
 export type CreateRegistrationXlsxImportMutationResult = Apollo.MutationResult<CreateRegistrationXlsxImportMutation>;
 export type CreateRegistrationXlsxImportMutationOptions = Apollo.BaseMutationOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>;
@@ -14559,9 +13997,9 @@ export type EraseRdiMutationFn = Apollo.MutationFunction<EraseRdiMutation, Erase
  * });
  */
 export function useEraseRdiMutation(baseOptions?: Apollo.MutationHookOptions<EraseRdiMutation, EraseRdiMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<EraseRdiMutation, EraseRdiMutationVariables>(EraseRdiDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<EraseRdiMutation, EraseRdiMutationVariables>(EraseRdiDocument, options);
+}
 export type EraseRdiMutationHookResult = ReturnType<typeof useEraseRdiMutation>;
 export type EraseRdiMutationResult = Apollo.MutationResult<EraseRdiMutation>;
 export type EraseRdiMutationOptions = Apollo.BaseMutationOptions<EraseRdiMutation, EraseRdiMutationVariables>;
@@ -14594,9 +14032,9 @@ export type MergeRdiMutationFn = Apollo.MutationFunction<MergeRdiMutation, Merge
  * });
  */
 export function useMergeRdiMutation(baseOptions?: Apollo.MutationHookOptions<MergeRdiMutation, MergeRdiMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<MergeRdiMutation, MergeRdiMutationVariables>(MergeRdiDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<MergeRdiMutation, MergeRdiMutationVariables>(MergeRdiDocument, options);
+}
 export type MergeRdiMutationHookResult = ReturnType<typeof useMergeRdiMutation>;
 export type MergeRdiMutationResult = Apollo.MutationResult<MergeRdiMutation>;
 export type MergeRdiMutationOptions = Apollo.BaseMutationOptions<MergeRdiMutation, MergeRdiMutationVariables>;
@@ -14632,9 +14070,9 @@ export type RefuseRdiMutationFn = Apollo.MutationFunction<RefuseRdiMutation, Ref
  * });
  */
 export function useRefuseRdiMutation(baseOptions?: Apollo.MutationHookOptions<RefuseRdiMutation, RefuseRdiMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RefuseRdiMutation, RefuseRdiMutationVariables>(RefuseRdiDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<RefuseRdiMutation, RefuseRdiMutationVariables>(RefuseRdiDocument, options);
+}
 export type RefuseRdiMutationHookResult = ReturnType<typeof useRefuseRdiMutation>;
 export type RefuseRdiMutationResult = Apollo.MutationResult<RefuseRdiMutation>;
 export type RefuseRdiMutationOptions = Apollo.BaseMutationOptions<RefuseRdiMutation, RefuseRdiMutationVariables>;
@@ -14665,9 +14103,9 @@ export type RerunDedupeMutationFn = Apollo.MutationFunction<RerunDedupeMutation,
  * });
  */
 export function useRerunDedupeMutation(baseOptions?: Apollo.MutationHookOptions<RerunDedupeMutation, RerunDedupeMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RerunDedupeMutation, RerunDedupeMutationVariables>(RerunDedupeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<RerunDedupeMutation, RerunDedupeMutationVariables>(RerunDedupeDocument, options);
+}
 export type RerunDedupeMutationHookResult = ReturnType<typeof useRerunDedupeMutation>;
 export type RerunDedupeMutationResult = Apollo.MutationResult<RerunDedupeMutation>;
 export type RerunDedupeMutationOptions = Apollo.BaseMutationOptions<RerunDedupeMutation, RerunDedupeMutationVariables>;
@@ -14706,9 +14144,9 @@ export type SaveKoboImportDataMutationFn = Apollo.MutationFunction<SaveKoboImpor
  * });
  */
 export function useSaveKoboImportDataMutation(baseOptions?: Apollo.MutationHookOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>(SaveKoboImportDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>(SaveKoboImportDataDocument, options);
+}
 export type SaveKoboImportDataMutationHookResult = ReturnType<typeof useSaveKoboImportDataMutation>;
 export type SaveKoboImportDataMutationResult = Apollo.MutationResult<SaveKoboImportDataMutation>;
 export type SaveKoboImportDataMutationOptions = Apollo.BaseMutationOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>;
@@ -14748,9 +14186,9 @@ export type SaveKoboImportDataAsyncMutationFn = Apollo.MutationFunction<SaveKobo
  * });
  */
 export function useSaveKoboImportDataAsyncMutation(baseOptions?: Apollo.MutationHookOptions<SaveKoboImportDataAsyncMutation, SaveKoboImportDataAsyncMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SaveKoboImportDataAsyncMutation, SaveKoboImportDataAsyncMutationVariables>(SaveKoboImportDataAsyncDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<SaveKoboImportDataAsyncMutation, SaveKoboImportDataAsyncMutationVariables>(SaveKoboImportDataAsyncDocument, options);
+}
 export type SaveKoboImportDataAsyncMutationHookResult = ReturnType<typeof useSaveKoboImportDataAsyncMutation>;
 export type SaveKoboImportDataAsyncMutationResult = Apollo.MutationResult<SaveKoboImportDataAsyncMutation>;
 export type SaveKoboImportDataAsyncMutationOptions = Apollo.BaseMutationOptions<SaveKoboImportDataAsyncMutation, SaveKoboImportDataAsyncMutationVariables>;
@@ -14794,9 +14232,9 @@ export type UploadImportDataXlsxFileAsyncMutationFn = Apollo.MutationFunction<Up
  * });
  */
 export function useUploadImportDataXlsxFileAsyncMutation(baseOptions?: Apollo.MutationHookOptions<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>(UploadImportDataXlsxFileAsyncDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>(UploadImportDataXlsxFileAsyncDocument, options);
+}
 export type UploadImportDataXlsxFileAsyncMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileAsyncMutation>;
 export type UploadImportDataXlsxFileAsyncMutationResult = Apollo.MutationResult<UploadImportDataXlsxFileAsyncMutation>;
 export type UploadImportDataXlsxFileAsyncMutationOptions = Apollo.BaseMutationOptions<UploadImportDataXlsxFileAsyncMutation, UploadImportDataXlsxFileAsyncMutationVariables>;
@@ -14827,9 +14265,9 @@ export type CreateDashboardReportMutationFn = Apollo.MutationFunction<CreateDash
  * });
  */
 export function useCreateDashboardReportMutation(baseOptions?: Apollo.MutationHookOptions<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>(CreateDashboardReportDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>(CreateDashboardReportDocument, options);
+}
 export type CreateDashboardReportMutationHookResult = ReturnType<typeof useCreateDashboardReportMutation>;
 export type CreateDashboardReportMutationResult = Apollo.MutationResult<CreateDashboardReportMutation>;
 export type CreateDashboardReportMutationOptions = Apollo.BaseMutationOptions<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>;
@@ -14882,9 +14320,9 @@ export type CreateReportMutationFn = Apollo.MutationFunction<CreateReportMutatio
  * });
  */
 export function useCreateReportMutation(baseOptions?: Apollo.MutationHookOptions<CreateReportMutation, CreateReportMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateReportMutation, CreateReportMutationVariables>(CreateReportDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateReportMutation, CreateReportMutationVariables>(CreateReportDocument, options);
+}
 export type CreateReportMutationHookResult = ReturnType<typeof useCreateReportMutation>;
 export type CreateReportMutationResult = Apollo.MutationResult<CreateReportMutation>;
 export type CreateReportMutationOptions = Apollo.BaseMutationOptions<CreateReportMutation, CreateReportMutationVariables>;
@@ -14937,9 +14375,9 @@ export type RestartCreateReportMutationFn = Apollo.MutationFunction<RestartCreat
  * });
  */
 export function useRestartCreateReportMutation(baseOptions?: Apollo.MutationHookOptions<RestartCreateReportMutation, RestartCreateReportMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RestartCreateReportMutation, RestartCreateReportMutationVariables>(RestartCreateReportDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<RestartCreateReportMutation, RestartCreateReportMutationVariables>(RestartCreateReportDocument, options);
+}
 export type RestartCreateReportMutationHookResult = ReturnType<typeof useRestartCreateReportMutation>;
 export type RestartCreateReportMutationResult = Apollo.MutationResult<RestartCreateReportMutation>;
 export type RestartCreateReportMutationOptions = Apollo.BaseMutationOptions<RestartCreateReportMutation, RestartCreateReportMutationVariables>;
@@ -14976,9 +14414,9 @@ export type CreateTpMutationFn = Apollo.MutationFunction<CreateTpMutation, Creat
  * });
  */
 export function useCreateTpMutation(baseOptions?: Apollo.MutationHookOptions<CreateTpMutation, CreateTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateTpMutation, CreateTpMutationVariables>(CreateTpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateTpMutation, CreateTpMutationVariables>(CreateTpDocument, options);
+}
 export type CreateTpMutationHookResult = ReturnType<typeof useCreateTpMutation>;
 export type CreateTpMutationResult = Apollo.MutationResult<CreateTpMutation>;
 export type CreateTpMutationOptions = Apollo.BaseMutationOptions<CreateTpMutation, CreateTpMutationVariables>;
@@ -15009,9 +14447,9 @@ export type DeleteTargetPopulationMutationFn = Apollo.MutationFunction<DeleteTar
  * });
  */
 export function useDeleteTargetPopulationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>(DeleteTargetPopulationDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>(DeleteTargetPopulationDocument, options);
+}
 export type DeleteTargetPopulationMutationHookResult = ReturnType<typeof useDeleteTargetPopulationMutation>;
 export type DeleteTargetPopulationMutationResult = Apollo.MutationResult<DeleteTargetPopulationMutation>;
 export type DeleteTargetPopulationMutationOptions = Apollo.BaseMutationOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>;
@@ -15046,9 +14484,9 @@ export type CopyTargetPopulationMutationFn = Apollo.MutationFunction<CopyTargetP
  * });
  */
 export function useCopyTargetPopulationMutation(baseOptions?: Apollo.MutationHookOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>(CopyTargetPopulationDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>(CopyTargetPopulationDocument, options);
+}
 export type CopyTargetPopulationMutationHookResult = ReturnType<typeof useCopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationResult = Apollo.MutationResult<CopyTargetPopulationMutation>;
 export type CopyTargetPopulationMutationOptions = Apollo.BaseMutationOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
@@ -15081,9 +14519,9 @@ export type FinalizeTpMutationFn = Apollo.MutationFunction<FinalizeTpMutation, F
  * });
  */
 export function useFinalizeTpMutation(baseOptions?: Apollo.MutationHookOptions<FinalizeTpMutation, FinalizeTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<FinalizeTpMutation, FinalizeTpMutationVariables>(FinalizeTpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<FinalizeTpMutation, FinalizeTpMutationVariables>(FinalizeTpDocument, options);
+}
 export type FinalizeTpMutationHookResult = ReturnType<typeof useFinalizeTpMutation>;
 export type FinalizeTpMutationResult = Apollo.MutationResult<FinalizeTpMutation>;
 export type FinalizeTpMutationOptions = Apollo.BaseMutationOptions<FinalizeTpMutation, FinalizeTpMutationVariables>;
@@ -15116,9 +14554,9 @@ export type LockTpMutationFn = Apollo.MutationFunction<LockTpMutation, LockTpMut
  * });
  */
 export function useLockTpMutation(baseOptions?: Apollo.MutationHookOptions<LockTpMutation, LockTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<LockTpMutation, LockTpMutationVariables>(LockTpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<LockTpMutation, LockTpMutationVariables>(LockTpDocument, options);
+}
 export type LockTpMutationHookResult = ReturnType<typeof useLockTpMutation>;
 export type LockTpMutationResult = Apollo.MutationResult<LockTpMutation>;
 export type LockTpMutationOptions = Apollo.BaseMutationOptions<LockTpMutation, LockTpMutationVariables>;
@@ -15151,9 +14589,9 @@ export type RebuildTpMutationFn = Apollo.MutationFunction<RebuildTpMutation, Reb
  * });
  */
 export function useRebuildTpMutation(baseOptions?: Apollo.MutationHookOptions<RebuildTpMutation, RebuildTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<RebuildTpMutation, RebuildTpMutationVariables>(RebuildTpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<RebuildTpMutation, RebuildTpMutationVariables>(RebuildTpDocument, options);
+}
 export type RebuildTpMutationHookResult = ReturnType<typeof useRebuildTpMutation>;
 export type RebuildTpMutationResult = Apollo.MutationResult<RebuildTpMutation>;
 export type RebuildTpMutationOptions = Apollo.BaseMutationOptions<RebuildTpMutation, RebuildTpMutationVariables>;
@@ -15186,9 +14624,9 @@ export type SetSteficonRuleOnTargetPopulationMutationFn = Apollo.MutationFunctio
  * });
  */
 export function useSetSteficonRuleOnTargetPopulationMutation(baseOptions?: Apollo.MutationHookOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>(SetSteficonRuleOnTargetPopulationDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>(SetSteficonRuleOnTargetPopulationDocument, options);
+}
 export type SetSteficonRuleOnTargetPopulationMutationHookResult = ReturnType<typeof useSetSteficonRuleOnTargetPopulationMutation>;
 export type SetSteficonRuleOnTargetPopulationMutationResult = Apollo.MutationResult<SetSteficonRuleOnTargetPopulationMutation>;
 export type SetSteficonRuleOnTargetPopulationMutationOptions = Apollo.BaseMutationOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
@@ -15221,9 +14659,9 @@ export type UnlockTpMutationFn = Apollo.MutationFunction<UnlockTpMutation, Unloc
  * });
  */
 export function useUnlockTpMutation(baseOptions?: Apollo.MutationHookOptions<UnlockTpMutation, UnlockTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UnlockTpMutation, UnlockTpMutationVariables>(UnlockTpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UnlockTpMutation, UnlockTpMutationVariables>(UnlockTpDocument, options);
+}
 export type UnlockTpMutationHookResult = ReturnType<typeof useUnlockTpMutation>;
 export type UnlockTpMutationResult = Apollo.MutationResult<UnlockTpMutation>;
 export type UnlockTpMutationOptions = Apollo.BaseMutationOptions<UnlockTpMutation, UnlockTpMutationVariables>;
@@ -15260,9 +14698,9 @@ export type UpdateTpMutationFn = Apollo.MutationFunction<UpdateTpMutation, Updat
  * });
  */
 export function useUpdateTpMutation(baseOptions?: Apollo.MutationHookOptions<UpdateTpMutation, UpdateTpMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateTpMutation, UpdateTpMutationVariables>(UpdateTpDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UpdateTpMutation, UpdateTpMutationVariables>(UpdateTpDocument, options);
+}
 export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
 export type UpdateTpMutationResult = Apollo.MutationResult<UpdateTpMutation>;
 export type UpdateTpMutationOptions = Apollo.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
@@ -15309,17 +14747,17 @@ export const AccountabilityCommunicationMessageDocument = gql`
  * });
  */
 export function useAccountabilityCommunicationMessageQuery(baseOptions: Apollo.QueryHookOptions<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>(AccountabilityCommunicationMessageDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>(AccountabilityCommunicationMessageDocument, options);
+}
 export function useAccountabilityCommunicationMessageLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>(AccountabilityCommunicationMessageDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>(AccountabilityCommunicationMessageDocument, options);
+}
 export function useAccountabilityCommunicationMessageSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>(AccountabilityCommunicationMessageDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AccountabilityCommunicationMessageQuery, AccountabilityCommunicationMessageQueryVariables>(AccountabilityCommunicationMessageDocument, options);
+}
 export type AccountabilityCommunicationMessageQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageQuery>;
 export type AccountabilityCommunicationMessageLazyQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageLazyQuery>;
 export type AccountabilityCommunicationMessageSuspenseQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageSuspenseQuery>;
@@ -15350,17 +14788,17 @@ export const AccountabilityCommunicationMessageSampleSizeDocument = gql`
  * });
  */
 export function useAccountabilityCommunicationMessageSampleSizeQuery(baseOptions: Apollo.QueryHookOptions<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>(AccountabilityCommunicationMessageSampleSizeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>(AccountabilityCommunicationMessageSampleSizeDocument, options);
+}
 export function useAccountabilityCommunicationMessageSampleSizeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>(AccountabilityCommunicationMessageSampleSizeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>(AccountabilityCommunicationMessageSampleSizeDocument, options);
+}
 export function useAccountabilityCommunicationMessageSampleSizeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>(AccountabilityCommunicationMessageSampleSizeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AccountabilityCommunicationMessageSampleSizeQuery, AccountabilityCommunicationMessageSampleSizeQueryVariables>(AccountabilityCommunicationMessageSampleSizeDocument, options);
+}
 export type AccountabilityCommunicationMessageSampleSizeQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageSampleSizeQuery>;
 export type AccountabilityCommunicationMessageSampleSizeLazyQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageSampleSizeLazyQuery>;
 export type AccountabilityCommunicationMessageSampleSizeSuspenseQueryHookResult = ReturnType<typeof useAccountabilityCommunicationMessageSampleSizeSuspenseQuery>;
@@ -15391,17 +14829,17 @@ export const AccountabilitySampleSizeDocument = gql`
  * });
  */
 export function useAccountabilitySampleSizeQuery(baseOptions: Apollo.QueryHookOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, options);
+}
 export function useAccountabilitySampleSizeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, options);
+}
 export function useAccountabilitySampleSizeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AccountabilitySampleSizeQuery, AccountabilitySampleSizeQueryVariables>(AccountabilitySampleSizeDocument, options);
+}
 export type AccountabilitySampleSizeQueryHookResult = ReturnType<typeof useAccountabilitySampleSizeQuery>;
 export type AccountabilitySampleSizeLazyQueryHookResult = ReturnType<typeof useAccountabilitySampleSizeLazyQuery>;
 export type AccountabilitySampleSizeSuspenseQueryHookResult = ReturnType<typeof useAccountabilitySampleSizeSuspenseQuery>;
@@ -15482,17 +14920,17 @@ export const AllAccountabilityCommunicationMessageRecipientsDocument = gql`
  * });
  */
 export function useAllAccountabilityCommunicationMessageRecipientsQuery(baseOptions: Apollo.QueryHookOptions<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>(AllAccountabilityCommunicationMessageRecipientsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>(AllAccountabilityCommunicationMessageRecipientsDocument, options);
+}
 export function useAllAccountabilityCommunicationMessageRecipientsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>(AllAccountabilityCommunicationMessageRecipientsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>(AllAccountabilityCommunicationMessageRecipientsDocument, options);
+}
 export function useAllAccountabilityCommunicationMessageRecipientsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>(AllAccountabilityCommunicationMessageRecipientsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllAccountabilityCommunicationMessageRecipientsQuery, AllAccountabilityCommunicationMessageRecipientsQueryVariables>(AllAccountabilityCommunicationMessageRecipientsDocument, options);
+}
 export type AllAccountabilityCommunicationMessageRecipientsQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessageRecipientsQuery>;
 export type AllAccountabilityCommunicationMessageRecipientsLazyQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessageRecipientsLazyQuery>;
 export type AllAccountabilityCommunicationMessageRecipientsSuspenseQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessageRecipientsSuspenseQuery>;
@@ -15574,17 +15012,17 @@ export const AllAccountabilityCommunicationMessagesDocument = gql`
  * });
  */
 export function useAllAccountabilityCommunicationMessagesQuery(baseOptions?: Apollo.QueryHookOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, options);
+}
 export function useAllAccountabilityCommunicationMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, options);
+}
 export function useAllAccountabilityCommunicationMessagesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllAccountabilityCommunicationMessagesQuery, AllAccountabilityCommunicationMessagesQueryVariables>(AllAccountabilityCommunicationMessagesDocument, options);
+}
 export type AllAccountabilityCommunicationMessagesQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessagesQuery>;
 export type AllAccountabilityCommunicationMessagesLazyQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessagesLazyQuery>;
 export type AllAccountabilityCommunicationMessagesSuspenseQueryHookResult = ReturnType<typeof useAllAccountabilityCommunicationMessagesSuspenseQuery>;
@@ -15636,17 +15074,17 @@ export const AllAdminAreasDocument = gql`
  * });
  */
 export function useAllAdminAreasQuery(baseOptions?: Apollo.QueryHookOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, options);
+}
 export function useAllAdminAreasLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, options);
+}
 export function useAllAdminAreasSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, options);
+}
 export type AllAdminAreasQueryHookResult = ReturnType<typeof useAllAdminAreasQuery>;
 export type AllAdminAreasLazyQueryHookResult = ReturnType<typeof useAllAdminAreasLazyQuery>;
 export type AllAdminAreasSuspenseQueryHookResult = ReturnType<typeof useAllAdminAreasSuspenseQuery>;
@@ -15693,17 +15131,17 @@ export const AllAreasTreeDocument = gql`
  * });
  */
 export function useAllAreasTreeQuery(baseOptions: Apollo.QueryHookOptions<AllAreasTreeQuery, AllAreasTreeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllAreasTreeQuery, AllAreasTreeQueryVariables>(AllAreasTreeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllAreasTreeQuery, AllAreasTreeQueryVariables>(AllAreasTreeDocument, options);
+}
 export function useAllAreasTreeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllAreasTreeQuery, AllAreasTreeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllAreasTreeQuery, AllAreasTreeQueryVariables>(AllAreasTreeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllAreasTreeQuery, AllAreasTreeQueryVariables>(AllAreasTreeDocument, options);
+}
 export function useAllAreasTreeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllAreasTreeQuery, AllAreasTreeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllAreasTreeQuery, AllAreasTreeQueryVariables>(AllAreasTreeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllAreasTreeQuery, AllAreasTreeQueryVariables>(AllAreasTreeDocument, options);
+}
 export type AllAreasTreeQueryHookResult = ReturnType<typeof useAllAreasTreeQuery>;
 export type AllAreasTreeLazyQueryHookResult = ReturnType<typeof useAllAreasTreeLazyQuery>;
 export type AllAreasTreeSuspenseQueryHookResult = ReturnType<typeof useAllAreasTreeSuspenseQuery>;
@@ -15745,17 +15183,17 @@ export const AllBusinessAreasDocument = gql`
  * });
  */
 export function useAllBusinessAreasQuery(baseOptions?: Apollo.QueryHookOptions<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, options);
+}
 export function useAllBusinessAreasLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, options);
+}
 export function useAllBusinessAreasSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, options);
+}
 export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAreasQuery>;
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasSuspenseQueryHookResult = ReturnType<typeof useAllBusinessAreasSuspenseQuery>;
@@ -15838,17 +15276,17 @@ export const AllLogEntriesDocument = gql`
  * });
  */
 export function useAllLogEntriesQuery(baseOptions: Apollo.QueryHookOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, options);
+}
 export function useAllLogEntriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, options);
+}
 export function useAllLogEntriesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, options);
+}
 export type AllLogEntriesQueryHookResult = ReturnType<typeof useAllLogEntriesQuery>;
 export type AllLogEntriesLazyQueryHookResult = ReturnType<typeof useAllLogEntriesLazyQuery>;
 export type AllLogEntriesSuspenseQueryHookResult = ReturnType<typeof useAllLogEntriesSuspenseQuery>;
@@ -15933,17 +15371,17 @@ export const AllSanctionListIndividualsDocument = gql`
  * });
  */
 export function useAllSanctionListIndividualsQuery(baseOptions: Apollo.QueryHookOptions<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>(AllSanctionListIndividualsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>(AllSanctionListIndividualsDocument, options);
+}
 export function useAllSanctionListIndividualsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>(AllSanctionListIndividualsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>(AllSanctionListIndividualsDocument, options);
+}
 export function useAllSanctionListIndividualsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>(AllSanctionListIndividualsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>(AllSanctionListIndividualsDocument, options);
+}
 export type AllSanctionListIndividualsQueryHookResult = ReturnType<typeof useAllSanctionListIndividualsQuery>;
 export type AllSanctionListIndividualsLazyQueryHookResult = ReturnType<typeof useAllSanctionListIndividualsLazyQuery>;
 export type AllSanctionListIndividualsSuspenseQueryHookResult = ReturnType<typeof useAllSanctionListIndividualsSuspenseQuery>;
@@ -16025,17 +15463,17 @@ export const AllUsersDocument = gql`
  * });
  */
 export function useAllUsersQuery(baseOptions: Apollo.QueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, options);
+}
 export function useAllUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, options);
+}
 export function useAllUsersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, options);
+}
 export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersSuspenseQueryHookResult = ReturnType<typeof useAllUsersSuspenseQuery>;
@@ -16094,17 +15532,17 @@ export const AllUsersForFiltersDocument = gql`
  * });
  */
 export function useAllUsersForFiltersQuery(baseOptions: Apollo.QueryHookOptions<AllUsersForFiltersQuery, AllUsersForFiltersQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllUsersForFiltersQuery, AllUsersForFiltersQueryVariables>(AllUsersForFiltersDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllUsersForFiltersQuery, AllUsersForFiltersQueryVariables>(AllUsersForFiltersDocument, options);
+}
 export function useAllUsersForFiltersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllUsersForFiltersQuery, AllUsersForFiltersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllUsersForFiltersQuery, AllUsersForFiltersQueryVariables>(AllUsersForFiltersDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllUsersForFiltersQuery, AllUsersForFiltersQueryVariables>(AllUsersForFiltersDocument, options);
+}
 export function useAllUsersForFiltersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllUsersForFiltersQuery, AllUsersForFiltersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllUsersForFiltersQuery, AllUsersForFiltersQueryVariables>(AllUsersForFiltersDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllUsersForFiltersQuery, AllUsersForFiltersQueryVariables>(AllUsersForFiltersDocument, options);
+}
 export type AllUsersForFiltersQueryHookResult = ReturnType<typeof useAllUsersForFiltersQuery>;
 export type AllUsersForFiltersLazyQueryHookResult = ReturnType<typeof useAllUsersForFiltersLazyQuery>;
 export type AllUsersForFiltersSuspenseQueryHookResult = ReturnType<typeof useAllUsersForFiltersSuspenseQuery>;
@@ -16137,17 +15575,17 @@ export const BusinessAreaDataDocument = gql`
  * });
  */
 export function useBusinessAreaDataQuery(baseOptions: Apollo.QueryHookOptions<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, options);
+}
 export function useBusinessAreaDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, options);
+}
 export function useBusinessAreaDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<BusinessAreaDataQuery, BusinessAreaDataQueryVariables>(BusinessAreaDataDocument, options);
+}
 export type BusinessAreaDataQueryHookResult = ReturnType<typeof useBusinessAreaDataQuery>;
 export type BusinessAreaDataLazyQueryHookResult = ReturnType<typeof useBusinessAreaDataLazyQuery>;
 export type BusinessAreaDataSuspenseQueryHookResult = ReturnType<typeof useBusinessAreaDataSuspenseQuery>;
@@ -16174,17 +15612,17 @@ export const CashAssistUrlPrefixDocument = gql`
  * });
  */
 export function useCashAssistUrlPrefixQuery(baseOptions?: Apollo.QueryHookOptions<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, options);
+}
 export function useCashAssistUrlPrefixLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, options);
+}
 export function useCashAssistUrlPrefixSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, options);
+}
 export type CashAssistUrlPrefixQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixQuery>;
 export type CashAssistUrlPrefixLazyQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixLazyQuery>;
 export type CashAssistUrlPrefixSuspenseQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixSuspenseQuery>;
@@ -16214,17 +15652,17 @@ export const CurrencyChoicesDocument = gql`
  * });
  */
 export function useCurrencyChoicesQuery(baseOptions?: Apollo.QueryHookOptions<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>(CurrencyChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>(CurrencyChoicesDocument, options);
+}
 export function useCurrencyChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>(CurrencyChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>(CurrencyChoicesDocument, options);
+}
 export function useCurrencyChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>(CurrencyChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<CurrencyChoicesQuery, CurrencyChoicesQueryVariables>(CurrencyChoicesDocument, options);
+}
 export type CurrencyChoicesQueryHookResult = ReturnType<typeof useCurrencyChoicesQuery>;
 export type CurrencyChoicesLazyQueryHookResult = ReturnType<typeof useCurrencyChoicesLazyQuery>;
 export type CurrencyChoicesSuspenseQueryHookResult = ReturnType<typeof useCurrencyChoicesSuspenseQuery>;
@@ -16255,17 +15693,17 @@ export const DataCollectionTypeChoiceDataDocument = gql`
  * });
  */
 export function useDataCollectionTypeChoiceDataQuery(baseOptions?: Apollo.QueryHookOptions<DataCollectionTypeChoiceDataQuery, DataCollectionTypeChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<DataCollectionTypeChoiceDataQuery, DataCollectionTypeChoiceDataQueryVariables>(DataCollectionTypeChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<DataCollectionTypeChoiceDataQuery, DataCollectionTypeChoiceDataQueryVariables>(DataCollectionTypeChoiceDataDocument, options);
+}
 export function useDataCollectionTypeChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DataCollectionTypeChoiceDataQuery, DataCollectionTypeChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<DataCollectionTypeChoiceDataQuery, DataCollectionTypeChoiceDataQueryVariables>(DataCollectionTypeChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<DataCollectionTypeChoiceDataQuery, DataCollectionTypeChoiceDataQueryVariables>(DataCollectionTypeChoiceDataDocument, options);
+}
 export function useDataCollectionTypeChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DataCollectionTypeChoiceDataQuery, DataCollectionTypeChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<DataCollectionTypeChoiceDataQuery, DataCollectionTypeChoiceDataQueryVariables>(DataCollectionTypeChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<DataCollectionTypeChoiceDataQuery, DataCollectionTypeChoiceDataQueryVariables>(DataCollectionTypeChoiceDataDocument, options);
+}
 export type DataCollectionTypeChoiceDataQueryHookResult = ReturnType<typeof useDataCollectionTypeChoiceDataQuery>;
 export type DataCollectionTypeChoiceDataLazyQueryHookResult = ReturnType<typeof useDataCollectionTypeChoiceDataLazyQuery>;
 export type DataCollectionTypeChoiceDataSuspenseQueryHookResult = ReturnType<typeof useDataCollectionTypeChoiceDataSuspenseQuery>;
@@ -16294,17 +15732,17 @@ export const LoggedCheckerDocument = gql`
  * });
  */
 export function useLoggedCheckerQuery(baseOptions?: Apollo.QueryHookOptions<LoggedCheckerQuery, LoggedCheckerQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, options);
+}
 export function useLoggedCheckerLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LoggedCheckerQuery, LoggedCheckerQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, options);
+}
 export function useLoggedCheckerSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<LoggedCheckerQuery, LoggedCheckerQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<LoggedCheckerQuery, LoggedCheckerQueryVariables>(LoggedCheckerDocument, options);
+}
 export type LoggedCheckerQueryHookResult = ReturnType<typeof useLoggedCheckerQuery>;
 export type LoggedCheckerLazyQueryHookResult = ReturnType<typeof useLoggedCheckerLazyQuery>;
 export type LoggedCheckerSuspenseQueryHookResult = ReturnType<typeof useLoggedCheckerSuspenseQuery>;
@@ -16347,17 +15785,17 @@ export const MeDocument = gql`
  * });
  */
 export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+}
 export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+}
 export function useMeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MeQuery, MeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+}
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeSuspenseQueryHookResult = ReturnType<typeof useMeSuspenseQuery>;
@@ -16396,17 +15834,17 @@ export const UserChoiceDataDocument = gql`
  * });
  */
 export function useUserChoiceDataQuery(baseOptions?: Apollo.QueryHookOptions<UserChoiceDataQuery, UserChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UserChoiceDataQuery, UserChoiceDataQueryVariables>(UserChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<UserChoiceDataQuery, UserChoiceDataQueryVariables>(UserChoiceDataDocument, options);
+}
 export function useUserChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserChoiceDataQuery, UserChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UserChoiceDataQuery, UserChoiceDataQueryVariables>(UserChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<UserChoiceDataQuery, UserChoiceDataQueryVariables>(UserChoiceDataDocument, options);
+}
 export function useUserChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<UserChoiceDataQuery, UserChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<UserChoiceDataQuery, UserChoiceDataQueryVariables>(UserChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<UserChoiceDataQuery, UserChoiceDataQueryVariables>(UserChoiceDataDocument, options);
+}
 export type UserChoiceDataQueryHookResult = ReturnType<typeof useUserChoiceDataQuery>;
 export type UserChoiceDataLazyQueryHookResult = ReturnType<typeof useUserChoiceDataLazyQuery>;
 export type UserChoiceDataSuspenseQueryHookResult = ReturnType<typeof useUserChoiceDataSuspenseQuery>;
@@ -16468,17 +15906,17 @@ export const AllAddIndividualFieldsDocument = gql`
  * });
  */
 export function useAllAddIndividualFieldsQuery(baseOptions?: Apollo.QueryHookOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, options);
+}
 export function useAllAddIndividualFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, options);
+}
 export function useAllAddIndividualFieldsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, options);
+}
 export type AllAddIndividualFieldsQueryHookResult = ReturnType<typeof useAllAddIndividualFieldsQuery>;
 export type AllAddIndividualFieldsLazyQueryHookResult = ReturnType<typeof useAllAddIndividualFieldsLazyQuery>;
 export type AllAddIndividualFieldsSuspenseQueryHookResult = ReturnType<typeof useAllAddIndividualFieldsSuspenseQuery>;
@@ -16532,17 +15970,17 @@ export const AllEditHouseholdFieldsDocument = gql`
  * });
  */
 export function useAllEditHouseholdFieldsQuery(baseOptions?: Apollo.QueryHookOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, options);
+}
 export function useAllEditHouseholdFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, options);
+}
 export function useAllEditHouseholdFieldsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, options);
+}
 export type AllEditHouseholdFieldsQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsQuery>;
 export type AllEditHouseholdFieldsLazyQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsLazyQuery>;
 export type AllEditHouseholdFieldsSuspenseQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsSuspenseQuery>;
@@ -16592,17 +16030,17 @@ export const AllHouseholdsFlexFieldsAttributesDocument = gql`
  * });
  */
 export function useAllHouseholdsFlexFieldsAttributesQuery(baseOptions?: Apollo.QueryHookOptions<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, options);
+}
 export function useAllHouseholdsFlexFieldsAttributesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, options);
+}
 export function useAllHouseholdsFlexFieldsAttributesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, options);
+}
 export type AllHouseholdsFlexFieldsAttributesQueryHookResult = ReturnType<typeof useAllHouseholdsFlexFieldsAttributesQuery>;
 export type AllHouseholdsFlexFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllHouseholdsFlexFieldsAttributesLazyQuery>;
 export type AllHouseholdsFlexFieldsAttributesSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsFlexFieldsAttributesSuspenseQuery>;
@@ -16652,17 +16090,17 @@ export const AllIndividualsFlexFieldsAttributesDocument = gql`
  * });
  */
 export function useAllIndividualsFlexFieldsAttributesQuery(baseOptions?: Apollo.QueryHookOptions<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, options);
+}
 export function useAllIndividualsFlexFieldsAttributesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, options);
+}
 export function useAllIndividualsFlexFieldsAttributesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, options);
+}
 export type AllIndividualsFlexFieldsAttributesQueryHookResult = ReturnType<typeof useAllIndividualsFlexFieldsAttributesQuery>;
 export type AllIndividualsFlexFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllIndividualsFlexFieldsAttributesLazyQuery>;
 export type AllIndividualsFlexFieldsAttributesSuspenseQueryHookResult = ReturnType<typeof useAllIndividualsFlexFieldsAttributesSuspenseQuery>;
@@ -16697,17 +16135,17 @@ export const FlexFieldsDocument = gql`
  * });
  */
 export function useFlexFieldsQuery(baseOptions?: Apollo.QueryHookOptions<FlexFieldsQuery, FlexFieldsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, options);
+}
 export function useFlexFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FlexFieldsQuery, FlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, options);
+}
 export function useFlexFieldsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FlexFieldsQuery, FlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, options);
+}
 export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
 export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
 export type FlexFieldsSuspenseQueryHookResult = ReturnType<typeof useFlexFieldsSuspenseQuery>;
@@ -16757,17 +16195,17 @@ export const ImportedIndividualFieldsDocument = gql`
  * });
  */
 export function useImportedIndividualFieldsQuery(baseOptions?: Apollo.QueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, options);
+}
 export function useImportedIndividualFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, options);
+}
 export function useImportedIndividualFieldsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, options);
+}
 export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFieldsQuery>;
 export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
 export type ImportedIndividualFieldsSuspenseQueryHookResult = ReturnType<typeof useImportedIndividualFieldsSuspenseQuery>;
@@ -16853,17 +16291,17 @@ export const AllFeedbacksDocument = gql`
  * });
  */
 export function useAllFeedbacksQuery(baseOptions?: Apollo.QueryHookOptions<AllFeedbacksQuery, AllFeedbacksQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllFeedbacksQuery, AllFeedbacksQueryVariables>(AllFeedbacksDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllFeedbacksQuery, AllFeedbacksQueryVariables>(AllFeedbacksDocument, options);
+}
 export function useAllFeedbacksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllFeedbacksQuery, AllFeedbacksQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllFeedbacksQuery, AllFeedbacksQueryVariables>(AllFeedbacksDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllFeedbacksQuery, AllFeedbacksQueryVariables>(AllFeedbacksDocument, options);
+}
 export function useAllFeedbacksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllFeedbacksQuery, AllFeedbacksQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllFeedbacksQuery, AllFeedbacksQueryVariables>(AllFeedbacksDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllFeedbacksQuery, AllFeedbacksQueryVariables>(AllFeedbacksDocument, options);
+}
 export type AllFeedbacksQueryHookResult = ReturnType<typeof useAllFeedbacksQuery>;
 export type AllFeedbacksLazyQueryHookResult = ReturnType<typeof useAllFeedbacksLazyQuery>;
 export type AllFeedbacksSuspenseQueryHookResult = ReturnType<typeof useAllFeedbacksSuspenseQuery>;
@@ -16955,17 +16393,17 @@ export const FeedbackDocument = gql`
  * });
  */
 export function useFeedbackQuery(baseOptions: Apollo.QueryHookOptions<FeedbackQuery, FeedbackQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<FeedbackQuery, FeedbackQueryVariables>(FeedbackDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<FeedbackQuery, FeedbackQueryVariables>(FeedbackDocument, options);
+}
 export function useFeedbackLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FeedbackQuery, FeedbackQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<FeedbackQuery, FeedbackQueryVariables>(FeedbackDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<FeedbackQuery, FeedbackQueryVariables>(FeedbackDocument, options);
+}
 export function useFeedbackSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FeedbackQuery, FeedbackQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<FeedbackQuery, FeedbackQueryVariables>(FeedbackDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<FeedbackQuery, FeedbackQueryVariables>(FeedbackDocument, options);
+}
 export type FeedbackQueryHookResult = ReturnType<typeof useFeedbackQuery>;
 export type FeedbackLazyQueryHookResult = ReturnType<typeof useFeedbackLazyQuery>;
 export type FeedbackSuspenseQueryHookResult = ReturnType<typeof useFeedbackSuspenseQuery>;
@@ -16995,17 +16433,17 @@ export const FeedbackIssueTypeChoicesDocument = gql`
  * });
  */
 export function useFeedbackIssueTypeChoicesQuery(baseOptions?: Apollo.QueryHookOptions<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>(FeedbackIssueTypeChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>(FeedbackIssueTypeChoicesDocument, options);
+}
 export function useFeedbackIssueTypeChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>(FeedbackIssueTypeChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>(FeedbackIssueTypeChoicesDocument, options);
+}
 export function useFeedbackIssueTypeChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>(FeedbackIssueTypeChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<FeedbackIssueTypeChoicesQuery, FeedbackIssueTypeChoicesQueryVariables>(FeedbackIssueTypeChoicesDocument, options);
+}
 export type FeedbackIssueTypeChoicesQueryHookResult = ReturnType<typeof useFeedbackIssueTypeChoicesQuery>;
 export type FeedbackIssueTypeChoicesLazyQueryHookResult = ReturnType<typeof useFeedbackIssueTypeChoicesLazyQuery>;
 export type FeedbackIssueTypeChoicesSuspenseQueryHookResult = ReturnType<typeof useFeedbackIssueTypeChoicesSuspenseQuery>;
@@ -17059,17 +16497,17 @@ export const AllGrievanceDashboardChartsDocument = gql`
  * });
  */
 export function useAllGrievanceDashboardChartsQuery(baseOptions: Apollo.QueryHookOptions<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, options);
+}
 export function useAllGrievanceDashboardChartsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, options);
+}
 export function useAllGrievanceDashboardChartsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllGrievanceDashboardChartsQuery, AllGrievanceDashboardChartsQueryVariables>(AllGrievanceDashboardChartsDocument, options);
+}
 export type AllGrievanceDashboardChartsQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsQuery>;
 export type AllGrievanceDashboardChartsLazyQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsLazyQuery>;
 export type AllGrievanceDashboardChartsSuspenseQueryHookResult = ReturnType<typeof useAllGrievanceDashboardChartsSuspenseQuery>;
@@ -17200,17 +16638,17 @@ export const AllGrievanceTicketDocument = gql`
  * });
  */
 export function useAllGrievanceTicketQuery(baseOptions: Apollo.QueryHookOptions<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, options);
+}
 export function useAllGrievanceTicketLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, options);
+}
 export function useAllGrievanceTicketSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, options);
+}
 export type AllGrievanceTicketQueryHookResult = ReturnType<typeof useAllGrievanceTicketQuery>;
 export type AllGrievanceTicketLazyQueryHookResult = ReturnType<typeof useAllGrievanceTicketLazyQuery>;
 export type AllGrievanceTicketSuspenseQueryHookResult = ReturnType<typeof useAllGrievanceTicketSuspenseQuery>;
@@ -17237,17 +16675,17 @@ export const GrievanceTicketAreaScopeDocument = gql`
  * });
  */
 export function useGrievanceTicketAreaScopeQuery(baseOptions?: Apollo.QueryHookOptions<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>(GrievanceTicketAreaScopeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>(GrievanceTicketAreaScopeDocument, options);
+}
 export function useGrievanceTicketAreaScopeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>(GrievanceTicketAreaScopeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>(GrievanceTicketAreaScopeDocument, options);
+}
 export function useGrievanceTicketAreaScopeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>(GrievanceTicketAreaScopeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GrievanceTicketAreaScopeQuery, GrievanceTicketAreaScopeQueryVariables>(GrievanceTicketAreaScopeDocument, options);
+}
 export type GrievanceTicketAreaScopeQueryHookResult = ReturnType<typeof useGrievanceTicketAreaScopeQuery>;
 export type GrievanceTicketAreaScopeLazyQueryHookResult = ReturnType<typeof useGrievanceTicketAreaScopeLazyQuery>;
 export type GrievanceTicketAreaScopeSuspenseQueryHookResult = ReturnType<typeof useGrievanceTicketAreaScopeSuspenseQuery>;
@@ -17332,17 +16770,17 @@ export const ExistingGrievanceTicketsDocument = gql`
  * });
  */
 export function useExistingGrievanceTicketsQuery(baseOptions: Apollo.QueryHookOptions<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>(ExistingGrievanceTicketsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>(ExistingGrievanceTicketsDocument, options);
+}
 export function useExistingGrievanceTicketsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>(ExistingGrievanceTicketsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>(ExistingGrievanceTicketsDocument, options);
+}
 export function useExistingGrievanceTicketsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>(ExistingGrievanceTicketsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>(ExistingGrievanceTicketsDocument, options);
+}
 export type ExistingGrievanceTicketsQueryHookResult = ReturnType<typeof useExistingGrievanceTicketsQuery>;
 export type ExistingGrievanceTicketsLazyQueryHookResult = ReturnType<typeof useExistingGrievanceTicketsLazyQuery>;
 export type ExistingGrievanceTicketsSuspenseQueryHookResult = ReturnType<typeof useExistingGrievanceTicketsSuspenseQuery>;
@@ -17372,17 +16810,17 @@ export const GrievanceTicketDocument = gql`
  * });
  */
 export function useGrievanceTicketQuery(baseOptions: Apollo.QueryHookOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, options);
+}
 export function useGrievanceTicketLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, options);
+}
 export function useGrievanceTicketSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, options);
+}
 export type GrievanceTicketQueryHookResult = ReturnType<typeof useGrievanceTicketQuery>;
 export type GrievanceTicketLazyQueryHookResult = ReturnType<typeof useGrievanceTicketLazyQuery>;
 export type GrievanceTicketSuspenseQueryHookResult = ReturnType<typeof useGrievanceTicketSuspenseQuery>;
@@ -17420,17 +16858,17 @@ export const GrievanceTicketFlexFieldsDocument = gql`
  * });
  */
 export function useGrievanceTicketFlexFieldsQuery(baseOptions: Apollo.QueryHookOptions<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>(GrievanceTicketFlexFieldsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>(GrievanceTicketFlexFieldsDocument, options);
+}
 export function useGrievanceTicketFlexFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>(GrievanceTicketFlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>(GrievanceTicketFlexFieldsDocument, options);
+}
 export function useGrievanceTicketFlexFieldsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>(GrievanceTicketFlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GrievanceTicketFlexFieldsQuery, GrievanceTicketFlexFieldsQueryVariables>(GrievanceTicketFlexFieldsDocument, options);
+}
 export type GrievanceTicketFlexFieldsQueryHookResult = ReturnType<typeof useGrievanceTicketFlexFieldsQuery>;
 export type GrievanceTicketFlexFieldsLazyQueryHookResult = ReturnType<typeof useGrievanceTicketFlexFieldsLazyQuery>;
 export type GrievanceTicketFlexFieldsSuspenseQueryHookResult = ReturnType<typeof useGrievanceTicketFlexFieldsSuspenseQuery>;
@@ -17461,17 +16899,17 @@ export const GrievanceTicketUnicefIdDocument = gql`
  * });
  */
 export function useGrievanceTicketUnicefIdQuery(baseOptions: Apollo.QueryHookOptions<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>(GrievanceTicketUnicefIdDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>(GrievanceTicketUnicefIdDocument, options);
+}
 export function useGrievanceTicketUnicefIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>(GrievanceTicketUnicefIdDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>(GrievanceTicketUnicefIdDocument, options);
+}
 export function useGrievanceTicketUnicefIdSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>(GrievanceTicketUnicefIdDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GrievanceTicketUnicefIdQuery, GrievanceTicketUnicefIdQueryVariables>(GrievanceTicketUnicefIdDocument, options);
+}
 export type GrievanceTicketUnicefIdQueryHookResult = ReturnType<typeof useGrievanceTicketUnicefIdQuery>;
 export type GrievanceTicketUnicefIdLazyQueryHookResult = ReturnType<typeof useGrievanceTicketUnicefIdLazyQuery>;
 export type GrievanceTicketUnicefIdSuspenseQueryHookResult = ReturnType<typeof useGrievanceTicketUnicefIdSuspenseQuery>;
@@ -17533,17 +16971,17 @@ export const GrievancesChoiceDataDocument = gql`
  * });
  */
 export function useGrievancesChoiceDataQuery(baseOptions?: Apollo.QueryHookOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, options);
+}
 export function useGrievancesChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, options);
+}
 export function useGrievancesChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, options);
+}
 export type GrievancesChoiceDataQueryHookResult = ReturnType<typeof useGrievancesChoiceDataQuery>;
 export type GrievancesChoiceDataLazyQueryHookResult = ReturnType<typeof useGrievancesChoiceDataLazyQuery>;
 export type GrievancesChoiceDataSuspenseQueryHookResult = ReturnType<typeof useGrievancesChoiceDataSuspenseQuery>;
@@ -17578,17 +17016,17 @@ export const PartnerForGrievanceChoicesDocument = gql`
  * });
  */
 export function usePartnerForGrievanceChoicesQuery(baseOptions?: Apollo.QueryHookOptions<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>(PartnerForGrievanceChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>(PartnerForGrievanceChoicesDocument, options);
+}
 export function usePartnerForGrievanceChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>(PartnerForGrievanceChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>(PartnerForGrievanceChoicesDocument, options);
+}
 export function usePartnerForGrievanceChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>(PartnerForGrievanceChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<PartnerForGrievanceChoicesQuery, PartnerForGrievanceChoicesQueryVariables>(PartnerForGrievanceChoicesDocument, options);
+}
 export type PartnerForGrievanceChoicesQueryHookResult = ReturnType<typeof usePartnerForGrievanceChoicesQuery>;
 export type PartnerForGrievanceChoicesLazyQueryHookResult = ReturnType<typeof usePartnerForGrievanceChoicesLazyQuery>;
 export type PartnerForGrievanceChoicesSuspenseQueryHookResult = ReturnType<typeof usePartnerForGrievanceChoicesSuspenseQuery>;
@@ -17624,17 +17062,17 @@ export const RelatedGrievanceTicketsDocument = gql`
  * });
  */
 export function useRelatedGrievanceTicketsQuery(baseOptions: Apollo.QueryHookOptions<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>(RelatedGrievanceTicketsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>(RelatedGrievanceTicketsDocument, options);
+}
 export function useRelatedGrievanceTicketsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>(RelatedGrievanceTicketsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>(RelatedGrievanceTicketsDocument, options);
+}
 export function useRelatedGrievanceTicketsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>(RelatedGrievanceTicketsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<RelatedGrievanceTicketsQuery, RelatedGrievanceTicketsQueryVariables>(RelatedGrievanceTicketsDocument, options);
+}
 export type RelatedGrievanceTicketsQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsQuery>;
 export type RelatedGrievanceTicketsLazyQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsLazyQuery>;
 export type RelatedGrievanceTicketsSuspenseQueryHookResult = ReturnType<typeof useRelatedGrievanceTicketsSuspenseQuery>;
@@ -17664,17 +17102,17 @@ export const AllDeliveryMechanismsDocument = gql`
  * });
  */
 export function useAllDeliveryMechanismsQuery(baseOptions?: Apollo.QueryHookOptions<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>(AllDeliveryMechanismsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>(AllDeliveryMechanismsDocument, options);
+}
 export function useAllDeliveryMechanismsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>(AllDeliveryMechanismsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>(AllDeliveryMechanismsDocument, options);
+}
 export function useAllDeliveryMechanismsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>(AllDeliveryMechanismsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllDeliveryMechanismsQuery, AllDeliveryMechanismsQueryVariables>(AllDeliveryMechanismsDocument, options);
+}
 export type AllDeliveryMechanismsQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsQuery>;
 export type AllDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsLazyQuery>;
 export type AllDeliveryMechanismsSuspenseQueryHookResult = ReturnType<typeof useAllDeliveryMechanismsSuspenseQuery>;
@@ -17785,17 +17223,17 @@ export const AllPaymentPlansForTableDocument = gql`
  * });
  */
 export function useAllPaymentPlansForTableQuery(baseOptions: Apollo.QueryHookOptions<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>(AllPaymentPlansForTableDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>(AllPaymentPlansForTableDocument, options);
+}
 export function useAllPaymentPlansForTableLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>(AllPaymentPlansForTableDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>(AllPaymentPlansForTableDocument, options);
+}
 export function useAllPaymentPlansForTableSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>(AllPaymentPlansForTableDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllPaymentPlansForTableQuery, AllPaymentPlansForTableQueryVariables>(AllPaymentPlansForTableDocument, options);
+}
 export type AllPaymentPlansForTableQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableQuery>;
 export type AllPaymentPlansForTableLazyQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableLazyQuery>;
 export type AllPaymentPlansForTableSuspenseQueryHookResult = ReturnType<typeof useAllPaymentPlansForTableSuspenseQuery>;
@@ -17829,17 +17267,17 @@ export const AvailableFspsForDeliveryMechanismsDocument = gql`
  * });
  */
 export function useAvailableFspsForDeliveryMechanismsQuery(baseOptions: Apollo.QueryHookOptions<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>(AvailableFspsForDeliveryMechanismsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>(AvailableFspsForDeliveryMechanismsDocument, options);
+}
 export function useAvailableFspsForDeliveryMechanismsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>(AvailableFspsForDeliveryMechanismsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>(AvailableFspsForDeliveryMechanismsDocument, options);
+}
 export function useAvailableFspsForDeliveryMechanismsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>(AvailableFspsForDeliveryMechanismsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AvailableFspsForDeliveryMechanismsQuery, AvailableFspsForDeliveryMechanismsQueryVariables>(AvailableFspsForDeliveryMechanismsDocument, options);
+}
 export type AvailableFspsForDeliveryMechanismsQueryHookResult = ReturnType<typeof useAvailableFspsForDeliveryMechanismsQuery>;
 export type AvailableFspsForDeliveryMechanismsLazyQueryHookResult = ReturnType<typeof useAvailableFspsForDeliveryMechanismsLazyQuery>;
 export type AvailableFspsForDeliveryMechanismsSuspenseQueryHookResult = ReturnType<typeof useAvailableFspsForDeliveryMechanismsSuspenseQuery>;
@@ -17951,17 +17389,17 @@ export const PaymentDocument = gql`
  * });
  */
 export function usePaymentQuery(baseOptions: Apollo.QueryHookOptions<PaymentQuery, PaymentQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, options);
+}
 export function usePaymentLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentQuery, PaymentQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, options);
+}
 export function usePaymentSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PaymentQuery, PaymentQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<PaymentQuery, PaymentQueryVariables>(PaymentDocument, options);
+}
 export type PaymentQueryHookResult = ReturnType<typeof usePaymentQuery>;
 export type PaymentLazyQueryHookResult = ReturnType<typeof usePaymentLazyQuery>;
 export type PaymentSuspenseQueryHookResult = ReturnType<typeof usePaymentSuspenseQuery>;
@@ -18233,17 +17671,17 @@ export const PaymentPlanDocument = gql`
  * });
  */
 export function usePaymentPlanQuery(baseOptions: Apollo.QueryHookOptions<PaymentPlanQuery, PaymentPlanQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PaymentPlanQuery, PaymentPlanQueryVariables>(PaymentPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<PaymentPlanQuery, PaymentPlanQueryVariables>(PaymentPlanDocument, options);
+}
 export function usePaymentPlanLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentPlanQuery, PaymentPlanQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PaymentPlanQuery, PaymentPlanQueryVariables>(PaymentPlanDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<PaymentPlanQuery, PaymentPlanQueryVariables>(PaymentPlanDocument, options);
+}
 export function usePaymentPlanSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PaymentPlanQuery, PaymentPlanQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PaymentPlanQuery, PaymentPlanQueryVariables>(PaymentPlanDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<PaymentPlanQuery, PaymentPlanQueryVariables>(PaymentPlanDocument, options);
+}
 export type PaymentPlanQueryHookResult = ReturnType<typeof usePaymentPlanQuery>;
 export type PaymentPlanLazyQueryHookResult = ReturnType<typeof usePaymentPlanLazyQuery>;
 export type PaymentPlanSuspenseQueryHookResult = ReturnType<typeof usePaymentPlanSuspenseQuery>;
@@ -18339,17 +17777,17 @@ export const AllCashPlansDocument = gql`
  * });
  */
 export function useAllCashPlansQuery(baseOptions?: Apollo.QueryHookOptions<AllCashPlansQuery, AllCashPlansQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllCashPlansQuery, AllCashPlansQueryVariables>(AllCashPlansDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllCashPlansQuery, AllCashPlansQueryVariables>(AllCashPlansDocument, options);
+}
 export function useAllCashPlansLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllCashPlansQuery, AllCashPlansQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllCashPlansQuery, AllCashPlansQueryVariables>(AllCashPlansDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllCashPlansQuery, AllCashPlansQueryVariables>(AllCashPlansDocument, options);
+}
 export function useAllCashPlansSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllCashPlansQuery, AllCashPlansQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllCashPlansQuery, AllCashPlansQueryVariables>(AllCashPlansDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllCashPlansQuery, AllCashPlansQueryVariables>(AllCashPlansDocument, options);
+}
 export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery>;
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansSuspenseQueryHookResult = ReturnType<typeof useAllCashPlansSuspenseQuery>;
@@ -18440,17 +17878,17 @@ export const AllCashPlansAndPaymentPlansDocument = gql`
  * });
  */
 export function useAllCashPlansAndPaymentPlansQuery(baseOptions: Apollo.QueryHookOptions<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>(AllCashPlansAndPaymentPlansDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>(AllCashPlansAndPaymentPlansDocument, options);
+}
 export function useAllCashPlansAndPaymentPlansLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>(AllCashPlansAndPaymentPlansDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>(AllCashPlansAndPaymentPlansDocument, options);
+}
 export function useAllCashPlansAndPaymentPlansSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>(AllCashPlansAndPaymentPlansDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllCashPlansAndPaymentPlansQuery, AllCashPlansAndPaymentPlansQueryVariables>(AllCashPlansAndPaymentPlansDocument, options);
+}
 export type AllCashPlansAndPaymentPlansQueryHookResult = ReturnType<typeof useAllCashPlansAndPaymentPlansQuery>;
 export type AllCashPlansAndPaymentPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansAndPaymentPlansLazyQuery>;
 export type AllCashPlansAndPaymentPlansSuspenseQueryHookResult = ReturnType<typeof useAllCashPlansAndPaymentPlansSuspenseQuery>;
@@ -18537,17 +17975,17 @@ export const AllPaymentRecordsDocument = gql`
  * });
  */
 export function useAllPaymentRecordsQuery(baseOptions?: Apollo.QueryHookOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>(AllPaymentRecordsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>(AllPaymentRecordsDocument, options);
+}
 export function useAllPaymentRecordsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>(AllPaymentRecordsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>(AllPaymentRecordsDocument, options);
+}
 export function useAllPaymentRecordsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>(AllPaymentRecordsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>(AllPaymentRecordsDocument, options);
+}
 export type AllPaymentRecordsQueryHookResult = ReturnType<typeof useAllPaymentRecordsQuery>;
 export type AllPaymentRecordsLazyQueryHookResult = ReturnType<typeof useAllPaymentRecordsLazyQuery>;
 export type AllPaymentRecordsSuspenseQueryHookResult = ReturnType<typeof useAllPaymentRecordsSuspenseQuery>;
@@ -18620,17 +18058,17 @@ export const AllPaymentRecordsAndPaymentsDocument = gql`
  * });
  */
 export function useAllPaymentRecordsAndPaymentsQuery(baseOptions: Apollo.QueryHookOptions<AllPaymentRecordsAndPaymentsQuery, AllPaymentRecordsAndPaymentsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllPaymentRecordsAndPaymentsQuery, AllPaymentRecordsAndPaymentsQueryVariables>(AllPaymentRecordsAndPaymentsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllPaymentRecordsAndPaymentsQuery, AllPaymentRecordsAndPaymentsQueryVariables>(AllPaymentRecordsAndPaymentsDocument, options);
+}
 export function useAllPaymentRecordsAndPaymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllPaymentRecordsAndPaymentsQuery, AllPaymentRecordsAndPaymentsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllPaymentRecordsAndPaymentsQuery, AllPaymentRecordsAndPaymentsQueryVariables>(AllPaymentRecordsAndPaymentsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllPaymentRecordsAndPaymentsQuery, AllPaymentRecordsAndPaymentsQueryVariables>(AllPaymentRecordsAndPaymentsDocument, options);
+}
 export function useAllPaymentRecordsAndPaymentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllPaymentRecordsAndPaymentsQuery, AllPaymentRecordsAndPaymentsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllPaymentRecordsAndPaymentsQuery, AllPaymentRecordsAndPaymentsQueryVariables>(AllPaymentRecordsAndPaymentsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllPaymentRecordsAndPaymentsQuery, AllPaymentRecordsAndPaymentsQueryVariables>(AllPaymentRecordsAndPaymentsDocument, options);
+}
 export type AllPaymentRecordsAndPaymentsQueryHookResult = ReturnType<typeof useAllPaymentRecordsAndPaymentsQuery>;
 export type AllPaymentRecordsAndPaymentsLazyQueryHookResult = ReturnType<typeof useAllPaymentRecordsAndPaymentsLazyQuery>;
 export type AllPaymentRecordsAndPaymentsSuspenseQueryHookResult = ReturnType<typeof useAllPaymentRecordsAndPaymentsSuspenseQuery>;
@@ -18730,17 +18168,17 @@ export const AllPaymentsForTableDocument = gql`
  * });
  */
 export function useAllPaymentsForTableQuery(baseOptions: Apollo.QueryHookOptions<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>(AllPaymentsForTableDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>(AllPaymentsForTableDocument, options);
+}
 export function useAllPaymentsForTableLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>(AllPaymentsForTableDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>(AllPaymentsForTableDocument, options);
+}
 export function useAllPaymentsForTableSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>(AllPaymentsForTableDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllPaymentsForTableQuery, AllPaymentsForTableQueryVariables>(AllPaymentsForTableDocument, options);
+}
 export type AllPaymentsForTableQueryHookResult = ReturnType<typeof useAllPaymentsForTableQuery>;
 export type AllPaymentsForTableLazyQueryHookResult = ReturnType<typeof useAllPaymentsForTableLazyQuery>;
 export type AllPaymentsForTableSuspenseQueryHookResult = ReturnType<typeof useAllPaymentsForTableSuspenseQuery>;
@@ -18852,17 +18290,17 @@ export const CashPlanDocument = gql`
  * });
  */
 export function useCashPlanQuery(baseOptions: Apollo.QueryHookOptions<CashPlanQuery, CashPlanQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CashPlanQuery, CashPlanQueryVariables>(CashPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<CashPlanQuery, CashPlanQueryVariables>(CashPlanDocument, options);
+}
 export function useCashPlanLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CashPlanQuery, CashPlanQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CashPlanQuery, CashPlanQueryVariables>(CashPlanDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<CashPlanQuery, CashPlanQueryVariables>(CashPlanDocument, options);
+}
 export function useCashPlanSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CashPlanQuery, CashPlanQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CashPlanQuery, CashPlanQueryVariables>(CashPlanDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<CashPlanQuery, CashPlanQueryVariables>(CashPlanDocument, options);
+}
 export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanSuspenseQueryHookResult = ReturnType<typeof useCashPlanSuspenseQuery>;
@@ -18902,17 +18340,17 @@ export const IndividualPhotosDocument = gql`
  * });
  */
 export function useIndividualPhotosQuery(baseOptions: Apollo.QueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, options);
+}
 export function useIndividualPhotosLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, options);
+}
 export function useIndividualPhotosSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, options);
+}
 export type IndividualPhotosQueryHookResult = ReturnType<typeof useIndividualPhotosQuery>;
 export type IndividualPhotosLazyQueryHookResult = ReturnType<typeof useIndividualPhotosLazyQuery>;
 export type IndividualPhotosSuspenseQueryHookResult = ReturnType<typeof useIndividualPhotosSuspenseQuery>;
@@ -18951,17 +18389,17 @@ export const ImportedIndividualPhotosDocument = gql`
  * });
  */
 export function useImportedIndividualPhotosQuery(baseOptions: Apollo.QueryHookOptions<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, options);
+}
 export function useImportedIndividualPhotosLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, options);
+}
 export function useImportedIndividualPhotosSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ImportedIndividualPhotosQuery, ImportedIndividualPhotosQueryVariables>(ImportedIndividualPhotosDocument, options);
+}
 export type ImportedIndividualPhotosQueryHookResult = ReturnType<typeof useImportedIndividualPhotosQuery>;
 export type ImportedIndividualPhotosLazyQueryHookResult = ReturnType<typeof useImportedIndividualPhotosLazyQuery>;
 export type ImportedIndividualPhotosSuspenseQueryHookResult = ReturnType<typeof useImportedIndividualPhotosSuspenseQuery>;
@@ -19026,17 +18464,17 @@ export const LookUpPaymentRecordsDocument = gql`
  * });
  */
 export function useLookUpPaymentRecordsQuery(baseOptions?: Apollo.QueryHookOptions<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>(LookUpPaymentRecordsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>(LookUpPaymentRecordsDocument, options);
+}
 export function useLookUpPaymentRecordsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>(LookUpPaymentRecordsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>(LookUpPaymentRecordsDocument, options);
+}
 export function useLookUpPaymentRecordsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>(LookUpPaymentRecordsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>(LookUpPaymentRecordsDocument, options);
+}
 export type LookUpPaymentRecordsQueryHookResult = ReturnType<typeof useLookUpPaymentRecordsQuery>;
 export type LookUpPaymentRecordsLazyQueryHookResult = ReturnType<typeof useLookUpPaymentRecordsLazyQuery>;
 export type LookUpPaymentRecordsSuspenseQueryHookResult = ReturnType<typeof useLookUpPaymentRecordsSuspenseQuery>;
@@ -19130,17 +18568,17 @@ export const PaymentRecordDocument = gql`
  * });
  */
 export function usePaymentRecordQuery(baseOptions: Apollo.QueryHookOptions<PaymentRecordQuery, PaymentRecordQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, options);
+}
 export function usePaymentRecordLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentRecordQuery, PaymentRecordQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, options);
+}
 export function usePaymentRecordSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PaymentRecordQuery, PaymentRecordQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, options);
+}
 export type PaymentRecordQueryHookResult = ReturnType<typeof usePaymentRecordQuery>;
 export type PaymentRecordLazyQueryHookResult = ReturnType<typeof usePaymentRecordLazyQuery>;
 export type PaymentRecordSuspenseQueryHookResult = ReturnType<typeof usePaymentRecordSuspenseQuery>;
@@ -19224,17 +18662,17 @@ export const AllPaymentVerificationLogEntriesDocument = gql`
  * });
  */
 export function useAllPaymentVerificationLogEntriesQuery(baseOptions: Apollo.QueryHookOptions<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>(AllPaymentVerificationLogEntriesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>(AllPaymentVerificationLogEntriesDocument, options);
+}
 export function useAllPaymentVerificationLogEntriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>(AllPaymentVerificationLogEntriesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>(AllPaymentVerificationLogEntriesDocument, options);
+}
 export function useAllPaymentVerificationLogEntriesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>(AllPaymentVerificationLogEntriesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllPaymentVerificationLogEntriesQuery, AllPaymentVerificationLogEntriesQueryVariables>(AllPaymentVerificationLogEntriesDocument, options);
+}
 export type AllPaymentVerificationLogEntriesQueryHookResult = ReturnType<typeof useAllPaymentVerificationLogEntriesQuery>;
 export type AllPaymentVerificationLogEntriesLazyQueryHookResult = ReturnType<typeof useAllPaymentVerificationLogEntriesLazyQuery>;
 export type AllPaymentVerificationLogEntriesSuspenseQueryHookResult = ReturnType<typeof useAllPaymentVerificationLogEntriesSuspenseQuery>;
@@ -19323,17 +18761,17 @@ export const AllPaymentVerificationsDocument = gql`
  * });
  */
 export function useAllPaymentVerificationsQuery(baseOptions: Apollo.QueryHookOptions<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>(AllPaymentVerificationsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>(AllPaymentVerificationsDocument, options);
+}
 export function useAllPaymentVerificationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>(AllPaymentVerificationsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>(AllPaymentVerificationsDocument, options);
+}
 export function useAllPaymentVerificationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>(AllPaymentVerificationsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>(AllPaymentVerificationsDocument, options);
+}
 export type AllPaymentVerificationsQueryHookResult = ReturnType<typeof useAllPaymentVerificationsQuery>;
 export type AllPaymentVerificationsLazyQueryHookResult = ReturnType<typeof useAllPaymentVerificationsLazyQuery>;
 export type AllPaymentVerificationsSuspenseQueryHookResult = ReturnType<typeof useAllPaymentVerificationsSuspenseQuery>;
@@ -19364,17 +18802,17 @@ export const AllRapidProFlowsDocument = gql`
  * });
  */
 export function useAllRapidProFlowsQuery(baseOptions: Apollo.QueryHookOptions<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, options);
+}
 export function useAllRapidProFlowsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, options);
+}
 export function useAllRapidProFlowsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, options);
+}
 export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFlowsQuery>;
 export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
 export type AllRapidProFlowsSuspenseQueryHookResult = ReturnType<typeof useAllRapidProFlowsSuspenseQuery>;
@@ -19404,17 +18842,17 @@ export const PaymentVerificationPlanDocument = gql`
  * });
  */
 export function usePaymentVerificationPlanQuery(baseOptions: Apollo.QueryHookOptions<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>(PaymentVerificationPlanDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>(PaymentVerificationPlanDocument, options);
+}
 export function usePaymentVerificationPlanLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>(PaymentVerificationPlanDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>(PaymentVerificationPlanDocument, options);
+}
 export function usePaymentVerificationPlanSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>(PaymentVerificationPlanDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<PaymentVerificationPlanQuery, PaymentVerificationPlanQueryVariables>(PaymentVerificationPlanDocument, options);
+}
 export type PaymentVerificationPlanQueryHookResult = ReturnType<typeof usePaymentVerificationPlanQuery>;
 export type PaymentVerificationPlanLazyQueryHookResult = ReturnType<typeof usePaymentVerificationPlanLazyQuery>;
 export type PaymentVerificationPlanSuspenseQueryHookResult = ReturnType<typeof usePaymentVerificationPlanSuspenseQuery>;
@@ -19448,17 +18886,17 @@ export const CashPlanVerificationStatusChoicesDocument = gql`
  * });
  */
 export function useCashPlanVerificationStatusChoicesQuery(baseOptions?: Apollo.QueryHookOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, options);
+}
 export function useCashPlanVerificationStatusChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, options);
+}
 export function useCashPlanVerificationStatusChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, options);
+}
 export type CashPlanVerificationStatusChoicesQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesQuery>;
 export type CashPlanVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesLazyQuery>;
 export type CashPlanVerificationStatusChoicesSuspenseQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesSuspenseQuery>;
@@ -19488,17 +18926,17 @@ export const PaymentPlanStatusChoicesQueryDocument = gql`
  * });
  */
 export function usePaymentPlanStatusChoicesQueryQuery(baseOptions?: Apollo.QueryHookOptions<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>(PaymentPlanStatusChoicesQueryDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>(PaymentPlanStatusChoicesQueryDocument, options);
+}
 export function usePaymentPlanStatusChoicesQueryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>(PaymentPlanStatusChoicesQueryDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>(PaymentPlanStatusChoicesQueryDocument, options);
+}
 export function usePaymentPlanStatusChoicesQuerySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>(PaymentPlanStatusChoicesQueryDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<PaymentPlanStatusChoicesQueryQuery, PaymentPlanStatusChoicesQueryQueryVariables>(PaymentPlanStatusChoicesQueryDocument, options);
+}
 export type PaymentPlanStatusChoicesQueryQueryHookResult = ReturnType<typeof usePaymentPlanStatusChoicesQueryQuery>;
 export type PaymentPlanStatusChoicesQueryLazyQueryHookResult = ReturnType<typeof usePaymentPlanStatusChoicesQueryLazyQuery>;
 export type PaymentPlanStatusChoicesQuerySuspenseQueryHookResult = ReturnType<typeof usePaymentPlanStatusChoicesQuerySuspenseQuery>;
@@ -19532,17 +18970,17 @@ export const PaymentRecordVerificationDocument = gql`
  * });
  */
 export function usePaymentRecordVerificationQuery(baseOptions: Apollo.QueryHookOptions<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, options);
+}
 export function usePaymentRecordVerificationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, options);
+}
 export function usePaymentRecordVerificationSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, options);
+}
 export type PaymentRecordVerificationQueryHookResult = ReturnType<typeof usePaymentRecordVerificationQuery>;
 export type PaymentRecordVerificationLazyQueryHookResult = ReturnType<typeof usePaymentRecordVerificationLazyQuery>;
 export type PaymentRecordVerificationSuspenseQueryHookResult = ReturnType<typeof usePaymentRecordVerificationSuspenseQuery>;
@@ -19580,17 +19018,17 @@ export const PaymentVerificationChoicesDocument = gql`
  * });
  */
 export function usePaymentVerificationChoicesQuery(baseOptions?: Apollo.QueryHookOptions<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, options);
+}
 export function usePaymentVerificationChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, options);
+}
 export function usePaymentVerificationChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<PaymentVerificationChoicesQuery, PaymentVerificationChoicesQueryVariables>(PaymentVerificationChoicesDocument, options);
+}
 export type PaymentVerificationChoicesQueryHookResult = ReturnType<typeof usePaymentVerificationChoicesQuery>;
 export type PaymentVerificationChoicesLazyQueryHookResult = ReturnType<typeof usePaymentVerificationChoicesLazyQuery>;
 export type PaymentVerificationChoicesSuspenseQueryHookResult = ReturnType<typeof usePaymentVerificationChoicesSuspenseQuery>;
@@ -19621,17 +19059,17 @@ export const SampleSizeDocument = gql`
  * });
  */
 export function useSampleSizeQuery(baseOptions: Apollo.QueryHookOptions<SampleSizeQuery, SampleSizeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, options);
+}
 export function useSampleSizeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SampleSizeQuery, SampleSizeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, options);
+}
 export function useSampleSizeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SampleSizeQuery, SampleSizeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, options);
+}
 export type SampleSizeQueryHookResult = ReturnType<typeof useSampleSizeQuery>;
 export type SampleSizeLazyQueryHookResult = ReturnType<typeof useSampleSizeLazyQuery>;
 export type SampleSizeSuspenseQueryHookResult = ReturnType<typeof useSampleSizeSuspenseQuery>;
@@ -19661,17 +19099,17 @@ export const CashPlanVerificationSamplingChoicesDocument = gql`
  * });
  */
 export function useCashPlanVerificationSamplingChoicesQuery(baseOptions?: Apollo.QueryHookOptions<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, options);
+}
 export function useCashPlanVerificationSamplingChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, options);
+}
 export function useCashPlanVerificationSamplingChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, options);
+}
 export type CashPlanVerificationSamplingChoicesQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesQuery>;
 export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesLazyQuery>;
 export type CashPlanVerificationSamplingChoicesSuspenseQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesSuspenseQuery>;
@@ -19786,17 +19224,17 @@ export const AllHouseholdsDocument = gql`
  * });
  */
 export function useAllHouseholdsQuery(baseOptions?: Apollo.QueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, options);
+}
 export function useAllHouseholdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, options);
+}
 export function useAllHouseholdsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, options);
+}
 export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQuery>;
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsSuspenseQuery>;
@@ -19904,17 +19342,17 @@ export const AllHouseholdsForPopulationTableDocument = gql`
  * });
  */
 export function useAllHouseholdsForPopulationTableQuery(baseOptions?: Apollo.QueryHookOptions<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>(AllHouseholdsForPopulationTableDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>(AllHouseholdsForPopulationTableDocument, options);
+}
 export function useAllHouseholdsForPopulationTableLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>(AllHouseholdsForPopulationTableDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>(AllHouseholdsForPopulationTableDocument, options);
+}
 export function useAllHouseholdsForPopulationTableSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>(AllHouseholdsForPopulationTableDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllHouseholdsForPopulationTableQuery, AllHouseholdsForPopulationTableQueryVariables>(AllHouseholdsForPopulationTableDocument, options);
+}
 export type AllHouseholdsForPopulationTableQueryHookResult = ReturnType<typeof useAllHouseholdsForPopulationTableQuery>;
 export type AllHouseholdsForPopulationTableLazyQueryHookResult = ReturnType<typeof useAllHouseholdsForPopulationTableLazyQuery>;
 export type AllHouseholdsForPopulationTableSuspenseQueryHookResult = ReturnType<typeof useAllHouseholdsForPopulationTableSuspenseQuery>;
@@ -20055,17 +19493,17 @@ export const AllIndividualsDocument = gql`
  * });
  */
 export function useAllIndividualsQuery(baseOptions?: Apollo.QueryHookOptions<AllIndividualsQuery, AllIndividualsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, options);
+}
 export function useAllIndividualsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllIndividualsQuery, AllIndividualsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, options);
+}
 export function useAllIndividualsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllIndividualsQuery, AllIndividualsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, options);
+}
 export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQuery>;
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsSuspenseQueryHookResult = ReturnType<typeof useAllIndividualsSuspenseQuery>;
@@ -20172,17 +19610,17 @@ export const AllIndividualsForPopulationTableDocument = gql`
  * });
  */
 export function useAllIndividualsForPopulationTableQuery(baseOptions?: Apollo.QueryHookOptions<AllIndividualsForPopulationTableQuery, AllIndividualsForPopulationTableQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllIndividualsForPopulationTableQuery, AllIndividualsForPopulationTableQueryVariables>(AllIndividualsForPopulationTableDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllIndividualsForPopulationTableQuery, AllIndividualsForPopulationTableQueryVariables>(AllIndividualsForPopulationTableDocument, options);
+}
 export function useAllIndividualsForPopulationTableLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllIndividualsForPopulationTableQuery, AllIndividualsForPopulationTableQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllIndividualsForPopulationTableQuery, AllIndividualsForPopulationTableQueryVariables>(AllIndividualsForPopulationTableDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllIndividualsForPopulationTableQuery, AllIndividualsForPopulationTableQueryVariables>(AllIndividualsForPopulationTableDocument, options);
+}
 export function useAllIndividualsForPopulationTableSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllIndividualsForPopulationTableQuery, AllIndividualsForPopulationTableQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllIndividualsForPopulationTableQuery, AllIndividualsForPopulationTableQueryVariables>(AllIndividualsForPopulationTableDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllIndividualsForPopulationTableQuery, AllIndividualsForPopulationTableQueryVariables>(AllIndividualsForPopulationTableDocument, options);
+}
 export type AllIndividualsForPopulationTableQueryHookResult = ReturnType<typeof useAllIndividualsForPopulationTableQuery>;
 export type AllIndividualsForPopulationTableLazyQueryHookResult = ReturnType<typeof useAllIndividualsForPopulationTableLazyQuery>;
 export type AllIndividualsForPopulationTableSuspenseQueryHookResult = ReturnType<typeof useAllIndividualsForPopulationTableSuspenseQuery>;
@@ -20212,17 +19650,17 @@ export const HouseholdDocument = gql`
  * });
  */
 export function useHouseholdQuery(baseOptions: Apollo.QueryHookOptions<HouseholdQuery, HouseholdQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, options);
+}
 export function useHouseholdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HouseholdQuery, HouseholdQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, options);
+}
 export function useHouseholdSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HouseholdQuery, HouseholdQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, options);
+}
 export type HouseholdQueryHookResult = ReturnType<typeof useHouseholdQuery>;
 export type HouseholdLazyQueryHookResult = ReturnType<typeof useHouseholdLazyQuery>;
 export type HouseholdSuspenseQueryHookResult = ReturnType<typeof useHouseholdSuspenseQuery>;
@@ -20288,17 +19726,17 @@ export const HouseholdChoiceDataDocument = gql`
  * });
  */
 export function useHouseholdChoiceDataQuery(baseOptions?: Apollo.QueryHookOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, options);
+}
 export function useHouseholdChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, options);
+}
 export function useHouseholdChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, options);
+}
 export type HouseholdChoiceDataQueryHookResult = ReturnType<typeof useHouseholdChoiceDataQuery>;
 export type HouseholdChoiceDataLazyQueryHookResult = ReturnType<typeof useHouseholdChoiceDataLazyQuery>;
 export type HouseholdChoiceDataSuspenseQueryHookResult = ReturnType<typeof useHouseholdChoiceDataSuspenseQuery>;
@@ -20329,17 +19767,17 @@ export const HouseholdFlexFieldsDocument = gql`
  * });
  */
 export function useHouseholdFlexFieldsQuery(baseOptions: Apollo.QueryHookOptions<HouseholdFlexFieldsQuery, HouseholdFlexFieldsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<HouseholdFlexFieldsQuery, HouseholdFlexFieldsQueryVariables>(HouseholdFlexFieldsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<HouseholdFlexFieldsQuery, HouseholdFlexFieldsQueryVariables>(HouseholdFlexFieldsDocument, options);
+}
 export function useHouseholdFlexFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HouseholdFlexFieldsQuery, HouseholdFlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<HouseholdFlexFieldsQuery, HouseholdFlexFieldsQueryVariables>(HouseholdFlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<HouseholdFlexFieldsQuery, HouseholdFlexFieldsQueryVariables>(HouseholdFlexFieldsDocument, options);
+}
 export function useHouseholdFlexFieldsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HouseholdFlexFieldsQuery, HouseholdFlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<HouseholdFlexFieldsQuery, HouseholdFlexFieldsQueryVariables>(HouseholdFlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<HouseholdFlexFieldsQuery, HouseholdFlexFieldsQueryVariables>(HouseholdFlexFieldsDocument, options);
+}
 export type HouseholdFlexFieldsQueryHookResult = ReturnType<typeof useHouseholdFlexFieldsQuery>;
 export type HouseholdFlexFieldsLazyQueryHookResult = ReturnType<typeof useHouseholdFlexFieldsLazyQuery>;
 export type HouseholdFlexFieldsSuspenseQueryHookResult = ReturnType<typeof useHouseholdFlexFieldsSuspenseQuery>;
@@ -20369,17 +19807,17 @@ export const IndividualDocument = gql`
  * });
  */
 export function useIndividualQuery(baseOptions: Apollo.QueryHookOptions<IndividualQuery, IndividualQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, options);
+}
 export function useIndividualLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IndividualQuery, IndividualQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, options);
+}
 export function useIndividualSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IndividualQuery, IndividualQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, options);
+}
 export type IndividualQueryHookResult = ReturnType<typeof useIndividualQuery>;
 export type IndividualLazyQueryHookResult = ReturnType<typeof useIndividualLazyQuery>;
 export type IndividualSuspenseQueryHookResult = ReturnType<typeof useIndividualSuspenseQuery>;
@@ -20413,17 +19851,17 @@ export const IndividualChoiceDataDocument = gql`
  * });
  */
 export function useIndividualChoiceDataQuery(baseOptions?: Apollo.QueryHookOptions<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>(IndividualChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>(IndividualChoiceDataDocument, options);
+}
 export function useIndividualChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>(IndividualChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>(IndividualChoiceDataDocument, options);
+}
 export function useIndividualChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>(IndividualChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<IndividualChoiceDataQuery, IndividualChoiceDataQueryVariables>(IndividualChoiceDataDocument, options);
+}
 export type IndividualChoiceDataQueryHookResult = ReturnType<typeof useIndividualChoiceDataQuery>;
 export type IndividualChoiceDataLazyQueryHookResult = ReturnType<typeof useIndividualChoiceDataLazyQuery>;
 export type IndividualChoiceDataSuspenseQueryHookResult = ReturnType<typeof useIndividualChoiceDataSuspenseQuery>;
@@ -20454,17 +19892,17 @@ export const IndividualFlexFieldsDocument = gql`
  * });
  */
 export function useIndividualFlexFieldsQuery(baseOptions: Apollo.QueryHookOptions<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>(IndividualFlexFieldsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>(IndividualFlexFieldsDocument, options);
+}
 export function useIndividualFlexFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>(IndividualFlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>(IndividualFlexFieldsDocument, options);
+}
 export function useIndividualFlexFieldsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>(IndividualFlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<IndividualFlexFieldsQuery, IndividualFlexFieldsQueryVariables>(IndividualFlexFieldsDocument, options);
+}
 export type IndividualFlexFieldsQueryHookResult = ReturnType<typeof useIndividualFlexFieldsQuery>;
 export type IndividualFlexFieldsLazyQueryHookResult = ReturnType<typeof useIndividualFlexFieldsLazyQuery>;
 export type IndividualFlexFieldsSuspenseQueryHookResult = ReturnType<typeof useIndividualFlexFieldsSuspenseQuery>;
@@ -20543,17 +19981,17 @@ export const AllActiveProgramsDocument = gql`
  * });
  */
 export function useAllActiveProgramsQuery(baseOptions: Apollo.QueryHookOptions<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>(AllActiveProgramsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>(AllActiveProgramsDocument, options);
+}
 export function useAllActiveProgramsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>(AllActiveProgramsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>(AllActiveProgramsDocument, options);
+}
 export function useAllActiveProgramsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>(AllActiveProgramsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllActiveProgramsQuery, AllActiveProgramsQueryVariables>(AllActiveProgramsDocument, options);
+}
 export type AllActiveProgramsQueryHookResult = ReturnType<typeof useAllActiveProgramsQuery>;
 export type AllActiveProgramsLazyQueryHookResult = ReturnType<typeof useAllActiveProgramsLazyQuery>;
 export type AllActiveProgramsSuspenseQueryHookResult = ReturnType<typeof useAllActiveProgramsSuspenseQuery>;
@@ -20637,17 +20075,17 @@ export const AllProgramsDocument = gql`
  * });
  */
 export function useAllProgramsQuery(baseOptions: Apollo.QueryHookOptions<AllProgramsQuery, AllProgramsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllProgramsQuery, AllProgramsQueryVariables>(AllProgramsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllProgramsQuery, AllProgramsQueryVariables>(AllProgramsDocument, options);
+}
 export function useAllProgramsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllProgramsQuery, AllProgramsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllProgramsQuery, AllProgramsQueryVariables>(AllProgramsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllProgramsQuery, AllProgramsQueryVariables>(AllProgramsDocument, options);
+}
 export function useAllProgramsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllProgramsQuery, AllProgramsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllProgramsQuery, AllProgramsQueryVariables>(AllProgramsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllProgramsQuery, AllProgramsQueryVariables>(AllProgramsDocument, options);
+}
 export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
 export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
 export type AllProgramsSuspenseQueryHookResult = ReturnType<typeof useAllProgramsSuspenseQuery>;
@@ -20729,17 +20167,17 @@ export const AllProgramsForChoicesDocument = gql`
  * });
  */
 export function useAllProgramsForChoicesQuery(baseOptions: Apollo.QueryHookOptions<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>(AllProgramsForChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>(AllProgramsForChoicesDocument, options);
+}
 export function useAllProgramsForChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>(AllProgramsForChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>(AllProgramsForChoicesDocument, options);
+}
 export function useAllProgramsForChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>(AllProgramsForChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllProgramsForChoicesQuery, AllProgramsForChoicesQueryVariables>(AllProgramsForChoicesDocument, options);
+}
 export type AllProgramsForChoicesQueryHookResult = ReturnType<typeof useAllProgramsForChoicesQuery>;
 export type AllProgramsForChoicesLazyQueryHookResult = ReturnType<typeof useAllProgramsForChoicesLazyQuery>;
 export type AllProgramsForChoicesSuspenseQueryHookResult = ReturnType<typeof useAllProgramsForChoicesSuspenseQuery>;
@@ -20802,17 +20240,17 @@ export const ProgramDocument = gql`
  * });
  */
 export function useProgramQuery(baseOptions: Apollo.QueryHookOptions<ProgramQuery, ProgramQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ProgramQuery, ProgramQueryVariables>(ProgramDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ProgramQuery, ProgramQueryVariables>(ProgramDocument, options);
+}
 export function useProgramLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProgramQuery, ProgramQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ProgramQuery, ProgramQueryVariables>(ProgramDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ProgramQuery, ProgramQueryVariables>(ProgramDocument, options);
+}
 export function useProgramSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ProgramQuery, ProgramQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ProgramQuery, ProgramQueryVariables>(ProgramDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ProgramQuery, ProgramQueryVariables>(ProgramDocument, options);
+}
 export type ProgramQueryHookResult = ReturnType<typeof useProgramQuery>;
 export type ProgramLazyQueryHookResult = ReturnType<typeof useProgramLazyQuery>;
 export type ProgramSuspenseQueryHookResult = ReturnType<typeof useProgramSuspenseQuery>;
@@ -20858,17 +20296,17 @@ export const ProgrammeChoiceDataDocument = gql`
  * });
  */
 export function useProgrammeChoiceDataQuery(baseOptions?: Apollo.QueryHookOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, options);
+}
 export function useProgrammeChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, options);
+}
 export function useProgrammeChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, options);
+}
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataSuspenseQueryHookResult = ReturnType<typeof useProgrammeChoiceDataSuspenseQuery>;
@@ -20898,17 +20336,17 @@ export const UserPartnerChoicesDocument = gql`
  * });
  */
 export function useUserPartnerChoicesQuery(baseOptions?: Apollo.QueryHookOptions<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>(UserPartnerChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>(UserPartnerChoicesDocument, options);
+}
 export function useUserPartnerChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>(UserPartnerChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>(UserPartnerChoicesDocument, options);
+}
 export function useUserPartnerChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>(UserPartnerChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<UserPartnerChoicesQuery, UserPartnerChoicesQueryVariables>(UserPartnerChoicesDocument, options);
+}
 export type UserPartnerChoicesQueryHookResult = ReturnType<typeof useUserPartnerChoicesQuery>;
 export type UserPartnerChoicesLazyQueryHookResult = ReturnType<typeof useUserPartnerChoicesLazyQuery>;
 export type UserPartnerChoicesSuspenseQueryHookResult = ReturnType<typeof useUserPartnerChoicesSuspenseQuery>;
@@ -20964,17 +20402,17 @@ export const AllImportedHouseholdsDocument = gql`
  * });
  */
 export function useAllImportedHouseholdsQuery(baseOptions?: Apollo.QueryHookOptions<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>(AllImportedHouseholdsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>(AllImportedHouseholdsDocument, options);
+}
 export function useAllImportedHouseholdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>(AllImportedHouseholdsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>(AllImportedHouseholdsDocument, options);
+}
 export function useAllImportedHouseholdsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>(AllImportedHouseholdsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>(AllImportedHouseholdsDocument, options);
+}
 export type AllImportedHouseholdsQueryHookResult = ReturnType<typeof useAllImportedHouseholdsQuery>;
 export type AllImportedHouseholdsLazyQueryHookResult = ReturnType<typeof useAllImportedHouseholdsLazyQuery>;
 export type AllImportedHouseholdsSuspenseQueryHookResult = ReturnType<typeof useAllImportedHouseholdsSuspenseQuery>;
@@ -21034,17 +20472,17 @@ export const AllImportedIndividualsDocument = gql`
  * });
  */
 export function useAllImportedIndividualsQuery(baseOptions?: Apollo.QueryHookOptions<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>(AllImportedIndividualsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>(AllImportedIndividualsDocument, options);
+}
 export function useAllImportedIndividualsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>(AllImportedIndividualsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>(AllImportedIndividualsDocument, options);
+}
 export function useAllImportedIndividualsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>(AllImportedIndividualsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>(AllImportedIndividualsDocument, options);
+}
 export type AllImportedIndividualsQueryHookResult = ReturnType<typeof useAllImportedIndividualsQuery>;
 export type AllImportedIndividualsLazyQueryHookResult = ReturnType<typeof useAllImportedIndividualsLazyQuery>;
 export type AllImportedIndividualsSuspenseQueryHookResult = ReturnType<typeof useAllImportedIndividualsSuspenseQuery>;
@@ -21097,17 +20535,17 @@ export const AllKoboProjectsDocument = gql`
  * });
  */
 export function useAllKoboProjectsQuery(baseOptions: Apollo.QueryHookOptions<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, options);
+}
 export function useAllKoboProjectsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, options);
+}
 export function useAllKoboProjectsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, options);
+}
 export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProjectsQuery>;
 export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
 export type AllKoboProjectsSuspenseQueryHookResult = ReturnType<typeof useAllKoboProjectsSuspenseQuery>;
@@ -21163,17 +20601,17 @@ export const AllMergedHouseholdsDocument = gql`
  * });
  */
 export function useAllMergedHouseholdsQuery(baseOptions?: Apollo.QueryHookOptions<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, options);
+}
 export function useAllMergedHouseholdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, options);
+}
 export function useAllMergedHouseholdsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllMergedHouseholdsQuery, AllMergedHouseholdsQueryVariables>(AllMergedHouseholdsDocument, options);
+}
 export type AllMergedHouseholdsQueryHookResult = ReturnType<typeof useAllMergedHouseholdsQuery>;
 export type AllMergedHouseholdsLazyQueryHookResult = ReturnType<typeof useAllMergedHouseholdsLazyQuery>;
 export type AllMergedHouseholdsSuspenseQueryHookResult = ReturnType<typeof useAllMergedHouseholdsSuspenseQuery>;
@@ -21233,17 +20671,17 @@ export const AllMergedIndividualsDocument = gql`
  * });
  */
 export function useAllMergedIndividualsQuery(baseOptions?: Apollo.QueryHookOptions<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, options);
+}
 export function useAllMergedIndividualsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, options);
+}
 export function useAllMergedIndividualsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllMergedIndividualsQuery, AllMergedIndividualsQueryVariables>(AllMergedIndividualsDocument, options);
+}
 export type AllMergedIndividualsQueryHookResult = ReturnType<typeof useAllMergedIndividualsQuery>;
 export type AllMergedIndividualsLazyQueryHookResult = ReturnType<typeof useAllMergedIndividualsLazyQuery>;
 export type AllMergedIndividualsSuspenseQueryHookResult = ReturnType<typeof useAllMergedIndividualsSuspenseQuery>;
@@ -21315,17 +20753,17 @@ export const AllRegistrationDataImportsDocument = gql`
  * });
  */
 export function useAllRegistrationDataImportsQuery(baseOptions?: Apollo.QueryHookOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, options);
+}
 export function useAllRegistrationDataImportsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, options);
+}
 export function useAllRegistrationDataImportsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, options);
+}
 export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsQuery>;
 export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
 export type AllRegistrationDataImportsSuspenseQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsSuspenseQuery>;
@@ -21355,17 +20793,17 @@ export const ImportedHouseholdDocument = gql`
  * });
  */
 export function useImportedHouseholdQuery(baseOptions: Apollo.QueryHookOptions<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, options);
+}
 export function useImportedHouseholdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, options);
+}
 export function useImportedHouseholdSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, options);
+}
 export type ImportedHouseholdQueryHookResult = ReturnType<typeof useImportedHouseholdQuery>;
 export type ImportedHouseholdLazyQueryHookResult = ReturnType<typeof useImportedHouseholdLazyQuery>;
 export type ImportedHouseholdSuspenseQueryHookResult = ReturnType<typeof useImportedHouseholdSuspenseQuery>;
@@ -21395,17 +20833,17 @@ export const ImportedIndividualDocument = gql`
  * });
  */
 export function useImportedIndividualQuery(baseOptions: Apollo.QueryHookOptions<ImportedIndividualQuery, ImportedIndividualQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, options);
+}
 export function useImportedIndividualLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ImportedIndividualQuery, ImportedIndividualQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, options);
+}
 export function useImportedIndividualSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ImportedIndividualQuery, ImportedIndividualQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, options);
+}
 export type ImportedIndividualQueryHookResult = ReturnType<typeof useImportedIndividualQuery>;
 export type ImportedIndividualLazyQueryHookResult = ReturnType<typeof useImportedIndividualLazyQuery>;
 export type ImportedIndividualSuspenseQueryHookResult = ReturnType<typeof useImportedIndividualSuspenseQuery>;
@@ -21436,17 +20874,17 @@ export const ImportedIndividualFlexFieldsDocument = gql`
  * });
  */
 export function useImportedIndividualFlexFieldsQuery(baseOptions: Apollo.QueryHookOptions<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>(ImportedIndividualFlexFieldsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>(ImportedIndividualFlexFieldsDocument, options);
+}
 export function useImportedIndividualFlexFieldsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>(ImportedIndividualFlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>(ImportedIndividualFlexFieldsDocument, options);
+}
 export function useImportedIndividualFlexFieldsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>(ImportedIndividualFlexFieldsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ImportedIndividualFlexFieldsQuery, ImportedIndividualFlexFieldsQueryVariables>(ImportedIndividualFlexFieldsDocument, options);
+}
 export type ImportedIndividualFlexFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFlexFieldsQuery>;
 export type ImportedIndividualFlexFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFlexFieldsLazyQuery>;
 export type ImportedIndividualFlexFieldsSuspenseQueryHookResult = ReturnType<typeof useImportedIndividualFlexFieldsSuspenseQuery>;
@@ -21484,17 +20922,17 @@ export const KoboImportDataDocument = gql`
  * });
  */
 export function useKoboImportDataQuery(baseOptions: Apollo.QueryHookOptions<KoboImportDataQuery, KoboImportDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<KoboImportDataQuery, KoboImportDataQueryVariables>(KoboImportDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<KoboImportDataQuery, KoboImportDataQueryVariables>(KoboImportDataDocument, options);
+}
 export function useKoboImportDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<KoboImportDataQuery, KoboImportDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<KoboImportDataQuery, KoboImportDataQueryVariables>(KoboImportDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<KoboImportDataQuery, KoboImportDataQueryVariables>(KoboImportDataDocument, options);
+}
 export function useKoboImportDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<KoboImportDataQuery, KoboImportDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<KoboImportDataQuery, KoboImportDataQueryVariables>(KoboImportDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<KoboImportDataQuery, KoboImportDataQueryVariables>(KoboImportDataDocument, options);
+}
 export type KoboImportDataQueryHookResult = ReturnType<typeof useKoboImportDataQuery>;
 export type KoboImportDataLazyQueryHookResult = ReturnType<typeof useKoboImportDataLazyQuery>;
 export type KoboImportDataSuspenseQueryHookResult = ReturnType<typeof useKoboImportDataSuspenseQuery>;
@@ -21524,17 +20962,17 @@ export const RegistrationChoicesDocument = gql`
  * });
  */
 export function useRegistrationChoicesQuery(baseOptions?: Apollo.QueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, options);
+}
 export function useRegistrationChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, options);
+}
 export function useRegistrationChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, options);
+}
 export type RegistrationChoicesQueryHookResult = ReturnType<typeof useRegistrationChoicesQuery>;
 export type RegistrationChoicesLazyQueryHookResult = ReturnType<typeof useRegistrationChoicesLazyQuery>;
 export type RegistrationChoicesSuspenseQueryHookResult = ReturnType<typeof useRegistrationChoicesSuspenseQuery>;
@@ -21564,17 +21002,17 @@ export const RegistrationDataImportDocument = gql`
  * });
  */
 export function useRegistrationDataImportQuery(baseOptions: Apollo.QueryHookOptions<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>(RegistrationDataImportDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>(RegistrationDataImportDocument, options);
+}
 export function useRegistrationDataImportLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>(RegistrationDataImportDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>(RegistrationDataImportDocument, options);
+}
 export function useRegistrationDataImportSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>(RegistrationDataImportDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>(RegistrationDataImportDocument, options);
+}
 export type RegistrationDataImportQueryHookResult = ReturnType<typeof useRegistrationDataImportQuery>;
 export type RegistrationDataImportLazyQueryHookResult = ReturnType<typeof useRegistrationDataImportLazyQuery>;
 export type RegistrationDataImportSuspenseQueryHookResult = ReturnType<typeof useRegistrationDataImportSuspenseQuery>;
@@ -21613,17 +21051,17 @@ export const XlsxImportDataDocument = gql`
  * });
  */
 export function useXlsxImportDataQuery(baseOptions: Apollo.QueryHookOptions<XlsxImportDataQuery, XlsxImportDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<XlsxImportDataQuery, XlsxImportDataQueryVariables>(XlsxImportDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<XlsxImportDataQuery, XlsxImportDataQueryVariables>(XlsxImportDataDocument, options);
+}
 export function useXlsxImportDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<XlsxImportDataQuery, XlsxImportDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<XlsxImportDataQuery, XlsxImportDataQueryVariables>(XlsxImportDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<XlsxImportDataQuery, XlsxImportDataQueryVariables>(XlsxImportDataDocument, options);
+}
 export function useXlsxImportDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<XlsxImportDataQuery, XlsxImportDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<XlsxImportDataQuery, XlsxImportDataQueryVariables>(XlsxImportDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<XlsxImportDataQuery, XlsxImportDataQueryVariables>(XlsxImportDataDocument, options);
+}
 export type XlsxImportDataQueryHookResult = ReturnType<typeof useXlsxImportDataQuery>;
 export type XlsxImportDataLazyQueryHookResult = ReturnType<typeof useXlsxImportDataLazyQuery>;
 export type XlsxImportDataSuspenseQueryHookResult = ReturnType<typeof useXlsxImportDataSuspenseQuery>;
@@ -21700,17 +21138,17 @@ export const AllReportsDocument = gql`
  * });
  */
 export function useAllReportsQuery(baseOptions: Apollo.QueryHookOptions<AllReportsQuery, AllReportsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, options);
+}
 export function useAllReportsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllReportsQuery, AllReportsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, options);
+}
 export function useAllReportsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllReportsQuery, AllReportsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, options);
+}
 export type AllReportsQueryHookResult = ReturnType<typeof useAllReportsQuery>;
 export type AllReportsLazyQueryHookResult = ReturnType<typeof useAllReportsLazyQuery>;
 export type AllReportsSuspenseQueryHookResult = ReturnType<typeof useAllReportsSuspenseQuery>;
@@ -21769,17 +21207,17 @@ export const ReportDocument = gql`
  * });
  */
 export function useReportQuery(baseOptions: Apollo.QueryHookOptions<ReportQuery, ReportQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReportQuery, ReportQueryVariables>(ReportDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ReportQuery, ReportQueryVariables>(ReportDocument, options);
+}
 export function useReportLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReportQuery, ReportQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReportQuery, ReportQueryVariables>(ReportDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ReportQuery, ReportQueryVariables>(ReportDocument, options);
+}
 export function useReportSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReportQuery, ReportQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReportQuery, ReportQueryVariables>(ReportDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ReportQuery, ReportQueryVariables>(ReportDocument, options);
+}
 export type ReportQueryHookResult = ReturnType<typeof useReportQuery>;
 export type ReportLazyQueryHookResult = ReturnType<typeof useReportLazyQuery>;
 export type ReportSuspenseQueryHookResult = ReturnType<typeof useReportSuspenseQuery>;
@@ -21813,17 +21251,17 @@ export const ReportChoiceDataDocument = gql`
  * });
  */
 export function useReportChoiceDataQuery(baseOptions?: Apollo.QueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, options);
+}
 export function useReportChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, options);
+}
 export function useReportChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, options);
+}
 export type ReportChoiceDataQueryHookResult = ReturnType<typeof useReportChoiceDataQuery>;
 export type ReportChoiceDataLazyQueryHookResult = ReturnType<typeof useReportChoiceDataLazyQuery>;
 export type ReportChoiceDataSuspenseQueryHookResult = ReturnType<typeof useReportChoiceDataSuspenseQuery>;
@@ -21981,17 +21419,17 @@ export const AllChartsDocument = gql`
  * });
  */
 export function useAllChartsQuery(baseOptions: Apollo.QueryHookOptions<AllChartsQuery, AllChartsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, options);
+}
 export function useAllChartsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllChartsQuery, AllChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, options);
+}
 export function useAllChartsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllChartsQuery, AllChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, options);
+}
 export type AllChartsQueryHookResult = ReturnType<typeof useAllChartsQuery>;
 export type AllChartsLazyQueryHookResult = ReturnType<typeof useAllChartsLazyQuery>;
 export type AllChartsSuspenseQueryHookResult = ReturnType<typeof useAllChartsSuspenseQuery>;
@@ -22038,17 +21476,17 @@ export const CountryChartsDocument = gql`
  * });
  */
 export function useCountryChartsQuery(baseOptions: Apollo.QueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, options);
+}
 export function useCountryChartsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, options);
+}
 export function useCountryChartsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, options);
+}
 export type CountryChartsQueryHookResult = ReturnType<typeof useCountryChartsQuery>;
 export type CountryChartsLazyQueryHookResult = ReturnType<typeof useCountryChartsLazyQuery>;
 export type CountryChartsSuspenseQueryHookResult = ReturnType<typeof useCountryChartsSuspenseQuery>;
@@ -22079,17 +21517,17 @@ export const DashboardReportChoiceDataDocument = gql`
  * });
  */
 export function useDashboardReportChoiceDataQuery(baseOptions: Apollo.QueryHookOptions<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, options);
+}
 export function useDashboardReportChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, options);
+}
 export function useDashboardReportChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, options);
+}
 export type DashboardReportChoiceDataQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataQuery>;
 export type DashboardReportChoiceDataLazyQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataLazyQuery>;
 export type DashboardReportChoiceDataSuspenseQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataSuspenseQuery>;
@@ -22117,17 +21555,17 @@ export const DashboardYearsChoiceDataDocument = gql`
  * });
  */
 export function useDashboardYearsChoiceDataQuery(baseOptions: Apollo.QueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, options);
+}
 export function useDashboardYearsChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, options);
+}
 export function useDashboardYearsChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, options);
+}
 export type DashboardYearsChoiceDataQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataQuery>;
 export type DashboardYearsChoiceDataLazyQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataLazyQuery>;
 export type DashboardYearsChoiceDataSuspenseQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataSuspenseQuery>;
@@ -22161,17 +21599,17 @@ export const GlobalAreaChartsDocument = gql`
  * });
  */
 export function useGlobalAreaChartsQuery(baseOptions: Apollo.QueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, options);
+}
 export function useGlobalAreaChartsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, options);
+}
 export function useGlobalAreaChartsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, options);
+}
 export type GlobalAreaChartsQueryHookResult = ReturnType<typeof useGlobalAreaChartsQuery>;
 export type GlobalAreaChartsLazyQueryHookResult = ReturnType<typeof useGlobalAreaChartsLazyQuery>;
 export type GlobalAreaChartsSuspenseQueryHookResult = ReturnType<typeof useGlobalAreaChartsSuspenseQuery>;
@@ -22208,17 +21646,17 @@ export const LanguageAutocompleteDocument = gql`
  * });
  */
 export function useLanguageAutocompleteQuery(baseOptions?: Apollo.QueryHookOptions<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>(LanguageAutocompleteDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>(LanguageAutocompleteDocument, options);
+}
 export function useLanguageAutocompleteLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>(LanguageAutocompleteDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>(LanguageAutocompleteDocument, options);
+}
 export function useLanguageAutocompleteSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>(LanguageAutocompleteDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<LanguageAutocompleteQuery, LanguageAutocompleteQueryVariables>(LanguageAutocompleteDocument, options);
+}
 export type LanguageAutocompleteQueryHookResult = ReturnType<typeof useLanguageAutocompleteQuery>;
 export type LanguageAutocompleteLazyQueryHookResult = ReturnType<typeof useLanguageAutocompleteLazyQuery>;
 export type LanguageAutocompleteSuspenseQueryHookResult = ReturnType<typeof useLanguageAutocompleteSuspenseQuery>;
@@ -22262,17 +21700,17 @@ export const RdiAutocompleteDocument = gql`
  * });
  */
 export function useRdiAutocompleteQuery(baseOptions?: Apollo.QueryHookOptions<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, options);
+}
 export function useRdiAutocompleteLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, options);
+}
 export function useRdiAutocompleteSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<RdiAutocompleteQuery, RdiAutocompleteQueryVariables>(RdiAutocompleteDocument, options);
+}
 export type RdiAutocompleteQueryHookResult = ReturnType<typeof useRdiAutocompleteQuery>;
 export type RdiAutocompleteLazyQueryHookResult = ReturnType<typeof useRdiAutocompleteLazyQuery>;
 export type RdiAutocompleteSuspenseQueryHookResult = ReturnType<typeof useRdiAutocompleteSuspenseQuery>;
@@ -22345,17 +21783,17 @@ export const AllSurveysDocument = gql`
  * });
  */
 export function useAllSurveysQuery(baseOptions: Apollo.QueryHookOptions<AllSurveysQuery, AllSurveysQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllSurveysQuery, AllSurveysQueryVariables>(AllSurveysDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllSurveysQuery, AllSurveysQueryVariables>(AllSurveysDocument, options);
+}
 export function useAllSurveysLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllSurveysQuery, AllSurveysQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllSurveysQuery, AllSurveysQueryVariables>(AllSurveysDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllSurveysQuery, AllSurveysQueryVariables>(AllSurveysDocument, options);
+}
 export function useAllSurveysSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllSurveysQuery, AllSurveysQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllSurveysQuery, AllSurveysQueryVariables>(AllSurveysDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllSurveysQuery, AllSurveysQueryVariables>(AllSurveysDocument, options);
+}
 export type AllSurveysQueryHookResult = ReturnType<typeof useAllSurveysQuery>;
 export type AllSurveysLazyQueryHookResult = ReturnType<typeof useAllSurveysLazyQuery>;
 export type AllSurveysSuspenseQueryHookResult = ReturnType<typeof useAllSurveysSuspenseQuery>;
@@ -22385,17 +21823,17 @@ export const SurveyAvailableFlowsDocument = gql`
  * });
  */
 export function useSurveyAvailableFlowsQuery(baseOptions?: Apollo.QueryHookOptions<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, options);
+}
 export function useSurveyAvailableFlowsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, options);
+}
 export function useSurveyAvailableFlowsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<SurveyAvailableFlowsQuery, SurveyAvailableFlowsQueryVariables>(SurveyAvailableFlowsDocument, options);
+}
 export type SurveyAvailableFlowsQueryHookResult = ReturnType<typeof useSurveyAvailableFlowsQuery>;
 export type SurveyAvailableFlowsLazyQueryHookResult = ReturnType<typeof useSurveyAvailableFlowsLazyQuery>;
 export type SurveyAvailableFlowsSuspenseQueryHookResult = ReturnType<typeof useSurveyAvailableFlowsSuspenseQuery>;
@@ -22468,17 +21906,17 @@ export const RecipientsDocument = gql`
  * });
  */
 export function useRecipientsQuery(baseOptions: Apollo.QueryHookOptions<RecipientsQuery, RecipientsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RecipientsQuery, RecipientsQueryVariables>(RecipientsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<RecipientsQuery, RecipientsQueryVariables>(RecipientsDocument, options);
+}
 export function useRecipientsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RecipientsQuery, RecipientsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RecipientsQuery, RecipientsQueryVariables>(RecipientsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<RecipientsQuery, RecipientsQueryVariables>(RecipientsDocument, options);
+}
 export function useRecipientsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RecipientsQuery, RecipientsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RecipientsQuery, RecipientsQueryVariables>(RecipientsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<RecipientsQuery, RecipientsQueryVariables>(RecipientsDocument, options);
+}
 export type RecipientsQueryHookResult = ReturnType<typeof useRecipientsQuery>;
 export type RecipientsLazyQueryHookResult = ReturnType<typeof useRecipientsLazyQuery>;
 export type RecipientsSuspenseQueryHookResult = ReturnType<typeof useRecipientsSuspenseQuery>;
@@ -22532,17 +21970,17 @@ export const SurveyDocument = gql`
  * });
  */
 export function useSurveyQuery(baseOptions: Apollo.QueryHookOptions<SurveyQuery, SurveyQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SurveyQuery, SurveyQueryVariables>(SurveyDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<SurveyQuery, SurveyQueryVariables>(SurveyDocument, options);
+}
 export function useSurveyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SurveyQuery, SurveyQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SurveyQuery, SurveyQueryVariables>(SurveyDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<SurveyQuery, SurveyQueryVariables>(SurveyDocument, options);
+}
 export function useSurveySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SurveyQuery, SurveyQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SurveyQuery, SurveyQueryVariables>(SurveyDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<SurveyQuery, SurveyQueryVariables>(SurveyDocument, options);
+}
 export type SurveyQueryHookResult = ReturnType<typeof useSurveyQuery>;
 export type SurveyLazyQueryHookResult = ReturnType<typeof useSurveyLazyQuery>;
 export type SurveySuspenseQueryHookResult = ReturnType<typeof useSurveySuspenseQuery>;
@@ -22572,17 +22010,17 @@ export const SurveysChoiceDataDocument = gql`
  * });
  */
 export function useSurveysChoiceDataQuery(baseOptions?: Apollo.QueryHookOptions<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, options);
+}
 export function useSurveysChoiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, options);
+}
 export function useSurveysChoiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<SurveysChoiceDataQuery, SurveysChoiceDataQueryVariables>(SurveysChoiceDataDocument, options);
+}
 export type SurveysChoiceDataQueryHookResult = ReturnType<typeof useSurveysChoiceDataQuery>;
 export type SurveysChoiceDataLazyQueryHookResult = ReturnType<typeof useSurveysChoiceDataLazyQuery>;
 export type SurveysChoiceDataSuspenseQueryHookResult = ReturnType<typeof useSurveysChoiceDataSuspenseQuery>;
@@ -22665,17 +22103,17 @@ export const AllActiveTargetPopulationsDocument = gql`
  * });
  */
 export function useAllActiveTargetPopulationsQuery(baseOptions?: Apollo.QueryHookOptions<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, options);
+}
 export function useAllActiveTargetPopulationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, options);
+}
 export function useAllActiveTargetPopulationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllActiveTargetPopulationsQuery, AllActiveTargetPopulationsQueryVariables>(AllActiveTargetPopulationsDocument, options);
+}
 export type AllActiveTargetPopulationsQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsQuery>;
 export type AllActiveTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsLazyQuery>;
 export type AllActiveTargetPopulationsSuspenseQueryHookResult = ReturnType<typeof useAllActiveTargetPopulationsSuspenseQuery>;
@@ -22708,17 +22146,17 @@ export const AllFieldsAttributesDocument = gql`
  * });
  */
 export function useAllFieldsAttributesQuery(baseOptions?: Apollo.QueryHookOptions<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, options);
+}
 export function useAllFieldsAttributesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, options);
+}
 export function useAllFieldsAttributesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, options);
+}
 export type AllFieldsAttributesQueryHookResult = ReturnType<typeof useAllFieldsAttributesQuery>;
 export type AllFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllFieldsAttributesLazyQuery>;
 export type AllFieldsAttributesSuspenseQueryHookResult = ReturnType<typeof useAllFieldsAttributesSuspenseQuery>;
@@ -22755,17 +22193,17 @@ export const AllSteficonRulesDocument = gql`
  * });
  */
 export function useAllSteficonRulesQuery(baseOptions: Apollo.QueryHookOptions<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, options);
+}
 export function useAllSteficonRulesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, options);
+}
 export function useAllSteficonRulesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, options);
+}
 export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRulesQuery>;
 export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
 export type AllSteficonRulesSuspenseQueryHookResult = ReturnType<typeof useAllSteficonRulesSuspenseQuery>;
@@ -22825,17 +22263,17 @@ export const AllTargetPopulationForChoicesDocument = gql`
  * });
  */
 export function useAllTargetPopulationForChoicesQuery(baseOptions?: Apollo.QueryHookOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, options);
+}
 export function useAllTargetPopulationForChoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, options);
+}
 export function useAllTargetPopulationForChoicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllTargetPopulationForChoicesQuery, AllTargetPopulationForChoicesQueryVariables>(AllTargetPopulationForChoicesDocument, options);
+}
 export type AllTargetPopulationForChoicesQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesQuery>;
 export type AllTargetPopulationForChoicesLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesLazyQuery>;
 export type AllTargetPopulationForChoicesSuspenseQueryHookResult = ReturnType<typeof useAllTargetPopulationForChoicesSuspenseQuery>;
@@ -22898,17 +22336,17 @@ export const AllTargetPopulationsDocument = gql`
  * });
  */
 export function useAllTargetPopulationsQuery(baseOptions?: Apollo.QueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
+}
 export function useAllTargetPopulationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
+}
 export function useAllTargetPopulationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, options);
+}
 export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTargetPopulationsQuery>;
 export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
 export type AllTargetPopulationsSuspenseQueryHookResult = ReturnType<typeof useAllTargetPopulationsSuspenseQuery>;
@@ -22938,17 +22376,17 @@ export const TargetPopulationDocument = gql`
  * });
  */
 export function useTargetPopulationQuery(baseOptions: Apollo.QueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, options);
+}
 export function useTargetPopulationLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, options);
+}
 export function useTargetPopulationSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, options);
+}
 export type TargetPopulationQueryHookResult = ReturnType<typeof useTargetPopulationQuery>;
 export type TargetPopulationLazyQueryHookResult = ReturnType<typeof useTargetPopulationLazyQuery>;
 export type TargetPopulationSuspenseQueryHookResult = ReturnType<typeof useTargetPopulationSuspenseQuery>;
@@ -23016,25 +22454,23 @@ export const TargetPopulationHouseholdsDocument = gql`
  * });
  */
 export function useTargetPopulationHouseholdsQuery(baseOptions: Apollo.QueryHookOptions<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>(TargetPopulationHouseholdsDocument, options);
-      }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>(TargetPopulationHouseholdsDocument, options);
+}
 export function useTargetPopulationHouseholdsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>(TargetPopulationHouseholdsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>(TargetPopulationHouseholdsDocument, options);
+}
 export function useTargetPopulationHouseholdsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>(TargetPopulationHouseholdsDocument, options);
-        }
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useSuspenseQuery<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>(TargetPopulationHouseholdsDocument, options);
+}
 export type TargetPopulationHouseholdsQueryHookResult = ReturnType<typeof useTargetPopulationHouseholdsQuery>;
 export type TargetPopulationHouseholdsLazyQueryHookResult = ReturnType<typeof useTargetPopulationHouseholdsLazyQuery>;
 export type TargetPopulationHouseholdsSuspenseQueryHookResult = ReturnType<typeof useTargetPopulationHouseholdsSuspenseQuery>;
 export type TargetPopulationHouseholdsQueryResult = Apollo.QueryResult<TargetPopulationHouseholdsQuery, TargetPopulationHouseholdsQueryVariables>;
 
-
 export type ResolverTypeWrapper<T> = Promise<T> | T;
-
 
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
@@ -23098,10 +22534,9 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
 
-
 /** Mapping of interface types */
 export type ResolversInterfaceTypes<RefType extends Record<string, unknown>> = {
-  Node: ( ApprovalProcessNode ) | ( AreaNode ) | ( AreaTypeNode ) | ( BankAccountInfoNode ) | ( BusinessAreaNode ) | ( CashPlanNode ) | ( CommunicationMessageNode ) | ( CommunicationMessageRecipientMapNode ) | ( DataCollectingTypeNode ) | ( DeliveryMechanismNode ) | ( DocumentNode ) | ( FeedbackMessageNode ) | ( FeedbackNode ) | ( FinancialServiceProviderNode ) | ( FinancialServiceProviderXlsxReportNode ) | ( FinancialServiceProviderXlsxTemplateNode ) | ( GrievanceDocumentNode ) | ( GrievanceTicketNode ) | ( HouseholdNode ) | ( ImportDataNode ) | ( ImportedDocumentNode ) | ( ImportedHouseholdNode ) | ( ImportedIndividualIdentityNode ) | ( ImportedIndividualNode ) | ( IndividualIdentityNode ) | ( IndividualNode ) | ( KoboImportDataNode ) | ( LogEntryNode ) | ( PaymentHouseholdSnapshotNode ) | ( PaymentNode ) | ( PaymentPlanNode ) | ( PaymentRecordNode ) | ( PaymentVerificationLogEntryNode ) | ( PaymentVerificationNode ) | ( PaymentVerificationPlanNode ) | ( PaymentVerificationSummaryNode ) | ( ProgramNode ) | ( RecipientNode ) | ( RegistrationDataImportDatahubNode ) | ( RegistrationDataImportNode ) | ( ReportNode ) | ( RuleCommitNode ) | ( SanctionListIndividualAliasNameNode ) | ( SanctionListIndividualCountriesNode ) | ( SanctionListIndividualDateOfBirthNode ) | ( SanctionListIndividualDocumentNode ) | ( SanctionListIndividualNationalitiesNode ) | ( SanctionListIndividualNode ) | ( ServiceProviderNode ) | ( SteficonRuleNode ) | ( SurveyNode ) | ( TargetPopulationNode ) | ( TicketAddIndividualDetailsNode ) | ( TicketComplaintDetailsNode ) | ( TicketDeleteHouseholdDetailsNode ) | ( TicketDeleteIndividualDetailsNode ) | ( TicketHouseholdDataUpdateDetailsNode ) | ( TicketIndividualDataUpdateDetailsNode ) | ( TicketNeedsAdjudicationDetailsNode ) | ( TicketNegativeFeedbackDetailsNode ) | ( TicketNoteNode ) | ( TicketPaymentVerificationDetailsNode ) | ( TicketPositiveFeedbackDetailsNode ) | ( TicketReferralDetailsNode ) | ( TicketSensitiveDetailsNode ) | ( TicketSystemFlaggingDetailsNode ) | ( UserBusinessAreaNode ) | ( UserNode ) | ( VolumeByDeliveryMechanismNode );
+  Node: (ApprovalProcessNode) | (AreaNode) | (AreaTypeNode) | (BankAccountInfoNode) | (BusinessAreaNode) | (CashPlanNode) | (CommunicationMessageNode) | (CommunicationMessageRecipientMapNode) | (DataCollectingTypeNode) | (DeliveryMechanismNode) | (DocumentNode) | (FeedbackMessageNode) | (FeedbackNode) | (FinancialServiceProviderNode) | (FinancialServiceProviderXlsxReportNode) | (FinancialServiceProviderXlsxTemplateNode) | (GrievanceDocumentNode) | (GrievanceTicketNode) | (HouseholdNode) | (ImportDataNode) | (ImportedDocumentNode) | (ImportedHouseholdNode) | (ImportedIndividualIdentityNode) | (ImportedIndividualNode) | (IndividualIdentityNode) | (IndividualNode) | (KoboImportDataNode) | (LogEntryNode) | (PaymentHouseholdSnapshotNode) | (PaymentNode) | (PaymentPlanNode) | (PaymentRecordNode) | (PaymentVerificationLogEntryNode) | (PaymentVerificationNode) | (PaymentVerificationPlanNode) | (PaymentVerificationSummaryNode) | (ProgramNode) | (RecipientNode) | (RegistrationDataImportDatahubNode) | (RegistrationDataImportNode) | (ReportNode) | (RuleCommitNode) | (SanctionListIndividualAliasNameNode) | (SanctionListIndividualCountriesNode) | (SanctionListIndividualDateOfBirthNode) | (SanctionListIndividualDocumentNode) | (SanctionListIndividualNationalitiesNode) | (SanctionListIndividualNode) | (ServiceProviderNode) | (SteficonRuleNode) | (SurveyNode) | (TargetPopulationNode) | (TicketAddIndividualDetailsNode) | (TicketComplaintDetailsNode) | (TicketDeleteHouseholdDetailsNode) | (TicketDeleteIndividualDetailsNode) | (TicketHouseholdDataUpdateDetailsNode) | (TicketIndividualDataUpdateDetailsNode) | (TicketNeedsAdjudicationDetailsNode) | (TicketNegativeFeedbackDetailsNode) | (TicketNoteNode) | (TicketPaymentVerificationDetailsNode) | (TicketPositiveFeedbackDetailsNode) | (TicketReferralDetailsNode) | (TicketSensitiveDetailsNode) | (TicketSystemFlaggingDetailsNode) | (UserBusinessAreaNode) | (UserNode) | (VolumeByDeliveryMechanismNode);
 };
 
 /** Mapping between all available schema types and the resolvers types */

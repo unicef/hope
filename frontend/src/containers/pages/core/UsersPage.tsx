@@ -18,7 +18,7 @@ const initialFilter = {
   status: '',
 };
 
-export const UsersPage = (): React.ReactElement => {
+export function UsersPage(): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -32,8 +32,7 @@ export const UsersPage = (): React.ReactElement => {
   );
   if (permissions === null) return null;
 
-  if (!hasPermissions(PERMISSIONS.USER_MANAGEMENT_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.USER_MANAGEMENT_VIEW_LIST, permissions)) return <PermissionDenied />;
 
   return (
     <>
@@ -61,4 +60,4 @@ export const UsersPage = (): React.ReactElement => {
       <UsersTable filter={appliedFilter} />
     </>
   );
-};
+}

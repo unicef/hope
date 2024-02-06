@@ -1,4 +1,6 @@
-import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import {
+  Box, Button, Dialog, DialogActions, DialogTitle,
+} from '@mui/material';
 import { Publish } from '@mui/icons-material';
 import get from 'lodash/get';
 import React, { ReactElement, useState } from 'react';
@@ -41,11 +43,9 @@ export function ImportXlsx({
 
   const { t } = useTranslation();
 
-  const [mutate, { data: uploadData, loading: fileLoading, error }] =
-    useImportXlsxPaymentVerificationPlanFileMutation();
+  const [mutate, { data: uploadData, loading: fileLoading, error }] = useImportXlsxPaymentVerificationPlanFileMutation();
 
-  const xlsxErrors: ImportXlsxPaymentVerificationPlanFileMutation['importXlsxPaymentVerificationPlanFile']['errors'] =
-    get(uploadData, 'importXlsxPaymentVerificationPlanFile.errors');
+  const xlsxErrors: ImportXlsxPaymentVerificationPlanFileMutation['importXlsxPaymentVerificationPlanFile']['errors'] = get(uploadData, 'importXlsxPaymentVerificationPlanFile.errors');
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -59,8 +59,8 @@ export function ImportXlsx({
         });
 
         if (
-          !errors &&
-          !data?.importXlsxPaymentVerificationPlanFile?.errors.length
+          !errors
+          && !data?.importXlsxPaymentVerificationPlanFile?.errors.length
         ) {
           setOpenImport(false);
           showMessage(t('Your import was successful!'));
@@ -113,8 +113,8 @@ export function ImportXlsx({
                 setFileToImport(file);
               }}
             />
-            {fileToImport &&
-            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
+            {fileToImport
+            && (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
               <Error>
                 <p>Errors</p>
                 {error
@@ -122,7 +122,7 @@ export function ImportXlsx({
                   : null}
                 <ImportErrors errors={xlsxErrors as XlsxErrorNode[]} />
               </Error>
-            ) : null}
+              ) : null}
           </>
           <DialogActions>
             <Button

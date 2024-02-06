@@ -3,7 +3,7 @@ import React from 'react';
 import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
 import { RotateImg } from './RotateImg';
 
-export const PhotoModalHeader = ({
+export function PhotoModalHeader({
   turnAngle,
   setTurnAngle,
   title,
@@ -13,7 +13,7 @@ export const PhotoModalHeader = ({
   setTurnAngle: React.Dispatch<React.SetStateAction<number>>;
   title: string;
   showRotate: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <DialogTitleWrapper>
       <DialogTitle>
@@ -26,4 +26,4 @@ export const PhotoModalHeader = ({
       </DialogTitle>
     </DialogTitleWrapper>
   );
-};
+}

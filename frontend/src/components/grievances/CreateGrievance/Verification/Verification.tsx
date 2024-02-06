@@ -23,9 +23,9 @@ export interface VerificationProps {
   values;
 }
 
-export const Verification = ({
+export function Verification({
   values,
-}: VerificationProps): React.ReactElement => {
+}: VerificationProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <BoxWithBorders>
@@ -69,4 +69,4 @@ export const Verification = ({
       />
     </BoxWithBorders>
   );
-};
+}

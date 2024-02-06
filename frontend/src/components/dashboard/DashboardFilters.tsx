@@ -15,13 +15,13 @@ interface DashboardFiltersProps {
   setAppliedFilter;
 }
 
-export const DashboardFilters = ({
+export function DashboardFilters({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: DashboardFiltersProps): React.ReactElement => {
+}: DashboardFiltersProps): React.ReactElement {
   const history = useHistory();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
@@ -77,4 +77,4 @@ export const DashboardFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

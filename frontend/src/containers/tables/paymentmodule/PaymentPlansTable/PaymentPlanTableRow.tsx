@@ -23,10 +23,10 @@ interface PaymentPlanTableRowProps {
   canViewDetails: boolean;
 }
 
-export const PaymentPlanTableRow = ({
+export function PaymentPlanTableRow({
   plan,
   canViewDetails,
-}: PaymentPlanTableRowProps): React.ReactElement => {
+}: PaymentPlanTableRowProps): React.ReactElement {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
@@ -35,8 +35,7 @@ export const PaymentPlanTableRow = ({
   const handleClick = (): void => {
     history.push(paymentPlanPath);
   };
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } = useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
 
@@ -110,4 +109,4 @@ export const PaymentPlanTableRow = ({
       <TableCell align="left">{followUpLinks()}</TableCell>
     </ClickableTableRow>
   );
-};
+}

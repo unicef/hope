@@ -1,4 +1,6 @@
-import { Box, Button, DialogContent, IconButton } from '@mui/material';
+import {
+  Box, Button, DialogContent, IconButton,
+} from '@mui/material';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import CloseIcon from '@mui/icons-material/Close';
 import React, { useState } from 'react';
@@ -37,7 +39,7 @@ export const MiniImage = styled.div`
   background-size: cover;
 `;
 
-export const PhotoModal = ({
+export function PhotoModal({
   src,
   linkText,
   variant = 'picture',
@@ -51,7 +53,7 @@ export const PhotoModal = ({
   title?: string;
   closeHandler?;
   showRotate?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [turnAngle, setTurnAngle] = useState(90);
   const { t } = useTranslation();
@@ -153,4 +155,4 @@ export const PhotoModal = ({
       </Dialog>
     </>
   );
-};
+}

@@ -1,8 +1,7 @@
-import { ApolloProvider } from '@apollo/client';
+import { ApolloProvider, ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { getClient } from './apollo/client';
 import { ConfirmationDialogProvider } from './components/core/ConfirmationDialog';
 import { theme } from './theme';
@@ -14,7 +13,7 @@ interface ProvidersProps {
 
 export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
-    ApolloClient<NormalizedCacheObject> | undefined
+  ApolloClient<NormalizedCacheObject> | undefined
   >();
 
   useEffect(() => {

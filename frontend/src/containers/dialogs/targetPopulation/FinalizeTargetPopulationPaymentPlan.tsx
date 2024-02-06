@@ -1,4 +1,6 @@
-import { Button, DialogContent, DialogTitle, Typography } from '@mui/material';
+import {
+  Button, DialogContent, DialogTitle, Typography,
+} from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '../../../components/core/LoadingButton';
@@ -18,12 +20,12 @@ export interface FinalizeTargetPopulationPaymentPlanProps {
   targetPopulationId: string;
 }
 
-export const FinalizeTargetPopulationPaymentPlan = ({
+export function FinalizeTargetPopulationPaymentPlan({
   open,
   setOpen,
   totalHouseholds,
   targetPopulationId,
-}: FinalizeTargetPopulationPaymentPlanProps): React.ReactElement => {
+}: FinalizeTargetPopulationPaymentPlanProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
@@ -54,7 +56,10 @@ export const FinalizeTargetPopulationPaymentPlan = ({
       </DialogTitleWrapper>
       <DialogContent>
         <DialogDescription>
-          {t('Are you sure you want to send')} {totalHouseholds}{' '}
+          {t('Are you sure you want to send')}
+          {' '}
+          {totalHouseholds}
+          {' '}
           {t(
             'households to HOPE? They will be accessible in Payment Module. Target population will not be editable further.',
           )}
@@ -77,4 +82,4 @@ export const FinalizeTargetPopulationPaymentPlan = ({
       </DialogFooter>
     </Dialog>
   );
-};
+}

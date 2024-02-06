@@ -17,20 +17,20 @@ interface FeedbackTableRowProps {
   canViewDetails: boolean;
 }
 
-export const FeedbackTableRow = ({
+export function FeedbackTableRow({
   feedback,
   canViewDetails,
-}: FeedbackTableRowProps): React.ReactElement => {
+}: FeedbackTableRowProps): React.ReactElement {
   const history = useHistory();
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const feedbackDetailsPath = `/${baseUrl}/grievance/feedback/${feedback.id}`;
   const householdDetailsPath = `/${baseUrl}/population/household/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = feedback.linkedGrievance
     ? getGrievanceDetailsPath(
-        feedback.linkedGrievance?.id,
-        feedback.linkedGrievance?.category,
-        baseUrl,
-      )
+      feedback.linkedGrievance?.id,
+      feedback.linkedGrievance?.category,
+      baseUrl,
+    )
     : null;
   const handleClick = (): void => {
     history.push(feedbackDetailsPath);
@@ -93,4 +93,4 @@ export const FeedbackTableRow = ({
       )}
     </ClickableTableRow>
   );
-};
+}

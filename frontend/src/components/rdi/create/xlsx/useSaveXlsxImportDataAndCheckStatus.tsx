@@ -35,12 +35,11 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
     },
   );
   const [startPollingImportData, stopPollingImportData] = useLazyInterval(
-    (args) =>
-      loadImportData({
-        variables: {
-          id: args.id,
-        },
-      }),
+    (args) => loadImportData({
+      variables: {
+        id: args.id,
+      },
+    }),
     3000,
   );
   useEffect(() => {

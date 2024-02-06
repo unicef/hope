@@ -21,28 +21,27 @@ interface LookUpTargetPopulationFiltersSurveysProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const LookUpTargetPopulationFiltersSurveys = ({
+export function LookUpTargetPopulationFiltersSurveys({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpTargetPopulationFiltersSurveysProps): React.ReactElement => {
+}: LookUpTargetPopulationFiltersSurveysProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -93,9 +92,7 @@ export const LookUpTargetPopulationFiltersSurveys = ({
             topLabel={t('Number of Households')}
             value={filter.totalHouseholdsCountMin}
             placeholder={t('From')}
-            onChange={(e) =>
-              handleFilterChange('totalHouseholdsCountMin', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('totalHouseholdsCountMin', e.target.value)}
             icon={<Group />}
             data-cy="filters-total-households-count-min"
           />
@@ -104,9 +101,7 @@ export const LookUpTargetPopulationFiltersSurveys = ({
           <NumberTextField
             value={filter.totalHouseholdsCountMax}
             placeholder={t('To')}
-            onChange={(e) =>
-              handleFilterChange('totalHouseholdsCountMax', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('totalHouseholdsCountMax', e.target.value)}
             icon={<Group />}
             data-cy="filters-total-households-count-max"
           />
@@ -131,4 +126,4 @@ export const LookUpTargetPopulationFiltersSurveys = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

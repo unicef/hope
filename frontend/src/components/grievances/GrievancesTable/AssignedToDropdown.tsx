@@ -17,7 +17,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export const AssignedToDropdown = ({
+export function AssignedToDropdown({
   fullWidth,
   onFilterChange,
   value,
@@ -35,7 +35,7 @@ export const AssignedToDropdown = ({
   ids?;
   label?;
   disableClearable?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
@@ -85,9 +85,7 @@ export const AssignedToDropdown = ({
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      getOptionSelected={(option, value1) => {
-        return option.node.id === value1.id;
-      }}
+      getOptionSelected={(option, value1) => option.node.id === value1.id}
       getOptionLabel={(option) => {
         if (option.node) {
           return `${option.node.email}`;
@@ -120,4 +118,4 @@ export const AssignedToDropdown = ({
       )}
     />
   );
-};
+}

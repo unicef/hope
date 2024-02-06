@@ -13,12 +13,12 @@ import * as Yup from 'yup';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 
-const RefuseRdiForm = ({
+function RefuseRdiForm({
   registration,
   refuseMutate,
   open,
   onClose,
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { id, name } = registration;
@@ -58,7 +58,10 @@ const RefuseRdiForm = ({
             <DialogTitle>Refuse RDI</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                Are you sure, that you want to refuse RDI {name}?
+                Are you sure, that you want to refuse RDI
+                {' '}
+                {name}
+                ?
               </DialogContentText>
               <Field
                 name="refuseReason"
@@ -80,6 +83,6 @@ const RefuseRdiForm = ({
       )}
     </Formik>
   );
-};
+}
 
 export { RefuseRdiForm };

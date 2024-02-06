@@ -13,7 +13,7 @@ describe('components/population/HouseholdDetails', () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllGrievances}>
         <HouseholdDetails
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           baseUrl={fakeBaseUrl}
           household={fakeHousehold}
           choicesData={fakeHouseholdChoices}

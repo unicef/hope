@@ -123,8 +123,7 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const { data, loading } =
-    useCachedImportedIndividualFieldsQuery(businessArea);
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(businessArea);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -151,17 +150,15 @@ export function TargetCriteriaForm({
     filters,
     individualsFiltersBlocks,
   }): { nonFieldErrors?: string[] } => {
-    const filterNullOrNoSelections = (filter): boolean =>
-      filter.value === null ||
-      (filter?.fieldAttribute?.type === 'SELECT_MANY' &&
-        filter.value &&
-        filter.value.length === 0);
+    const filterNullOrNoSelections = (filter): boolean => filter.value === null
+      || (filter?.fieldAttribute?.type === 'SELECT_MANY'
+        && filter.value
+        && filter.value.length === 0);
 
-    const filterEmptyFromTo = (filter): boolean =>
-      filter.value?.hasOwnProperty('from') &&
-      filter.value?.hasOwnProperty('to') &&
-      !filter.value.from &&
-      !filter.value.to;
+    const filterEmptyFromTo = (filter): boolean => filter.value?.hasOwnProperty('from')
+      && filter.value?.hasOwnProperty('to')
+      && !filter.value.from
+      && !filter.value.to;
 
     const hasFiltersNullValues = Boolean(
       filters.filter(filterNullOrNoSelections).length,
@@ -171,16 +168,14 @@ export function TargetCriteriaForm({
       filters.filter(filterEmptyFromTo).length,
     );
 
-    const hasFiltersErrors =
-      hasFiltersNullValues || hasFiltersEmptyFromToValues;
+    const hasFiltersErrors = hasFiltersNullValues || hasFiltersEmptyFromToValues;
 
     const hasIndividualsFiltersBlocksErrors = individualsFiltersBlocks.some(
       (block) => {
         const hasNulls = block.individualBlockFilters.some(
           filterNullOrNoSelections,
         );
-        const hasFromToError =
-          block.individualBlockFilters.some(filterEmptyFromTo);
+        const hasFromToError = block.individualBlockFilters.some(filterEmptyFromTo);
 
         return hasNulls || hasFromToError;
       },
@@ -225,7 +220,9 @@ export function TargetCriteriaForm({
         validationSchema={validationSchema}
         enableReinitialize
       >
-        {({ submitForm, values, resetForm, errors }) => (
+        {({
+          submitForm, values, resetForm, errors,
+        }) => (
           <Dialog
             open={open}
             onClose={onClose}
@@ -271,29 +268,27 @@ export function TargetCriteriaForm({
                     arrayHelpers={arrayHelpers}
                     ref={filtersArrayWrapperRef}
                   >
-                    {values.filters.map((each, index) => {
-                      return (
-                        <TargetingCriteriaFilter
-                          //eslint-disable-next-line
+                    {values.filters.map((each, index) => (
+                      <TargetingCriteriaFilter
+                          // eslint-disable-next-line
                           key={index}
-                          index={index}
-                          data={householdData}
-                          each={each}
-                          onChange={(e, object) => {
-                            if (object) {
-                              return chooseFieldType(
-                                object,
-                                arrayHelpers,
-                                index,
-                              );
-                            }
-                            return clearField(arrayHelpers, index);
-                          }}
-                          values={values}
-                          onClick={() => arrayHelpers.remove(index)}
-                        />
-                      );
-                    })}
+                        index={index}
+                        data={householdData}
+                        each={each}
+                        onChange={(e, object) => {
+                          if (object) {
+                            return chooseFieldType(
+                              object,
+                              arrayHelpers,
+                              index,
+                            );
+                          }
+                          return clearField(arrayHelpers, index);
+                        }}
+                        values={values}
+                        onClick={() => arrayHelpers.remove(index)}
+                      />
+                    ))}
                   </ArrayFieldWrapper>
                 )}
               />
@@ -301,11 +296,9 @@ export function TargetCriteriaForm({
                 <Box display="flex" flexDirection="column">
                   <ButtonBox>
                     <Button
-                      onClick={() =>
-                        filtersArrayWrapperRef.current
-                          .getArrayHelpers()
-                          .push({ fieldName: '' })
-                      }
+                      onClick={() => filtersArrayWrapperRef.current
+                        .getArrayHelpers()
+                        .push({ fieldName: '' })}
                       color="primary"
                       startIcon={<AddCircleOutline />}
                       data-cy="button-household-rule"
@@ -322,13 +315,13 @@ export function TargetCriteriaForm({
                       <AndDividerLabel>And</AndDividerLabel>
                     </AndDivider>
                   ) : null}
-                  {values.individualsFiltersBlocks.length &&
-                  shouldShowWarningForIndividualFilter ? (
+                  {values.individualsFiltersBlocks.length
+                  && shouldShowWarningForIndividualFilter ? (
                     <DialogDescription>
                       In your programme, individual rules can only be applied to
                       head of households.
                     </DialogDescription>
-                  ) : null}
+                    ) : null}
                   <FieldArray
                     name="individualsFiltersBlocks"
                     render={(arrayHelpers) => (
@@ -336,18 +329,16 @@ export function TargetCriteriaForm({
                         arrayHelpers={arrayHelpers}
                         ref={individualsFiltersBlocksWrapperRef}
                       >
-                        {values.individualsFiltersBlocks.map((each, index) => {
-                          return (
-                            <TargetCriteriaFilterBlocks
-                              //eslint-disable-next-line
+                        {values.individualsFiltersBlocks.map((each, index) => (
+                          <TargetCriteriaFilterBlocks
+                              // eslint-disable-next-line
                               key={index}
-                              blockIndex={index}
-                              data={individualData}
-                              values={values}
-                              onDelete={() => arrayHelpers.remove(index)}
-                            />
-                          );
-                        })}
+                            blockIndex={index}
+                            data={individualData}
+                            values={values}
+                            onDelete={() => arrayHelpers.remove(index)}
+                          />
+                        ))}
                       </ArrayFieldWrapper>
                     )}
                   />
@@ -355,13 +346,11 @@ export function TargetCriteriaForm({
                     <ButtonBox>
                       <Button
                         data-cy="button-individual-rule"
-                        onClick={() =>
-                          individualsFiltersBlocksWrapperRef.current
-                            .getArrayHelpers()
-                            .push({
-                              individualBlockFilters: [{ fieldName: '' }],
-                            })
-                        }
+                        onClick={() => individualsFiltersBlocksWrapperRef.current
+                          .getArrayHelpers()
+                          .push({
+                            individualBlockFilters: [{ fieldName: '' }],
+                          })}
                         color="primary"
                         startIcon={<AddCircleOutline />}
                       >
