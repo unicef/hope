@@ -9,7 +9,6 @@ from django.utils import timezone
 
 from celery.exceptions import TaskError
 from concurrency.api import disable_concurrency
-from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
@@ -19,24 +18,25 @@ from hct_mis_api.apps.targeting.services.targeting_stats_refresher import (
     full_rebuild,
     refresh_stats,
 )
-from hct_mis_api.apps.utils.sentry import sentry_tags
+from hct_mis_api.apps.utils.logs import log_start_and_end
+from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
 
 
 @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
 @sentry_tags
 def target_population_apply_steficon(self: Any, target_population_id: UUID) -> None:
     from hct_mis_api.apps.steficon.models import RuleCommit
 
     try:
         target_population = TargetPopulation.objects.get(pk=target_population_id)
-        with configure_scope() as scope:
-            scope.set_tag("business_area", target_population.business_area)
+        set_sentry_business_area_tag(target_population.business_area.name)
 
-            rule: RuleCommit = target_population.steficon_rule
-            if not rule:
-                raise Exception("TargetPopulation does not have a Steficon rule")
+        rule: RuleCommit = target_population.steficon_rule
+        if not rule:
+            raise Exception("TargetPopulation does not have a Steficon rule")
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -70,6 +70,8 @@ def target_population_apply_steficon(self: Any, target_population_id: UUID) -> N
 
 
 @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
 def target_population_rebuild_stats(self: Any, target_population_id: UUID) -> None:
     with cache.lock(
         f"target_population_rebuild_stats_{target_population_id}",
@@ -77,6 +79,7 @@ def target_population_rebuild_stats(self: Any, target_population_id: UUID) -> No
         timeout=60 * 60 * 2,
     ):
         target_population = TargetPopulation.objects.get(pk=target_population_id)
+        set_sentry_business_area_tag(target_population.business_area.name)
         target_population.build_status = TargetPopulation.BUILD_STATUS_BUILDING
         target_population.save()
         try:
@@ -92,6 +95,8 @@ def target_population_rebuild_stats(self: Any, target_population_id: UUID) -> No
 
 
 @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
 def target_population_full_rebuild(self: Any, target_population_id: UUID) -> None:
     with cache.lock(
         f"target_population_full_rebuild_{target_population_id}",
@@ -99,6 +104,7 @@ def target_population_full_rebuild(self: Any, target_population_id: UUID) -> Non
         timeout=60 * 60 * 2,
     ):
         target_population = TargetPopulation.objects.get(pk=target_population_id)
+        set_sentry_business_area_tag(target_population.business_area.name)
         target_population.build_status = TargetPopulation.BUILD_STATUS_BUILDING
         target_population.save()
         try:
@@ -116,12 +122,14 @@ def target_population_full_rebuild(self: Any, target_population_id: UUID) -> Non
 
 
 @app.task()
+@log_start_and_end
 @sentry_tags
 def create_tp_from_list(form_data: Dict[str, str], user_id: str) -> None:
     form = CreateTargetPopulationTextForm(form_data)
     if form.is_valid():
         ba = form.cleaned_data["business_area"]
         population = form.cleaned_data["criteria"]
+        set_sentry_business_area_tag(ba.name)
         try:
             with atomic():
                 tp = TargetPopulation.objects.create(
