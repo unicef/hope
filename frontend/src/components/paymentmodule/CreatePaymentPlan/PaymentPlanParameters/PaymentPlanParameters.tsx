@@ -47,7 +47,7 @@ export const PaymentPlanParameters = ({
         <Grid spacing={3} container>
           <Grid item xs={4}>
             <Field
-              name='paymentPlanName'
+              name='name'
               label={t('Name')}
               type='text'
               fullWidth

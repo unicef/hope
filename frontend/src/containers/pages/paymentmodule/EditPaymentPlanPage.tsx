@@ -58,6 +58,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
+    name: paymentPlan.name,
     targetingId: paymentPlan.targetPopulation.id,
     startDate: paymentPlan.startDate,
     endDate: paymentPlan.endDate,
@@ -70,6 +71,10 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
   };
 
   const validationSchema = Yup.object().shape({
+    name: Yup.string()
+        .required(t('Payment Plan Name is required'))
+        .min(5, t('Too short'))
+        .max(100, t('Too long')),
     targetingId: Yup.string().required(t('Target Population is required')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
@@ -113,6 +118,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
           input: {
             paymentPlanId: id,
             targetingId: values.targetingId,
+            name: values.name,
             startDate: values.startDate,
             endDate: values.endDate,
             dispersionStartDate: values.dispersionStartDate,

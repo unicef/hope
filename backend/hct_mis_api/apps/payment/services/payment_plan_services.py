@@ -387,6 +387,7 @@ class PaymentPlanService:
             target_population=target_population,
             program=target_population.program,
             program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
+            name=input_data["name"],
             currency=input_data["currency"],
             dispersion_start_date=input_data["dispersion_start_date"],
             dispersion_end_date=dispersion_end_date,
@@ -478,6 +479,9 @@ class PaymentPlanService:
         end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
         if end_date and end_date > self.payment_plan.target_population.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
+
+        if input_data.get("name") and input_data["name"] != self.payment_plan.dispersion_start_date:
+            self.payment_plan.name = input_data["name"]
 
         self.payment_plan.save()
 
