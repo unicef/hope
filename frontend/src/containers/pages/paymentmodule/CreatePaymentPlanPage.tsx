@@ -45,6 +45,10 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
+    paymentPlanName: Yup.string()
+        .required(t('Payment Plan Name is required'))
+        .min(5, t('Too short'))
+        .max(100, t('Too long')),
     targetingId: Yup.string().required(t('Target Population is required')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
@@ -86,6 +90,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
+    name: '',
     targetingId: '',
     startDate: '',
     endDate: '',
@@ -95,11 +100,13 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
   };
   const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
+      const { paymentPlanName, ...data } = values;
       const res = await mutate({
         variables: {
           input: {
             businessAreaSlug: businessArea,
-            ...values,
+            name: paymentPlanName,
+            ...data,
           },
         },
       });

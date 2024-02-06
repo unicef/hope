@@ -731,6 +731,7 @@ input CreatePaymentPlanInput {
   dispersionStartDate: Date!
   dispersionEndDate: Date!
   currency: String!
+  name: String!
 }
 
 type CreatePaymentPlanMutation {
@@ -3122,6 +3123,7 @@ type PaymentPlanNode implements Node {
   isFollowUp: Boolean!
   exclusionReason: String!
   excludeHouseholdError: String!
+  name: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   deliveryMechanisms: [DeliveryMechanismNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -4933,6 +4935,7 @@ input UpdatePaymentPlanInput {
   dispersionStartDate: Date
   dispersionEndDate: Date
   currency: String
+  name: String
 }
 
 type UpdatePaymentPlanMutation {
