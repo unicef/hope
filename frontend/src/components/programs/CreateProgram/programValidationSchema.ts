@@ -8,6 +8,9 @@ export const programValidationSchema = (t): Yup.ObjectSchema =>
       .required(t('Programme name is required'))
       .min(3, t('Too short'))
       .max(150, t('Too long')),
+    programmeCode: Yup.string()
+      .min(4, t('Too short'))
+      .max(4, t('Too long')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
       .required(t('End Date is required'))
@@ -30,13 +33,15 @@ export const programValidationSchema = (t): Yup.ObjectSchema =>
     ),
     description: Yup.string()
       .min(3, t('Too short'))
-      .max(255, t('Too long')).nullable(),
+      .max(255, t('Too long'))
+      .nullable(),
     budget: Yup.number()
       .min(0)
       .max(99999999, t('Number is too big')),
     administrativeAreasOfImplementation: Yup.string()
       .min(2, t('Too short'))
-      .max(255, t('Too long')).nullable(),
+      .max(255, t('Too long'))
+      .nullable(),
     populationGoal: Yup.number()
       .min(0)
       .max(99999999, t('Number is too big')),
