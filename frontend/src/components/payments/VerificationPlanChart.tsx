@@ -13,9 +13,9 @@ const ChartContainer = styled.div`
   height: 100%;
 `;
 
-export const VerificationPlanDetailsChart = ({
+export function VerificationPlanDetailsChart({
   verificationPlan,
-}: VerificationPlanDetailsChartProps): React.ReactElement => {
+}: VerificationPlanDetailsChartProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <ChartContainer>
@@ -55,4 +55,4 @@ export const VerificationPlanDetailsChart = ({
       />
     </ChartContainer>
   );
-};
+}

@@ -44,18 +44,17 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data?.importedHousehold || !choicesData || permissions === null)
-    return null;
+  if (!data?.importedHousehold || !choicesData || permissions === null) return null;
 
   const { importedHousehold } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
-          {
-            title: t('Registration Data import'),
-            to: `/${baseUrl}/registration-data-import/`,
-          },
-        ]
+        {
+          title: t('Registration Data import'),
+          to: `/${baseUrl}/registration-data-import/`,
+        },
+      ]
       : []),
     {
       title: importedHousehold.registrationDataImport.name,

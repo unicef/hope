@@ -63,7 +63,7 @@ const StyledLink = styled.a`
   color: #e3e6e7;
 `;
 
-export const AppBar = ({ open, handleDrawerOpen }): React.ReactElement => {
+export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   const { data: meData, loading: meLoading } = useCachedMe();
   const classes = useStyles({});
   const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${
@@ -113,4 +113,4 @@ export const AppBar = ({ open, handleDrawerOpen }): React.ReactElement => {
       </StyledToolbar>
     </MuiAppBar>
   );
-};
+}

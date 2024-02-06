@@ -2,12 +2,12 @@ import Autocomplete from '@mui/lab/Autocomplete';
 import { Box, TextField } from '@mui/material';
 import React from 'react';
 
-export const FormikAutocomplete = ({
+export function FormikAutocomplete({
   field,
   form,
   choices,
   label,
-}): React.ReactElement => {
+}): React.ReactElement {
   const realSelectedValue = choices.find((item) => item.value === field.value);
 
   const handleChange = (e, option): void => {
@@ -32,4 +32,4 @@ export const FormikAutocomplete = ({
       />
     </Box>
   );
-};
+}

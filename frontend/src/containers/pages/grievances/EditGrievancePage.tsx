@@ -1,4 +1,6 @@
-import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
+import {
+  Box, Button, FormHelperText, Grid, Typography,
+} from '@mui/material';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -85,7 +87,7 @@ const BoxWithBottomBorders = styled.div`
   padding: 15px 0;
 `;
 
-export const EditGrievancePage = (): React.ReactElement => {
+export function EditGrievancePage(): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
@@ -103,15 +105,13 @@ export const EditGrievancePage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: currentUserData, loading: currentUserDataLoading } = useMeQuery();
 
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
@@ -119,15 +119,13 @@ export const EditGrievancePage = (): React.ReactElement => {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
-    });
+  const { data: householdFieldsData, loading: householdFieldsLoading } = useAllEditHouseholdFieldsQuery();
+  const { data: programsData, loading: programsDataLoading } = useAllProgramsForChoicesQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
+  });
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -140,28 +138,26 @@ export const EditGrievancePage = (): React.ReactElement => {
   );
 
   if (
-    userDataLoading ||
-    choicesLoading ||
-    ticketLoading ||
-    allAddIndividualFieldsDataLoading ||
-    householdFieldsLoading ||
-    currentUserDataLoading ||
-    programsDataLoading
-  )
-    return <LoadingComponent />;
+    userDataLoading
+    || choicesLoading
+    || ticketLoading
+    || allAddIndividualFieldsDataLoading
+    || householdFieldsLoading
+    || currentUserDataLoading
+    || programsDataLoading
+  ) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (
-    !choicesData ||
-    !userData ||
-    !ticketData ||
-    !currentUserData ||
-    permissions === null ||
-    !householdFieldsData ||
-    !householdFieldsDict ||
-    !individualFieldsDict ||
-    !programsData
-  )
-    return null;
+    !choicesData
+    || !userData
+    || !ticketData
+    || !currentUserData
+    || permissions === null
+    || !householdFieldsData
+    || !householdFieldsDict
+    || !individualFieldsDict
+    || !programsData
+  ) return null;
 
   const categoryChoices: {
     [id: number]: string;
@@ -173,8 +169,7 @@ export const EditGrievancePage = (): React.ReactElement => {
   const isCreator = ticket.createdBy?.id === currentUserId;
   const isOwner = ticket.assignedTo?.id === currentUserId;
 
-  const { canViewHouseholdDetails, canViewIndividualDetails } =
-    grievancePermissions(isCreator, isOwner, ticket, permissions);
+  const { canViewHouseholdDetails, canViewIndividualDetails } = grievancePermissions(isCreator, isOwner, ticket, permissions);
 
   if (
     !hasCreatorOrOwnerPermissions(
@@ -185,8 +180,7 @@ export const EditGrievancePage = (): React.ReactElement => {
       PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
       permissions,
     )
-  )
-    return <PermissionDenied />;
+  ) return <PermissionDenied />;
 
   const changeState = (status): void => {
     mutateStatus({
@@ -205,30 +199,26 @@ export const EditGrievancePage = (): React.ReactElement => {
     },
   ];
 
-  const showIssueType = (values): boolean => {
-    return (
-      values.category ===
-        parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE, 10) ||
-      values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE, 10) ||
-      values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT, 10)
-    );
-  };
-  const dataChangeErrors = (errors, touched): React.ReactElement[] =>
-    [
-      'householdDataUpdateFields',
-      'individualDataUpdateFields',
-      'individualDataUpdateFieldsDocuments',
-      'individualDataUpdateFieldsIdentities',
-      'individualDataUpdateDocumentsToEdit',
-      'individualDataUpdateIdentitiesToEdit',
-      'individualDataUpdateFieldsPaymentChannels',
-      'individualDataUpdatePaymentChannelsToEdit',
-    ].map(
-      (fieldname) =>
-        isInvalid(fieldname, errors, touched) && (
-          <FormHelperText error>{errors[fieldname]}</FormHelperText>
-        ),
-    );
+  const showIssueType = (values): boolean => (
+    values.category
+        === parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE, 10)
+      || values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE, 10)
+      || values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT, 10)
+  );
+  const dataChangeErrors = (errors, touched): React.ReactElement[] => [
+    'householdDataUpdateFields',
+    'individualDataUpdateFields',
+    'individualDataUpdateFieldsDocuments',
+    'individualDataUpdateFieldsIdentities',
+    'individualDataUpdateDocumentsToEdit',
+    'individualDataUpdateIdentitiesToEdit',
+    'individualDataUpdateFieldsPaymentChannels',
+    'individualDataUpdatePaymentChannelsToEdit',
+  ].map(
+    (fieldname) => isInvalid(fieldname, errors, touched) && (
+      <FormHelperText error>{errors[fieldname]}</FormHelperText>
+    ),
+  );
 
   const canAddDocumentation = hasPermissions(
     PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
@@ -241,14 +231,12 @@ export const EditGrievancePage = (): React.ReactElement => {
     baseUrl,
   );
 
-  const categoryDescription =
-    GRIEVANCE_CATEGORY_DESCRIPTIONS[
-      GRIEVANCE_CATEGORIES_NAMES[ticket.category]
-    ] || '';
-  const issueTypeDescription =
-    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-      GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
-    ] || '';
+  const categoryDescription = GRIEVANCE_CATEGORY_DESCRIPTIONS[
+    GRIEVANCE_CATEGORIES_NAMES[ticket.category]
+  ] || '';
+  const issueTypeDescription = GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
+    GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
+  ] || '';
 
   const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
     (element) => ({ name: element.node.name, value: element.node.id }),
@@ -277,23 +265,23 @@ export const EditGrievancePage = (): React.ReactElement => {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
         if (
-          ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-          ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD
+          ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+          || ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD
         ) {
           changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
         }
       }}
-      validate={(values) =>
-        validate(
-          values,
-          allAddIndividualFieldsData,
-          individualFieldsDict,
-          householdFieldsDict,
-        )
-      }
+      validate={(values) => validate(
+        values,
+        allAddIndividualFieldsData,
+        individualFieldsDict,
+        householdFieldsDict,
+      )}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values, setFieldValue, errors, touched }) => {
+      {({
+        submitForm, values, setFieldValue, errors, touched,
+      }) => {
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
@@ -367,42 +355,42 @@ export const EditGrievancePage = (): React.ReactElement => {
                         <Grid item xs={3}>
                           <LabelizedField label={t('Household ID')}>
                             <span>
-                              {ticket.household?.id &&
-                              canViewHouseholdDetails &&
-                              !isAllPrograms ? (
+                              {ticket.household?.id
+                              && canViewHouseholdDetails
+                              && !isAllPrograms ? (
                                 <BlackLink
                                   to={`/${baseUrl}/population/household/${ticket.household.id}`}
                                 >
                                   {ticket.household.unicefId}
                                 </BlackLink>
-                              ) : (
-                                <div>
-                                  {ticket.household?.id
-                                    ? ticket.household.unicefId
-                                    : '-'}
-                                </div>
-                              )}
+                                ) : (
+                                  <div>
+                                    {ticket.household?.id
+                                      ? ticket.household.unicefId
+                                      : '-'}
+                                  </div>
+                                )}
                             </span>
                           </LabelizedField>
                         </Grid>
                         <Grid item xs={3}>
                           <LabelizedField label={t('Individual ID')}>
                             <span>
-                              {ticket.individual?.id &&
-                              canViewIndividualDetails &&
-                              !isAllPrograms ? (
+                              {ticket.individual?.id
+                              && canViewIndividualDetails
+                              && !isAllPrograms ? (
                                 <BlackLink
                                   to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
                                 >
                                   {ticket.individual.unicefId}
                                 </BlackLink>
-                              ) : (
-                                <div>
-                                  {ticket.individual?.id
-                                    ? ticket.individual.unicefId
-                                    : '-'}
-                                </div>
-                              )}
+                                ) : (
+                                  <div>
+                                    {ticket.individual?.id
+                                      ? ticket.individual.unicefId
+                                      : '-'}
+                                  </div>
+                                )}
                             </span>
                           </LabelizedField>
                         </Grid>
@@ -493,8 +481,8 @@ export const EditGrievancePage = (): React.ReactElement => {
                             choices={mappedProgramChoices}
                             component={FormikSelectField}
                             disabled={
-                              !isAllPrograms ||
-                              Boolean(ticket.programs?.[0]?.id)
+                              !isAllPrograms
+                              || Boolean(ticket.programs?.[0]?.id)
                             }
                           />
                         </Grid>
@@ -530,21 +518,21 @@ export const EditGrievancePage = (): React.ReactElement => {
                           />
                         </Box>
                       </Grid>
-                      {(ticket.issueType?.toString() ===
-                        GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
-                        ticket.issueType?.toString() ===
-                          GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
-                        <BoxWithBottomBorders>
-                          <Grid item xs={6}>
-                            <Box py={3}>
-                              <LookUpPaymentRecord
-                                values={values}
-                                disabled={Boolean(ticket.paymentRecord)}
-                                onValueChange={setFieldValue}
-                              />
-                            </Box>
-                          </Grid>
-                        </BoxWithBottomBorders>
+                      {(ticket.issueType?.toString()
+                        === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT
+                        || ticket.issueType?.toString()
+                          === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
+                          <BoxWithBottomBorders>
+                            <Grid item xs={6}>
+                              <Box py={3}>
+                                <LookUpPaymentRecord
+                                  values={values}
+                                  disabled={Boolean(ticket.paymentRecord)}
+                                  onValueChange={setFieldValue}
+                                />
+                              </Box>
+                            </Grid>
+                          </BoxWithBottomBorders>
                       )}
                     </BoxPadding>
                     {hasCreatorOrOwnerPermissions(
@@ -577,4 +565,4 @@ export const EditGrievancePage = (): React.ReactElement => {
       }}
     </Formik>
   );
-};
+}

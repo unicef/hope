@@ -19,8 +19,8 @@ interface LookUpHouseholdTableRowProps {
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
     event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     number,
   ) => void;
   selected?: Array<string>;
@@ -29,7 +29,7 @@ interface LookUpHouseholdTableRowProps {
   isFeedbackWithHouseholdOnly?: boolean;
 }
 
-export const LookUpHouseholdTableRow = ({
+export function LookUpHouseholdTableRow({
   household,
   radioChangeHandler,
   selectedHousehold,
@@ -38,7 +38,7 @@ export const LookUpHouseholdTableRow = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
-}: LookUpHouseholdTableRowProps): React.ReactElement => {
+}: LookUpHouseholdTableRowProps): React.ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const isSelected = (id: string): boolean => selected.includes(id);
   const isItemSelected = isSelected(household.id);
@@ -52,8 +52,7 @@ export const LookUpHouseholdTableRow = ({
     }
   };
 
-  const isSelectionDisabled =
-    redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly || false;
+  const isSelectionDisabled = redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly || false;
   return (
     <ClickableTableRow
       onClick={(event) => {
@@ -118,4 +117,4 @@ export const LookUpHouseholdTableRow = ({
       )}
     </ClickableTableRow>
   );
-};
+}

@@ -17,8 +17,8 @@ interface LookUpPaymentRecordTableRowProps {
   selected: Array<PaymentRecordAndPaymentNode>;
   checkboxClickHandler: (
     event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     selectedPaymentRecord: PaymentRecordAndPaymentNode,
   ) => void;
 }
@@ -29,8 +29,7 @@ export function LookUpPaymentRecordTableRow({
   checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  const isItemSelected = (item): boolean =>
-    selected.some((selectedItem) => selectedItem.id === item.id);
+  const isItemSelected = (item): boolean => selected.some((selectedItem) => selectedItem.id === item.id);
   const paymentRecordIsSelected = isItemSelected(paymentRecord);
   const received = paymentRecord?.verification?.receivedAmount;
   const renderUrl = (objType): string => {

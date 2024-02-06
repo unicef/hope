@@ -21,7 +21,7 @@ import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPay
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-export const EditPaymentPlanPage = (): React.ReactElement => {
+export function EditPaymentPlanPage(): React.ReactElement {
   const { id } = useParams();
   const { t } = useTranslation();
   const {
@@ -49,12 +49,10 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
       program: [programId],
     },
   });
-  if (loadingTargetPopulations || loadingPaymentPlan)
-    return <LoadingComponent />;
+  if (loadingTargetPopulations || loadingPaymentPlan) return <LoadingComponent />;
   if (!allTargetPopulationsData || !paymentPlanData) return null;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions)) return <PermissionDenied />;
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
@@ -76,9 +74,8 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
       .required(t('End Date is required'))
       .when(
         'startDate',
-        (startDate, schema) =>
-          startDate &&
-          schema.min(
+        (startDate, schema) => startDate
+          && schema.min(
             startDate,
             `${t('End date has to be greater than')} ${moment(startDate).format(
               'YYYY-MM-DD',
@@ -94,9 +91,8 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate, schema) =>
-          dispersionStartDate &&
-          schema.min(
+        (dispersionStartDate, schema) => dispersionStartDate
+          && schema.min(
             dispersionStartDate,
             `${t('Dispersion End Date has to be greater than')} ${moment(
               dispersionStartDate,
@@ -157,4 +153,4 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
       )}
     </Formik>
   );
-};
+}

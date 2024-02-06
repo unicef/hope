@@ -9,12 +9,12 @@ export interface SentryRouteProps {
   exact?: boolean;
 }
 
-export const SentryRoute = ({
+export function SentryRoute({
   path,
   children,
   label,
   exact,
-}: SentryRouteProps): React.ReactElement => {
+}: SentryRouteProps): React.ReactElement {
   return (
     <Route exact={exact} path={path}>
       <Sentry.ErrorBoundary
@@ -26,4 +26,4 @@ export const SentryRoute = ({
       </Sentry.ErrorBoundary>
     </Route>
   );
-};
+}

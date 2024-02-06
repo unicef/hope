@@ -10,9 +10,9 @@ interface EditProgramButtonLinkProps {
   program: ProgramQuery['program'];
 }
 
-export const EditProgramButtonLink = ({
+export function EditProgramButtonLink({
   program,
-}: EditProgramButtonLinkProps): ReactElement => {
+}: EditProgramButtonLinkProps): ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
@@ -28,4 +28,4 @@ export const EditProgramButtonLink = ({
       {t('EDIT PROGRAMME')}
     </Button>
   );
-};
+}

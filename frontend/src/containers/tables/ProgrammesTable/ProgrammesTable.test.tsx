@@ -18,14 +18,14 @@ describe('containers/tables/ProgrammesTable', () => {
     numberOfHouseholdsMax: '',
     budgetMin: '',
     budgetMax: '',
-    dataCollectingType: ''
+    dataCollectingType: '',
   };
 
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllPrograms}>
         <ProgrammesTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
           choicesData={fakeProgramChoices}
         />
@@ -44,7 +44,7 @@ describe('containers/tables/ProgrammesTable', () => {
         mocks={fakeApolloAllPrograms}
       >
         <ProgrammesTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
           choicesData={fakeProgramChoices}
         />

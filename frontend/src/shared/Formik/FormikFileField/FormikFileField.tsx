@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import React from 'react';
 
-export const FormikFileField = ({ field, form }): React.ReactElement => {
+export function FormikFileField({ field, form }): React.ReactElement {
   return (
     <Box style={{ height: '100%' }} display="flex" alignItems="center">
       <input
@@ -13,4 +13,4 @@ export const FormikFileField = ({ field, form }): React.ReactElement => {
       />
     </Box>
   );
-};
+}

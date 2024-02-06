@@ -4,14 +4,14 @@ import moment from 'moment';
 import React from 'react';
 import { FieldLabel } from './FieldLabel';
 
-export const DatePickerFilter = ({
+export function DatePickerFilter({
   topLabel = null,
   onChange,
   value = null,
   fullWidth = true,
   dataCy = 'date-picker-filter',
   ...props
-}): React.ReactElement => {
+}): React.ReactElement {
   const datePickerValue = value ? moment(value).toISOString() : null;
 
   return (
@@ -51,4 +51,4 @@ export const DatePickerFilter = ({
       />
     </Box>
   );
-};
+}

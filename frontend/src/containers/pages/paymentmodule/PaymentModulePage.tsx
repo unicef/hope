@@ -23,7 +23,7 @@ const initialFilter = {
   isFollowUp: '',
 };
 
-export const PaymentModulePage = (): React.ReactElement => {
+export function PaymentModulePage(): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
@@ -39,19 +39,18 @@ export const PaymentModulePage = (): React.ReactElement => {
 
   if (permissions === null) return null;
 
-  if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions)) return <PermissionDenied />;
 
   return (
     <>
       <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
           <ButtonTooltip
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             component={Link}
             to={`/${baseUrl}/payment-module/new-plan`}
-            data-cy='button-new-payment-plan'
+            data-cy="button-new-payment-plan"
             title={t('Program has to be active to create new Payment Program')}
             disabled={!isActiveProgram}
           >
@@ -77,4 +76,4 @@ export const PaymentModulePage = (): React.ReactElement => {
       </TableWrapper>
     </>
   );
-};
+}

@@ -26,7 +26,7 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
   ] = useSaveKoboImportDataAsyncMutation();
   const [
     loadImportData,
-    { data: koboImportData},
+    { data: koboImportData },
   ] = useKoboImportDataLazyQuery({
     variables: {
       id: koboImportDataFromMutation?.saveKoboImportDataAsync?.importData?.id,
@@ -34,12 +34,11 @@ export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndC
     fetchPolicy: 'network-only',
   });
   const [startPollingImportData, stopPollingImportData] = useLazyInterval(
-    (args) =>
-      loadImportData({
-        variables: {
-          id: args.id,
-        },
-      }),
+    (args) => loadImportData({
+      variables: {
+        id: args.id,
+      },
+    }),
     3000,
   );
   useEffect(() => {

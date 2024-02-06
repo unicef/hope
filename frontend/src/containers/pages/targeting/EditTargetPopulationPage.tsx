@@ -12,7 +12,7 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { isPermissionDeniedError } from '../../../utils/utils';
 
-export const EditTargetPopulationPage = (): React.ReactElement => {
+export function EditTargetPopulationPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
   const {
@@ -59,4 +59,4 @@ export const EditTargetPopulationPage = (): React.ReactElement => {
       screenBeneficiary={businessAreaData?.businessArea?.screenBeneficiary}
     />
   );
-};
+}

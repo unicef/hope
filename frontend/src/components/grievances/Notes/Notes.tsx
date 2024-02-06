@@ -1,4 +1,6 @@
-import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
+import {
+  Avatar, Box, Grid, Paper, Typography,
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -84,14 +86,12 @@ export function Notes({
     </Grid>
   );
 
-  const mappedNotes = notes?.edges?.map((el) =>
-    note(
-      renderUserName(el.node.createdBy),
-      el.node.createdAt,
-      el.node.description,
-      el.node.id,
-    ),
-  );
+  const mappedNotes = notes?.edges?.map((el) => note(
+    renderUserName(el.node.createdBy),
+    el.node.createdAt,
+    el.node.description,
+    el.node.id,
+  ));
 
   const initialValues: { [key: string]: string } = {
     newNote: '',

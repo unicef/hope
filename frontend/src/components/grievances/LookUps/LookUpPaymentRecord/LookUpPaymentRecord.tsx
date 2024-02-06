@@ -5,7 +5,7 @@ import { LookUpButton } from '../../LookUpButton';
 import { LookUpPaymentRecordDisplay } from './LookUpPaymentRecordDisplay';
 import { LookUpPaymentRecordModal } from './LookUpPaymentRecordModal';
 
-export const LookUpPaymentRecord = ({
+export function LookUpPaymentRecord({
   onValueChange,
   values,
   disabled,
@@ -13,15 +13,13 @@ export const LookUpPaymentRecord = ({
   onValueChange;
   values;
   disabled?;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
 
-  const shouldDisplayPlaceholder = (): boolean => {
-    return !values.selectedHousehold;
-  };
+  const shouldDisplayPlaceholder = (): boolean => !values.selectedHousehold;
 
   return (
     <>
@@ -49,4 +47,4 @@ export const LookUpPaymentRecord = ({
       />
     </>
   );
-};
+}

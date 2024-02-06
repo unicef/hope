@@ -10,13 +10,13 @@ const ErrorButton = styled(Button)({
   },
 });
 
-export const ErrorButtonContained = ({
+export function ErrorButtonContained({
   children,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
-    <ErrorButton variant='contained' {...otherProps}>
+    <ErrorButton variant="contained" {...otherProps}>
       {children}
     </ErrorButton>
   );
-};
+}

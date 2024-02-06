@@ -16,15 +16,14 @@ interface CashPlanTableRowProps {
   cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
 }
 
-export const CashPlanTableRow = ({
+export function CashPlanTableRow({
   cashAndPaymentPlan,
-}: CashPlanTableRowProps): React.ReactElement => {
+}: CashPlanTableRowProps): React.ReactElement {
   const history = useHistory();
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  const objectPath =
-    cashAndPaymentPlan.objType === 'PaymentPlan'
-      ? `/${baseUrl}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
-      : `/${baseUrl}/cashplans/${cashAndPaymentPlan.id}`;
+  const objectPath = cashAndPaymentPlan.objType === 'PaymentPlan'
+    ? `/${baseUrl}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
+    : `/${baseUrl}/cashplans/${cashAndPaymentPlan.id}`;
 
   const handleClick = (): void => {
     history.push(objectPath);
@@ -88,4 +87,4 @@ export const CashPlanTableRow = ({
       </TableCell>
     </ClickableTableRow>
   );
-};
+}

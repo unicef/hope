@@ -17,17 +17,15 @@ export interface EditHouseholdDataChangeProps {
   values;
   setFieldValue;
 }
-export const EditHouseholdDataChange = ({
+export function EditHouseholdDataChange({
   values,
   setFieldValue,
-}: EditHouseholdDataChangeProps): React.ReactElement => {
+}: EditHouseholdDataChangeProps): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.includes('edit-ticket');
-  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
-    values.selectedHousehold;
-  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
-    useHouseholdLazyQuery({ variables: { id: household?.id } });
+  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] = values.selectedHousehold;
+  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] = useHouseholdLazyQuery({ variables: { id: household?.id } });
   useEffect(() => {
     if (values.selectedHousehold) {
       getHousehold();
@@ -36,8 +34,8 @@ export const EditHouseholdDataChange = ({
   }, [values.selectedHousehold]);
   useEffect(() => {
     if (
-      !values.householdDataUpdateFields ||
-      values.householdDataUpdateFields.length === 0
+      !values.householdDataUpdateFields
+      || values.householdDataUpdateFields.length === 0
     ) {
       setFieldValue('householdDataUpdateFields', [
         { fieldName: null, fieldValue: '' },
@@ -45,8 +43,7 @@ export const EditHouseholdDataChange = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, loading: householdFieldsLoading } = useAllEditHouseholdFieldsQuery();
   if (!household) {
     return <div>{t('You have to select a household earlier')}</div>;
   }
@@ -101,4 +98,4 @@ export const EditHouseholdDataChange = ({
       </>
     )
   );
-};
+}

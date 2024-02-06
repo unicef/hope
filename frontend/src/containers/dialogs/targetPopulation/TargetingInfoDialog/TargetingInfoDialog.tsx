@@ -1,4 +1,6 @@
-import { Dialog, DialogContent, IconButton, Tab, Tabs } from '@mui/material';
+import {
+  Dialog, DialogContent, IconButton, Tab, Tabs,
+} from '@mui/material';
 import { Close } from '@mui/icons-material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';

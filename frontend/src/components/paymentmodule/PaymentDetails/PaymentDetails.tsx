@@ -38,19 +38,19 @@ interface PaymentDetailsProps {
   canViewHouseholdDetails: boolean;
 }
 
-export const PaymentDetails = ({
+export function PaymentDetails({
   payment,
   canViewActivityLog,
   canViewHouseholdDetails,
-}: PaymentDetailsProps): React.ReactElement => {
+}: PaymentDetailsProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
 
   let paymentVerification: PaymentQuery['payment']['verification'] = null;
   if (
-    payment.verification &&
-    payment.verification.status !== PaymentVerificationStatus.Pending
+    payment.verification
+    && payment.verification.status !== PaymentVerificationStatus.Pending
   ) {
     paymentVerification = payment.verification;
   }
@@ -309,4 +309,4 @@ export const PaymentDetails = ({
       )}
     </>
   );
-};
+}

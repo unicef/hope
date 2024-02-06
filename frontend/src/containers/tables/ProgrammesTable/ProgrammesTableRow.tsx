@@ -21,10 +21,10 @@ interface ProgrammesTableRowProps {
   choicesData: ProgrammeChoiceDataQuery;
 }
 
-export const ProgrammesTableRow = ({
+export function ProgrammesTableRow({
   program,
   choicesData,
-}: ProgrammesTableRowProps): React.ReactElement => {
+}: ProgrammesTableRowProps): React.ReactElement {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
   const programDetailsPath = `/${baseUrl}/details/${program.id}`;
@@ -54,7 +54,10 @@ export const ProgrammesTableRow = ({
         />
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
+        <UniversalMoment>{program.startDate}</UniversalMoment>
+        {' '}
+        -
+        {' '}
         <UniversalMoment>{program.endDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
@@ -64,4 +67,4 @@ export const ProgrammesTableRow = ({
       <TableCell align="right">{formatCurrency(program.budget)}</TableCell>
     </ClickableTableRow>
   );
-};
+}

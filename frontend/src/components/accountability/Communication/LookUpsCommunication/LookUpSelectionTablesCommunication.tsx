@@ -18,7 +18,7 @@ interface LookUpSelectionTablesCommunicationProps {
   onValueChange;
   handleChange;
 }
-export const LookUpSelectionTablesCommunication = ({
+export function LookUpSelectionTablesCommunication({
   selectedTab,
   choicesData,
   values,
@@ -28,7 +28,7 @@ export const LookUpSelectionTablesCommunication = ({
   businessArea,
   onValueChange,
   handleChange,
-}: LookUpSelectionTablesCommunicationProps): React.ReactElement => {
+}: LookUpSelectionTablesCommunicationProps): React.ReactElement {
   const permissions = usePermissions();
 
   return (
@@ -81,4 +81,4 @@ export const LookUpSelectionTablesCommunication = ({
       )}
     </>
   );
-};
+}

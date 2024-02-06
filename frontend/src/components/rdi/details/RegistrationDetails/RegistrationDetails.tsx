@@ -24,8 +24,7 @@ export const BigValueContainer = styled.div`
   display: flex;
 `;
 export const BigValue = styled.div`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
@@ -113,11 +112,11 @@ export function RegistrationDetails({
               <Grid item xs={6}>
                 <LabelizedField
                   label={t('Import Date')}
-                  value={
+                  value={(
                     <UniversalMoment withTime>
                       {registration?.importDate}
                     </UniversalMoment>
-                  }
+                  )}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -126,15 +125,15 @@ export function RegistrationDetails({
                   value={renderImportedBy()}
                 />
               </Grid>
-              {registration.status === RegistrationDataImportStatus.Refused &&
-              registration.refuseReason ? (
+              {registration.status === RegistrationDataImportStatus.Refused
+              && registration.refuseReason ? (
                 <Grid item xs={6}>
                   <LabelizedField
                     label={t('Refuse Reason')}
                     value={registration?.refuseReason}
                   />
                 </Grid>
-              ) : null}
+                ) : null}
             </Grid>
           </Grid>
           <Grid item xs={4}>

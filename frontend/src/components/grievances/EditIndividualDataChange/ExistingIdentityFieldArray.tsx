@@ -28,25 +28,21 @@ export function ExistingIdentityFieldArray({
     <Grid container spacing={3}>
       <FieldArray
         name="individualDataUpdateIdentitiesToEdit"
-        render={(arrayHelpers) => {
-          return (
-            <>
-              {individual.identities.edges.map((item) => {
-                return (
-                  <EditIdentityRow
-                    key={item.node.id}
-                    setFieldValue={setFieldValue}
-                    values={values}
-                    identity={item}
-                    id={item.node.id}
-                    arrayHelpers={arrayHelpers}
-                    addIndividualFieldsData={addIndividualFieldsData}
-                  />
-                );
-              })}
-            </>
-          );
-        }}
+        render={(arrayHelpers) => (
+          <>
+            {individual.identities.edges.map((item) => (
+              <EditIdentityRow
+                key={item.node.id}
+                setFieldValue={setFieldValue}
+                values={values}
+                identity={item}
+                id={item.node.id}
+                arrayHelpers={arrayHelpers}
+                addIndividualFieldsData={addIndividualFieldsData}
+              />
+            ))}
+          </>
+        )}
       />
     </Grid>
   ) : (

@@ -27,16 +27,16 @@ interface PaymentsTableProps {
   canViewDetails?: boolean;
 }
 
-export const PaymentsTable = ({
+export function PaymentsTable({
   businessArea,
   baseUrl,
   paymentPlan,
   permissions,
   canViewDetails = false,
-}: PaymentsTableProps): React.ReactElement => {
+}: PaymentsTableProps): React.ReactElement {
   const { t } = useTranslation();
   const [dialogPayment, setDialogPayment] = useState<
-    AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
+  AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
   >();
   const initialVariables: AllPaymentsForTableQueryVariables = {
     businessArea,
@@ -51,8 +51,8 @@ export const PaymentsTable = ({
             <Typography data-cy="table-title" variant="h6">
               {t('Payee List')}
             </Typography>
-            {(paymentPlan.status === PaymentPlanStatus.Accepted ||
-              paymentPlan.status === PaymentPlanStatus.Finished) && (
+            {(paymentPlan.status === PaymentPlanStatus.Accepted
+              || paymentPlan.status === PaymentPlanStatus.Finished) && (
               <ImportXlsxPaymentPlanPaymentListPerFsp
                 paymentPlan={paymentPlan}
                 permissions={permissions}
@@ -60,8 +60,8 @@ export const PaymentsTable = ({
             )}
           </StyledBox>
           <UniversalTable<
-            AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
-            AllPaymentsForTableQueryVariables
+          AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
+          AllPaymentsForTableQueryVariables
           >
             isOnPaper={false}
             headCells={headCells}
@@ -93,4 +93,4 @@ export const PaymentsTable = ({
       />
     </>
   );
-};
+}

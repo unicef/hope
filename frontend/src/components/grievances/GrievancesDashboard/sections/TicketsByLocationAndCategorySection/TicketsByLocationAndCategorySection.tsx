@@ -8,13 +8,13 @@ interface TicketsByLocationAndCategorySectionProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByLocationAndCategory'];
 }
 
-export const TicketsByLocationAndCategorySection = ({
+export function TicketsByLocationAndCategorySection({
   data,
-}: TicketsByLocationAndCategorySectionProps): React.ReactElement => {
+}: TicketsByLocationAndCategorySectionProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <DashboardPaper noMarginTop title={t('Tickets by Category and Location')}>
       <TicketsByLocationAndCategoryChart data={data} />
     </DashboardPaper>
   );
-};
+}

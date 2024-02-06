@@ -13,7 +13,7 @@ const Flex = styled.div`
   }
 `;
 
-export const LookUpHouseholdIndividualSelectionDisplay = ({
+export function LookUpHouseholdIndividualSelectionDisplay({
   onValueChange,
   disableUnselectIndividual,
   disableUnselectHousehold,
@@ -29,7 +29,7 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
   setSelectedHousehold: Function;
   selectedIndividual;
   setSelectedIndividual: Function;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const handleRemove = (type): void => {
     if (type === Types.household) {
@@ -50,7 +50,8 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
           <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
               <Box display="flex">
-                {t('Household ID')}:
+                {t('Household ID')}
+                :
                 <BlueText>
                   &ensp;
                   {selectedHousehold?.unicefId || '-'}
@@ -78,7 +79,8 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
           <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
               <Box display="flex">
-                {t('Individual ID')}:
+                {t('Individual ID')}
+                :
                 <BlueText>
                   &ensp;
                   {selectedIndividual?.unicefId || '-'}
@@ -103,4 +105,4 @@ export const LookUpHouseholdIndividualSelectionDisplay = ({
       </Grid>
     </Grid>
   );
-};
+}

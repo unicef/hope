@@ -36,7 +36,7 @@ export interface DocumentsTableProps {
   countriesDict;
 }
 
-export const DocumentsTable = ({
+export function DocumentsTable({
   values,
   isEdit,
   ticket,
@@ -44,7 +44,7 @@ export const DocumentsTable = ({
   documents,
   documentTypeDict,
   countriesDict,
-}: DocumentsTableProps): React.ReactElement => {
+}: DocumentsTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedDocuments } = values;
   const handleSelectDocument = (documentIndex): void => {
@@ -84,46 +84,44 @@ export const DocumentsTable = ({
       <StyledTable>
         {documentsTableHead}
         <TableBody>
-          {documents?.map((row, index) => {
-            return (
-              <TableRow key={`${row.value.type}-${row.value.country}`}>
-                <TableCell align="left">
-                  {isEdit ? (
-                    <Checkbox
-                      color="primary"
-                      data-cy="checkbox-document"
-                      onChange={(): void => {
-                        handleSelectDocument(index);
-                      }}
-                      disabled={
+          {documents?.map((row, index) => (
+            <TableRow key={`${row.value.type}-${row.value.country}`}>
+              <TableCell align="left">
+                {isEdit ? (
+                  <Checkbox
+                    color="primary"
+                    data-cy="checkbox-document"
+                    onChange={(): void => {
+                      handleSelectDocument(index);
+                    }}
+                    disabled={
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
-                      checked={selectedDocuments.includes(index)}
-                      inputProps={{ 'aria-labelledby': 'selected' }}
-                    />
-                  ) : (
-                    selectedDocuments.includes(index) && (
-                      <GreenIcon data-cy="green-check-icon">
-                        <CheckCircleIcon />
-                      </GreenIcon>
-                    )
-                  )}
-                </TableCell>
-                <TableCell align="left">
-                  {documentTypeDict[row.value.key]}
-                </TableCell>
-                <TableCell align="left">
-                  {countriesDict[row.value.country]}
-                </TableCell>
-                <TableCell align="left">{row.value.number}</TableCell>
-                <TableCell align="left">
-                  {row.value.photo ? <PhotoModal src={row.value.photo} /> : '-'}
-                </TableCell>
-              </TableRow>
-            );
-          })}
+                    checked={selectedDocuments.includes(index)}
+                    inputProps={{ 'aria-labelledby': 'selected' }}
+                  />
+                ) : (
+                  selectedDocuments.includes(index) && (
+                  <GreenIcon data-cy="green-check-icon">
+                    <CheckCircleIcon />
+                  </GreenIcon>
+                  )
+                )}
+              </TableCell>
+              <TableCell align="left">
+                {documentTypeDict[row.value.key]}
+              </TableCell>
+              <TableCell align="left">
+                {countriesDict[row.value.country]}
+              </TableCell>
+              <TableCell align="left">{row.value.number}</TableCell>
+              <TableCell align="left">
+                {row.value.photo ? <PhotoModal src={row.value.photo} /> : '-'}
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </StyledTable>
     </>
   );
-};
+}

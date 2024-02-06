@@ -34,7 +34,7 @@ import { LoadingButton } from '../core/LoadingButton';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 
-export const NewReportForm = (): React.ReactElement => {
+export function NewReportForm(): React.ReactElement {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -45,9 +45,8 @@ export const NewReportForm = (): React.ReactElement => {
     dateTo: Yup.date()
       .when(
         'dateFrom',
-        (dateFrom, schema) =>
-          dateFrom &&
-          schema.min(
+        (dateFrom, schema) => dateFrom
+          && schema.min(
             dateFrom,
             `${t('End date have to be greater than')}
             ${moment(dateFrom).format('YYYY-MM-DD')}`,
@@ -57,13 +56,11 @@ export const NewReportForm = (): React.ReactElement => {
       .required(t('Date To is required')),
   });
 
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsQuery({
-      variables: { businessArea, status: ['ACTIVE'] },
-      fetchPolicy: 'cache-and-network',
-    });
-  const { data: choicesData, loading: choicesLoading } =
-    useReportChoiceDataQuery();
+  const { data: allProgramsData, loading: loadingPrograms } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+    fetchPolicy: 'cache-and-network',
+  });
+  const { data: choicesData, loading: choicesLoading } = useReportChoiceDataQuery();
   const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
@@ -85,18 +82,15 @@ export const NewReportForm = (): React.ReactElement => {
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const prepareVariables = (values) => {
-    const shouldSendAdminAreaField =
-      values.reportType === REPORT_TYPES.INDIVIDUALS ||
-      values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS ||
-      values.reportType === REPORT_TYPES.PAYMENTS;
+    const shouldSendAdminAreaField = values.reportType === REPORT_TYPES.INDIVIDUALS
+      || values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS
+      || values.reportType === REPORT_TYPES.PAYMENTS;
 
-    const shouldSendProgramField =
-      values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION ||
-      values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION ||
-      values.reportType === REPORT_TYPES.CASH_PLAN;
+    const shouldSendProgramField = values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION
+      || values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION
+      || values.reportType === REPORT_TYPES.CASH_PLAN;
 
-    const shouldSendBothFields =
-      values.reportType === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT;
+    const shouldSendBothFields = values.reportType === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT;
 
     let variables = null;
 
@@ -170,15 +164,13 @@ export const NewReportForm = (): React.ReactElement => {
         />
       </Grid>
     );
-    const showOnlyAdminAreaField =
-      values.reportType === REPORT_TYPES.INDIVIDUALS ||
-      values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS ||
-      values.reportType === REPORT_TYPES.PAYMENTS;
+    const showOnlyAdminAreaField = values.reportType === REPORT_TYPES.INDIVIDUALS
+      || values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS
+      || values.reportType === REPORT_TYPES.PAYMENTS;
 
-    const showOnlyProgramField =
-      values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION ||
-      values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION ||
-      values.reportType === REPORT_TYPES.CASH_PLAN;
+    const showOnlyProgramField = values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION
+      || values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION
+      || values.reportType === REPORT_TYPES.CASH_PLAN;
 
     let fields = null;
 
@@ -304,8 +296,8 @@ export const NewReportForm = (): React.ReactElement => {
                       </Grid>
                     </Grid>
                     {renderConditionalFields(values)}
-                    {values.reportType ===
-                      REPORT_TYPES.INDIVIDUALS_AND_PAYMENT && (
+                    {values.reportType
+                      === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT && (
                       <>
                         <Grid item xs={12}>
                           <Field
@@ -315,9 +307,7 @@ export const NewReportForm = (): React.ReactElement => {
                             level={1}
                             component={FormikAdminAreaAutocomplete}
                             onClear={() => setFieldValue('adminArea2', [])}
-                            additionalOnChange={() =>
-                              setFieldValue('adminArea2', [])
-                            }
+                            additionalOnChange={() => setFieldValue('adminArea2', [])}
                           />
                         </Grid>
                         <Grid item xs={12}>
@@ -367,4 +357,4 @@ export const NewReportForm = (): React.ReactElement => {
       </Dialog>
     </>
   );
-};
+}

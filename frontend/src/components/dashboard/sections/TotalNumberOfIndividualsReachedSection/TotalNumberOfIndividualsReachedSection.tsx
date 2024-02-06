@@ -1,4 +1,6 @@
-import { Box, Button, DialogContent, Grid } from '@mui/material';
+import {
+  Box, Button, DialogContent, Grid,
+} from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,11 +33,11 @@ interface TotalNumberOfIndividualsReachedSectionProps {
   chartDataIndividualsDisability: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];
 }
 
-export const TotalNumberOfIndividualsReachedSection = ({
+export function TotalNumberOfIndividualsReachedSection({
   data,
   chartDataIndividuals,
   chartDataIndividualsDisability,
-}: TotalNumberOfIndividualsReachedSectionProps): React.ReactElement => {
+}: TotalNumberOfIndividualsReachedSectionProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   if (!data) return null;
@@ -95,4 +97,4 @@ export const TotalNumberOfIndividualsReachedSection = ({
       </Dialog>
     </>
   );
-};
+}

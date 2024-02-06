@@ -59,12 +59,12 @@ interface LinkedGrievancesModalProps {
   grievancesChoices: GrievancesChoiceDataQuery;
 }
 
-export const LinkedGrievancesModal = ({
+export function LinkedGrievancesModal({
   household,
   businessArea,
   baseUrl,
   grievancesChoices,
-}: LinkedGrievancesModalProps): React.ReactElement => {
+}: LinkedGrievancesModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const history = useHistory();
   const { t } = useTranslation();
@@ -111,27 +111,26 @@ export const LinkedGrievancesModal = ({
 
   const allGrievances = grievances ? grievances.allGrievanceTicket.edges : [];
 
-  const renderGrievances = (): Array<React.ReactElement> => {
-    return allGrievances.length
-      ? allGrievances.map((el) => {
-          const grievanceDetailsPath = getGrievanceDetailsPath(
-            el.node.id,
-            el.node.category,
-            baseUrl,
-          );
-          return (
-            <span key={el.node.id}>
-              <ContentLink href={grievanceDetailsPath}>
-                {`${el.node.unicefId} - ${
-                  categoryChoices[el.node.category]
-                } - ${statusChoices[el.node.status]}`}
-              </ContentLink>{' '}
-              <br />
-            </span>
-          );
-        })
-      : [<span>-</span>];
-  };
+  const renderGrievances = (): Array<React.ReactElement> => (allGrievances.length
+    ? allGrievances.map((el) => {
+      const grievanceDetailsPath = getGrievanceDetailsPath(
+        el.node.id,
+        el.node.category,
+        baseUrl,
+      );
+      return (
+        <span key={el.node.id}>
+          <ContentLink href={grievanceDetailsPath}>
+            {`${el.node.unicefId} - ${
+              categoryChoices[el.node.category]
+            } - ${statusChoices[el.node.status]}`}
+          </ContentLink>
+          {' '}
+          <br />
+        </span>
+      );
+    })
+    : [<span>-</span>]);
 
   const renderLink = (): React.ReactElement => {
     if (allGrievances.length === 0) {
@@ -159,11 +158,9 @@ export const LinkedGrievancesModal = ({
     );
   };
 
-  const renderRows = (): React.ReactElement => {
-    return (
-      <>{allGrievances.map((relatedTicket) => renderRow(relatedTicket.node))}</>
-    );
-  };
+  const renderRows = (): React.ReactElement => (
+    <>{allGrievances.map((relatedTicket) => renderRow(relatedTicket.node))}</>
+  );
 
   return (
     <>
@@ -181,7 +178,10 @@ export const LinkedGrievancesModal = ({
         <DialogContent>
           <Box mt={2} mb={6}>
             <Typography>
-              <Bold>Household ID {household.unicefId} </Bold>
+              <Bold>
+                Household ID
+                {household.unicefId}
+              </Bold>
               is linked to following Grievances.
             </Typography>
           </Box>
@@ -211,4 +211,4 @@ export const LinkedGrievancesModal = ({
       </StyledDialog>
     </>
   );
-};
+}

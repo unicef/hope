@@ -35,13 +35,13 @@ export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   businessAreaData: BusinessAreaDataQuery;
 }
 
-export const LockedTargetPopulationHeaderButtons = ({
+export function LockedTargetPopulationHeaderButtons({
   targetPopulation,
   canSend,
   canDuplicate,
   canUnlock,
   businessAreaData,
-}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
+}: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
@@ -155,4 +155,4 @@ export const LockedTargetPopulationHeaderButtons = ({
       )}
     </Box>
   );
-};
+}

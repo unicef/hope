@@ -27,11 +27,11 @@ interface HouseholdTableRowProps {
   canViewDetails: boolean;
 }
 
-export const HouseholdTableRow = ({
+export function HouseholdTableRow({
   household,
   choicesData,
   canViewDetails,
-}: HouseholdTableRowProps): React.ReactElement => {
+}: HouseholdTableRowProps): React.ReactElement {
   const history = useHistory();
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -101,4 +101,4 @@ export const HouseholdTableRow = ({
       </TableCell>
     </ClickableTableRow>
   );
-};
+}

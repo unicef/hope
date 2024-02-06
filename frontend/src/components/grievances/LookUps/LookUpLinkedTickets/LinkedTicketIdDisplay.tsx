@@ -2,17 +2,17 @@ import React from 'react';
 import { useGrievanceTicketUnicefIdQuery } from '../../../../__generated__/graphql';
 import { BlueText } from '../LookUpStyles';
 
-export const LinkedTicketIdDisplay = ({
+export function LinkedTicketIdDisplay({
   ticketId,
 }: {
   ticketId: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { data } = useGrievanceTicketUnicefIdQuery({
     variables: { id: ticketId },
   });
   return (
-    <BlueText data-cy='linked-ticket-id'>
+    <BlueText data-cy="linked-ticket-id">
       {data?.grievanceTicket?.unicefId}
     </BlueText>
   );
-};
+}

@@ -16,7 +16,7 @@ describe('components/population/IndividualBioData', () => {
       <MockedProvider addTypename={false} mocks={fakeApolloAllGrievances}>
         <IndividualBioData
           baseUrl={fakeBaseUrl}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           individual={fakeIndividual}
           choicesData={fakeHouseholdChoices}
           grievancesChoices={fakeGrievancesChoices}

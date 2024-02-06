@@ -16,12 +16,12 @@ export interface FinalizeTargetPopulationPropTypes {
   setOpen: Function;
 }
 
-export const FinalizeTargetPopulation = ({
+export function FinalizeTargetPopulation({
   open,
   setOpen,
   totalHouseholds,
   targetPopulationId,
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
@@ -50,7 +50,10 @@ export const FinalizeTargetPopulation = ({
       </DialogTitleWrapper>
       <DialogContent>
         <DialogDescription>
-          {t('Are you sure you want to push')} {totalHouseholds}{' '}
+          {t('Are you sure you want to push')}
+          {' '}
+          {totalHouseholds}
+          {' '}
           {t(
             'households to CashAssist? Target population will not be editable further.',
           )}
@@ -73,4 +76,4 @@ export const FinalizeTargetPopulation = ({
       </DialogFooter>
     </Dialog>
   );
-};
+}

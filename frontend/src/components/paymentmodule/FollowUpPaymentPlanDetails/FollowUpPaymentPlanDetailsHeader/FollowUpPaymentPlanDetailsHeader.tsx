@@ -30,11 +30,11 @@ interface FollowUpPaymentPlanDetailsHeaderProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const FollowUpPaymentPlanDetailsHeader = ({
+export function FollowUpPaymentPlanDetailsHeader({
   baseUrl,
   permissions,
   paymentPlan,
-}: FollowUpPaymentPlanDetailsHeaderProps): React.ReactElement => {
+}: FollowUpPaymentPlanDetailsHeaderProps): React.ReactElement {
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -172,9 +172,12 @@ export const FollowUpPaymentPlanDetailsHeader = ({
 
   return (
     <PageHeader
-      title={
+      title={(
         <Box display="flex" alignItems="center">
-          {t('Follow-up Payment Plan')} ID:{' '}
+          {t('Follow-up Payment Plan')}
+          {' '}
+          ID:
+          {' '}
           <Box ml={1}>
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
@@ -193,7 +196,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
             </StatusWrapper>
           )}
         </Box>
-      }
+      )}
       breadCrumbs={
         hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)
           ? breadCrumbsItems
@@ -203,4 +206,4 @@ export const FollowUpPaymentPlanDetailsHeader = ({
       {buttons}
     </PageHeader>
   );
-};
+}

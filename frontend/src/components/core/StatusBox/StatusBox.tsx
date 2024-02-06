@@ -16,8 +16,7 @@ const StatusContainer = styled.div`
 
 const StatusBoxContainer = styled.div`
   color: ${({ status, statusToColor, theme }) => statusToColor(theme, status)};
-  background-color: ${({ status, statusToColor, theme }) =>
-    `${statusToColor(theme, status)}${opacityToHex(0.15)}`};
+  background-color: ${({ status, statusToColor, theme }) => `${statusToColor(theme, status)}${opacityToHex(0.15)}`};
   border-radius: 16px;
   font-family: Roboto;
   font-size: 10px;

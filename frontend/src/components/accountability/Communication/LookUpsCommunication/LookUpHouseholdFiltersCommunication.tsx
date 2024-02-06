@@ -22,28 +22,27 @@ interface LookUpHouseholdFiltersCommunicationProps {
   setAppliedFilter: (filter) => void;
 }
 
-export const LookUpHouseholdFiltersCommunication = ({
+export function LookUpHouseholdFiltersCommunication({
   filter,
   choicesData,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpHouseholdFiltersCommunicationProps): React.ReactElement => {
+}: LookUpHouseholdFiltersCommunicationProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -71,9 +70,7 @@ export const LookUpHouseholdFiltersCommunication = ({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('residenceStatus', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('residenceStatus', e.target.value)}
             label={t('Residence Status')}
             fullWidth
             value={filter.residenceStatus}
@@ -106,9 +103,7 @@ export const LookUpHouseholdFiltersCommunication = ({
             placeholder={t('From')}
             icon={<GroupIcon />}
             fullWidth
-            onChange={(e) =>
-              handleFilterChange('householdSizeMin', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('householdSizeMin', e.target.value)}
             data-cy="hh-filters-household-size-from"
           />
         </Grid>
@@ -118,9 +113,7 @@ export const LookUpHouseholdFiltersCommunication = ({
             placeholder={t('To')}
             icon={<GroupIcon />}
             fullWidth
-            onChange={(e) =>
-              handleFilterChange('householdSizeMax', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('householdSizeMax', e.target.value)}
             data-cy="hh-filters-household-size-to"
           />
         </Grid>
@@ -159,4 +152,4 @@ export const LookUpHouseholdFiltersCommunication = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

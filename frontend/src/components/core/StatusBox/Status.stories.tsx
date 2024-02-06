@@ -1,9 +1,8 @@
 import React from 'react';
 import { ThemeProvider } from '@mui/material';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
+import styled, { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { theme } from '../../../theme';
 import { StatusBox } from './StatusBox';
-import styled from 'styled-components';
 import {
   programStatusToColor,
   cashPlanStatusToColor,
@@ -38,7 +37,7 @@ const StatusWrapper = styled.div`
   margin: 2rem;
 `;
 
-export const ProgramStatuses = () => {
+export function ProgramStatuses() {
   return (
     <ThemeProvider theme={theme}>
       <StyledThemeProvider theme={theme}>
@@ -50,9 +49,9 @@ export const ProgramStatuses = () => {
       </StyledThemeProvider>
     </ThemeProvider>
   );
-};
+}
 
-export const CashPlanStatuses = () => {
+export function CashPlanStatuses() {
   return (
     <ThemeProvider theme={theme}>
       <StyledThemeProvider theme={theme}>
@@ -64,9 +63,9 @@ export const CashPlanStatuses = () => {
       </StyledThemeProvider>
     </ThemeProvider>
   );
-};
+}
 
-export const PaymentRecordStatuses = () => {
+export function PaymentRecordStatuses() {
   return (
     <ThemeProvider theme={theme}>
       <StyledThemeProvider theme={theme}>
@@ -78,4 +77,4 @@ export const PaymentRecordStatuses = () => {
       </StyledThemeProvider>
     </ThemeProvider>
   );
-};
+}

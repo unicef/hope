@@ -28,13 +28,14 @@ Chart.defaults.plugins.datalabels.font = () => ({
 });
 
 setupInternalization();
-if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN)
+if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     release: packageJson.version,
     environment: process.env.SENTRY_ENVIRONMENT,
     ignoreErrors: ['Permission Denied'],
   });
+}
 
 ReactDOM.render(
   <React.StrictMode>

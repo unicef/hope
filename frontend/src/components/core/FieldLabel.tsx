@@ -9,12 +9,10 @@ const Label = styled.span`
 interface FieldLabelProps {
   children: string
 }
-export const FieldLabel = ({
-  children }: FieldLabelProps
-): React.ReactElement => {
+export function FieldLabel({ children }: FieldLabelProps): React.ReactElement {
   return (
     <Label>
       {children}
     </Label>
-  )
-};
+  );
+}

@@ -9,7 +9,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { usePaymentPlanQuery } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-export const EditSetUpFspPage = (): React.ReactElement => {
+export function EditSetUpFspPage(): React.ReactElement {
   const { id } = useParams();
 
   const {
@@ -26,8 +26,7 @@ export const EditSetUpFspPage = (): React.ReactElement => {
   const permissions = usePermissions();
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP, permissions)) return <PermissionDenied />;
   if (!paymentPlanData) return null;
   if (paymentPlanLoading) return <LoadingComponent />;
 
@@ -52,4 +51,4 @@ export const EditSetUpFspPage = (): React.ReactElement => {
       />
     </>
   );
-};
+}

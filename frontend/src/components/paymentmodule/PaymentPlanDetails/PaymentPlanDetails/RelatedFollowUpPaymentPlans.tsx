@@ -11,10 +11,10 @@ interface RelatedFollowUpPaymentPlansProps {
   followUps: PaymentPlanQuery['paymentPlan']['followUps'];
 }
 
-export const RelatedFollowUpPaymentPlans = ({
+export function RelatedFollowUpPaymentPlans({
   followUps,
   baseUrl,
-}: RelatedFollowUpPaymentPlansProps): React.ReactElement => {
+}: RelatedFollowUpPaymentPlansProps): React.ReactElement {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
 
@@ -54,4 +54,4 @@ export const RelatedFollowUpPaymentPlans = ({
       </Box>
     </LabelizedField>
   );
-};
+}

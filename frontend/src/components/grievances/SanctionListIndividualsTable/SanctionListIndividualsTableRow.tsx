@@ -5,11 +5,11 @@ import { DATE_FORMAT } from '../../../config';
 import { AllSanctionListIndividualsQuery } from '../../../__generated__/graphql';
 import { UniversalMoment } from '../../core/UniversalMoment';
 
-export const SanctionListIndividualsTableRow = ({
+export function SanctionListIndividualsTableRow({
   individual,
 }: {
   individual: AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'];
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <TableRow>
       <TableCell align="left">{individual.referenceNumber}</TableCell>
@@ -29,4 +29,4 @@ export const SanctionListIndividualsTableRow = ({
       </TableCell>
     </TableRow>
   );
-};
+}

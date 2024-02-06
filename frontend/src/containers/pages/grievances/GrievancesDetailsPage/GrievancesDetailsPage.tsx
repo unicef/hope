@@ -20,31 +20,27 @@ import { isPermissionDeniedError } from '../../../../utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';
 
-export const GrievancesDetailsPage = (): React.ReactElement => {
+export function GrievancesDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data: currentUserData, loading: currentUserDataLoading } =
-    useMeQuery();
+  const { data: currentUserData, loading: currentUserDataLoading } = useMeQuery();
   const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
     fetchPolicy: 'network-only',
   });
 
   const { baseUrl } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery();
 
-  if (choicesLoading || loading || currentUserDataLoading)
-    return <LoadingComponent />;
+  if (choicesLoading || loading || currentUserDataLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data?.grievanceTicket ||
-    !choicesData ||
-    !currentUserData ||
-    permissions === null
-  )
-    return null;
+    !data?.grievanceTicket
+    || !choicesData
+    || !currentUserData
+    || permissions === null
+  ) return null;
 
   const ticket = data?.grievanceTicket;
   const currentUserId = currentUserData?.me?.id;
@@ -102,4 +98,4 @@ export const GrievancesDetailsPage = (): React.ReactElement => {
       )}
     </>
   );
-};
+}

@@ -48,21 +48,21 @@ const IconsContainer = styled.div`
   align-items: center;
   font-size: 50px;
 `;
-export const ReportingDetailsPage = (): React.ReactElement => {
+export function ReportingDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
-  const [mutate, { loading: restartReportLoading }] =
-    useRestartCreateReportMutation();
+  const [mutate, { loading: restartReportLoading }] = useRestartCreateReportMutation();
 
-  const { data, loading, startPolling, stopPolling } = useReportQuery({
+  const {
+    data, loading, startPolling, stopPolling,
+  } = useReportQuery({
     variables: { id },
   });
-  const { data: choicesData, loading: choicesLoading } =
-    useReportChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } = useReportChoiceDataQuery();
 
   useEffect(() => {
     if (data.report.status === REPORTING_STATES.PROCESSING) {
@@ -75,8 +75,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
 
   if (loading || choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions)) return <PermissionDenied />;
 
   if (!data || !choicesData) return null;
   const { report } = data;
@@ -120,7 +119,10 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       label: t('Timeframe'),
       value: (
         <span>
-          <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
+          <UniversalMoment>{report.dateFrom}</UniversalMoment>
+          {' '}
+          -
+          {' '}
           <UniversalMoment>{report.dateTo}</UniversalMoment>
         </span>
       ),
@@ -135,7 +137,9 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       label: t('Created By'),
       value: (
         <span>
-          {report.createdBy.firstName} {report.createdBy.lastName}
+          {report.createdBy.firstName}
+          {' '}
+          {report.createdBy.lastName}
         </span>
       ),
       size: 3,
@@ -149,8 +153,8 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       label: t('Administrative Level 1'),
       value: (
         <span>
-          {report.adminArea1?.edges.map((edge) => edge.node.name).join(', ') ||
-            '-'}
+          {report.adminArea1?.edges.map((edge) => edge.node.name).join(', ')
+            || '-'}
         </span>
       ),
       size: 3,
@@ -159,8 +163,8 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       label: t('Administrative Level 2'),
       value: (
         <span>
-          {report.adminArea2?.edges.map((edge) => edge.node.name).join(', ') ||
-            '-'}
+          {report.adminArea2?.edges.map((edge) => edge.node.name).join(', ')
+            || '-'}
         </span>
       ),
       size: 3,
@@ -196,12 +200,13 @@ export const ReportingDetailsPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader
-        title={
+        title={(
           <span>
-            {typeChoices[report.reportType]}{' '}
+            {typeChoices[report.reportType]}
+            {' '}
             <UniversalMoment>{report.createdAt}</UniversalMoment>
           </span>
-        }
+        )}
         breadCrumbs={breadCrumbsItems}
       >
         <>
@@ -270,4 +275,4 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       )}
     </>
   );
-};
+}

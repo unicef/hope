@@ -3,12 +3,12 @@ import React from 'react';
 import { FieldLabel } from '../../../components/core/FieldLabel';
 import { AdminAreaFixedAutocomplete } from '../../autocompletes/AdminAreaFixedAutocomplete';
 
-export const FormikAdminAreaAutocomplete = ({
+export function FormikAdminAreaAutocomplete({
   field,
   form,
   disabled,
   ...props
-}): React.ReactElement => {
+}): React.ReactElement {
   const { label } = props;
   const handleChange = (e, option): void => {
     if (!option) {
@@ -28,4 +28,4 @@ export const FormikAdminAreaAutocomplete = ({
       />
     </Box>
   );
-};
+}

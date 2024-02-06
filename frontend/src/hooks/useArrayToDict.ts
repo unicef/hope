@@ -32,10 +32,9 @@ export function useArrayToDict<T>(
       // @ts-ignore
       value = valueExtractor(currentValue);
     } else {
-      value =
-        valueExtractor === '*'
-          ? currentValue
-          : get(currentValue, valueExtractor);
+      value = valueExtractor === '*'
+        ? currentValue
+        : get(currentValue, valueExtractor);
     }
     // eslint-disable-next-line no-param-reassign
     previousValue[key] = value;

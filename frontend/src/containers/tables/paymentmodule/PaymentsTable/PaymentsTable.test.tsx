@@ -18,7 +18,7 @@ describe('containers/tables/paymentmodule/PaymentsTable', () => {
       <MockedProvider addTypename={false} mocks={fakeApolloAllPaymentsForTable}>
         <PaymentsTable
           canViewDetails={false}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           paymentPlan={paymentPlan}
           permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
         />
@@ -38,7 +38,7 @@ describe('containers/tables/paymentmodule/PaymentsTable', () => {
       >
         <PaymentsTable
           canViewDetails={false}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           paymentPlan={paymentPlan}
           permissions={[PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION]}
         />

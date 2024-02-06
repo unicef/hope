@@ -8,14 +8,14 @@ const useStyles = makeStyles({
   },
 });
 
-export const ErrorButton = ({
+export function ErrorButton({
   children,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const classes = useStyles(otherProps);
   return (
     <Button {...otherProps} className={classes.error}>
       {children}
     </Button>
   );
-};
+}

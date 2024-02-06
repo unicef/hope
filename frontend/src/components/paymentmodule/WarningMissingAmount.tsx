@@ -22,7 +22,11 @@ export function WarningMissingAmount({
   return (
     <Box display="flex" alignItems="center">
       <WarnIcon />
-      {t('Missing')} {amount} {currency}
+      {t('Missing')}
+      {' '}
+      {amount}
+      {' '}
+      {currency}
     </Box>
   );
 }

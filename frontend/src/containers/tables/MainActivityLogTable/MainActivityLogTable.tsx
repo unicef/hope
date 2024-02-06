@@ -47,7 +47,7 @@ interface MainActivityLogTableProps {
   actionChoices: AllLogEntriesQuery['logEntryActionChoices'];
   loading: boolean;
 }
-export const MainActivityLogTable = ({
+export function MainActivityLogTable({
   logEntries,
   totalCount,
   rowsPerPage,
@@ -56,7 +56,7 @@ export const MainActivityLogTable = ({
   onChangeRowsPerPage,
   actionChoices,
   loading = false,
-}: MainActivityLogTableProps): ReactElement => {
+}: MainActivityLogTableProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [expanded, setExpanded] = useState(true);
   const choicesDict = useArrayToDict(actionChoices, 'value', 'name');
@@ -65,13 +65,11 @@ export const MainActivityLogTable = ({
       <Collapse in={expanded}>
         <Table>
           <Row>
-            {headCells.map((item) => {
-              return (
-                <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
-                  {item.label}
-                </HeadingCell>
-              );
-            })}
+            {headCells.map((item) => (
+              <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
+                {item.label}
+              </HeadingCell>
+            ))}
             <ButtonPlaceHolder />
           </Row>
           {logEntries.map((value) => (
@@ -98,4 +96,4 @@ export const MainActivityLogTable = ({
       </Collapse>
     </PaperContainer>
   );
-};
+}

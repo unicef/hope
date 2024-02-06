@@ -19,7 +19,7 @@ import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOn
 import { today } from '../../../utils/utils';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-export const CreatePaymentPlanPage = (): React.ReactElement => {
+export function CreatePaymentPlanPage(): React.ReactElement {
   const { t } = useTranslation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
@@ -41,8 +41,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
   if (loadingTargetPopulations) return <LoadingComponent />;
   if (!allTargetPopulationsData) return null;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions)) return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
     targetingId: Yup.string().required(t('Target Population is required')),
@@ -51,9 +50,8 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       .required(t('End Date is required'))
       .when(
         'startDate',
-        (startDate: string, schema) =>
-          startDate &&
-          schema.min(
+        (startDate: string, schema) => startDate
+          && schema.min(
             startDate,
             `${t('End date has to be greater than')} ${moment(startDate).format(
               'YYYY-MM-DD',
@@ -72,9 +70,8 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate: string, schema) =>
-          dispersionStartDate &&
-          schema.min(
+        (dispersionStartDate: string, schema) => dispersionStartDate
+          && schema.min(
             dispersionStartDate,
             `${t('Dispersion End Date has to be greater than')} ${moment(
               dispersionStartDate,
@@ -138,4 +135,4 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       )}
     </Formik>
   );
-};
+}

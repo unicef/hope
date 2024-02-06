@@ -26,7 +26,7 @@ import {
 import { LoadingComponent } from '../core/LoadingComponent';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 
-export const ExportModal = ({ filter, year }): React.ReactElement => {
+export function ExportModal({ filter, year }): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
@@ -35,8 +35,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
   const numSelected = selected.length;
   const isSelected = (id: string): boolean => selected.includes(id);
 
-  const { data: choicesData, loading: choicesLoading } =
-    useDashboardReportChoiceDataQuery({ variables: { businessArea } });
+  const { data: choicesData, loading: choicesLoading } = useDashboardReportChoiceDataQuery({ variables: { businessArea } });
   const [mutate] = useCreateDashboardReportMutation();
 
   useEffect(() => {
@@ -72,24 +71,22 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
     setSelected(newSelected);
   };
 
-  const renderRows = (): Array<React.ReactElement> => {
-    return data.map((el) => {
-      const isItemSelected = isSelected(el.id);
-      return (
-        <TableRow onClick={() => onCheckboxClick(el.id)} key={el.id}>
-          <TableCell align="left" padding="checkbox">
-            <Checkbox
-              color="primary"
-              onClick={() => onCheckboxClick(el.id)}
-              checked={isItemSelected}
-              inputProps={{ 'aria-labelledby': el.id }}
-            />
-          </TableCell>
-          <TableCell align="left">{el.name}</TableCell>
-        </TableRow>
-      );
-    });
-  };
+  const renderRows = (): Array<React.ReactElement> => data.map((el) => {
+    const isItemSelected = isSelected(el.id);
+    return (
+      <TableRow onClick={() => onCheckboxClick(el.id)} key={el.id}>
+        <TableCell align="left" padding="checkbox">
+          <Checkbox
+            color="primary"
+            onClick={() => onCheckboxClick(el.id)}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': el.id }}
+          />
+        </TableCell>
+        <TableCell align="left">{el.name}</TableCell>
+      </TableRow>
+    );
+  });
 
   const submitFormHandler = async (): Promise<void> => {
     const response = await mutate({
@@ -143,7 +140,8 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
             </Box>
             <Box mb={2}>
               <Typography variant="subtitle2">
-                {t('Select types of reports to be exported')}:
+                {t('Select types of reports to be exported')}
+                :
               </Typography>
             </Box>
             <Table>
@@ -196,4 +194,4 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
       </Dialog>
     </>
   );
-};
+}

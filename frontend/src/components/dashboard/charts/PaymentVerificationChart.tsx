@@ -17,9 +17,9 @@ type Dataset = {
   [key in DatasetTypes]: Array<number>;
 };
 
-export const PaymentVerificationChart = ({
+export function PaymentVerificationChart({
   data,
-}: PaymentVerificationChartProps): React.ReactElement => {
+}: PaymentVerificationChartProps): React.ReactElement {
   if (!data) return null;
 
   const datasets = data.datasets.reduce(
@@ -30,8 +30,7 @@ export const PaymentVerificationChart = ({
     {},
   ) as Dataset;
 
-  const convertToPercent = (dataset: Array<number>): string =>
-    `${(dataset[0] * 100).toFixed(0)}%`;
+  const convertToPercent = (dataset: Array<number>): string => `${(dataset[0] * 100).toFixed(0)}%`;
 
   const defaults = {
     categoryPercentage: 0.5,
@@ -82,8 +81,7 @@ export const PaymentVerificationChart = ({
       mode: 'point',
       callbacks: {
         title: () => '',
-        label: (tooltipItem, dataArgs) =>
-          dataArgs.datasets[tooltipItem.datasetIndex].label,
+        label: (tooltipItem, dataArgs) => dataArgs.datasets[tooltipItem.datasetIndex].label,
       },
     },
     scales: {
@@ -113,4 +111,4 @@ export const PaymentVerificationChart = ({
       <HorizontalBar data={chartData} options={options} />
     </Box>
   );
-};
+}

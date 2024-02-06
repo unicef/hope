@@ -16,25 +16,24 @@ interface PaymentVerificationFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const PaymentVerificationFilters = ({
+export function PaymentVerificationFilters({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: PaymentVerificationFiltersProps): React.ReactElement => {
+}: PaymentVerificationFiltersProps): React.ReactElement {
   const history = useHistory();
   const location = useLocation();
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -44,8 +43,7 @@ export const PaymentVerificationFilters = ({
     clearFilter();
   };
 
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } = useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) {
     return null;
@@ -68,22 +66,18 @@ export const PaymentVerificationFilters = ({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('verificationStatus', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('verificationStatus', e.target.value)}
             label="Status"
             multiple
             fullWidth
             data-cy="filter-status"
             value={filter.verificationStatus}
           >
-            {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
@@ -92,9 +86,7 @@ export const PaymentVerificationFilters = ({
             data-cy="filter-fsp"
             label="FSP"
             fullWidth
-            onChange={(e) =>
-              handleFilterChange('serviceProvider', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('serviceProvider', e.target.value)}
           />
         </Grid>
         <Grid item xs={3}>
@@ -135,4 +127,4 @@ export const PaymentVerificationFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

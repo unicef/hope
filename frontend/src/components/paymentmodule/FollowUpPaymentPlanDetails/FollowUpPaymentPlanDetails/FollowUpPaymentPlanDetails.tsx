@@ -15,10 +15,10 @@ interface FollowUpPaymentPlanDetailsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const FollowUpPaymentPlanDetails = ({
+export function FollowUpPaymentPlanDetails({
   baseUrl,
   paymentPlan,
-}: FollowUpPaymentPlanDetailsProps): React.ReactElement => {
+}: FollowUpPaymentPlanDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const {
     createdBy,
@@ -101,4 +101,4 @@ export const FollowUpPaymentPlanDetails = ({
       </ContainerColumnWithBorder>
     </Grid>
   );
-};
+}

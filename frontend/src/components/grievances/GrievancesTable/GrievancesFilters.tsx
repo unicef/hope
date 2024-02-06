@@ -37,7 +37,7 @@ interface GrievancesFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const GrievancesFilters = ({
+export function GrievancesFilters({
   filter,
   choicesData,
   selectedTab,
@@ -45,23 +45,22 @@ export const GrievancesFilters = ({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: GrievancesFiltersProps): React.ReactElement => {
+}: GrievancesFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
   const history = useHistory();
   const location = useLocation();
   const { data: areaScopeData } = useGrievanceTicketAreaScopeQuery();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -77,17 +76,14 @@ export const GrievancesFilters = ({
     '*',
   );
 
-  const categoryChoices = useMemo(() => {
-    return filter.grievanceType ===
-      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
-      ? choicesData.grievanceTicketManualCategoryChoices
-      : choicesData.grievanceTicketSystemCategoryChoices;
-  }, [choicesData, filter.grievanceType]);
+  const categoryChoices = useMemo(() => (filter.grievanceType
+      === GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
+    ? choicesData.grievanceTicketManualCategoryChoices
+    : choicesData.grievanceTicketSystemCategoryChoices), [choicesData, filter.grievanceType]);
 
-  const showIssueType =
-    filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-    filter.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
+  const showIssueType = filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE
+    || filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    || filter.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
   const updatedPriorityChoices = useMemo(() => {
     const priorityChoices = choicesData.grievanceTicketPriorityChoices;
@@ -214,13 +210,11 @@ export const GrievancesFilters = ({
             fullWidth
             data-cy="filters-category"
           >
-            {categoryChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {categoryChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         {showIssueType && (
@@ -332,13 +326,11 @@ export const GrievancesFilters = ({
             data-cy="filters-priority"
             fullWidth
           >
-            {updatedPriorityChoices?.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {updatedPriorityChoices?.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item container xs={3}>
@@ -349,20 +341,16 @@ export const GrievancesFilters = ({
             data-cy="filters-urgency"
             fullWidth
           >
-            {updatedUrgencyChoices?.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {updatedUrgencyChoices?.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item container xs={3}>
           <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('grievanceStatus', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('grievanceStatus', e.target.value)}
             label={undefined}
             value={filter.grievanceStatus}
             fullWidth
@@ -380,9 +368,7 @@ export const GrievancesFilters = ({
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('programState', e.target.value)
-              }
+              onChange={(e) => handleFilterChange('programState', e.target.value)}
               label={t('Programme State')}
               value={filter.programState}
               fullWidth
@@ -394,13 +380,11 @@ export const GrievancesFilters = ({
             </SelectFilter>
           </Grid>
         )}
-        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated &&
-          areaScopeData?.crossAreaFilterAvailable && (
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated
+          && areaScopeData?.crossAreaFilterAvailable && (
             <Grid item xs={3}>
               <SelectFilter
-                onChange={(e) =>
-                  handleFilterChange('areaScope', e.target.value)
-                }
+                onChange={(e) => handleFilterChange('areaScope', e.target.value)}
                 label={t('Ticket Type')}
                 value={filter.areaScope}
                 fullWidth
@@ -413,8 +397,8 @@ export const GrievancesFilters = ({
                 <MenuItem value="all">{t('All Tickets')}</MenuItem>
               </SelectFilter>
             </Grid>
-          )}
+        )}
       </Grid>
     </FiltersSection>
   );
-};
+}

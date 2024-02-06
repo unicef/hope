@@ -49,21 +49,19 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  if (loading || choicesLoading || flexFieldsDataLoading)
-    return <LoadingComponent />;
+  if (loading || choicesLoading || flexFieldsDataLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !choicesData || !flexFieldsData || permissions === null)
-    return null;
+  if (!data || !choicesData || !flexFieldsData || permissions === null) return null;
 
   const { importedIndividual } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
-          {
-            title: t('Registration Data import'),
-            to: `/${baseUrl}/registration-data-import/`,
-          },
-        ]
+        {
+          title: t('Registration Data import'),
+          to: `/${baseUrl}/registration-data-import/`,
+        },
+      ]
       : []),
     {
       title: importedIndividual.registrationDataImport.name,

@@ -17,8 +17,9 @@ interface ProgramDetailsProps {
 export function TargetPopulationDetails({
   targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
-  const { createdBy, finalizedBy, changeDate, finalizedAt, program } =
-    targetPopulation;
+  const {
+    createdBy, finalizedBy, changeDate, finalizedAt, program,
+  } = targetPopulation;
   const { t } = useTranslation();
   const closeDate = changeDate ? (
     <UniversalMoment>{changeDate}</UniversalMoment>

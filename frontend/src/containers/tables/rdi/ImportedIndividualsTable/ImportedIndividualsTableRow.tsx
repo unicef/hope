@@ -16,11 +16,11 @@ interface ImportedIndividualsTableRowProps {
   isMerged?: boolean;
 }
 
-export const ImportedIndividualsTableRow = ({
+export function ImportedIndividualsTableRow({
   individual,
   choices,
   isMerged,
-}: ImportedIndividualsTableRowProps): React.ReactElement => {
+}: ImportedIndividualsTableRowProps): React.ReactElement {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
 
@@ -64,16 +64,14 @@ export const ImportedIndividualsTableRow = ({
       <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align="left">
         {individual.deduplicationBatchResults.length ? (
-          <>
-            <DedupeResults
-              isInBatch
-              status={
+          <DedupeResults
+            isInBatch
+            status={
                 deduplicationBatchDict[individual.deduplicationBatchStatus]
               }
-              results={individual.deduplicationBatchResults}
-              individual={individual}
-            />
-          </>
+            results={individual.deduplicationBatchResults}
+            individual={individual}
+          />
         ) : (
           `${deduplicationBatchDict[individual.deduplicationBatchStatus]}`
         )}
@@ -99,4 +97,4 @@ export const ImportedIndividualsTableRow = ({
       </TableCell>
     </ClickableTableRow>
   );
-};
+}

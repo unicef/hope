@@ -1,10 +1,17 @@
-import { InputAdornment } from '@mui/material';
+import {
+  InputAdornment,
+  TextField,
+  OutlinedTextFieldProps,
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import styled from 'styled-components';
 import React from 'react';
-import TextField from '../../shared/TextField';
 
-const StyledTextField = styled(TextField)`
+interface StyledTextFieldProps extends OutlinedTextFieldProps {
+  borderRadius?: string;
+}
+
+const StyledTextField = styled(TextField)<StyledTextFieldProps>`
   flex: 1;
   && {
     min-width: 150px;
@@ -13,17 +20,18 @@ const StyledTextField = styled(TextField)`
     border-radius: ${(props) => props.borderRadius};
   }
 `;
-export const SearchTextField = ({
+
+export function SearchTextField({
   icon = null,
   borderRadius = '4px',
   fullWidth = true,
   ...props
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <StyledTextField
       {...props}
       fullWidth={fullWidth}
-      theme={{ borderRadius }}
+      borderRadius={borderRadius}
       variant="outlined"
       margin="dense"
       inputProps={{ maxLength: 200 }}
@@ -38,4 +46,4 @@ export const SearchTextField = ({
       }}
     />
   );
-};
+}

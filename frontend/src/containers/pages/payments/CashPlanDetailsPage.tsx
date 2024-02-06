@@ -30,26 +30,22 @@ const Container = styled.div`
   }
 `;
 
-export const CashPlanDetailsPage = (): React.ReactElement => {
+export function CashPlanDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const { baseUrl, isAllPrograms, businessArea } = useBaseUrl();
-  const { data: businessAreaData, loading: businessAreaDataLoading } =
-    useBusinessAreaDataQuery({
-      variables: { businessAreaSlug: businessArea },
-    });
+  const { data: businessAreaData, loading: businessAreaDataLoading } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: caData, loading: caPrefixLoading } =
-    useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
-  if (loading || caPrefixLoading || businessAreaDataLoading)
-    return <LoadingComponent />;
+  const { data: caData, loading: caPrefixLoading } = useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
+  if (loading || caPrefixLoading || businessAreaDataLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !caData || !businessAreaData || permissions === null)
-    return null;
+  if (!data || !caData || !businessAreaData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -101,4 +97,4 @@ export const CashPlanDetailsPage = (): React.ReactElement => {
       </Container>
     </div>
   );
-};
+}

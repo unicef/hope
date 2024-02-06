@@ -35,18 +35,18 @@ export function ProgrammesTable({
       max: filter.numberOfHouseholdsMax,
     }),
     budget: JSON.stringify({ min: filter.budgetMin, max: filter.budgetMax }),
-    dataCollectingType: filter.dataCollectingType
+    dataCollectingType: filter.dataCollectingType,
   };
   return (
     <TableWrapper>
       <UniversalTable<
-        AllProgramsQuery['allPrograms']['edges'][number]['node'],
-        AllProgramsQueryVariables
+      AllProgramsQuery['allPrograms']['edges'][number]['node'],
+      AllProgramsQueryVariables
       >
         title={t('Programmes')}
         headCells={headCells}
         query={useAllProgramsQuery}
-        queriedObjectName='allPrograms'
+        queriedObjectName="allPrograms"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <ProgrammesTableRow

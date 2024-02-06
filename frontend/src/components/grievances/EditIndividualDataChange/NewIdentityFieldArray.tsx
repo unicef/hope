@@ -25,53 +25,49 @@ export function NewIdentityFieldArray({
     <Grid container spacing={3}>
       <FieldArray
         name="individualDataUpdateFieldsIdentities"
-        render={(arrayHelpers) => {
-          return (
-            <>
-              {values.individualDataUpdateFieldsIdentities?.map((item) => {
-                const existingOrNewId = item.node?.id || item.id;
-                return (
-                  <AgencyField
-                    id={existingOrNewId}
-                    key={`${existingOrNewId}-${item?.country}-${item?.partner}`}
-                    onDelete={() =>
-                      removeItemById(
-                        values.individualDataUpdateFieldsIdentities,
-                        existingOrNewId,
-                        arrayHelpers,
-                      )
-                    }
-                    countryChoices={addIndividualFieldsData.countriesChoices}
-                    identityTypeChoices={
+        render={(arrayHelpers) => (
+          <>
+            {values.individualDataUpdateFieldsIdentities?.map((item) => {
+              const existingOrNewId = item.node?.id || item.id;
+              return (
+                <AgencyField
+                  id={existingOrNewId}
+                  key={`${existingOrNewId}-${item?.country}-${item?.partner}`}
+                  onDelete={() => removeItemById(
+                    values.individualDataUpdateFieldsIdentities,
+                    existingOrNewId,
+                    arrayHelpers,
+                  )}
+                  countryChoices={addIndividualFieldsData.countriesChoices}
+                  identityTypeChoices={
                       addIndividualFieldsData.identityTypeChoices
                     }
-                    baseName="individualDataUpdateFieldsIdentities"
-                    values={values}
-                  />
-                );
-              })}
+                  baseName="individualDataUpdateFieldsIdentities"
+                  values={values}
+                />
+              );
+            })}
 
-              <Grid item xs={8} />
-              <Grid item xs={12}>
-                <Button
-                  color="primary"
-                  onClick={() => {
-                    arrayHelpers.push({
-                      id: uuidv4(),
-                      country: null,
-                      partner: null,
-                      number: '',
-                    });
-                  }}
-                  startIcon={<AddCircleOutline />}
-                  disabled={isEditTicket}
-                >
-                  {t('Add Identity')}
-                </Button>
-              </Grid>
-            </>
-          );
-        }}
+            <Grid item xs={8} />
+            <Grid item xs={12}>
+              <Button
+                color="primary"
+                onClick={() => {
+                  arrayHelpers.push({
+                    id: uuidv4(),
+                    country: null,
+                    partner: null,
+                    number: '',
+                  });
+                }}
+                startIcon={<AddCircleOutline />}
+                disabled={isEditTicket}
+              >
+                {t('Add Identity')}
+              </Button>
+            </Grid>
+          </>
+        )}
       />
     </Grid>
   );

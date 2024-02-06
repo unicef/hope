@@ -37,17 +37,16 @@ const EditIcon = styled(Edit)`
   color: ${({ theme }) => theme.hctPalette.darkerBlue};
 `;
 
-export const ApproveDeleteHouseholdGrievanceDetails = ({
+export function ApproveDeleteHouseholdGrievanceDetails({
   ticket,
   type,
-}: ApproveDeleteHouseholdGrievanceDetails): React.ReactElement => {
+}: ApproveDeleteHouseholdGrievanceDetails): React.ReactElement {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
   const { showMessage } = useSnackbar();
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-  const { approveStatus, reasonHousehold } =
-    ticket.deleteHouseholdTicketDetails;
+  const { approveStatus, reasonHousehold } = ticket.deleteHouseholdTicketDetails;
 
   const validationSchema = Yup.object().shape({
     reasonHhId: Yup.string().when('withdrawReason', (withdrawReasonValue) => {
@@ -156,11 +155,11 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
                     <Typography variant="body2">
                       {showWithdraw()
                         ? t(
-                            'Please provide the reason of withdrawal of this household.',
-                          )
+                          'Please provide the reason of withdrawal of this household.',
+                        )
                         : t(
-                            'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
-                          )}
+                          'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
+                        )}
                     </Typography>
                   </Box>
                   {showWithdraw() && (
@@ -227,4 +226,4 @@ export const ApproveDeleteHouseholdGrievanceDetails = ({
       )}
     </Formik>
   );
-};
+}

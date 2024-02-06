@@ -10,9 +10,9 @@ interface TicketsByLocationAndCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByLocationAndCategory'];
 }
 
-export const TicketsByLocationAndCategoryChart = ({
+export function TicketsByLocationAndCategoryChart({
   data,
-}: TicketsByLocationAndCategoryChartProps): React.ReactElement => {
+}: TicketsByLocationAndCategoryChartProps): React.ReactElement {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
   const { t } = useTranslation();
@@ -21,9 +21,7 @@ export const TicketsByLocationAndCategoryChart = ({
 
   const matchDataSize = (
     dataToSlice: number[] | string[],
-  ): number[] | string[] => {
-    return showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount);
-  };
+  ): number[] | string[] => (showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount));
 
   const categoriesAndColors = [
     { category: 'Data Change', color: '#FFAA20' },
@@ -104,4 +102,4 @@ export const TicketsByLocationAndCategoryChart = ({
       ) : null}
     </Box>
   );
-};
+}

@@ -16,9 +16,9 @@ export function ScreenBeneficiaryField(): React.ReactElement {
   }
   return (
     <Field
-      name='screenBeneficiary'
+      name="screenBeneficiary"
       label={t('Screen Beneficiary')}
-      color='primary'
+      color="primary"
       component={FormikCheckboxField}
     />
   );

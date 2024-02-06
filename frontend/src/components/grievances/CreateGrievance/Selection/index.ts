@@ -1,1 +1,1 @@
-import {Selection} from './Selection'
+import { Selection } from './Selection';

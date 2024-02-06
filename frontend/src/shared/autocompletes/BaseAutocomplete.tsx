@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import TextField from '../TextField';
 import { StyledAutocomplete } from './StyledAutocomplete';
 
-export const BaseAutocomplete = ({
+export function BaseAutocomplete({
   value,
   disabled,
   label,
@@ -31,7 +31,7 @@ export const BaseAutocomplete = ({
   loading: boolean;
   allEdges;
   handleChange: (event, newValue) => void;
-  //eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleClose: (_: any, reason: string) => void;
   handleOptionSelected: (option, value) => boolean;
   handleOptionLabel: (option) => string;
@@ -42,7 +42,7 @@ export const BaseAutocomplete = ({
   onInputTextChange: (value) => void;
   debouncedInputText: string;
   startAdornment?: React.ReactNode;
-}): React.ReactElement => {
+}): React.ReactElement {
   const prevValueRef = useRef(value);
 
   useEffect(() => {
@@ -76,11 +76,10 @@ export const BaseAutocomplete = ({
       options={[{ value: '', label: '' }, ...allEdges]}
       filterOptions={(options, params) => {
         const filtered = options.filter(
-          (option) =>
-            option.value !== '' &&
-            (params.inputValue === '' ||
-              (option.label &&
-                option.label
+          (option) => option.value !== ''
+            && (params.inputValue === ''
+              || (option.label
+                && option.label
                   .toLowerCase()
                   .includes(params.inputValue.toLowerCase()))),
         );
@@ -118,4 +117,4 @@ export const BaseAutocomplete = ({
       )}
     />
   );
-};
+}

@@ -27,11 +27,11 @@ interface ReportingTableRowProps {
   statusChoices: { [id: number]: string };
   typeChoices: { [id: number]: string };
 }
-export const ReportingTableRow = ({
+export function ReportingTableRow({
   report,
   typeChoices,
   statusChoices,
-}: ReportingTableRowProps): React.ReactElement => {
+}: ReportingTableRowProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const history = useHistory();
@@ -46,7 +46,10 @@ export const ReportingTableRow = ({
         <Pointer>{typeChoices[report.reportType]}</Pointer>
       </UnderlinedTableCell>
       <TableCell align="left">
-        <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
+        <UniversalMoment>{report.dateFrom}</UniversalMoment>
+        {' '}
+        -
+        {' '}
         <UniversalMoment>{report.dateTo}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
@@ -62,7 +65,9 @@ export const ReportingTableRow = ({
         <UniversalMoment>{report.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        {report.createdBy.firstName} {report.createdBy.lastName}
+        {report.createdBy.firstName}
+        {' '}
+        {report.createdBy.lastName}
       </TableCell>
       <DownloadTableCell
         align="left"
@@ -77,4 +82,4 @@ export const ReportingTableRow = ({
       </DownloadTableCell>
     </TableRow>
   );
-};
+}

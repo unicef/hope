@@ -36,7 +36,7 @@ const WarnIcon = styled(WarningIcon)`
   margin-right: 10px;
 `;
 
-export const ReassignRoleBox = ({
+export function ReassignRoleBox({
   ticket,
   shouldDisplayButton,
   shouldDisableButton,
@@ -44,7 +44,7 @@ export const ReassignRoleBox = ({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   let { individual } = ticket;
@@ -54,16 +54,14 @@ export const ReassignRoleBox = ({
 
   if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
     individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
-    household =
-      ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
+    household = ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
     reassignData = JSON.parse(
       ticket.needsAdjudicationTicketDetails.roleReassignData,
     );
-    uniqueIndividual =
-      ticket.needsAdjudicationTicketDetails.possibleDuplicate.id ===
-      individual.id
-        ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
-        : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
+    uniqueIndividual = ticket.needsAdjudicationTicketDetails.possibleDuplicate.id
+      === individual.id
+      ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
+      : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
   } else if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
   ) {
@@ -75,8 +73,8 @@ export const ReassignRoleBox = ({
   let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
 
   if (
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE
+    && ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
   ) {
     if (isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)) {
       householdsAndRoles = [];
@@ -96,7 +94,11 @@ export const ReassignRoleBox = ({
       <Box mb={2} mt={2} key={el.id}>
         <Box mb={2}>
           <LabelizedField label={t('ROLE')}>
-            <>{capitalize(el.role)} Collector</>
+            <>
+              {capitalize(el.role)}
+              {' '}
+              Collector
+            </>
           </LabelizedField>
           <LabelizedField label={t('HOUSEHOLD ID')}>
             <ContentLink
@@ -115,16 +117,16 @@ export const ReassignRoleBox = ({
             individual={individual}
           />
         ) : null}
-        {shouldDisplayButton &&
-        ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-        reassignData[el.id]?.individual !== uniqueIndividual.id ? (
+        {shouldDisplayButton
+        && ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+        && reassignData[el.id]?.individual !== uniqueIndividual.id ? (
           <ReassignRoleUnique
             individualRole={{ role: el.role, id: el.id }}
             ticket={ticket}
             household={el.household}
             individual={uniqueIndividual}
           />
-        ) : null}
+          ) : null}
       </Box>
     ));
 
@@ -171,4 +173,4 @@ export const ReassignRoleBox = ({
       </Box>
     </StyledBox>
   );
-};
+}

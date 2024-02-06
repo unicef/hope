@@ -25,7 +25,7 @@ describe('containers/tables/population/HouseholdTable', () => {
         mocks={fakeApolloAllHouseholdsForPopulationTable}
       >
         <HouseholdTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
           canViewDetails
           choicesData={fakeHouseholdChoices}
@@ -45,7 +45,7 @@ describe('containers/tables/population/HouseholdTable', () => {
         mocks={fakeApolloAllHouseholdsForPopulationTable}
       >
         <HouseholdTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
           canViewDetails
           choicesData={fakeHouseholdChoices}

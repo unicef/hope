@@ -4,7 +4,7 @@ import { isInvalid } from '../../../../utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
 import { LookUpHouseholdIndividualSelectionDisplay } from './LookUpHouseholdIndividualSelectionDisplay';
 
-export const LookUpHouseholdIndividualSelection = ({
+export function LookUpHouseholdIndividualSelection({
   onValueChange,
   values,
   errors,
@@ -18,7 +18,7 @@ export const LookUpHouseholdIndividualSelection = ({
   touched?;
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const [selectedHousehold, setSelectedHousehold] = useState(
     values.selectedHousehold,
   );
@@ -70,11 +70,11 @@ export const LookUpHouseholdIndividualSelection = ({
             </Grid>
           </Grid>
         )}
-        {isInvalid('selectedHousehold', errors, touched) &&
-          !selectedHousehold && (
+        {isInvalid('selectedHousehold', errors, touched)
+          && !selectedHousehold && (
             <FormHelperText error>{errors?.selectedHousehold}</FormHelperText>
-          )}
+        )}
       </Box>
     </>
   );
-};
+}

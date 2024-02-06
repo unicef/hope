@@ -6,9 +6,9 @@ import { AllChartsQuery } from '../../../__generated__/graphql';
 interface ProgrammesBySectorProps {
   data: AllChartsQuery['chartProgrammesBySector'];
 }
-export const ProgrammesBySector = ({
+export function ProgrammesBySector({
   data,
-}: ProgrammesBySectorProps): React.ReactElement => {
+}: ProgrammesBySectorProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -69,4 +69,4 @@ export const ProgrammesBySector = ({
   };
 
   return <HorizontalBar data={chartData} options={options} />;
-};
+}

@@ -1,7 +1,9 @@
 import { Button } from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
+import {
+  Link, useHistory, useLocation, useParams,
+} from 'react-router-dom';
 import styled from 'styled-components';
 import {
   PaymentVerificationPlanStatus,
@@ -58,7 +60,7 @@ const initialFilter = {
   paymentVerificationPlan: '',
 };
 
-export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
+export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const permissions = usePermissions();
@@ -75,8 +77,7 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: choicesData, loading: choicesLoading } =
-    useCashPlanVerificationSamplingChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } = useCashPlanVerificationSamplingChoicesQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
@@ -102,29 +103,23 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
   );
 
   const canSeeVerificationRecords = (): boolean => {
-    const showTable =
-      statesArray.includes(PaymentVerificationPlanStatus.Finished) ||
-      statesArray.includes(PaymentVerificationPlanStatus.Active);
+    const showTable = statesArray.includes(PaymentVerificationPlanStatus.Finished)
+      || statesArray.includes(PaymentVerificationPlanStatus.Active);
 
     return showTable && statesArray.length > 0;
   };
-  const canSeeCreationMessage = (): boolean => {
-    return statesArray.length === 0;
-  };
+  const canSeeCreationMessage = (): boolean => statesArray.length === 0;
 
-  const canSeeActivationMessage = (): boolean => {
-    return !canSeeVerificationRecords() && !canSeeCreationMessage();
-  };
+  const canSeeActivationMessage = (): boolean => !canSeeVerificationRecords() && !canSeeCreationMessage();
 
-  const isFinished =
-    paymentPlan?.paymentVerificationSummary?.status === 'FINISHED';
+  const isFinished = paymentPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
   const { isFollowUp } = paymentPlan;
 
   const toolbar = (
     <PageHeader
       handleBack={() => history.push(`/${baseUrl}/payment-verification`)}
-      title={
+      title={(
         <BlackLink
           data-cy="plan-link"
           to={`/${baseUrl}/payment-module/${
@@ -132,10 +127,11 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
           }/${paymentPlan.id}`}
           fullWidth
         >
-          {t('Payment Plan')}{' '}
+          {t('Payment Plan')}
+          {' '}
           <span data-cy="plan-id">{paymentPlan.unicefId}</span>
         </BlackLink>
-      }
+      )}
       breadCrumbs={
         hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
           ? breadCrumbsItems
@@ -153,8 +149,8 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
           />
         )}
 
-        {isFinished &&
-          (isAllPrograms ? (
+        {isFinished
+          && (isAllPrograms ? (
             <Button
               variant="contained"
               color="primary"
@@ -181,13 +177,13 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
       </Container>
       {paymentPlan.verificationPlans?.edges?.length
         ? paymentPlan.verificationPlans.edges.map((edge) => (
-            <VerificationPlanDetails
-              key={edge.node.id}
-              samplingChoicesData={choicesData}
-              verificationPlan={edge.node}
-              planNode={paymentPlan}
-            />
-          ))
+          <VerificationPlanDetails
+            key={edge.node.id}
+            samplingChoicesData={choicesData}
+            verificationPlan={edge.node}
+            planNode={paymentPlan}
+          />
+        ))
         : null}
       {canSeeVerificationRecords() ? (
         <>
@@ -223,13 +219,13 @@ export const PaymentPlanVerificationDetailsPage = (): React.ReactElement => {
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
-      {paymentPlan.verificationPlans?.edges[0]?.node?.id &&
-        hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+      {paymentPlan.verificationPlans?.edges[0]?.node?.id
+        && hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={paymentPlan.id}
             objectType="PaymentPlan"
           />
-        )}
+      )}
     </>
   );
-};
+}

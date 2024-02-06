@@ -14,14 +14,15 @@ const PastContainer = styled.div`
 
 export function PastTickets({ tickets }): React.ReactElement {
   const { t } = useTranslation();
-  const formattedTickets = (strings: string[]) =>
-    strings ? strings.join(', ') : t('No past tickets');
+  const formattedTickets = (strings: string[]) => (strings ? strings.join(', ') : t('No past tickets'));
   return (
     <PastContainer>
       <ContainerColumnWithBorder>
         <Title>
           <Typography variant="h6">
-            {t('Past tickets')} <Missing />
+            {t('Past tickets')}
+            {' '}
+            <Missing />
           </Typography>
         </Title>
         <OverviewContainer>

@@ -7,9 +7,9 @@ import { AllChartsQuery } from '../../../__generated__/graphql';
 interface VolumeByDeliveryMechanismProps {
   data: AllChartsQuery['chartVolumeByDeliveryMechanism'];
 }
-export const VolumeByDeliveryMechanism = ({
+export function VolumeByDeliveryMechanism({
   data,
-}: VolumeByDeliveryMechanismProps): React.ReactElement => {
+}: VolumeByDeliveryMechanismProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -56,16 +56,14 @@ export const VolumeByDeliveryMechanism = ({
     tooltips: {
       mode: 'point',
       callbacks: {
-        label: (tooltipItem, tooltipData) => {
-          return ` ${
-            tooltipData.labels[tooltipItem.index]
-          } ${formatCurrencyWithSymbol(
-            tooltipData.datasets[0].data[tooltipItem.index],
-          )} (${getPercentage(
-            tooltipData.datasets[0].data[tooltipItem.index],
-            tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
-          )})`;
-        },
+        label: (tooltipItem, tooltipData) => ` ${
+          tooltipData.labels[tooltipItem.index]
+        } ${formatCurrencyWithSymbol(
+          tooltipData.datasets[0].data[tooltipItem.index],
+        )} (${getPercentage(
+          tooltipData.datasets[0].data[tooltipItem.index],
+          tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
+        )})`,
       },
     },
   };
@@ -75,4 +73,4 @@ export const VolumeByDeliveryMechanism = ({
       <Doughnut data={chartData} options={options} />
     </Box>
   );
-};
+}

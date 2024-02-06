@@ -12,13 +12,13 @@ interface GrievanceDashboardCardProps {
   dataCy?: string;
 }
 
-export const GrievanceDashboardCard = ({
+export function GrievanceDashboardCard({
   topLabel,
   topNumber,
   systemGenerated,
   userGenerated,
   dataCy,
-}: GrievanceDashboardCardProps): React.ReactElement => {
+}: GrievanceDashboardCardProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <DashboardCard color="#FFF">
@@ -50,4 +50,4 @@ export const GrievanceDashboardCard = ({
       </Grid>
     </DashboardCard>
   );
-};
+}

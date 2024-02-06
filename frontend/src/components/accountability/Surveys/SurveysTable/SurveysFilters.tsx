@@ -16,26 +16,25 @@ interface SurveysFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const SurveysFilters = ({
+export function SurveysFilters({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: SurveysFiltersProps): React.ReactElement => {
+}: SurveysFiltersProps): React.ReactElement {
   const history = useHistory();
   const location = useLocation();
   const { t } = useTranslation();
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -105,4 +104,4 @@ export const SurveysFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

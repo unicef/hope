@@ -49,13 +49,13 @@ interface WarningTooltipTableProps {
   canViewDetails: boolean;
 }
 
-export const WarningTooltipTable = ({
+export function WarningTooltipTable({
   paymentPlan,
   payment,
   setDialogOpen,
   baseUrl,
   canViewDetails = false,
-}: WarningTooltipTableProps): React.ReactElement => {
+}: WarningTooltipTableProps): React.ReactElement {
   const { t } = useTranslation();
   if (!payment) return null;
   const mappedPaymentPlanRows = (): React.ReactElement[] => {
@@ -117,8 +117,12 @@ export const WarningTooltipTable = ({
       </DialogTitleWrapper>
       <DialogContent>
         <Box mt={4} mb={2} display="flex">
-          {t('Payment Plan ID')} <Bold>{paymentPlan.unicefId}</Bold>{' '}
-          {t('details')}:
+          {t('Payment Plan ID')}
+          {' '}
+          <Bold>{paymentPlan.unicefId}</Bold>
+          {' '}
+          {t('details')}
+          :
         </Box>
         <GreyBox p={3}>
           <Grid container>
@@ -135,8 +139,12 @@ export const WarningTooltipTable = ({
           </Grid>
         </GreyBox>
         <Box mt={10} mb={10} display="flex">
-          {t('Household ID')} <Bold>{payment.household?.unicefId}</Bold>{' '}
-          {t('is also included in the following Payment Plans')}:
+          {t('Household ID')}
+          {' '}
+          <Bold>{payment.household?.unicefId}</Bold>
+          {' '}
+          {t('is also included in the following Payment Plans')}
+          :
         </Box>
         <StyledTable>
           <TableHead>
@@ -165,4 +173,4 @@ export const WarningTooltipTable = ({
       </DialogFooter>
     </Dialog>
   );
-};
+}

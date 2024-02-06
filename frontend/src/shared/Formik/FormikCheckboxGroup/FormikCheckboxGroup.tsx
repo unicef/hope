@@ -3,10 +3,10 @@ import { Field } from 'formik';
 import React from 'react';
 import { FieldLabel } from '../../../components/core/FieldLabel';
 
-export const FormikCheckboxGroup = ({
+export function FormikCheckboxGroup({
   field,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <>
       <FieldLabel>{otherProps.label}</FieldLabel>
@@ -18,16 +18,16 @@ export const FormikCheckboxGroup = ({
             value={each.value}
             key={each.name}
             as={FormControlLabel}
-            control={
+            control={(
               <Checkbox
                 color="primary"
                 checked={otherProps.values[field.name]?.includes(each.value)}
               />
-            }
+            )}
             label={each.name}
           />
         ))}
       </Box>
     </>
   );
-};
+}

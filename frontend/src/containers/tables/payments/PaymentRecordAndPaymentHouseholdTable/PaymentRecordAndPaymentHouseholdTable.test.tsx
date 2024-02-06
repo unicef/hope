@@ -17,7 +17,7 @@ describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
         <PaymentRecordHouseholdTable
           household={fakeHousehold}
           openInNewTab={false}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           canViewPaymentRecordDetails
         />
       </MockedProvider>,
@@ -37,7 +37,7 @@ describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {
         <PaymentRecordHouseholdTable
           household={fakeHousehold}
           openInNewTab={false}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           canViewPaymentRecordDetails
         />
       </MockedProvider>,

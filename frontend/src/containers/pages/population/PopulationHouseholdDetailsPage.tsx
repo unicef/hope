@@ -58,7 +58,7 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
+export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -69,31 +69,26 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
-    useAllHouseholdsFlexFieldsAttributesQuery();
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
-  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: flexFieldsData, loading: flexFieldsDataLoading } = useAllHouseholdsFlexFieldsAttributesQuery();
+  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery();
+  const { data: grievancesChoices, loading: grievancesChoicesLoading } = useGrievancesChoiceDataQuery();
 
   if (
-    loading ||
-    choicesLoading ||
-    flexFieldsDataLoading ||
-    grievancesChoicesLoading
-  )
-    return <LoadingComponent />;
+    loading
+    || choicesLoading
+    || flexFieldsDataLoading
+    || grievancesChoicesLoading
+  ) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data ||
-    !choicesData ||
-    !grievancesChoices ||
-    !flexFieldsData ||
-    permissions === null
-  )
-    return null;
+    !data
+    || !choicesData
+    || !grievancesChoices
+    || !flexFieldsData
+    || permissions === null
+  ) return null;
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -129,7 +124,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
             ? breadCrumbsItems
             : null
         }
-        flags={
+        flags={(
           <>
             <Box mr={2}>
               {household?.hasDuplicates && (
@@ -153,7 +148,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
               )}
             </Box>
           </>
-        }
+        )}
       />
       <HouseholdDetails
         choicesData={choicesData}
@@ -250,4 +245,4 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       )}
     </>
   );
-};
+}

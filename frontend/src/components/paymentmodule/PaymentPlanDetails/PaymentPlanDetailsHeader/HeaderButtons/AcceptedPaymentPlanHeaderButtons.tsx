@@ -21,33 +21,29 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const AcceptedPaymentPlanHeaderButtons = ({
+export function AcceptedPaymentPlanHeaderButtons({
   canDownloadXlsx,
   canExportXlsx,
   canSendToPaymentGateway,
   paymentPlan,
-}: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
+}: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  const [mutateExport, { loading: loadingExport }] =
-    useExportXlsxPpListPerFspMutation();
+  const [mutateExport, { loading: loadingExport }] = useExportXlsxPpListPerFspMutation();
 
   const {
     mutatePaymentPlanAction: sendToPaymentGateway,
     loading: LoadingSendToPaymentGateway,
-  } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () =>
-    showMessage(t('Sending to Payment Gateway started')),
-  );
+  } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () => showMessage(t('Sending to Payment Gateway started')));
 
-  const shouldDisableExportXlsx =
-    loadingExport ||
-    !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
-    !canExportXlsx ||
-    paymentPlan?.backgroundActionStatus ===
-      PaymentPlanBackgroundActionStatus.XlsxExporting ||
-    !isActiveProgram;
+  const shouldDisableExportXlsx = loadingExport
+    || !paymentPlan.hasFspDeliveryMechanismXlsxTemplate
+    || !canExportXlsx
+    || paymentPlan?.backgroundActionStatus
+      === PaymentPlanBackgroundActionStatus.XlsxExporting
+    || !isActiveProgram;
 
   return (
     <Box display="flex" alignItems="center">
@@ -93,8 +89,8 @@ export const AcceptedPaymentPlanHeaderButtons = ({
               download
               href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
               disabled={
-                !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
-                !canDownloadXlsx
+                !paymentPlan.hasFspDeliveryMechanismXlsxTemplate
+                || !canDownloadXlsx
               }
             >
               {t('Download XLSX')}
@@ -116,4 +112,4 @@ export const AcceptedPaymentPlanHeaderButtons = ({
       </>
     </Box>
   );
-};
+}

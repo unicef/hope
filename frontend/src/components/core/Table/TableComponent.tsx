@@ -17,37 +17,35 @@ import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 
 export type Order = 'asc' | 'desc';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: '100%',
-    },
-    paper: {
-      width: '100%',
-      marginBottom: theme.spacing(2),
-    },
-    table: {
-      minWidth: 750,
-    },
-    empty: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
-      color: 'rgba(0, 0, 0, 0.38)',
-      fontSize: '24px',
-      lineHeight: '28px',
-      textAlign: 'center',
-      padding: '70px',
-    },
-    smallerText: {
-      fontSize: '16px',
-    },
-    icon: {
-      fontSize: '50px',
-    },
-  }),
-);
+const useStyles = makeStyles((theme: Theme) => createStyles({
+  root: {
+    width: '100%',
+  },
+  paper: {
+    width: '100%',
+    marginBottom: theme.spacing(2),
+  },
+  table: {
+    minWidth: 750,
+  },
+  empty: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    color: 'rgba(0, 0, 0, 0.38)',
+    fontSize: '24px',
+    lineHeight: '28px',
+    textAlign: 'center',
+    padding: '70px',
+  },
+  smallerText: {
+    fontSize: '16px',
+  },
+  icon: {
+    fontSize: '50px',
+  },
+}));
 
 interface TableComponentProps<T> {
   data: T[];
@@ -137,9 +135,7 @@ export function TableComponent<T>({
   } else {
     body = (
       <>
-        {data.map((row) => {
-          return renderRow(row);
-        })}
+        {data.map((row) => renderRow(row))}
         {emptyRows > 0 && (
           <TableRow style={{ height: 70 }}>
             <TableCell colSpan={headCells.length} />

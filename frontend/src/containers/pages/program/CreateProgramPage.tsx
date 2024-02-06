@@ -1,4 +1,6 @@
-import { Box, Step, StepButton, Stepper } from '@mui/material';
+import {
+  Box, Step, StepButton, Stepper,
+} from '@mui/material';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +22,7 @@ import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 
-export const CreateProgramPage = (): ReactElement => {
+export function CreateProgramPage(): ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
   const [step, setStep] = useState(0);
@@ -30,8 +32,7 @@ export const CreateProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
-    useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } = useUserPartnerChoicesQuery();
 
   const [mutate] = useCreateProgramMutation({
     refetchQueries: () => [
@@ -128,7 +129,9 @@ export const CreateProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm, values, validateForm, setFieldTouched,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -199,4 +202,4 @@ export const CreateProgramPage = (): ReactElement => {
       }}
     </Formik>
   );
-};
+}

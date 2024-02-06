@@ -6,7 +6,7 @@ import { SelectFilter } from '../../../../components/core/SelectFilter';
 import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 
-export const FlexFieldTab = (): React.ReactElement => {
+export function FlexFieldTab(): React.ReactElement {
   const { t } = useTranslation();
   const { data } = useAllFieldsAttributesQuery();
   const [searchValue, setSearchValue] = useState('');
@@ -51,13 +51,11 @@ export const FlexFieldTab = (): React.ReactElement => {
               <MenuItem value="All">
                 <em>{t('All')}</em>
               </MenuItem>
-              {selectOptions.map((type) => {
-                return (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                );
-              })}
+              {selectOptions.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
             </SelectFilter>
           )}
         </Grid>
@@ -75,13 +73,11 @@ export const FlexFieldTab = (): React.ReactElement => {
             {[
               { name: 'Flex field', value: 'Flex field' },
               { name: 'Core field', value: 'Core field' },
-            ].map((el) => {
-              return (
-                <MenuItem key={el.name} value={el.value}>
-                  {el.name}
-                </MenuItem>
-              );
-            })}
+            ].map((el) => (
+              <MenuItem key={el.name} value={el.value}>
+                {el.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
       </Grid>
@@ -93,4 +89,4 @@ export const FlexFieldTab = (): React.ReactElement => {
       />
     </Box>
   );
-};
+}

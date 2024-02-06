@@ -14,9 +14,9 @@ describe('containers/tables/payments/VerificationRecordsTable', () => {
         mocks={fakeApolloAllPaymentVerifications}
       >
         <VerificationRecordsTable
-          paymentPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
+          paymentPlanId="Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=="
           canViewRecordDetails
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={{}}
         />
       </MockedProvider>,
@@ -34,9 +34,9 @@ describe('containers/tables/payments/VerificationRecordsTable', () => {
         mocks={fakeApolloAllPaymentVerifications}
       >
         <VerificationRecordsTable
-          paymentPlanId='Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=='
+          paymentPlanId="Q2FzaFBsYW5Ob2RlOjIyODExYzJjLWVmYTktNDRiYy1hYjM0LWQ0YjJkNjFmYThlNA=="
           canViewRecordDetails
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={{}}
         />
       </MockedProvider>,

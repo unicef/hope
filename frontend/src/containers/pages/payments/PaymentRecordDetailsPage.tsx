@@ -21,14 +21,13 @@ import { ForceFailedButton } from '../../../components/payments/ForceFailedButto
 import { RevertForceFailedButton } from '../../../components/payments/RevertForceFailedButton';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-export const PaymentRecordDetailsPage = (): React.ReactElement => {
+export function PaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { businessArea } = useBaseUrl();
-  const { data: businessAreaData, loading: businessAreaDataLoading } =
-    useBusinessAreaDataQuery({
-      variables: { businessAreaSlug: businessArea },
-    });
+  const { data: businessAreaData, loading: businessAreaDataLoading } = useBusinessAreaDataQuery({
+    variables: { businessAreaSlug: businessArea },
+  });
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
@@ -39,16 +38,14 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
   });
   const permissions = usePermissions();
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  if (loading || caLoading || businessAreaDataLoading)
-    return <LoadingComponent />;
+  if (loading || caLoading || businessAreaDataLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissions(
       PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
       permissions,
     )
-  )
-    return <PermissionDenied />;
+  ) return <PermissionDenied />;
 
   if (!data || !caData || !businessAreaData) return null;
 
@@ -79,10 +76,9 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
         permissions,
       )
     ) {
-      const ButtonComponent =
-        paymentRecord.status === PaymentRecordStatus.ForceFailed
-          ? RevertForceFailedButton
-          : ForceFailedButton;
+      const ButtonComponent = paymentRecord.status === PaymentRecordStatus.ForceFailed
+        ? RevertForceFailedButton
+        : ForceFailedButton;
       buttons.push(
         <ButtonComponent
           key={`${paymentRecord.id}-failed`}
@@ -129,4 +125,4 @@ export const PaymentRecordDetailsPage = (): React.ReactElement => {
       </Box>
     </>
   );
-};
+}

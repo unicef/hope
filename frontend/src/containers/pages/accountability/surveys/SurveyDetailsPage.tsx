@@ -23,7 +23,7 @@ import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 
-export const SurveyDetailsPage = (): React.ReactElement => {
+export function SurveyDetailsPage(): React.ReactElement {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
@@ -33,10 +33,9 @@ export const SurveyDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: choicesData, loading: choicesLoading } =
-    useSurveysChoiceDataQuery({
-      fetchPolicy: 'cache-and-network',
-    });
+  const { data: choicesData, loading: choicesLoading } = useSurveysChoiceDataQuery({
+    fetchPolicy: 'cache-and-network',
+  });
 
   const [mutate] = useExportSurveySampleMutation();
   const permissions = usePermissions();
@@ -144,4 +143,4 @@ export const SurveyDetailsPage = (): React.ReactElement => {
       </Box>
     </>
   );
-};
+}

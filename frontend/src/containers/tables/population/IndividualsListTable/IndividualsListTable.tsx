@@ -21,12 +21,12 @@ interface IndividualsListTableProps {
   choicesData: HouseholdChoiceDataQuery;
 }
 
-export const IndividualsListTable = ({
+export function IndividualsListTable({
   businessArea,
   filter,
   canViewDetails,
   choicesData,
-}: IndividualsListTableProps): React.ReactElement => {
+}: IndividualsListTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialVariables: AllIndividualsForPopulationTableQueryVariables = {
@@ -52,7 +52,7 @@ export const IndividualsListTable = ({
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllIndividualsForPopulationTableQuery}
-        queriedObjectName='allIndividuals'
+        queriedObjectName="allIndividuals"
         initialVariables={initialVariables}
         allowSort={false}
         filterOrderBy={filter.orderBy}
@@ -67,4 +67,4 @@ export const IndividualsListTable = ({
       />
     </TableWrapper>
   );
-};
+}

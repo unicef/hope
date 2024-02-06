@@ -16,10 +16,10 @@ export interface EditIndividualDataChangeField {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   name: string;
 }
-export const EditIndividualDataChangeField = ({
+export function EditIndividualDataChangeField({
   name,
   field,
-}: EditIndividualDataChangeField): React.ReactElement => {
+}: EditIndividualDataChangeField): React.ReactElement {
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -95,18 +95,16 @@ export const EditIndividualDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <>
-      <Grid item xs={4}>
-        <Field
-          name={name}
-          variant="outlined"
-          label={field.labelEn}
-          required={field.required}
-          data-cy={`input-individual-data-${field.labelEn}`}
-          disabled={isEditTicket}
-          {...fieldProps}
-        />
-      </Grid>
-    </>
+    <Grid item xs={4}>
+      <Field
+        name={name}
+        variant="outlined"
+        label={field.labelEn}
+        required={field.required}
+        data-cy={`input-individual-data-${field.labelEn}`}
+        disabled={isEditTicket}
+        {...fieldProps}
+      />
+    </Grid>
   );
-};
+}

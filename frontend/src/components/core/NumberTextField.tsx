@@ -14,14 +14,14 @@ const TextContainer = styled(TextField)`
   }
 `;
 
-export const NumberTextField = ({
+export function NumberTextField({
   topLabel = null,
   value,
   placeholder,
   onChange,
   icon = null,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <Box display="flex" flexDirection="column">
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
@@ -36,13 +36,13 @@ export const NumberTextField = ({
         InputProps={
           icon
             ? {
-                startAdornment: (
-                  <InputAdornment position="start">{icon}</InputAdornment>
-                ),
-              }
+              startAdornment: (
+                <InputAdornment position="start">{icon}</InputAdornment>
+              ),
+            }
             : null
         }
       />
     </Box>
   );
-};
+}

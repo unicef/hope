@@ -26,22 +26,21 @@ export interface ApprovePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const ApprovePaymentPlan = ({
+export function ApprovePaymentPlan({
   paymentPlan,
-}: ApprovePaymentPlanProps): React.ReactElement => {
+}: ApprovePaymentPlanProps): React.ReactElement {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
 
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
 
-  const { mutatePaymentPlanAction: approve, loading: loadingApprove } =
-    usePaymentPlanAction(
-      Action.Approve,
-      paymentPlan.id,
-      () => showMessage(t('Payment Plan has been approved.')),
-      () => setApproveDialogOpen(false),
-    );
+  const { mutatePaymentPlanAction: approve, loading: loadingApprove } = usePaymentPlanAction(
+    Action.Approve,
+    paymentPlan.id,
+    () => showMessage(t('Payment Plan has been approved.')),
+    () => setApproveDialogOpen(false),
+  );
   const initialValues = {
     comment: '',
   };
@@ -51,96 +50,92 @@ export const ApprovePaymentPlan = ({
   });
 
   const shouldShowLastApproverMessage = (): boolean => {
-    const approvalNumberRequired =
-      paymentPlan.approvalProcess?.edges[0]?.node.approvalNumberRequired;
+    const approvalNumberRequired = paymentPlan.approvalProcess?.edges[0]?.node.approvalNumberRequired;
 
-    const approvalsCount =
-      paymentPlan.approvalProcess?.edges[0]?.node.actions.approval.length;
+    const approvalsCount = paymentPlan.approvalProcess?.edges[0]?.node.actions.approval.length;
 
     return approvalNumberRequired - 1 === approvalsCount;
   };
 
   return (
-    <>
-      <Formik
-        initialValues={initialValues}
-        onSubmit={(values, { resetForm }) => {
-          approve(values.comment);
-          resetForm({});
-        }}
-        validationSchema={validationSchema}
-      >
-        {({ submitForm }) => (
-          <>
-            {approveDialogOpen && <AutoSubmitFormOnEnter />}
-            <Box p={2}>
-              <Button
-                color="primary"
-                variant="contained"
-                onClick={() => setApproveDialogOpen(true)}
-                data-cy="button-approve"
-                disabled={!isActiveProgram}
-              >
-                {t('Approve')}
-              </Button>
-            </Box>
-            <Dialog
-              open={approveDialogOpen}
-              onClose={() => setApproveDialogOpen(false)}
-              scroll="paper"
-              aria-labelledby="form-dialog-title"
-              maxWidth="md"
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values, { resetForm }) => {
+        approve(values.comment);
+        resetForm({});
+      }}
+      validationSchema={validationSchema}
+    >
+      {({ submitForm }) => (
+        <>
+          {approveDialogOpen && <AutoSubmitFormOnEnter />}
+          <Box p={2}>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => setApproveDialogOpen(true)}
+              data-cy="button-approve"
+              disabled={!isActiveProgram}
             >
-              <DialogTitleWrapper>
-                <DialogTitle>{t('Approve Payment Plan')}</DialogTitle>
-              </DialogTitleWrapper>
-              <DialogContent>
-                <DialogContainer>
-                  <Box p={5}>
-                    {t('Are you sure you want to approve this Payment Plan?')}
-                  </Box>
-                  {shouldShowLastApproverMessage() && (
-                    <Box p={5}>
-                      <GreyText>
-                        {t(
-                          'Note: You are the last approver. Upon proceeding, this Payment Plan will be automatically moved to authorization stage.',
-                        )}
-                      </GreyText>
-                    </Box>
-                  )}
-                  <Form>
-                    <Field
-                      name="comment"
-                      multiline
-                      fullWidth
-                      variant="filled"
-                      label="Comment (optional)"
-                      component={FormikTextField}
-                    />
-                  </Form>
-                </DialogContainer>
-              </DialogContent>
-              <DialogFooter>
-                <DialogActions>
-                  <Button onClick={() => setApproveDialogOpen(false)}>
-                    CANCEL
-                  </Button>
-                  <LoadingButton
-                    loading={loadingApprove}
-                    type="submit"
-                    color="primary"
-                    variant="contained"
-                    onClick={submitForm}
-                    data-cy="button-submit"
-                  >
-                    {t('Approve')}
-                  </LoadingButton>
-                </DialogActions>
-              </DialogFooter>
-            </Dialog>
-          </>
-        )}
-      </Formik>
-    </>
+              {t('Approve')}
+            </Button>
+          </Box>
+          <Dialog
+            open={approveDialogOpen}
+            onClose={() => setApproveDialogOpen(false)}
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
+            maxWidth="md"
+          >
+            <DialogTitleWrapper>
+              <DialogTitle>{t('Approve Payment Plan')}</DialogTitle>
+            </DialogTitleWrapper>
+            <DialogContent>
+              <DialogContainer>
+                <Box p={5}>
+                  {t('Are you sure you want to approve this Payment Plan?')}
+                </Box>
+                {shouldShowLastApproverMessage() && (
+                <Box p={5}>
+                  <GreyText>
+                    {t(
+                      'Note: You are the last approver. Upon proceeding, this Payment Plan will be automatically moved to authorization stage.',
+                    )}
+                  </GreyText>
+                </Box>
+                )}
+                <Form>
+                  <Field
+                    name="comment"
+                    multiline
+                    fullWidth
+                    variant="filled"
+                    label="Comment (optional)"
+                    component={FormikTextField}
+                  />
+                </Form>
+              </DialogContainer>
+            </DialogContent>
+            <DialogFooter>
+              <DialogActions>
+                <Button onClick={() => setApproveDialogOpen(false)}>
+                  CANCEL
+                </Button>
+                <LoadingButton
+                  loading={loadingApprove}
+                  type="submit"
+                  color="primary"
+                  variant="contained"
+                  onClick={submitForm}
+                  data-cy="button-submit"
+                >
+                  {t('Approve')}
+                </LoadingButton>
+              </DialogActions>
+            </DialogFooter>
+          </Dialog>
+        </>
+      )}
+    </Formik>
   );
-};
+}

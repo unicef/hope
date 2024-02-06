@@ -33,7 +33,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export const LookUpHouseholdTableCommunication = ({
+export function LookUpHouseholdTableCommunication({
   businessArea,
   filter,
   choicesData,
@@ -45,8 +45,8 @@ export const LookUpHouseholdTableCommunication = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
-}: LookUpHouseholdTableCommunicationProps): React.ReactElement => {
-  const {programId} = useBaseUrl()
+}: LookUpHouseholdTableCommunicationProps): React.ReactElement {
+  const { programId } = useBaseUrl();
   const matchWithdrawnValue = (): boolean | undefined => {
     if (filter.withdrawn === 'true') {
       return true;
@@ -69,7 +69,7 @@ export const LookUpHouseholdTableCommunication = ({
     withdrawn: matchWithdrawnValue(),
     orderBy: filter.orderBy,
     headOfHouseholdPhoneNoValid: true,
-    program: programId
+    program: programId,
   };
 
   const [selected, setSelected] = useState<string[]>(
@@ -78,8 +78,8 @@ export const LookUpHouseholdTableCommunication = ({
 
   const handleCheckboxClick = (
     _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -123,42 +123,40 @@ export const LookUpHouseholdTableCommunication = ({
     setFieldValue('identityVerified', false);
   };
 
-  const renderTable = (): React.ReactElement => {
-    return (
-      <UniversalTable<
-        AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-        AllHouseholdsQueryVariables
-      >
-        headCells={householdMultiSelect ? headCells.slice(1) : headCells}
-        rowsPerPageOptions={[5, 10, 15, 20]}
-        query={useAllHouseholdsForPopulationTableQuery}
-        queriedObjectName='allHouseholds'
-        initialVariables={initialVariables}
-        filterOrderBy={filter.orderBy}
-        onSelectAllClick={
+  const renderTable = (): React.ReactElement => (
+    <UniversalTable<
+    AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
+    AllHouseholdsQueryVariables
+    >
+      headCells={householdMultiSelect ? headCells.slice(1) : headCells}
+      rowsPerPageOptions={[5, 10, 15, 20]}
+      query={useAllHouseholdsForPopulationTableQuery}
+      queriedObjectName="allHouseholds"
+      initialVariables={initialVariables}
+      filterOrderBy={filter.orderBy}
+      onSelectAllClick={
           householdMultiSelect && handleSelectAllCheckboxesClick
         }
-        numSelected={householdMultiSelect && selected.length}
-        renderRow={(row) => (
-          <LookUpHouseholdTableRowCommunication
-            key={row.id}
-            household={row}
-            radioChangeHandler={handleRadioChange}
-            selectedHousehold={selectedHousehold}
-            choicesData={choicesData}
-            checkboxClickHandler={handleCheckboxClick}
-            selected={selected}
-            householdMultiSelect={householdMultiSelect}
-            redirectedFromRelatedTicket={redirectedFromRelatedTicket}
-            isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
-          />
-        )}
-      />
-    );
-  };
+      numSelected={householdMultiSelect && selected.length}
+      renderRow={(row) => (
+        <LookUpHouseholdTableRowCommunication
+          key={row.id}
+          household={row}
+          radioChangeHandler={handleRadioChange}
+          selectedHousehold={selectedHousehold}
+          choicesData={choicesData}
+          checkboxClickHandler={handleCheckboxClick}
+          selected={selected}
+          householdMultiSelect={householdMultiSelect}
+          redirectedFromRelatedTicket={redirectedFromRelatedTicket}
+          isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
+        />
+      )}
+    />
+  );
   return noTableStyling ? (
     <NoTableStyling>{renderTable()}</NoTableStyling>
   ) : (
     <TableWrapper>{renderTable()}</TableWrapper>
   );
-};
+}

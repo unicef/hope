@@ -15,9 +15,9 @@ interface AcceptanceProcessStepperProps {
   acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
 }
 
-export const AcceptanceProcessStepper = ({
+export function AcceptanceProcessStepper({
   acceptanceProcess,
-}: AcceptanceProcessStepperProps): React.ReactElement => {
+}: AcceptanceProcessStepperProps): React.ReactElement {
   const {
     rejectedOn,
     actions,
@@ -74,4 +74,4 @@ export const AcceptanceProcessStepper = ({
       ))}
     </Stepper>
   );
-};
+}

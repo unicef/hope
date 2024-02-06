@@ -42,8 +42,8 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 
   if (currentStep === GrievanceSteps.Description) {
     datum.description = Yup.string().required(
-      datum.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
-        datum.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+      datum.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD
+        || datum.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
         ? 'Withdrawal Reason is required'
         : 'Description is required',
     );

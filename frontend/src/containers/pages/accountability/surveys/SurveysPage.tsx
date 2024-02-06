@@ -14,7 +14,7 @@ import { usePermissions } from '../../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
 
-export const SurveysPage = (): React.ReactElement => {
+export function SurveysPage(): React.ReactElement {
   const permissions = usePermissions();
   const { t } = useTranslation();
   const { data: choicesData } = useSurveysChoiceDataQuery({
@@ -43,8 +43,7 @@ export const SurveysPage = (): React.ReactElement => {
       PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_LIST,
       permissions,
     )
-  )
-    return <PermissionDenied />;
+  ) return <PermissionDenied />;
   const canViewDetails = hasPermissionInModule(
     PERMISSIONS.ACCOUNTABILITY_SURVEY_VIEW_DETAILS,
     permissions,
@@ -69,4 +68,4 @@ export const SurveysPage = (): React.ReactElement => {
       />
     </>
   );
-};
+}

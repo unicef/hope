@@ -20,8 +20,7 @@ const NumberOfHouseHolds = styled.div`
   border-left-style: solid;
 `;
 const NumberOfHouseHoldsValue = styled.div`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
@@ -57,20 +56,19 @@ export function CashPlanDetails({
   };
 
   const renderTargetPopulations = ():
-    | React.ReactElement
-    | Array<React.ReactElement> => {
-    return filteredTps().length ? (
-      filteredTps().map((el) => (
-        <span key={el.id}>
-          <ContentLink href={`/${baseUrl}/target-population/${el.id}`}>
-            {el.name}
-          </ContentLink>{' '}
-        </span>
-      ))
-    ) : (
-      <span>-</span>
-    );
-  };
+  | React.ReactElement
+  | Array<React.ReactElement> => (filteredTps().length ? (
+    filteredTps().map((el) => (
+      <span key={el.id}>
+        <ContentLink href={`/${baseUrl}/target-population/${el.id}`}>
+          {el.name}
+        </ContentLink>
+        {' '}
+      </span>
+    ))
+  ) : (
+    <span>-</span>
+  ));
   return (
     <ContainerWithBorder>
       <Box display="flex" flexDirection="column">

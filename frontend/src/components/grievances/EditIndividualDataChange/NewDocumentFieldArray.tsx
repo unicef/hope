@@ -27,54 +27,50 @@ export function NewDocumentFieldArray({
     <Grid container spacing={3}>
       <FieldArray
         name="individualDataUpdateFieldsDocuments"
-        render={(arrayHelpers) => {
-          return (
-            <>
-              {values.individualDataUpdateFieldsDocuments?.map((item) => {
-                const existingOrNewId = item.node?.id || item.id;
-                return (
-                  <DocumentField
-                    id={existingOrNewId}
-                    key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
-                    onDelete={() =>
-                      removeItemById(
-                        values.individualDataUpdateFieldsDocuments,
-                        existingOrNewId,
-                        arrayHelpers,
-                      )
-                    }
-                    countryChoices={addIndividualFieldsData.countriesChoices}
-                    documentTypeChoices={
+        render={(arrayHelpers) => (
+          <>
+            {values.individualDataUpdateFieldsDocuments?.map((item) => {
+              const existingOrNewId = item.node?.id || item.id;
+              return (
+                <DocumentField
+                  id={existingOrNewId}
+                  key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
+                  onDelete={() => removeItemById(
+                    values.individualDataUpdateFieldsDocuments,
+                    existingOrNewId,
+                    arrayHelpers,
+                  )}
+                  countryChoices={addIndividualFieldsData.countriesChoices}
+                  documentTypeChoices={
                       addIndividualFieldsData.documentTypeChoices
                     }
-                    baseName="individualDataUpdateFieldsDocuments"
-                    setFieldValue={setFieldValue}
-                    values={values}
-                  />
-                );
-              })}
+                  baseName="individualDataUpdateFieldsDocuments"
+                  setFieldValue={setFieldValue}
+                  values={values}
+                />
+              );
+            })}
 
-              <Grid item xs={8} />
-              <Grid item xs={12}>
-                <Button
-                  color="primary"
-                  disabled={isEditTicket}
-                  onClick={() => {
-                    arrayHelpers.push({
-                      id: uuidv4(),
-                      country: null,
-                      key: null,
-                      number: '',
-                    });
-                  }}
-                  startIcon={<AddCircleOutline />}
-                >
-                  {t('Add Document')}
-                </Button>
-              </Grid>
-            </>
-          );
-        }}
+            <Grid item xs={8} />
+            <Grid item xs={12}>
+              <Button
+                color="primary"
+                disabled={isEditTicket}
+                onClick={() => {
+                  arrayHelpers.push({
+                    id: uuidv4(),
+                    country: null,
+                    key: null,
+                    number: '',
+                  });
+                }}
+                startIcon={<AddCircleOutline />}
+              >
+                {t('Add Document')}
+              </Button>
+            </Grid>
+          </>
+        )}
       />
     </Grid>
   );

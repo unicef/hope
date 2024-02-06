@@ -38,7 +38,7 @@ export interface IdentitiesToEditTableProps {
   identity;
 }
 
-export const IdentitiesToEditTable = ({
+export function IdentitiesToEditTable({
   values,
   isEdit,
   ticket,
@@ -46,7 +46,7 @@ export const IdentitiesToEditTable = ({
   countriesDict,
   index,
   identity,
-}: IdentitiesToEditTableProps): React.ReactElement => {
+}: IdentitiesToEditTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedIdentitiesToEdit } = values;
   const renderNewOrNotUpdated = (prev, curr): React.ReactElement => {
@@ -64,9 +64,7 @@ export const IdentitiesToEditTable = ({
     );
   };
 
-  const getPreviousPartner = (previousIdentity): string => {
-    return previousIdentity.partner || previousIdentity.agency;
-  };
+  const getPreviousPartner = (previousIdentity): string => previousIdentity.partner || previousIdentity.agency;
 
   return (
     <>
@@ -145,4 +143,4 @@ export const IdentitiesToEditTable = ({
       </StyledTable>
     </>
   );
-};
+}

@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+
 export const BulkUpdateGrievancePriority = gql`
   mutation BulkUpdateGrievancePriority(
     $grievanceTicketIds: [ID]!

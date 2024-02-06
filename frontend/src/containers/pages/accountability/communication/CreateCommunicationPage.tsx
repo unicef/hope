@@ -12,7 +12,9 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, {
+  ReactElement, useCallback, useEffect, useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -92,31 +94,30 @@ function prepareVariables(
       fullListArguments:
         selectedSampleSizeType === 0
           ? {
-              excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
+            excludedAdminAreas: values.excludedAdminAreasFull || [],
+          }
           : null,
       randomSamplingArguments:
         selectedSampleSizeType === 1
           ? {
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              excludedAdminAreas: values.adminCheckbox
-                ? values.excludedAdminAreasRandom
-                : [],
-              age: values.ageCheckbox
-                ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
+            confidenceInterval: values.confidenceInterval * 0.01,
+            marginOfError: values.marginOfError * 0.01,
+            excludedAdminAreas: values.adminCheckbox
+              ? values.excludedAdminAreasRandom
+              : [],
+            age: values.ageCheckbox
+              ? { min: values.filterAgeMin, max: values.filterAgeMax }
+              : null,
+            sex: values.sexCheckbox ? values.filterSex : null,
+          }
           : null,
     },
   };
 }
 
-export const CreateCommunicationPage = (): React.ReactElement => {
+export function CreateCommunicationPage(): React.ReactElement {
   const { t } = useTranslation();
-  const [mutate, { loading }] =
-    useCreateAccountabilityCommunicationMessageMutation();
+  const [mutate, { loading }] = useCreateAccountabilityCommunicationMessageMutation();
   const { showMessage } = useSnackbar();
   const history = useHistory();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -138,11 +139,10 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     },
   });
 
-  const [loadSampleSize, { data: sampleSizesData }] =
-    useAccountabilityCommunicationMessageSampleSizeLazyQuery({
-      variables: prepareVariables(selectedSampleSizeType, formValues),
-      fetchPolicy: 'network-only',
-    });
+  const [loadSampleSize, { data: sampleSizesData }] = useAccountabilityCommunicationMessageSampleSizeLazyQuery({
+    variables: prepareVariables(selectedSampleSizeType, formValues),
+    fetchPolicy: 'network-only',
+  });
 
   useEffect(() => {
     if (activeStep === CommunicationSteps.SampleSize) {
@@ -150,17 +150,16 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     }
   }, [activeStep, formValues, loadSampleSize]);
 
-  const [loadAvailableFlows, { data: flowsData }] =
-    useSurveyAvailableFlowsLazyQuery({
-      fetchPolicy: 'network-only',
-    });
+  const [loadAvailableFlows, { data: flowsData }] = useSurveyAvailableFlowsLazyQuery({
+    fetchPolicy: 'network-only',
+  });
 
   useEffect(() => {
     loadAvailableFlows();
   }, [loadAvailableFlows]);
 
   useEffect(() => {
-    //Redirect to error page if RapidPro unavailable available
+    // Redirect to error page if RapidPro unavailable available
     if (!flowsData?.surveyAvailableFlows?.length) {
       history.push(`/error/${businessArea}`, {
         errorMessage: t(
@@ -195,9 +194,9 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     const { households, targetPopulation, registrationDataImport } = values;
     const errors: { [key: string]: string | { [key: string]: string } } = {};
     if (
-      households.length === 0 &&
-      !targetPopulation &&
-      !registrationDataImport
+      households.length === 0
+      && !targetPopulation
+      && !registrationDataImport
     ) {
       errors.error = t('Field Selection is required');
     }
@@ -206,9 +205,9 @@ export const CreateCommunicationPage = (): React.ReactElement => {
 
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
     ? data.allAdminAreas.edges.map((el) => ({
-        value: el.node.id,
-        name: el.node.name,
-      }))
+      value: el.node.id,
+      name: el.node.name,
+    }))
     : [];
 
   if (permissions === null) return null;
@@ -217,16 +216,13 @@ export const CreateCommunicationPage = (): React.ReactElement => {
       PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
       permissions,
     )
-  )
-    return <PermissionDenied />;
+  ) return <PermissionDenied />;
 
-  const getSampleSizePercentage = (): string => {
-    return `(${getPercentage(
-      sampleSizesData?.accountabilityCommunicationMessageSampleSize?.sampleSize,
-      sampleSizesData?.accountabilityCommunicationMessageSampleSize
-        ?.numberOfRecipients,
-    )})`;
-  };
+  const getSampleSizePercentage = (): string => `(${getPercentage(
+    sampleSizesData?.accountabilityCommunicationMessageSampleSize?.sampleSize,
+    sampleSizesData?.accountabilityCommunicationMessageSampleSize
+      ?.numberOfRecipients,
+  )})`;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -251,46 +247,43 @@ export const CreateCommunicationPage = (): React.ReactElement => {
 
   const prepareMutationVariables = (
     values,
-  ): CreateAccountabilityCommunicationMessageMutationVariables => {
-    return {
-      input: {
-        households: values.households,
-        targetPopulation: values.targetPopulation,
-        registrationDataImport: values.registrationDataImport,
-        samplingType:
+  ): CreateAccountabilityCommunicationMessageMutationVariables => ({
+    input: {
+      households: values.households,
+      targetPopulation: values.targetPopulation,
+      registrationDataImport: values.registrationDataImport,
+      samplingType:
           selectedSampleSizeType === 0
             ? SamplingChoices.FullList
             : SamplingChoices.Random,
-        fullListArguments:
+      fullListArguments:
           selectedSampleSizeType === 0
             ? {
-                excludedAdminAreas: values.excludedAdminAreasFull,
-              }
+              excludedAdminAreas: values.excludedAdminAreasFull,
+            }
             : null,
-        randomSamplingArguments:
+      randomSamplingArguments:
           selectedSampleSizeType === 1
             ? {
-                excludedAdminAreas: values.excludedAdminAreasRandom,
-                confidenceInterval: values.confidenceInterval * 0.01,
-                marginOfError: values.marginOfError * 0.01,
-                age: values.ageCheckbox
-                  ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                  : null,
-                sex: values.sexCheckbox ? values.filterSex : null,
-              }
+              excludedAdminAreas: values.excludedAdminAreasRandom,
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
             : null,
-        title: values.title,
-        body: values.body,
-      },
-    };
-  };
+      title: values.title,
+      body: values.body,
+    },
+  });
 
-  const dataChangeErrors = (errors): ReactElement[] =>
-    ['error'].map((fieldname) => (
-      <FormHelperText key={fieldname} error>
-        {errors[fieldname]}
-      </FormHelperText>
-    ));
+  const dataChangeErrors = (errors): ReactElement[] => ['error'].map((fieldname) => (
+    <FormHelperText key={fieldname} error>
+      {errors[fieldname]}
+    </FormHelperText>
+  ));
 
   return (
     <Formik
@@ -322,7 +315,9 @@ export const CreateCommunicationPage = (): React.ReactElement => {
         }
       }}
     >
-      {({ submitForm, setValues, values, setFieldValue, errors }) => (
+      {({
+        submitForm, setValues, values, setFieldValue, errors,
+      }) => (
         <>
           <PageHeader
             title="New Message"
@@ -357,19 +352,19 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 onChange={() => setFormValues(values)}
               />
               {activeStep === CommunicationSteps.LookUp && (
-                <Box display="flex" flexDirection="column">
-                  <LookUpSelectionCommunication
-                    businessArea={businessArea}
-                    values={values}
-                    onValueChange={setFieldValue}
-                    setValues={setValues}
-                    selectedTab={selectedTab}
-                    setSelectedTab={setSelectedTab}
-                  />
-                </Box>
+              <Box display="flex" flexDirection="column">
+                <LookUpSelectionCommunication
+                  businessArea={businessArea}
+                  values={values}
+                  onValueChange={setFieldValue}
+                  setValues={setValues}
+                  selectedTab={selectedTab}
+                  setSelectedTab={setSelectedTab}
+                />
+              </Box>
               )}
-              {activeStep === CommunicationSteps.SampleSize &&
-                (values.households.length ? (
+              {activeStep === CommunicationSteps.SampleSize
+                && (values.households.length ? (
                   <Box px={8}>
                     <Box pt={3}>
                       <Box fontSize={12} color="#797979">
@@ -383,8 +378,11 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        {t('Message will be sent to all households selected')}:
-                        ({values.households.length})
+                        {t('Message will be sent to all households selected')}
+                        :
+                        (
+                        {values.households.length}
+                        )
                       </Box>
                     </Box>
                   </Box>
@@ -392,7 +390,8 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                   <Box px={8}>
                     <Box display="flex" alignItems="center">
                       <Box pr={5} fontWeight="500" fontSize="medium">
-                        {t('Sample Size')}:
+                        {t('Sample Size')}
+                        :
                       </Box>
                       <RadioGroup
                         aria-labelledby="selection-radio-buttons-group"
@@ -431,18 +430,22 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                           fontSize={16}
                           fontWeight="fontWeightBold"
                         >
-                          Sample size:{' '}
+                          Sample size:
+                          {' '}
                           {
                             sampleSizesData
                               ?.accountabilityCommunicationMessageSampleSize
                               ?.sampleSize
-                          }{' '}
-                          out of{' '}
+                          }
+                          {' '}
+                          out of
+                          {' '}
                           {
                             sampleSizesData
                               ?.accountabilityCommunicationMessageSampleSize
                               ?.numberOfRecipients
-                          }{' '}
+                          }
+                          {' '}
                           {getSampleSizePercentage()}
                         </Box>
                       </Box>
@@ -543,18 +546,22 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                           fontSize={16}
                           fontWeight="fontWeightBold"
                         >
-                          Sample size:{' '}
+                          Sample size:
+                          {' '}
                           {
                             sampleSizesData
                               ?.accountabilityCommunicationMessageSampleSize
                               ?.sampleSize
-                          }{' '}
-                          out of{' '}
+                          }
+                          {' '}
+                          out of
+                          {' '}
                           {
                             sampleSizesData
                               ?.accountabilityCommunicationMessageSampleSize
                               ?.numberOfRecipients
-                          }{' '}
+                          }
+                          {' '}
                           {getSampleSizePercentage()}
                         </Box>
                       </Box>
@@ -562,34 +569,34 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                   </Box>
                 ))}
               {activeStep === CommunicationSteps.Details && (
-                <>
-                  <Border />
-                  <Box my={3}>
-                    <Grid item xs={12}>
-                      <Field
-                        name="title"
-                        required
-                        fullWidth
-                        variant="outlined"
-                        label={t('Title')}
-                        component={FormikTextField}
-                        data-cy="input-title"
-                      />
-                    </Grid>
-                  </Box>
+              <>
+                <Border />
+                <Box my={3}>
                   <Grid item xs={12}>
                     <Field
-                      name="body"
+                      name="title"
                       required
-                      multiline
                       fullWidth
                       variant="outlined"
-                      label={t('Message')}
+                      label={t('Title')}
                       component={FormikTextField}
-                      data-cy="input-body"
+                      data-cy="input-title"
                     />
                   </Grid>
-                </>
+                </Box>
+                <Grid item xs={12}>
+                  <Field
+                    name="body"
+                    required
+                    multiline
+                    fullWidth
+                    variant="outlined"
+                    label={t('Message')}
+                    component={FormikTextField}
+                    data-cy="input-body"
+                  />
+                </Grid>
+              </>
               )}
               {dataChangeErrors(errors)}
             </Form>
@@ -627,4 +634,4 @@ export const CreateCommunicationPage = (): React.ReactElement => {
       )}
     </Formik>
   );
-};
+}

@@ -9,9 +9,9 @@ import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 interface TotalAmountTransferredByCountrySectionProps {
   data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];
 }
-export const TotalAmountTransferredByCountrySection = ({
+export function TotalAmountTransferredByCountrySection({
   data,
-}: TotalAmountTransferredByCountrySectionProps): React.ReactElement => {
+}: TotalAmountTransferredByCountrySectionProps): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   if (businessArea !== 'global') {
@@ -26,4 +26,4 @@ export const TotalAmountTransferredByCountrySection = ({
       <TotalAmountTransferredByCountryChart data={data} />
     </DashboardPaper>
   );
-};
+}

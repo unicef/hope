@@ -10,11 +10,11 @@ export interface InReviewPaymentPlanHeaderButtonsProps {
   canMarkAsReleased: boolean;
 }
 
-export const InReviewPaymentPlanHeaderButtons = ({
+export function InReviewPaymentPlanHeaderButtons({
   paymentPlan,
   canReject,
   canMarkAsReleased,
-}: InReviewPaymentPlanHeaderButtonsProps): React.ReactElement => {
+}: InReviewPaymentPlanHeaderButtonsProps): React.ReactElement {
   return (
     <Box display="flex" alignItems="center">
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
@@ -23,4 +23,4 @@ export const InReviewPaymentPlanHeaderButtons = ({
       )}
     </Box>
   );
-};
+}

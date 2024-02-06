@@ -19,9 +19,9 @@ interface PaymentIdsProps {
   verifications: VerificationId[];
 }
 
-export const PaymentIds = ({
+export function PaymentIds({
   verifications,
-}: PaymentIdsProps): React.ReactElement => {
+}: PaymentIdsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
@@ -46,4 +46,4 @@ export const PaymentIds = ({
       </Box>
     </ApproveBox>
   );
-};
+}

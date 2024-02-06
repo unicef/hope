@@ -14,10 +14,10 @@ import { usePermissions } from '../../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../../utils/utils';
 import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { ButtonTooltip } from "../../../../components/core/ButtonTooltip";
-import { useProgramContext } from "../../../../programContext";
+import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
+import { useProgramContext } from '../../../../programContext';
 
-export const CommunicationPage = (): React.ReactElement => {
+export function CommunicationPage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
@@ -49,19 +49,18 @@ export const CommunicationPage = (): React.ReactElement => {
       PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST,
       permissions,
     )
-  )
-    return <PermissionDenied />;
+  ) return <PermissionDenied />;
   if (!choicesData) return null;
 
   return (
     <>
       <PageHeader title={t('Communication')}>
         <ButtonTooltip
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           component={Link}
           to={`/${baseUrl}/accountability/communication/create`}
-          data-cy='button-communication-create-new'
+          data-cy="button-communication-create-new"
           title={t('Program has to be active to create new Message')}
           disabled={!isActiveProgram}
         >
@@ -84,4 +83,4 @@ export const CommunicationPage = (): React.ReactElement => {
       />
     </>
   );
-};
+}

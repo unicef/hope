@@ -13,13 +13,13 @@ export interface DraftProgramDetailsPageHeaderPropTypes {
   canActivate: boolean;
   canDuplicate: boolean;
 }
-export const DraftProgramDetailsPageHeaderButtons = ({
+export function DraftProgramDetailsPageHeaderButtons({
   program,
   canRemove,
   canEdit,
   canActivate,
   canDuplicate,
-}: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+}: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
     <Box display="flex" alignItems="center">
       {canRemove && (
@@ -44,4 +44,4 @@ export const DraftProgramDetailsPageHeaderButtons = ({
       )}
     </Box>
   );
-};
+}

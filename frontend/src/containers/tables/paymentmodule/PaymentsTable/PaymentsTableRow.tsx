@@ -28,8 +28,7 @@ export const StyledLink = styled.div`
 
 const RoutedBox = styled.div`
   color: ${({ theme }) => theme.hctPalette.red};
-  background-color: ${({ theme }) =>
-    `${theme.hctPalette.red}${opacityToHex(0.15)}`};
+  background-color: ${({ theme }) => `${theme.hctPalette.red}${opacityToHex(0.15)}`};
   border-radius: 16px;
   font-family: Roboto;
   font-size: 10px;
@@ -61,11 +60,11 @@ interface PaymentsTableRowProps {
   ) => void;
 }
 
-export const PaymentsTableRow = ({
+export function PaymentsTableRow({
   payment,
   canViewDetails,
   onWarningClick,
-}: PaymentsTableRowProps): React.ReactElement => {
+}: PaymentsTableRowProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${payment.id}`;
@@ -80,8 +79,9 @@ export const PaymentsTableRow = ({
   };
 
   const renderDeliveredQuantity = (): React.ReactElement => {
-    const { deliveredQuantity, currency, deliveredQuantityUsd, status } =
-      payment;
+    const {
+      deliveredQuantity, currency, deliveredQuantityUsd, status,
+    } = payment;
     if (status === PaymentStatus.TransactionErroneous) {
       return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
     }
@@ -114,8 +114,8 @@ export const PaymentsTableRow = ({
   return (
     <ClickableTableRow hover role="checkbox" key={payment.id}>
       <TableCell align="left">
-        {(payment.paymentPlanHardConflicted ||
-          payment.paymentPlanSoftConflicted) && (
+        {(payment.paymentPlanHardConflicted
+          || payment.paymentPlanSoftConflicted) && (
           <WarningTooltip
             handleClick={(e) => handleDialogWarningOpen(e)}
             message={t(
@@ -162,12 +162,12 @@ export const PaymentsTableRow = ({
       <TableCell align="left">
         {payment.entitlementQuantity != null && payment.entitlementQuantity >= 0
           ? `${formatCurrencyWithSymbol(
-              payment.entitlementQuantity,
-              payment.currency,
-            )} (${formatCurrencyWithSymbol(
-              payment.entitlementQuantityUsd,
-              'USD',
-            )})`
+            payment.entitlementQuantity,
+            payment.currency,
+          )} (${formatCurrencyWithSymbol(
+            payment.entitlementQuantityUsd,
+            'USD',
+          )})`
           : '-'}
       </TableCell>
       <TableCell data-cy="delivered-quantity-cell" align="left">
@@ -176,4 +176,4 @@ export const PaymentsTableRow = ({
       <TableCell>{renderMark()}</TableCell>
     </ClickableTableRow>
   );
-};
+}

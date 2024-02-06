@@ -17,12 +17,12 @@ interface LookUpRegistrationDataImportTableRowCommunicationProps {
   radioChangeHandler?: (id: string) => void;
 }
 
-export const LookUpRegistrationDataImportTableRowCommunication = ({
+export function LookUpRegistrationDataImportTableRowCommunication({
   registrationDataImport,
   canViewDetails,
   selectedRDI,
   radioChangeHandler,
-}: LookUpRegistrationDataImportTableRowCommunicationProps): React.ReactElement => {
+}: LookUpRegistrationDataImportTableRowCommunicationProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const importDetailsPath = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;
@@ -90,4 +90,4 @@ export const LookUpRegistrationDataImportTableRowCommunication = ({
       <TableCell align="left">{registrationDataImport.dataSource}</TableCell>
     </ClickableTableRow>
   );
-};
+}

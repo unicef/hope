@@ -14,11 +14,11 @@ const StyledLabel = styled.span`
   font-size: 16px;
 `;
 
-export const FormikSwitchField = ({
+export function FormikSwitchField({
   field,
   form,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
   return (
     <>
@@ -39,4 +39,4 @@ export const FormikSwitchField = ({
       )}
     </>
   );
-};
+}

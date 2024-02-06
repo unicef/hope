@@ -1,9 +1,8 @@
 import React from 'react';
 import { ThemeProvider } from '@mui/material';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { theme } from '../../../theme';
+import styled, { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { Field, Form, Formik } from 'formik';
-import styled from 'styled-components';
+import { theme } from '../../../theme';
 import { FormikRadioGroup } from './FormikRadioGroup';
 
 export default {
@@ -20,7 +19,7 @@ const sampleChoices = [
   { name: 'Choice', value: 'choice' },
 ];
 
-export const RadioGroup = () => {
+export function RadioGroup() {
   return (
     <ThemeProvider theme={theme}>
       <StyledThemeProvider theme={theme}>
@@ -44,4 +43,4 @@ export const RadioGroup = () => {
       </StyledThemeProvider>
     </ThemeProvider>
   );
-};
+}

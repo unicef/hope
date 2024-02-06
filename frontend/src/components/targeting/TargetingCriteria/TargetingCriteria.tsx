@@ -152,8 +152,8 @@ export function TargetingCriteria({
 
     // Disable household filters for social programs
     if (
-      selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-      DataCollectingTypeType.Social
+      selectedProgram?.dataCollectingType?.type?.toUpperCase()
+      === DataCollectingTypeType.Social
     ) {
       householdFiltersAvailable = false;
     }
@@ -176,7 +176,10 @@ export function TargetingCriteria({
                     onClick={() => setOpen(true)}
                     data-cy="button-target-population-add-criteria"
                   >
-                    {t('Add')} &apos;Or&apos; {t('Filter')}
+                    {t('Add')}
+                    {' '}
+                    &apos;Or&apos;
+                    {t('Filter')}
                   </Button>
                 )}
               </>
@@ -197,9 +200,8 @@ export function TargetingCriteria({
             <Box display="flex" flexDirection="column">
               <Box display="flex" flexWrap="wrap">
                 {rules.length ? (
-                  rules.map((criteria, index) => {
-                    return (
-                      //eslint-disable-next-line
+                  rules.map((criteria, index) => (
+                      // eslint-disable-next-line
                       <Fragment key={criteria.id || index}>
                         <Criteria
                           isEdit={isEdit}
@@ -212,15 +214,14 @@ export function TargetingCriteria({
                           removeFunction={() => helpers.remove(index)}
                         />
 
-                        {index === rules.length - 1 ||
-                        (rules.length === 1 && index === 0) ? null : (
+                        {index === rules.length - 1
+                        || (rules.length === 1 && index === 0) ? null : (
                           <Divider>
                             <DividerLabel>Or</DividerLabel>
                           </Divider>
-                        )}
+                          )}
                       </Fragment>
-                    );
-                  })
+                  ))
                 ) : (
                   <AddCriteria
                     onClick={() => setOpen(true)}
@@ -238,7 +239,7 @@ export function TargetingCriteria({
                       <Grid item xs={6}>
                         <FormControlLabel
                           disabled
-                          control={
+                          control={(
                             <Checkbox
                               color="primary"
                               name="flagExcludeIfActiveAdjudicationTicket"
@@ -248,7 +249,7 @@ export function TargetingCriteria({
                                   ?.flagExcludeIfActiveAdjudicationTicket,
                               )}
                             />
-                          }
+                          )}
                           label={t(
                             'Exclude Households with Active Adjudication Ticket',
                           )}
@@ -258,13 +259,13 @@ export function TargetingCriteria({
                         {screenBeneficiary && (
                           <FormControlLabel
                             disabled
-                            control={
+                            control={(
                               <Checkbox
                                 data-cy="checkbox-exclude-if-on-sanction-list"
                                 color="primary"
                                 name="flagExcludeIfOnSanctionList"
                               />
-                            }
+                            )}
                             checked={Boolean(
                               targetPopulation?.targetingCriteria
                                 ?.flagExcludeIfOnSanctionList,

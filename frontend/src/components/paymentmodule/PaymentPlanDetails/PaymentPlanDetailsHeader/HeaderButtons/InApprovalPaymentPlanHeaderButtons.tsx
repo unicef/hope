@@ -10,15 +10,15 @@ export interface InApprovalPaymentPlanHeaderButtonsProps {
   canApprove: boolean;
 }
 
-export const InApprovalPaymentPlanHeaderButtons = ({
+export function InApprovalPaymentPlanHeaderButtons({
   paymentPlan,
   canReject,
   canApprove,
-}: InApprovalPaymentPlanHeaderButtonsProps): React.ReactElement => {
+}: InApprovalPaymentPlanHeaderButtonsProps): React.ReactElement {
   return (
     <Box display="flex" alignItems="center">
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
       {canApprove && <ApprovePaymentPlan paymentPlan={paymentPlan} />}
     </Box>
   );
-};
+}

@@ -10,7 +10,7 @@ const useStyles = makeStyles({
   },
 });
 
-export const FormikSliderField = ({
+export function FormikSliderField({
   field,
   form,
   suffix,
@@ -18,7 +18,7 @@ export const FormikSliderField = ({
   max,
   dataCy,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const classes = useStyles();
 
   const handleSliderChange = (event, newValue): void => {
@@ -49,4 +49,4 @@ export const FormikSliderField = ({
       </Grid>
     </div>
   );
-};
+}

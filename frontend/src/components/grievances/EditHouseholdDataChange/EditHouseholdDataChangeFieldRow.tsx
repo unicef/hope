@@ -22,7 +22,7 @@ export interface EditHouseholdDataChangeFieldRowProps {
   onDelete: () => {};
   values;
 }
-export const EditHouseholdDataChangeFieldRow = ({
+export function EditHouseholdDataChangeFieldRow({
   fields,
   household,
   index,
@@ -30,7 +30,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   notAvailableFields,
   onDelete,
   values,
-}: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
+}: EditHouseholdDataChangeFieldRowProps): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -57,9 +57,8 @@ export const EditHouseholdDataChangeFieldRow = ({
           component={FormikSelectField}
           choices={fields
             .filter(
-              (item) =>
-                !notAvailableFields.includes(item.name) ||
-                item.name === itemValue?.fieldName,
+              (item) => !notAvailableFields.includes(item.name)
+                || item.name === itemValue?.fieldName,
             )
             .map((item) => ({
               value: item.name,
@@ -93,4 +92,4 @@ export const EditHouseholdDataChangeFieldRow = ({
       )}
     </>
   );
-};
+}

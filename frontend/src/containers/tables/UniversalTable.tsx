@@ -74,7 +74,9 @@ export function UniversalTable<T, K>({
     initVariables.orderBy = filterOrderBy;
   }
 
-  const { data, refetch, loading, error } = query({
+  const {
+    data, refetch, loading, error,
+  } = query({
     variables: initVariables,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',

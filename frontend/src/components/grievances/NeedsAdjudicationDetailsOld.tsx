@@ -60,30 +60,25 @@ export function NeedsAdjudicationDetailsOld({
   const isApproved = !!details.selectedIndividual;
   const isEditable = isEditMode || !isApproved;
 
-  const isApproveDisabled = (): boolean => {
-    return (
-      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-      !selectedDuplicate
-    );
-  };
+  const isApproveDisabled = (): boolean => (
+    ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+      || !selectedDuplicate
+  );
 
   const findRecord = (itemId) => (record) => record.hitId === itemId;
 
-  const getSimilarity = (records, individualId): number => {
-    return records?.find(findRecord(individualId))?.score;
-  };
+  const getSimilarity = (records, individualId): number => records?.find(findRecord(individualId))?.score;
 
   const getGoldenRecordSimilarity = (): number | string => {
     const { extraData, goldenRecordsIndividual, possibleDuplicate } = details;
     const individualId = possibleDuplicate?.id;
     const extraDataGoldenRecords = extraData?.goldenRecords;
-    const deduplicationGoldenRecordResults =
-      goldenRecordsIndividual?.deduplicationGoldenRecordResults;
+    const deduplicationGoldenRecordResults = goldenRecordsIndividual?.deduplicationGoldenRecordResults;
 
     return (
-      getSimilarity(extraDataGoldenRecords, individualId) ||
-      getSimilarity(deduplicationGoldenRecordResults, individualId) ||
-      '-'
+      getSimilarity(extraDataGoldenRecords, individualId)
+      || getSimilarity(deduplicationGoldenRecordResults, individualId)
+      || '-'
     );
   };
 
@@ -91,13 +86,12 @@ export function NeedsAdjudicationDetailsOld({
     const { extraData, goldenRecordsIndividual, possibleDuplicate } = details;
     const individualId = goldenRecordsIndividual?.id;
     const extraDataPossibleDuplicate1 = extraData?.possibleDuplicate;
-    const deduplicationGoldenRecordResults =
-      possibleDuplicate?.deduplicationGoldenRecordResults;
+    const deduplicationGoldenRecordResults = possibleDuplicate?.deduplicationGoldenRecordResults;
 
     return (
-      getSimilarity(extraDataPossibleDuplicate1, individualId) ||
-      getSimilarity(deduplicationGoldenRecordResults, individualId) ||
-      '-'
+      getSimilarity(extraDataPossibleDuplicate1, individualId)
+      || getSimilarity(deduplicationGoldenRecordResults, individualId)
+      || '-'
     );
   };
 
@@ -110,12 +104,10 @@ export function NeedsAdjudicationDetailsOld({
           </Typography>
           <Box gridGap={24} display="flex">
             <Button
-              onClick={() =>
-                history.push({
-                  pathname: `/${baseUrl}/grievance/new-ticket`,
-                  state: { linkedTicketId: ticket.id },
-                })
-              }
+              onClick={() => history.push({
+                pathname: `/${baseUrl}/grievance/new-ticket`,
+                state: { linkedTicketId: ticket.id },
+              })}
               variant="outlined"
               color="primary"
               data-cy="button-create-linked-ticket"
@@ -138,24 +130,22 @@ export function NeedsAdjudicationDetailsOld({
             {isEditable && canApprove && (
               <Button
                 disabled={
-                  isApproveDisabled() ||
-                  !isActiveProgram ||
-                  selectedDuplicate === details?.selectedIndividual?.id
+                  isApproveDisabled()
+                  || !isActiveProgram
+                  || selectedDuplicate === details?.selectedIndividual?.id
                 }
                 data-cy="button-mark-duplicate"
-                onClick={() =>
-                  confirm({
-                    content: confirmationText,
-                  }).then(() => {
-                    approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        selectedIndividualId: selectedDuplicate,
-                      },
-                    });
-                    setIsEditMode(false);
-                  })
-                }
+                onClick={() => confirm({
+                  content: confirmationText,
+                }).then(() => {
+                  approve({
+                    variables: {
+                      grievanceTicketId: ticket.id,
+                      selectedIndividualId: selectedDuplicate,
+                    },
+                  });
+                  setIsEditMode(false);
+                })}
                 variant="outlined"
                 color="primary"
               >
@@ -211,18 +201,16 @@ export function NeedsAdjudicationDetailsOld({
                 color="primary"
                 data-cy="checkbox-individual"
                 disabled={
-                  !isEditable ||
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-                  !isActiveProgram
+                  !isEditable
+                  || ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                  || !isActiveProgram
                 }
                 checked={
                   selectedDuplicate === details.goldenRecordsIndividual?.id
                 }
-                onChange={(_event, checked) =>
-                  setSelectedDuplicate(
-                    checked ? details.goldenRecordsIndividual?.id : null,
-                  )
-                }
+                onChange={(_event, checked) => setSelectedDuplicate(
+                  checked ? details.goldenRecordsIndividual?.id : null,
+                )}
               />
             </TableCell>
 
@@ -291,16 +279,14 @@ export function NeedsAdjudicationDetailsOld({
               <Checkbox
                 color="primary"
                 disabled={
-                  !isEditable ||
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-                  !isActiveProgram
+                  !isEditable
+                  || ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                  || !isActiveProgram
                 }
                 checked={selectedDuplicate === details.possibleDuplicate?.id}
-                onChange={(event, checked) =>
-                  setSelectedDuplicate(
-                    checked ? details.possibleDuplicate?.id : null,
-                  )
-                }
+                onChange={(event, checked) => setSelectedDuplicate(
+                  checked ? details.possibleDuplicate?.id : null,
+                )}
               />
             </TableCell>
             <TableCell align="left">

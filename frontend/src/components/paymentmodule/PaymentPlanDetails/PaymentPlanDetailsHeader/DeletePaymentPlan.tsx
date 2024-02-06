@@ -26,9 +26,9 @@ export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const DeletePaymentPlan = ({
+export function DeletePaymentPlan({
   paymentPlan,
-}: DeletePaymentPlanProps): React.ReactElement => {
+}: DeletePaymentPlanProps): React.ReactElement {
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
@@ -98,4 +98,4 @@ export const DeletePaymentPlan = ({
       </Dialog>
     </>
   );
-};
+}

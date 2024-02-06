@@ -1,4 +1,6 @@
-import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
+import {
+  Box, FormControlLabel, Radio, RadioGroup,
+} from '@mui/material';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -21,7 +23,7 @@ const BoxWithBorderBottom = styled(Box)`
   padding: 15px 0;
 `;
 
-export const LookUpSelectionCommunication = ({
+export function LookUpSelectionCommunication({
   businessArea,
   onValueChange,
   setValues,
@@ -35,7 +37,7 @@ export const LookUpSelectionCommunication = ({
   values;
   selectedTab;
   setSelectedTab;
-}): React.ReactElement => {
+}): React.ReactElement {
   const location = useLocation();
 
   const initialFilterRDI = {
@@ -91,10 +93,9 @@ export const LookUpSelectionCommunication = ({
 
   const { t } = useTranslation();
 
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery({
-      variables: { businessArea },
-    });
+  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery({
+    variables: { businessArea },
+  });
 
   const handleChange = (type: number, value: string[] | string): void => {
     setValues({
@@ -104,8 +105,8 @@ export const LookUpSelectionCommunication = ({
           ? value
           : [],
       targetPopulation:
-        type === CommunicationTabsValues.TARGET_POPULATION &&
-        typeof value === 'string'
+        type === CommunicationTabsValues.TARGET_POPULATION
+        && typeof value === 'string'
           ? value
           : '',
       registrationDataImport:
@@ -191,4 +192,4 @@ export const LookUpSelectionCommunication = ({
       />
     </Box>
   );
-};
+}

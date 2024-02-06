@@ -1,5 +1,7 @@
 import get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useRdiAutocompleteLazyQuery } from '../../__generated__/graphql';
@@ -14,7 +16,7 @@ import {
 } from '../../utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const RdiAutocomplete = ({
+export function RdiAutocomplete({
   disabled,
   name,
   filter,
@@ -32,7 +34,7 @@ export const RdiAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const history = useHistory();
@@ -84,7 +86,7 @@ export const RdiAutocomplete = ({
       value={value}
       disabled={disabled}
       label={t('Registration Data Import')}
-      dataCy='filters-registration-data-import'
+      dataCy="filters-registration-data-import"
       loadData={loadData}
       loading={loading}
       allEdges={allEdges}
@@ -97,19 +99,13 @@ export const RdiAutocomplete = ({
       }}
       handleOpen={() => setOpen(true)}
       open={open}
-      handleClose={(_, reason) =>
-        handleAutocompleteClose(setOpen, onInputTextChange, reason)
-      }
-      handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option?.node?.id, value1)
-      }
-      handleOptionLabel={(option) =>
-        getAutocompleteOptionLabel(option, allEdges, inputValue)
-      }
+      handleClose={(_, reason) => handleAutocompleteClose(setOpen, onInputTextChange, reason)}
+      handleOptionSelected={(option, value1) => handleOptionSelected(option?.node?.id, value1)}
+      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue)}
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
     />
   );
-};
+}

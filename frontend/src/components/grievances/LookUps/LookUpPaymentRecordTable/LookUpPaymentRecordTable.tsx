@@ -34,8 +34,8 @@ export function LookUpPaymentRecordTable({
 
   const handleCheckboxClick = (
     _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     selectedPaymentRecord,
   ): void => {
     const selectedIndex = selected.indexOf(selectedPaymentRecord);
@@ -65,12 +65,12 @@ export function LookUpPaymentRecordTable({
   if (isEditTicket) {
     return (
       <UniversalTable<
-        PaymentRecordAndPaymentNode,
-        LookUpPaymentRecordsQueryVariables
+      PaymentRecordAndPaymentNode,
+      LookUpPaymentRecordsQueryVariables
       >
         headCells={headCells}
         query={useLookUpPaymentRecordsQuery}
-        queriedObjectName='allPaymentRecords'
+        queriedObjectName="allPaymentRecords"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <LookUpPaymentRecordTableRow
@@ -86,12 +86,12 @@ export function LookUpPaymentRecordTable({
   }
   return (
     <UniversalTable<
-      PaymentRecordAndPaymentNode,
-      LookUpPaymentRecordsQueryVariables
+    PaymentRecordAndPaymentNode,
+    LookUpPaymentRecordsQueryVariables
     >
       headCells={headCells}
       query={useAllPaymentRecordsAndPaymentsQuery}
-      queriedObjectName='allPaymentRecordsAndPayments'
+      queriedObjectName="allPaymentRecordsAndPayments"
       initialVariables={initialVariables}
       onSelectAllClick={handleSelectAllCheckboxesClick}
       numSelected={numSelected}

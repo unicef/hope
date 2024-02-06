@@ -10,9 +10,9 @@ interface HouseholdQuestionnaireProps {
   values;
 }
 
-export const HouseholdQuestionnaire = ({
+export function HouseholdQuestionnaire({
   values,
-}: HouseholdQuestionnaireProps): React.ReactElement => {
+}: HouseholdQuestionnaireProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const selectedHouseholdData = values.selectedHousehold;
@@ -117,4 +117,4 @@ export const HouseholdQuestionnaire = ({
       ))}
     </Grid>
   );
-};
+}

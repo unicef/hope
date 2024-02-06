@@ -16,7 +16,7 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspButtonActions', () => 
         step={step}
         submitForm={submitForm}
         baseUrl={fakeBaseUrl}
-        paymentPlanId='asdjkfhsakdjfsd76asdf0sdf=='
+        paymentPlanId="asdjkfhsakdjfsd76asdf0sdf=="
         handleBackStep={setStep}
       />,
     );

@@ -16,7 +16,7 @@ const StyledBox = styled(Box)`
   width: 100%;
 `;
 
-export const PaymentPlanTargeting = ({
+export function PaymentPlanTargeting({
   allTargetPopulations,
   loading,
   disabled,
@@ -24,7 +24,7 @@ export const PaymentPlanTargeting = ({
   allTargetPopulations: AllTargetPopulationsQuery;
   loading: boolean;
   disabled?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   if (loading) return <LoadingComponent />;
 
@@ -65,4 +65,4 @@ export const PaymentPlanTargeting = ({
       </OverviewContainer>
     </PaperContainer>
   );
-};
+}

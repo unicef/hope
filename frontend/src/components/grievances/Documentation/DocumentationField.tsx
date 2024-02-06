@@ -13,13 +13,13 @@ export interface DocumentationFieldProps {
   setFieldValue;
 }
 
-export const DocumentationField = ({
+export function DocumentationField({
   index,
   baseName,
   onDelete,
   isEdited,
   setFieldValue,
-}: DocumentationFieldProps): React.ReactElement => {
+}: DocumentationFieldProps): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -58,4 +58,4 @@ export const DocumentationField = ({
       ) : null}
     </>
   );
-};
+}

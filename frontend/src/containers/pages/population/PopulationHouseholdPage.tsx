@@ -13,7 +13,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { getFilterFromQueryParams } from '../../../utils/utils';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
-export const PopulationHouseholdPage = (): React.ReactElement => {
+export function PopulationHouseholdPage(): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const initialFilter = {
@@ -37,17 +37,15 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery({
-      variables: { businessArea },
-      fetchPolicy: 'cache-first',
-    });
+  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery({
+    variables: { businessArea },
+    fetchPolicy: 'cache-first',
+  });
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
 
-  if (!hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions)) return <PermissionDenied />;
 
   if (!choicesData) return null;
 
@@ -79,4 +77,4 @@ export const PopulationHouseholdPage = (): React.ReactElement => {
       </Box>
     </>
   );
-};
+}

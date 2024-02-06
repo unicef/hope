@@ -58,7 +58,7 @@ const initialFilter = {
   paymentVerificationPlan: '',
 };
 
-export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
+export function CashPlanVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
 
@@ -77,8 +77,7 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: choicesData, loading: choicesLoading } =
-    useCashPlanVerificationSamplingChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } = useCashPlanVerificationSamplingChoicesQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
@@ -104,30 +103,26 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
   );
 
   const canSeeVerificationRecords = (): boolean => {
-    const showTable =
-      statesArray.includes(PaymentVerificationPlanStatus.Finished) ||
-      statesArray.includes(PaymentVerificationPlanStatus.Active);
+    const showTable = statesArray.includes(PaymentVerificationPlanStatus.Finished)
+      || statesArray.includes(PaymentVerificationPlanStatus.Active);
 
     return showTable && statesArray.length > 0;
   };
-  const canSeeCreationMessage = (): boolean => {
-    return statesArray.length === 0;
-  };
+  const canSeeCreationMessage = (): boolean => statesArray.length === 0;
 
-  const canSeeActivationMessage = (): boolean => {
-    return !canSeeVerificationRecords() && !canSeeCreationMessage();
-  };
+  const canSeeActivationMessage = (): boolean => !canSeeVerificationRecords() && !canSeeCreationMessage();
 
-  const isFinished =
-    cashPlan?.paymentVerificationSummary?.status === 'FINISHED';
+  const isFinished = cashPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
   const toolbar = (
     <PageHeader
-      title={
+      title={(
         <BlackLink fullWidth to={`/${baseUrl}/cashplans/${cashPlan.id}`}>
-          {t('Payment Plan')} {cashPlan.caId}
+          {t('Payment Plan')}
+          {' '}
+          {cashPlan.caId}
         </BlackLink>
-      }
+      )}
       breadCrumbs={
         hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
           ? breadCrumbsItems
@@ -145,8 +140,8 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
           />
         )}
 
-        {isFinished &&
-          (isAllPrograms ? (
+        {isFinished
+          && (isAllPrograms ? (
             <Button
               variant="contained"
               color="primary"
@@ -173,13 +168,13 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
       </Container>
       {cashPlan.verificationPlans?.edges?.length
         ? cashPlan.verificationPlans.edges.map((edge) => (
-            <VerificationPlanDetails
-              key={edge.node.id}
-              samplingChoicesData={choicesData}
-              verificationPlan={edge.node}
-              planNode={cashPlan}
-            />
-          ))
+          <VerificationPlanDetails
+            key={edge.node.id}
+            samplingChoicesData={choicesData}
+            verificationPlan={edge.node}
+            planNode={cashPlan}
+          />
+        ))
         : null}
       {canSeeVerificationRecords() ? (
         <>
@@ -217,12 +212,12 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
-      {cashPlan.verificationPlans?.edges[0]?.node?.id &&
-        hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+      {cashPlan.verificationPlans?.edges[0]?.node?.id
+        && hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={cashPlan.id}
           />
-        )}
+      )}
     </>
   );
-};
+}

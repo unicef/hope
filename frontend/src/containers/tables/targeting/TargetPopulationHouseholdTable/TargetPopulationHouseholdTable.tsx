@@ -13,13 +13,13 @@ interface TargetPopulationHouseholdProps {
   canViewDetails?: boolean;
 }
 
-export const TargetPopulationHouseholdTable = ({
+export function TargetPopulationHouseholdTable({
   id,
   query,
   queryObjectName,
   variables,
   canViewDetails,
-}: TargetPopulationHouseholdProps): ReactElement => {
+}: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
   const initialVariables = {
     ...(id && { targetPopulation: id }),
@@ -44,4 +44,4 @@ export const TargetPopulationHouseholdTable = ({
       />
     </TableWrapper>
   );
-};
+}

@@ -39,21 +39,18 @@ export function EditIdentityRow({
   const isEditTicket = location.pathname.includes('edit-ticket');
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
-  const identitiesToRemove =
-    values?.individualDataUpdateIdentitiesToRemove || [];
+  const identitiesToRemove = values?.individualDataUpdateIdentitiesToRemove || [];
   const removed = identitiesToRemove.includes(identity.node.id);
   return isEdited ? (
     <>
       <AgencyField
         id={id}
         key={`${id}-${identity?.node?.number}-${identity?.node?.partner}`}
-        onDelete={() =>
-          removeItemById(
-            values.individualDataUpdateDocumentsToEdit,
-            identity.node.id,
-            arrayHelpers,
-          )
-        }
+        onDelete={() => removeItemById(
+          values.individualDataUpdateDocumentsToEdit,
+          identity.node.id,
+          arrayHelpers,
+        )}
         countryChoices={addIndividualFieldsData.countriesChoices}
         identityTypeChoices={addIndividualFieldsData.identityTypeChoices}
         baseName="individualDataUpdateIdentitiesToEdit"

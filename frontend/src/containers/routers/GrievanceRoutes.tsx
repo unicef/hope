@@ -11,7 +11,7 @@ import { GrievancesDashboardPage } from '../pages/grievances/GrievancesDashboard
 import { GrievancesDetailsPage } from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from '../pages/grievances/GrievancesTablePage';
 
-export const GrievanceRoutes = (): React.ReactElement => {
+export function GrievanceRoutes(): React.ReactElement {
   const { path } = useRouteMatch();
 
   const grievanceRoutes = [
@@ -21,39 +21,39 @@ export const GrievanceRoutes = (): React.ReactElement => {
     },
     {
       path: `${path}/grievance/edit-ticket/user-generated/:id`,
-      component: <EditGrievancePage key='user' />,
+      component: <EditGrievancePage key="user" />,
     },
     {
       path: `${path}/grievance/edit-ticket/system-generated/:id`,
-      component: <EditGrievancePage key='system' />,
+      component: <EditGrievancePage key="system" />,
     },
     {
       path: `${path}/grievance/tickets/user-generated/:id`,
-      component: <GrievancesDetailsPage key='user' />,
+      component: <GrievancesDetailsPage key="user" />,
     },
     {
       path: `${path}/grievance/tickets/system-generated/:id`,
-      component: <GrievancesDetailsPage key='system' />,
+      component: <GrievancesDetailsPage key="system" />,
     },
     {
       path: `${path}/grievance/rdi/:id`,
-      component: <GrievancesTablePage key='rdi' />,
+      component: <GrievancesTablePage key="rdi" />,
     },
     {
       path: `${path}/grievance/payment-verification/:cashPlanId`,
-      component: <GrievancesTablePage key='verificationId' />,
+      component: <GrievancesTablePage key="verificationId" />,
     },
     {
       path: `${path}/grievance/tickets/user-generated`,
-      component: <GrievancesTablePage key='user' />,
+      component: <GrievancesTablePage key="user" />,
     },
     {
       path: `${path}/grievance/tickets/system-generated`,
-      component: <GrievancesTablePage key='system' />,
+      component: <GrievancesTablePage key="system" />,
     },
     {
       path: `${path}/grievance/dashboard`,
-      component: <GrievancesDashboardPage key='all' />,
+      component: <GrievancesDashboardPage key="all" />,
     },
     {
       path: `${path}/grievance/feedback/create`,
@@ -82,4 +82,4 @@ export const GrievanceRoutes = (): React.ReactElement => {
       ))}
     </Switch>
   );
-};
+}

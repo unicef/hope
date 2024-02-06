@@ -10,10 +10,10 @@ interface CreateSetUpFspHeaderProps {
   permissions: string[];
 }
 
-export const CreateSetUpFspHeader = ({
+export function CreateSetUpFspHeader({
   baseUrl,
   permissions,
-}: CreateSetUpFspHeaderProps): React.ReactElement => {
+}: CreateSetUpFspHeaderProps): React.ReactElement {
   const location = useLocation();
   const { t } = useTranslation();
   const { id } = useParams();
@@ -38,4 +38,4 @@ export const CreateSetUpFspHeader = ({
       }
     />
   );
-};
+}

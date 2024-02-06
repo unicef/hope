@@ -33,7 +33,7 @@ const Container = styled.div`
   }
 `;
 
-export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
+export function PopulationIndividualsDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -46,33 +46,28 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery();
 
-  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
-    useAllIndividualsFlexFieldsAttributesQuery();
+  const { data: flexFieldsData, loading: flexFieldsDataLoading } = useAllIndividualsFlexFieldsAttributesQuery();
 
-  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: grievancesChoices, loading: grievancesChoicesLoading } = useGrievancesChoiceDataQuery();
 
   if (
-    loading ||
-    choicesLoading ||
-    flexFieldsDataLoading ||
-    grievancesChoicesLoading
-  )
-    return <LoadingComponent />;
+    loading
+    || choicesLoading
+    || flexFieldsDataLoading
+    || grievancesChoicesLoading
+  ) return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data ||
-    !choicesData ||
-    !flexFieldsData ||
-    !grievancesChoices ||
-    permissions === null
-  )
-    return null;
+    !data
+    || !choicesData
+    || !flexFieldsData
+    || !grievancesChoices
+    || permissions === null
+  ) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -122,4 +117,4 @@ export const PopulationIndividualsDetailsPage = (): React.ReactElement => {
       </Container>
     </>
   );
-};
+}

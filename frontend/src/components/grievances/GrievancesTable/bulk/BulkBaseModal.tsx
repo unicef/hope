@@ -48,7 +48,7 @@ interface BulkBaseModalProps {
   disabledSave?: boolean;
 }
 
-export const BulkBaseModal = ({
+export function BulkBaseModal({
   selectedTickets,
   icon,
   buttonTitle,
@@ -56,30 +56,28 @@ export const BulkBaseModal = ({
   children,
   onSave,
   disabledSave,
-}: BulkBaseModalProps): React.ReactElement => {
+}: BulkBaseModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
 
-  const renderButton = (): React.ReactElement => {
-    return (
-      <Button
-        variant="outlined"
-        color="primary"
-        startIcon={icon}
-        disabled={!selectedTickets.length || !isActiveProgram}
-        onClick={() => setDialogOpen(true)}
-      >
-        {buttonTitle}
-      </Button>
-    );
-  };
+  const renderButton = (): React.ReactElement => (
+    <Button
+      variant="outlined"
+      color="primary"
+      startIcon={icon}
+      disabled={!selectedTickets.length || !isActiveProgram}
+      onClick={() => setDialogOpen(true)}
+    >
+      {buttonTitle}
+    </Button>
+  );
   const onAccept = async (): Promise<void> => {
     try {
       await onSave(selectedTickets);
       setDialogOpen(false);
     } catch (e) {
-      //handled by inner function
+      // handled by inner function
     }
   };
 
@@ -99,7 +97,9 @@ export const BulkBaseModal = ({
           <Box mt={2} mb={6}>
             <StyledTable>
               <Typography>
-                {t('Tickets ID')}:{' '}
+                {t('Tickets ID')}
+                :
+                {' '}
                 <Bold>
                   {selectedTickets.map((ticket) => ticket.unicefId).join(', ')}
                 </Bold>
@@ -132,4 +132,4 @@ export const BulkBaseModal = ({
       </StyledDialog>
     </>
   );
-};
+}

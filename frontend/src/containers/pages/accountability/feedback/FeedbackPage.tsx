@@ -15,7 +15,7 @@ import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 
-export const FeedbackPage = (): React.ReactElement => {
+export function FeedbackPage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -45,8 +45,7 @@ export const FeedbackPage = (): React.ReactElement => {
       PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
       permissions,
     )
-  )
-    return <PermissionDenied />;
+  ) return <PermissionDenied />;
   const canViewDetails = hasPermissionInModule(
     PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
     permissions,
@@ -56,11 +55,11 @@ export const FeedbackPage = (): React.ReactElement => {
     <>
       <PageHeader title={t('Feedback')}>
         <ButtonTooltip
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           component={Link}
           to={`/${baseUrl}/grievance/feedback/create`}
-          data-cy='button-submit-new-feedback'
+          data-cy="button-submit-new-feedback"
           title={t('Program has to be active to create a new Feedback')}
           disabled={!isActiveProgram}
         >
@@ -77,4 +76,4 @@ export const FeedbackPage = (): React.ReactElement => {
       <FeedbackTable filter={appliedFilter} canViewDetails={canViewDetails} />
     </>
   );
-};
+}

@@ -86,18 +86,17 @@ export const grievancePermissions = (
     GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK,
     GRIEVANCE_CATEGORIES.REFERRAL,
   ].includes(ticket?.category?.toString());
-  const canClose =
-    (isFeedbackType &&
-      hasCreatorOrOwnerPermissions(
+  const canClose = (isFeedbackType
+      && hasCreatorOrOwnerPermissions(
         PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
         isCreator,
         PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
         isOwner,
         PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
         permissions,
-      )) ||
-    (!isFeedbackType &&
-      hasCreatorOrOwnerPermissions(
+      ))
+    || (!isFeedbackType
+      && hasCreatorOrOwnerPermissions(
         PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
         isCreator,
         PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,

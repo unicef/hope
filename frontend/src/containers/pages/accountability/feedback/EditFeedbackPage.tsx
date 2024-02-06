@@ -1,4 +1,6 @@
-import { Box, Button, Divider, Grid } from '@mui/material';
+import {
+  Box, Button, Divider, Grid,
+} from '@mui/material';
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,7 +44,7 @@ export const validationSchema = Yup.object().shape({
   comments: Yup.string().nullable(),
 });
 
-export const EditFeedbackPage = (): React.ReactElement => {
+export function EditFeedbackPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
@@ -59,29 +61,25 @@ export const EditFeedbackPage = (): React.ReactElement => {
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useFeedbackIssueTypeChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } = useFeedbackIssueTypeChoicesQuery();
 
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
-    });
+  const { data: programsData, loading: programsDataLoading } = useAllProgramsForChoicesQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
+  });
 
   const [mutate, { loading }] = useUpdateFeedbackTicketMutation();
 
   if (
-    userDataLoading ||
-    choicesLoading ||
-    feedbackDataLoading ||
-    programsDataLoading
-  )
-    return <LoadingComponent />;
+    userDataLoading
+    || choicesLoading
+    || feedbackDataLoading
+    || programsDataLoading
+  ) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions)) return <PermissionDenied />;
 
   if (!choicesData || !userData || !feedbackData || !programsData) return null;
 
@@ -153,12 +151,11 @@ export const EditFeedbackPage = (): React.ReactElement => {
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm }) => {
-        return (
-          <>
-            <PageHeader
-              title={`Edit Feedback #${feedback.unicefId}`}
-              breadCrumbs={
+      {({ submitForm }) => (
+        <>
+          <PageHeader
+            title={`Edit Feedback #${feedback.unicefId}`}
+            breadCrumbs={
                 hasPermissionInModule(
                   'GRIEVANCES_FEEDBACK_VIEW_LIST',
                   permissions,
@@ -166,53 +163,53 @@ export const EditFeedbackPage = (): React.ReactElement => {
                   ? breadCrumbsItems
                   : null
               }
-            >
-              <Box display="flex" alignContent="center">
-                <Box mr={3}>
-                  <Button
-                    component={Link}
-                    to={`/${baseUrl}/grievance/feedback/${feedback.id}`}
-                  >
-                    {t('Cancel')}
-                  </Button>
-                </Box>
-                <LoadingButton
-                  loading={loading}
-                  color="primary"
-                  variant="contained"
-                  onClick={submitForm}
-                  data-cy="button-submit"
+          >
+            <Box display="flex" alignContent="center">
+              <Box mr={3}>
+                <Button
+                  component={Link}
+                  to={`/${baseUrl}/grievance/feedback/${feedback.id}`}
                 >
-                  {t('Save')}
-                </LoadingButton>
+                  {t('Cancel')}
+                </Button>
               </Box>
-            </PageHeader>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Box p={3}>
-                  <ContainerColumnWithBorder>
-                    <Box p={3}>
-                      <Box mb={3}>
-                        <Grid container item xs={6} spacing={6}>
-                          <Grid item xs={6}>
-                            <LabelizedField label={t('Category')}>
-                              {t('Feedback')}
-                            </LabelizedField>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <LabelizedField label={t('Issue Type')}>
-                              {feedback.issueType === 'POSITIVE_FEEDBACK'
-                                ? 'Positive Feedback'
-                                : 'Negative Feedback'}
-                            </LabelizedField>
-                          </Grid>
+              <LoadingButton
+                loading={loading}
+                color="primary"
+                variant="contained"
+                onClick={submitForm}
+                data-cy="button-submit"
+              >
+                {t('Save')}
+              </LoadingButton>
+            </Box>
+          </PageHeader>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Box p={3}>
+                <ContainerColumnWithBorder>
+                  <Box p={3}>
+                    <Box mb={3}>
+                      <Grid container item xs={6} spacing={6}>
+                        <Grid item xs={6}>
+                          <LabelizedField label={t('Category')}>
+                            {t('Feedback')}
+                          </LabelizedField>
                         </Grid>
-                        <Grid container xs={6} spacing={6}>
-                          <Grid item xs={6}>
-                            <LabelizedField label={t('Household ID')}>
-                              {feedback.householdLookup?.id &&
-                              canViewHouseholdDetails &&
-                              !isAllPrograms ? (
+                        <Grid item xs={6}>
+                          <LabelizedField label={t('Issue Type')}>
+                            {feedback.issueType === 'POSITIVE_FEEDBACK'
+                              ? 'Positive Feedback'
+                              : 'Negative Feedback'}
+                          </LabelizedField>
+                        </Grid>
+                      </Grid>
+                      <Grid container xs={6} spacing={6}>
+                        <Grid item xs={6}>
+                          <LabelizedField label={t('Household ID')}>
+                            {feedback.householdLookup?.id
+                              && canViewHouseholdDetails
+                              && !isAllPrograms ? (
                                 <BlackLink
                                   to={`/${baseUrl}/population/household/${feedback.householdLookup?.id}`}
                                 >
@@ -225,13 +222,13 @@ export const EditFeedbackPage = (): React.ReactElement => {
                                     : '-'}
                                 </div>
                               )}
-                            </LabelizedField>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <LabelizedField label={t('Individual ID')}>
-                              {feedback.individualLookup?.id &&
-                              canViewIndividualDetails &&
-                              !isAllPrograms ? (
+                          </LabelizedField>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <LabelizedField label={t('Individual ID')}>
+                            {feedback.individualLookup?.id
+                              && canViewIndividualDetails
+                              && !isAllPrograms ? (
                                 <BlackLink
                                   to={`/${baseUrl}/population/individuals/${feedback.individualLookup?.id}`}
                                 >
@@ -244,84 +241,83 @@ export const EditFeedbackPage = (): React.ReactElement => {
                                     : '-'}
                                 </div>
                               )}
-                            </LabelizedField>
-                          </Grid>
-                        </Grid>
-                        <Box mt={6} mb={6}>
-                          <Divider />
-                        </Box>
-                      </Box>
-                      <Grid container spacing={3}>
-                        <Grid item xs={12}>
-                          <Field
-                            name="description"
-                            multiline
-                            fullWidth
-                            variant="outlined"
-                            label={t('Description')}
-                            required
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Field
-                            name="comments"
-                            multiline
-                            fullWidth
-                            variant="outlined"
-                            label={t('Comments')}
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name="admin2"
-                            variant="outlined"
-                            component={FormikAdminAreaAutocomplete}
-                            disabled={Boolean(feedback.admin2?.id)}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name="area"
-                            fullWidth
-                            variant="outlined"
-                            label={t('Area / Village / Pay point')}
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Field
-                            name="language"
-                            multiline
-                            fullWidth
-                            variant="outlined"
-                            label={t('Languages Spoken')}
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={3}>
-                          <Field
-                            name="program"
-                            label={t('Programme Name')}
-                            fullWidth
-                            variant="outlined"
-                            choices={mappedProgramChoices}
-                            component={FormikSelectField}
-                            disabled={
-                              !isAllPrograms || Boolean(feedback.program?.id)
-                            }
-                          />
+                          </LabelizedField>
                         </Grid>
                       </Grid>
+                      <Box mt={6} mb={6}>
+                        <Divider />
+                      </Box>
                     </Box>
-                  </ContainerColumnWithBorder>
-                </Box>
-              </Grid>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
+                        <Field
+                          name="description"
+                          multiline
+                          fullWidth
+                          variant="outlined"
+                          label={t('Description')}
+                          required
+                          component={FormikTextField}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Field
+                          name="comments"
+                          multiline
+                          fullWidth
+                          variant="outlined"
+                          label={t('Comments')}
+                          component={FormikTextField}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Field
+                          name="admin2"
+                          variant="outlined"
+                          component={FormikAdminAreaAutocomplete}
+                          disabled={Boolean(feedback.admin2?.id)}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Field
+                          name="area"
+                          fullWidth
+                          variant="outlined"
+                          label={t('Area / Village / Pay point')}
+                          component={FormikTextField}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Field
+                          name="language"
+                          multiline
+                          fullWidth
+                          variant="outlined"
+                          label={t('Languages Spoken')}
+                          component={FormikTextField}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <Field
+                          name="program"
+                          label={t('Programme Name')}
+                          fullWidth
+                          variant="outlined"
+                          choices={mappedProgramChoices}
+                          component={FormikSelectField}
+                          disabled={
+                              !isAllPrograms || Boolean(feedback.program?.id)
+                            }
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </ContainerColumnWithBorder>
+              </Box>
             </Grid>
-          </>
-        );
-      }}
+          </Grid>
+        </>
+      )}
     </Formik>
   );
-};
+}

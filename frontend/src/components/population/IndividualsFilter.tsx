@@ -32,7 +32,7 @@ interface IndividualsFilterProps {
   isOnPaper?: boolean;
 }
 
-export const IndividualsFilter = ({
+export function IndividualsFilter({
   filter,
   programs,
   choicesData,
@@ -41,23 +41,22 @@ export const IndividualsFilter = ({
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
-}: IndividualsFilterProps): React.ReactElement => {
+}: IndividualsFilterProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -67,10 +66,9 @@ export const IndividualsFilter = ({
     clearFilter();
   };
 
-  //Show admin area filter only for social programs
-  const showAdminAreaFilter =
-    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
-    DataCollectingTypeType.Social;
+  // Show admin area filter only for social programs
+  const showAdminAreaFilter = selectedProgram?.dataCollectingType?.type?.toUpperCase()
+    === DataCollectingTypeType.Social;
 
   return (
     <FiltersSection
@@ -238,9 +236,7 @@ export const IndividualsFilter = ({
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
-            onChange={(date) =>
-              handleFilterChange('lastRegistrationDateMin', date)
-            }
+            onChange={(date) => handleFilterChange('lastRegistrationDateMin', date)}
             value={filter.lastRegistrationDateMin}
             data-cy="ind-filters-reg-date-from"
           />
@@ -248,9 +244,7 @@ export const IndividualsFilter = ({
         <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
-            onChange={(date) =>
-              handleFilterChange('lastRegistrationDateMax', date)
-            }
+            onChange={(date) => handleFilterChange('lastRegistrationDateMax', date)}
             value={filter.lastRegistrationDateMax}
             data-cy="ind-filters-reg-date-to"
           />
@@ -258,9 +252,7 @@ export const IndividualsFilter = ({
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('programState', e.target.value)
-              }
+              onChange={(e) => handleFilterChange('programState', e.target.value)}
               label={t('Programme State')}
               value={filter.programState}
               fullWidth
@@ -275,4 +267,4 @@ export const IndividualsFilter = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

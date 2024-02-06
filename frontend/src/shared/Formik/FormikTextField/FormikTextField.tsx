@@ -16,7 +16,7 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
-export const FormikTextField = ({
+export function FormikTextField({
   field,
   form,
   decoratorStart,
@@ -26,10 +26,9 @@ export const FormikTextField = ({
   integer,
   maxLength,
   ...otherProps
-}): React.ReactElement => {
-  const isInvalid =
-    get(form.errors, field.name) &&
-    (get(form.touched, field.name) || form.submitCount > 0);
+}): React.ReactElement {
+  const isInvalid = get(form.errors, field.name)
+    && (get(form.touched, field.name) || form.submitCount > 0);
   const handleKeyPress = (evt): void => {
     if (type === 'number' && ['e', 'E', '+', '-'].includes(evt.key)) {
       evt.preventDefault();
@@ -55,37 +54,35 @@ export const FormikTextField = ({
   };
 
   return (
-    <>
-      <StyledTextField
-        {...field}
-        {...otherProps}
-        name={field.name}
-        id={`textField-${field.name}`}
-        margin="dense"
-        value={field.value}
-        onChange={handleChange}
-        onBlur={onBlur}
-        error={isInvalid}
-        autoComplete="off"
-        type={type}
-        helperText={isInvalid && get(form.errors, field.name)}
-        InputProps={{
-          onKeyPress: handleKeyPress,
-          startAdornment: decoratorStart && (
-            <InputAdornment position="start">{decoratorStart}</InputAdornment>
-          ),
+    <StyledTextField
+      {...field}
+      {...otherProps}
+      name={field.name}
+      id={`textField-${field.name}`}
+      margin="dense"
+      value={field.value}
+      onChange={handleChange}
+      onBlur={onBlur}
+      error={isInvalid}
+      autoComplete="off"
+      type={type}
+      helperText={isInvalid && get(form.errors, field.name)}
+      InputProps={{
+        onKeyPress: handleKeyPress,
+        startAdornment: decoratorStart && (
+        <InputAdornment position="start">{decoratorStart}</InputAdornment>
+        ),
 
-          endAdornment: decoratorEnd && (
-            <InputAdornment position="end">{decoratorEnd}</InputAdornment>
-          ),
-        }}
+        endAdornment: decoratorEnd && (
+        <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+        ),
+      }}
         // https://github.com/mui-org/material-ui/issues/12805
         // eslint-disable-next-line react/jsx-no-duplicate-props
-        inputProps={{
-          'data-cy': `input-${field.name}`,
-          maxLength: maxLength || undefined,
-        }}
-      />
-    </>
+      inputProps={{
+        'data-cy': `input-${field.name}`,
+        maxLength: maxLength || undefined,
+      }}
+    />
   );
-};
+}

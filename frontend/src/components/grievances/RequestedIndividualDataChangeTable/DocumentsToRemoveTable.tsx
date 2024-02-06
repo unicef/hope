@@ -34,7 +34,7 @@ export interface DocumentsToRemoveTableProps {
   previousDocuments;
 }
 
-export const DocumentsToRemoveTable = ({
+export function DocumentsToRemoveTable({
   values,
   isEdit,
   ticket,
@@ -42,7 +42,7 @@ export const DocumentsToRemoveTable = ({
   countriesDict,
   documentsToRemove,
   previousDocuments,
-}: DocumentsToRemoveTableProps): React.ReactElement => {
+}: DocumentsToRemoveTableProps): React.ReactElement {
   const { t } = useTranslation();
   const documentsTableHead = (
     <TableHead>
@@ -120,4 +120,4 @@ export const DocumentsToRemoveTable = ({
       </StyledTable>
     </>
   );
-};
+}

@@ -17,10 +17,10 @@ interface PaymentPlanDetailsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const PaymentPlanDetails = ({
+export function PaymentPlanDetails({
   baseUrl,
   paymentPlan,
-}: PaymentPlanDetailsProps): React.ReactElement => {
+}: PaymentPlanDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const {
     createdBy,
@@ -105,4 +105,4 @@ export const PaymentPlanDetails = ({
       </ContainerColumnWithBorder>
     </Grid>
   );
-};
+}

@@ -67,9 +67,14 @@ export function MergeRegistrationDataImportDialog({
             <div>{t('Are your sure you want to merge this data import?')}</div>
             <div>
               <strong>
-                {registration.numberOfHouseholds} {t('households and')}{' '}
-                {registration.numberOfIndividuals}{' '}
-                {t('individuals will be merged.')}{' '}
+                {registration.numberOfHouseholds}
+                {' '}
+                {t('households and')}
+                {' '}
+                {registration.numberOfIndividuals}
+                {' '}
+                {t('individuals will be merged.')}
+                {' '}
               </strong>
               {t('Do you want to proceed?')}
             </div>

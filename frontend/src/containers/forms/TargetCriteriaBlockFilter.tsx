@@ -30,7 +30,7 @@ export function TargetCriteriaBlockFilter({
         baseName={`individualsFiltersBlocks[${blockIndex}].individualBlockFilters[${index}]`}
       />
       {each.fieldName && (
-        <div data-cy='autocomplete-target-criteria-values'>
+        <div data-cy="autocomplete-target-criteria-values">
           <SubField
             field={each}
             index={index}

@@ -4,17 +4,16 @@ import DatePicker from '@mui/lab/DatePicker';
 import moment from 'moment';
 import get from 'lodash/get';
 
-export const FormikDateField = ({
+export function FormikDateField({
   field,
   form,
   decoratorStart,
   decoratorEnd,
   tooltip = null,
   ...otherProps
-}): React.ReactElement => {
-  const isInvalid =
-    get(form.errors, field.name) &&
-    (get(form.touched, field.name) || form.submitCount > 0);
+}): React.ReactElement {
+  const isInvalid = get(form.errors, field.name)
+    && (get(form.touched, field.name) || form.submitCount > 0);
   const dateFormat = 'YYYY-MM-DD';
   let formattedValue = field.value === '' ? null : field.value;
   if (formattedValue) {
@@ -76,4 +75,4 @@ export const FormikDateField = ({
     );
   }
   return datePickerComponent;
-};
+}

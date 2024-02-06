@@ -24,7 +24,7 @@ const initialFilter = {
   onlyMy: false,
 };
 
-export const ReportingPage = (): React.ReactElement => {
+export function ReportingPage(): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -49,8 +49,7 @@ export const ReportingPage = (): React.ReactElement => {
   if (choicesLoading || meLoading) return <LoadingComponent />;
 
   if (!choicesData || !meData || permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions)) return <PermissionDenied />;
 
   return (
     <>
@@ -73,4 +72,4 @@ export const ReportingPage = (): React.ReactElement => {
       />
     </>
   );
-};
+}

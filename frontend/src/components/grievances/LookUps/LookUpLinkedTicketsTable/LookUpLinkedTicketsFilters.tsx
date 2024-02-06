@@ -18,27 +18,26 @@ interface LookUpLinkedTicketsFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const LookUpLinkedTicketsFilters = ({
+export function LookUpLinkedTicketsFilters({
   filter,
   choicesData,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpLinkedTicketsFiltersProps): React.ReactElement => {
+}: LookUpLinkedTicketsFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const history = useHistory();
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -69,13 +68,11 @@ export const LookUpLinkedTicketsFilters = ({
             value={filter.status || null}
             data-cy="filters-status"
           >
-            {choicesData.grievanceTicketStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.grievanceTicketStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
@@ -118,4 +115,4 @@ export const LookUpLinkedTicketsFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

@@ -10,10 +10,10 @@ interface EditFspHeaderProps {
   permissions: string[];
 }
 
-export const EditSetUpFspHeader = ({
+export function EditSetUpFspHeader({
   baseUrl,
   permissions,
-}: EditFspHeaderProps): React.ReactElement => {
+}: EditFspHeaderProps): React.ReactElement {
   const location = useLocation();
   const { t } = useTranslation();
   const { id } = useParams();
@@ -37,4 +37,4 @@ export const EditSetUpFspHeader = ({
       }
     />
   );
-};
+}

@@ -11,10 +11,10 @@ export interface GrievanceFlexFieldPhotoModalNewIndividualProps {
   individualId: string;
 }
 
-export const GrievanceFlexFieldPhotoModalNewIndividual = ({
+export function GrievanceFlexFieldPhotoModalNewIndividual({
   flexField,
   individualId,
-}: GrievanceFlexFieldPhotoModalNewIndividualProps): React.ReactElement => {
+}: GrievanceFlexFieldPhotoModalNewIndividualProps): React.ReactElement {
   const { data } = useIndividualFlexFieldsQuery({
     variables: { id: individualId },
     fetchPolicy: 'network-only',
@@ -38,4 +38,4 @@ export const GrievanceFlexFieldPhotoModalNewIndividual = ({
       )}
     </Box>
   );
-};
+}

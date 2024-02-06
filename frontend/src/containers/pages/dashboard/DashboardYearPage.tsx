@@ -51,7 +51,9 @@ export function DashboardYearPage({
   filter,
 }: DashboardYearPageProps): React.ReactElement {
   const { t } = useTranslation();
-  const { businessArea, isGlobal, isAllPrograms, programId } = useBaseUrl();
+  const {
+    businessArea, isGlobal, isAllPrograms, programId,
+  } = useBaseUrl();
 
   const variables: AllChartsQueryVariables = {
     year: parseInt(year, 10),
@@ -72,12 +74,11 @@ export function DashboardYearPage({
     fetchPolicy: 'cache-and-network',
   });
 
-  const [loadGlobal, { data: globalData, loading: globalLoading }] =
-    useGlobalAreaChartsLazyQuery({
-      variables: {
-        year: parseInt(year, 10),
-      },
-    });
+  const [loadGlobal, { data: globalData, loading: globalLoading }] = useGlobalAreaChartsLazyQuery({
+    variables: {
+      year: parseInt(year, 10),
+    },
+  });
 
   useEffect(() => {
     if (isGlobal) {

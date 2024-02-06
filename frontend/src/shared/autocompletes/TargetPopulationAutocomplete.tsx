@@ -1,5 +1,7 @@
 import get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback, useEffect, useRef, useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useAllTargetPopulationForChoicesLazyQuery } from '../../__generated__/graphql';
@@ -14,7 +16,7 @@ import {
 } from '../../utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const TargetPopulationAutocomplete = ({
+export function TargetPopulationAutocomplete({
   disabled,
   name,
   filter,
@@ -35,7 +37,7 @@ export const TargetPopulationAutocomplete = ({
   appliedFilter;
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
@@ -103,7 +105,7 @@ export const TargetPopulationAutocomplete = ({
       value={value}
       disabled={disabled}
       label={label || t('Target Population')}
-      dataCy='filters-target-population-autocomplete'
+      dataCy="filters-target-population-autocomplete"
       loadData={loadData}
       loading={loading}
       allEdges={allEdges}
@@ -116,19 +118,13 @@ export const TargetPopulationAutocomplete = ({
       }}
       handleOpen={() => setOpen(true)}
       open={open}
-      handleClose={(_, reason) =>
-        handleAutocompleteClose(setOpen, onInputTextChange, reason)
-      }
-      handleOptionSelected={(option, value1) =>
-        handleOptionSelected(option?.node?.id, value1)
-      }
-      handleOptionLabel={(option) =>
-        getAutocompleteOptionLabel(option, allEdges, inputValue)
-      }
+      handleClose={(_, reason) => handleAutocompleteClose(setOpen, onInputTextChange, reason)}
+      handleOptionSelected={(option, value1) => handleOptionSelected(option?.node?.id, value1)}
+      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue)}
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
     />
   );
-};
+}

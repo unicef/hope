@@ -1,4 +1,6 @@
-import { Box, Step, StepButton, Stepper } from '@mui/material';
+import {
+  Box, Step, StepButton, Stepper,
+} from '@mui/material';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +23,7 @@ import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 
-export const DuplicateProgramPage = (): ReactElement => {
+export function DuplicateProgramPage(): ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -37,8 +39,7 @@ export const DuplicateProgramPage = (): ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
-    useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } = useUserPartnerChoicesQuery();
 
   const handleSubmit = async (values): Promise<void> => {
     try {
@@ -66,8 +67,7 @@ export const DuplicateProgramPage = (): ReactElement => {
     }
   };
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
-    return <LoadingComponent />;
+  if (loadingProgram || treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
   if (!data || !treeData || !userPartnerChoicesData) return null;
 
   const {
@@ -132,7 +132,9 @@ export const DuplicateProgramPage = (): ReactElement => {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({ submitForm, values, validateForm, setFieldTouched }) => {
+      {({
+        submitForm, values, validateForm, setFieldTouched,
+      }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({
@@ -210,4 +212,4 @@ export const DuplicateProgramPage = (): ReactElement => {
       }}
     </Formik>
   );
-};
+}

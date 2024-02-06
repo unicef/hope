@@ -1,9 +1,8 @@
 import React from 'react';
 import { ThemeProvider } from '@mui/material';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { theme } from '../../../theme';
+import styled, { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { Field, Form, Formik } from 'formik';
-import styled from 'styled-components';
+import { theme } from '../../../theme';
 import { FormikSwitchField } from './FormikSwitchField';
 
 export default {
@@ -15,15 +14,13 @@ const FieldWrapper = styled.div`
   width: 300px;
 `;
 
-export const SwitchField = () => {
+export function SwitchField() {
   return (
     <ThemeProvider theme={theme}>
       <StyledThemeProvider theme={theme}>
         <Formik
           initialValues={{ switchField: false }}
-          onSubmit={(values) => {
-            return console.log(values);
-          }}
+          onSubmit={(values) => console.log(values)}
         >
           {() => (
             <Form>
@@ -41,4 +38,4 @@ export const SwitchField = () => {
       </StyledThemeProvider>
     </ThemeProvider>
   );
-};
+}

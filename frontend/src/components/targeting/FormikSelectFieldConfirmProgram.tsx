@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { getFullNodeFromEdgesById } from '../../utils/utils';
 import { useConfirmation } from '../core/ConfirmationDialog';
 
-export const FormikSelectFieldConfirmProgram = ({
+export function FormikSelectFieldConfirmProgram({
   field,
   form,
   allProgramsEdges,
@@ -18,7 +18,7 @@ export const FormikSelectFieldConfirmProgram = ({
   setFieldValue,
   values,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const confirm = useConfirmation();
 
@@ -35,7 +35,10 @@ export const FormikSelectFieldConfirmProgram = ({
   const dialogContent = (
     <span>
       {' '}
-      {t('Are you sure you want to change the programme?')} <br />{' '}
+      {t('Are you sure you want to change the programme?')}
+      {' '}
+      <br />
+      {' '}
       {t(
         'Changing the programme will result in deleting your current Targeting Criteria.',
       )}
@@ -61,10 +64,10 @@ export const FormikSelectFieldConfirmProgram = ({
           );
 
           if (
-            program &&
-            values.targetingCriteria?.length &&
-            oldProgram?.individualDataNeeded ===
-              newProgram?.individualDataNeeded
+            program
+            && values.targetingCriteria?.length
+            && oldProgram?.individualDataNeeded
+              === newProgram?.individualDataNeeded
           ) {
             confirm({
               title: dialogTitle,
@@ -97,4 +100,4 @@ export const FormikSelectFieldConfirmProgram = ({
       )}
     </FormControl>
   );
-};
+}

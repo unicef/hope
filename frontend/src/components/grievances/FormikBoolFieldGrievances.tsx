@@ -18,16 +18,15 @@ const toExternalValue = (internalValue): boolean | null => {
       return null;
   }
 };
-export const FormikBoolFieldGrievances = ({
+export function FormikBoolFieldGrievances({
   field,
   form,
   multiple,
   required,
   ...otherProps
-}): React.ReactElement => {
-  const isInvalid =
-    get(form.errors, field.name) &&
-    (get(form.touched, field.name) || form.submitCount > 0);
+}): React.ReactElement {
+  const isInvalid = get(form.errors, field.name)
+    && (get(form.touched, field.name) || form.submitCount > 0);
   const options: { key: string; value: string }[] = [
     { key: 'Yes', value: 'YES' },
     { key: 'No', value: 'NO' },
@@ -59,45 +58,43 @@ export const FormikBoolFieldGrievances = ({
   };
 
   return (
-    <>
-      <FormControl
-        required={required}
-        variant="outlined"
-        margin="dense"
-        fullWidth
+    <FormControl
+      required={required}
+      variant="outlined"
+      margin="dense"
+      fullWidth
+      {...otherProps}
+    >
+      <InputLabel>{otherProps.label}</InputLabel>
+      <Select
+        {...field}
         {...otherProps}
+        name={field.name}
+        onChange={handleChange}
+        multiple={multiple}
+        value={value}
+        id={`textField-${field.name}`}
+        error={isInvalid}
+        SelectDisplayProps={{ 'data-cy': `select-${field.name}` }}
+        MenuProps={{
+          'data-cy': `select-options-${field.name}`,
+          MenuListProps: { 'data-cy': 'select-options-container' },
+          getContentAnchorEl: null,
+        }}
       >
-        <InputLabel>{otherProps.label}</InputLabel>
-        <Select
-          {...field}
-          {...otherProps}
-          name={field.name}
-          onChange={handleChange}
-          multiple={multiple}
-          value={value}
-          id={`textField-${field.name}`}
-          error={isInvalid}
-          SelectDisplayProps={{ 'data-cy': `select-${field.name}` }}
-          MenuProps={{
-            'data-cy': `select-options-${field.name}`,
-            MenuListProps: { 'data-cy': 'select-options-container' },
-            getContentAnchorEl: null,
-          }}
-        >
-          {options.map((each, index) => (
-            <MenuItem
-              key={each.value}
-              value={each.value}
-              data-cy={`select-option-${index}`}
-            >
-              {each.key}
-            </MenuItem>
-          ))}
-        </Select>
-        {isInvalid && (
-          <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
-        )}
-      </FormControl>
-    </>
+        {options.map((each, index) => (
+          <MenuItem
+            key={each.value}
+            value={each.value}
+            data-cy={`select-option-${index}`}
+          >
+            {each.key}
+          </MenuItem>
+        ))}
+      </Select>
+      {isInvalid && (
+      <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
+      )}
+    </FormControl>
   );
-};
+}

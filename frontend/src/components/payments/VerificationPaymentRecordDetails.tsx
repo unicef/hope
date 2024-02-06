@@ -201,11 +201,11 @@ export function VerificationPaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('ENTITLEMENT CARD ISSUE DATE')}
-              value={
+              value={(
                 <UniversalMoment>
                   {paymentRecord.entitlementCardIssueDate}
                 </UniversalMoment>
-              }
+              )}
             />
           </Grid>
           <Grid item xs={3}>

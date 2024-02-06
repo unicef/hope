@@ -48,13 +48,11 @@ export function EditDocumentRow({
       <DocumentField
         id={id}
         key={`${id}-${document.node.country}-${document.node.type.label}`}
-        onDelete={() =>
-          removeItemById(
-            values.individualDataUpdateDocumentsToEdit,
-            document.node.id,
-            arrayHelpers,
-          )
-        }
+        onDelete={() => removeItemById(
+          values.individualDataUpdateDocumentsToEdit,
+          document.node.id,
+          arrayHelpers,
+        )}
         countryChoices={addIndividualFieldsData.countriesChoices}
         documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
         baseName="individualDataUpdateDocumentsToEdit"

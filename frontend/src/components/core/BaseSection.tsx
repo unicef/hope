@@ -31,14 +31,14 @@ interface BaseSectionProps {
   noPaper?: boolean;
 }
 
-export const BaseSection = ({
+export function BaseSection({
   children = <></>,
   buttons,
   title,
   description,
   p = 3,
   noPaper = false,
-}: BaseSectionProps): React.ReactElement => {
+}: BaseSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const Container = noPaper ? BoxContainer : PaperContainer;
 
@@ -62,4 +62,4 @@ export const BaseSection = ({
       </Box>
     </Container>
   );
-};
+}

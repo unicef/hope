@@ -28,11 +28,10 @@ export function RecipientsTableRow({
 }: RecipientsTableRowProps): React.ReactElement {
   const history = useHistory();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery({
-      variables: { businessArea },
-      fetchPolicy: 'cache-first',
-    });
+  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery({
+    variables: { businessArea },
+    fetchPolicy: 'cache-first',
+  });
   const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
   const handleClick = (): void => {
     history.push(householdDetailsPath);

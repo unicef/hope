@@ -44,11 +44,11 @@ export interface MessageDialogProps {
   author: Pick<UserNode, 'id' | 'email' | 'firstName' | 'lastName'>;
   date: string;
 }
-export const MessageDialog = ({
+export function MessageDialog({
   comment,
   author,
   date,
-}: MessageDialogProps): React.ReactElement => {
+}: MessageDialogProps): React.ReactElement {
   const { t } = useTranslation();
   const [MessageDialogOpen, setMessageDialogOpen] = useState(false);
   return (
@@ -72,10 +72,13 @@ export const MessageDialog = ({
           <DialogContainer>
             <Box display="flex" flexDirection="column">
               <Box mt={2} display="flex">
-                {renderUserName(author)}{' '}
+                {renderUserName(author)}
+                {' '}
                 <GreyText>
                   <Box ml={1}>
-                    on <UniversalMoment>{date}</UniversalMoment>
+                    on
+                    {' '}
+                    <UniversalMoment>{date}</UniversalMoment>
                   </Box>
                 </GreyText>
               </Box>
@@ -98,4 +101,4 @@ export const MessageDialog = ({
       </Dialog>
     </>
   );
-};
+}

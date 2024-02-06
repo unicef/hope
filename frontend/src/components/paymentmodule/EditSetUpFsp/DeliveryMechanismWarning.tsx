@@ -18,9 +18,9 @@ interface DeliveryMechanismWarningProps {
   warning: string;
 }
 
-export const DeliveryMechanismWarning = ({
+export function DeliveryMechanismWarning({
   warning,
-}: DeliveryMechanismWarningProps): React.ReactElement => {
+}: DeliveryMechanismWarningProps): React.ReactElement {
   return (
     <WarningBox
       data-cy="warning-box"
@@ -34,4 +34,4 @@ export const DeliveryMechanismWarning = ({
       {warning}
     </WarningBox>
   );
-};
+}

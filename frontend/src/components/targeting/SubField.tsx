@@ -17,7 +17,7 @@ const InlineField = styled.div`
   width: 48%;
 `;
 
-export const SubField = ({ field, index, baseName }): React.ReactElement => {
+export function SubField({ field, index, baseName }): React.ReactElement {
   const { t } = useTranslation();
   switch (field.fieldAttribute.type) {
     case 'DECIMAL':
@@ -171,4 +171,4 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
     default:
       return <p>{field.fieldAttribute.type}</p>;
   }
-};
+}

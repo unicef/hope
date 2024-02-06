@@ -56,23 +56,22 @@ interface LinkedTicketsModalProps {
   issueTypeChoicesData;
 }
 
-export const LinkedTicketsModal = ({
+export function LinkedTicketsModal({
   ticket,
   categoryChoices,
   statusChoices,
   canViewDetails,
   baseUrl,
   issueTypeChoicesData,
-}: LinkedTicketsModalProps): React.ReactElement => {
+}: LinkedTicketsModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const history = useHistory();
   const { t } = useTranslation();
-  const [loadRelatedTickets, { data, loading }] =
-    useRelatedGrievanceTicketsLazyQuery({
-      variables: {
-        id: ticket.id,
-      },
-    });
+  const [loadRelatedTickets, { data, loading }] = useRelatedGrievanceTicketsLazyQuery({
+    variables: {
+      id: ticket.id,
+    },
+  });
   useEffect(() => {
     if (dialogOpen) {
       loadRelatedTickets();
@@ -135,7 +134,9 @@ export const LinkedTicketsModal = ({
           setDialogOpen(true);
         }}
       >
-        {ticketsCount} linked ticket
+        {ticketsCount}
+        {' '}
+        linked ticket
         {ticketsCount === 1 ? '' : 's'}
       </StyledLink>
     );
@@ -167,7 +168,10 @@ export const LinkedTicketsModal = ({
         <DialogContent>
           <Box mt={2} mb={6}>
             <Typography>
-              <Bold>Ticket ID {ticket.unicefId} </Bold>
+              <Bold>
+                Ticket ID
+                {ticket.unicefId}
+              </Bold>
               is related to the following tickets.
             </Typography>
           </Box>
@@ -198,4 +202,4 @@ export const LinkedTicketsModal = ({
       </StyledDialog>
     </>
   );
-};
+}

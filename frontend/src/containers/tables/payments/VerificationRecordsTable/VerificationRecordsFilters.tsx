@@ -16,28 +16,27 @@ interface VerificationRecordsFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const VerificationRecordsFilters = ({
+export function VerificationRecordsFilters({
   filter,
   verifications,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: VerificationRecordsFiltersProps): React.ReactElement => {
+}: VerificationRecordsFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -51,13 +50,11 @@ export const VerificationRecordsFilters = ({
     return null;
   }
 
-  const verificationPlanOptions = verifications.edges.map((item) => {
-    return (
-      <MenuItem key={item.node.unicefId} value={item.node.id}>
-        {item.node.unicefId}
-      </MenuItem>
-    );
-  });
+  const verificationPlanOptions = verifications.edges.map((item) => (
+    <MenuItem key={item.node.unicefId} value={item.node.id}>
+      {item.node.unicefId}
+    </MenuItem>
+  ));
 
   return (
     <FiltersSection
@@ -81,39 +78,31 @@ export const VerificationRecordsFilters = ({
             value={filter.status}
             fullWidth
           >
-            {choicesData.paymentVerificationStatusChoices.map((item) => {
-              return (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              );
-            })}
+            {choicesData.paymentVerificationStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('verificationChannel', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('verificationChannel', e.target.value)}
             label={t('Verification Channel')}
             value={filter.verificationChannel}
           >
             {choicesData.cashPlanVerificationVerificationChannelChoices.map(
-              (item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              },
+              (item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ),
             )}
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('paymentVerificationPlan', e.target.value)
-            }
+            onChange={(e) => handleFilterChange('paymentVerificationPlan', e.target.value)}
             label={t('Verification Plan Id')}
             value={filter.paymentVerificationPlan}
           >
@@ -123,4 +112,4 @@ export const VerificationRecordsFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

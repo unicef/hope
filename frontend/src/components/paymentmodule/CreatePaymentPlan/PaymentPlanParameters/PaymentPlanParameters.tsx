@@ -16,13 +16,12 @@ interface PaymentPlanParametersProps {
   paymentPlan?;
 }
 
-export const PaymentPlanParameters = ({
+export function PaymentPlanParameters({
   values,
   paymentPlan,
-}: PaymentPlanParametersProps): React.ReactElement => {
+}: PaymentPlanParametersProps): React.ReactElement {
   const { t } = useTranslation();
-  const [loadTargetPopulation, { data, loading }] =
-    useTargetPopulationLazyQuery();
+  const [loadTargetPopulation, { data, loading }] = useTargetPopulationLazyQuery();
 
   useEffect(() => {
     if (values.targetingId) {
@@ -120,4 +119,4 @@ export const PaymentPlanParameters = ({
       </OverviewContainer>
     </PaperContainer>
   );
-};
+}

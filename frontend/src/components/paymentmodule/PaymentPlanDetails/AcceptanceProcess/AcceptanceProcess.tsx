@@ -26,9 +26,9 @@ interface AcceptanceProcessProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const AcceptanceProcess = ({
+export function AcceptanceProcess({
   paymentPlan,
-}: AcceptanceProcessProps): React.ReactElement => {
+}: AcceptanceProcessProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const permissions = usePermissions();
@@ -36,14 +36,11 @@ export const AcceptanceProcess = ({
 
   const { edges } = paymentPlan.approvalProcess;
   const [showAll, setShowAll] = useState(false);
-  const [mutate, { loading: exportPdfLoading }] =
-    useExportPdfPpSummaryMutation();
+  const [mutate, { loading: exportPdfLoading }] = useExportPdfPpSummaryMutation();
 
   const matchDataSize = (
     data: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'],
-  ): PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'] => {
-    return showAll ? data : [data[0]];
-  };
+  ): PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'] => (showAll ? data : [data[0]]);
 
   if (!edges.length) {
     return null;
@@ -62,10 +59,9 @@ export const AcceptanceProcess = ({
     }
   };
 
-  const canExportPdf =
-    hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions) &&
-    (paymentPlan.status === PaymentPlanStatus.Accepted ||
-      paymentPlan.status === PaymentPlanStatus.Finished);
+  const canExportPdf = hasPermissions(PERMISSIONS.PM_EXPORT_PDF_SUMMARY, permissions)
+    && (paymentPlan.status === PaymentPlanStatus.Accepted
+      || paymentPlan.status === PaymentPlanStatus.Finished);
 
   return (
     <Box m={5}>
@@ -108,4 +104,4 @@ export const AcceptanceProcess = ({
       </ContainerColumnWithBorder>
     </Box>
   );
-};
+}

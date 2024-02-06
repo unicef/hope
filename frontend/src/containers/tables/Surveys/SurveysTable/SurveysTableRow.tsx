@@ -14,11 +14,11 @@ interface SurveysTableRowProps {
   categoryDict;
 }
 
-export const SurveysTableRow = ({
+export function SurveysTableRow({
   survey,
   canViewDetails,
   categoryDict,
-}: SurveysTableRowProps): React.ReactElement => {
+}: SurveysTableRowProps): React.ReactElement {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
   const surveyDetailsPath = `/${baseUrl}/accountability/surveys/${survey.id}`;
@@ -49,4 +49,4 @@ export const SurveysTableRow = ({
       </TableCell>
     </ClickableTableRow>
   );
-};
+}

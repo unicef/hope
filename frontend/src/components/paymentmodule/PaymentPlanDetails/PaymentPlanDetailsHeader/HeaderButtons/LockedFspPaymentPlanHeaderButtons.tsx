@@ -13,26 +13,21 @@ export interface LockedFspPaymentPlanHeaderButtonsProps {
   canSendForApproval: boolean;
 }
 
-export const LockedFspPaymentPlanHeaderButtons = ({
+export function LockedFspPaymentPlanHeaderButtons({
   paymentPlan,
   canUnlock,
   canSendForApproval,
-}: LockedFspPaymentPlanHeaderButtonsProps): React.ReactElement => {
+}: LockedFspPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
   const { id } = paymentPlan;
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  const { mutatePaymentPlanAction: unlock, loading: loadingUnlock } =
-    usePaymentPlanAction(Action.UnlockFsp, id, () =>
-      showMessage(t('Payment Plan FSPs have been unlocked.')),
-    );
+  const { mutatePaymentPlanAction: unlock, loading: loadingUnlock } = usePaymentPlanAction(Action.UnlockFsp, id, () => showMessage(t('Payment Plan FSPs have been unlocked.')));
   const {
     mutatePaymentPlanAction: sendForApproval,
     loading: loadingSendForApproval,
-  } = usePaymentPlanAction(Action.SendForApproval, id, () =>
-    showMessage(t('Payment Plan has been sent for approval.')),
-  );
+  } = usePaymentPlanAction(Action.SendForApproval, id, () => showMessage(t('Payment Plan has been sent for approval.')));
 
   return (
     <Box display="flex" alignItems="center">
@@ -65,4 +60,4 @@ export const LockedFspPaymentPlanHeaderButtons = ({
       )}
     </Box>
   );
-};
+}

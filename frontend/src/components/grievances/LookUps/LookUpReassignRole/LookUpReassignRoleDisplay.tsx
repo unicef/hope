@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyledBox, BlueText, LightGrey } from '../LookUpStyles';
 
-export const LookUpReassignRoleDisplay = ({
+export function LookUpReassignRoleDisplay({
   selectedHousehold,
   selectedIndividual,
   setLookUpDialogOpen,
@@ -14,7 +14,7 @@ export const LookUpReassignRoleDisplay = ({
   selectedIndividual;
   setLookUpDialogOpen;
   disabled?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   return (
     <StyledBox>
@@ -22,11 +22,16 @@ export const LookUpReassignRoleDisplay = ({
         <Grid item>
           <Box display="flex" flexDirection="column">
             <span>
-              {t('Household ID')}:
-              <BlueText> {selectedHousehold?.unicefId || '-'}</BlueText>
+              {t('Household ID')}
+              :
+              <BlueText>
+                {' '}
+                {selectedHousehold?.unicefId || '-'}
+              </BlueText>
             </span>
             <span>
-              {t('Individual ID')}:
+              {t('Individual ID')}
+              :
               <BlueText>{selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
@@ -51,4 +56,4 @@ export const LookUpReassignRoleDisplay = ({
       </Grid>
     </StyledBox>
   );
-};
+}

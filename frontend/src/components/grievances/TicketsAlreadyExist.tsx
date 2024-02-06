@@ -1,4 +1,6 @@
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import {
+  Box, Grid, Paper, Typography,
+} from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +31,7 @@ const WarnIcon = styled(WarningIcon)`
   margin-right: 10px;
 `;
 
-export const TicketsAlreadyExist = ({ values }): React.ReactElement => {
+export function TicketsAlreadyExist({ values }): React.ReactElement {
   const { baseUrl, businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -59,9 +61,8 @@ export const TicketsAlreadyExist = ({ values }): React.ReactElement => {
       </Box>
     );
   });
-  const shouldShowBox =
-    !!values.category &&
-    (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id);
+  const shouldShowBox = !!values.category
+    && (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id);
 
   return edges.length && shouldShowBox ? (
     <Grid item xs={6}>
@@ -85,4 +86,4 @@ export const TicketsAlreadyExist = ({ values }): React.ReactElement => {
       </StyledBox>
     </Grid>
   ) : null;
-};
+}

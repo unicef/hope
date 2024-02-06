@@ -6,7 +6,7 @@ import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulatio
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
 
-export const TargetingRoutes = (): React.ReactElement => {
+export function TargetingRoutes(): React.ReactElement {
   const { path } = useRouteMatch();
 
   const targetingRoutes = [
@@ -38,4 +38,4 @@ export const TargetingRoutes = (): React.ReactElement => {
       ))}
     </Switch>
   );
-};
+}

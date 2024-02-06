@@ -18,11 +18,11 @@ interface IndividualsListTableRowProps {
   choicesData: HouseholdChoiceDataQuery;
 }
 
-export const IndividualsListTableRow = ({
+export function IndividualsListTableRow({
   individual,
   canViewDetails,
   choicesData,
-}: IndividualsListTableRowProps): React.ReactElement => {
+}: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
 
@@ -61,4 +61,4 @@ export const IndividualsListTableRow = ({
       <TableCell align="left">{individual.household?.admin2?.name}</TableCell>
     </ClickableTableRow>
   );
-};
+}

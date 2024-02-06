@@ -15,7 +15,7 @@ describe('containers/tables/payments/PaymentVerificationTable', () => {
       >
         <PaymentVerificationTable
           canViewDetails={false}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={{
             search: '',
             verificationStatus: [],
@@ -41,7 +41,7 @@ describe('containers/tables/payments/PaymentVerificationTable', () => {
       >
         <PaymentVerificationTable
           canViewDetails={false}
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={{
             search: '',
             verificationStatus: [],

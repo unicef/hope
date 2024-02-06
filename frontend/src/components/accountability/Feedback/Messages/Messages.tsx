@@ -1,4 +1,6 @@
-import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
+import {
+  Avatar, Box, Grid, Paper, Typography,
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,10 +42,10 @@ interface MessagesProps {
   canAddMessage: boolean;
 }
 
-export const Messages = ({
+export function Messages({
   messages,
   canAddMessage,
-}: MessagesProps): React.ReactElement => {
+}: MessagesProps): React.ReactElement {
   const { t } = useTranslation();
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
@@ -84,14 +86,12 @@ export const Messages = ({
     </Grid>
   );
 
-  const mappedMessages = messages?.edges?.map((el) =>
-    note(
-      renderUserName(el.node.createdBy),
-      el.node.createdAt,
-      el.node.description,
-      el.node.id,
-    ),
-  );
+  const mappedMessages = messages?.edges?.map((el) => note(
+    renderUserName(el.node.createdBy),
+    el.node.createdAt,
+    el.node.description,
+    el.node.id,
+  ));
 
   const initialValues: { [key: string]: string } = {
     newNote: '',
@@ -177,4 +177,4 @@ export const Messages = ({
       </Box>
     </Grid>
   );
-};
+}

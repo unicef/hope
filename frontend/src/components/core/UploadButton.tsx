@@ -1,11 +1,11 @@
 import React, { useRef } from 'react';
 import Button from '@mui/material/Button';
 
-export const UploadButton = ({
+export function UploadButton({
   children,
   handleChange,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onClickHandler = () => {
@@ -28,4 +28,4 @@ export const UploadButton = ({
       />
     </>
   );
-};
+}

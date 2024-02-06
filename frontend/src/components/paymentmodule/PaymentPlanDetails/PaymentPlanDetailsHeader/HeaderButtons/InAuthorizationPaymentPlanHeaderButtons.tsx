@@ -10,15 +10,15 @@ export interface InAuthorizationPaymentPlanHeaderButtonsProps {
   canAuthorize: boolean;
 }
 
-export const InAuthorizationPaymentPlanHeaderButtons = ({
+export function InAuthorizationPaymentPlanHeaderButtons({
   paymentPlan,
   canReject,
   canAuthorize,
-}: InAuthorizationPaymentPlanHeaderButtonsProps): React.ReactElement => {
+}: InAuthorizationPaymentPlanHeaderButtonsProps): React.ReactElement {
   return (
     <Box display="flex" alignItems="center">
       {canReject && <RejectPaymentPlan paymentPlanId={paymentPlan.id} />}
       {canAuthorize && <AuthorizePaymentPlan paymentPlan={paymentPlan} />}
     </Box>
   );
-};
+}

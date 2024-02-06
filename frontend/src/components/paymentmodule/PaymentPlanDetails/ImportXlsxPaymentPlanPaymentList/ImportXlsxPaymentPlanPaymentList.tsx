@@ -1,4 +1,6 @@
-import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import {
+  Box, Button, Dialog, DialogActions, DialogTitle,
+} from '@mui/material';
 import { Publish } from '@mui/icons-material';
 import get from 'lodash/get';
 import React, { useState } from 'react';
@@ -29,21 +31,19 @@ interface ImportXlsxPaymentPlanPaymentListProps {
   permissions: string[];
 }
 
-export const ImportXlsxPaymentPlanPaymentList = ({
+export function ImportXlsxPaymentPlanPaymentList({
   paymentPlan,
   permissions,
-}: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement => {
+}: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
-  const [mutate, { data: uploadData, loading: fileLoading, error }] =
-    useImportXlsxPpListMutation();
+  const [mutate, { data: uploadData, loading: fileLoading, error }] = useImportXlsxPpListMutation();
 
-  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] =
-    get(uploadData, 'importXlsxPaymentPlanPaymentList.errors');
+  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] = get(uploadData, 'importXlsxPaymentPlanPaymentList.errors');
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -77,10 +77,9 @@ export const ImportXlsxPaymentPlanPaymentList = ({
     permissions,
   );
 
-  const shouldDisableUpload =
-    paymentPlan.status !== PaymentPlanStatus.Locked ||
-    !canUploadFile ||
-    !isActiveProgram;
+  const shouldDisableUpload = paymentPlan.status !== PaymentPlanStatus.Locked
+    || !canUploadFile
+    || !isActiveProgram;
 
   return (
     <>
@@ -123,8 +122,8 @@ export const ImportXlsxPaymentPlanPaymentList = ({
                 setFileToImport(file);
               }}
             />
-            {fileToImport &&
-            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
+            {fileToImport
+            && (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
               <Error data-cy="error-list">
                 <p>Errors</p>
                 {error
@@ -132,7 +131,7 @@ export const ImportXlsxPaymentPlanPaymentList = ({
                   : null}
                 <ImportErrors errors={xlsxErrors} />
               </Error>
-            ) : null}
+              ) : null}
           </>
           <DialogActions>
             <Button
@@ -160,4 +159,4 @@ export const ImportXlsxPaymentPlanPaymentList = ({
       </Dialog>
     </>
   );
-};
+}

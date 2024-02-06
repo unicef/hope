@@ -18,7 +18,7 @@ export interface ProgramDetailsPageHeaderPropTypes {
   isPaymentPlanApplicable: boolean;
 }
 
-export const ProgramDetailsPageHeader = ({
+export function ProgramDetailsPageHeader({
   program,
   canActivate,
   canEdit,
@@ -26,7 +26,7 @@ export const ProgramDetailsPageHeader = ({
   canFinish,
   canDuplicate,
   isPaymentPlanApplicable,
-}: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   let buttons;
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
@@ -76,4 +76,4 @@ export const ProgramDetailsPageHeader = ({
       {buttons}
     </PageHeader>
   );
-};
+}

@@ -33,12 +33,12 @@ interface BreadCrumbsElementProps {
   onClick?: () => void;
 }
 
-const BreadCrumbsElement = ({
+function BreadCrumbsElement({
   title,
   to,
   last = false,
   onClick = () => null,
-}: BreadCrumbsElementProps): React.ReactElement => {
+}: BreadCrumbsElementProps): React.ReactElement {
   return (
     <BreadCrumbsElementContainer>
       {to ? (
@@ -51,7 +51,7 @@ const BreadCrumbsElement = ({
       {!last ? <ChevronRightRoundedIcon /> : null}
     </BreadCrumbsElementContainer>
   );
-};
+}
 export interface BreadCrumbsItem {
   title: string;
   to?: string;

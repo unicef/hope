@@ -27,20 +27,19 @@ export interface RejectPaymentPlanProps {
   paymentPlanId: string;
 }
 
-export const RejectPaymentPlan = ({
+export function RejectPaymentPlan({
   paymentPlanId,
-}: RejectPaymentPlanProps): React.ReactElement => {
+}: RejectPaymentPlanProps): React.ReactElement {
   const { t } = useTranslation();
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const { mutatePaymentPlanAction: reject, loading: loadingReject } =
-    usePaymentPlanAction(
-      Action.Reject,
-      paymentPlanId,
-      () => showMessage(t('Payment Plan has been rejected.')),
-      () => setRejectDialogOpen(false),
-    );
+  const { mutatePaymentPlanAction: reject, loading: loadingReject } = usePaymentPlanAction(
+    Action.Reject,
+    paymentPlanId,
+    () => showMessage(t('Payment Plan has been rejected.')),
+    () => setRejectDialogOpen(false),
+  );
 
   const initialValues = {
     comment: '',
@@ -125,4 +124,4 @@ export const RejectPaymentPlan = ({
       )}
     </Formik>
   );
-};
+}

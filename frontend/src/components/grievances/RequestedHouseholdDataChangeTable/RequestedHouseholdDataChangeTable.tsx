@@ -67,8 +67,7 @@ export function RequestedHouseholdDataChangeTable({
   };
 
   const isSelected = (name: string): boolean => selectedBioData.includes(name);
-  const isSelectedFlexfields = (name: string): boolean =>
-    selectedFlexFields.includes(name);
+  const isSelectedFlexfields = (name: string): boolean => selectedFlexFields.includes(name);
   return (
     <StyledTable>
       <TableHead>
@@ -80,7 +79,8 @@ export function RequestedHouseholdDataChangeTable({
           <TableCell data-cy="table-cell-previous-current-value" align="left">
             {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
               ? t('Previous')
-              : t('Current')}{' '}
+              : t('Current')}
+            {' '}
             {t('Value')}
           </TableCell>
           <TableCell data-cy="table-cell-new-value" align="left">
@@ -89,30 +89,26 @@ export function RequestedHouseholdDataChangeTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) => {
-          return householdDataRow(
-            row,
-            fieldsDict,
-            isSelected,
-            index,
-            countriesDict,
-            ticket,
-            isEdit,
-            handleSelectBioData,
-          );
-        })}
-        {entriesFlexFields.map((row, index) => {
-          return householdDataRow(
-            row,
-            fieldsDict,
-            isSelectedFlexfields,
-            index,
-            countriesDict,
-            ticket,
-            isEdit,
-            handleFlexFields,
-          );
-        })}
+        {entries.map((row, index) => householdDataRow(
+          row,
+          fieldsDict,
+          isSelected,
+          index,
+          countriesDict,
+          ticket,
+          isEdit,
+          handleSelectBioData,
+        ))}
+        {entriesFlexFields.map((row, index) => householdDataRow(
+          row,
+          fieldsDict,
+          isSelectedFlexfields,
+          index,
+          countriesDict,
+          ticket,
+          isEdit,
+          handleFlexFields,
+        ))}
       </TableBody>
     </StyledTable>
   );

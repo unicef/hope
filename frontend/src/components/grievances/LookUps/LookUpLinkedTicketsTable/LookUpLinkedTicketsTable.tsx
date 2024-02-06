@@ -18,12 +18,12 @@ interface LookUpLinkedTicketsTableProps {
   initialValues;
 }
 
-export const LookUpLinkedTicketsTable = ({
+export function LookUpLinkedTicketsTable({
   businessArea,
   filter,
   setFieldValue,
   initialValues,
-}: LookUpLinkedTicketsTableProps): React.ReactElement => {
+}: LookUpLinkedTicketsTableProps): React.ReactElement {
   const initialVariables: AllGrievanceTicketQueryVariables = {
     businessArea,
     search: filter.search.trim(),
@@ -54,8 +54,8 @@ export const LookUpLinkedTicketsTable = ({
 
   const handleCheckboxClick = (
     _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -86,13 +86,13 @@ export const LookUpLinkedTicketsTable = ({
   return (
     <TableWrapper>
       <UniversalTable<
-        AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-        AllGrievanceTicketQueryVariables
+      AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+      AllGrievanceTicketQueryVariables
       >
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllGrievanceTicketQuery}
-        queriedObjectName='allGrievanceTicket'
+        queriedObjectName="allGrievanceTicket"
         initialVariables={initialVariables}
         onSelectAllClick={handleSelectAllCheckboxesClick}
         numSelected={numSelected}
@@ -109,4 +109,4 @@ export const LookUpLinkedTicketsTable = ({
       />
     </TableWrapper>
   );
-};
+}

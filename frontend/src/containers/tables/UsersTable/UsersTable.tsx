@@ -15,7 +15,7 @@ interface UsersTableProps {
   filter;
 }
 
-export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
+export function UsersTable({ filter }: UsersTableProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
 
@@ -33,12 +33,12 @@ export const UsersTable = ({ filter }: UsersTableProps): ReactElement => {
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllUsersQuery}
-        queriedObjectName='allUsers'
-        defaultOrderBy='status'
-        defaultOrderDirection='desc'
+        queriedObjectName="allUsers"
+        defaultOrderBy="status"
+        defaultOrderDirection="desc"
         initialVariables={initialVariables}
         renderRow={(row) => <UsersTableRow user={row} key={row.id} />}
       />
     </TableWrapper>
   );
-};
+}

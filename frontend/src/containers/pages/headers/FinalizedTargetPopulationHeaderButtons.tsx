@@ -28,11 +28,11 @@ export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
   businessAreaData: BusinessAreaDataQuery;
 }
 
-export const FinalizedTargetPopulationHeaderButtons = ({
+export function FinalizedTargetPopulationHeaderButtons({
   targetPopulation,
   canDuplicate,
   businessAreaData,
-}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
+}: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const { data, loading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
@@ -71,4 +71,4 @@ export const FinalizedTargetPopulationHeaderButtons = ({
       />
     </Box>
   );
-};
+}

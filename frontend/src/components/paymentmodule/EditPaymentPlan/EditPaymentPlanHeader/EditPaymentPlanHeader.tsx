@@ -25,12 +25,12 @@ interface EditPaymentPlanHeaderProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const EditPaymentPlanHeader = ({
+export function EditPaymentPlanHeader({
   handleSubmit,
   baseUrl,
   permissions,
   paymentPlan,
-}: EditPaymentPlanHeaderProps): React.ReactElement => {
+}: EditPaymentPlanHeaderProps): React.ReactElement {
   const { t } = useTranslation();
   const { id, isFollowUp } = paymentPlan;
 
@@ -45,9 +45,12 @@ export const EditPaymentPlanHeader = ({
 
   return (
     <PageHeader
-      title={
+      title={(
         <Box display="flex" alignItems="center">
-          {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
+          {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')}
+          {' '}
+          ID
+          {' '}
           {paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox
@@ -64,7 +67,7 @@ export const EditPaymentPlanHeader = ({
             </StatusWrapper>
           )}
         </Box>
-      }
+      )}
       breadCrumbs={
         hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions)
           ? breadCrumbsItems
@@ -86,4 +89,4 @@ export const EditPaymentPlanHeader = ({
       </Box>
     </PageHeader>
   );
-};
+}

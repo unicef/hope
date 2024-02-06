@@ -1,4 +1,6 @@
-import { Box, Button, Grid, Typography } from '@mui/material';
+import {
+  Box, Button, Grid, Typography,
+} from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
@@ -17,10 +19,10 @@ interface FspSectionProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const FspSection = ({
+export function FspSection({
   baseUrl,
   paymentPlan,
-}: FspSectionProps): React.ReactElement => {
+}: FspSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { isActiveProgram } = useProgramContext();
@@ -101,4 +103,4 @@ export const FspSection = ({
       </ContainerColumnWithBorder>
     </Box>
   );
-};
+}

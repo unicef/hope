@@ -20,7 +20,7 @@ const initialFilter = {
   importDateRangeMax: '',
 };
 
-export const RegistrationDataImportPage = (): React.ReactElement => {
+export function RegistrationDataImportPage(): React.ReactElement {
   const location = useLocation();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -34,8 +34,7 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
 
   if (permissions === null) return null;
 
-  if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)) return <PermissionDenied />;
 
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
@@ -63,4 +62,4 @@ export const RegistrationDataImportPage = (): React.ReactElement => {
       />
     </div>
   );
-};
+}

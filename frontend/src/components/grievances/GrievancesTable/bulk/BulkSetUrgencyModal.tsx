@@ -25,11 +25,11 @@ interface BulkSetUrgencyModalProps {
   setSelected;
 }
 
-export const BulkSetUrgencyModal = ({
+export function BulkSetUrgencyModal({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkSetUrgencyModalProps): React.ReactElement => {
+}: BulkSetUrgencyModalProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] = React.useState<number>(0);
@@ -55,29 +55,27 @@ export const BulkSetUrgencyModal = ({
   };
 
   return (
-    <>
-      <BulkBaseModal
-        selectedTickets={selectedTickets}
-        title={t('Set Urgency')}
-        buttonTitle={t('Set Urgency')}
-        onSave={onSave}
-        icon={<PriorityHighIcon />}
+    <BulkBaseModal
+      selectedTickets={selectedTickets}
+      title={t('Set Urgency')}
+      buttonTitle={t('Set Urgency')}
+      onSave={onSave}
+      icon={<PriorityHighIcon />}
+    >
+      <Select
+        value={value}
+        onChange={(e) => setValue(e.target.value as number)}
+        style={{ width: '100%' }}
+        variant="outlined"
+        margin="dense"
+        label={t('Urgency')}
       >
-        <Select
-          value={value}
-          onChange={(e) => setValue(e.target.value as number)}
-          style={{ width: '100%' }}
-          variant="outlined"
-          margin="dense"
-          label={t('Urgency')}
-        >
-          {urgencyChoices.map((choice) => (
-            <MenuItem key={choice.value} value={choice.value}>
-              {choice.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </BulkBaseModal>
-    </>
+        {urgencyChoices.map((choice) => (
+          <MenuItem key={choice.value} value={choice.value}>
+            {choice.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </BulkBaseModal>
   );
-};
+}

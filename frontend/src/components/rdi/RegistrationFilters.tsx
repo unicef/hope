@@ -20,26 +20,25 @@ interface RegistrationFiltersProps {
   setAppliedFilter: (filter) => void;
 }
 
-export const RegistrationFilters = ({
+export function RegistrationFilters({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: RegistrationFiltersProps): React.ReactElement => {
+}: RegistrationFiltersProps): React.ReactElement {
   const history = useHistory();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } =
-    createHandleApplyFilterChange(
-      initialFilter,
-      history,
-      location,
-      filter,
-      setFilter,
-      appliedFilter,
-      setAppliedFilter,
-    );
+  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
+    initialFilter,
+    history,
+    location,
+    filter,
+    setFilter,
+    appliedFilter,
+    setAppliedFilter,
+  );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -89,13 +88,11 @@ export const RegistrationFilters = ({
             data-cy="filter-status"
           >
             {registrationChoicesData.registrationDataStatusChoices.map(
-              (item) => {
-                return (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                );
-              },
+              (item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ),
             )}
           </SelectFilter>
         </Grid>
@@ -140,4 +137,4 @@ export const RegistrationFilters = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

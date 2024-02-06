@@ -7,10 +7,10 @@ interface ClearApplyButtonsProps {
   applyHandler: () => void;
 }
 
-export const ClearApplyButtons = ({
+export function ClearApplyButtons({
   clearHandler,
   applyHandler,
-}: ClearApplyButtonsProps): React.ReactElement => {
+}: ClearApplyButtonsProps): React.ReactElement {
   const { t } = useTranslation();
 
   const handleKeyPress = useCallback(
@@ -54,4 +54,4 @@ export const ClearApplyButtons = ({
       </Box>
     </Grid>
   );
-};
+}

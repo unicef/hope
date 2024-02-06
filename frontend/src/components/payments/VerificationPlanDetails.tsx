@@ -37,11 +37,11 @@ interface VerificationPlanDetailsProps {
   planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
-export const VerificationPlanDetails = ({
+export function VerificationPlanDetails({
   verificationPlan,
   samplingChoicesData,
   planNode,
-}: VerificationPlanDetailsProps): React.ReactElement => {
+}: VerificationPlanDetailsProps): React.ReactElement {
   const { t } = useTranslation();
 
   const samplingChoicesDict = choicesToDict(
@@ -52,7 +52,10 @@ export const VerificationPlanDetails = ({
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Title>
           <Typography variant="h6">
-            {t('Verification Plan')} #{verificationPlan.unicefId}
+            {t('Verification Plan')}
+            {' '}
+            #
+            {verificationPlan.unicefId}
           </Typography>
         </Title>
         <VerificationPlanActions
@@ -131,4 +134,4 @@ export const VerificationPlanDetails = ({
       </Grid>
     </Container>
   );
-};
+}

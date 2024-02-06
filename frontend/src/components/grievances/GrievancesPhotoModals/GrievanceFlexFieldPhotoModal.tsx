@@ -13,11 +13,11 @@ export interface GrievanceFlexFieldPhotoModalProps {
   isIndividual?: boolean;
 }
 
-export const GrievanceFlexFieldPhotoModal = ({
+export function GrievanceFlexFieldPhotoModal({
   field,
   isCurrent,
   isIndividual,
-}: GrievanceFlexFieldPhotoModalProps): React.ReactElement => {
+}: GrievanceFlexFieldPhotoModalProps): React.ReactElement {
   const { id } = useParams();
   const { data } = useGrievanceTicketFlexFieldsQuery({
     variables: { id },
@@ -29,9 +29,9 @@ export const GrievanceFlexFieldPhotoModal = ({
 
   const flexFields = isIndividual
     ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-        ?.flex_fields
+      ?.flex_fields
     : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-        ?.flex_fields;
+      ?.flex_fields;
 
   const picUrl: string = isCurrent
     ? flexFields[field.name]?.previous_value
@@ -43,4 +43,4 @@ export const GrievanceFlexFieldPhotoModal = ({
       -
     </Box>
   );
-};
+}

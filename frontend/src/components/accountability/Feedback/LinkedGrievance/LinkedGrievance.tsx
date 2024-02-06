@@ -14,9 +14,9 @@ interface LinkedGrievanceProps {
   feedback: FeedbackQuery['feedback'];
 }
 
-export const LinkedGrievance = ({
+export function LinkedGrievance({
   feedback,
-}: LinkedGrievanceProps): React.ReactElement => {
+}: LinkedGrievanceProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const grievanceDetailsPath = getGrievanceDetailsPath(
@@ -44,4 +44,4 @@ export const LinkedGrievance = ({
       ) : null}
     </Grid>
   );
-};
+}

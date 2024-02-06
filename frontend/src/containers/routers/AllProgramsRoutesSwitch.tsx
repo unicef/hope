@@ -8,12 +8,12 @@ import { ReportingPage } from '../pages/reporting/ReportingPage';
 import { GrievanceRoutes } from './GrievanceRoutes';
 import { ProgramRoutes } from './ProgramRoutes';
 
-export const AllProgramsRoutesSwitch = (): React.ReactElement => {
+export function AllProgramsRoutesSwitch(): React.ReactElement {
   const { path } = useRouteMatch();
   return (
     <>
       <Switch>
-        <SentryRoute label='/ - Dashboard' path={`${path}/country-dashboard`}>
+        <SentryRoute label="/ - Dashboard" path={`${path}/country-dashboard`}>
           <DashboardPage />
         </SentryRoute>
         <SentryRoute path={`${path}/reporting/:id`}>
@@ -30,4 +30,4 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
       <ProgramRoutes />
     </>
   );
-};
+}

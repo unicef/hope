@@ -9,9 +9,9 @@ interface ImportedIndividualPhotoModalProps {
   individual: ImportedIndividualNode;
 }
 
-export const ImportedIndividualPhotoModal = ({
+export function ImportedIndividualPhotoModal({
   individual,
-}: ImportedIndividualPhotoModalProps): React.ReactElement => {
+}: ImportedIndividualPhotoModalProps): React.ReactElement {
   const { data } = useImportedIndividualPhotosQuery({
     variables: { id: individual?.id },
     fetchPolicy: 'network-only',
@@ -20,8 +20,8 @@ export const ImportedIndividualPhotoModal = ({
   return (
     <PhotoModal
       src={data?.importedIndividual?.photo}
-      variant='button'
+      variant="button"
       title="Individuals's Photo"
     />
   );
-};
+}

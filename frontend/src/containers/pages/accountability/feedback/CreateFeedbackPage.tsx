@@ -135,7 +135,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 // const MIN_SELECTED_ITEMS = 5;
 // const selectedItems = verficationStepFields.filter((item) => values[item]);
 
-//TODO: enable this when questionnaire verification is required
+// TODO: enable this when questionnaire verification is required
 
 // if (selectedItems.length < MIN_SELECTED_ITEMS) {
 //   setValidateData(true);
@@ -145,9 +145,11 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 //   return errors;
 // }
 
-export const CreateFeedbackPage = (): React.ReactElement => {
+export function CreateFeedbackPage(): React.ReactElement {
   const { t } = useTranslation();
-  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
+  const {
+    baseUrl, businessArea, isAllPrograms, programId,
+  } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
@@ -172,24 +174,20 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useFeedbackIssueTypeChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } = useFeedbackIssueTypeChoicesQuery();
 
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
-    });
+  const { data: programsData, loading: programsDataLoading } = useAllProgramsForChoicesQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
+  });
 
   const [mutate, { loading }] = useCreateFeedbackTicketMutation();
 
-  if (userDataLoading || choicesLoading || programsDataLoading)
-    return <LoadingComponent />;
+  if (userDataLoading || choicesLoading || programsDataLoading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions)) return <PermissionDenied />;
 
   if (!choicesData || !userData || !programsData) return null;
 
@@ -253,9 +251,10 @@ export const CreateFeedbackPage = (): React.ReactElement => {
       //   validateUsingSteps(values, activeStep, setValidateData)
       // }
     >
-      {({ submitForm, values, setFieldValue, errors, touched }) => {
-        const isAnonymousTicket =
-          !values.selectedHousehold?.id && !values.selectedIndividual?.id;
+      {({
+        submitForm, values, setFieldValue, errors, touched,
+      }) => {
+        const isAnonymousTicket = !values.selectedHousehold?.id && !values.selectedIndividual?.id;
         return (
           <>
             <PageHeader
@@ -373,8 +372,8 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 </Grid>
                                 <Grid item xs={6}>
                                   <LabelizedField label={t('Issue Type')}>
-                                    {values.issueType ===
-                                    FeedbackIssueType.PositiveFeedback
+                                    {values.issueType
+                                    === FeedbackIssueType.PositiveFeedback
                                       ? 'Positive Feedback'
                                       : 'Negative Feedback'}
                                   </LabelizedField>
@@ -510,4 +509,4 @@ export const CreateFeedbackPage = (): React.ReactElement => {
       }}
     </Formik>
   );
-};
+}

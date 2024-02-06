@@ -38,9 +38,9 @@ export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const CreateFollowUpPaymentPlan = ({
+export function CreateFollowUpPaymentPlan({
   paymentPlan,
-}: CreateFollowUpPaymentPlanProps): React.ReactElement => {
+}: CreateFollowUpPaymentPlanProps): React.ReactElement {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
@@ -49,8 +49,7 @@ export const CreateFollowUpPaymentPlan = ({
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
-  const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
-    paymentPlan;
+  const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } = paymentPlan;
 
   if (permissions === null) return null;
 
@@ -63,9 +62,8 @@ export const CreateFollowUpPaymentPlan = ({
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate: string, schema) =>
-          dispersionStartDate &&
-          schema.min(
+        (dispersionStartDate: string, schema) => dispersionStartDate
+          && schema.min(
             dispersionStartDate,
             `${t('Dispersion End Date has to be greater than')} ${moment(
               dispersionStartDate,
@@ -115,8 +113,8 @@ export const CreateFollowUpPaymentPlan = ({
               color="primary"
               onClick={() => setDialogOpen(true)}
               disabled={
-                !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
-                !isActiveProgram
+                !hasPermissions(PERMISSIONS.PM_CREATE, permissions)
+                || !isActiveProgram
               }
             >
               {t('Create Follow-up Payment Plan')}
@@ -260,4 +258,4 @@ export const CreateFollowUpPaymentPlan = ({
       )}
     </Formik>
   );
-};
+}

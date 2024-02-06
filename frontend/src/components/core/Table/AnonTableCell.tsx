@@ -4,7 +4,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { anon } from '../../../utils/utils';
 
-export const AnonTableCell = ({ children, ...props }): React.ReactElement => {
+export function AnonTableCell({ children, ...props }): React.ReactElement {
   const permissions = usePermissions();
   if (permissions === null) return null;
 
@@ -17,4 +17,4 @@ export const AnonTableCell = ({ children, ...props }): React.ReactElement => {
       {anon(children, shouldAnonymize)}
     </TableCell>
   );
-};
+}

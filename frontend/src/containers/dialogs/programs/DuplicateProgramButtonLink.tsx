@@ -9,9 +9,9 @@ interface DuplicateProgramButtonLinkProps {
   program: ProgramQuery['program'];
 }
 
-export const DuplicateProgramButtonLink = ({
+export function DuplicateProgramButtonLink({
   program,
-}: DuplicateProgramButtonLinkProps): ReactElement => {
+}: DuplicateProgramButtonLinkProps): ReactElement {
   const { baseUrl } = useBaseUrl();
 
   return (
@@ -23,4 +23,4 @@ export const DuplicateProgramButtonLink = ({
       <FileCopy />
     </IconButton>
   );
-};
+}

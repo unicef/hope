@@ -30,7 +30,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export const RegistrationDataImportTable = ({
+export function RegistrationDataImportTable({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -38,7 +38,7 @@ export const RegistrationDataImportTable = ({
   handleChange,
   noTableStyling,
   noTitle,
-}: RegistrationDataImportProps): ReactElement => {
+}: RegistrationDataImportProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const initialVariables = {
@@ -60,43 +60,39 @@ export const RegistrationDataImportTable = ({
     handleChange(id);
   };
 
-  const renderTable = (): React.ReactElement => {
-    return (
-      <TableWrapper>
-        <UniversalTable<
-          RegistrationDataImportNode,
-          AllRegistrationDataImportsQueryVariables
-        >
-          title={noTitle ? null : t('List of Imports')}
-          getTitle={(data) =>
-            noTitle
-              ? null
-              : `${t('List of Imports')} (${data?.allRegistrationDataImports
-                  ?.totalCount || 0})`
-          }
-          headCells={enableRadioButton ? headCells : headCells.slice(1)}
-          defaultOrderBy='importDate'
-          defaultOrderDirection='desc'
-          rowsPerPageOptions={[10, 15, 20]}
-          query={useAllRegistrationDataImportsQuery}
-          queriedObjectName='allRegistrationDataImports'
-          initialVariables={initialVariables}
-          renderRow={(row) => (
-            <RegistrationDataImportTableRow
-              key={row.id}
-              radioChangeHandler={enableRadioButton && handleRadioChange}
-              selectedRDI={selectedRDI}
-              registrationDataImport={row}
-              canViewDetails={canViewDetails}
-            />
-          )}
-        />
-      </TableWrapper>
-    );
-  };
+  const renderTable = (): React.ReactElement => (
+    <TableWrapper>
+      <UniversalTable<
+      RegistrationDataImportNode,
+      AllRegistrationDataImportsQueryVariables
+      >
+        title={noTitle ? null : t('List of Imports')}
+        getTitle={(data) => (noTitle
+          ? null
+          : `${t('List of Imports')} (${data?.allRegistrationDataImports
+            ?.totalCount || 0})`)}
+        headCells={enableRadioButton ? headCells : headCells.slice(1)}
+        defaultOrderBy="importDate"
+        defaultOrderDirection="desc"
+        rowsPerPageOptions={[10, 15, 20]}
+        query={useAllRegistrationDataImportsQuery}
+        queriedObjectName="allRegistrationDataImports"
+        initialVariables={initialVariables}
+        renderRow={(row) => (
+          <RegistrationDataImportTableRow
+            key={row.id}
+            radioChangeHandler={enableRadioButton && handleRadioChange}
+            selectedRDI={selectedRDI}
+            registrationDataImport={row}
+            canViewDetails={canViewDetails}
+          />
+        )}
+      />
+    </TableWrapper>
+  );
   return noTableStyling ? (
     <NoTableStyling>{renderTable()}</NoTableStyling>
   ) : (
     renderTable()
   );
-};
+}

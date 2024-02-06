@@ -18,18 +18,16 @@ interface ProgramFormPropTypes {
   values;
 }
 
-export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
+export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
-  const { data: dataCollectionTypeChoicesData } =
-    useDataCollectionTypeChoiceDataQuery();
+  const { data: dataCollectionTypeChoicesData } = useDataCollectionTypeChoiceDataQuery();
 
   if (!data || !dataCollectionTypeChoicesData) return null;
 
-  const filteredDataCollectionTypeChoicesData =
-    dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
-      (el) => el.name !== '',
-    );
+  const filteredDataCollectionTypeChoicesData = dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
+    (el) => el.name !== '',
+  );
 
   return (
     <Form>
@@ -169,4 +167,4 @@ export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
       </Grid>
     </Form>
   );
-};
+}

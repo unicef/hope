@@ -20,7 +20,7 @@ const initialFilter = {
   endDate: '',
 };
 
-export const PaymentVerificationPage = (): React.ReactElement => {
+export function PaymentVerificationPage(): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -34,8 +34,7 @@ export const PaymentVerificationPage = (): React.ReactElement => {
   );
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)) return <PermissionDenied />;
 
   return (
     <>
@@ -59,4 +58,4 @@ export const PaymentVerificationPage = (): React.ReactElement => {
       </TableWrapper>
     </>
   );
-};
+}

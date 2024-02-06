@@ -1,12 +1,12 @@
 import React from 'react';
 import { AdminAreaAutocompleteMultiple } from '../../autocompletes/AdminAreaAutocompleteMultiple';
 
-export const FormikAdminAreaAutocompleteMultiple = ({
+export function FormikAdminAreaAutocompleteMultiple({
   field,
   form,
   disabled,
   ...props
-}): React.ReactElement => {
+}): React.ReactElement {
   const handleChange = (e, option): void => {
     if (!option) {
       form.setFieldValue(field.name, null);
@@ -15,13 +15,11 @@ export const FormikAdminAreaAutocompleteMultiple = ({
     }
   };
   return (
-    <>
-      <AdminAreaAutocompleteMultiple
-        disabled={disabled}
-        value={field.value}
-        onChange={handleChange}
-        {...props}
-      />
-    </>
+    <AdminAreaAutocompleteMultiple
+      disabled={disabled}
+      value={field.value}
+      onChange={handleChange}
+      {...props}
+    />
   );
-};
+}

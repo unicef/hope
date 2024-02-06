@@ -8,7 +8,7 @@ import {
 import get from 'lodash/get';
 import { LabelizedField } from '../../../components/core/LabelizedField';
 
-export const Check = ({
+export function Check({
   field,
   form,
   label,
@@ -16,13 +16,12 @@ export const Check = ({
   displayValue = '',
   container = true,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const handleChange = (): void => {
     form.setFieldValue(field.name, !field.value);
   };
-  const isInvalid =
-    get(form.errors, field.name) &&
-    (get(form.touched, field.name) || form.submitCount > 0);
+  const isInvalid = get(form.errors, field.name)
+    && (get(form.touched, field.name) || form.submitCount > 0);
   useEffect(() => {
     if (initValue !== null && initValue !== undefined) {
       form.setFieldValue(field.name, initValue);
@@ -42,7 +41,7 @@ export const Check = ({
   return (
     <Grid container={container}>
       <FormControlLabel
-        control={
+        control={(
           <Checkbox
             {...otherProps}
             color="primary"
@@ -50,7 +49,7 @@ export const Check = ({
             onChange={handleChange}
             data-cy={`input-${field.name}`}
           />
-        }
+        )}
         label={displayValue ? '' : label}
       />
       {displayValue && (
@@ -63,4 +62,4 @@ export const Check = ({
       )}
     </Grid>
   );
-};
+}

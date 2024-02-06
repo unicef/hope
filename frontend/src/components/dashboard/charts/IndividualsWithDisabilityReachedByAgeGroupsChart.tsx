@@ -12,9 +12,9 @@ interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
   data: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];
 }
 
-export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
+export function IndividualsWithDisabilityReachedByAgeGroupsChart({
   data,
-}: IndividualsWithDisabilityReachedByAgeGroupsChartProps): React.ReactElement => {
+}: IndividualsWithDisabilityReachedByAgeGroupsChartProps): React.ReactElement {
   if (!data) return null;
 
   const chartData = {
@@ -46,14 +46,12 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
     tooltips: {
       mode: 'point',
       callbacks: {
-        label: (tooltipItem, tooltipData) => {
-          return ` ${
-            tooltipData.datasets[tooltipItem.datasetIndex].label
-          }: ${formatNumber(tooltipItem.xLabel)} (${getPercentage(
-            tooltipItem.xLabel,
-            data.datasets[2].data[tooltipItem.index],
-          )})`;
-        },
+        label: (tooltipItem, tooltipData) => ` ${
+          tooltipData.datasets[tooltipItem.datasetIndex].label
+        }: ${formatNumber(tooltipItem.xLabel)} (${getPercentage(
+          tooltipItem.xLabel,
+          data.datasets[2].data[tooltipItem.index],
+        )})`,
       },
     },
     scales: {
@@ -98,4 +96,4 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
       plugins={[ChartDataLabels]}
     />
   );
-};
+}

@@ -2,13 +2,13 @@ import React from 'react';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import { IconButton } from '@mui/material';
 
-export const RotateImg = ({
+export function RotateImg({
   turnAngle,
   setTurnAngle,
 }: {
   turnAngle: number;
   setTurnAngle: React.Dispatch<React.SetStateAction<number>>;
-}): React.ReactElement => {
+}): React.ReactElement {
   const handleRotateImg = (): void => {
     document
       .getElementById('modalImg')
@@ -21,4 +21,4 @@ export const RotateImg = ({
       <RotateRightIcon />
     </IconButton>
   );
-};
+}

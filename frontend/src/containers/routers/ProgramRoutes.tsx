@@ -7,7 +7,7 @@ import { CreateProgramPage } from '../pages/program/CreateProgramPage';
 import { EditProgramPage } from '../pages/program/EditProgramPage';
 import { DuplicateProgramPage } from '../pages/program/DuplicateProgramPage';
 
-export const ProgramRoutes = (): React.ReactElement => {
+export function ProgramRoutes(): React.ReactElement {
   const { path } = useRouteMatch();
 
   const programRoutes = [
@@ -42,4 +42,4 @@ export const ProgramRoutes = (): React.ReactElement => {
       ))}
     </Switch>
   );
-};
+}

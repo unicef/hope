@@ -21,7 +21,7 @@ import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTabl
 import { ExcludeSection } from '../../../components/paymentmodule/PaymentPlanDetails/ExcludeSection';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
+export function FollowUpPaymentPlanDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
   const { baseUrl, businessArea } = useBaseUrl();
@@ -53,18 +53,15 @@ export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
   if (permissions === null || !data) return null;
 
   if (
-    !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions) ||
-    isPermissionDeniedError(error)
-  )
-    return <PermissionDenied />;
+    !hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)
+    || isPermissionDeniedError(error)
+  ) return <PermissionDenied />;
 
-  const shouldDisplayEntitlement =
-    status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
+  const shouldDisplayEntitlement = status !== PaymentPlanStatus.Open && status !== PaymentPlanStatus.Accepted;
 
   const shouldDisplayFsp = status !== PaymentPlanStatus.Open;
-  const shouldDisplayReconciliationSummary =
-    status === PaymentPlanStatus.Accepted ||
-    status === PaymentPlanStatus.Finished;
+  const shouldDisplayReconciliationSummary = status === PaymentPlanStatus.Accepted
+    || status === PaymentPlanStatus.Finished;
 
   const { paymentPlan } = data;
   return (
@@ -99,4 +96,4 @@ export const FollowUpPaymentPlanDetailsPage = (): React.ReactElement => {
       )}
     </>
   );
-};
+}

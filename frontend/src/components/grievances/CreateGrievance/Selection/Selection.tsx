@@ -23,14 +23,14 @@ export interface SelectionProps {
   redirectedFromRelatedTicket: boolean;
 }
 
-export const Selection = ({
+export function Selection({
   handleChange,
   choicesData,
   setFieldValue,
   showIssueType,
   values,
   redirectedFromRelatedTicket,
-}: SelectionProps): React.ReactElement => {
+}: SelectionProps): React.ReactElement {
   const { t } = useTranslation();
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
@@ -43,14 +43,12 @@ export const Selection = ({
     { name: 'Individual Data Update', value: '14' },
   ];
 
-  const categoryDescription =
-    GRIEVANCE_CATEGORY_DESCRIPTIONS[
-      GRIEVANCE_CATEGORIES_NAMES[values.category]
-    ] || '';
-  const issueTypeDescription =
-    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-      GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
-    ] || '';
+  const categoryDescription = GRIEVANCE_CATEGORY_DESCRIPTIONS[
+    GRIEVANCE_CATEGORIES_NAMES[values.category]
+  ] || '';
+  const issueTypeDescription = GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
+    GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
+  ] || '';
 
   return (
     <Grid container spacing={3}>
@@ -102,4 +100,4 @@ export const Selection = ({
       )}
     </Grid>
   );
-};
+}

@@ -40,7 +40,7 @@ export interface DocumentsToEditTableProps {
   document;
 }
 
-export const DocumentsToEditTable = ({
+export function DocumentsToEditTable({
   values,
   isEdit,
   ticket,
@@ -49,7 +49,7 @@ export const DocumentsToEditTable = ({
   countriesDict,
   index,
   document,
-}: DocumentsToEditTableProps): React.ReactElement => {
+}: DocumentsToEditTableProps): React.ReactElement {
   const { t } = useTranslation();
   const renderNewOrNotUpdated = (prev, curr): React.ReactElement => {
     if (prev === curr) {
@@ -174,4 +174,4 @@ export const DocumentsToEditTable = ({
       </StyledTable>
     </div>
   );
-};
+}

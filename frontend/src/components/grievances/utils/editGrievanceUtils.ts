@@ -30,8 +30,8 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: Pick<
-    PaymentRecordAndPaymentNode,
-    'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
+  PaymentRecordAndPaymentNode,
+  'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
   >[];
   paymentRecord?: string;
   selectedLinkedTickets: string[];
@@ -75,7 +75,7 @@ function prepareInitialValueAddIndividual(
   return initialValues;
 }
 
-//eslint-disable-next-line
+// eslint-disable-next-line
 function prepareInitialValueEditIndividual(initialValues, ticket) {
   const {
     individual,
@@ -242,7 +242,9 @@ export function prepareInitialValues(
   return initialValues;
 }
 
-export const EmptyComponent = (): React.ReactElement => null;
+export function EmptyComponent(): React.ReactElement {
+  return null;
+}
 export const dataChangeComponentDict = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
     [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: AddIndividualDataChange,

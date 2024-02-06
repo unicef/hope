@@ -20,10 +20,10 @@ interface PaymentVerificationTableRowProps {
   canViewDetails: boolean;
 }
 
-export const PaymentVerificationTableRow = ({
+export function PaymentVerificationTableRow({
   plan,
   canViewDetails,
-}: PaymentVerificationTableRowProps): React.ReactElement => {
+}: PaymentVerificationTableRowProps): React.ReactElement {
   const history = useHistory();
   const { baseUrl } = useBaseUrl();
   const planVerificationPath = `/${baseUrl}/payment-verification/${
@@ -32,8 +32,7 @@ export const PaymentVerificationTableRow = ({
   const handleClick = (): void => {
     history.push(planVerificationPath);
   };
-  const { data: statusChoicesData } =
-    useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } = useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
 
@@ -62,7 +61,10 @@ export const PaymentVerificationTableRow = ({
         {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
+        <UniversalMoment>{plan.startDate}</UniversalMoment>
+        {' '}
+        -
+        {' '}
         <UniversalMoment>{plan.endDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
@@ -70,4 +72,4 @@ export const PaymentVerificationTableRow = ({
       </TableCell>
     </ClickableTableRow>
   );
-};
+}

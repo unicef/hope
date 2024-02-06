@@ -9,7 +9,7 @@ import { PaymentVerificationPage } from '../pages/payments/PaymentVerificationPa
 import { VerificationPaymentDetailsPage } from '../pages/payments/VerificationPaymentDetailsPage';
 import { VerificationPaymentRecordDetailsPage } from '../pages/payments/VerificationPaymentRecordDetailsPage';
 
-export const PaymentVerificationRoutes = (): React.ReactElement => {
+export function PaymentVerificationRoutes(): React.ReactElement {
   const { path } = useRouteMatch();
 
   const paymentVerificationRoutes = [
@@ -53,4 +53,4 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
       ))}
     </Switch>
   );
-};
+}

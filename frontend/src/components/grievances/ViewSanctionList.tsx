@@ -15,11 +15,11 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { SearchTextField } from '../core/SearchTextField';
 import { SanctionListIndividualsTable } from './SanctionListIndividualsTable/SanctionListIndividualsTable';
 
-export const ViewSanctionList = ({
+export function ViewSanctionList({
   referenceNumber,
 }: {
   referenceNumber: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const initialFilter = {
@@ -33,8 +33,7 @@ export const ViewSanctionList = ({
 
   const debouncedFilter = useDebounce(filter, 500);
 
-  const handleFilterChange = (e, name): void =>
-    setFilter({ ...filter, [name]: e.target.value });
+  const handleFilterChange = (e, name): void => setFilter({ ...filter, [name]: e.target.value });
   return (
     <>
       <Button color="primary" onClick={() => setDialogOpen(true)}>
@@ -89,4 +88,4 @@ export const ViewSanctionList = ({
       </Dialog>
     </>
   );
-};
+}

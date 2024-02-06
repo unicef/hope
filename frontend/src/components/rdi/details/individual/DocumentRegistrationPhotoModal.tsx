@@ -11,11 +11,11 @@ interface DocumentRegistrationPhotoModalProps {
   documentId: string;
 }
 
-export const DocumentRegistrationPhotoModal = ({
+export function DocumentRegistrationPhotoModal({
   individual,
   documentNumber,
   documentId,
-}: DocumentRegistrationPhotoModalProps): React.ReactElement => {
+}: DocumentRegistrationPhotoModalProps): React.ReactElement {
   const { data } = useImportedIndividualPhotosQuery({
     variables: { id: individual?.id },
     fetchPolicy: 'network-only',
@@ -28,8 +28,8 @@ export const DocumentRegistrationPhotoModal = ({
     <PhotoModal
       src={documentWithPhoto?.node?.photo}
       linkText={documentNumber}
-      variant='link'
+      variant="link"
       title="Document's Photo"
     />
   );
-};
+}

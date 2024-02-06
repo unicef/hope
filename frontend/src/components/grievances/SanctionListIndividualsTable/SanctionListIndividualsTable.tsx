@@ -8,25 +8,25 @@ import {
 import { SanctionListIndividualsTableRow } from './SanctionListIndividualsTableRow';
 import { headCells } from './SanctionListIndividualsHeadCells';
 
-export const SanctionListIndividualsTable = ({
+export function SanctionListIndividualsTable({
   filter,
-}): React.ReactElement => {
+}): React.ReactElement {
   const initialVariables = {
     fullNameContains: filter.fullName,
     referenceNumber: filter.referenceNumber,
   };
   return (
     <UniversalTable<
-      AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'],
-      AllSanctionListIndividualsQueryVariables
+    AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'],
+    AllSanctionListIndividualsQueryVariables
     >
       headCells={headCells}
       query={useAllSanctionListIndividualsQuery}
-      queriedObjectName='allSanctionListIndividuals'
+      queriedObjectName="allSanctionListIndividuals"
       initialVariables={initialVariables}
       renderRow={(row) => (
         <SanctionListIndividualsTableRow key={row.id} individual={row} />
       )}
     />
   );
-};
+}

@@ -31,13 +31,13 @@ const MergeButtonContainer = styled.span`
   margin-left: ${({ theme }) => theme.spacing(4)}px;
 `;
 
-export const RegistrationDataImportDetailsPageHeader = ({
+export function RegistrationDataImportDetailsPageHeader({
   registration,
   canMerge,
   canRerunDedupe,
   canViewList,
   canRefuse,
-}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement => {
+}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
@@ -52,18 +52,16 @@ export const RegistrationDataImportDetailsPageHeader = ({
   const eraseButton = (
     <LoadingButton
       loading={eraseLoading}
-      onClick={() =>
-        confirm({
-          title: t('Warning'),
-          content: t(
-            'Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data',
-          ),
-        }).then(async () => {
-          await eraseRdiMutate({
-            variables: { id: registration.id },
-          });
-        })
-      }
+      onClick={() => confirm({
+        title: t('Warning'),
+        content: t(
+          'Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data',
+        ),
+      }).then(async () => {
+        await eraseRdiMutate({
+          variables: { id: registration.id },
+        });
+      })}
       variant="contained"
       color="primary"
       disabled={!isActiveProgram}
@@ -151,4 +149,4 @@ export const RegistrationDataImportDetailsPageHeader = ({
       />
     </>
   );
-};
+}

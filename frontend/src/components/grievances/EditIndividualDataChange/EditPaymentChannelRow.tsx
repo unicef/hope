@@ -41,13 +41,11 @@ export function EditPaymentChannelRow({
       <PaymentChannelField
         id={id}
         key={`${id}-${paymentChannel.id}`}
-        onDelete={() =>
-          removeItemById(
-            values.individualDataUpdatePaymentChannelsToRemove,
-            paymentChannel.id,
-            arrayHelpers,
-          )
-        }
+        onDelete={() => removeItemById(
+          values.individualDataUpdatePaymentChannelsToRemove,
+          paymentChannel.id,
+          arrayHelpers,
+        )}
         baseName="individualDataUpdatePaymentChannelsToEdit"
         isEdited={isEdited}
         paymentChannel={paymentChannel}

@@ -13,7 +13,9 @@ export function TotalAmount(): React.ReactElement {
         <Box mt={4}>
           <Title>
             <Typography variant="h6">
-              {t('Total Amount')}(PLN) {t('per FSP')}
+              {t('Total Amount')}
+              (PLN)
+              {t('per FSP')}
             </Typography>
           </Title>
         </Box>

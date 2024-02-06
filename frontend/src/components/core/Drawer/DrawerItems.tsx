@@ -38,8 +38,7 @@ const Icon = styled(ListItemIcon)`
 `;
 
 const SubList = styled(List)`
-  padding-left: ${({ theme, open }) =>
-    open ? `${theme.spacing(10)}px !important` : 0};
+  padding-left: ${({ theme, open }) => (open ? `${theme.spacing(10)}px !important` : 0)};
 `;
 
 export const StyledLink = styled.a`
@@ -54,14 +53,16 @@ interface DrawerItemsProps {
   currentLocation: string;
   open: boolean;
 }
-export const DrawerItems = ({
+export function DrawerItems({
   currentLocation,
   open,
-}: DrawerItemsProps): React.ReactElement => {
+}: DrawerItemsProps): React.ReactElement {
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
-  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
+  const {
+    baseUrl, businessArea, programId, isAllPrograms,
+  } = useBaseUrl();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -74,16 +75,14 @@ export const DrawerItems = ({
       return false;
     }
     return (
-      item.secondaryActions.findIndex((secondaryItem) => {
-        return Boolean(secondaryItem.selectedRegexp.exec(clearLocation));
-      }) !== -1
+      item.secondaryActions.findIndex((secondaryItem) => Boolean(secondaryItem.selectedRegexp.exec(clearLocation))) !== -1
     );
   });
   const [expandedItem, setExpandedItem] = React.useState(
     initialIndex !== -1 ? initialIndex : null,
   );
 
-  //close nav when changing business area or program
+  // close nav when changing business area or program
   useEffect(() => {
     setExpandedItem(null);
   }, [baseUrl]);
@@ -92,9 +91,7 @@ export const DrawerItems = ({
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
     const updatedMenuItems = [...items];
-    const getIndexByName = (name: string): number => {
-      return updatedMenuItems.findIndex((item) => item?.name === name);
-    };
+    const getIndexByName = (name: string): number => updatedMenuItems.findIndex((item) => item?.name === name);
     const cashAssistIndex = getIndexByName('Cash Assist');
     const programDetailsIndex = getIndexByName('Programme Details');
     const reportingIndex = getIndexByName('Reporting');
@@ -104,15 +101,14 @@ export const DrawerItems = ({
       updatedMenuItems.splice(reportingIndex, 1);
     }
 
-    //Set CashAssist URL
-    updatedMenuItems[cashAssistIndex].href =
-      cashAssistUrlData?.cashAssistUrlPrefix;
+    // Set CashAssist URL
+    updatedMenuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
 
-    //When GlobalProgramFilter applied
+    // When GlobalProgramFilter applied
     if (!isAllPrograms) {
       updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
     }
-    //When GlobalProgramFilter not applied show some pages only
+    // When GlobalProgramFilter not applied show some pages only
     if (isAllPrograms) {
       const pagesAvailableForAllPrograms = [
         'Country Dashboard',
@@ -121,17 +117,14 @@ export const DrawerItems = ({
         'Grievance',
         'Activity Log',
       ];
-      return updatedMenuItems.filter((item) =>
-        pagesAvailableForAllPrograms.includes(item.name),
-      );
+      return updatedMenuItems.filter((item) => pagesAvailableForAllPrograms.includes(item.name));
     }
     return updatedMenuItems;
   };
 
   const preparedMenuItems = prepareMenuItems(menuItems);
 
-  const { isPaymentPlanApplicable, isAccountabilityApplicable } =
-    businessAreaData.businessArea;
+  const { isPaymentPlanApplicable, isAccountabilityApplicable } = businessAreaData.businessArea;
   const flags = {
     isPaymentPlanApplicable,
     isAccountabilityApplicable,
@@ -141,8 +134,8 @@ export const DrawerItems = ({
     let resultHref = '';
     for (const item of secondaryActions) {
       if (
-        item.permissionModule &&
-        hasPermissionInModule(item.permissionModule, permissions)
+        item.permissionModule
+        && hasPermissionInModule(item.permissionModule, permissions)
       ) {
         resultHref = item.href;
         break;
@@ -155,13 +148,11 @@ export const DrawerItems = ({
     <div>
       {preparedMenuItems?.map((item, index) => {
         if (
-          item.permissionModule &&
-          !hasPermissionInModule(item.permissionModule, permissions)
-        )
-          return null;
+          item.permissionModule
+          && !hasPermissionInModule(item.permissionModule, permissions)
+        ) return null;
 
-        if (item.permissions && !hasPermissions(item.permissions, permissions))
-          return null;
+        if (item.permissions && !hasPermissions(item.permissions, permissions)) return null;
 
         if (item.flag && !flags[item.flag]) {
           return null;
@@ -198,11 +189,10 @@ export const DrawerItems = ({
               </ListItem>
               <Collapse in={expandedItem !== null && expandedItem === index}>
                 <SubList open={open} component="div">
-                  {item.secondaryActions &&
-                    item.secondaryActions.map(
-                      (secondary) =>
-                        secondary.permissionModule &&
-                        hasPermissionInModule(
+                  {item.secondaryActions
+                    && item.secondaryActions.map(
+                      (secondary) => secondary.permissionModule
+                        && hasPermissionInModule(
                           secondary.permissionModule,
                           permissions,
                         ) && (
@@ -219,7 +209,7 @@ export const DrawerItems = ({
                             <Icon>{secondary.icon}</Icon>
                             <Text primary={secondary.name} />
                           </ListItem>
-                        ),
+                      ),
                     )}
                 </SubList>
               </Collapse>
@@ -258,4 +248,4 @@ export const DrawerItems = ({
       })}
     </div>
   );
-};
+}

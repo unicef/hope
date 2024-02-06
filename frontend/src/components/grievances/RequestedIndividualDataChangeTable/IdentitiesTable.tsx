@@ -37,7 +37,7 @@ export interface IdentitiesTableProps {
   identities;
 }
 
-export const IdentitiesTable = ({
+export function IdentitiesTable({
   values,
   isEdit,
   ticket,
@@ -45,7 +45,7 @@ export const IdentitiesTable = ({
   countriesDict,
   identityTypeDict,
   identities,
-}: IdentitiesTableProps): React.ReactElement => {
+}: IdentitiesTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedIdentities } = values;
 
@@ -84,43 +84,41 @@ export const IdentitiesTable = ({
       <StyledTable>
         {identitiesTableHead}
         <TableBody>
-          {identities?.map((row, index) => {
-            return (
-              <TableRow key={`${row.value.partner}-${row.value.partner}`}>
-                <TableCell align="left">
-                  {isEdit ? (
-                    <Checkbox
-                      color="primary"
-                      onChange={(): void => {
-                        handleSelectIdentity(index);
-                      }}
-                      disabled={
+          {identities?.map((row, index) => (
+            <TableRow key={`${row.value.partner}-${row.value.partner}`}>
+              <TableCell align="left">
+                {isEdit ? (
+                  <Checkbox
+                    color="primary"
+                    onChange={(): void => {
+                      handleSelectIdentity(index);
+                    }}
+                    disabled={
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
-                      checked={selectedIdentities.includes(index)}
-                      inputProps={{ 'aria-labelledby': 'selected' }}
-                      data-cy="checkbox-identity"
-                    />
-                  ) : (
-                    selectedIdentities.includes(index) && (
-                      <GreenIcon data-cy="green-check">
-                        <CheckCircleIcon />
-                      </GreenIcon>
-                    )
-                  )}
-                </TableCell>
-                <TableCell align="left">
-                  {identityTypeDict[row.value.partner]}
-                </TableCell>
-                <TableCell align="left">
-                  {countriesDict[row.value.country]}
-                </TableCell>
-                <TableCell align="left">{row.value.number}</TableCell>
-              </TableRow>
-            );
-          })}
+                    checked={selectedIdentities.includes(index)}
+                    inputProps={{ 'aria-labelledby': 'selected' }}
+                    data-cy="checkbox-identity"
+                  />
+                ) : (
+                  selectedIdentities.includes(index) && (
+                  <GreenIcon data-cy="green-check">
+                    <CheckCircleIcon />
+                  </GreenIcon>
+                  )
+                )}
+              </TableCell>
+              <TableCell align="left">
+                {identityTypeDict[row.value.partner]}
+              </TableCell>
+              <TableCell align="left">
+                {countriesDict[row.value.country]}
+              </TableCell>
+              <TableCell align="left">{row.value.number}</TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </StyledTable>
     </>
   );
-};
+}

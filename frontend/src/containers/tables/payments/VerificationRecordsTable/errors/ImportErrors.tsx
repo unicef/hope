@@ -38,8 +38,12 @@ export function ImportErrors({
         {errors.map((item) => (
           <Error>
             <strong>
-              {item.sheet} - {item.coordinates}
-            </strong>{' '}
+              {item.sheet}
+              {' '}
+              -
+              {item.coordinates}
+            </strong>
+            {' '}
             {item.message}
           </Error>
         ))}

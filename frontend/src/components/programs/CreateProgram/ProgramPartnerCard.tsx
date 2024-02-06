@@ -1,4 +1,6 @@
-import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
+import {
+  Box, Checkbox, Collapse, Grid, IconButton,
+} from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -55,14 +57,11 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const { t } = useTranslation();
   const selectedAdminAreasLength = values.partners[index]?.adminAreas?.length;
   const initialExpanded = selectedAdminAreasLength > 0;
-  const [isAdminAreaExpanded, setIsAdminAreaExpanded] =
-    useState(initialExpanded);
-  const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
-    AreaTreeNode.buildTree(
-      allAreasTreeData,
-      values.partners[index]?.adminAreas,
-    ),
-  );
+  const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(initialExpanded);
+  const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() => AreaTreeNode.buildTree(
+    allAreasTreeData,
+    values.partners[index]?.adminAreas,
+  ));
   const businessAreaOptionLabel = (
     <Box display="flex" flexDirection="column">
       <BigText>{t('Business Area')}</BigText>
@@ -83,29 +82,27 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     setAllAreasTree([...allAreasTree]);
   };
   let renderTree = null;
-  const renderNode = (node: AreaTreeNode): React.ReactElement => {
-    return (
-      <TreeItem
-        key={node.id}
-        nodeId={node.id}
-        label={
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Checkbox
-              id={node.id}
-              color="primary"
-              checked={Boolean(node.checked)}
-              indeterminate={node.checked === 'indeterminate'}
-              onChange={(event) => handleCheckBoxSelect(event, node)}
-              onClick={(event) => event.stopPropagation()}
-            />
-            {node.name}
-          </div>
-        }
-      >
-        {renderTree(node.children)}
-      </TreeItem>
-    );
-  };
+  const renderNode = (node: AreaTreeNode): React.ReactElement => (
+    <TreeItem
+      key={node.id}
+      nodeId={node.id}
+      label={(
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Checkbox
+            id={node.id}
+            color="primary"
+            checked={Boolean(node.checked)}
+            indeterminate={node.checked === 'indeterminate'}
+            onChange={(event) => handleCheckBoxSelect(event, node)}
+            onClick={(event) => event.stopPropagation()}
+          />
+          {node.name}
+        </div>
+        )}
+    >
+      {renderTree(node.children)}
+    </TreeItem>
+  );
   renderTree = (children: AreaTreeNode[]): React.ReactElement => {
     if (!children.length) {
       return null;
@@ -123,7 +120,9 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           </SmallText>
           <Box mt={2} mb={2}>
             <SmallText>
-              Selected Admin Areas: {selectedAdminAreasLength || 0}
+              Selected Admin Areas:
+              {' '}
+              {selectedAdminAreasLength || 0}
             </SmallText>
           </Box>
         </Box>
@@ -170,7 +169,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           />
         </Grid>
         <DeleteProgramPartner
-          //TODO: add permission
+          // TODO: add permission
           canDeleteProgramPartner
           handleDeleteProgramPartner={handleDeleteProgramPartner}
         />

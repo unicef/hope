@@ -25,21 +25,20 @@ export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   canLock: boolean;
 }
 
-export const OpenTargetPopulationHeaderButtons = ({
+export function OpenTargetPopulationHeaderButtons({
   targetPopulation,
   canDuplicate,
   canEdit,
   canLock,
   canRemove,
-}: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement => {
+}: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openLock, setOpenLock] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
 
-  const [rebuildTargetPopulation, { loading: rebuildTargetPopulationLoading }] =
-    useRebuildTpMutation();
+  const [rebuildTargetPopulation, { loading: rebuildTargetPopulationLoading }] = useRebuildTpMutation();
   return (
     <Box display="flex" alignItems="center">
       {canDuplicate && (
@@ -83,11 +82,9 @@ export const OpenTargetPopulationHeaderButtons = ({
             color="primary"
             disabled={rebuildTargetPopulationLoading || !isActiveProgram}
             startIcon={<RefreshRounded />}
-            onClick={() =>
-              rebuildTargetPopulation({
-                variables: { id: targetPopulation.id },
-              })
-            }
+            onClick={() => rebuildTargetPopulation({
+              variables: { id: targetPopulation.id },
+            })}
           >
             Rebuild
           </Button>
@@ -123,4 +120,4 @@ export const OpenTargetPopulationHeaderButtons = ({
       />
     </Box>
   );
-};
+}

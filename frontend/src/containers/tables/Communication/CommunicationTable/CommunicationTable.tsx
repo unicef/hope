@@ -17,10 +17,10 @@ interface CommunicationTableProps {
   canViewDetails: boolean;
 }
 
-export const CommunicationTable = ({
+export function CommunicationTable({
   filter,
   canViewDetails,
-}: CommunicationTableProps): ReactElement => {
+}: CommunicationTableProps): ReactElement {
   const { programId } = useBaseUrl();
   const { t } = useTranslation();
   const initialVariables: AllAccountabilityCommunicationMessagesQueryVariables = {
@@ -35,16 +35,16 @@ export const CommunicationTable = ({
   return (
     <TableWrapper>
       <UniversalTable<
-        CommunicationMessageNode,
-        AllAccountabilityCommunicationMessagesQueryVariables
+      CommunicationMessageNode,
+      AllAccountabilityCommunicationMessagesQueryVariables
       >
         title={t('Messages List')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllAccountabilityCommunicationMessagesQuery}
-        queriedObjectName='allAccountabilityCommunicationMessages'
-        defaultOrderBy='createdAt'
-        defaultOrderDirection='desc'
+        queriedObjectName="allAccountabilityCommunicationMessages"
+        defaultOrderBy="createdAt"
+        defaultOrderDirection="desc"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <CommunicationTableRow
@@ -56,4 +56,4 @@ export const CommunicationTable = ({
       />
     </TableWrapper>
   );
-};
+}

@@ -15,7 +15,7 @@ import {
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-export const TargetPopulationDetailsPage = (): React.ReactElement => {
+export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
   const {
@@ -57,9 +57,8 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
 
   const { targetPopulation } = data;
 
-  const canDuplicate =
-    hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
-    Boolean(targetPopulation.targetingCriteria);
+  const canDuplicate = hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions)
+    && Boolean(targetPopulation.targetingCriteria);
 
   return (
     <>
@@ -81,4 +80,4 @@ export const TargetPopulationDetailsPage = (): React.ReactElement => {
       />
     </>
   );
-};
+}

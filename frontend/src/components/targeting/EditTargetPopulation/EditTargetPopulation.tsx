@@ -31,10 +31,10 @@ interface EditTargetPopulationProps {
   screenBeneficiary: boolean;
 }
 
-export const EditTargetPopulation = ({
+export function EditTargetPopulation({
   targetPopulation,
   screenBeneficiary,
-}: EditTargetPopulationProps): React.ReactElement => {
+}: EditTargetPopulationProps): React.ReactElement {
   const { t } = useTranslation();
   const initialValues = {
     id: targetPopulation.id,
@@ -52,11 +52,10 @@ export const EditTargetPopulation = ({
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data: allProgramsData, loading: loadingPrograms } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, status: [ProgramStatus.Active] },
-      fetchPolicy: 'cache-and-network',
-    });
+  const { data: allProgramsData, loading: loadingPrograms } = useAllProgramsForChoicesQuery({
+    variables: { businessArea, status: [ProgramStatus.Active] },
+    fetchPolicy: 'cache-and-network',
+  });
 
   if (loadingPrograms) {
     return <LoadingComponent />;
@@ -87,9 +86,7 @@ export const EditTargetPopulation = ({
           return true;
         }
         const idsArr = ids.split(',');
-        return idsArr.every((el) =>
-          /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
-        );
+        return idsArr.every((el) => /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
       },
     ),
     exclusionReason: Yup.string().max(500, t('Too long')),
@@ -125,11 +122,10 @@ export const EditTargetPopulation = ({
     }
   };
 
-  const selectedProgram = (values): void =>
-    getFullNodeFromEdgesById(
-      allProgramsData?.allPrograms?.edges,
-      values.program,
-    );
+  const selectedProgram = (values): void => getFullNodeFromEdgesById(
+    allProgramsData?.allPrograms?.edges,
+    values.program,
+  );
 
   return (
     <Formik
@@ -138,41 +134,39 @@ export const EditTargetPopulation = ({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, submitForm }) => {
-        return (
-          <Form>
-            <AutoSubmitFormOnEnter />
-            <EditTargetPopulationHeader
-              handleSubmit={submitForm}
-              values={values}
-              loading={loading}
-              baseUrl={baseUrl}
-              targetPopulation={targetPopulation}
-            />
-            <FieldArray
-              name="targetingCriteria"
-              render={(arrayHelpers) => (
-                <TargetingCriteria
-                  helpers={arrayHelpers}
-                  rules={values.targetingCriteria}
-                  selectedProgram={selectedProgram(values)}
-                  isEdit
-                  screenBeneficiary={screenBeneficiary}
-                />
-              )}
-            />
-            <Exclusions initialOpen={Boolean(values.excludedIds)} />
-            <PaperContainer>
-              <Typography variant="h6">
-                {t('Save to see the list of households')}
-              </Typography>
-              <Label>
-                {t('List of households will be available after saving')}
-              </Label>
-            </PaperContainer>
-          </Form>
-        );
-      }}
+      {({ values, submitForm }) => (
+        <Form>
+          <AutoSubmitFormOnEnter />
+          <EditTargetPopulationHeader
+            handleSubmit={submitForm}
+            values={values}
+            loading={loading}
+            baseUrl={baseUrl}
+            targetPopulation={targetPopulation}
+          />
+          <FieldArray
+            name="targetingCriteria"
+            render={(arrayHelpers) => (
+              <TargetingCriteria
+                helpers={arrayHelpers}
+                rules={values.targetingCriteria}
+                selectedProgram={selectedProgram(values)}
+                isEdit
+                screenBeneficiary={screenBeneficiary}
+              />
+            )}
+          />
+          <Exclusions initialOpen={Boolean(values.excludedIds)} />
+          <PaperContainer>
+            <Typography variant="h6">
+              {t('Save to see the list of households')}
+            </Typography>
+            <Label>
+              {t('List of households will be available after saving')}
+            </Label>
+          </PaperContainer>
+        </Form>
+      )}
     </Formik>
   );
-};
+}

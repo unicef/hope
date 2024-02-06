@@ -18,9 +18,9 @@ interface GrievancesSectionProps {
   data: AllChartsQuery['chartGrievances'];
 }
 
-export const GrievancesSection = ({
+export function GrievancesSection({
   data,
-}: GrievancesSectionProps): React.ReactElement => {
+}: GrievancesSectionProps): React.ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
   return (
@@ -48,4 +48,4 @@ export const GrievancesSection = ({
       </Typography>
     </DashboardPaper>
   );
-};
+}

@@ -1,4 +1,6 @@
-import { Box, Button, FormHelperText, Grid } from '@mui/material';
+import {
+  Box, Button, FormHelperText, Grid,
+} from '@mui/material';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -70,7 +72,9 @@ const BoxWithBorders = styled.div`
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
-const EmptyComponent = (): React.ReactElement => null;
+function EmptyComponent(): React.ReactElement {
+  return null;
+}
 export const dataChangeComponentDict = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
     [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: AddIndividualDataChange,
@@ -79,10 +83,12 @@ export const dataChangeComponentDict = {
   },
 };
 
-export const CreateGrievancePage = (): React.ReactElement => {
+export function CreateGrievancePage(): React.ReactElement {
   const { t } = useTranslation();
   const history = useHistory();
-  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
+  const {
+    baseUrl, businessArea, programId, isAllPrograms,
+  } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
@@ -95,8 +101,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const category = history.location.state?.category;
   const linkedFeedbackId = history.location.state?.linkedFeedbackId;
   const redirectedFromRelatedTicket = Boolean(category);
-  const isFeedbackWithHouseholdOnly =
-    history.location.state?.isFeedbackWithHouseholdOnly;
+  const isFeedbackWithHouseholdOnly = history.location.state?.isFeedbackWithHouseholdOnly;
 
   const initialValues = {
     description: '',
@@ -125,24 +130,21 @@ export const CreateGrievancePage = (): React.ReactElement => {
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } =
-    useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
-  const { data: programsData, loading: programsDataLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: {
-        first: 100,
-        businessArea,
-      },
-    });
+  const { data: programsData, loading: programsDataLoading } = useAllProgramsForChoicesQuery({
+    variables: {
+      first: 100,
+      businessArea,
+    },
+  });
 
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const { data: householdFieldsData, loading: householdFieldsLoading } =
-    useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, loading: householdFieldsLoading } = useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -154,37 +156,32 @@ export const CreateGrievancePage = (): React.ReactElement => {
     '*',
   );
 
-  const showIssueType = (values): boolean => {
-    return (
-      values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-      values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
-    );
-  };
+  const showIssueType = (values): boolean => (
+    values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE
+      || values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+      || values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
+  );
 
   if (
-    userDataLoading ||
-    choicesLoading ||
-    allAddIndividualFieldsDataLoading ||
-    householdFieldsLoading ||
-    programsDataLoading
-  )
-    return <LoadingComponent />;
+    userDataLoading
+    || choicesLoading
+    || allAddIndividualFieldsDataLoading
+    || householdFieldsLoading
+    || programsDataLoading
+  ) return <LoadingComponent />;
   if (permissions === null) return null;
 
-  if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))
-    return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions)) return <PermissionDenied />;
 
   if (
-    !choicesData ||
-    !userData ||
-    !allAddIndividualFieldsData ||
-    !householdFieldsData ||
-    !householdFieldsDict ||
-    !individualFieldsDict ||
-    !programsData
-  )
-    return null;
+    !choicesData
+    || !userData
+    || !allAddIndividualFieldsData
+    || !householdFieldsData
+    || !householdFieldsDict
+    || !individualFieldsDict
+    || !programsData
+  ) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -193,19 +190,17 @@ export const CreateGrievancePage = (): React.ReactElement => {
     },
   ];
 
-  const dataChangeErrors = (errors): ReactElement[] => {
-    return [
-      'householdDataUpdateFields',
-      'individualDataUpdateFields',
-      'individualDataUpdateFieldsDocuments',
-      'individualDataUpdateFieldsIdentities',
-      'verificationRequired',
-    ].map((fieldname) => (
-      <FormHelperText key={fieldname} error>
-        {errors[fieldname]}
-      </FormHelperText>
-    ));
-  };
+  const dataChangeErrors = (errors): ReactElement[] => [
+    'householdDataUpdateFields',
+    'individualDataUpdateFields',
+    'individualDataUpdateFieldsDocuments',
+    'individualDataUpdateFieldsIdentities',
+    'verificationRequired',
+  ].map((fieldname) => (
+    <FormHelperText key={fieldname} error>
+      {errors[fieldname]}
+    </FormHelperText>
+  ));
 
   const handleNext = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -264,10 +259,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
           handleNext();
           // if creating a linked G&F ticket from Feedback page and IND and HH selected skip Look Up
           if (
-            activeStep === 0 &&
-            linkedFeedbackId &&
-            selectedHousehold &&
-            selectedIndividual
+            activeStep === 0
+            && linkedFeedbackId
+            && selectedHousehold
+            && selectedIndividual
           ) {
             handleNext();
           }
@@ -277,16 +272,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
         activeStep < GrievanceSteps.Verification || validateData
       }
       validateOnBlur={activeStep < GrievanceSteps.Verification || validateData}
-      validate={(values) =>
-        validateUsingSteps(
-          values,
-          allAddIndividualFieldsData,
-          individualFieldsDict,
-          householdFieldsDict,
-          activeStep,
-          setValidateData,
-        )
-      }
+      validate={(values) => validateUsingSteps(
+        values,
+        allAddIndividualFieldsData,
+        individualFieldsDict,
+        householdFieldsDict,
+        activeStep,
+        setValidateData,
+      )}
       validationSchema={validationSchemaWithSteps(activeStep)}
     >
       {({
@@ -303,11 +296,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
           EmptyComponent,
         );
 
-        const issueTypeToDisplay = (): string =>
-          selectedIssueType(
-            values,
-            choicesData.grievanceTicketIssueTypeChoices,
-          );
+        const issueTypeToDisplay = (): string => selectedIssueType(
+          values,
+          choicesData.grievanceTicketIssueTypeChoices,
+        );
 
         return (
           <>
@@ -433,4 +425,4 @@ export const CreateGrievancePage = (): React.ReactElement => {
       }}
     </Formik>
   );
-};
+}
