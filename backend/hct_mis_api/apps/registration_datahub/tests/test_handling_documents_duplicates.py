@@ -392,7 +392,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
-                    "program": program_2,
                 }
             ],
         )
