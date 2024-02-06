@@ -14,13 +14,9 @@ volumes:
 
 services:
   proxy:
-    image: unicef/hct-mis-proxy
+    image: tivix/docker-nginx:v17
     environment:
-      - DJANGO_APPLICATION_SERVICE_HOST=backend
-      - FRONTEND_HOST=host.docker.internal:3000
-    build:
-      context: ./proxy
-      dockerfile: ./Dockerfile
+      - UPSTREAMS=/:localhost:8000
     ports:
       - "8082:80"
     depends_on:
@@ -44,11 +40,9 @@ services:
       - REDIS_INSTANCE=redis:6379
       - PYTHONUNBUFFERED=1
     build:
-      context: ./backend
+      context: ./
       dockerfile: docker/Dockerfile
       target: dev
-      args:
-        APP_ENV: DEV
     ports:
       - "8080:8000"
     volumes:

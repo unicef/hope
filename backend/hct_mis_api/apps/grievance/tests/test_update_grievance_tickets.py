@@ -108,9 +108,12 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example")
+        household_one = HouseholdFactory.build(
+            id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example", program=cls.program
+        )
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = cls.program
         household_one.registration_data_import.save()
         household_one.programs.add(cls.program)
 
@@ -136,7 +139,8 @@ class TestUpdateGrievanceTickets(APITestCase):
         ]
 
         cls.individuals = [
-            IndividualFactory(household=household_one, **individual) for individual in cls.individuals_to_create
+            IndividualFactory(household=household_one, program=cls.program, **individual)
+            for individual in cls.individuals_to_create
         ]
 
         first_individual = cls.individuals[0]
@@ -148,10 +152,18 @@ class TestUpdateGrievanceTickets(APITestCase):
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
         )
         cls.national_id = DocumentFactory(
-            country=country_pl, type=national_id_type, document_number="789-789-645", individual=first_individual
+            country=country_pl,
+            type=national_id_type,
+            document_number="789-789-645",
+            individual=first_individual,
+            program=cls.program,
         )
         cls.birth_certificate = DocumentFactory(
-            country=country_pl, type=birth_certificate_type, document_number="ITY8456", individual=first_individual
+            country=country_pl,
+            type=birth_certificate_type,
+            document_number="ITY8456",
+            individual=first_individual,
+            program=cls.program,
         )
         household_one.head_of_household = cls.individuals[0]
         household_one.save()
