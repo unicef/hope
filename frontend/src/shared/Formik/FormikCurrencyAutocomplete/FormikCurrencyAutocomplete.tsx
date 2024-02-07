@@ -1,11 +1,10 @@
-import { Box } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import { useCurrencyChoicesQuery } from '../../../__generated__/graphql';
-import TextField from '../../TextField';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}
@@ -32,8 +31,9 @@ export function FormikCurrencyAutocomplete({
     }
   };
 
-  const isInvalid = get(form.errors, field.name)
-    && (get(form.touched, field.name) || form.submitCount > 0);
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount > 0);
 
   if (!data) return null;
   return (

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Autocomplete from '@mui/lab/Autocomplete';
 import styled from 'styled-components';
+import { TextField } from '@mui/material';
 import { useDebounce } from '../../../hooks/useDebounce';
-import TextField from '../../../shared/TextField';
 import { useProgramContext } from '../../../programContext';
 
 const StyledAutocomplete = styled(Autocomplete)`
