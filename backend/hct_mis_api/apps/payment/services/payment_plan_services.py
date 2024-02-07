@@ -381,6 +381,9 @@ class PaymentPlanService:
         if end_date > target_population.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
 
+        if not input_data.get("name"):
+            raise GraphQLError("Payment plan name is required")
+
         payment_plan = PaymentPlan.objects.create(
             business_area=business_area,
             created_by=user,
@@ -470,6 +473,9 @@ class PaymentPlanService:
             recreate_payments = True
             recalculate_payments = True
 
+        if input_data.get("name") and input_data["name"] != self.payment_plan.name:
+            self.payment_plan.name = input_data["name"]
+
         start_date = input_data.get("start_date")
         start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date
         if start_date and start_date < self.payment_plan.target_population.program.start_date:
@@ -479,9 +485,6 @@ class PaymentPlanService:
         end_date = end_date.date() if isinstance(end_date, (timezone.datetime, datetime.datetime)) else end_date
         if end_date and end_date > self.payment_plan.target_population.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
-
-        if input_data.get("name") and input_data["name"] != self.payment_plan.dispersion_start_date:
-            self.payment_plan.name = input_data["name"]
 
         self.payment_plan.save()
 
