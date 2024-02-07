@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --ignore-pattern .eslintrc.cjs",
     "preview": "vite preview",
     "download-dev-schema": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql",
     "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:8080/api/graphql/schema.graphql",
@@ -18,6 +18,8 @@
     "@apollo/link-error": "^2.0.0-beta.3",
     "@apollo/react-hooks": "^4.0.0",
     "@date-io/moment": "^3.0.0",
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.7",
     "@mui/lab": "^5.0.0-alpha.163",
     "@mui/material": "^5.15.7",

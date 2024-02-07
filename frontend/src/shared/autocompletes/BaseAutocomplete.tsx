@@ -1,6 +1,6 @@
+import { TextField } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import React, { useEffect, useRef } from 'react';
-import TextField from '../TextField';
 import { StyledAutocomplete } from './StyledAutocomplete';
 
 export function BaseAutocomplete({
@@ -76,10 +76,11 @@ export function BaseAutocomplete({
       options={[{ value: '', label: '' }, ...allEdges]}
       filterOptions={(options, params) => {
         const filtered = options.filter(
-          (option) => option.value !== ''
-            && (params.inputValue === ''
-              || (option.label
-                && option.label
+          (option) =>
+            option.value !== '' &&
+            (params.inputValue === '' ||
+              (option.label &&
+                option.label
                   .toLowerCase()
                   .includes(params.inputValue.toLowerCase()))),
         );

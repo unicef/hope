@@ -18,7 +18,15 @@
     "strict": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["/src/*"],
+      "@components/*": ["src/components/*"],
+      "@containers/*": ["src/containers/*"],
+      "@shared/*": ["src/shared/*"],
+      "@utils/*": ["src/utils/*"]
+    }
   },
   "include": ["src", "__tests__", "jest", "vite.config.ts", "tsconfig.json"],
   "exclude": ["node_modules"],

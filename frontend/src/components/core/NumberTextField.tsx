@@ -1,7 +1,6 @@
-import { Box, InputAdornment } from '@mui/material';
+import { Box, InputAdornment, TextField } from '@mui/material';
 import styled from 'styled-components';
 import React from 'react';
-import TextField from '../../shared/TextField';
 import { FieldLabel } from './FieldLabel';
 
 const TextContainer = styled(TextField)`
@@ -36,10 +35,10 @@ export function NumberTextField({
         InputProps={
           icon
             ? {
-              startAdornment: (
-                <InputAdornment position="start">{icon}</InputAdornment>
-              ),
-            }
+                startAdornment: (
+                  <InputAdornment position="start">{icon}</InputAdornment>
+                ),
+              }
             : null
         }
       />

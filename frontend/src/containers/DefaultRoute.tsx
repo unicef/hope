@@ -2,7 +2,7 @@ import { Redirect } from 'react-router-dom';
 import React from 'react';
 import { useCachedMe } from '../hooks/useCachedMe';
 
-export function DefaultRoute(): React.ReactElement {
+export const DefaultRoute = (): React.ReactElement => {
   const { data } = useCachedMe();
   if (!data || !data.me) {
     return null;
@@ -15,4 +15,4 @@ export function DefaultRoute(): React.ReactElement {
       to={`/${data.me.businessAreas.edges[0].node.slug}/programs/all/list`}
     />
   );
-}
+};
