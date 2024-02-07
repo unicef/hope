@@ -74,7 +74,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
     name: Yup.string()
         .required(t('Payment Plan Name is required'))
         .min(5, t('Too short'))
-        .max(100, t('Too long')),
+        .max(25, t('Too long')),
     targetingId: Yup.string().required(t('Target Population is required')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()

@@ -12,7 +12,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField, IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator,
+    MinLengthValidator,
+    MinValueValidator,
+)
 from django.db import models
 from django.db.models import (
     Count,
@@ -505,11 +509,12 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     is_follow_up = models.BooleanField(default=False)
     exclusion_reason = models.TextField(blank=True)
     exclude_household_error = models.TextField(blank=True)
-    name = models.CharField(max_length=100, null=True, blank=True)
+    name = models.CharField(max_length=25, validators=[MinLengthValidator(5)], null=True, blank=True)
 
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
+        constraints = [models.UniqueConstraint(fields=["name", "program"], name="name_unique_per_program")]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
