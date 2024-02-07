@@ -311,7 +311,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             for ind in current_individuals:
                 ind.first_registration_date = registration_date
                 ind.last_registration_date = registration_date
-                ind.kobo_asset_id = household_obj.kobo_asset_id
+                ind.detail_id = household_obj.kobo_asset_id
 
             ImportedIndividual.objects.bulk_create(individuals_to_create_list)
             self._handle_documents_and_identities(documents_and_identities_to_create)

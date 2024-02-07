@@ -582,9 +582,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         ) from e
 
                 obj_to_create.last_registration_date = obj_to_create.first_registration_date
-                obj_to_create.row_id = row[0].row
+                if sheet_title == "individuals":
+                    obj_to_create.detail_id = row[0].row
 
                 if sheet_title == "households":
+                    obj_to_create.row_id = row[0].row
                     obj_to_create.set_admin_areas()
                     self.households[household_id] = obj_to_create
                 else:

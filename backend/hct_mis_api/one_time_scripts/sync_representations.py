@@ -298,8 +298,7 @@ def update_individual_representations(original: Individual, representations: Que
         "who_answers_alt_phone",
         "fchild_hoh",
         "child_hoh",
-        "kobo_asset_id",
-        "row_id",
+        "detail_id",
         "registration_id",
         "disability_certificate_picture",  # ImageField
         "preferred_language",

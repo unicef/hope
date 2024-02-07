@@ -135,7 +135,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 individual: ImportedIndividual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
-                individual.kobo_asset_id = record.source_id
+                individual.detail_id = record.source_id
                 individual.save()
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
