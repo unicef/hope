@@ -156,6 +156,13 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.headerTitle)
 
     def getButtonNewProgram(self) -> WebElement:
+        # Workaround because elements overlapped even though Selenium saw that they were available:
+        self.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
         return self.wait_for(self.buttonNewProgram)
 
     def fillFiltersSearch(self, filterText: str) -> None:

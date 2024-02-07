@@ -1,11 +1,11 @@
 import pytest
 import random
-
 from helpers.date_time_format import FormatTime
 from datetime import datetime
 from page_object.programme_management.programme_management import ProgrammeManagement
 from page_object.programme_details.programme_details import ProgrammeDetails
 from dateutil.relativedelta import relativedelta
+from hct_mis_api.apps.account.fixtures import BusinessAreaFactory, UserFactory
 
 
 class TestProgrammeManagement:
@@ -289,7 +289,6 @@ class TestProgrammeManagement:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "16" in pageProgrammeDetails.getLabelAreaAccess().text
 
-
     def test_create_programme_check_empty_mandatory_fields(self, pageProgrammeManagement: ProgrammeManagement) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -382,7 +381,6 @@ class TestProgrammeManagement:
         assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
-        
     def test_create_programme_cancel_scenario(self,
                                               pageProgrammeManagement: ProgrammeManagement,
                                               pageProgrammeDetails: ProgrammeDetails) -> None:
@@ -416,6 +414,6 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert str(datetime.now().strFormatTime('15 %b %Y')) in pageProgrammeDetails.getLabelStartDate().text
+        assert str(datetime.now().strftime('15 %b %Y')) in pageProgrammeDetails.getLabelStartDate().text
         end_date = datetime.now() + relativedelta(months=1)
-        assert str(end_date.strFormatTime('25 %b %Y')) in pageProgrammeDetails.getLabelEndDate().text
+        assert str(end_date.strftime('25 %b %Y')) in pageProgrammeDetails.getLabelEndDate().text
