@@ -878,8 +878,7 @@ class Individual(
             "comms_disability",
             "who_answers_phone",
             "who_answers_alt_phone",
-            "kobo_asset_id",
-            "row_id",
+            "detail_id",
             "registration_id",
             "payment_delivery_phone_no",
         ]
@@ -979,8 +978,9 @@ class Individual(
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     fchild_hoh = models.BooleanField(default=False)
     child_hoh = models.BooleanField(default=False)
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
-    row_id = models.PositiveIntegerField(blank=True, null=True)
+    detail_id = models.CharField(
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
+    )
     registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
