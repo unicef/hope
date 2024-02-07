@@ -1,20 +1,20 @@
 import { Box } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { FlagTooltip } from '../../../../components/core/FlagTooltip';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { WarningTooltip } from '../../../../components/core/WarningTooltip';
+import { BlackLink } from '@components/core/BlackLink';
+import { FlagTooltip } from '@components/core/FlagTooltip';
+import { StatusBox } from '@components/core/StatusBox';
+import { AnonTableCell } from '@components/core/Table/AnonTableCell';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { WarningTooltip } from '@components/core/WarningTooltip';
 import {
   choicesToDict,
   formatCurrencyWithSymbol,
   householdStatusToColor,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -32,15 +32,14 @@ export function HouseholdTableRow({
   choicesData,
   canViewDetails,
 }: HouseholdTableRowProps): React.ReactElement {
-  const history = useHistory();
-  const { t } = useTranslation();
+const navigate = useNavigate()  const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const residenceStatusChoiceDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
   const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
   const handleClick = (): void => {
-    history.push(householdDetailsPath);
+    navigate(householdDetailsPath);
   };
   return (
     <ClickableTableRow

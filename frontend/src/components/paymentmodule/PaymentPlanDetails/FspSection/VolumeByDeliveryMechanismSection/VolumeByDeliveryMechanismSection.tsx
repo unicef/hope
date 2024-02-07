@@ -1,5 +1,5 @@
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -83,7 +83,9 @@ export function VolumeByDeliveryMechanismSection({
   const chartData = volumeByDeliveryMechanism.map((el) => el.volumeUsd);
 
   const chartColors = (): string[] => {
-    const defaultColorsArray = volumeByDeliveryMechanism.map((el) => getDeliveryMechanismColor(el.deliveryMechanism.name));
+    const defaultColorsArray = volumeByDeliveryMechanism.map((el) =>
+      getDeliveryMechanismColor(el.deliveryMechanism.name),
+    );
 
     return defaultColorsArray;
   };
@@ -93,8 +95,7 @@ export function VolumeByDeliveryMechanismSection({
       <Title>
         <Typography variant="h6">
           {t('Volume by Delivery Mechanism')}
-        </Typography>
-        {' '}
+        </Typography>{' '}
       </Title>
       <ContentWrapper>
         <Grid container spacing={0} justifyContent="flex-start">

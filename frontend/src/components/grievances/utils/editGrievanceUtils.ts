@@ -1,17 +1,14 @@
 import camelCase from 'lodash/camelCase';
-import React from 'react';
+import * as React from 'react';
 import {
   GrievanceTicketQuery,
   PaymentRecordAndPaymentNode,
 } from '../../../__generated__/graphql';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../utils/constants';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   camelizeArrayObjects,
   thingForSpecificGrievanceType,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange/EditHouseholdDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange/EditIndividualDataChange';
@@ -30,8 +27,8 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: Pick<
-  PaymentRecordAndPaymentNode,
-  'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
+    PaymentRecordAndPaymentNode,
+    'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
   >[];
   paymentRecord?: string;
   selectedLinkedTickets: string[];
@@ -131,33 +128,24 @@ function prepareInitialValueEditIndividual(initialValues, ticket) {
     ...flexFieldsArray,
   ];
 
-  initialValuesCopy.individualDataUpdateFieldsDocuments = camelizeArrayObjects(
-    documents,
-  );
-  initialValuesCopy.individualDataUpdateDocumentsToRemove = camelizeArrayObjects(
-    documentsToRemove,
-  );
-  initialValuesCopy.individualDataUpdateFieldsIdentities = camelizeArrayObjects(
-    identities,
-  );
-  initialValuesCopy.individualDataUpdateIdentitiesToRemove = camelizeArrayObjects(
-    identitiesToRemove,
-  );
-  initialValuesCopy.individualDataUpdateDocumentsToEdit = camelizeArrayObjects(
-    documentsToEdit,
-  );
-  initialValuesCopy.individualDataUpdateIdentitiesToEdit = camelizeArrayObjects(
-    identitiesToEdit,
-  );
-  initialValuesCopy.individualDataUpdateFieldsPaymentChannels = camelizeArrayObjects(
-    paymentChannels,
-  );
-  initialValuesCopy.individualDataUpdatePaymentChannelsToRemove = camelizeArrayObjects(
-    paymentChannelsToRemove,
-  );
-  initialValuesCopy.individualDataUpdatePaymentChannelsToEdit = camelizeArrayObjects(
-    paymentChannelsToEdit,
-  );
+  initialValuesCopy.individualDataUpdateFieldsDocuments =
+    camelizeArrayObjects(documents);
+  initialValuesCopy.individualDataUpdateDocumentsToRemove =
+    camelizeArrayObjects(documentsToRemove);
+  initialValuesCopy.individualDataUpdateFieldsIdentities =
+    camelizeArrayObjects(identities);
+  initialValuesCopy.individualDataUpdateIdentitiesToRemove =
+    camelizeArrayObjects(identitiesToRemove);
+  initialValuesCopy.individualDataUpdateDocumentsToEdit =
+    camelizeArrayObjects(documentsToEdit);
+  initialValuesCopy.individualDataUpdateIdentitiesToEdit =
+    camelizeArrayObjects(identitiesToEdit);
+  initialValuesCopy.individualDataUpdateFieldsPaymentChannels =
+    camelizeArrayObjects(paymentChannels);
+  initialValuesCopy.individualDataUpdatePaymentChannelsToRemove =
+    camelizeArrayObjects(paymentChannelsToRemove);
+  initialValuesCopy.individualDataUpdatePaymentChannelsToEdit =
+    camelizeArrayObjects(paymentChannelsToEdit);
 
   return initialValuesCopy;
 }
@@ -469,7 +457,8 @@ export const prepareVariablesDict = {
   [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: prepareNegativeFeedbackVariables,
   [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: preparePositiveFeedbackVariables,
   [GRIEVANCE_CATEGORIES.REFERRAL]: prepareReferralVariables,
-  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: prepareGrievanceComplaintVariables,
+  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]:
+    prepareGrievanceComplaintVariables,
   [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: prepareSensitiveVariables,
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
     [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: prepareAddIndividualVariables,

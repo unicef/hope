@@ -1,18 +1,18 @@
-import React from 'react';
+import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import {
   CashPlanAndPaymentPlanNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../../__generated__/graphql';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import {
   formatCurrencyWithSymbol,
   paymentVerificationStatusToColor,
-} from '../../../../utils/utils';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
+} from '@utils/utils';
+import { StatusBox } from '@components/core/StatusBox';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface PaymentVerificationTableRowProps {
@@ -24,15 +24,16 @@ export function PaymentVerificationTableRow({
   plan,
   canViewDetails,
 }: PaymentVerificationTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const planVerificationPath = `/${baseUrl}/payment-verification/${
     plan.objType === 'CashPlan' ? 'cash-plan' : 'payment-plan'
   }/${plan.id}`;
   const handleClick = (): void => {
-    history.push(planVerificationPath);
+    navigate(planVerificationPath);
   };
-  const { data: statusChoicesData } = useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } =
+    useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
 
@@ -61,10 +62,7 @@ export function PaymentVerificationTableRow({
         {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{plan.startDate}</UniversalMoment>
-        {' '}
-        -
-        {' '}
+        <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
         <UniversalMoment>{plan.endDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">

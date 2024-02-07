@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -8,13 +8,13 @@ import {
   useProgrammeChoiceDataQuery,
   useProgramQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { ProgramDetails } from '../../../components/programs/ProgramDetails/ProgramDetails';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { isPermissionDeniedError } from '@utils/utils';
 import { CashPlanTable } from '../../tables/payments/CashPlanTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from '../headers/ProgramDetailsPageHeader';
@@ -59,23 +59,21 @@ export function ProgramDetailsPage(): React.ReactElement {
     fetchPolicy: 'network-only',
   });
   const { businessArea } = useBaseUrl();
-  const {
-    data: businessAreaData,
-    loading: businessAreaDataLoading,
-  } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
-  const {
-    data: choices,
-    loading: choicesLoading,
-  } = useProgrammeChoiceDataQuery();
+  const { data: businessAreaData, loading: businessAreaDataLoading } =
+    useBusinessAreaDataQuery({
+      variables: { businessAreaSlug: businessArea },
+    });
+  const { data: choices, loading: choicesLoading } =
+    useProgrammeChoiceDataQuery();
   const permissions = usePermissions();
 
-  if (loading || choicesLoading || businessAreaDataLoading) return <LoadingComponent />;
+  if (loading || choicesLoading || businessAreaDataLoading)
+    return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data?.program || !choices || !businessAreaData || permissions === null) return null;
+  if (!data?.program || !choices || !businessAreaData || permissions === null)
+    return null;
 
   const { program } = data;
   return (

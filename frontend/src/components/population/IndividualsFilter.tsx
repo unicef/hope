@@ -2,18 +2,18 @@ import { Grid, MenuItem } from '@mui/material';
 import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import WcIcon from '@mui/icons-material/Wc';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   DataCollectingTypeType,
   IndividualChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
-import { individualTableOrderOptions } from '../../utils/constants';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
+import { individualTableOrderOptions } from '@utils/constants';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { FiltersSection } from '../core/FiltersSection';
 import { NumberTextField } from '../core/NumberTextField';
@@ -43,21 +43,21 @@ export function IndividualsFilter({
   isOnPaper = true,
 }: IndividualsFilterProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -67,8 +67,9 @@ export function IndividualsFilter({
   };
 
   // Show admin area filter only for social programs
-  const showAdminAreaFilter = selectedProgram?.dataCollectingType?.type?.toUpperCase()
-    === DataCollectingTypeType.Social;
+  const showAdminAreaFilter =
+    selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
+    DataCollectingTypeType.Social;
 
   return (
     <FiltersSection
@@ -236,7 +237,9 @@ export function IndividualsFilter({
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
-            onChange={(date) => handleFilterChange('lastRegistrationDateMin', date)}
+            onChange={(date) =>
+              handleFilterChange('lastRegistrationDateMin', date)
+            }
             value={filter.lastRegistrationDateMin}
             data-cy="ind-filters-reg-date-from"
           />
@@ -244,7 +247,9 @@ export function IndividualsFilter({
         <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
-            onChange={(date) => handleFilterChange('lastRegistrationDateMax', date)}
+            onChange={(date) =>
+              handleFilterChange('lastRegistrationDateMax', date)
+            }
             value={filter.lastRegistrationDateMax}
             data-cy="ind-filters-reg-date-to"
           />
@@ -252,7 +257,9 @@ export function IndividualsFilter({
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
-              onChange={(e) => handleFilterChange('programState', e.target.value)}
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
               label={t('Programme State')}
               value={filter.programState}
               fullWidth

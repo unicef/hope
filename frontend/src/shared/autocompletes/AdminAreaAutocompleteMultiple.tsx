@@ -1,6 +1,6 @@
 import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -8,8 +8,8 @@ import {
   AllAdminAreasQuery,
   useAllAdminAreasQuery,
 } from '../../__generated__/graphql';
-import { FieldLabel } from '../../components/core/FieldLabel';
-import { LoadingComponent } from '../../components/core/LoadingComponent';
+import { FieldLabel } from '@components/core/FieldLabel';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
@@ -70,7 +70,9 @@ export function AdminAreaAutocompleteMultiple({
         onClose={() => {
           setOpen(false);
         }}
-        getOptionSelected={(option, value1) => value1?.node?.id === option.node.id}
+        getOptionSelected={(option, value1) =>
+          value1?.node?.id === option.node.id
+        }
         getOptionLabel={(option) => {
           if (!option.node) {
             return '';
@@ -88,8 +90,8 @@ export function AdminAreaAutocompleteMultiple({
               value: inputValue,
             }}
             placeholder={
-                newValue.length > 0 ? null : t('Administrative Level 2')
-              }
+              newValue.length > 0 ? null : t('Administrative Level 2')
+            }
             variant="outlined"
             margin="dense"
             value={inputValue}

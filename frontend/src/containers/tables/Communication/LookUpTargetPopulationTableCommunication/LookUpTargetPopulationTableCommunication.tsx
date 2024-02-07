@@ -1,9 +1,9 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../../utils/utils';
+import { decodeIdString } from '@utils/utils';
 import {
   AllActiveTargetPopulationsQueryVariables,
   TargetPopulationNode,
@@ -63,7 +63,9 @@ export function LookUpTargetPopulationTableCommunication({
 
   if (filter.program) {
     if (Array.isArray(filter.program)) {
-      initialVariables.program = filter.program.map((programId) => decodeIdString(programId));
+      initialVariables.program = filter.program.map((programId) =>
+        decodeIdString(programId),
+      );
     } else {
       initialVariables.program = [decodeIdString(filter.program)];
     }
@@ -72,8 +74,8 @@ export function LookUpTargetPopulationTableCommunication({
   const renderTable = (): React.ReactElement => (
     <TableWrapper>
       <UniversalTable<
-      TargetPopulationNode,
-      AllActiveTargetPopulationsQueryVariables
+        TargetPopulationNode,
+        AllActiveTargetPopulationsQueryVariables
       >
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}

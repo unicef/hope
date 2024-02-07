@@ -1,14 +1,14 @@
 import { Box, Grid } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { GrievanceDashboardCard } from '../../../components/grievances/GrievancesDashboard/GrievanceDashboardCard';
-import { TicketsByCategorySection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByCategorySection/TicketsByCategorySection';
-import { TicketsByLocationAndCategorySection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
-import { TicketsByStatusSection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { GrievanceDashboardCard } from '@components/grievances/GrievancesDashboard/GrievanceDashboardCard';
+import { TicketsByCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByCategorySection/TicketsByCategorySection';
+import { TicketsByLocationAndCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
+import { TicketsByStatusSection } from '@components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useAllGrievanceDashboardChartsQuery } from '../../../__generated__/graphql';
@@ -25,7 +25,8 @@ export function GrievancesDashboardPage(): React.ReactElement {
 
   if (!data || permissions === null) return null;
   if (loading) return <LoadingComponent />;
-  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)) return <PermissionDenied />;
+  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
+    return <PermissionDenied />;
 
   const {
     ticketsByCategory,
@@ -42,9 +43,12 @@ export function GrievancesDashboardPage(): React.ReactElement {
   } = data;
 
   // use weighted average to calculate average resolution time
-  const userWeightedTime = userGeneratedAvgResolution * closedUserGeneratedCount;
-  const systemWeightedTime = systemGeneratedAvgResolution * closedSystemGeneratedCount;
-  const numberOfClosedTickets = closedUserGeneratedCount + closedSystemGeneratedCount;
+  const userWeightedTime =
+    userGeneratedAvgResolution * closedUserGeneratedCount;
+  const systemWeightedTime =
+    systemGeneratedAvgResolution * closedSystemGeneratedCount;
+  const numberOfClosedTickets =
+    closedUserGeneratedCount + closedSystemGeneratedCount;
 
   return (
     <>
@@ -76,9 +80,9 @@ export function GrievancesDashboardPage(): React.ReactElement {
                 topNumber={`${
                   numberOfClosedTickets > 0
                     ? (
-                      (userWeightedTime + systemWeightedTime)
-                        / numberOfClosedTickets
-                    ).toFixed(2)
+                        (userWeightedTime + systemWeightedTime) /
+                        numberOfClosedTickets
+                      ).toFixed(2)
                     : 0
                 } days`}
                 systemGenerated={`${systemGeneratedAvgResolution} days`}

@@ -1,9 +1,9 @@
 import { Grid, MenuItem } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useUserChoiceDataQuery } from '../../__generated__/graphql';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
@@ -24,19 +24,19 @@ export function UsersListFilters({
   setAppliedFilter,
 }: UsersListFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -84,11 +84,8 @@ export function UsersListFilters({
           >
             {choices.userRolesChoices.map((item) => (
               <MenuItem key={item.value} value={item.value}>
-                {item.name}
-                {' '}
-                (
-                {item.subsystem === 'CA' ? 'Cash Assist' : item.subsystem}
-                )
+                {item.name} (
+                {item.subsystem === 'CA' ? 'Cash Assist' : item.subsystem})
               </MenuItem>
             ))}
           </SelectFilter>

@@ -10,10 +10,10 @@ import {
   Typography,
 } from '@mui/material';
 import moment from 'moment';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DATE_FORMAT } from '../../config';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -69,14 +69,18 @@ export function FlagDetails({
                 disabled={
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                 }
-                onClick={() => confirm({
-                  content: isFlagConfirmed ? removalText : confirmationText,
-                }).then(() => approve({
-                  variables: {
-                    grievanceTicketId: ticket.id,
-                    approveStatus: !details.approveStatus,
-                  },
-                }))}
+                onClick={() =>
+                  confirm({
+                    content: isFlagConfirmed ? removalText : confirmationText,
+                  }).then(() =>
+                    approve({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus: !details.approveStatus,
+                      },
+                    }),
+                  )
+                }
                 variant="outlined"
                 color="primary"
               >

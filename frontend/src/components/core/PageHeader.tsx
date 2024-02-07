@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
 

@@ -1,16 +1,16 @@
 import { Box, TableCell } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const StatusContainer = styled.div`
@@ -27,15 +27,16 @@ export function PaymentPlanTableRow({
   plan,
   canViewDetails,
 }: PaymentPlanTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
     plan.isFollowUp ? 'followup-payment-plans' : 'payment-plans'
   }/${plan.id}`;
   const handleClick = (): void => {
-    history.push(paymentPlanPath);
+    navigate(paymentPlanPath);
   };
-  const { data: statusChoicesData } = useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } =
+    useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) return null;
 

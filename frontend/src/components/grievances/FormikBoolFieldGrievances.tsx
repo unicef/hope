@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import {
   FormControl,
   FormHelperText,
@@ -25,8 +26,9 @@ export function FormikBoolFieldGrievances({
   required,
   ...otherProps
 }): React.ReactElement {
-  const isInvalid = get(form.errors, field.name)
-    && (get(form.touched, field.name) || form.submitCount > 0);
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount > 0);
   const options: { key: string; value: string }[] = [
     { key: 'Yes', value: 'YES' },
     { key: 'No', value: 'NO' },
@@ -93,7 +95,7 @@ export function FormikBoolFieldGrievances({
         ))}
       </Select>
       {isInvalid && (
-      <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
+        <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
       )}
     </FormControl>
   );

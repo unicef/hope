@@ -1,8 +1,8 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '../../../core/ContentLink';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 

@@ -1,9 +1,10 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
 
 const Link = styled.a`
-  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
   color: #000;
   font-size: 14px;
   line-height: 19px;

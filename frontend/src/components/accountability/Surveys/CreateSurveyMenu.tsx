@@ -5,7 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { withStyles } from '@mui/material/styles';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Tooltip } from '@mui/material';
 import { SurveyCategory } from '../../../__generated__/graphql';
@@ -45,7 +45,7 @@ const StyledMenuItem = withStyles((theme) => ({
 
 export function CreateSurveyMenu(): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { isActiveProgram } = useProgramContext();
@@ -59,7 +59,7 @@ export function CreateSurveyMenu(): React.ReactElement {
   };
 
   const handleMenuItemClick = (category: string): void => {
-    history.push({
+    navigate({
       pathname: `/${baseUrl}/accountability/surveys/create/${category}`,
     });
   };

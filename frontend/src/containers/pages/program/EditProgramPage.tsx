@@ -1,8 +1,6 @@
-import {
-  Box, Step, StepButton, Stepper,
-} from '@mui/material';
+import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
@@ -13,15 +11,15 @@ import {
 } from '../../../__generated__/graphql';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
-import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
+import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { decodeIdString } from '../../../utils/utils';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { decodeIdString } from '@utils/utils';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 
@@ -40,7 +38,8 @@ export function EditProgramPage(): ReactElement {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } = useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
+    useUserPartnerChoicesQuery();
 
   const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
@@ -62,7 +61,8 @@ export function EditProgramPage(): ReactElement {
     },
   });
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
+  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+    return <LoadingComponent />;
   if (!data || !treeData || !userPartnerChoicesData) return null;
   const {
     name,
@@ -128,8 +128,10 @@ export function EditProgramPage(): ReactElement {
       areaAccess: partner.areaAccess,
     })),
   };
-  initialValues.budget = data.program.budget === '0.00' ? '' : data.program.budget;
-  initialValues.populationGoal = data.program.populationGoal === 0 ? '' : data.program.populationGoal;
+  initialValues.budget =
+    data.program.budget === '0.00' ? '' : data.program.budget;
+  initialValues.populationGoal =
+    data.program.populationGoal === 0 ? '' : data.program.populationGoal;
 
   const stepFields = [
     [
@@ -159,9 +161,7 @@ export function EditProgramPage(): ReactElement {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({
-        submitForm, values, validateForm, setFieldTouched,
-      }) => {
+      {({ submitForm, values, validateForm, setFieldTouched }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({

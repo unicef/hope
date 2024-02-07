@@ -1,8 +1,8 @@
 import { Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { formatNumber } from '../../../../utils/utils';
+import { formatNumber } from '@utils/utils';
 import { AllChartsQuery } from '../../../../__generated__/graphql';
 import { GrievancesChart } from '../../charts/GrievancesChart';
 import { DashboardPaper } from '../../DashboardPaper';

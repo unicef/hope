@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { render, RenderOptions } from '@testing-library/react';
 import { MockLink } from '@apollo/react-testing';
@@ -10,17 +10,18 @@ import { ProgramStatus } from '../__generated__/graphql';
 const customRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, 'queries'>,
-) => render(
-  <BrowserRouter>
-    <Formik initialValues={{}} onSubmit={noop}>
-      {ui}
-    </Formik>
-  </BrowserRouter>,
-  {
-    wrapper: TestProviders,
-    ...options,
-  },
-);
+) =>
+  render(
+    <BrowserRouter>
+      <Formik initialValues={{}} onSubmit={noop}>
+        {ui}
+      </Formik>
+    </BrowserRouter>,
+    {
+      wrapper: TestProviders,
+      ...options,
+    },
+  );
 
 export * from '@testing-library/react';
 export { customRender as render };

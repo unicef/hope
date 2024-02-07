@@ -1,18 +1,18 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '../../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../../utils/utils';
+import { isPermissionDeniedError } from '@utils/utils';
 import { useAccountabilityCommunicationMessageQuery } from '../../../../__generated__/graphql';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { CommunicationDetails } from '../../../../components/accountability/Communication/CommunicationDetails';
-import { CommunicationMessageDetails } from '../../../../components/accountability/Communication/CommunicationMessageDetails';
+import { CommunicationDetails } from '@components/accountability/Communication/CommunicationDetails';
+import { CommunicationMessageDetails } from '@components/accountability/Communication/CommunicationMessageDetails';
 import { RecipientsTable } from '../../../tables/Communication/RecipientsTable/RecipientsTable';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 

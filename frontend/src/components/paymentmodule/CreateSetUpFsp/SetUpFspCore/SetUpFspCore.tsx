@@ -3,7 +3,8 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { FieldArray, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
@@ -43,9 +44,10 @@ export function SetUpFspCore({
   const { id } = useParams();
   const location = useLocation();
 
-  const { data: deliveryMechanismsData, loading: deliveryMechanismLoading } = useAllDeliveryMechanismsQuery({
-    fetchPolicy: 'network-only',
-  });
+  const { data: deliveryMechanismsData, loading: deliveryMechanismLoading } =
+    useAllDeliveryMechanismsQuery({
+      fetchPolicy: 'network-only',
+    });
 
   const { data: fspsData } = useAvailableFspsForDeliveryMechanismsQuery({
     variables: {
@@ -62,7 +64,8 @@ export function SetUpFspCore({
   const [activeStep, setActiveStep] = useState(isEdit ? 1 : 0);
   // const [warning, setWarning] = useState('');
 
-  const [chooseDeliveryMechanisms] = useChooseDeliveryMechForPaymentPlanMutation();
+  const [chooseDeliveryMechanisms] =
+    useChooseDeliveryMechForPaymentPlanMutation();
 
   const [assignFspToDeliveryMechanism] = useAssignFspToDeliveryMechMutation();
 
@@ -193,40 +196,36 @@ export function SetUpFspCore({
                 name="deliveryMechanisms"
                 render={(arrayHelpers) => (
                   <>
-                    {values.deliveryMechanisms.map(
-                      (item, index: number) => {
-                        const mapping = fspsData?.availableFspsForDeliveryMechanisms[
-                          index
-                        ];
-                        const mappedFsps = mapping?.fsps.map((el) => ({
-                          name: el.name,
-                          value: el.id,
-                        }));
+                    {values.deliveryMechanisms.map((item, index: number) => {
+                      const mapping =
+                        fspsData?.availableFspsForDeliveryMechanisms[index];
+                      const mappedFsps = mapping?.fsps.map((el) => ({
+                        name: el.name,
+                        value: el.id,
+                      }));
 
-                        const deliveryMechanismsChoices = deliveryMechanismsData.allDeliveryMechanisms.map(
+                      const deliveryMechanismsChoices =
+                        deliveryMechanismsData.allDeliveryMechanisms.map(
                           (el) => ({
                             name: el.name,
                             value: el.value,
                           }),
                         );
 
-                        return (
-                          <DeliveryMechanismRow
-                                /* eslint-disable-next-line react/no-array-index-key */
-                            key={`${item.deliveryMechanism}-${index}`}
-                            index={index}
-                            arrayHelpers={arrayHelpers}
-                            deliveryMechanismsChoices={
-                                  deliveryMechanismsChoices
-                                }
-                            fspsChoices={mappedFsps}
-                            step={activeStep}
-                            values={values}
-                            permissions={permissions}
-                          />
-                        );
-                      },
-                    )}
+                      return (
+                        <DeliveryMechanismRow
+                          /* eslint-disable-next-line react/no-array-index-key */
+                          key={`${item.deliveryMechanism}-${index}`}
+                          index={index}
+                          arrayHelpers={arrayHelpers}
+                          deliveryMechanismsChoices={deliveryMechanismsChoices}
+                          fspsChoices={mappedFsps}
+                          step={activeStep}
+                          values={values}
+                          permissions={permissions}
+                        />
+                      );
+                    })}
                     {/* // button not shown in Payment Module 1.0 */}
                     {/* {activeStep === 0 && (
                           <Grid container>

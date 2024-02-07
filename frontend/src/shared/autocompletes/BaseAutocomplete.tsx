@@ -1,6 +1,7 @@
 import { TextField } from '@mui/material';
+import * as React from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { StyledAutocomplete } from './StyledAutocomplete';
 
 export function BaseAutocomplete({

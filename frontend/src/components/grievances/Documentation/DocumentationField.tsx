@@ -1,9 +1,9 @@
 import { Box, Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 
 export interface DocumentationFieldProps {
   index: number;

@@ -1,5 +1,6 @@
 import { Button } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -8,16 +9,16 @@ import {
   useCashPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
 } from '../../../__generated__/graphql';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { CashPlanDetailsSection } from '../../../components/payments/CashPlanDetailsSection';
-import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
-import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
-import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
+import { BlackLink } from '@components/core/BlackLink';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { CashPlanDetailsSection } from '@components/payments/CashPlanDetailsSection';
+import { CreateVerificationPlan } from '@components/payments/CreateVerificationPlan';
+import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
+import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -25,7 +26,7 @@ import {
   decodeIdString,
   getFilterFromQueryParams,
   isPermissionDeniedError,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
@@ -77,7 +78,8 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: choicesData, loading: choicesLoading } = useCashPlanVerificationSamplingChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useCashPlanVerificationSamplingChoicesQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
@@ -103,26 +105,27 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
   );
 
   const canSeeVerificationRecords = (): boolean => {
-    const showTable = statesArray.includes(PaymentVerificationPlanStatus.Finished)
-      || statesArray.includes(PaymentVerificationPlanStatus.Active);
+    const showTable =
+      statesArray.includes(PaymentVerificationPlanStatus.Finished) ||
+      statesArray.includes(PaymentVerificationPlanStatus.Active);
 
     return showTable && statesArray.length > 0;
   };
   const canSeeCreationMessage = (): boolean => statesArray.length === 0;
 
-  const canSeeActivationMessage = (): boolean => !canSeeVerificationRecords() && !canSeeCreationMessage();
+  const canSeeActivationMessage = (): boolean =>
+    !canSeeVerificationRecords() && !canSeeCreationMessage();
 
-  const isFinished = cashPlan?.paymentVerificationSummary?.status === 'FINISHED';
+  const isFinished =
+    cashPlan?.paymentVerificationSummary?.status === 'FINISHED';
 
   const toolbar = (
     <PageHeader
-      title={(
+      title={
         <BlackLink fullWidth to={`/${baseUrl}/cashplans/${cashPlan.id}`}>
-          {t('Payment Plan')}
-          {' '}
-          {cashPlan.caId}
+          {t('Payment Plan')} {cashPlan.caId}
         </BlackLink>
-      )}
+      }
       breadCrumbs={
         hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
           ? breadCrumbsItems
@@ -140,8 +143,8 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
           />
         )}
 
-        {isFinished
-          && (isAllPrograms ? (
+        {isFinished &&
+          (isAllPrograms ? (
             <Button
               variant="contained"
               color="primary"
@@ -168,13 +171,13 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
       </Container>
       {cashPlan.verificationPlans?.edges?.length
         ? cashPlan.verificationPlans.edges.map((edge) => (
-          <VerificationPlanDetails
-            key={edge.node.id}
-            samplingChoicesData={choicesData}
-            verificationPlan={edge.node}
-            planNode={cashPlan}
-          />
-        ))
+            <VerificationPlanDetails
+              key={edge.node.id}
+              samplingChoicesData={choicesData}
+              verificationPlan={edge.node}
+              planNode={cashPlan}
+            />
+          ))
         : null}
       {canSeeVerificationRecords() ? (
         <>
@@ -212,12 +215,12 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
           {t('To see more details please create Verification Plan')}
         </BottomTitle>
       ) : null}
-      {cashPlan.verificationPlans?.edges[0]?.node?.id
-        && hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+      {cashPlan.verificationPlans?.edges[0]?.node?.id &&
+        hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTablePaymentVerification
             objectId={cashPlan.id}
           />
-      )}
+        )}
     </>
   );
 }

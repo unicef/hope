@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import Collapse from '@mui/material/Collapse';
 import { Paper } from '@mui/material';
@@ -10,7 +10,7 @@ import {
 import {
   ButtonPlaceHolder,
   Row,
-} from '../../../components/core/ActivityLogTable/TableStyledComponents';
+} from '@components/core/ActivityLogTable/TableStyledComponents';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';

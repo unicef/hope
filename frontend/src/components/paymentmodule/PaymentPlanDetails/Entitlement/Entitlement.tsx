@@ -10,7 +10,8 @@ import {
 } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
@@ -115,13 +116,15 @@ export function Entitlement({
     ],
   };
 
-  const [setSteficonRule, { loading: loadingSetSteficonRule }] = useSetSteficonRuleOnPpListMutation(options);
+  const [setSteficonRule, { loading: loadingSetSteficonRule }] =
+    useSetSteficonRuleOnPpListMutation(options);
 
   const { data: steficonData, loading } = useAllSteficonRulesQuery({
     variables: { enabled: true, deprecated: false, type: 'PAYMENT_PLAN' },
     fetchPolicy: 'network-only',
   });
-  const [mutateExport, { loading: loadingExport }] = useExportXlsxPpListMutation();
+  const [mutateExport, { loading: loadingExport }] =
+    useExportXlsxPpListMutation();
 
   if (!steficonData) {
     return null;
@@ -135,17 +138,20 @@ export function Entitlement({
     permissions,
   );
 
-  const shouldDisableEntitlementSelect = !canApplySteficonRule
-    || paymentPlan.status !== PaymentPlanStatus.Locked
-    || !isActiveProgram;
+  const shouldDisableEntitlementSelect =
+    !canApplySteficonRule ||
+    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    !isActiveProgram;
 
-  const shouldDisableDownloadTemplate = paymentPlan.status !== PaymentPlanStatus.Locked || !isActiveProgram;
+  const shouldDisableDownloadTemplate =
+    paymentPlan.status !== PaymentPlanStatus.Locked || !isActiveProgram;
 
-  const shouldDisableExportXlsx = loadingExport
-    || paymentPlan.status !== PaymentPlanStatus.Locked
-    || paymentPlan?.backgroundActionStatus
-      === PaymentPlanBackgroundActionStatus.XlsxExporting
-    || !isActiveProgram;
+  const shouldDisableExportXlsx =
+    loadingExport ||
+    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    paymentPlan?.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting ||
+    !isActiveProgram;
 
   return (
     <Box m={5}>
@@ -187,12 +193,12 @@ export function Entitlement({
                   variant="contained"
                   color="primary"
                   disabled={
-                    loadingSetSteficonRule
-                    || !steficonRuleValue
-                    || paymentPlan.status !== PaymentPlanStatus.Locked
-                    || paymentPlan.backgroundActionStatus
-                      === PaymentPlanBackgroundActionStatus.RuleEngineRun
-                    || !isActiveProgram
+                    loadingSetSteficonRule ||
+                    !steficonRuleValue ||
+                    paymentPlan.status !== PaymentPlanStatus.Locked ||
+                    paymentPlan.backgroundActionStatus ===
+                      PaymentPlanBackgroundActionStatus.RuleEngineRun ||
+                    !isActiveProgram
                   }
                   data-cy="button-apply-steficon"
                   onClick={async () => {

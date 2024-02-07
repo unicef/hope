@@ -9,7 +9,8 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,18 +23,18 @@ import {
   useCreateFeedbackTicketMutation,
   useFeedbackIssueTypeChoicesQuery,
 } from '../../../../__generated__/graphql';
-import { HouseholdQuestionnaire } from '../../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
-import { IndividualQuestionnaire } from '../../../../components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../../components/core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../../components/core/LabelizedField';
-import { LoadingButton } from '../../../../components/core/LoadingButton';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { OverviewContainer } from '../../../../components/core/OverviewContainer';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { Consent } from '../../../../components/grievances/Consent';
-import { LookUpHouseholdIndividualSelection } from '../../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
+import { HouseholdQuestionnaire } from '@components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
+import { IndividualQuestionnaire } from '@components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { OverviewContainer } from '@components/core/OverviewContainer';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { Consent } from '@components/grievances/Consent';
+import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import {
   PERMISSIONS,
   hasPermissionInModule,
@@ -42,11 +43,11 @@ import {
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { FeedbackSteps } from '../../../../utils/constants';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FeedbackSteps } from '@utils/constants';
 
 const steps = [
   'Category Selection',
@@ -147,9 +148,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 
 export function CreateFeedbackPage(): React.ReactElement {
   const { t } = useTranslation();
-  const {
-    baseUrl, businessArea, isAllPrograms, programId,
-  } = useBaseUrl();
+  const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
@@ -174,20 +173,24 @@ export function CreateFeedbackPage(): React.ReactElement {
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } = useFeedbackIssueTypeChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useFeedbackIssueTypeChoicesQuery();
 
-  const { data: programsData, loading: programsDataLoading } = useAllProgramsForChoicesQuery({
-    variables: {
-      first: 100,
-      businessArea,
-    },
-  });
+  const { data: programsData, loading: programsDataLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: {
+        first: 100,
+        businessArea,
+      },
+    });
 
   const [mutate, { loading }] = useCreateFeedbackTicketMutation();
 
-  if (userDataLoading || choicesLoading || programsDataLoading) return <LoadingComponent />;
+  if (userDataLoading || choicesLoading || programsDataLoading)
+    return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions)) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_CREATE, permissions))
+    return <PermissionDenied />;
 
   if (!choicesData || !userData || !programsData) return null;
 
@@ -251,10 +254,9 @@ export function CreateFeedbackPage(): React.ReactElement {
       //   validateUsingSteps(values, activeStep, setValidateData)
       // }
     >
-      {({
-        submitForm, values, setFieldValue, errors, touched,
-      }) => {
-        const isAnonymousTicket = !values.selectedHousehold?.id && !values.selectedIndividual?.id;
+      {({ submitForm, values, setFieldValue, errors, touched }) => {
+        const isAnonymousTicket =
+          !values.selectedHousehold?.id && !values.selectedIndividual?.id;
         return (
           <>
             <PageHeader
@@ -372,8 +374,8 @@ export function CreateFeedbackPage(): React.ReactElement {
                                 </Grid>
                                 <Grid item xs={6}>
                                   <LabelizedField label={t('Issue Type')}>
-                                    {values.issueType
-                                    === FeedbackIssueType.PositiveFeedback
+                                    {values.issueType ===
+                                    FeedbackIssueType.PositiveFeedback
                                       ? 'Positive Feedback'
                                       : 'Negative Feedback'}
                                   </LabelizedField>

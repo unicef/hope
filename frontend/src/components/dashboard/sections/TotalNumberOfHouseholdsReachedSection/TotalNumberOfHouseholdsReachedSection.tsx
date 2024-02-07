@@ -1,8 +1,8 @@
 import { Grid } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatNumber } from '../../../../utils/utils';
+import { formatNumber } from '@utils/utils';
 import { AllChartsQuery } from '../../../../__generated__/graphql';
 import {
   CardAmountSmaller,

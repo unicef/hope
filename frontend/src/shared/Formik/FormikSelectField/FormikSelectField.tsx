@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import get from 'lodash/get';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 
 const StartInputAdornment = styled(InputAdornment)`
@@ -32,8 +32,9 @@ export function FormikSelectField({
   disableClearable = false,
   ...otherProps
 }): React.ReactElement {
-  const isInvalid = get(form.errors, field.name)
-    && (get(form.touched, field.name) || form.submitCount > 0);
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount > 0);
   const value = multiple
     ? field.value || otherProps.value || []
     : field.value || otherProps.value || '';
@@ -76,24 +77,24 @@ export function FormikSelectField({
           MenuListProps: { 'data-cy': 'select-options-container' },
         }}
         endAdornment={
-            showX && (
-              <EndInputAdornment position="end">
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    form.setFieldValue(field.name, multiple ? [] : '');
-                  }}
-                >
-                  <XIcon fontSize="small" />
-                </IconButton>
-              </EndInputAdornment>
-            )
-          }
+          showX && (
+            <EndInputAdornment position="end">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  form.setFieldValue(field.name, multiple ? [] : '');
+                }}
+              >
+                <XIcon fontSize="small" />
+              </IconButton>
+            </EndInputAdornment>
+          )
+        }
         startAdornment={
-            icon ? (
-              <StartInputAdornment position="start">{icon}</StartInputAdornment>
-            ) : null
-          }
+          icon ? (
+            <StartInputAdornment position="start">{icon}</StartInputAdornment>
+          ) : null
+        }
       >
         {otherProps.choices.map((each) => (
           <MenuItem
@@ -118,7 +119,7 @@ export function FormikSelectField({
         ))}
       </Select>
       {isInvalid && (
-      <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
+        <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
       )}
     </FormControl>
   );

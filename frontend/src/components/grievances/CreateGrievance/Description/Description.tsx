@@ -1,8 +1,6 @@
-import {
-  Box, FormHelperText, Grid, GridSize, Typography,
-} from '@mui/material';
+import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -12,11 +10,11 @@ import {
 } from '../../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
-import { choicesToDict } from '../../../../utils/utils';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { choicesToDict } from '@utils/utils';
 import { BlackLink } from '../../../core/BlackLink';
 import { LabelizedField } from '../../../core/LabelizedField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
@@ -95,7 +93,8 @@ export function Description({
     (element) => ({ name: element.node.name, value: element.node.id }),
   );
 
-  const isAnonymousTicket = !values.selectedHousehold?.id && !values.selectedIndividual?.id;
+  const isAnonymousTicket =
+    !values.selectedHousehold?.id && !values.selectedIndividual?.id;
 
   return (
     <>
@@ -117,17 +116,17 @@ export function Description({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {values.selectedHousehold?.id
-                    && canViewHouseholdDetails
-                    && !isAllPrograms ? (
+                    {values.selectedHousehold?.id &&
+                    canViewHouseholdDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/household/${values.selectedHousehold.id}`}
                       >
                         {values.selectedHousehold.unicefId}
                       </BlackLink>
-                      ) : (
-                        <div>{values.selectedHousehold?.unicefId || '-'}</div>
-                      )}
+                    ) : (
+                      <div>{values.selectedHousehold?.unicefId || '-'}</div>
+                    )}
                   </span>
                 ),
                 size: 3,
@@ -136,17 +135,17 @@ export function Description({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {values.selectedIndividual?.id
-                    && canViewIndividualDetails
-                    && !isAllPrograms ? (
+                    {values.selectedIndividual?.id &&
+                    canViewIndividualDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/individuals/${values.selectedIndividual.id}`}
                       >
                         {values.selectedIndividual.unicefId}
                       </BlackLink>
-                      ) : (
-                        <div>{values.selectedIndividual?.unicefId || '-'}</div>
-                      )}
+                    ) : (
+                      <div>{values.selectedIndividual?.unicefId || '-'}</div>
+                    )}
                   </span>
                 ),
                 size: 3,
@@ -182,8 +181,8 @@ export function Description({
               fullWidth
               variant="outlined"
               label={
-                values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD
-                || values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+                values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
+                values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
                   ? t('Withdrawal Reason*')
                   : t('Description*')
               }
@@ -272,8 +271,8 @@ export function Description({
                   />
                 </Box>
               </Grid>
-              {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT
-                || values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
+              {(values.issueType === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
+                values.issueType === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
                 <Grid item xs={6}>
                   <Box py={3}>
                     <LookUpPaymentRecord

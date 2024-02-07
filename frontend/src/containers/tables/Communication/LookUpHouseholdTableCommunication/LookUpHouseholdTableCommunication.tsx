@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import {
   AllHouseholdsQuery,
@@ -6,7 +7,7 @@ import {
   HouseholdChoiceDataQuery,
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
@@ -78,8 +79,8 @@ export function LookUpHouseholdTableCommunication({
 
   const handleCheckboxClick = (
     _event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -125,8 +126,8 @@ export function LookUpHouseholdTableCommunication({
 
   const renderTable = (): React.ReactElement => (
     <UniversalTable<
-    AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
-    AllHouseholdsQueryVariables
+      AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
+      AllHouseholdsQueryVariables
     >
       headCells={householdMultiSelect ? headCells.slice(1) : headCells}
       rowsPerPageOptions={[5, 10, 15, 20]}
@@ -134,9 +135,7 @@ export function LookUpHouseholdTableCommunication({
       queriedObjectName="allHouseholds"
       initialVariables={initialVariables}
       filterOrderBy={filter.orderBy}
-      onSelectAllClick={
-          householdMultiSelect && handleSelectAllCheckboxesClick
-        }
+      onSelectAllClick={householdMultiSelect && handleSelectAllCheckboxesClick}
       numSelected={householdMultiSelect && selected.length}
       renderRow={(row) => (
         <LookUpHouseholdTableRowCommunication

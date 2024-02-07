@@ -11,7 +11,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,15 +19,15 @@ import {
   AllGrievanceTicketQuery,
   useRelatedGrievanceTicketsLazyQuery,
 } from '../../../__generated__/graphql';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { grievanceTicketStatusToColor } from '../../../utils/utils';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { grievanceTicketStatusToColor } from '@utils/utils';
 import { BlackLink } from '../../core/BlackLink';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { StatusBox } from '../../core/StatusBox';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
-import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
+import { getGrievanceDetailsPath } from '@utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -65,8 +65,7 @@ export function LinkedTicketsModal({
   issueTypeChoicesData,
 }: LinkedTicketsModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const history = useHistory();
-  const { t } = useTranslation();
+const navigate = useNavigate()  const { t } = useTranslation();
   const [loadRelatedTickets, { data, loading }] = useRelatedGrievanceTicketsLazyQuery({
     variables: {
       id: ticket.id,
@@ -99,7 +98,7 @@ export function LinkedTicketsModal({
       <ClickableTableRow
         hover
         onClick={
-          canViewDetails ? () => history.push(grievanceDetailsPath) : undefined
+          canViewDetails ? () => navigate(grievanceDetailsPath) : undefined
         }
         key={row.id}
       >

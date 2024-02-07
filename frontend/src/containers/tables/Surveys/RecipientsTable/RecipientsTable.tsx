@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import {
   RecipientNode,
   RecipientsQueryVariables,

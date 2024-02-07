@@ -1,13 +1,12 @@
-import {
-  Box, Button, DialogContent, IconButton,
-} from '@mui/material';
+import { Box, Button, DialogContent, IconButton } from '@mui/material';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import CloseIcon from '@mui/icons-material/Close';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
+import { Dialog } from '@containers/dialogs/Dialog';
 import { PhotoModalFooter } from './PhotoModalFooter';
 import { PhotoModalHeader } from './PhotoModalHeader';
 

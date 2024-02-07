@@ -1,8 +1,7 @@
-import {
-  Button, Dialog, DialogContent, DialogTitle,
-} from '@mui/material';
+import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import CloseIcon from '@mui/icons-material/CloseRounded';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {

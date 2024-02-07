@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useGrievanceTicketUnicefIdQuery } from '../../../../__generated__/graphql';
 import { BlueText } from '../LookUpStyles';
 

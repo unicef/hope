@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import { IconButton } from '@mui/material';
 

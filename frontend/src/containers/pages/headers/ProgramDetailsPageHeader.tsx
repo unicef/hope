@@ -1,8 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramQuery, ProgramStatus } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { PageHeader } from '../../../components/core/PageHeader';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { PageHeader } from '@components/core/PageHeader';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';

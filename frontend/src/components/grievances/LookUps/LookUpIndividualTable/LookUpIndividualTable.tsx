@@ -1,12 +1,12 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import {
   AllIndividualsForPopulationTableQuery,
   AllIndividualsForPopulationTableQueryVariables,
   useAllIndividualsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { decodeIdString } from '../../../../utils/utils';
+import { UniversalTable } from '@containers/tables/UniversalTable';
+import { decodeIdString } from '@utils/utils';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { headCells } from './LookUpIndividualTableHeadCells';
@@ -103,8 +103,8 @@ export function LookUpIndividualTable({
 
   const renderTable = (): React.ReactElement => (
     <UniversalTable<
-    AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
-    AllIndividualsForPopulationTableQueryVariables
+      AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
+      AllIndividualsForPopulationTableQueryVariables
     >
       headCells={preparedHeadcells}
       allowSort={false}

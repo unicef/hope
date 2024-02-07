@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
@@ -30,7 +30,8 @@ export function PaymentVerificationChart({
     {},
   ) as Dataset;
 
-  const convertToPercent = (dataset: Array<number>): string => `${(dataset[0] * 100).toFixed(0)}%`;
+  const convertToPercent = (dataset: Array<number>): string =>
+    `${(dataset[0] * 100).toFixed(0)}%`;
 
   const defaults = {
     categoryPercentage: 0.5,
@@ -81,7 +82,8 @@ export function PaymentVerificationChart({
       mode: 'point',
       callbacks: {
         title: () => '',
-        label: (tooltipItem, dataArgs) => dataArgs.datasets[tooltipItem.datasetIndex].label,
+        label: (tooltipItem, dataArgs) =>
+          dataArgs.datasets[tooltipItem.datasetIndex].label,
       },
     },
     scales: {

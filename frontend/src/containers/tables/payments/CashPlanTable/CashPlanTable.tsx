@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllCashPlansAndPaymentPlansQueryVariables,
@@ -26,8 +26,8 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
 
   return (
     <UniversalTable<
-    CashPlanAndPaymentPlanNode,
-    AllCashPlansAndPaymentPlansQueryVariables
+      CashPlanAndPaymentPlanNode,
+      AllCashPlansAndPaymentPlansQueryVariables
     >
       title={t('Payment Plans')}
       headCells={headCells}

@@ -1,10 +1,10 @@
-import React from 'react';
+import * as React from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   formatCurrencyWithSymbol,
   formatThousands,
   getPercentage,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface TotalTransferredByMonthProps {
@@ -62,8 +62,8 @@ export function TotalTransferredByMonth({
             tooltipData.datasets[tooltipItem.datasetIndex].label
           }: ${formatCurrencyWithSymbol(tooltipItem.yLabel)} (${getPercentage(
             tooltipItem.yLabel,
-            tooltipData.datasets[1].data[tooltipItem.index]
-              + tooltipData.datasets[2].data[tooltipItem.index],
+            tooltipData.datasets[1].data[tooltipItem.index] +
+              tooltipData.datasets[2].data[tooltipItem.index],
           )})`;
         },
       },

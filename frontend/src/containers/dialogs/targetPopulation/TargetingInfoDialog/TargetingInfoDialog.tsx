@@ -1,12 +1,11 @@
-import {
-  Dialog, DialogContent, IconButton, Tab, Tabs,
-} from '@mui/material';
+import { Dialog, DialogContent, IconButton, Tab, Tabs } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';
-import { TabPanel } from '../../../../components/core/TabPanel';
+import { TabPanel } from '@components/core/TabPanel';
 import { FlexFieldTab } from './FlexFieldTab';
 
 export interface FinalizeTargetPopulationPropTypes {

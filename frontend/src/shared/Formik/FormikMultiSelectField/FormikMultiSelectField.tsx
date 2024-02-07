@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { makeStyles, useTheme } from '@mui/material/styles';
 import Input from '@mui/material/Input';
 import InputLabel from '@mui/material/InputLabel';

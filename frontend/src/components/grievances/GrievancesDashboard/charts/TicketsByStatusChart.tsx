@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
 

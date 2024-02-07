@@ -3,7 +3,8 @@ import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import Close from '@mui/icons-material/Close';
 import Edit from '@mui/icons-material/Edit';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -12,7 +13,7 @@ import {
 } from '../../../__generated__/graphql';
 import { LabelizedField } from '../../core/LabelizedField';
 import { AgencyField } from '../AgencyField';
-import { removeItemById } from '../utils/helpers';
+import { removeItemById } from '@utils/helpers';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
@@ -39,18 +40,21 @@ export function EditIdentityRow({
   const isEditTicket = location.pathname.includes('edit-ticket');
   const { t } = useTranslation();
   const [isEdited, setEdit] = useState(false);
-  const identitiesToRemove = values?.individualDataUpdateIdentitiesToRemove || [];
+  const identitiesToRemove =
+    values?.individualDataUpdateIdentitiesToRemove || [];
   const removed = identitiesToRemove.includes(identity.node.id);
   return isEdited ? (
     <>
       <AgencyField
         id={id}
         key={`${id}-${identity?.node?.number}-${identity?.node?.partner}`}
-        onDelete={() => removeItemById(
-          values.individualDataUpdateDocumentsToEdit,
-          identity.node.id,
-          arrayHelpers,
-        )}
+        onDelete={() =>
+          removeItemById(
+            values.individualDataUpdateDocumentsToEdit,
+            identity.node.id,
+            arrayHelpers,
+          )
+        }
         countryChoices={addIndividualFieldsData.countriesChoices}
         identityTypeChoices={addIndividualFieldsData.identityTypeChoices}
         baseName="individualDataUpdateIdentitiesToEdit"

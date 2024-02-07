@@ -1,16 +1,16 @@
-import React from 'react';
+import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import { Radio } from '@mui/material';
 import { TargetPopulationNode } from '../../../../__generated__/graphql';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { StatusBox } from '../../../../components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { StatusBox } from '@components/core/StatusBox';
 import {
   targetPopulationStatusToColor,
   targetPopulationStatusMapping,
-} from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
+} from '@utils/utils';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface LookUpTargetPopulationTableRowSurveysProps {
@@ -26,14 +26,14 @@ export function LookUpTargetPopulationTableRowSurveys({
   radioChangeHandler,
   selectedTargetPopulation,
 }: LookUpTargetPopulationTableRowSurveysProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const targetPopulationDetailsPath = `/${baseUrl}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(targetPopulation.id);
     } else {
-      history.push(targetPopulationDetailsPath);
+      navigate(targetPopulationDetailsPath);
     }
   };
   return (
@@ -83,8 +83,7 @@ export function LookUpTargetPopulationTableRowSurveys({
         <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        {targetPopulation.createdBy?.firstName}
-        {' '}
+        {targetPopulation.createdBy?.firstName}{' '}
         {targetPopulation.createdBy?.lastName}
       </TableCell>
     </ClickableTableRow>

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import logoWithoutSubtitleTransparent from '../../images/logo-transparent.png';
 import logoWithSubtitleTransparent from '../../images/logo-with-subtitle-transparent.png';
@@ -22,16 +22,24 @@ export function Logo({
 }: LogoProps): React.ReactElement {
   let logoSrc;
   if (transparent) {
-    logoSrc = displayLogoWithoutSubtitle === true
-      ? logoWithoutSubtitleTransparent
-      : logoWithSubtitleTransparent;
+    logoSrc =
+      displayLogoWithoutSubtitle === true
+        ? logoWithoutSubtitleTransparent
+        : logoWithSubtitleTransparent;
   } else {
-    logoSrc = displayLogoWithoutSubtitle === true
-      ? logoWithoutSubtitle
-      : logoWithSubtitle;
+    logoSrc =
+      displayLogoWithoutSubtitle === true
+        ? logoWithoutSubtitle
+        : logoWithSubtitle;
   }
 
   const imageHeight = displayLogoWithoutSubtitle === true ? 64 : 206;
 
-  return <Image height={height || imageHeight} src={logoSrc} alt="HOPE Portal Logo" />;
+  return (
+    <Image
+      height={height || imageHeight}
+      src={logoSrc}
+      alt="HOPE Portal Logo"
+    />
+  );
 }

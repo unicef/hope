@@ -1,17 +1,17 @@
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { AnonTableCell } from '@components/core/Table/AnonTableCell';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
   paymentRecordStatusToColor,
   paymentStatusDisplayMap,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import { PaymentRecordNode } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
@@ -25,13 +25,12 @@ export function PaymentRecordTableRow({
   openInNewTab,
 }: PaymentRecordTableRowProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
-  const history = useHistory();
-  const paymentRecordPath = `/${baseUrl}/payment-records/${paymentRecord.id}`;
+const navigate = useNavigate()  const paymentRecordPath = `/${baseUrl}/payment-records/${paymentRecord.id}`;
   const handleClick = (): void => {
     if (openInNewTab) {
       window.open(paymentRecordPath);
     } else {
-      history.push(paymentRecordPath);
+      navigate(paymentRecordPath);
     }
   };
   return (

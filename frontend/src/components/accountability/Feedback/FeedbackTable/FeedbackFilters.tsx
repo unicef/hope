@@ -1,17 +1,17 @@
 import { Grid, MenuItem } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useFeedbackIssueTypeChoicesQuery } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { FiltersSection } from '../../../core/FiltersSection';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { ProgramAutocomplete } from '../../../../shared/autocompletes/ProgramAutocomplete';
+import { ProgramAutocomplete } from '@shared/autocompletes/ProgramAutocomplete';
 
 interface FeedbackFiltersProps {
   setFilter: (filter) => void;
@@ -28,21 +28,22 @@ export function FeedbackFilters({
   filter,
 }: FeedbackFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } = useFeedbackIssueTypeChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useFeedbackIssueTypeChoicesQuery();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -127,7 +128,9 @@ export function FeedbackFilters({
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
-              onChange={(e) => handleFilterChange('programState', e.target.value)}
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
               label={t('Programme State')}
               value={filter.programState}
               fullWidth

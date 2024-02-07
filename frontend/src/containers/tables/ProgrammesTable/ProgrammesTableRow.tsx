@@ -1,20 +1,20 @@
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   AllProgramsQuery,
   ProgrammeChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import {
   choicesToDict,
   formatCurrency,
   programStatusToColor,
-} from '../../../utils/utils';
+} from '@utils/utils';
 
 interface ProgrammesTableRowProps {
   program: AllProgramsQuery['allPrograms']['edges'][number]['node'];
@@ -25,11 +25,11 @@ export function ProgrammesTableRow({
   program,
   choicesData,
 }: ProgrammesTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const programDetailsPath = `/${baseUrl}/details/${program.id}`;
   const handleClick = (): void => {
-    history.push(programDetailsPath);
+    navigate(programDetailsPath);
   };
 
   const programSectorChoiceDict = choicesToDict(
@@ -54,10 +54,7 @@ export function ProgrammesTableRow({
         />
       </TableCell>
       <TableCell align="left">
-        <UniversalMoment>{program.startDate}</UniversalMoment>
-        {' '}
-        -
-        {' '}
+        <UniversalMoment>{program.startDate}</UniversalMoment> -{' '}
         <UniversalMoment>{program.endDate}</UniversalMoment>
       </TableCell>
       <TableCell align="left">

@@ -1,10 +1,10 @@
-import React from 'react';
+import * as React from 'react';
 import { ProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { LookUpProgrammesTableSurveys } from '../../../../containers/tables/Surveys/LookUpProgrammesTableSurveys/LookUpProgrammesTableSurveys';
-import { LookUpTargetPopulationTableSurveys } from '../../../../containers/tables/Surveys/LookUpTargetPopulationTableSurveys';
+import { LookUpProgrammesTableSurveys } from '@containers/tables/Surveys/LookUpProgrammesTableSurveys/LookUpProgrammesTableSurveys';
+import { LookUpTargetPopulationTableSurveys } from '@containers/tables/Surveys/LookUpTargetPopulationTableSurveys';
 import { usePermissions } from '../../../../hooks/usePermissions';
-import { SurveyTabsValues } from '../../../../utils/constants';
+import { SurveyTabsValues } from '@utils/constants';
 
 interface LookUpSelectionTablesSurveysProps {
   selectedTab: number;

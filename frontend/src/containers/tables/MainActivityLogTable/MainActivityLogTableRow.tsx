@@ -4,7 +4,7 @@ import Collapse from '@mui/material/Collapse';
 import ExpandMore from '@mui/icons-material/ExpandMoreRounded';
 import clsx from 'clsx';
 import moment from 'moment';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -15,8 +15,8 @@ import {
   ButtonPlaceHolder,
   Cell,
   Row,
-} from '../../../components/core/ActivityLogTable/TableStyledComponents';
-import { Dashable } from '../../../components/core/Dashable';
+} from '@components/core/ActivityLogTable/TableStyledComponents';
+import { Dashable } from '@components/core/Dashable';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { MiśTheme } from '../../../theme';
 import { headCells } from './MainActivityLogTableHeadCells';
@@ -47,7 +47,9 @@ function snakeToFieldReadable(str: string): string {
   if (!str) {
     return str;
   }
-  return str.replace(/([-_][a-z])/g, (group) => group.replace('-', ' ').replace('_', ' '));
+  return str.replace(/([-_][a-z])/g, (group) =>
+    group.replace('-', ' ').replace('_', ' '),
+  );
 }
 interface ObjectRepresentationsProps {
   logEntry: AllLogEntriesQuery['allLogEntries']['edges'][number]['node'];
@@ -89,9 +91,9 @@ function ObjectRepresentations({
     )}`,
   };
   if (
-    !(model in modelToUrlDict)
-    || logEntry.action === LogEntryAction.Delete
-    || logEntry.action === LogEntryAction.SoftDelete
+    !(model in modelToUrlDict) ||
+    logEntry.action === LogEntryAction.Delete ||
+    logEntry.action === LogEntryAction.SoftDelete
   ) {
     return <>{logEntry.objectId}</>;
   }

@@ -1,15 +1,16 @@
 import { Grid, Typography } from '@mui/material';
 import { Field } from 'formik';
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { FormikDateField } from '../../../../shared/Formik/FormikDateField';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { Title } from '../../../core/Title';
-import { FormikCurrencyAutocomplete } from '../../../../shared/Formik/FormikCurrencyAutocomplete';
+import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
 import { useTargetPopulationLazyQuery } from '../../../../__generated__/graphql';
-import { tomorrow } from '../../../../utils/utils';
+import { tomorrow } from '@utils/utils';
 
 interface PaymentPlanParametersProps {
   values;
@@ -21,7 +22,8 @@ export function PaymentPlanParameters({
   paymentPlan,
 }: PaymentPlanParametersProps): React.ReactElement {
   const { t } = useTranslation();
-  const [loadTargetPopulation, { data, loading }] = useTargetPopulationLazyQuery();
+  const [loadTargetPopulation, { data, loading }] =
+    useTargetPopulationLazyQuery();
 
   useEffect(() => {
     if (values.targetingId) {

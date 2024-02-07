@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { formatCurrencyWithSymbol, getPercentage } from '../../../utils/utils';
+import { formatCurrencyWithSymbol, getPercentage } from '@utils/utils';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface VolumeByDeliveryMechanismProps {
@@ -56,14 +56,13 @@ export function VolumeByDeliveryMechanism({
     tooltips: {
       mode: 'point',
       callbacks: {
-        label: (tooltipItem, tooltipData) => ` ${
-          tooltipData.labels[tooltipItem.index]
-        } ${formatCurrencyWithSymbol(
-          tooltipData.datasets[0].data[tooltipItem.index],
-        )} (${getPercentage(
-          tooltipData.datasets[0].data[tooltipItem.index],
-          tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
-        )})`,
+        label: (tooltipItem, tooltipData) =>
+          ` ${tooltipData.labels[tooltipItem.index]} ${formatCurrencyWithSymbol(
+            tooltipData.datasets[0].data[tooltipItem.index],
+          )} (${getPercentage(
+            tooltipData.datasets[0].data[tooltipItem.index],
+            tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
+          )})`,
       },
     },
   };

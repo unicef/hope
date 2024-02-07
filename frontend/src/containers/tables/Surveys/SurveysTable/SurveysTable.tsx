@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllSurveysQueryVariables,
@@ -6,8 +6,8 @@ import {
   SurveysChoiceDataQuery,
   useAllSurveysQuery,
 } from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { choicesToDict, dateToIsoString } from '../../../../utils/utils';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { choicesToDict, dateToIsoString } from '@utils/utils';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';

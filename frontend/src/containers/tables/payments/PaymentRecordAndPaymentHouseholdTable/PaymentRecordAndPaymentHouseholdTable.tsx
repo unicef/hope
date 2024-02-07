@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllPaymentRecordsAndPaymentsQueryVariables,
@@ -29,8 +29,8 @@ export function PaymentRecordHouseholdTable({
   };
   return (
     <UniversalTable<
-    PaymentRecordAndPaymentNode,
-    AllPaymentRecordsAndPaymentsQueryVariables
+      PaymentRecordAndPaymentNode,
+      AllPaymentRecordsAndPaymentsQueryVariables
     >
       title={t('Payment Records')}
       headCells={headCells}

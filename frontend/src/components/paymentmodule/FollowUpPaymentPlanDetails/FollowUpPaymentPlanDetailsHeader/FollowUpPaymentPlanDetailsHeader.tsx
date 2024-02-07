@@ -1,12 +1,12 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
@@ -172,12 +172,9 @@ export function FollowUpPaymentPlanDetailsHeader({
 
   return (
     <PageHeader
-      title={(
+      title={
         <Box display="flex" alignItems="center">
-          {t('Follow-up Payment Plan')}
-          {' '}
-          ID:
-          {' '}
+          {t('Follow-up Payment Plan')} ID:{' '}
           <Box ml={1}>
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
@@ -196,7 +193,7 @@ export function FollowUpPaymentPlanDetailsHeader({
             </StatusWrapper>
           )}
         </Box>
-      )}
+      }
       breadCrumbs={
         hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)
           ? breadCrumbsItems

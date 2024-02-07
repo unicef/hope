@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useIdleTimer } from 'react-idle-timer';
 import { AUTO_LOGOUT_MILLIS } from '../../config';
 

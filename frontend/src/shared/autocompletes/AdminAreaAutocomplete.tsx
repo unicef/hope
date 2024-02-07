@@ -1,9 +1,8 @@
 import { get } from 'lodash';
-import React, {
-  useCallback, useEffect, useRef, useState,
-} from 'react';
+import * as React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAllAdminAreasLazyQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -13,7 +12,7 @@ import {
   handleAutocompleteChange,
   handleAutocompleteClose,
   handleOptionSelected,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
 export function AdminAreaAutocomplete({
@@ -41,7 +40,7 @@ export function AdminAreaAutocomplete({
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
 
@@ -74,7 +73,7 @@ export function AdminAreaAutocomplete({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
@@ -105,9 +104,15 @@ export function AdminAreaAutocomplete({
       }}
       handleOpen={() => setOpen(true)}
       open={open}
-      handleClose={(_, reason) => handleAutocompleteClose(setOpen, onInputTextChange, reason)}
-      handleOptionSelected={(option, value1) => handleOptionSelected(option?.node?.id, value1)}
-      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue)}
+      handleClose={(_, reason) =>
+        handleAutocompleteClose(setOpen, onInputTextChange, reason)
+      }
+      handleOptionSelected={(option, value1) =>
+        handleOptionSelected(option?.node?.id, value1)
+      }
+      handleOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue)
+      }
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}

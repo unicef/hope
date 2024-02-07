@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 import { Switch, useRouteMatch } from 'react-router-dom';
-import { SentryRoute } from '../../components/core/SentryRoute';
+import { SentryRoute } from '@components/core/SentryRoute';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';

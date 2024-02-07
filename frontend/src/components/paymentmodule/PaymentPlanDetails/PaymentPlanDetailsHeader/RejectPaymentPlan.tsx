@@ -7,15 +7,16 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { Action } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { ErrorButton } from '../../../core/ErrorButton';
@@ -34,12 +35,13 @@ export function RejectPaymentPlan({
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
-  const { mutatePaymentPlanAction: reject, loading: loadingReject } = usePaymentPlanAction(
-    Action.Reject,
-    paymentPlanId,
-    () => showMessage(t('Payment Plan has been rejected.')),
-    () => setRejectDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: reject, loading: loadingReject } =
+    usePaymentPlanAction(
+      Action.Reject,
+      paymentPlanId,
+      () => showMessage(t('Payment Plan has been rejected.')),
+      () => setRejectDialogOpen(false),
+    );
 
   const initialValues = {
     comment: '',

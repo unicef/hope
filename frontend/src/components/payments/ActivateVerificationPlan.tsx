@@ -1,13 +1,12 @@
-import {
-  Box, Button, DialogContent, DialogTitle,
-} from '@mui/material';
-import React, { useState } from 'react';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useActivatePaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { useProgramContext } from '../../programContext';

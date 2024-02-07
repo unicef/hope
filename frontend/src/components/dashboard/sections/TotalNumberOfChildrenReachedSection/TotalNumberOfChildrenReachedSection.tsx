@@ -1,8 +1,8 @@
 import { Grid } from '@mui/material';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatNumber } from '../../../../utils/utils';
+import { formatNumber } from '@utils/utils';
 import { AllChartsQuery } from '../../../../__generated__/graphql';
 import {
   CardAmountSmaller,

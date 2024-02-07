@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -7,7 +7,7 @@ import {
   TargetPopulationStatus,
   useAllActiveTargetPopulationsQuery,
 } from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsSurveys';
@@ -62,8 +62,8 @@ export function LookUpTargetPopulationTableSurveys({
   const renderTable = (): React.ReactElement => (
     <TableWrapper>
       <UniversalTable<
-      TargetPopulationNode,
-      AllActiveTargetPopulationsQueryVariables
+        TargetPopulationNode,
+        AllActiveTargetPopulationsQueryVariables
       >
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}

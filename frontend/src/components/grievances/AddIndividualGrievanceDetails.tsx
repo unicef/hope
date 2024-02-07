@@ -1,12 +1,10 @@
-import {
-  Box, Button, Grid, Typography,
-} from '@mui/material';
-import React from 'react';
+import { Box, Button, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { getFlexFieldTextValue, renderBoolean } from '../../utils/utils';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { getFlexFieldTextValue, renderBoolean } from '@utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -56,56 +54,61 @@ export function AddIndividualGrievanceDetails({
   delete individualData?.flex_fields;
   delete individualData.documents;
   delete individualData.identities;
-  const labels = Object.entries(individualData || {}).map(([key, value]) => {
-    let textValue = value;
+  const labels =
+    Object.entries(individualData || {}).map(([key, value]) => {
+      let textValue = value;
 
-    const fieldAttribute = fieldsDict[key];
-    if (fieldAttribute.type === 'BOOL') {
-      textValue = renderBoolean(value as boolean);
-    }
-    if (fieldAttribute.type === 'SELECT_ONE') {
-      textValue = fieldAttribute.choices.find((item) => item.value === value)
-        ?.labelEn || '-';
-    }
-    if (Array.isArray(value)) {
-      textValue = value.map((el) => capitalize(el)).join(', ');
-    }
-    return (
-      <Grid key={key} item xs={6}>
+      const fieldAttribute = fieldsDict[key];
+      if (fieldAttribute.type === 'BOOL') {
+        textValue = renderBoolean(value as boolean);
+      }
+      if (fieldAttribute.type === 'SELECT_ONE') {
+        textValue =
+          fieldAttribute.choices.find((item) => item.value === value)
+            ?.labelEn || '-';
+      }
+      if (Array.isArray(value)) {
+        textValue = value.map((el) => capitalize(el)).join(', ');
+      }
+      return (
+        <Grid key={key} item xs={6}>
+          <LabelizedField
+            label={key === 'sex' ? t('GENDER') : key.replace(/_/g, ' ')}
+            value={textValue}
+          />
+        </Grid>
+      );
+    }) || [];
+
+  const flexFieldLabels =
+    Object.entries(flexFields || {}).map(
+      ([key, value]: [string, string | string[]]) => (
+        <Grid key={key} item xs={6}>
+          <LabelizedField
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={getFlexFieldTextValue(key, value, fieldsDict[key])}
+          />
+        </Grid>
+      ),
+    ) || [];
+  const documentLabels =
+    documents?.map((item) => (
+      <Grid key={item?.country + item?.key} item xs={6}>
         <LabelizedField
-          label={key === 'sex' ? t('GENDER') : key.replace(/_/g, ' ')}
-          value={textValue}
+          label={item?.key?.replace(/_/g, ' ')}
+          value={item.number}
         />
       </Grid>
-    );
-  }) || [];
-
-  const flexFieldLabels = Object.entries(flexFields || {}).map(
-    ([key, value]: [string, string | string[]]) => (
-      <Grid key={key} item xs={6}>
-        <LabelizedField
-          label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-          value={getFlexFieldTextValue(key, value, fieldsDict[key])}
-        />
-      </Grid>
-    ),
-  ) || [];
-  const documentLabels = documents?.map((item) => (
-    <Grid key={item?.country + item?.key} item xs={6}>
-      <LabelizedField
-        label={item?.key?.replace(/_/g, ' ')}
-        value={item.number}
-      />
-    </Grid>
-  )) || [];
-  const identityLabels = identities?.map((item) => {
-    const partner = item.partner || item.agency; // For backward compatibility
-    return (
-      <Grid key={item.country + partner} item xs={6}>
-        <LabelizedField label={partner} value={item.number} />
-      </Grid>
-    );
-  }) || [];
+    )) || [];
+  const identityLabels =
+    identities?.map((item) => {
+      const partner = item.partner || item.agency; // For backward compatibility
+      return (
+        <Grid key={item.country + partner} item xs={6}>
+          <LabelizedField label={partner} value={item.number} />
+        </Grid>
+      );
+    }) || [];
   const allLabels = [
     ...labels,
     ...flexFieldLabels,
@@ -130,34 +133,36 @@ export function AddIndividualGrievanceDetails({
           {canApproveDataChange && (
             <Button
               data-cy="button-approve"
-              onClick={() => confirm({
-                title: t('Warning'),
-                content: dialogText,
-              }).then(async () => {
-                try {
-                  await mutate({
-                    variables: {
-                      grievanceTicketId: ticket.id,
-                      approveStatus:
+              onClick={() =>
+                confirm({
+                  title: t('Warning'),
+                  content: dialogText,
+                }).then(async () => {
+                  try {
+                    await mutate({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus:
                           !ticket.addIndividualTicketDetails.approveStatus,
-                    },
-                    refetchQueries: () => [
-                      {
-                        query: GrievanceTicketDocument,
-                        variables: { id: ticket.id },
                       },
-                    ],
-                  });
-                  if (ticket.addIndividualTicketDetails.approveStatus) {
-                    showMessage(t('Changes Disapproved'));
+                      refetchQueries: () => [
+                        {
+                          query: GrievanceTicketDocument,
+                          variables: { id: ticket.id },
+                        },
+                      ],
+                    });
+                    if (ticket.addIndividualTicketDetails.approveStatus) {
+                      showMessage(t('Changes Disapproved'));
+                    }
+                    if (!ticket.addIndividualTicketDetails.approveStatus) {
+                      showMessage(t('Changes Approved'));
+                    }
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
                   }
-                  if (!ticket.addIndividualTicketDetails.approveStatus) {
-                    showMessage(t('Changes Approved'));
-                  }
-                } catch (e) {
-                  e.graphQLErrors.map((x) => showMessage(x.message));
-                }
-              })}
+                })
+              }
               variant={
                 ticket.addIndividualTicketDetails?.approveStatus
                   ? 'outlined'

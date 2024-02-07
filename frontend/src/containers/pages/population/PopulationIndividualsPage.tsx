@@ -1,19 +1,20 @@
 import { Box } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import {
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { IndividualsFilter } from '../../../components/population/IndividualsFilter';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { IndividualsFilter } from '@components/population/IndividualsFilter';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { IndividualsListTable } from '../../tables/population/IndividualsListTable';
 
 const initialFilter = {
@@ -35,7 +36,8 @@ export function PopulationIndividualsPage(): React.ReactElement {
   const location = useLocation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
-  const { data: householdChoicesData, loading: householdChoicesLoading } = useHouseholdChoiceDataQuery();
+  const { data: householdChoicesData, loading: householdChoicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [filter, setFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
@@ -44,15 +46,19 @@ export function PopulationIndividualsPage(): React.ReactElement {
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data: individualChoicesData, loading: individualChoicesLoading } = useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
-  if (householdChoicesLoading || individualChoicesLoading) return <LoadingComponent />;
+  if (householdChoicesLoading || individualChoicesLoading)
+    return <LoadingComponent />;
 
-  if (!individualChoicesData || !householdChoicesData || permissions === null) return null;
+  if (!individualChoicesData || !householdChoicesData || permissions === null)
+    return null;
 
   if (
     !hasPermissions(PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions)
-  ) return <PermissionDenied />;
+  )
+    return <PermissionDenied />;
 
   return (
     <>

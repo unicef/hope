@@ -1,13 +1,13 @@
 import { Box, Button } from '@mui/material';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { PaymentRecordDetails } from '../../../components/payments/PaymentRecordDetails';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { PaymentRecordDetails } from '@components/payments/PaymentRecordDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
@@ -17,17 +17,18 @@ import {
   useCashAssistUrlPrefixQuery,
   usePaymentRecordQuery,
 } from '../../../__generated__/graphql';
-import { ForceFailedButton } from '../../../components/payments/ForceFailedButton';
-import { RevertForceFailedButton } from '../../../components/payments/RevertForceFailedButton';
+import { ForceFailedButton } from '@components/payments/ForceFailedButton';
+import { RevertForceFailedButton } from '@components/payments/RevertForceFailedButton';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export function PaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { businessArea } = useBaseUrl();
-  const { data: businessAreaData, loading: businessAreaDataLoading } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
+  const { data: businessAreaData, loading: businessAreaDataLoading } =
+    useBusinessAreaDataQuery({
+      variables: { businessAreaSlug: businessArea },
+    });
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
@@ -38,14 +39,16 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
   });
   const permissions = usePermissions();
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  if (loading || caLoading || businessAreaDataLoading) return <LoadingComponent />;
+  if (loading || caLoading || businessAreaDataLoading)
+    return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissions(
       PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
       permissions,
     )
-  ) return <PermissionDenied />;
+  )
+    return <PermissionDenied />;
 
   if (!data || !caData || !businessAreaData) return null;
 
@@ -76,9 +79,10 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
         permissions,
       )
     ) {
-      const ButtonComponent = paymentRecord.status === PaymentRecordStatus.ForceFailed
-        ? RevertForceFailedButton
-        : ForceFailedButton;
+      const ButtonComponent =
+        paymentRecord.status === PaymentRecordStatus.ForceFailed
+          ? RevertForceFailedButton
+          : ForceFailedButton;
       buttons.push(
         <ButtonComponent
           key={`${paymentRecord.id}-failed`}

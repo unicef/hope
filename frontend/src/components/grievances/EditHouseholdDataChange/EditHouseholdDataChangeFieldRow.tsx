@@ -3,9 +3,10 @@ import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field, useField } from 'formik';
 import camelCase from 'lodash/camelCase';
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllEditHouseholdFieldsQuery,
   HouseholdQuery,
@@ -57,8 +58,9 @@ export function EditHouseholdDataChangeFieldRow({
           component={FormikSelectField}
           choices={fields
             .filter(
-              (item) => !notAvailableFields.includes(item.name)
-                || item.name === itemValue?.fieldName,
+              (item) =>
+                !notAvailableFields.includes(item.name) ||
+                item.name === itemValue?.fieldName,
             )
             .map((item) => ({
               value: item.name,

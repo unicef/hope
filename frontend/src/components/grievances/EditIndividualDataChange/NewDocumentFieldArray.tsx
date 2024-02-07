@@ -3,11 +3,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from 'react-router-dom';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 import { DocumentField } from '../DocumentField';
-import { removeItemById } from '../utils/helpers';
+import { removeItemById } from '@utils/helpers';
 
 export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
@@ -35,15 +35,17 @@ export function NewDocumentFieldArray({
                 <DocumentField
                   id={existingOrNewId}
                   key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
-                  onDelete={() => removeItemById(
-                    values.individualDataUpdateFieldsDocuments,
-                    existingOrNewId,
-                    arrayHelpers,
-                  )}
+                  onDelete={() =>
+                    removeItemById(
+                      values.individualDataUpdateFieldsDocuments,
+                      existingOrNewId,
+                      arrayHelpers,
+                    )
+                  }
                   countryChoices={addIndividualFieldsData.countriesChoices}
                   documentTypeChoices={
-                      addIndividualFieldsData.documentTypeChoices
-                    }
+                    addIndividualFieldsData.documentTypeChoices
+                  }
                   baseName="individualDataUpdateFieldsDocuments"
                   setFieldValue={setFieldValue}
                   values={values}

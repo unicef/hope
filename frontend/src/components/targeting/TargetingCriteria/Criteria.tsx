@@ -1,6 +1,6 @@
 import { IconButton } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
@@ -14,9 +14,11 @@ const CriteriaElement = styled.div`
   border: ${(props) => (props.alternative ? '0' : '2px solid #033f91')};
   border-radius: 3px;
   font-size: 16px;
-  background-color: ${(props) => (props.alternative ? 'transparent' : '#f7faff')};
+  background-color: ${(props) =>
+    props.alternative ? 'transparent' : '#f7faff'};
   padding: ${({ theme }) => theme.spacing(1)}px
-    ${({ theme, alternative }) => (alternative ? theme.spacing(1) : theme.spacing(17))}px
+    ${({ theme, alternative }) =>
+      alternative ? theme.spacing(1) : theme.spacing(17)}px
     ${({ theme }) => theme.spacing(1)}px ${({ theme }) => theme.spacing(4)}px;
   margin: ${({ theme }) => theme.spacing(2)}px 0;
   p {
@@ -62,9 +64,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
     case 'NOT_EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}
-          :
-          {' '}
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <span>{field.arguments[0]}</span>
         </p>
       );
@@ -72,14 +72,9 @@ const CriteriaField = ({ field }): React.ReactElement => {
     case 'RANGE':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}
-          :
-          {' '}
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <span>
-            {field.arguments[0]}
-            {' '}
-            -
-            {field.arguments[1]}
+            {field.arguments[0]} -{field.arguments[1]}
           </span>
         </p>
       );
@@ -87,17 +82,15 @@ const CriteriaField = ({ field }): React.ReactElement => {
     case 'EQUALS':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}
-          :
-          {' '}
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           {field.fieldAttribute.type === 'BOOL' ? (
             <span>{field.arguments[0] === 'True' ? t('Yes') : t('No')}</span>
           ) : (
             <span>
               {field.fieldAttribute.choices?.length
                 ? field.fieldAttribute.choices.find(
-                  (each) => each.value === field.arguments[0],
-                )?.labelEn
+                    (each) => each.value === field.arguments[0],
+                  )?.labelEn
                 : field.arguments[0]}
             </span>
           )}
@@ -107,9 +100,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
     case 'LESS_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}
-          :
-          {' '}
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <MathSign src={LessThanEqual} alt="less_than" />
           <span>{field.arguments[0]}</span>
         </p>
@@ -118,54 +109,47 @@ const CriteriaField = ({ field }): React.ReactElement => {
     case 'GREATER_THAN':
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn || field.fieldName}
-          :
-          {' '}
+          {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <MathSign src={GreaterThanEqual} alt="greater_than" />
           <span>{field.arguments[0]}</span>
         </p>
       );
       break;
     case 'CONTAINS':
-      fieldElement = field.arguments.length > 1 ? (
-        <p>
-          {field.fieldAttribute.labelEn || field.fieldName}
-          :
-          {' '}
-          {field.arguments.map((argument, index) => (
-            <>
-              <span>
-                {field.fieldAttribute.choices?.length
-                  ? field.fieldAttribute.choices.find(
-                    (each) => each.value === argument,
+      fieldElement =
+        field.arguments.length > 1 ? (
+          <p>
+            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+            {field.arguments.map((argument, index) => (
+              <>
+                <span>
+                  {field.fieldAttribute.choices?.length
+                    ? field.fieldAttribute.choices.find(
+                        (each) => each.value === argument,
+                      )?.labelEn
+                    : field.arguments[0]}
+                </span>
+                {index !== field.arguments.length - 1 && ', '}
+              </>
+            ))}
+          </p>
+        ) : (
+          <p>
+            {field.fieldAttribute.labelEn || field.fieldName}:{' '}
+            <span>
+              {field.fieldAttribute.choices?.length
+                ? field.fieldAttribute.choices.find(
+                    (each) => each.value === field.arguments[0],
                   )?.labelEn
-                  : field.arguments[0]}
-              </span>
-              {index !== field.arguments.length - 1 && ', '}
-            </>
-          ))}
-        </p>
-      ) : (
-        <p>
-          {field.fieldAttribute.labelEn || field.fieldName}
-          :
-          {' '}
-          <span>
-            {field.fieldAttribute.choices?.length
-              ? field.fieldAttribute.choices.find(
-                (each) => each.value === field.arguments[0],
-              )?.labelEn
-              : field.arguments[0]}
-          </span>
-        </p>
-      );
+                : field.arguments[0]}
+            </span>
+          </p>
+        );
       break;
     default:
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn}
-          :
-          <span>{field.arguments[0]}</span>
+          {field.fieldAttribute.labelEn}:<span>{field.arguments[0]}</span>
         </p>
       );
       break;
@@ -194,12 +178,15 @@ export function Criteria({
 }: CriteriaProps): React.ReactElement {
   return (
     <CriteriaElement alternative={alternative} data-cy="criteria-container">
-      {rules.map((each, index) =>
-      // eslint-disable-next-line
-         <CriteriaField key={index} field={each} />)}
+      {rules.map((each, index) => (
+        // eslint-disable-next-line
+        <CriteriaField key={index} field={each} />
+      ))}
       {individualsFiltersBlocks.map((item) => (
         <CriteriaSetBox>
-          {item.individualBlockFilters.map((filter) => <CriteriaField field={filter} />)}
+          {item.individualBlockFilters.map((filter) => (
+            <CriteriaField field={filter} />
+          ))}
         </CriteriaSetBox>
       ))}
       {isEdit && (

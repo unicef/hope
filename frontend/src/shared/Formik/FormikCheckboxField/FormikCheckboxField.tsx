@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import {
   FormControlLabel,
   Checkbox,
@@ -6,7 +7,7 @@ import {
   Grid,
 } from '@mui/material';
 import get from 'lodash/get';
-import { LabelizedField } from '../../../components/core/LabelizedField';
+import { LabelizedField } from '@components/core/LabelizedField';
 
 export function Check({
   field,
@@ -20,8 +21,9 @@ export function Check({
   const handleChange = (): void => {
     form.setFieldValue(field.name, !field.value);
   };
-  const isInvalid = get(form.errors, field.name)
-    && (get(form.touched, field.name) || form.submitCount > 0);
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount > 0);
   useEffect(() => {
     if (initValue !== null && initValue !== undefined) {
       form.setFieldValue(field.name, initValue);
@@ -41,7 +43,7 @@ export function Check({
   return (
     <Grid container={container}>
       <FormControlLabel
-        control={(
+        control={
           <Checkbox
             {...otherProps}
             color="primary"
@@ -49,7 +51,7 @@ export function Check({
             onChange={handleChange}
             data-cy={`input-${field.name}`}
           />
-        )}
+        }
         label={displayValue ? '' : label}
       />
       {displayValue && (

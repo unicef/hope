@@ -1,8 +1,8 @@
-import { HeadCell } from '../../../components/core/Table/EnhancedTableHead';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { AllLogEntriesQuery } from '../../../__generated__/graphql';
 
 export const headCells: HeadCell<
-AllLogEntriesQuery['allLogEntries']['edges'][number]['node']
+  AllLogEntriesQuery['allLogEntries']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,

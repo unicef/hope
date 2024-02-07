@@ -1,11 +1,9 @@
-import {
-  Box, Button, Grid, Typography,
-} from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import snakeCase from 'lodash/snakeCase';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -40,15 +38,18 @@ export function DeleteIndividualGrievanceDetails({
   const confirm = useConfirmation();
 
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-  const isHeadOfHousehold = ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
+  const isHeadOfHousehold =
+    ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
   const isOneIndividual = ticket?.household?.activeIndividualsCount === 1;
-  const primaryCollectorRolesCount = ticket?.individual?.householdsAndRoles.filter(
-    (el) => el.role === IndividualRoleInHouseholdRole.Primary,
-  ).length + (isHeadOfHousehold ? 1 : 0);
+  const primaryCollectorRolesCount =
+    ticket?.individual?.householdsAndRoles.filter(
+      (el) => el.role === IndividualRoleInHouseholdRole.Primary,
+    ).length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
     JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
   )?.filter(
-    (el: RoleReassignData) => el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+    (el: RoleReassignData) =>
+      el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
   ).length;
 
   const approveEnabled = (): boolean => {
@@ -56,8 +57,8 @@ export function DeleteIndividualGrievanceDetails({
       return true;
     }
     if (
-      isForApproval
-      && primaryCollectorRolesCount === primaryColletorRolesReassignedCount
+      isForApproval &&
+      primaryCollectorRolesCount === primaryColletorRolesReassignedCount
     ) {
       return true;
     }
@@ -91,62 +92,65 @@ export function DeleteIndividualGrievanceDetails({
     'typeName',
     'commsDisability',
   ];
-  const labels = Object.entries(ticket.individual || {})
-    .filter(([key]) => {
-      const snakeKey = snakeCase(key);
-      const fieldAttribute = fieldsDict[snakeKey];
-      return fieldAttribute && !excludedFields.includes(key);
-    })
-    .map(([key, value]) => {
-      let textValue = value;
-      const snakeKey = snakeCase(key);
-      const fieldAttribute = fieldsDict[snakeKey];
+  const labels =
+    Object.entries(ticket.individual || {})
+      .filter(([key]) => {
+        const snakeKey = snakeCase(key);
+        const fieldAttribute = fieldsDict[snakeKey];
+        return fieldAttribute && !excludedFields.includes(key);
+      })
+      .map(([key, value]) => {
+        let textValue = value;
+        const snakeKey = snakeCase(key);
+        const fieldAttribute = fieldsDict[snakeKey];
 
-      if (
-        fieldAttribute?.type === 'SELECT_MANY'
-          || fieldAttribute?.type === 'SELECT_ONE'
-      ) {
-        if (value instanceof Array) {
-          textValue = value
-            .map(
-              (choice) => fieldAttribute.choices.find((item) => item.value === choice)
-                ?.labelEn || '-',
-            )
-            .join(', ');
-        } else {
-          textValue = textValue === 'A_' ? null : textValue;
-          textValue = textValue
-            ? fieldAttribute.choices.find((item) => item.value === textValue)
-              ?.labelEn
-            : '-';
+        if (
+          fieldAttribute?.type === 'SELECT_MANY' ||
+          fieldAttribute?.type === 'SELECT_ONE'
+        ) {
+          if (value instanceof Array) {
+            textValue = value
+              .map(
+                (choice) =>
+                  fieldAttribute.choices.find((item) => item.value === choice)
+                    ?.labelEn || '-',
+              )
+              .join(', ');
+          } else {
+            textValue = textValue === 'A_' ? null : textValue;
+            textValue = textValue
+              ? fieldAttribute.choices.find((item) => item.value === textValue)
+                  ?.labelEn
+              : '-';
+          }
         }
-      }
-      if (fieldAttribute?.type === 'DATE') {
-        textValue = <UniversalMoment>{textValue}</UniversalMoment>;
-      }
-      return (
-        <Grid key={key} item xs={6}>
-          <LabelizedField
-            label={
+        if (fieldAttribute?.type === 'DATE') {
+          textValue = <UniversalMoment>{textValue}</UniversalMoment>;
+        }
+        return (
+          <Grid key={key} item xs={6}>
+            <LabelizedField
+              label={
                 snakeKey === 'sex' ? t('GENDER') : snakeKey.replace(/_/g, ' ')
               }
-            value={textValue}
+              value={textValue}
+            />
+          </Grid>
+        );
+      }) || [];
+
+  const documentLabels =
+    documents?.edges?.map((edge) => {
+      const item = edge.node;
+      return (
+        <Grid key={item.country + item.type.label} item xs={6}>
+          <LabelizedField
+            label={item.type.label.replace(/_/g, ' ')}
+            value={item.documentNumber}
           />
         </Grid>
       );
     }) || [];
-
-  const documentLabels = documents?.edges?.map((edge) => {
-    const item = edge.node;
-    return (
-      <Grid key={item.country + item.type.label} item xs={6}>
-        <LabelizedField
-          label={item.type.label.replace(/_/g, ' ')}
-          value={item.documentNumber}
-        />
-      </Grid>
-    );
-  }) || [];
   const allLabels = [...labels, ...documentLabels];
 
   let dialogText = t(
@@ -167,34 +171,36 @@ export function DeleteIndividualGrievanceDetails({
           {canApproveDataChange && (
             <Button
               data-cy="button-approve"
-              onClick={() => confirm({
-                title: t('Warning'),
-                content: dialogText,
-              }).then(async () => {
-                try {
-                  await mutate({
-                    variables: {
-                      grievanceTicketId: ticket.id,
-                      approveStatus:
+              onClick={() =>
+                confirm({
+                  title: t('Warning'),
+                  content: dialogText,
+                }).then(async () => {
+                  try {
+                    await mutate({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus:
                           !ticket.deleteIndividualTicketDetails?.approveStatus,
-                    },
-                    refetchQueries: () => [
-                      {
-                        query: GrievanceTicketDocument,
-                        variables: { id: ticket.id },
                       },
-                    ],
-                  });
-                  if (ticket.deleteIndividualTicketDetails.approveStatus) {
-                    showMessage(t('Changes Disapproved'));
+                      refetchQueries: () => [
+                        {
+                          query: GrievanceTicketDocument,
+                          variables: { id: ticket.id },
+                        },
+                      ],
+                    });
+                    if (ticket.deleteIndividualTicketDetails.approveStatus) {
+                      showMessage(t('Changes Disapproved'));
+                    }
+                    if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+                      showMessage(t('Changes Approved'));
+                    }
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
                   }
-                  if (!ticket.deleteIndividualTicketDetails.approveStatus) {
-                    showMessage(t('Changes Approved'));
-                  }
-                } catch (e) {
-                  e.graphQLErrors.map((x) => showMessage(x.message));
-                }
-              })}
+                })
+              }
               variant={
                 ticket.deleteIndividualTicketDetails?.approveStatus
                   ? 'outlined'

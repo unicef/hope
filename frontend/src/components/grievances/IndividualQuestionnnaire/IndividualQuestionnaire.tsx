@@ -1,8 +1,8 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '../../core/ContentLink';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
@@ -15,7 +15,8 @@ export function IndividualQuestionnaire({
 }: IndividualQuestionnaireProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-  const selectedIndividualData = values.selectedIndividual || values.selectedHousehold.headOfHousehold;
+  const selectedIndividualData =
+    values.selectedIndividual || values.selectedHousehold.headOfHousehold;
   return (
     <Grid container spacing={6}>
       {[

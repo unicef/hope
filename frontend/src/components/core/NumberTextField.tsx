@@ -1,6 +1,6 @@
 import { Box, InputAdornment, TextField } from '@mui/material';
 import styled from 'styled-components';
-import React from 'react';
+import * as React from 'react';
 import { FieldLabel } from './FieldLabel';
 
 const TextContainer = styled(TextField)`

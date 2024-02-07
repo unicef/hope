@@ -1,11 +1,11 @@
-import { Grid } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
-import React from 'react';
+import { Grid } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '../../../../__generated__/graphql';
-import { AssigneeAutocomplete } from '../../../../shared/autocompletes/AssigneeAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { FiltersSection } from '../../../core/FiltersSection';
 import { NumberTextField } from '../../../core/NumberTextField';
@@ -26,18 +26,19 @@ export function LookUpRegistrationFiltersCommunication({
   appliedFilter,
   setAppliedFilter,
 }: LookUpRegistrationFiltersCommunicationProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -86,10 +87,12 @@ export function LookUpRegistrationFiltersCommunication({
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
             placeholder="From"
             icon={<GroupIcon />}
-            onChange={(e) => handleFilterChange(
-              'totalHouseholdsCountWithValidPhoneNoMin',
-              e.target.value,
-            )}
+            onChange={(e) =>
+              handleFilterChange(
+                'totalHouseholdsCountWithValidPhoneNoMin',
+                e.target.value,
+              )
+            }
             data-cy="filter-size-min"
           />
         </Grid>
@@ -98,10 +101,12 @@ export function LookUpRegistrationFiltersCommunication({
             value={filter.totalHouseholdsCountWithValidPhoneNoMax}
             placeholder="To"
             icon={<GroupIcon />}
-            onChange={(e) => handleFilterChange(
-              'totalHouseholdsCountWithValidPhoneNoMax',
-              e.target.value,
-            )}
+            onChange={(e) =>
+              handleFilterChange(
+                'totalHouseholdsCountWithValidPhoneNoMax',
+                e.target.value,
+              )
+            }
             data-cy="filter-size-max"
           />
         </Grid>

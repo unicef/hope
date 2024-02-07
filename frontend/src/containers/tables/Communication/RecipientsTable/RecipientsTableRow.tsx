@@ -1,13 +1,13 @@
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { choicesToDict, householdStatusToColor } from '../../../../utils/utils';
+import { BlackLink } from '@components/core/BlackLink';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { StatusBox } from '@components/core/StatusBox';
+import { AnonTableCell } from '@components/core/Table/AnonTableCell';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { choicesToDict, householdStatusToColor } from '@utils/utils';
 import {
   HouseholdNode,
   IndividualNode,
@@ -26,8 +26,7 @@ export function RecipientsTableRow({
   headOfHousehold,
   canViewDetails,
 }: RecipientsTableRowProps): React.ReactElement {
-  const history = useHistory();
-  const { baseUrl, businessArea } = useBaseUrl();
+const navigate = useNavigate()  const { baseUrl, businessArea } = useBaseUrl();
   const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery({
     variables: { businessArea },
     fetchPolicy: 'cache-first',
@@ -37,7 +36,7 @@ export function RecipientsTableRow({
   );
   const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
   const handleClick = (): void => {
-    history.push(householdDetailsPath);
+    navigate(householdDetailsPath);
   };
   if (choicesLoading) return <LoadingComponent />;
   return (

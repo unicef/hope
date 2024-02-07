@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import {
   GrievanceTicketQuery,
@@ -69,11 +69,11 @@ export function RequestedIndividualDataChangeTable({
   );
 
   if (
-    loading
-    || !fieldsDict
-    || !countriesDict
-    || !documentTypeDict
-    || !identityTypeDict
+    loading ||
+    !fieldsDict ||
+    !countriesDict ||
+    !documentTypeDict ||
+    !identityTypeDict
   ) {
     return <LoadingComponent />;
   }
@@ -104,18 +104,18 @@ export function RequestedIndividualDataChangeTable({
       ) : null}
       {documentsToEdit?.length
         ? documentsToEdit.map((document, index) => (
-          <DocumentsToEditTable
-            key={document.previous_value.number}
-            values={values}
-            isEdit={isEdit}
-            ticket={ticket}
-            setFieldValue={setFieldValue}
-            documentTypeDict={documentTypeDict}
-            countriesDict={countriesDict}
-            index={index}
-            document={document}
-          />
-        ))
+            <DocumentsToEditTable
+              key={document.previous_value.number}
+              values={values}
+              isEdit={isEdit}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              documentTypeDict={documentTypeDict}
+              countriesDict={countriesDict}
+              index={index}
+              document={document}
+            />
+          ))
         : null}
       {identities?.length ? (
         <IdentitiesTable
@@ -132,17 +132,17 @@ export function RequestedIndividualDataChangeTable({
       ) : null}
       {identitiesToEdit?.length
         ? identitiesToEdit.map((identity, index) => (
-          <IdentitiesToEditTable
-            key={identity.previous_value.number}
-            values={values}
-            isEdit={isEdit}
-            ticket={ticket}
-            setFieldValue={setFieldValue}
-            countriesDict={countriesDict}
-            index={index}
-            identity={identity}
-          />
-        ))
+            <IdentitiesToEditTable
+              key={identity.previous_value.number}
+              values={values}
+              isEdit={isEdit}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              countriesDict={countriesDict}
+              index={index}
+              identity={identity}
+            />
+          ))
         : null}
       {paymentChannels?.length ? (
         <PaymentChannelsTable
@@ -155,16 +155,16 @@ export function RequestedIndividualDataChangeTable({
       ) : null}
       {paymentChannelsToEdit?.length
         ? paymentChannelsToEdit.map((paymentChannel, index) => (
-          <PaymentChannelsToEditTable
-            key={paymentChannel.previous_value.bankAccountNumber}
-            values={values}
-            isEdit={isEdit}
-            ticket={ticket}
-            setFieldValue={setFieldValue}
-            index={index}
-            paymentChannel={paymentChannel}
-          />
-        ))
+            <PaymentChannelsToEditTable
+              key={paymentChannel.previous_value.bankAccountNumber}
+              values={values}
+              isEdit={isEdit}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              index={index}
+              paymentChannel={paymentChannel}
+            />
+          ))
         : null}
       {documentsToRemove?.length ? (
         <DocumentsToRemoveTable

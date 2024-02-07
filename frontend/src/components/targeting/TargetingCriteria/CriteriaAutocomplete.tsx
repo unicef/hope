@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import Autocomplete from '@mui/lab/Autocomplete';
-import { TextField, Paper } from '@mui/material';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import { Paper, TextField } from '@mui/material';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;
@@ -18,12 +19,14 @@ export function CriteriaAutocomplete({
   const [open, setOpen] = useState(false);
   const [newValue, setNewValue] = useState(null);
   useEffect(() => {
-    const optionValue = otherProps.choices.find((choice) => choice.name === field.value) || null;
+    const optionValue =
+      otherProps.choices.find((choice) => choice.name === field.value) || null;
     setNewValue(optionValue);
   }, [field.value, otherProps.choices]);
 
-  const isInvalid = get(otherProps.form.errors, field.name)
-    && get(otherProps.form.touched, field.name);
+  const isInvalid =
+    get(otherProps.form.errors, field.name) &&
+    get(otherProps.form.touched, field.name);
   return (
     <StyledAutocomplete<Option>
       {...field}

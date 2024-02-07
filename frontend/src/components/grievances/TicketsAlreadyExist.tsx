@@ -1,13 +1,11 @@
-import {
-  Box, Grid, Paper, Typography,
-} from '@mui/material';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { decodeIdString } from '../../utils/utils';
+import { decodeIdString } from '@utils/utils';
 import { ContentLink } from '../core/ContentLink';
 import { LoadingComponent } from '../core/LoadingComponent';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
@@ -61,8 +59,9 @@ export function TicketsAlreadyExist({ values }): React.ReactElement {
       </Box>
     );
   });
-  const shouldShowBox = !!values.category
-    && (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id);
+  const shouldShowBox =
+    !!values.category &&
+    (!!values.selectedHousehold?.id || !!values.selectedIndividual?.id);
 
   return edges.length && shouldShowBox ? (
     <Grid item xs={6}>

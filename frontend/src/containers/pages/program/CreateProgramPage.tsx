@@ -1,8 +1,6 @@
-import {
-  Box, Step, StepButton, Stepper,
-} from '@mui/material';
+import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllProgramsForChoicesDocument,
@@ -11,16 +9,16 @@ import {
   useUserPartnerChoicesQuery,
 } from '../../../__generated__/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
-import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
+import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 
 export function CreateProgramPage(): ReactElement {
   const { t } = useTranslation();
@@ -32,7 +30,8 @@ export function CreateProgramPage(): ReactElement {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } = useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
+    useUserPartnerChoicesQuery();
 
   const [mutate] = useCreateProgramMutation({
     refetchQueries: () => [
@@ -129,9 +128,7 @@ export function CreateProgramPage(): ReactElement {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({
-        submitForm, values, validateForm, setFieldTouched,
-      }) => {
+      {({ submitForm, values, validateForm, setFieldTouched }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({

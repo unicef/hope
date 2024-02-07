@@ -1,9 +1,7 @@
-import {
-  Box, Radio, RadioGroup, Typography,
-} from '@mui/material';
-import React from 'react';
+import { Box, Radio, RadioGroup, Typography } from '@mui/material';
+import * as React from 'react';
 import styled from 'styled-components';
-import { GreyBox } from '../../../components/core/GreyBox';
+import { GreyBox } from '@components/core/GreyBox';
 
 const FormLabelContainer = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing(3)}px;

@@ -1,20 +1,19 @@
-import {
-  Box, Checkbox, Collapse, Grid, IconButton,
-} from '@mui/material';
+import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TreeItem, TreeView } from '@mui/lab';
 import { Field } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllAreasTreeQuery,
   UserPartnerChoicesQuery,
 } from '../../../__generated__/graphql';
-import { FormikRadioGroup } from '../../../shared/Formik/FormikRadioGroup';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '../../core/DividerLine';
 import { DeleteProgramPartner } from './DeleteProgramPartner';
 import { AreaTreeNode } from './AreaTreeNode';
@@ -57,11 +56,14 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const { t } = useTranslation();
   const selectedAdminAreasLength = values.partners[index]?.adminAreas?.length;
   const initialExpanded = selectedAdminAreasLength > 0;
-  const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(initialExpanded);
-  const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() => AreaTreeNode.buildTree(
-    allAreasTreeData,
-    values.partners[index]?.adminAreas,
-  ));
+  const [isAdminAreaExpanded, setIsAdminAreaExpanded] =
+    useState(initialExpanded);
+  const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
+    AreaTreeNode.buildTree(
+      allAreasTreeData,
+      values.partners[index]?.adminAreas,
+    ),
+  );
   const businessAreaOptionLabel = (
     <Box display="flex" flexDirection="column">
       <BigText>{t('Business Area')}</BigText>
@@ -86,7 +88,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     <TreeItem
       key={node.id}
       nodeId={node.id}
-      label={(
+      label={
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Checkbox
             id={node.id}
@@ -98,7 +100,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           />
           {node.name}
         </div>
-        )}
+      }
     >
       {renderTree(node.children)}
     </TreeItem>
@@ -120,9 +122,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           </SmallText>
           <Box mt={2} mb={2}>
             <SmallText>
-              Selected Admin Areas:
-              {' '}
-              {selectedAdminAreasLength || 0}
+              Selected Admin Areas: {selectedAdminAreasLength || 0}
             </SmallText>
           </Box>
         </Box>

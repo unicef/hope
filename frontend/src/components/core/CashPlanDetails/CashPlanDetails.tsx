@@ -1,9 +1,9 @@
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
-import { cashPlanStatusToColor } from '../../../utils/utils';
+import { cashPlanStatusToColor } from '@utils/utils';
 import { CashPlanNode } from '../../../__generated__/graphql';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { ContentLink } from '../ContentLink';
@@ -20,7 +20,8 @@ const NumberOfHouseHolds = styled.div`
   border-left-style: solid;
 `;
 const NumberOfHouseHoldsValue = styled.div`
-  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
@@ -56,19 +57,19 @@ export function CashPlanDetails({
   };
 
   const renderTargetPopulations = ():
-  | React.ReactElement
-  | Array<React.ReactElement> => (filteredTps().length ? (
-    filteredTps().map((el) => (
-      <span key={el.id}>
-        <ContentLink href={`/${baseUrl}/target-population/${el.id}`}>
-          {el.name}
-        </ContentLink>
-        {' '}
-      </span>
-    ))
-  ) : (
-    <span>-</span>
-  ));
+    | React.ReactElement
+    | Array<React.ReactElement> =>
+    filteredTps().length ? (
+      filteredTps().map((el) => (
+        <span key={el.id}>
+          <ContentLink href={`/${baseUrl}/target-population/${el.id}`}>
+            {el.name}
+          </ContentLink>{' '}
+        </span>
+      ))
+    ) : (
+      <span>-</span>
+    );
   return (
     <ContainerWithBorder>
       <Box display="flex" flexDirection="column">

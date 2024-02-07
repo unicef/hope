@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -6,9 +6,9 @@ import {
   TargetPopulationNode,
   useAllTargetPopulationsQuery,
 } from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { dateToIsoString } from '../../../../utils/utils';
+import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
@@ -59,10 +59,7 @@ export function TargetPopulationTable({
 
   const renderTable = (): React.ReactElement => (
     <TableWrapper>
-      <UniversalTable<
-      TargetPopulationNode,
-      AllTargetPopulationsQueryVariables
-      >
+      <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         rowsPerPageOptions={[10, 15, 20]}

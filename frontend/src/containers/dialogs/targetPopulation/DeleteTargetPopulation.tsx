@@ -6,10 +6,10 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { LoadingButton } from '../../../components/core/LoadingButton';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useDeleteTargetPopulationMutation } from '../../../__generated__/graphql';
 import { DialogDescription } from '../DialogDescription';

@@ -1,6 +1,6 @@
 import { Box, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -14,7 +14,7 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
+} from '@utils/constants';
 import { BreadCrumbsItem } from '../core/BreadCrumbs';
 import { ButtonDialog } from '../core/ButtonDialog';
 import { useConfirmation } from '../core/ConfirmationDialog';
@@ -72,8 +72,7 @@ export function GrievanceDetailsToolbar({
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
-  const history = useHistory();
-  const { isActiveProgram } = useProgramContext();
+const navigate = useNavigate()  const { isActiveProgram } = useProgramContext();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -477,7 +476,7 @@ export function GrievanceDetailsToolbar({
             {canCreateDataChange() && (
               <Box mr={3}>
                 <Button
-                  onClick={() => history.push({
+                  onClick={() => navigate({
                     pathname: `/${baseUrl}/grievance/new-ticket`,
                     state: {
                       category: GRIEVANCE_CATEGORIES.DATA_CHANGE,

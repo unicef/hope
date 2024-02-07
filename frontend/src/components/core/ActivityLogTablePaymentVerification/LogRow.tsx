@@ -3,7 +3,7 @@ import Collapse from '@mui/material/Collapse';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import clsx from 'clsx';
 import moment from 'moment';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import { PaymentVerificationLogEntryNode } from '../../../__generated__/graphql';

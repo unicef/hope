@@ -1,6 +1,6 @@
-import React from 'react';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { choicesToDict, dateToIsoString } from '../../../utils/utils';
+import * as React from 'react';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { choicesToDict, dateToIsoString } from '@utils/utils';
 import {
   AllReportsQueryVariables,
   MeQuery,

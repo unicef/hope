@@ -1,7 +1,7 @@
 import { Checkbox } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
-import React from 'react';
+import * as React from 'react';
 import {
   AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
@@ -9,18 +9,18 @@ import {
 } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { BlackLink } from '../../core/BlackLink';
 import { StatusBox } from '../../core/StatusBox';
 import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
 import { UniversalMoment } from '../../core/UniversalMoment';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
-import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
+import { getGrievanceDetailsPath } from '@utils/createGrievanceUtils';
 import { AssignedToDropdown } from './AssignedToDropdown';
 
 interface GrievancesTableRowProps {
@@ -55,8 +55,7 @@ export function GrievancesTableRow({
   initialVariables,
 }: GrievancesTableRowProps): React.ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
-  const history = useHistory();
-  const { showMessage } = useSnackbar();
+const navigate = useNavigate()  const { showMessage } = useSnackbar();
   const detailsPath = getGrievanceDetailsPath(
     ticket.id,
     ticket.category,
@@ -95,7 +94,7 @@ export function GrievancesTableRow({
 
   const handleRowClick = (): void => {
     if (canViewDetails) {
-      history.push(detailsPath);
+      navigate(detailsPath);
     }
     return null;
   };

@@ -10,7 +10,7 @@ import {
 import { Formik, Form, Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 
 function RefuseRdiForm({
@@ -58,10 +58,7 @@ function RefuseRdiForm({
             <DialogTitle>Refuse RDI</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                Are you sure, that you want to refuse RDI
-                {' '}
-                {name}
-                ?
+                Are you sure, that you want to refuse RDI {name}?
               </DialogContentText>
               <Field
                 name="refuseReason"

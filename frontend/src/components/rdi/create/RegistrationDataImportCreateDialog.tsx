@@ -9,13 +9,13 @@ import {
   Select,
 } from '@mui/material';
 import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../containers/dialogs/DialogActions';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
 import { ButtonTooltip } from '../../core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';

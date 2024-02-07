@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { Field, Form, Formik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
@@ -21,21 +21,21 @@ import {
   useEditPaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { FormikEffect } from '../core/FormikEffect';
 import { LoadingButton } from '../core/LoadingButton';
@@ -70,32 +70,32 @@ function prepareVariables(
       fullListArguments:
         selectedTab === 0
           ? {
-            excludedAdminAreas: values.excludedAdminAreasFull || [],
-          }
+              excludedAdminAreas: values.excludedAdminAreasFull || [],
+            }
           : null,
       verificationChannel: values.verificationChannel,
       rapidProArguments:
         values.verificationChannel === 'RAPIDPRO'
           ? {
-            flowId: values.rapidProFlow,
-          }
+              flowId: values.rapidProFlow,
+            }
           : null,
       randomSamplingArguments:
         selectedTab === 1
           ? {
-            confidenceInterval: values.confidenceInterval * 0.01,
-            marginOfError: values.marginOfError * 0.01,
-            excludedAdminAreas: values.adminCheckbox
-              ? values.excludedAdminAreasRandom
-              : [],
-            age: values.ageCheckbox
-              ? {
-                min: values.filterAgeMin || null,
-                max: values.filterAgeMax || null,
-              }
-              : null,
-            sex: values.sexCheckbox ? values.filterSex : null,
-          }
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              excludedAdminAreas: values.adminCheckbox
+                ? values.excludedAdminAreasRandom
+                : [],
+              age: values.ageCheckbox
+                ? {
+                    min: values.filterAgeMin || null,
+                    max: values.filterAgeMax || null,
+                  }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
           : null,
       businessAreaSlug: businessArea,
     },
@@ -119,8 +119,7 @@ export function EditVerificationPlan({
   const [mutate, { loading }] = useEditPaymentVerificationPlanMutation();
   const { businessArea } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
-  const history = useHistory();
-
+  const navigate = useNavigate();
   useEffect(() => {
     if (paymentVerificationPlanNode.sampling === 'FULL_LIST') {
       setSelectedTab(0);
@@ -146,19 +145,20 @@ export function EditVerificationPlan({
     adminCheckbox:
       paymentVerificationPlanNode.excludedAdminAreasFilter?.length !== 0,
     ageCheckbox:
-      Boolean(paymentVerificationPlanNode.ageFilter?.min)
-      || Boolean(paymentVerificationPlanNode.ageFilter?.max)
-      || false,
+      Boolean(paymentVerificationPlanNode.ageFilter?.min) ||
+      Boolean(paymentVerificationPlanNode.ageFilter?.max) ||
+      false,
     sexCheckbox: Boolean(paymentVerificationPlanNode.sexFilter) || false,
   };
 
   const [formValues, setFormValues] = useState(initialValues);
 
-  const [loadRapidProFlows, { data: rapidProFlows }] = useAllRapidProFlowsLazyQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-    },
-  });
+  const [loadRapidProFlows, { data: rapidProFlows }] =
+    useAllRapidProFlowsLazyQuery({
+      variables: {
+        businessAreaSlug: businessArea,
+      },
+    });
   const { data } = useAllAdminAreasQuery({
     variables: {
       first: 100,
@@ -208,9 +208,9 @@ export function EditVerificationPlan({
 
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
     ? data.allAdminAreas.edges.map((el) => ({
-      value: el.node.id,
-      name: el.node.name,
-    }))
+        value: el.node.id,
+        name: el.node.name,
+      }))
     : [];
 
   const handleFormChange = (values): void => {
@@ -220,9 +220,9 @@ export function EditVerificationPlan({
   const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
       return ` (${
-        (sampleSizesData?.sampleSize?.sampleSize
-          / sampleSizesData?.sampleSize?.paymentRecordCount)
-        * 100
+        (sampleSizesData?.sampleSize?.sampleSize /
+          sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100
       })%`;
     }
     return ' (0%)';
@@ -232,10 +232,10 @@ export function EditVerificationPlan({
       {({ submitForm, values, setValues }) => {
         // Redirect to error page if no flows available
         if (
-          !rapidProFlows?.allRapidProFlows?.length
-          && values.verificationChannel === 'RAPIDPRO'
+          !rapidProFlows?.allRapidProFlows?.length &&
+          values.verificationChannel === 'RAPIDPRO'
         ) {
-          history.push(`/error/${businessArea}`, {
+          navigate(`/error/${businessArea}`, {
             errorMessage: t(
               'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
             ),
@@ -306,13 +306,8 @@ export function EditVerificationPlan({
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size:
-                        {' '}
-                        {sampleSizesData?.sampleSize?.sampleSize}
-                        {' '}
-                        out of
-                        {' '}
-                        {sampleSizesData?.sampleSize?.paymentRecordCount}
+                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
+                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}
                         {getSampleSizePercentage()}
                       </Box>
                       <Box fontSize={12} color="#797979">
@@ -338,9 +333,9 @@ export function EditVerificationPlan({
                           choices={
                             rapidProFlows
                               ? rapidProFlows.allRapidProFlows.map((flow) => ({
-                                value: flow.id,
-                                name: flow.name,
-                              }))
+                                  value: flow.id,
+                                  name: flow.name,
+                                }))
                               : []
                           }
                           component={FormikSelectField}
@@ -445,14 +440,8 @@ export function EditVerificationPlan({
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size:
-                        {' '}
-                        {sampleSizesData?.sampleSize?.sampleSize}
-                        {' '}
-                        out of
-                        {' '}
-                        {sampleSizesData?.sampleSize?.paymentRecordCount}
-                        {' '}
+                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
+                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
                         {getSampleSizePercentage()}
                       </Box>
                       <Field

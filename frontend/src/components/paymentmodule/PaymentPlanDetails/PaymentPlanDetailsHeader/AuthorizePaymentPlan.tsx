@@ -8,13 +8,14 @@ import {
 } from '@mui/material';
 import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { LoadingButton } from '../../../core/LoadingButton';
 import { GreyText } from '../../../core/GreyText';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
@@ -34,12 +35,13 @@ export function AuthorizePaymentPlan({
   const { isActiveProgram } = useProgramContext();
 
   const { showMessage } = useSnackbar();
-  const { mutatePaymentPlanAction: authorize, loading: loadingAuthorize } = usePaymentPlanAction(
-    Action.Authorize,
-    paymentPlan.id,
-    () => showMessage(t('Payment Plan has been authorized.')),
-    () => setAuthorizeDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: authorize, loading: loadingAuthorize } =
+    usePaymentPlanAction(
+      Action.Authorize,
+      paymentPlan.id,
+      () => showMessage(t('Payment Plan has been authorized.')),
+      () => setAuthorizeDialogOpen(false),
+    );
   const initialValues = {
     comment: '',
   };
@@ -49,9 +51,11 @@ export function AuthorizePaymentPlan({
   });
 
   const shouldShowLastAuthorizerMessage = (): boolean => {
-    const authorizationNumberRequired = paymentPlan.approvalProcess?.edges[0]?.node.authorizationNumberRequired;
+    const authorizationNumberRequired =
+      paymentPlan.approvalProcess?.edges[0]?.node.authorizationNumberRequired;
 
-    const authorizationsCount = paymentPlan.approvalProcess?.edges[0]?.node.actions.authorization.length;
+    const authorizationsCount =
+      paymentPlan.approvalProcess?.edges[0]?.node.actions.authorization.length;
 
     return authorizationNumberRequired - 1 === authorizationsCount;
   };
@@ -95,13 +99,13 @@ export function AuthorizePaymentPlan({
                   {t('Are you sure you want to authorize this Payment Plan?')}
                 </Box>
                 {shouldShowLastAuthorizerMessage() && (
-                <Box p={5}>
-                  <GreyText>
-                    {t(
-                      'Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Release stage.',
-                    )}
-                  </GreyText>
-                </Box>
+                  <Box p={5}>
+                    <GreyText>
+                      {t(
+                        'Note: Upon Proceeding, this Payment Plan will be automatically moved to Finance Release stage.',
+                      )}
+                    </GreyText>
+                  </Box>
                 )}
                 <Form>
                   <Field

@@ -3,8 +3,9 @@ import camelCase from 'lodash/camelCase';
 import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { useField, Field } from 'formik';
-import React, { useEffect } from 'react';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import * as React from 'react';
+import { useEffect } from 'react';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllAddIndividualFieldsQuery,
   IndividualQuery,
@@ -54,8 +55,9 @@ export function EditIndividualDataChangeFieldRow({
           component={FormikSelectField}
           choices={fields
             .filter(
-              (item) => !notAvailableFields.includes(item.name)
-                || item.name === itemValue?.fieldName,
+              (item) =>
+                !notAvailableFields.includes(item.name) ||
+                item.name === itemValue?.fieldName,
             )
             .map((item) => ({
               value: item.name,

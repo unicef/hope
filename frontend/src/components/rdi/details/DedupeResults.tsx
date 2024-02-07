@@ -11,19 +11,20 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { BlackLink } from '../../core/BlackLink';
 import { MiśTheme } from '../../../theme';
-import { decodeIdString } from '../../../utils/utils';
+import { decodeIdString } from '@utils/utils';
 import {
   DeduplicationResultNode,
   ImportedIndividualMinimalFragment,
 } from '../../../__generated__/graphql';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const Error = styled.span`
@@ -67,25 +68,32 @@ export function DedupeResults({
     score,
     proximityToScore,
   ): {
-      hitId: number;
-      fullName: string;
-      age: number;
-      location: string;
-      score: number;
-      proximityToScore: number;
-    } {
+    hitId: number;
+    fullName: string;
+    age: number;
+    location: string;
+    score: number;
+    proximityToScore: number;
+  } {
     return {
-      hitId, fullName, age, location, score, proximityToScore,
+      hitId,
+      fullName,
+      age,
+      location,
+      score,
+      proximityToScore,
     };
   }
-  const rows = results.map((result) => createData(
-    result.hitId,
-    result.fullName,
-    result.age,
-    result.location,
-    result.score,
-    result.proximityToScore,
-  ));
+  const rows = results.map((result) =>
+    createData(
+      result.hitId,
+      result.fullName,
+      result.age,
+      result.location,
+      result.score,
+      result.proximityToScore,
+    ),
+  );
   const handleClickBatch = (id): string => {
     const path = `/${baseUrl}/registration-data-import/individual/${id}`;
     return path;
@@ -103,11 +111,7 @@ export function DedupeResults({
           setOpen(true);
         }}
       >
-        {status}
-        {' '}
-        (
-        {results.length}
-        )
+        {status} ({results.length})
       </Error>
       <Dialog
         maxWidth="md"
@@ -123,16 +127,10 @@ export function DedupeResults({
         <DialogContent>
           <DialogDescription>
             <div>
-              {t('Duplicates of')}
-              {' '}
+              {t('Duplicates of')}{' '}
               <Bold>
-                {individual.fullName}
-                {' '}
-                (
-                {decodeIdString(individual.id)}
-                )
-              </Bold>
-              {' '}
+                {individual.fullName} ({decodeIdString(individual.id)})
+              </Bold>{' '}
               {isInBatch ? t('within batch ') : t('against population ')}
               {t('are listed below.')}
             </div>
@@ -177,9 +175,7 @@ export function DedupeResults({
                   <TableCell align="left">{row.location}</TableCell>
                   <TableCell align="left">{row.score}</TableCell>
                   <TableCell align="left">
-                    {row.proximityToScore > 0 && '+'}
-                    {' '}
-                    {row.proximityToScore}
+                    {row.proximityToScore > 0 && '+'} {row.proximityToScore}
                   </TableCell>
                 </TableRow>
               ))}

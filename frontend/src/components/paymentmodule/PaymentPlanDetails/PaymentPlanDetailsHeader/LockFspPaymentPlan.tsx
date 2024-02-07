@@ -6,11 +6,12 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
@@ -31,15 +32,17 @@ export function LockFspPaymentPlan({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
-  const { mutatePaymentPlanAction: lock, loading: loadingLock } = usePaymentPlanAction(
-    Action.LockFsp,
-    paymentPlan.id,
-    () => showMessage(t('Payment Plan FSPs are locked.')),
-    () => setLockDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: lock, loading: loadingLock } =
+    usePaymentPlanAction(
+      Action.LockFsp,
+      paymentPlan.id,
+      () => showMessage(t('Payment Plan FSPs are locked.')),
+      () => setLockDialogOpen(false),
+    );
 
-  const canLockFsp = paymentPlan.deliveryMechanisms.length > 0
-    && hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP, permissions);
+  const canLockFsp =
+    paymentPlan.deliveryMechanisms.length > 0 &&
+    hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP, permissions);
 
   return (
     <>

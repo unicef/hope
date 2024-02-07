@@ -1,8 +1,6 @@
-import {
-  Box, Button, FormHelperText, Grid, Typography,
-} from '@mui/material';
+import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
 import { Field, Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,34 +16,34 @@ import {
   useMeQuery,
   useUpdateGrievanceMutation,
 } from '../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { DividerLine } from '../../../components/core/DividerLine';
-import { LabelizedField } from '../../../components/core/LabelizedField';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { Title } from '../../../components/core/Title';
-import { ExistingDocumentationFieldArray } from '../../../components/grievances/Documentation/ExistingDocumentationFieldArray';
-import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
-import { LookUpLinkedTickets } from '../../../components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
-import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { BlackLink } from '@components/core/BlackLink';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { DividerLine } from '@components/core/DividerLine';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { Title } from '@components/core/Title';
+import { ExistingDocumentationFieldArray } from '@components/grievances/Documentation/ExistingDocumentationFieldArray';
+import { NewDocumentationFieldArray } from '@components/grievances/Documentation/NewDocumentationFieldArray';
+import { LookUpLinkedTickets } from '@components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
+import { LookUpPaymentRecord } from '@components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
 import {
   getGrievanceDetailsPath,
   selectedIssueType,
-} from '../../../components/grievances/utils/createGrievanceUtils';
+} from '@components/grievances/utils/createGrievanceUtils';
 import {
   EmptyComponent,
   dataChangeComponentDict,
   prepareInitialValues,
   prepareVariables,
-} from '../../../components/grievances/utils/editGrievanceUtils';
-import { validate } from '../../../components/grievances/utils/validateGrievance';
-import { validationSchema } from '../../../components/grievances/utils/validationSchema';
+} from '@components/grievances/utils/editGrievanceUtils';
+import { validate } from '@components/grievances/utils/validateGrievance';
+import { validationSchema } from '@components/grievances/utils/validationSchema';
 import {
   PERMISSIONS,
   hasCreatorOrOwnerPermissions,
@@ -55,9 +53,9 @@ import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
@@ -66,13 +64,13 @@ import {
   GRIEVANCE_ISSUE_TYPES_NAMES,
   GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
   GRIEVANCE_TICKET_STATES,
-} from '../../../utils/constants';
+} from '@utils/constants';
 import {
   choicesToDict,
   isInvalid,
   isPermissionDeniedError,
   thingForSpecificGrievanceType,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 
 const BoxPadding = styled.div`
@@ -105,13 +103,15 @@ export function EditGrievancePage(): React.ReactElement {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: currentUserData, loading: currentUserDataLoading } = useMeQuery();
+  const { data: currentUserData, loading: currentUserDataLoading } =
+    useMeQuery();
 
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
@@ -119,13 +119,15 @@ export function EditGrievancePage(): React.ReactElement {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const { data: householdFieldsData, loading: householdFieldsLoading } = useAllEditHouseholdFieldsQuery();
-  const { data: programsData, loading: programsDataLoading } = useAllProgramsForChoicesQuery({
-    variables: {
-      first: 100,
-      businessArea,
-    },
-  });
+  const { data: householdFieldsData, loading: householdFieldsLoading } =
+    useAllEditHouseholdFieldsQuery();
+  const { data: programsData, loading: programsDataLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: {
+        first: 100,
+        businessArea,
+      },
+    });
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -138,26 +140,28 @@ export function EditGrievancePage(): React.ReactElement {
   );
 
   if (
-    userDataLoading
-    || choicesLoading
-    || ticketLoading
-    || allAddIndividualFieldsDataLoading
-    || householdFieldsLoading
-    || currentUserDataLoading
-    || programsDataLoading
-  ) return <LoadingComponent />;
+    userDataLoading ||
+    choicesLoading ||
+    ticketLoading ||
+    allAddIndividualFieldsDataLoading ||
+    householdFieldsLoading ||
+    currentUserDataLoading ||
+    programsDataLoading
+  )
+    return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (
-    !choicesData
-    || !userData
-    || !ticketData
-    || !currentUserData
-    || permissions === null
-    || !householdFieldsData
-    || !householdFieldsDict
-    || !individualFieldsDict
-    || !programsData
-  ) return null;
+    !choicesData ||
+    !userData ||
+    !ticketData ||
+    !currentUserData ||
+    permissions === null ||
+    !householdFieldsData ||
+    !householdFieldsDict ||
+    !individualFieldsDict ||
+    !programsData
+  )
+    return null;
 
   const categoryChoices: {
     [id: number]: string;
@@ -169,7 +173,8 @@ export function EditGrievancePage(): React.ReactElement {
   const isCreator = ticket.createdBy?.id === currentUserId;
   const isOwner = ticket.assignedTo?.id === currentUserId;
 
-  const { canViewHouseholdDetails, canViewIndividualDetails } = grievancePermissions(isCreator, isOwner, ticket, permissions);
+  const { canViewHouseholdDetails, canViewIndividualDetails } =
+    grievancePermissions(isCreator, isOwner, ticket, permissions);
 
   if (
     !hasCreatorOrOwnerPermissions(
@@ -180,7 +185,8 @@ export function EditGrievancePage(): React.ReactElement {
       PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
       permissions,
     )
-  ) return <PermissionDenied />;
+  )
+    return <PermissionDenied />;
 
   const changeState = (status): void => {
     mutateStatus({
@@ -199,26 +205,27 @@ export function EditGrievancePage(): React.ReactElement {
     },
   ];
 
-  const showIssueType = (values): boolean => (
-    values.category
-        === parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE, 10)
-      || values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE, 10)
-      || values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT, 10)
-  );
-  const dataChangeErrors = (errors, touched): React.ReactElement[] => [
-    'householdDataUpdateFields',
-    'individualDataUpdateFields',
-    'individualDataUpdateFieldsDocuments',
-    'individualDataUpdateFieldsIdentities',
-    'individualDataUpdateDocumentsToEdit',
-    'individualDataUpdateIdentitiesToEdit',
-    'individualDataUpdateFieldsPaymentChannels',
-    'individualDataUpdatePaymentChannelsToEdit',
-  ].map(
-    (fieldname) => isInvalid(fieldname, errors, touched) && (
-      <FormHelperText error>{errors[fieldname]}</FormHelperText>
-    ),
-  );
+  const showIssueType = (values): boolean =>
+    values.category ===
+      parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE, 10) ||
+    values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE, 10) ||
+    values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT, 10);
+  const dataChangeErrors = (errors, touched): React.ReactElement[] =>
+    [
+      'householdDataUpdateFields',
+      'individualDataUpdateFields',
+      'individualDataUpdateFieldsDocuments',
+      'individualDataUpdateFieldsIdentities',
+      'individualDataUpdateDocumentsToEdit',
+      'individualDataUpdateIdentitiesToEdit',
+      'individualDataUpdateFieldsPaymentChannels',
+      'individualDataUpdatePaymentChannelsToEdit',
+    ].map(
+      (fieldname) =>
+        isInvalid(fieldname, errors, touched) && (
+          <FormHelperText error>{errors[fieldname]}</FormHelperText>
+        ),
+    );
 
   const canAddDocumentation = hasPermissions(
     PERMISSIONS.GRIEVANCE_DOCUMENTS_UPLOAD,
@@ -231,12 +238,14 @@ export function EditGrievancePage(): React.ReactElement {
     baseUrl,
   );
 
-  const categoryDescription = GRIEVANCE_CATEGORY_DESCRIPTIONS[
-    GRIEVANCE_CATEGORIES_NAMES[ticket.category]
-  ] || '';
-  const issueTypeDescription = GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-    GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
-  ] || '';
+  const categoryDescription =
+    GRIEVANCE_CATEGORY_DESCRIPTIONS[
+      GRIEVANCE_CATEGORIES_NAMES[ticket.category]
+    ] || '';
+  const issueTypeDescription =
+    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
+      GRIEVANCE_ISSUE_TYPES_NAMES[ticket.issueType]
+    ] || '';
 
   const mappedProgramChoices = programsData?.allPrograms?.edges?.map(
     (element) => ({ name: element.node.name, value: element.node.id }),
@@ -265,23 +274,23 @@ export function EditGrievancePage(): React.ReactElement {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
         if (
-          ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-          || ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD
+          ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+          ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD
         ) {
           changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
         }
       }}
-      validate={(values) => validate(
-        values,
-        allAddIndividualFieldsData,
-        individualFieldsDict,
-        householdFieldsDict,
-      )}
+      validate={(values) =>
+        validate(
+          values,
+          allAddIndividualFieldsData,
+          individualFieldsDict,
+          householdFieldsDict,
+        )
+      }
       validationSchema={validationSchema}
     >
-      {({
-        submitForm, values, setFieldValue, errors, touched,
-      }) => {
+      {({ submitForm, values, setFieldValue, errors, touched }) => {
         const DataChangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
@@ -355,42 +364,42 @@ export function EditGrievancePage(): React.ReactElement {
                         <Grid item xs={3}>
                           <LabelizedField label={t('Household ID')}>
                             <span>
-                              {ticket.household?.id
-                              && canViewHouseholdDetails
-                              && !isAllPrograms ? (
+                              {ticket.household?.id &&
+                              canViewHouseholdDetails &&
+                              !isAllPrograms ? (
                                 <BlackLink
                                   to={`/${baseUrl}/population/household/${ticket.household.id}`}
                                 >
                                   {ticket.household.unicefId}
                                 </BlackLink>
-                                ) : (
-                                  <div>
-                                    {ticket.household?.id
-                                      ? ticket.household.unicefId
-                                      : '-'}
-                                  </div>
-                                )}
+                              ) : (
+                                <div>
+                                  {ticket.household?.id
+                                    ? ticket.household.unicefId
+                                    : '-'}
+                                </div>
+                              )}
                             </span>
                           </LabelizedField>
                         </Grid>
                         <Grid item xs={3}>
                           <LabelizedField label={t('Individual ID')}>
                             <span>
-                              {ticket.individual?.id
-                              && canViewIndividualDetails
-                              && !isAllPrograms ? (
+                              {ticket.individual?.id &&
+                              canViewIndividualDetails &&
+                              !isAllPrograms ? (
                                 <BlackLink
                                   to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
                                 >
                                   {ticket.individual.unicefId}
                                 </BlackLink>
-                                ) : (
-                                  <div>
-                                    {ticket.individual?.id
-                                      ? ticket.individual.unicefId
-                                      : '-'}
-                                  </div>
-                                )}
+                              ) : (
+                                <div>
+                                  {ticket.individual?.id
+                                    ? ticket.individual.unicefId
+                                    : '-'}
+                                </div>
+                              )}
                             </span>
                           </LabelizedField>
                         </Grid>
@@ -481,8 +490,8 @@ export function EditGrievancePage(): React.ReactElement {
                             choices={mappedProgramChoices}
                             component={FormikSelectField}
                             disabled={
-                              !isAllPrograms
-                              || Boolean(ticket.programs?.[0]?.id)
+                              !isAllPrograms ||
+                              Boolean(ticket.programs?.[0]?.id)
                             }
                           />
                         </Grid>
@@ -518,21 +527,21 @@ export function EditGrievancePage(): React.ReactElement {
                           />
                         </Box>
                       </Grid>
-                      {(ticket.issueType?.toString()
-                        === GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT
-                        || ticket.issueType?.toString()
-                          === GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
-                          <BoxWithBottomBorders>
-                            <Grid item xs={6}>
-                              <Box py={3}>
-                                <LookUpPaymentRecord
-                                  values={values}
-                                  disabled={Boolean(ticket.paymentRecord)}
-                                  onValueChange={setFieldValue}
-                                />
-                              </Box>
-                            </Grid>
-                          </BoxWithBottomBorders>
+                      {(ticket.issueType?.toString() ===
+                        GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT ||
+                        ticket.issueType?.toString() ===
+                          GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT) && (
+                        <BoxWithBottomBorders>
+                          <Grid item xs={6}>
+                            <Box py={3}>
+                              <LookUpPaymentRecord
+                                values={values}
+                                disabled={Boolean(ticket.paymentRecord)}
+                                onValueChange={setFieldValue}
+                              />
+                            </Box>
+                          </Grid>
+                        </BoxWithBottomBorders>
                       )}
                     </BoxPadding>
                     {hasCreatorOrOwnerPermissions(

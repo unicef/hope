@@ -1,10 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { Tooltip, TooltipProps } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 
 const StyledWarning = styled(WarningIcon)`
-  color: ${({ theme, confirmed }) => (confirmed ? 'deeppink' : theme.hctPalette.orange)};
+  color: ${({ theme, confirmed }) =>
+    confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
 
 interface WarningTooltipProps {

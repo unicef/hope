@@ -1,16 +1,16 @@
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import { CashPlanAndPaymentPlanNode } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import {
   paymentPlanStatusToColor,
   renderSomethingOrDash,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 
 interface CashPlanTableRowProps {
   cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
@@ -19,14 +19,13 @@ interface CashPlanTableRowProps {
 export function CashPlanTableRow({
   cashAndPaymentPlan,
 }: CashPlanTableRowProps): React.ReactElement {
-  const history = useHistory();
-  const { baseUrl, isAllPrograms } = useBaseUrl();
+const navigate = useNavigate()  const { baseUrl, isAllPrograms } = useBaseUrl();
   const objectPath = cashAndPaymentPlan.objType === 'PaymentPlan'
     ? `/${baseUrl}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
     : `/${baseUrl}/cashplans/${cashAndPaymentPlan.id}`;
 
   const handleClick = (): void => {
-    history.push(objectPath);
+    navigate(objectPath);
   };
   return (
     <ClickableTableRow

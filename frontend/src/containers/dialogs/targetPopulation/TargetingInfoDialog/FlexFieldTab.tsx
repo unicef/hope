@@ -1,8 +1,8 @@
 import { Box, Grid, MenuItem } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../../components/core/SelectFilter';
+import { SearchTextField } from '@components/core/SearchTextField';
+import { SelectFilter } from '@components/core/SelectFilter';
 import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 

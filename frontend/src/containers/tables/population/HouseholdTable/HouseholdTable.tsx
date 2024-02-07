@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllHouseholdsForPopulationTableQueryVariables,
@@ -7,7 +7,7 @@ import {
   HouseholdNode,
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { headCells } from './HouseholdTableHeadCells';

@@ -1,5 +1,5 @@
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FeedbackQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '../../../core/BlackLink';

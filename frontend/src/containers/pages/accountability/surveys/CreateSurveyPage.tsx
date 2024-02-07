@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, {
+import  {
   ReactElement, useCallback, useEffect, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,26 +29,26 @@ import {
   useSurveyAvailableFlowsLazyQuery,
   useCreateSurveyAccountabilityMutation,
 } from '../../../../__generated__/graphql';
-import { LookUpSelectionSurveys } from '../../../../components/accountability/Surveys/LookUpsSurveys/LookUpSelectionSurveys';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
-import { FormikEffect } from '../../../../components/core/FormikEffect';
-import { LoadingButton } from '../../../../components/core/LoadingButton';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { TabPanel } from '../../../../components/core/TabPanel';
-import { PaperContainer } from '../../../../components/targeting/PaperContainer';
+import { LookUpSelectionSurveys } from '@components/accountability/Surveys/LookUpsSurveys/LookUpSelectionSurveys';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { FormikEffect } from '@components/core/FormikEffect';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TabPanel } from '@components/core/TabPanel';
+import { PaperContainer } from '@components/targeting/PaperContainer';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '../../../../shared/Formik/FormikMultiSelectField';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { SurveySteps, SurveyTabsValues } from '../../../../utils/constants';
-import { getPercentage } from '../../../../utils/utils';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { SurveySteps, SurveyTabsValues } from '@utils/constants';
+import { getPercentage } from '@utils/utils';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
@@ -93,8 +93,7 @@ function prepareVariables(
 
 export function CreateSurveyPage(): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
-  const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
+const navigate = useNavigate()  const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -116,7 +115,7 @@ export function CreateSurveyPage(): React.ReactElement {
 
   // Set category to SMS if the user types random string in url
   if (!isCategoryValid) {
-    history.push(
+    navigate(
       `/${businessArea}/accountability/surveys/create/${SurveyCategory.Sms}`,
     );
   }
@@ -201,7 +200,7 @@ export function CreateSurveyPage(): React.ReactElement {
       !flowsData?.surveyAvailableFlows?.length
       && category === SurveyCategory.RapidPro
     ) {
-      history.push(`/error/${businessArea}`, {
+      navigate(`/error/${businessArea}`, {
         errorMessage: t(
           'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
         ),

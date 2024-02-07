@@ -1,10 +1,10 @@
 import { Grid } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
-import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { useLocation } from 'react-router-dom';
+import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
+import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { FiltersSection } from '../../../core/FiltersSection';
 import { SearchTextField } from '../../../core/SearchTextField';
@@ -23,19 +23,19 @@ export function SurveysFilters({
   appliedFilter,
   setAppliedFilter,
 }: SurveysFiltersProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };

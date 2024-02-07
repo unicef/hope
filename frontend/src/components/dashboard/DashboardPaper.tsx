@@ -1,5 +1,5 @@
 import { Box, Paper } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 
 interface DashboardPaperProps {
@@ -12,9 +12,7 @@ interface DashboardPaperProps {
 }
 const StyledPaper = styled(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ({
-    noMarginTop, extraPaddingLeft, color, ...props
-  }) => <Paper {...props} />,
+  ({ noMarginTop, extraPaddingLeft, color, ...props }) => <Paper {...props} />,
 )`
   padding: 18px 24px;
   padding-left: ${(props) => (props.extraPaddingLeft ? '46px' : '24px')}

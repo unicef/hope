@@ -1,13 +1,14 @@
 import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import {
   formatCurrencyWithSymbol,
   formatThousands,
   getPercentage,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { GlobalAreaChartsQuery } from '../../../__generated__/graphql';
 
 interface TotalAmountTransferredByCountryChartProps {
@@ -25,7 +26,8 @@ export function TotalAmountTransferredByCountryChart({
 
   const matchDataSize = (
     dataToSlice: number[] | string[],
-  ): number[] | string[] => (showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount));
+  ): number[] | string[] =>
+    showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount);
 
   const chartData = {
     labels: matchDataSize(data.labels),
@@ -58,12 +60,13 @@ export function TotalAmountTransferredByCountryChart({
     tooltips: {
       mode: 'point',
       callbacks: {
-        label: (tooltipItem, tooltipData) => ` ${
-          tooltipData.datasets[tooltipItem.datasetIndex].label
-        }: ${formatCurrencyWithSymbol(tooltipItem.xLabel)} (${getPercentage(
-          tooltipItem.xLabel,
-          data.datasets[2].data[tooltipItem.index],
-        )})`,
+        label: (tooltipItem, tooltipData) =>
+          ` ${
+            tooltipData.datasets[tooltipItem.datasetIndex].label
+          }: ${formatCurrencyWithSymbol(tooltipItem.xLabel)} (${getPercentage(
+            tooltipItem.xLabel,
+            data.datasets[2].data[tooltipItem.index],
+          )})`,
       },
     },
     scales: {

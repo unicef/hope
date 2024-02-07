@@ -1,12 +1,12 @@
 import { Tab, Tabs } from '@mui/material';
-import React, { useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import  { useState } from 'react';
+import {  useLocation, useParams } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { GrievancesFilters } from '../../../components/grievances/GrievancesTable/GrievancesFilters';
-import { GrievancesTable } from '../../../components/grievances/GrievancesTable/GrievancesTable';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { GrievancesFilters } from '@components/grievances/GrievancesTable/GrievancesFilters';
+import { GrievancesTable } from '@components/grievances/GrievancesTable/GrievancesTable';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -14,16 +14,15 @@ import {
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
-} from '../../../utils/constants';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+} from '@utils/constants';
+import { getFilterFromQueryParams } from '@utils/utils';
 
 export function GrievancesTablePage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
-  const history = useHistory();
-  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
+const navigate = useNavigate()  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
 
   const initialFilter = {
     search: '',
@@ -83,7 +82,7 @@ export function GrievancesTablePage(): React.ReactElement {
           category: '',
           program: '',
         });
-        history.push(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
+        navigate(newValue === 0 ? userGeneratedPath : systemGeneratedPath);
       }}
       indicatorColor="primary"
       textColor="primary"

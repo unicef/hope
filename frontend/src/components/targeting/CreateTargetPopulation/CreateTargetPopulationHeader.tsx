@@ -1,9 +1,9 @@
 import { Box } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { LoadingButton } from '../../core/LoadingButton';
 import { PageHeader } from '../../core/PageHeader';
@@ -34,7 +34,7 @@ export function CreateTargetPopulationHeader({
 
   return (
     <PageHeader
-      title={(
+      title={
         <Field
           name="name"
           label={t('Enter Target Population Name')}
@@ -44,7 +44,7 @@ export function CreateTargetPopulationHeader({
           component={FormikTextField}
           data-cy="input-name"
         />
-      )}
+      }
       breadCrumbs={
         hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions)
           ? breadCrumbsItems

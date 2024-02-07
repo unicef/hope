@@ -1,11 +1,11 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
@@ -14,9 +14,9 @@ import {
   useCashAssistUrlPrefixQuery,
   usePaymentQuery,
 } from '../../../__generated__/graphql';
-import { PaymentDetails } from '../../../components/paymentmodule/PaymentDetails';
-import { RevertForceFailedButton } from '../../../components/paymentmodule/RevertForceFailedButton';
-import { ForceFailedButton } from '../../../components/paymentmodule/ForceFailedButton';
+import { PaymentDetails } from '@components/paymentmodule/PaymentDetails';
+import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
+import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export function PaymentDetailsPage(): React.ReactElement {
@@ -35,7 +35,8 @@ export function PaymentDetailsPage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   if (loading || caLoading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions))
+    return <PermissionDenied />;
 
   if (!data || !caData) return null;
   const { payment } = data;
@@ -56,13 +57,14 @@ export function PaymentDetailsPage(): React.ReactElement {
 
   const renderButton = (): React.ReactElement | null => {
     if (
-      (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions)
-        && paymentPlanStatus === PaymentPlanStatus.Accepted)
-      || paymentPlanStatus === PaymentPlanStatus.Finished
+      (hasPermissions(PERMISSIONS.PM_MARK_PAYMENT_AS_FAILED, permissions) &&
+        paymentPlanStatus === PaymentPlanStatus.Accepted) ||
+      paymentPlanStatus === PaymentPlanStatus.Finished
     ) {
-      const ButtonComponent = payment.status === PaymentStatus.ForceFailed
-        ? RevertForceFailedButton
-        : ForceFailedButton;
+      const ButtonComponent =
+        payment.status === PaymentStatus.ForceFailed
+          ? RevertForceFailedButton
+          : ForceFailedButton;
       return <ButtonComponent paymentId={payment.id} />;
     }
     return null;

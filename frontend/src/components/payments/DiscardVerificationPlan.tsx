@@ -1,14 +1,13 @@
-import {
-  Box, Button, DialogContent, DialogTitle,
-} from '@mui/material';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useDiscardPaymentVerificationPlanMutation } from '../../__generated__/graphql';
 import { ErrorButton } from '../core/ErrorButton';
@@ -68,9 +67,7 @@ export function DiscardVerificationPlan({
                 {t(
                   'Are you sure you would like to remove payment verification records',
                 )}
-                <br />
-                {' '}
-                {t('and restart the verification process?')}
+                <br /> {t('and restart the verification process?')}
               </div>
             </Box>
           </DialogContainer>

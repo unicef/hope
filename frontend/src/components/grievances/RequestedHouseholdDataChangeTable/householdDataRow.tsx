@@ -2,9 +2,9 @@ import { Checkbox, TableCell, TableRow } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
 
@@ -35,23 +35,27 @@ export const householdDataRow = (
     approveStatus: boolean;
   };
 
-  const previousValue = fieldName === 'country' || fieldName === 'country_origin'
-    ? countriesDict[valueDetails.previousValue]
-    : valueDetails.previousValue;
+  const previousValue =
+    fieldName === 'country' || fieldName === 'country_origin'
+      ? countriesDict[valueDetails.previousValue]
+      : valueDetails.previousValue;
 
   const householdValue = field.isFlexField
     ? ticket.householdDataUpdateTicketDetails.household.flexFields[fieldName]
     : ticket.householdDataUpdateTicketDetails.household[camelCase(fieldName)];
-  const currentValue = ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
-    ? previousValue
-    : householdValue;
+  const currentValue =
+    ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+      ? previousValue
+      : householdValue;
   return (
     <TableRow role="checkbox" aria-checked={isItemSelected} key={fieldName}>
       <TableCell>
         {isEdit ? (
           <Checkbox
             data-cy="checkbox-household-data"
-            onChange={(event) => handleSelectBioData(fieldName, event.target.checked)}
+            onChange={(event) =>
+              handleSelectBioData(fieldName, event.target.checked)
+            }
             color="primary"
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             checked={isItemSelected}

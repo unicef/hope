@@ -1,6 +1,6 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
-import React from 'react';
+import * as React from 'react';
 import wait from 'waait';
 import { fakeApolloAllPaymentVerifications } from '../../../../../fixtures/payments/fakeApolloAllPaymentVerifications';
 import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';

@@ -1,7 +1,7 @@
 import { Box, Paper, Typography } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -41,18 +41,22 @@ export function ReassignMultipleRoleBox({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
-  const selectedIndividualsToReassign = ticket.needsAdjudicationTicketDetails.selectedIndividuals?.filter(
-    (el) => el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
-  );
+  const selectedIndividualsToReassign =
+    ticket.needsAdjudicationTicketDetails.selectedIndividuals?.filter(
+      (el) =>
+        el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+    );
 
   const mappedReassignLookups = (): React.ReactElement => (
     <>
       {selectedIndividualsToReassign.map((selectedIndividualToReassign) => {
         const { household } = selectedIndividualToReassign;
 
-        const householdsAndRoles = selectedIndividualToReassign?.householdsAndRoles;
+        const householdsAndRoles =
+          selectedIndividualToReassign?.householdsAndRoles;
 
-        const shouldShowReassignHoH = selectedIndividualToReassign?.id === household?.headOfHousehold?.id;
+        const shouldShowReassignHoH =
+          selectedIndividualToReassign?.id === household?.headOfHousehold?.id;
 
         const mappedLookUpsForExternalHouseholds = householdsAndRoles
           .filter((element) => element.role !== 'NO_ROLE')
@@ -60,19 +64,14 @@ export function ReassignMultipleRoleBox({
             <Box mb={2} mt={2} key={householdAndRole.id}>
               <Box mb={2}>
                 <LabelizedField label={t('ROLE')}>
-                  <>
-                    {capitalize(householdAndRole.role)}
-                    {' '}
-                    Collector
-                  </>
+                  <>{capitalize(householdAndRole.role)} Collector</>
                 </LabelizedField>
                 <LabelizedField label={t('INDIVIDUAL ID')}>
                   <ContentLink
                     href={`/${baseUrl}/population/individuals/${householdAndRole.individual.id}`}
                   >
                     {householdAndRole.individual.unicefId}
-                  </ContentLink>
-                  {' '}
+                  </ContentLink>{' '}
                   {householdAndRole.individual.fullName}
                 </LabelizedField>
                 <LabelizedField label={t('HOUSEHOLD ID')}>
@@ -104,36 +103,35 @@ export function ReassignMultipleRoleBox({
             flexDirection="column"
           >
             {shouldShowReassignHoH && (
-            <Box mb={2} mt={2}>
-              <Box mb={2}>
-                <LabelizedField label={t('ROLE')}>
-                  <>{t('Head of Household')}</>
-                </LabelizedField>
-                <LabelizedField label={t('INDIVIDUAL ID')}>
-                  <ContentLink
-                    href={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
-                  >
-                    {ticket.individual.unicefId}
-                  </ContentLink>
-                  {' '}
-                  {ticket.individual.fullName}
-                </LabelizedField>
-                <LabelizedField label={t('HOUSEHOLD ID')}>
-                  <ContentLink
-                    href={`/${baseUrl}/population/household/${ticket?.household.id}`}
-                  >
-                    {household.unicefId}
-                  </ContentLink>
-                </LabelizedField>
+              <Box mb={2} mt={2}>
+                <Box mb={2}>
+                  <LabelizedField label={t('ROLE')}>
+                    <>{t('Head of Household')}</>
+                  </LabelizedField>
+                  <LabelizedField label={t('INDIVIDUAL ID')}>
+                    <ContentLink
+                      href={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
+                    >
+                      {ticket.individual.unicefId}
+                    </ContentLink>{' '}
+                    {ticket.individual.fullName}
+                  </LabelizedField>
+                  <LabelizedField label={t('HOUSEHOLD ID')}>
+                    <ContentLink
+                      href={`/${baseUrl}/population/household/${ticket?.household.id}`}
+                    >
+                      {household.unicefId}
+                    </ContentLink>
+                  </LabelizedField>
+                </Box>
+                <LookUpReassignRole
+                  shouldDisableButton={false}
+                  individualRole={{ role: 'HEAD', id: 'HEAD' }}
+                  ticket={ticket}
+                  household={household}
+                  individual={selectedIndividualToReassign}
+                />
               </Box>
-              <LookUpReassignRole
-                shouldDisableButton={false}
-                individualRole={{ role: 'HEAD', id: 'HEAD' }}
-                ticket={ticket}
-                household={household}
-                individual={selectedIndividualToReassign}
-              />
-            </Box>
             )}
             {mappedLookUpsForExternalHouseholds}
           </Box>

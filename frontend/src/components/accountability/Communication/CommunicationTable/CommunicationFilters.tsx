@@ -1,12 +1,12 @@
 import { Grid } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { FiltersSection } from '../../../core/FiltersSection';
-import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
+import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
+import { DatePickerFilter } from '@components/core/DatePickerFilter';
+import { FiltersSection } from '@components/core/FiltersSection';
+import { createHandleApplyFilterChange } from '@utils/utils';
 
 interface CommunicationFiltersProps {
   filter;
@@ -23,17 +23,19 @@ export function CommunicationFilters({
   setAppliedFilter,
 }: CommunicationFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();

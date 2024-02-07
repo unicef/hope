@@ -1,18 +1,18 @@
 import { Grid } from '@mui/material';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form } from 'formik';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useDataCollectionTypeChoiceDataQuery,
   useProgrammeChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { today } from '../../utils/utils';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { today } from '@utils/utils';
 
 interface ProgramFormPropTypes {
   values;
@@ -21,13 +21,15 @@ interface ProgramFormPropTypes {
 export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
-  const { data: dataCollectionTypeChoicesData } = useDataCollectionTypeChoiceDataQuery();
+  const { data: dataCollectionTypeChoicesData } =
+    useDataCollectionTypeChoiceDataQuery();
 
   if (!data || !dataCollectionTypeChoicesData) return null;
 
-  const filteredDataCollectionTypeChoicesData = dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
-    (el) => el.name !== '',
-  );
+  const filteredDataCollectionTypeChoicesData =
+    dataCollectionTypeChoicesData?.dataCollectionTypeChoices.filter(
+      (el) => el.name !== '',
+    );
 
   return (
     <Form>

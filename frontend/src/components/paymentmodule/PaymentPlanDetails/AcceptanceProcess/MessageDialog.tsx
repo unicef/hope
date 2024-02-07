@@ -5,16 +5,17 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import MessageIcon from '@mui/icons-material/Message';
 import styled from 'styled-components';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../../containers/dialogs/DialogActions';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
 import { UniversalMoment } from '../../../core/UniversalMoment';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DividerLine } from '../../../core/DividerLine';
-import { renderUserName } from '../../../../utils/utils';
+import { renderUserName } from '@utils/utils';
 import { UserNode } from '../../../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
@@ -72,13 +73,10 @@ export function MessageDialog({
           <DialogContainer>
             <Box display="flex" flexDirection="column">
               <Box mt={2} display="flex">
-                {renderUserName(author)}
-                {' '}
+                {renderUserName(author)}{' '}
                 <GreyText>
                   <Box ml={1}>
-                    on
-                    {' '}
-                    <UniversalMoment>{date}</UniversalMoment>
+                    on <UniversalMoment>{date}</UniversalMoment>
                   </Box>
                 </GreyText>
               </Box>

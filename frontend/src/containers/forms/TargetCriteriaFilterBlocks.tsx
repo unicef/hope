@@ -1,10 +1,10 @@
 import { Box, Button } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { chooseFieldType, clearField } from '../../utils/targetingUtils';
+import { chooseFieldType, clearField } from '@utils/targetingUtils';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
 
@@ -80,7 +80,8 @@ export function TargetCriteriaFilterBlocks({
   onDelete: () => void;
 }): React.ReactElement {
   const { t } = useTranslation();
-  const shouldShowAndDivider = blockIndex + 1 < values.individualsFiltersBlocks.length;
+  const shouldShowAndDivider =
+    blockIndex + 1 < values.individualsFiltersBlocks.length;
   return (
     <div>
       Set Individual Criteria
@@ -92,8 +93,9 @@ export function TargetCriteriaFilterBlocks({
               {values.individualsFiltersBlocks[
                 blockIndex
               ].individualBlockFilters.map((each, index) => {
-                const shouldShowDivider = index + 1
-                  < values.individualsFiltersBlocks[blockIndex]
+                const shouldShowDivider =
+                  index + 1 <
+                  values.individualsFiltersBlocks[blockIndex]
                     .individualBlockFilters.length;
                 return (
                   <Fragment key={blockIndex + index.toString()}>
@@ -134,9 +136,11 @@ export function TargetCriteriaFilterBlocks({
                   color="primary"
                   variant="outlined"
                   startIcon={<AddCircleOutline />}
-                  onClick={() => arrayHelpers.push({
-                    fieldName: '',
-                  })}
+                  onClick={() =>
+                    arrayHelpers.push({
+                      fieldName: '',
+                    })
+                  }
                   style={{
                     position: 'relative',
                     top: 18,

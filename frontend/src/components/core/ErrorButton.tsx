@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { makeStyles } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 
@@ -8,10 +8,7 @@ const useStyles = makeStyles({
   },
 });
 
-export function ErrorButton({
-  children,
-  ...otherProps
-}): React.ReactElement {
+export function ErrorButton({ children, ...otherProps }): React.ReactElement {
   const classes = useStyles(otherProps);
   return (
     <Button {...otherProps} className={classes.error}>

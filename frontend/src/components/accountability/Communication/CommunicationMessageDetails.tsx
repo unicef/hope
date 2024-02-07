@@ -1,10 +1,8 @@
-import {
-  Box, Grid, Paper, Typography,
-} from '@mui/material';
-import React from 'react';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { renderUserName } from '../../../utils/utils';
+import { renderUserName } from '@utils/utils';
 import { AccountabilityCommunicationMessageQuery } from '../../../__generated__/graphql';
 import { OverviewContainer } from '../../core/OverviewContainer';
 import { Title } from '../../core/Title';

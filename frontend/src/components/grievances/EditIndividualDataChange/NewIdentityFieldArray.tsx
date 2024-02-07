@@ -3,11 +3,11 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 import { AgencyField } from '../AgencyField';
-import { removeItemById } from '../utils/helpers';
+import { removeItemById } from '@utils/helpers';
 
 export interface NewIdentityFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
@@ -33,15 +33,17 @@ export function NewIdentityFieldArray({
                 <AgencyField
                   id={existingOrNewId}
                   key={`${existingOrNewId}-${item?.country}-${item?.partner}`}
-                  onDelete={() => removeItemById(
-                    values.individualDataUpdateFieldsIdentities,
-                    existingOrNewId,
-                    arrayHelpers,
-                  )}
+                  onDelete={() =>
+                    removeItemById(
+                      values.individualDataUpdateFieldsIdentities,
+                      existingOrNewId,
+                      arrayHelpers,
+                    )
+                  }
                   countryChoices={addIndividualFieldsData.countriesChoices}
                   identityTypeChoices={
-                      addIndividualFieldsData.identityTypeChoices
-                    }
+                    addIndividualFieldsData.identityTypeChoices
+                  }
                   baseName="individualDataUpdateFieldsIdentities"
                   values={values}
                 />

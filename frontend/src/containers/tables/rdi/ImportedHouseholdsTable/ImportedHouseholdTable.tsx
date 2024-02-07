@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import {
   AllImportedHouseholdsQueryVariables,
   AllMergedHouseholdsQueryVariables,
@@ -25,8 +25,8 @@ export function ImportedHouseholdTable({
   if (isMerged) {
     return (
       <UniversalTable<
-      MergedHouseholdMinimalFragment,
-      AllMergedHouseholdsQueryVariables
+        MergedHouseholdMinimalFragment,
+        AllMergedHouseholdsQueryVariables
       >
         headCells={mergedHeadCells}
         query={useAllMergedHouseholdsQuery}
@@ -47,8 +47,8 @@ export function ImportedHouseholdTable({
   }
   return (
     <UniversalTable<
-    ImportedHouseholdMinimalFragment,
-    AllImportedHouseholdsQueryVariables
+      ImportedHouseholdMinimalFragment,
+      AllImportedHouseholdsQueryVariables
     >
       headCells={importedHeadCells}
       query={useAllImportedHouseholdsQuery}

@@ -1,27 +1,27 @@
 import { Grid, MenuItem } from '@mui/material';
 import { AccountBalance } from '@mui/icons-material';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   GrievancesChoiceDataQuery,
   useGrievanceTicketAreaScopeQuery,
 } from '../../../__generated__/graphql';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { AdminAreaAutocomplete } from '../../../shared/autocompletes/AdminAreaAutocomplete';
-import { AssigneeAutocomplete } from '../../../shared/autocompletes/AssigneeAutocomplete';
-import { CreatedByAutocomplete } from '../../../shared/autocompletes/CreatedByAutocomplete';
-import { LanguageAutocomplete } from '../../../shared/autocompletes/LanguageAutocomplete';
-import { ProgramAutocomplete } from '../../../shared/autocompletes/ProgramAutocomplete';
-import { RdiAutocomplete } from '../../../shared/autocompletes/RdiAutocomplete';
+import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
+import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
+import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
+import { LanguageAutocomplete } from '@shared/autocompletes/LanguageAutocomplete';
+import { ProgramAutocomplete } from '@shared/autocompletes/ProgramAutocomplete';
+import { RdiAutocomplete } from '@shared/autocompletes/RdiAutocomplete';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,
   GrievanceTypes,
-} from '../../../utils/constants';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
+} from '@utils/constants';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '../../core/DatePickerFilter';
 import { FiltersSection } from '../../core/FiltersSection';
 import { NumberTextField } from '../../core/NumberTextField';
@@ -48,20 +48,20 @@ export function GrievancesFilters({
 }: GrievancesFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const { data: areaScopeData } = useGrievanceTicketAreaScopeQuery();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -76,14 +76,19 @@ export function GrievancesFilters({
     '*',
   );
 
-  const categoryChoices = useMemo(() => (filter.grievanceType
-      === GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
-    ? choicesData.grievanceTicketManualCategoryChoices
-    : choicesData.grievanceTicketSystemCategoryChoices), [choicesData, filter.grievanceType]);
+  const categoryChoices = useMemo(
+    () =>
+      filter.grievanceType ===
+      GrievanceTypes[GRIEVANCE_TICKETS_TYPES.userGenerated]
+        ? choicesData.grievanceTicketManualCategoryChoices
+        : choicesData.grievanceTicketSystemCategoryChoices,
+    [choicesData, filter.grievanceType],
+  );
 
-  const showIssueType = filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE
-    || filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE
-    || filter.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
+  const showIssueType =
+    filter.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    filter.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    filter.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
   const updatedPriorityChoices = useMemo(() => {
     const priorityChoices = choicesData.grievanceTicketPriorityChoices;
@@ -350,7 +355,9 @@ export function GrievancesFilters({
         </Grid>
         <Grid item container xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('grievanceStatus', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('grievanceStatus', e.target.value)
+            }
             label={undefined}
             value={filter.grievanceStatus}
             fullWidth
@@ -368,7 +375,9 @@ export function GrievancesFilters({
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
-              onChange={(e) => handleFilterChange('programState', e.target.value)}
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
               label={t('Programme State')}
               value={filter.programState}
               fullWidth
@@ -380,11 +389,13 @@ export function GrievancesFilters({
             </SelectFilter>
           </Grid>
         )}
-        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated
-          && areaScopeData?.crossAreaFilterAvailable && (
+        {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated &&
+          areaScopeData?.crossAreaFilterAvailable && (
             <Grid item xs={3}>
               <SelectFilter
-                onChange={(e) => handleFilterChange('areaScope', e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange('areaScope', e.target.value)
+                }
                 label={t('Ticket Type')}
                 value={filter.areaScope}
                 fullWidth
@@ -397,7 +408,7 @@ export function GrievancesFilters({
                 <MenuItem value="all">{t('All Tickets')}</MenuItem>
               </SelectFilter>
             </Grid>
-        )}
+          )}
       </Grid>
     </FiltersSection>
   );

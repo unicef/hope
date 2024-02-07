@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
 import { ApprovePaymentPlan } from '../ApprovePaymentPlan';
 import { RejectPaymentPlan } from '../RejectPaymentPlan';

@@ -1,5 +1,5 @@
 import { Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -32,7 +32,8 @@ const SummaryBorder = styled.div`
 `;
 
 const SummaryValue = styled.div`
-  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
@@ -163,9 +164,7 @@ export function PaymentPlanDetailsResults({
               <Grid item xs={6}>
                 <SummaryBorder>
                   <LabelizedField label={t('Targeted Individuals')}>
-                    <SummaryValue>
-                      {totalIndividualsCount || '0'}
-                    </SummaryValue>
+                    <SummaryValue>{totalIndividualsCount || '0'}</SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
               </Grid>

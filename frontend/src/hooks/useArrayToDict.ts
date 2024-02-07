@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import isFunction from 'lodash/isFunction';
 
@@ -32,9 +33,10 @@ export function useArrayToDict<T>(
       // @ts-ignore
       value = valueExtractor(currentValue);
     } else {
-      value = valueExtractor === '*'
-        ? currentValue
-        : get(currentValue, valueExtractor);
+      value =
+        valueExtractor === '*'
+          ? currentValue
+          : get(currentValue, valueExtractor);
     }
     // eslint-disable-next-line no-param-reassign
     previousValue[key] = value;

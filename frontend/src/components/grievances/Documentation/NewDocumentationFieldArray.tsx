@@ -1,7 +1,7 @@
 import { Button, FormHelperText, Grid } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DocumentationField } from './DocumentationField';
 
@@ -51,7 +51,7 @@ export function NewDocumentationFieldArray({
               </Button>
             </Grid>
             {errors?.documentation && (
-            <FormHelperText error>{errors?.documentation}</FormHelperText>
+              <FormHelperText error>{errors?.documentation}</FormHelperText>
             )}
           </>
         )}

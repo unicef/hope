@@ -1,5 +1,5 @@
 import { Paper } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -7,14 +7,14 @@ import {
   LogEntryNode,
   useAllLogEntriesQuery,
 } from '../../../__generated__/graphql';
-import { ActivityLogPageFilters } from '../../../components/core/ActivityLogPageFilters';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { EmptyTable } from '../../../components/core/Table/EmptyTable';
+import { ActivityLogPageFilters } from '@components/core/ActivityLogPageFilters';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { EmptyTable } from '@components/core/Table/EmptyTable';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { MainActivityLogTable } from '../../tables/MainActivityLogTable/MainActivityLogTable';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
@@ -37,9 +37,9 @@ function filtersToVariables(filters) {
   }
 
   if (
-    filters.search !== ''
-    && filters.search !== null
-    && filters.search !== undefined
+    filters.search !== '' &&
+    filters.search !== null &&
+    filters.search !== undefined
   ) {
     variables.search = filters.search;
   } else {
@@ -81,8 +81,8 @@ export function ActivityLogPage(): React.ReactElement {
     // we need to check for permission before refetch, otherwise returned permission denied error
     // breaks the page
     if (
-      permissions
-      && hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)
+      permissions &&
+      hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)
     ) {
       setPage(0);
       refetch({
@@ -97,7 +97,8 @@ export function ActivityLogPage(): React.ReactElement {
   }, [appliedFilter, businessArea, refetch, permissions, rowsPerPage]);
 
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions))
+    return <PermissionDenied />;
 
   if (!data && !loading) {
     return <EmptyTable />;

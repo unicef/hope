@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { makeStyles } from '@mui/material/styles';
 import Grid from '@mui/material/Grid';
 import Slider from '@mui/material/Slider';

@@ -1,10 +1,10 @@
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { renderUserName } from '../../../../utils/utils';
+import { BlackLink } from '@components/core/BlackLink';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { renderUserName } from '@utils/utils';
 import { SurveyNode } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
@@ -19,12 +19,12 @@ export function SurveysTableRow({
   canViewDetails,
   categoryDict,
 }: SurveysTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const surveyDetailsPath = `/${baseUrl}/accountability/surveys/${survey.id}`;
 
   const handleClick = (): void => {
-    history.push(surveyDetailsPath);
+    navigate(surveyDetailsPath);
   };
   return (
     <ClickableTableRow

@@ -1,17 +1,17 @@
-import { Grid, MenuItem } from '@mui/material';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import GroupIcon from '@mui/icons-material/Group';
-import React from 'react';
+import { Grid, MenuItem } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
-import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
+import { householdTableOrderOptions } from '@utils/constants';
+import { createHandleApplyFilterChange } from '@utils/utils';
+import { FiltersSection } from '../../../core/FiltersSection';
 import { NumberTextField } from '../../../core/NumberTextField';
 import { SearchTextField } from '../../../core/SearchTextField';
 import { SelectFilter } from '../../../core/SelectFilter';
-import { householdTableOrderOptions } from '../../../../utils/constants';
-import { FiltersSection } from '../../../core/FiltersSection';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;
@@ -31,18 +31,19 @@ export function LookUpHouseholdFiltersCommunication({
   setAppliedFilter,
 }: LookUpHouseholdFiltersCommunicationProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -70,7 +71,9 @@ export function LookUpHouseholdFiltersCommunication({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('residenceStatus', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('residenceStatus', e.target.value)
+            }
             label={t('Residence Status')}
             fullWidth
             value={filter.residenceStatus}
@@ -103,7 +106,9 @@ export function LookUpHouseholdFiltersCommunication({
             placeholder={t('From')}
             icon={<GroupIcon />}
             fullWidth
-            onChange={(e) => handleFilterChange('householdSizeMin', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('householdSizeMin', e.target.value)
+            }
             data-cy="hh-filters-household-size-from"
           />
         </Grid>
@@ -113,7 +118,9 @@ export function LookUpHouseholdFiltersCommunication({
             placeholder={t('To')}
             icon={<GroupIcon />}
             fullWidth
-            onChange={(e) => handleFilterChange('householdSizeMax', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('householdSizeMax', e.target.value)
+            }
             data-cy="hh-filters-household-size-to"
           />
         </Grid>

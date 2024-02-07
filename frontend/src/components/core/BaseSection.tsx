@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GreyText } from './GreyText';

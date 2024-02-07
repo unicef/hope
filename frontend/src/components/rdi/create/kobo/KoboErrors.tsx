@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { IconButton, Collapse } from '@mui/material';
 import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
@@ -41,8 +42,7 @@ export function ErrorsKobo({
             <strong>
               Field:
               {item.header}
-            </strong>
-            {' '}
+            </strong>{' '}
             {item.message}
           </Error>
         ))}

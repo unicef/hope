@@ -10,11 +10,11 @@ import {
   Typography,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -71,69 +71,55 @@ export function PaymentGrievanceDetails({
           {ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS ? (
             <VerifyPaymentGrievance ticket={ticket} />
           ) : null}
-          {canApprovePaymentVerification
-          && ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ? (
+          {canApprovePaymentVerification &&
+          ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ? (
             <Button
-              onClick={() => confirm({
-                title: t('Approve'),
-                content: dialogText,
-              }).then(async () => {
-                try {
-                  await mutate({
-                    variables: {
-                      grievanceTicketId: ticket.id,
-                      approveStatus: !approveStatus,
-                    },
-                    refetchQueries: () => [
-                      {
-                        query: GrievanceTicketDocument,
-                        variables: { id: ticket.id },
+              onClick={() =>
+                confirm({
+                  title: t('Approve'),
+                  content: dialogText,
+                }).then(async () => {
+                  try {
+                    await mutate({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus: !approveStatus,
                       },
-                    ],
-                  });
-                  if (approveStatus) {
-                    showMessage(t('Changes Disapproved'));
+                      refetchQueries: () => [
+                        {
+                          query: GrievanceTicketDocument,
+                          variables: { id: ticket.id },
+                        },
+                      ],
+                    });
+                    if (approveStatus) {
+                      showMessage(t('Changes Disapproved'));
+                    }
+                    if (!approveStatus) {
+                      showMessage(t('Changes Approved'));
+                    }
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
                   }
-                  if (!approveStatus) {
-                    showMessage(t('Changes Approved'));
-                  }
-                } catch (e) {
-                  e.graphQLErrors.map((x) => showMessage(x.message));
-                }
-              })}
+                })
+              }
               variant={approveStatus ? 'outlined' : 'contained'}
               color="primary"
               disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             >
               {approveStatus ? t('Disapprove') : t('Approve')}
             </Button>
-            ) : null}
+          ) : null}
         </Box>
       </Title>
       <StyledTable>
         <TableHead>
           <TableRow>
             <TableCell align="right" />
-            <TableCell align="right">
-              {t('Entitlement Value')}
-              {' '}
-              ($)
-            </TableCell>
-            <TableCell align="right">
-              {t('Delivered Value')}
-              {' '}
-              ($)
-            </TableCell>
-            <TableCell align="right">
-              {t('Received Value')}
-              {' '}
-              ($)
-            </TableCell>
-            <TableCell align="right">
-              {t('New Verified Value')}
-              {' '}
-              ($)
-            </TableCell>
+            <TableCell align="right">{t('Entitlement Value')} ($)</TableCell>
+            <TableCell align="right">{t('Delivered Value')} ($)</TableCell>
+            <TableCell align="right">{t('Received Value')} ($)</TableCell>
+            <TableCell align="right">{t('New Verified Value')} ($)</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

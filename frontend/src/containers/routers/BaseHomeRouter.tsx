@@ -1,15 +1,15 @@
 import { makeStyles, Snackbar, SnackbarContent } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import React from 'react';
+import * as React from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   useAllBusinessAreasQuery,
   useAllProgramsForChoicesQuery,
 } from '../../__generated__/graphql';
-import { AppBar } from '../../components/core/AppBar';
-import { Drawer } from '../../components/core/Drawer/Drawer';
-import { LoadingComponent } from '../../components/core/LoadingComponent';
+import { AppBar } from '@components/core/AppBar';
+import { Drawer } from '@components/core/Drawer/Drawer';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
@@ -39,17 +39,19 @@ export function BaseHomeRouter({ children }): React.ReactElement {
   const handleDrawerClose = (): void => {
     setOpen(false);
   };
-  const { data: businessAreaData, loading: businessAreaLoading } = useAllBusinessAreasQuery({
-    variables: {
-      slug: businessArea,
-    },
-    fetchPolicy: 'cache-first',
-  });
+  const { data: businessAreaData, loading: businessAreaLoading } =
+    useAllBusinessAreasQuery({
+      variables: {
+        slug: businessArea,
+      },
+      fetchPolicy: 'cache-first',
+    });
 
-  const { data: programsData, loading: programsLoading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, first: 100 },
-    fetchPolicy: 'cache-first',
-  });
+  const { data: programsData, loading: programsLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, first: 100 },
+      fetchPolicy: 'cache-first',
+    });
 
   if (!businessAreaData) {
     return null;

@@ -1,5 +1,6 @@
 import { Grid } from '@mui/material';
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -7,21 +8,21 @@ import {
   useAllChartsQuery,
   useGlobalAreaChartsLazyQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { TabPanel } from '../../../components/core/TabPanel';
-import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
-import { PaymentsChart } from '../../../components/dashboard/charts/PaymentsChart';
-import { ProgrammesBySector } from '../../../components/dashboard/charts/ProgrammesBySector';
-import { TotalTransferredByMonth } from '../../../components/dashboard/charts/TotalTransferredByMonth';
-import { VolumeByDeliveryMechanism } from '../../../components/dashboard/charts/VolumeByDeliveryMechanism';
-import { GrievancesSection } from '../../../components/dashboard/sections/GrievancesSection/GrievancesSection';
-import { PaymentVerificationSection } from '../../../components/dashboard/sections/PaymentVerificationSection/PaymentVerificationSection';
-import { TotalAmountTransferredSectionByAdminAreaSection } from '../../../components/dashboard/sections/TotalAmountTransferredByAdminAreaSection/TotalAmountTransferredByAdminAreaSection';
-import { TotalAmountTransferredByCountrySection } from '../../../components/dashboard/sections/TotalAmountTransferredByCountrySection';
-import { TotalAmountTransferredSection } from '../../../components/dashboard/sections/TotalAmountTransferredSection/TotalAmountTransferredSection';
-import { TotalNumberOfChildrenReachedSection } from '../../../components/dashboard/sections/TotalNumberOfChildrenReachedSection/TotalNumberOfChildrenReachedSection';
-import { TotalNumberOfHouseholdsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfHouseholdsReachedSection/TotalNumberOfHouseholdsReachedSection';
-import { TotalNumberOfIndividualsReachedSection } from '../../../components/dashboard/sections/TotalNumberOfIndividualsReachedSection/TotalNumberOfIndividualsReachedSection';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { TabPanel } from '@components/core/TabPanel';
+import { DashboardPaper } from '@components/dashboard/DashboardPaper';
+import { PaymentsChart } from '@components/dashboard/charts/PaymentsChart';
+import { ProgrammesBySector } from '@components/dashboard/charts/ProgrammesBySector';
+import { TotalTransferredByMonth } from '@components/dashboard/charts/TotalTransferredByMonth';
+import { VolumeByDeliveryMechanism } from '@components/dashboard/charts/VolumeByDeliveryMechanism';
+import { GrievancesSection } from '@components/dashboard/sections/GrievancesSection/GrievancesSection';
+import { PaymentVerificationSection } from '@components/dashboard/sections/PaymentVerificationSection/PaymentVerificationSection';
+import { TotalAmountTransferredSectionByAdminAreaSection } from '@components/dashboard/sections/TotalAmountTransferredByAdminAreaSection/TotalAmountTransferredByAdminAreaSection';
+import { TotalAmountTransferredByCountrySection } from '@components/dashboard/sections/TotalAmountTransferredByCountrySection';
+import { TotalAmountTransferredSection } from '@components/dashboard/sections/TotalAmountTransferredSection/TotalAmountTransferredSection';
+import { TotalNumberOfChildrenReachedSection } from '@components/dashboard/sections/TotalNumberOfChildrenReachedSection/TotalNumberOfChildrenReachedSection';
+import { TotalNumberOfHouseholdsReachedSection } from '@components/dashboard/sections/TotalNumberOfHouseholdsReachedSection/TotalNumberOfHouseholdsReachedSection';
+import { TotalNumberOfIndividualsReachedSection } from '@components/dashboard/sections/TotalNumberOfIndividualsReachedSection/TotalNumberOfIndividualsReachedSection';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 const PaddingContainer = styled.div`
@@ -51,9 +52,7 @@ export function DashboardYearPage({
   filter,
 }: DashboardYearPageProps): React.ReactElement {
   const { t } = useTranslation();
-  const {
-    businessArea, isGlobal, isAllPrograms, programId,
-  } = useBaseUrl();
+  const { businessArea, isGlobal, isAllPrograms, programId } = useBaseUrl();
 
   const variables: AllChartsQueryVariables = {
     year: parseInt(year, 10),
@@ -74,11 +73,12 @@ export function DashboardYearPage({
     fetchPolicy: 'cache-and-network',
   });
 
-  const [loadGlobal, { data: globalData, loading: globalLoading }] = useGlobalAreaChartsLazyQuery({
-    variables: {
-      year: parseInt(year, 10),
-    },
-  });
+  const [loadGlobal, { data: globalData, loading: globalLoading }] =
+    useGlobalAreaChartsLazyQuery({
+      variables: {
+        year: parseInt(year, 10),
+      },
+    });
 
   useEffect(() => {
     if (isGlobal) {

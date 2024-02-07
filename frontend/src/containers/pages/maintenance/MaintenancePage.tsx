@@ -1,7 +1,7 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
-import { clearCache } from '../../../utils/utils';
+import { clearCache } from '@utils/utils';
 import MaintenanceGraphic from './maintenance_graphic_painter.png';
 import HopeLogo from './maintenance_hope_logo.png';
 

@@ -1,13 +1,13 @@
 import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { TargetPopulationStatus } from '../../../../__generated__/graphql';
 import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { FiltersSection } from '../../../core/FiltersSection';
 import { NumberTextField } from '../../../core/NumberTextField';
@@ -29,20 +29,20 @@ export function LookUpTargetPopulationFiltersCommunication({
   setAppliedFilter,
 }: LookUpTargetPopulationFiltersCommunicationProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -92,10 +92,12 @@ export function LookUpTargetPopulationFiltersCommunication({
             topLabel={t('Num. of Recipients')}
             value={filter.totalHouseholdsCountWithValidPhoneNoMin}
             placeholder={t('From')}
-            onChange={(e) => handleFilterChange(
-              'totalHouseholdsCountWithValidPhoneNoMin',
-              e.target.value,
-            )}
+            onChange={(e) =>
+              handleFilterChange(
+                'totalHouseholdsCountWithValidPhoneNoMin',
+                e.target.value,
+              )
+            }
             icon={<Group />}
             data-cy="filters-total-households-count-min"
           />
@@ -104,10 +106,12 @@ export function LookUpTargetPopulationFiltersCommunication({
           <NumberTextField
             value={filter.totalHouseholdsCountWithValidPhoneNoMax}
             placeholder={t('To')}
-            onChange={(e) => handleFilterChange(
-              'totalHouseholdsCountWithValidPhoneNoMax',
-              e.target.value,
-            )}
+            onChange={(e) =>
+              handleFilterChange(
+                'totalHouseholdsCountWithValidPhoneNoMax',
+                e.target.value,
+              )
+            }
             icon={<Group />}
             data-cy="filters-total-households-count-max"
           />

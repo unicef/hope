@@ -1,11 +1,11 @@
 import { Box, Grid } from '@mui/material';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import * as React from 'react';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
-} from '../../../utils/constants';
+} from '@utils/constants';
 import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
@@ -22,19 +22,21 @@ export function GrievancesSidebar({
     const { category, issueType, status } = ticket;
     if (category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
       individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
-      household = ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
+      household =
+        ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
     }
     const isOneIndividual = household?.activeIndividualsCount === 1;
 
     if (isOneIndividual) return false;
-    const isRightCategory = (category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE
-        && issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL)
-      || (category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE
-        && issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL)
-      || (category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING
-        && ticket?.systemFlaggingTicketDetails?.approveStatus)
-      || (category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
-        && ticket?.needsAdjudicationTicketDetails?.selectedIndividual);
+    const isRightCategory =
+      (category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+        issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) ||
+      (category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+        issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) ||
+      (category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+        ticket?.systemFlaggingTicketDetails?.approveStatus) ||
+      (category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+        ticket?.needsAdjudicationTicketDetails?.selectedIndividual);
 
     if (!isRightCategory) return false;
 
@@ -43,16 +45,17 @@ export function GrievancesSidebar({
 
     const householdsAndRoles = individual?.householdsAndRoles;
     const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
-    const hasRolesToReassign = householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
+    const hasRolesToReassign =
+      householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
 
     let isProperDataChange = true;
     if (
-      category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE
-      && issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+      category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
     ) {
       if (
-        isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)
-        && isEmpty(
+        isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role) &&
+        isEmpty(
           ticket.individualDataUpdateTicketDetails.individualData.relationship,
         )
       ) {
@@ -63,8 +66,9 @@ export function GrievancesSidebar({
     return (isHeadOfHousehold || hasRolesToReassign) && isProperDataChange;
   };
 
-  const shouldShowReassignMultipleBoxDataChange = (): boolean => ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
-    && ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion;
+  const shouldShowReassignMultipleBoxDataChange = (): boolean =>
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+    ticket.needsAdjudicationTicketDetails.isMultipleDuplicatesVersion;
 
   const renderRightSection = (): React.ReactElement => {
     if (
@@ -75,8 +79,8 @@ export function GrievancesSidebar({
           <Box mt={3}>
             {ticket.paymentVerificationTicketDetails
               ?.hasMultiplePaymentVerifications ? (
-                <PaymentIds
-                  verifications={
+              <PaymentIds
+                verifications={
                   ticket.paymentVerificationTicketDetails?.paymentVerifications?.edges.map(
                     (edge) => ({
                       id: edge.node.id,
@@ -84,8 +88,8 @@ export function GrievancesSidebar({
                     }),
                   ) || []
                 }
-                />
-              ) : null}
+              />
+            ) : null}
           </Box>
           <Box mt={3}>
             <OtherRelatedTickets ticket={ticket} />

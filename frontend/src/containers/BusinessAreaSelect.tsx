@@ -1,5 +1,5 @@
 import { MenuItem, Select } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useCachedMe } from '../hooks/useCachedMe';
@@ -45,9 +45,8 @@ const CountrySelect = styled(Select)`
 export function BusinessAreaSelect(): React.ReactElement {
   const { data } = useCachedMe();
   const { businessArea } = useBaseUrl();
-  const history = useHistory();
-  const onChange = (e): void => {
-    history.push(`/${e.target.value}/programs/all/list`);
+const navigate = useNavigate()  const onChange = (e): void => {
+    navigate(`/${e.target.value}/programs/all/list`);
   };
   if (!data) {
     return null;

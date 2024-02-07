@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/EditRounded';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProgramQuery } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';

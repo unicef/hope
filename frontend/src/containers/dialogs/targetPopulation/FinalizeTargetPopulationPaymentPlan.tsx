@@ -1,9 +1,7 @@
-import {
-  Button, DialogContent, DialogTitle, Typography,
-} from '@mui/material';
-import React from 'react';
+import { Button, DialogContent, DialogTitle, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useFinalizeTpMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
@@ -56,10 +54,7 @@ export function FinalizeTargetPopulationPaymentPlan({
       </DialogTitleWrapper>
       <DialogContent>
         <DialogDescription>
-          {t('Are you sure you want to send')}
-          {' '}
-          {totalHouseholds}
-          {' '}
+          {t('Are you sure you want to send')} {totalHouseholds}{' '}
           {t(
             'households to HOPE? They will be accessible in Payment Module. Target population will not be editable further.',
           )}

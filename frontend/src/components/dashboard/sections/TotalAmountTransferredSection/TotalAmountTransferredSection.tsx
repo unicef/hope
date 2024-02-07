@@ -1,8 +1,8 @@
 import { Grid } from '@mui/material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatCurrencyWithSymbol } from '../../../../utils/utils';
+import { formatCurrencyWithSymbol } from '@utils/utils';
 import { AllChartsQuery } from '../../../../__generated__/graphql';
 import {
   CardAmount,

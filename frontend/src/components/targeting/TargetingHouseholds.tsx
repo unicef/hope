@@ -1,5 +1,5 @@
-import React from 'react';
-import { TargetPopulationHouseholdTable } from '../../containers/tables/targeting/TargetPopulationHouseholdTable';
+import * as React from 'react';
+import { TargetPopulationHouseholdTable } from '@containers/tables/targeting/TargetPopulationHouseholdTable';
 import { useTargetPopulationHouseholdsQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 

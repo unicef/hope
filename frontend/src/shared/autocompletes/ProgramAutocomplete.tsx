@@ -1,11 +1,9 @@
 import { InputAdornment } from '@mui/material';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import get from 'lodash/get';
-import React, {
-  useCallback, useEffect, useRef, useState,
-} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -14,7 +12,7 @@ import {
   getAutocompleteOptionLabel,
   handleAutocompleteChange,
   handleOptionSelected,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
 export function ProgramAutocomplete({
@@ -40,7 +38,7 @@ export function ProgramAutocomplete({
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
@@ -69,7 +67,7 @@ export function ProgramAutocomplete({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
@@ -105,17 +103,21 @@ export function ProgramAutocomplete({
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      handleOptionSelected={(option, value1) => handleOptionSelected(option?.node?.id, value1)}
-      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue)}
+      handleOptionSelected={(option, value1) =>
+        handleOptionSelected(option?.node?.id, value1)
+      }
+      handleOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue)
+      }
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
-      startAdornment={(
+      startAdornment={
         <InputAdornment position="start">
           <FlashOnIcon />
         </InputAdornment>
-      )}
+      }
     />
   );
 }

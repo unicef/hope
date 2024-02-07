@@ -1,5 +1,5 @@
 import { Grid, Paper, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -8,7 +8,7 @@ import {
   PaymentStatus,
   PaymentVerificationStatus,
 } from '../../../__generated__/graphql';
-import { UniversalActivityLogTable } from '../../../containers/tables/UniversalActivityLogTable';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
@@ -16,7 +16,7 @@ import {
   paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { BlackLink } from '../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { DividerLine } from '../../core/DividerLine';
@@ -49,8 +49,8 @@ export function PaymentDetails({
 
   let paymentVerification: PaymentQuery['payment']['verification'] = null;
   if (
-    payment.verification
-    && payment.verification.status !== PaymentVerificationStatus.Pending
+    payment.verification &&
+    payment.verification.status !== PaymentVerificationStatus.Pending
   ) {
     paymentVerification = payment.verification;
   }

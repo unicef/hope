@@ -1,9 +1,10 @@
 import { Box, Paper, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { ImportXlsxPaymentPlanPaymentListPerFsp } from '../../../../components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { ImportXlsxPaymentPlanPaymentListPerFsp } from '@components/paymentmodule/PaymentPlanDetails/ImportXlsxPaymentPlanPaymentListPerFsp';
 import {
   AllPaymentsForTableQuery,
   AllPaymentsForTableQueryVariables,
@@ -36,7 +37,7 @@ export function PaymentsTable({
 }: PaymentsTableProps): React.ReactElement {
   const { t } = useTranslation();
   const [dialogPayment, setDialogPayment] = useState<
-  AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
+    AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
   >();
   const initialVariables: AllPaymentsForTableQueryVariables = {
     businessArea,
@@ -51,8 +52,8 @@ export function PaymentsTable({
             <Typography data-cy="table-title" variant="h6">
               {t('Payee List')}
             </Typography>
-            {(paymentPlan.status === PaymentPlanStatus.Accepted
-              || paymentPlan.status === PaymentPlanStatus.Finished) && (
+            {(paymentPlan.status === PaymentPlanStatus.Accepted ||
+              paymentPlan.status === PaymentPlanStatus.Finished) && (
               <ImportXlsxPaymentPlanPaymentListPerFsp
                 paymentPlan={paymentPlan}
                 permissions={permissions}
@@ -60,8 +61,8 @@ export function PaymentsTable({
             )}
           </StyledBox>
           <UniversalTable<
-          AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
-          AllPaymentsForTableQueryVariables
+            AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
+            AllPaymentsForTableQueryVariables
           >
             isOnPaper={false}
             headCells={headCells}

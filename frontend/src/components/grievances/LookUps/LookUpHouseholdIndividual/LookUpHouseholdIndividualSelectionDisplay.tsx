@@ -1,6 +1,6 @@
 import { Box, Grid } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { StyledBox, BlueText, DarkGrey } from '../LookUpStyles';
@@ -50,8 +50,7 @@ export function LookUpHouseholdIndividualSelectionDisplay({
           <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
               <Box display="flex">
-                {t('Household ID')}
-                :
+                {t('Household ID')}:
                 <BlueText>
                   &ensp;
                   {selectedHousehold?.unicefId || '-'}
@@ -79,8 +78,7 @@ export function LookUpHouseholdIndividualSelectionDisplay({
           <Grid container alignItems="center" justifyContent="space-between">
             <Grid item>
               <Box display="flex">
-                {t('Individual ID')}
-                :
+                {t('Individual ID')}:
                 <BlueText>
                   &ensp;
                   {selectedIndividual?.unicefId || '-'}

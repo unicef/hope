@@ -1,7 +1,5 @@
-import {
-  Box, Grid, Paper, Typography,
-} from '@mui/material';
-import React from 'react';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -10,7 +8,7 @@ import {
   HouseholdNode,
 } from '../../../__generated__/graphql';
 import { useProgramContext } from '../../../programContext';
-import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
+import { choicesToDict, formatCurrencyWithSymbol } from '@utils/utils';
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
 import { Title } from '../../core/Title';
@@ -213,13 +211,13 @@ export function HouseholdDetails({
                           >
                             {item.currency === 'USD'
                               ? formatCurrencyWithSymbol(
-                                item.totalDeliveredQuantity,
-                                item.currency,
-                              )
+                                  item.totalDeliveredQuantity,
+                                  item.currency,
+                                )
                               : `(${formatCurrencyWithSymbol(
-                                item.totalDeliveredQuantity,
-                                item.currency,
-                              )})`}
+                                  item.totalDeliveredQuantity,
+                                  item.currency,
+                                )})`}
                           </Box>
                         ))}
                       </Box>

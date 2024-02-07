@@ -1,17 +1,17 @@
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { WarningTooltip } from '../../../../components/core/WarningTooltip';
+import { BlackLink } from '@components/core/BlackLink';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { WarningTooltip } from '@components/core/WarningTooltip';
 import {
   formatCurrencyWithSymbol,
   opacityToHex,
   renderSomethingOrDash,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import {
   AllPaymentsForTableQuery,
   PaymentStatus,
@@ -28,7 +28,8 @@ export const StyledLink = styled.div`
 
 const RoutedBox = styled.div`
   color: ${({ theme }) => theme.hctPalette.red};
-  background-color: ${({ theme }) => `${theme.hctPalette.red}${opacityToHex(0.15)}`};
+  background-color: ${({ theme }) =>
+    `${theme.hctPalette.red}${opacityToHex(0.15)}`};
   border-radius: 16px;
   font-family: Roboto;
   font-size: 10px;
@@ -79,9 +80,8 @@ export function PaymentsTableRow({
   };
 
   const renderDeliveredQuantity = (): React.ReactElement => {
-    const {
-      deliveredQuantity, currency, deliveredQuantityUsd, status,
-    } = payment;
+    const { deliveredQuantity, currency, deliveredQuantityUsd, status } =
+      payment;
     if (status === PaymentStatus.TransactionErroneous) {
       return <RoutedBox>UNSUCCESSFUL</RoutedBox>;
     }
@@ -114,8 +114,8 @@ export function PaymentsTableRow({
   return (
     <ClickableTableRow hover role="checkbox" key={payment.id}>
       <TableCell align="left">
-        {(payment.paymentPlanHardConflicted
-          || payment.paymentPlanSoftConflicted) && (
+        {(payment.paymentPlanHardConflicted ||
+          payment.paymentPlanSoftConflicted) && (
           <WarningTooltip
             handleClick={(e) => handleDialogWarningOpen(e)}
             message={t(
@@ -162,12 +162,12 @@ export function PaymentsTableRow({
       <TableCell align="left">
         {payment.entitlementQuantity != null && payment.entitlementQuantity >= 0
           ? `${formatCurrencyWithSymbol(
-            payment.entitlementQuantity,
-            payment.currency,
-          )} (${formatCurrencyWithSymbol(
-            payment.entitlementQuantityUsd,
-            'USD',
-          )})`
+              payment.entitlementQuantity,
+              payment.currency,
+            )} (${formatCurrencyWithSymbol(
+              payment.entitlementQuantityUsd,
+              'USD',
+            )})`
           : '-'}
       </TableCell>
       <TableCell data-cy="delivered-quantity-cell" align="left">

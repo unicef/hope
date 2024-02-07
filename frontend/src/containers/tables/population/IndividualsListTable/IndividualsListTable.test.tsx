@@ -1,5 +1,5 @@
 import { MockedProvider } from '@apollo/react-testing';
-import React from 'react';
+import * as React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { IndividualsListTable } from '.';

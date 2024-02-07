@@ -1,13 +1,13 @@
 import { Grid, MenuItem } from '@mui/material';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import * as React from 'react';
+import { useLocation } from 'react-router-dom';
 import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
-import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
-import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { FiltersSection } from '../../../../components/core/FiltersSection';
+import { DatePickerFilter } from '@components/core/DatePickerFilter';
+import { SearchTextField } from '@components/core/SearchTextField';
+import { SelectFilter } from '@components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '@utils/utils';
+import { FiltersSection } from '@components/core/FiltersSection';
 
 interface PaymentVerificationFiltersProps {
   filter;
@@ -23,18 +23,18 @@ export function PaymentVerificationFilters({
   appliedFilter,
   setAppliedFilter,
 }: PaymentVerificationFiltersProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -43,7 +43,8 @@ export function PaymentVerificationFilters({
     clearFilter();
   };
 
-  const { data: statusChoicesData } = useCashPlanVerificationStatusChoicesQuery();
+  const { data: statusChoicesData } =
+    useCashPlanVerificationStatusChoicesQuery();
 
   if (!statusChoicesData) {
     return null;
@@ -66,7 +67,9 @@ export function PaymentVerificationFilters({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('verificationStatus', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('verificationStatus', e.target.value)
+            }
             label="Status"
             multiple
             fullWidth
@@ -86,7 +89,9 @@ export function PaymentVerificationFilters({
             data-cy="filter-fsp"
             label="FSP"
             fullWidth
-            onChange={(e) => handleFilterChange('serviceProvider', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('serviceProvider', e.target.value)
+            }
           />
         </Grid>
         <Grid item xs={3}>

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { get } from 'lodash';
-import { removeBracketsAndQuotes } from '../utils/utils';
+import { removeBracketsAndQuotes } from '@utils/utils';
 
 export const useSnackbar = (): {
   show;
@@ -10,7 +11,7 @@ export const useSnackbar = (): {
   showMessage;
   dataCy?;
 } => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const [show, setShow] = useState(
     location.state ? location.state.showSnackbar : false,
@@ -50,7 +51,7 @@ export const useSnackbar = (): {
         dataCy: get(options, 'dataCy'),
       },
     });
-    history.push(get(options, 'pathname', history.location.pathname));
+    navigate(get(options, 'pathname', history.location.pathname));
   };
 
   return {

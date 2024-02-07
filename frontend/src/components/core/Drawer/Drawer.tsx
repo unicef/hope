@@ -11,7 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useBackendVersion } from '../../../hooks/useBackendVersion';
@@ -143,10 +143,10 @@ export function Drawer({
   const frontendVersion = useFrontendVersion();
   useEffect(() => {
     if (
-      !showMismatchedDialog
-      && backendVersion
-      && frontendVersion
-      && backendVersion !== frontendVersion
+      !showMismatchedDialog &&
+      backendVersion &&
+      frontendVersion &&
+      backendVersion !== frontendVersion
     ) {
       setShowMismatchedDialog(true);
     }

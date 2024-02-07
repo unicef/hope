@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { Grid, Box } from '@mui/material';
 import { MiśTheme } from '../../../theme';
@@ -56,10 +56,7 @@ export function DedupeBox({ label, options }: Props): React.ReactElement {
                   </BoldGrey>
                 </Grid>
                 <Grid item xs={4}>
-                  <Bold>
-                    {option.percent.toFixed(2)}
-                    %
-                  </Bold>
+                  <Bold>{option.percent.toFixed(2)}%</Bold>
                 </Grid>
                 <Grid item xs={4}>
                   <BoldGrey>{option.value}</BoldGrey>

@@ -10,19 +10,20 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import get from 'lodash/get';
 import moment from 'moment';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { REPORT_TYPES } from '../../utils/constants';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikAdminAreaAutocompleteMultiple } from '@shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { REPORT_TYPES } from '@utils/constants';
 import {
   useAllProgramsQuery,
   useCreateReportMutation,
@@ -45,8 +46,9 @@ export function NewReportForm(): React.ReactElement {
     dateTo: Yup.date()
       .when(
         'dateFrom',
-        (dateFrom, schema) => dateFrom
-          && schema.min(
+        (dateFrom, schema) =>
+          dateFrom &&
+          schema.min(
             dateFrom,
             `${t('End date have to be greater than')}
             ${moment(dateFrom).format('YYYY-MM-DD')}`,
@@ -56,11 +58,13 @@ export function NewReportForm(): React.ReactElement {
       .required(t('Date To is required')),
   });
 
-  const { data: allProgramsData, loading: loadingPrograms } = useAllProgramsQuery({
-    variables: { businessArea, status: ['ACTIVE'] },
-    fetchPolicy: 'cache-and-network',
-  });
-  const { data: choicesData, loading: choicesLoading } = useReportChoiceDataQuery();
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsQuery({
+      variables: { businessArea, status: ['ACTIVE'] },
+      fetchPolicy: 'cache-and-network',
+    });
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
   const [mutate, { loading }] = useCreateReportMutation();
 
   if (loadingPrograms || choicesLoading) return <LoadingComponent />;
@@ -82,15 +86,18 @@ export function NewReportForm(): React.ReactElement {
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const prepareVariables = (values) => {
-    const shouldSendAdminAreaField = values.reportType === REPORT_TYPES.INDIVIDUALS
-      || values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS
-      || values.reportType === REPORT_TYPES.PAYMENTS;
+    const shouldSendAdminAreaField =
+      values.reportType === REPORT_TYPES.INDIVIDUALS ||
+      values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS ||
+      values.reportType === REPORT_TYPES.PAYMENTS;
 
-    const shouldSendProgramField = values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION
-      || values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION
-      || values.reportType === REPORT_TYPES.CASH_PLAN;
+    const shouldSendProgramField =
+      values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION ||
+      values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION ||
+      values.reportType === REPORT_TYPES.CASH_PLAN;
 
-    const shouldSendBothFields = values.reportType === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT;
+    const shouldSendBothFields =
+      values.reportType === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT;
 
     let variables = null;
 
@@ -164,13 +171,15 @@ export function NewReportForm(): React.ReactElement {
         />
       </Grid>
     );
-    const showOnlyAdminAreaField = values.reportType === REPORT_TYPES.INDIVIDUALS
-      || values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS
-      || values.reportType === REPORT_TYPES.PAYMENTS;
+    const showOnlyAdminAreaField =
+      values.reportType === REPORT_TYPES.INDIVIDUALS ||
+      values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS ||
+      values.reportType === REPORT_TYPES.PAYMENTS;
 
-    const showOnlyProgramField = values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION
-      || values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION
-      || values.reportType === REPORT_TYPES.CASH_PLAN;
+    const showOnlyProgramField =
+      values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION ||
+      values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION ||
+      values.reportType === REPORT_TYPES.CASH_PLAN;
 
     let fields = null;
 
@@ -296,8 +305,8 @@ export function NewReportForm(): React.ReactElement {
                       </Grid>
                     </Grid>
                     {renderConditionalFields(values)}
-                    {values.reportType
-                      === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT && (
+                    {values.reportType ===
+                      REPORT_TYPES.INDIVIDUALS_AND_PAYMENT && (
                       <>
                         <Grid item xs={12}>
                           <Field
@@ -307,7 +316,9 @@ export function NewReportForm(): React.ReactElement {
                             level={1}
                             component={FormikAdminAreaAutocomplete}
                             onClear={() => setFieldValue('adminArea2', [])}
-                            additionalOnChange={() => setFieldValue('adminArea2', [])}
+                            additionalOnChange={() =>
+                              setFieldValue('adminArea2', [])
+                            }
                           />
                         </Grid>
                         <Grid item xs={12}>

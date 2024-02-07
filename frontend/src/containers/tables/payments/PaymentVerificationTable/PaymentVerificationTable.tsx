@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllCashPlansAndPaymentPlansQueryVariables,
@@ -6,7 +6,7 @@ import {
   useAllCashPlansAndPaymentPlansQuery,
 } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { dateToIsoString } from '../../../../utils/utils';
+import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
@@ -36,8 +36,8 @@ export function PaymentVerificationTable({
   };
   return (
     <UniversalTable<
-    CashPlanAndPaymentPlanNode,
-    AllCashPlansAndPaymentPlansQueryVariables
+      CashPlanAndPaymentPlanNode,
+      AllCashPlansAndPaymentPlansQueryVariables
     >
       title={t('List of Payment Plans')}
       headCells={headCells}

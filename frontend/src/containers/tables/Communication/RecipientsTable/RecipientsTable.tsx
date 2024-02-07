@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import {
   AllAccountabilityCommunicationMessageRecipientsQueryVariables,
   CommunicationMessageRecipientMapNode,
@@ -20,15 +20,16 @@ export function RecipientsTable({
   canViewDetails,
 }: RecipientsTableProps): React.ReactElement {
   const { t } = useTranslation();
-  const initialVariables: AllAccountabilityCommunicationMessageRecipientsQueryVariables = {
-    messageId: id,
-  };
+  const initialVariables: AllAccountabilityCommunicationMessageRecipientsQueryVariables =
+    {
+      messageId: id,
+    };
 
   return (
     <TableWrapper>
       <UniversalTable<
-      CommunicationMessageRecipientMapNode,
-      AllAccountabilityCommunicationMessageRecipientsQueryVariables
+        CommunicationMessageRecipientMapNode,
+        AllAccountabilityCommunicationMessageRecipientsQueryVariables
       >
         title={t('Recipients')}
         headCells={headCells}

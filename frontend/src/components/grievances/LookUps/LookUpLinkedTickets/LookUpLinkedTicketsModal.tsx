@@ -6,14 +6,15 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { LookUpLinkedTicketsFilters } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsFilters';
@@ -45,7 +46,8 @@ export function LookUpLinkedTicketsModal({
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
   if (!choicesData) return null;
   if (choicesLoading) {
     return <LoadingComponent />;

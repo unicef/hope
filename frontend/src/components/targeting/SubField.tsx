@@ -1,13 +1,13 @@
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FormikAutocomplete } from '../../shared/Formik/FormikAutocomplete';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 
 const FlexWrapper = styled.div`
   display: flex;
