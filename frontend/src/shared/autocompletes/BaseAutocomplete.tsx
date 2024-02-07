@@ -4,6 +4,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useEffect, useRef } from 'react';
 import { StyledAutocomplete } from './StyledAutocomplete';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type OptionType = any;
+
 export function BaseAutocomplete({
   value,
   disabled,
@@ -34,8 +37,8 @@ export function BaseAutocomplete({
   handleChange: (event, newValue) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleClose: (_: any, reason: string) => void;
-  handleOptionSelected: (option, value) => boolean;
-  handleOptionLabel: (option) => string;
+  handleOptionSelected: (option: OptionType, value: OptionType) => boolean;
+  handleOptionLabel: (option: OptionType) => string;
   handleOpen: () => void;
   open: boolean;
   data;
@@ -75,7 +78,7 @@ export function BaseAutocomplete({
       data-cy={dataCy}
       open={open}
       options={[{ value: '', label: '' }, ...allEdges]}
-      filterOptions={(options, params) => {
+      filterOptions={(options: OptionType[], params) => {
         const filtered = options.filter(
           (option) =>
             option.value !== '' &&
@@ -90,7 +93,10 @@ export function BaseAutocomplete({
       onChange={handleChange}
       onOpen={handleOpen}
       onClose={handleClose}
-      getOptionSelected={handleOptionSelected}
+      isOptionEqualToValue={(option, selectedValue) =>
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        handleOptionSelected(option as any, selectedValue as any)
+      }
       getOptionLabel={handleOptionLabel}
       disabled={disabled}
       loading={loading}
