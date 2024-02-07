@@ -12298,7 +12298,7 @@ export type AllPaymentPlansForTableQuery = (
       & Pick<PaymentPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentPlanNode' }
-        & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'isFollowUp' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+        & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'name' | 'isFollowUp' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
         & { followUps: (
           { __typename?: 'PaymentPlanNodeConnection' }
           & Pick<PaymentPlanNodeConnection, 'totalCount'>
@@ -22825,6 +22825,7 @@ export const AllPaymentPlansForTableDocument = gql`
       node {
         id
         unicefId
+        name
         isFollowUp
         followUps {
           totalCount
