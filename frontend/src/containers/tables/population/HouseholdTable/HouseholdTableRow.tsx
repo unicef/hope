@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BlackLink } from '@components/core/BlackLink';
 import { FlagTooltip } from '@components/core/FlagTooltip';
 import { StatusBox } from '@components/core/StatusBox';

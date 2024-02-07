@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as React from 'react';DOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import './index.css';
 import * as Sentry from '@sentry/react';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -37,11 +37,11 @@ if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {
   });
 }
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-  document.getElementById('root'),
 );
 
 // If you want your app to work offline and load faster, you can change

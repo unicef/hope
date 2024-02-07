@@ -1,5 +1,5 @@
 import TableCell from '@mui/material/TableCell';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import * as React from 'react';
 import { Radio } from '@mui/material';
 import { RegistrationDataImportNode } from '../../../../__generated__/graphql';

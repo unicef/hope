@@ -4,7 +4,7 @@ import {
 import { Formik } from 'formik';
 import  { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   useAllAddIndividualFieldsQuery,

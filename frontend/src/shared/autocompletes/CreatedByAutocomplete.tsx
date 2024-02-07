@@ -60,9 +60,19 @@ export const CreatedByAutocomplete = ({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (isMounted.current && businessArea) {
-      loadData({ variables: { businessArea, search: debouncedInputText } });
-    }
+    const asyncLoadData = async () => {
+      if (isMounted.current && businessArea) {
+        try {
+          await loadData({
+            variables: { businessArea, search: debouncedInputText },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    void asyncLoadData();
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {

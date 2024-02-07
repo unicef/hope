@@ -28,7 +28,7 @@ export function DashboardFilters({
 
   const { applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,

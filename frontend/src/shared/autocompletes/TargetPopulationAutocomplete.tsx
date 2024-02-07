@@ -60,9 +60,19 @@ export function TargetPopulationAutocomplete({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (businessArea) {
-      loadData({ variables: { businessArea, name: debouncedInputText } });
-    }
+    const asyncLoadData = async () => {
+      if (isMounted.current && businessArea) {
+        try {
+          await loadData({
+            variables: { businessArea, name: debouncedInputText },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    void asyncLoadData();
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {
@@ -87,7 +97,7 @@ export function TargetPopulationAutocomplete({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
