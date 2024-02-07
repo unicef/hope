@@ -32,7 +32,7 @@ git add -A
 current_version=$(cd backend && poetry version --short)
 git commit -m "Bump version $current_version"
 git tag "$current_version"
-git push --tags
+git push origin "$current_version"
 git push
 
 echo "New version $current_version pushed to origin"
