@@ -1,10 +1,3 @@
-import get from 'lodash/get';
-import * as React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useDebounce } from '../../hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
   getAutocompleteOptionLabel,
@@ -12,6 +5,13 @@ import {
   handleAutocompleteClose,
   handleOptionSelected,
 } from '@utils/utils';
+import get from 'lodash/get';
+import * as React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
+import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useDebounce } from '../../hooks/useDebounce';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
 export function AssigneeAutocomplete({
@@ -38,7 +38,7 @@ export function AssigneeAutocomplete({
   dataCy?: string;
 }): React.ReactElement {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const { businessArea } = useBaseUrl();
@@ -84,7 +84,7 @@ export function AssigneeAutocomplete({
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
     navigate,
-    searchParams,
+    location,
     filter,
     setFilter,
     appliedFilter,
