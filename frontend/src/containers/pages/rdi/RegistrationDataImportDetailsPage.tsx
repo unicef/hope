@@ -1,6 +1,6 @@
 import { Tab, Typography } from '@mui/material';
 import Tabs from '@mui/material/Tabs';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -9,17 +9,17 @@ import {
   useHouseholdChoiceDataQuery,
   useRegistrationDataImportQuery,
 } from '../../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { Title } from '../../../components/core/Title';
-import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
-import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { Title } from '@components/core/Title';
+import { RegistrationDataImportDetailsPageHeader } from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
+import { RegistrationDetails } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { isPermissionDeniedError } from '@utils/utils';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
 
@@ -62,13 +62,13 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
   const { businessArea } = useBaseUrl();
-  const {
-    data, loading, error, stopPolling, startPolling,
-  } = useRegistrationDataImportQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-  });
-  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery();
+  const { data, loading, error, stopPolling, startPolling } =
+    useRegistrationDataImportQuery({
+      variables: { id },
+      fetchPolicy: 'cache-and-network',
+    });
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -97,7 +97,8 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
     return null;
   }
 
-  const isMerged = RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
+  const isMerged =
+    RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
 
   function RegistrationContainer({
     isErased,
@@ -118,7 +119,9 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
               <TabsContainer>
                 <StyledTabs
                   value={selectedTab}
-                  onChange={(event: React.ChangeEvent<{}>, newValue: number) => setSelectedTab(newValue)}
+                  onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
+                    setSelectedTab(newValue)
+                  }
                   indicatorColor="primary"
                   textColor="primary"
                   variant="fullWidth"

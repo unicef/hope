@@ -3,10 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentChannelField } from '../PaymentChannelField';
-import { removeItemById } from '../utils/helpers';
+import { removeItemById } from '@utils/helpers';
 
 export interface NewPaymentChannelFieldArrayProps {
   values;
@@ -30,11 +30,13 @@ export function NewPaymentChannelFieldArray({
                 <PaymentChannelField
                   id={existingOrNewId}
                   key={existingOrNewId}
-                  onDelete={() => removeItemById(
-                    values.individualDataUpdateFieldsPaymentChannels,
-                    existingOrNewId,
-                    arrayHelpers,
-                  )}
+                  onDelete={() =>
+                    removeItemById(
+                      values.individualDataUpdateFieldsPaymentChannels,
+                      existingOrNewId,
+                      arrayHelpers,
+                    )
+                  }
                   baseName="individualDataUpdateFieldsPaymentChannels"
                   values={values}
                 />

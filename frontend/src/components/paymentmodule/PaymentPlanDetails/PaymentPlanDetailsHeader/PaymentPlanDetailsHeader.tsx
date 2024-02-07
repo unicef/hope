@@ -1,12 +1,12 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import {
   FinancialServiceProviderCommunicationChannel,
   PaymentPlanQuery,
@@ -74,15 +74,16 @@ export function PaymentPlanDetailsHeader({
     PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
     permissions,
   );
-  const canSendToPaymentGateway = hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions)
-    && paymentPlan.status === PaymentPlanStatus.Accepted
-    && paymentPlan.deliveryMechanisms.some((deliveryMechanism) => {
+  const canSendToPaymentGateway =
+    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
+    paymentPlan.status === PaymentPlanStatus.Accepted &&
+    paymentPlan.deliveryMechanisms.some((deliveryMechanism) => {
       const { sentToPaymentGateway, fsp } = deliveryMechanism;
       const { communicationChannel } = fsp;
       return (
-        !sentToPaymentGateway
-        && communicationChannel
-          === FinancialServiceProviderCommunicationChannel.Api
+        !sentToPaymentGateway &&
+        communicationChannel ===
+          FinancialServiceProviderCommunicationChannel.Api
       );
     });
 
@@ -178,12 +179,9 @@ export function PaymentPlanDetailsHeader({
 
   return (
     <PageHeader
-      title={(
+      title={
         <Box display="flex" alignItems="center">
-          {t('Payment Plan')}
-          {' '}
-          ID:
-          {' '}
+          {t('Payment Plan')} ID:{' '}
           <Box ml={1}>
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
@@ -202,7 +200,7 @@ export function PaymentPlanDetailsHeader({
             </StatusWrapper>
           )}
         </Box>
-      )}
+      }
       breadCrumbs={
         hasPermissions(PERMISSIONS.PM_VIEW_DETAILS, permissions)
           ? breadCrumbsItems

@@ -1,9 +1,9 @@
 import { Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccountabilityCommunicationMessageQuery } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { renderUserName } from '../../../utils/utils';
+import { renderUserName } from '@utils/utils';
 import { BlackLink } from '../../core/BlackLink';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';

@@ -1,12 +1,12 @@
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Radio } from '@mui/material';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { targetPopulationStatusToColor } from '../../../../utils/utils';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { targetPopulationStatusToColor } from '@utils/utils';
 import { TargetPopulationNode } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
@@ -23,14 +23,14 @@ export function TargetPopulationTableRow({
   radioChangeHandler,
   selectedTargetPopulation,
 }: TargetPopulationTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const targetPopulationDetailsPath = `/${baseUrl}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(targetPopulation.id);
     } else {
-      history.push(targetPopulationDetailsPath);
+      navigate(targetPopulationDetailsPath);
     }
   };
   return (
@@ -79,8 +79,7 @@ export function TargetPopulationTableRow({
         <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        {targetPopulation.createdBy?.firstName}
-        {' '}
+        {targetPopulation.createdBy?.firstName}{' '}
         {targetPopulation.createdBy?.lastName}
       </TableCell>
     </ClickableTableRow>

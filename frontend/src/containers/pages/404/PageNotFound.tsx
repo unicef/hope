@@ -1,11 +1,11 @@
 import { Box, Button } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import React from 'react';
+import * as React from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
-import { clearCache } from '../../../utils/utils';
+import { clearCache } from '@utils/utils';
 import PageNotFoundGraphic from './404_graphic.png';
 import HopeLogo from './404_hope_logo.png';
 
@@ -55,8 +55,7 @@ export const PageNotFound: React.FC = () => {
     await clearCache(client);
     window.history.back();
   };
-  const history = useHistory();
-  const pathSegments = history.location.pathname.split('/');
+const navigate = useNavigate()  const pathSegments = history.location.pathname.split('/');
   const businessArea = pathSegments[2];
 
   return (

@@ -1,20 +1,17 @@
 import TableCell from '@mui/material/TableCell';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import {
-  Order,
-  TableComponent,
-} from '../../../../components/core/Table/TableComponent';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { Order, TableComponent } from '@components/core/Table/TableComponent';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 import {
   choicesToDict,
   populationStatusToColor,
   sexToCapitalize,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -75,14 +72,14 @@ export function HouseholdIndividualsTable({
   household,
   choicesData,
 }: HouseholdIndividualsTableProps): ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);
   const [orderDirection, setOrderDirection] = useState('asc');
   const handleClick = (row): void => {
-    history.push(`/${baseUrl}/population/individuals/${row.id}`);
+    navigate(`/${baseUrl}/population/individuals/${row.id}`);
   };
 
   const relationshipChoicesDict = choicesToDict(

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { DialogActions as MuiDialogActions } from '@mui/material';
 
 export function DialogActions(props): React.ReactElement {

@@ -3,10 +3,10 @@
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "allowJs": true,
+    "allowJs": false,
     "module": "ESNext",
     "skipLibCheck": true,
-    "esModuleInterop": true,
+    "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "importHelpers": true,
     "forceConsistentCasingInFileNames": true,
@@ -21,14 +21,20 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["/src/*"],
       "@components/*": ["src/components/*"],
       "@containers/*": ["src/containers/*"],
       "@shared/*": ["src/shared/*"],
       "@utils/*": ["src/utils/*"]
     }
   },
-  "include": ["src", "__tests__", "jest", "vite.config.ts", "tsconfig.json"],
+  "include": [
+    "src",
+    "__tests__",
+    "jest",
+    "vite.config.ts",
+    "tsconfig.json",
+    ".eslintrc.cjs"
+  ],
   "exclude": ["node_modules"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

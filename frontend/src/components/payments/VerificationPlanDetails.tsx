@@ -1,5 +1,5 @@
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -7,10 +7,7 @@ import {
   CashPlanVerificationSamplingChoicesQuery,
   PaymentPlanQuery,
 } from '../../__generated__/graphql';
-import {
-  choicesToDict,
-  paymentVerificationStatusToColor,
-} from '../../utils/utils';
+import { choicesToDict, paymentVerificationStatusToColor } from '@utils/utils';
 import { LabelizedField } from '../core/LabelizedField';
 import { StatusBox } from '../core/StatusBox';
 import { Title } from '../core/Title';
@@ -52,10 +49,7 @@ export function VerificationPlanDetails({
       <Box display="flex" alignItems="center" justifyContent="space-between">
         <Title>
           <Typography variant="h6">
-            {t('Verification Plan')}
-            {' '}
-            #
-            {verificationPlan.unicefId}
+            {t('Verification Plan')} #{verificationPlan.unicefId}
           </Typography>
         </Title>
         <VerificationPlanActions

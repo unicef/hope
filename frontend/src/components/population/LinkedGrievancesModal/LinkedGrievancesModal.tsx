@@ -11,17 +11,17 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import {
   grievanceTicketStatusToColor,
   choicesToDict,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import {
   GrievancesChoiceDataQuery,
   HouseholdNode,
@@ -66,8 +66,7 @@ export function LinkedGrievancesModal({
   grievancesChoices,
 }: LinkedGrievancesModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const history = useHistory();
-  const { t } = useTranslation();
+const navigate = useNavigate()  const { t } = useTranslation();
 
   const { data: grievances } = useAllGrievanceTicketQuery({
     variables: { businessArea, household: household.unicefId },
@@ -92,7 +91,7 @@ export function LinkedGrievancesModal({
     return (
       <ClickableTableRow
         hover
-        onClick={() => history.push(grievanceDetailsPath)}
+        onClick={() => navigate(grievanceDetailsPath)}
         key={row.id}
       >
         <TableCell align="left">

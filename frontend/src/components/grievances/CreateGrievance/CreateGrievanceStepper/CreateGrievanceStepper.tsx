@@ -1,5 +1,5 @@
 import { Step, StepLabel, Stepper } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 
 const NoRootPadding = styled.div`

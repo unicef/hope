@@ -1,9 +1,6 @@
-import React, { ReactElement, useState } from 'react';
-import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
-import {
-  Order,
-  TableComponent,
-} from '../../../../components/core/Table/TableComponent';
+import { ReactElement, useState } from 'react';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { Order, TableComponent } from '@components/core/Table/TableComponent';
 import { ImportedIndividualMinimalFragment } from '../../../../__generated__/graphql';
 import { ImportedIndividualsTableRow } from '../ImportedIndividualsTable/ImportedIndividualsTableRow';
 

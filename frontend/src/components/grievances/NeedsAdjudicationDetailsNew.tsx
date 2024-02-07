@@ -8,7 +8,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import {
@@ -19,8 +19,8 @@ import {
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { arraysHaveSameContent } from '../../utils/utils';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { arraysHaveSameContent } from '@utils/utils';
 import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
@@ -39,8 +39,7 @@ export function NeedsAdjudicationDetailsNew({
 }): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  const history = useHistory();
-  const confirm = useConfirmation();
+const navigate = useNavigate()  const confirm = useConfirmation();
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
@@ -209,7 +208,7 @@ export function NeedsAdjudicationDetailsNew({
           </Typography>
           <Box gridGap={24} display="flex">
             <Button
-              onClick={() => history.push({
+              onClick={() => navigate({
                 pathname: `/${baseUrl}/grievance/new-ticket`,
                 state: { linkedTicketId: ticket.id },
               })}

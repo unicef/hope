@@ -5,11 +5,12 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import {
   RegistrationDetailedFragment,

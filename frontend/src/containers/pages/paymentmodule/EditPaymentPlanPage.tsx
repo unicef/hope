@@ -1,58 +1,56 @@
 import { Form, Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import * as Yup from 'yup';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
-import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
+import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { today } from '../../../utils/utils';
+import { today } from '@utils/utils';
 import {
   useAllTargetPopulationsQuery,
   usePaymentPlanQuery,
   useUpdatePpMutation,
 } from '../../../__generated__/graphql';
-import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
+import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export function EditPaymentPlanPage(): React.ReactElement {
   const { id } = useParams();
   const { t } = useTranslation();
-  const {
-    data: paymentPlanData,
-    loading: loadingPaymentPlan,
-  } = usePaymentPlanQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: paymentPlanData, loading: loadingPaymentPlan } =
+    usePaymentPlanQuery({
+      variables: {
+        id,
+      },
+      fetchPolicy: 'cache-and-network',
+    });
 
   const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const {
-    data: allTargetPopulationsData,
-    loading: loadingTargetPopulations,
-  } = useAllTargetPopulationsQuery({
-    variables: {
-      businessArea,
-      paymentPlanApplicable: false,
-      program: [programId],
-    },
-  });
-  if (loadingTargetPopulations || loadingPaymentPlan) return <LoadingComponent />;
+  const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
+    useAllTargetPopulationsQuery({
+      variables: {
+        businessArea,
+        paymentPlanApplicable: false,
+        program: [programId],
+      },
+    });
+  if (loadingTargetPopulations || loadingPaymentPlan)
+    return <LoadingComponent />;
   if (!allTargetPopulationsData || !paymentPlanData) return null;
   if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions)) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.PM_CREATE, permissions))
+    return <PermissionDenied />;
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
@@ -74,8 +72,9 @@ export function EditPaymentPlanPage(): React.ReactElement {
       .required(t('End Date is required'))
       .when(
         'startDate',
-        (startDate, schema) => startDate
-          && schema.min(
+        (startDate, schema) =>
+          startDate &&
+          schema.min(
             startDate,
             `${t('End date has to be greater than')} ${moment(startDate).format(
               'YYYY-MM-DD',
@@ -91,8 +90,9 @@ export function EditPaymentPlanPage(): React.ReactElement {
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate, schema) => dispersionStartDate
-          && schema.min(
+        (dispersionStartDate, schema) =>
+          dispersionStartDate &&
+          schema.min(
             dispersionStartDate,
             `${t('Dispersion End Date has to be greater than')} ${moment(
               dispersionStartDate,

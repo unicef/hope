@@ -1,7 +1,7 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { theme as themeObj } from '../../../theme';
-import { opacityToHex } from '../../../utils/utils';
+import { opacityToHex } from '@utils/utils';
 
 interface Props {
   status: string;
@@ -16,7 +16,8 @@ const StatusContainer = styled.div`
 
 const StatusBoxContainer = styled.div`
   color: ${({ status, statusToColor, theme }) => statusToColor(theme, status)};
-  background-color: ${({ status, statusToColor, theme }) => `${statusToColor(theme, status)}${opacityToHex(0.15)}`};
+  background-color: ${({ status, statusToColor, theme }) =>
+    `${statusToColor(theme, status)}${opacityToHex(0.15)}`};
   border-radius: 16px;
   font-family: Roboto;
   font-size: 10px;

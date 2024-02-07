@@ -1,13 +1,13 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllFeedbacksQueryVariables,
   FeedbackNode,
   useAllFeedbacksQuery,
 } from '../../../__generated__/graphql';
-import { TableWrapper } from '../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { dateToIsoString, decodeIdString } from '../../../utils/utils';
+import { dateToIsoString, decodeIdString } from '@utils/utils';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './FeedbackTableHeadCells';
 import { FeedbackTableRow } from './FeedbackTableRow';
@@ -30,9 +30,9 @@ export function FeedbackTable({
     createdAtRange:
       filter.createdAtRangeMin || filter.createdAtRangeMax
         ? JSON.stringify({
-          min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-          max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
-        })
+            min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+            max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+          })
         : '',
     program: isAllPrograms ? filter.program : programId,
     isActiveProgram: filter.programState === 'active' ? 'true' : '',

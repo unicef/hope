@@ -6,12 +6,13 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Delete } from '@mui/icons-material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { GreyText } from '../../core/GreyText';
 import { LoadingButton } from '../../core/LoadingButton';
 import { ErrorButton } from '../../core/ErrorButton';

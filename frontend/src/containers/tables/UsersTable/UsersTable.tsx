@@ -1,11 +1,11 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllUsersQueryVariables,
   useAllUsersQuery,
   UserNode,
 } from '../../../__generated__/graphql';
-import { TableWrapper } from '../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './UsersTableHeadCells';

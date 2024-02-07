@@ -1,10 +1,7 @@
 import { Formik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../../utils/constants';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   GrievanceTicketQuery,
   useIndividualLazyQuery,
@@ -16,8 +13,8 @@ import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
 
 interface LookUpReassignRoleProps {
   household?:
-  | GrievanceTicketQuery['grievanceTicket']['household']
-  | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
+    | GrievanceTicketQuery['grievanceTicket']['household']
+    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
   individual: GrievanceTicketQuery['grievanceTicket']['individual'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
@@ -33,9 +30,8 @@ export function LookUpReassignRole({
 }: LookUpReassignRoleProps): React.ReactElement {
   const { t } = useTranslation();
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState<boolean>(false);
-  const [selectedHousehold, setSelectedHousehold] = useState<
-  LookUpReassignRoleProps['household']
-  >(null);
+  const [selectedHousehold, setSelectedHousehold] =
+    useState<LookUpReassignRoleProps['household']>(null);
   const [selectedIndividual, setSelectedIndividual] = useState(null);
   const [reAssigneeRole, setReAssigneeRole] = useState<{
     role;
@@ -47,10 +43,8 @@ export function LookUpReassignRole({
     role: null,
   });
   const [shouldUseMultiple, setShouldUseMultiple] = useState(false);
-  const [
-    loadIndividual,
-    { data: individualData, loading },
-  ] = useIndividualLazyQuery();
+  const [loadIndividual, { data: individualData, loading }] =
+    useIndividualLazyQuery();
 
   useEffect(() => {
     setSelectedHousehold(household);
@@ -76,19 +70,23 @@ export function LookUpReassignRole({
     switch (category) {
       case GRIEVANCE_CATEGORIES.DATA_CHANGE:
         if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
-          roleReassignData = ticket?.deleteIndividualTicketDetails?.roleReassignData;
+          roleReassignData =
+            ticket?.deleteIndividualTicketDetails?.roleReassignData;
         } else if (issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-          roleReassignData = ticket?.individualDataUpdateTicketDetails?.roleReassignData;
+          roleReassignData =
+            ticket?.individualDataUpdateTicketDetails?.roleReassignData;
         }
         break;
       case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
-        roleReassignData = ticket?.systemFlaggingTicketDetails?.roleReassignData;
+        roleReassignData =
+          ticket?.systemFlaggingTicketDetails?.roleReassignData;
         break;
       case GRIEVANCE_CATEGORIES.DEDUPLICATION:
-        roleReassignData = ticket?.needsAdjudicationTicketDetails?.roleReassignData;
+        roleReassignData =
+          ticket?.needsAdjudicationTicketDetails?.roleReassignData;
         setShouldUseMultiple(
-          ticket?.needsAdjudicationTicketDetails?.selectedIndividuals?.length
-            > 0,
+          ticket?.needsAdjudicationTicketDetails?.selectedIndividuals?.length >
+            0,
         );
         break;
       default:

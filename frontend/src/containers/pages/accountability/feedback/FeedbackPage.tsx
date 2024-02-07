@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,13 +7,13 @@ import {
   PERMISSIONS,
 } from '../../../../config/permissions';
 import { usePermissions } from '../../../../hooks/usePermissions';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import { FeedbackTable } from '../../../tables/Feedback/FeedbackTable';
-import { FeedbackFilters } from '../../../../components/accountability/Feedback/FeedbackTable/FeedbackFilters';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { FeedbackFilters } from '@components/accountability/Feedback/FeedbackTable/FeedbackFilters';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 
 export function FeedbackPage(): React.ReactElement {
@@ -45,7 +46,8 @@ export function FeedbackPage(): React.ReactElement {
       PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_LIST,
       permissions,
     )
-  ) return <PermissionDenied />;
+  )
+    return <PermissionDenied />;
   const canViewDetails = hasPermissionInModule(
     PERMISSIONS.GRIEVANCES_FEEDBACK_VIEW_DETAILS,
     permissions,

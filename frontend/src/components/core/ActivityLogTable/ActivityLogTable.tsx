@@ -5,7 +5,7 @@ import TablePagination from '@mui/material/TablePagination';
 import Typography from '@mui/material/Typography';
 import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LogEntryNode } from '../../../__generated__/graphql';

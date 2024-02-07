@@ -1,6 +1,6 @@
 import { Box, FormHelperText, Grid } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { isInvalid } from '../../../../utils/utils';
+import { useEffect, useState } from 'react';
+import { isInvalid } from '@utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
 import { LookUpHouseholdIndividualSelectionDisplay } from './LookUpHouseholdIndividualSelectionDisplay';
 
@@ -70,10 +70,10 @@ export function LookUpHouseholdIndividualSelection({
             </Grid>
           </Grid>
         )}
-        {isInvalid('selectedHousehold', errors, touched)
-          && !selectedHousehold && (
+        {isInvalid('selectedHousehold', errors, touched) &&
+          !selectedHousehold && (
             <FormHelperText error>{errors?.selectedHousehold}</FormHelperText>
-        )}
+          )}
       </Box>
     </>
   );

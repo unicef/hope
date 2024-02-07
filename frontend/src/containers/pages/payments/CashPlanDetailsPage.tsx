@@ -1,18 +1,18 @@
 import { Button } from '@mui/material';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { CashPlanDetails } from '../../../components/core/CashPlanDetails/CashPlanDetails';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { CashPlanDetails } from '@components/core/CashPlanDetails/CashPlanDetails';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { isPermissionDeniedError } from '@utils/utils';
 import {
   CashPlanNode,
   useBusinessAreaDataQuery,
@@ -35,17 +35,21 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
   const { baseUrl, isAllPrograms, businessArea } = useBaseUrl();
-  const { data: businessAreaData, loading: businessAreaDataLoading } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
+  const { data: businessAreaData, loading: businessAreaDataLoading } =
+    useBusinessAreaDataQuery({
+      variables: { businessAreaSlug: businessArea },
+    });
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: caData, loading: caPrefixLoading } = useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
-  if (loading || caPrefixLoading || businessAreaDataLoading) return <LoadingComponent />;
+  const { data: caData, loading: caPrefixLoading } =
+    useCashAssistUrlPrefixQuery({ fetchPolicy: 'cache-first' });
+  if (loading || caPrefixLoading || businessAreaDataLoading)
+    return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || !caData || !businessAreaData || permissions === null) return null;
+  if (!data || !caData || !businessAreaData || permissions === null)
+    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

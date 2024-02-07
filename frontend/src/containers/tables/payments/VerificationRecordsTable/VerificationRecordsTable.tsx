@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllPaymentVerificationsQueryVariables,
@@ -32,8 +32,8 @@ export function VerificationRecordsTable({
 
   return (
     <UniversalTable<
-    PaymentVerificationNode,
-    AllPaymentVerificationsQueryVariables
+      PaymentVerificationNode,
+      AllPaymentVerificationsQueryVariables
     >
       title={t('Verification Records')}
       headCells={headCells}

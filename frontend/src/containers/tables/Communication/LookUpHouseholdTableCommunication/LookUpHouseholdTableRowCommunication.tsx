@@ -1,14 +1,14 @@
 import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
   AllHouseholdsQuery,
   HouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 
 interface LookUpHouseholdTableRowCommunicationProps {
   household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
@@ -19,8 +19,8 @@ interface LookUpHouseholdTableRowCommunicationProps {
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
     event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     number,
   ) => void;
   selected?: Array<string>;
@@ -52,7 +52,8 @@ export function LookUpHouseholdTableRowCommunication({
     }
   };
 
-  const isSelectionDisabled = redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly || false;
+  const isSelectionDisabled =
+    redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly || false;
   return (
     <ClickableTableRow
       onClick={(event) => {

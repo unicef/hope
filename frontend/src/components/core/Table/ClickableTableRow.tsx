@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useState } from 'react';
+import { MouseEventHandler, useState } from 'react';
 import TableRow, { TableRowProps } from '@mui/material/TableRow';
 import styled from 'styled-components';
 
@@ -12,10 +12,10 @@ function getSelectedText(): string {
   } else if (
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
-    document.selection !== undefined
+    document.selection !== undefined &&
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
-    && document.selection.type === 'Text'
+    document.selection.type === 'Text'
   ) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore

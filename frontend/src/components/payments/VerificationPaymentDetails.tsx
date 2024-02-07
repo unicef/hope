@@ -1,8 +1,8 @@
 import { Grid, Paper, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   choicesToDict,
   formatCurrencyWithSymbol,
@@ -10,7 +10,7 @@ import {
   paymentStatusDisplayMap,
   paymentStatusToColor,
   verificationRecordsStatusToColor,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { PaymentQuery } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';

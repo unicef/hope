@@ -1,7 +1,7 @@
-import React from 'react';
-import { SubField } from '../../components/targeting/SubField';
+import * as React from 'react';
+import { SubField } from '@components/targeting/SubField';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FieldChooser } from '../../components/targeting/FieldChooser';
+import { FieldChooser } from '@components/targeting/FieldChooser';
 
 export function TargetCriteriaBlockFilter({
   blockIndex,

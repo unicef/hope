@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { Field } from 'formik';
 import get from 'lodash/get';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { AllProgramsForChoicesQuery } from '../../__generated__/graphql';

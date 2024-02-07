@@ -7,7 +7,8 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Field, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 import {
@@ -15,11 +16,11 @@ import {
   useIndividualChoiceDataQuery,
   useReassignRoleGrievanceMutation,
 } from '../../../../__generated__/graphql';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
@@ -84,7 +85,8 @@ export function LookUpReassignRoleModal({
   );
 
   const { businessArea } = useBaseUrl();
-  const { data: individualChoicesData, loading: individualChoicesLoading } = useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
   if (individualChoicesLoading) return <LoadingComponent />;
 

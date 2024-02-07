@@ -1,9 +1,8 @@
+import * as React from 'react';
 import get from 'lodash/get';
-import React, {
-  useCallback, useEffect, useRef, useState,
-} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguageAutocompleteLazyQuery } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
 import {
@@ -11,7 +10,7 @@ import {
   getAutocompleteOptionLabel,
   handleAutocompleteChange,
   handleOptionSelected,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
 export function LanguageAutocomplete({
@@ -37,7 +36,7 @@ export function LanguageAutocomplete({
 }): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
@@ -69,7 +68,7 @@ export function LanguageAutocomplete({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
@@ -105,8 +104,12 @@ export function LanguageAutocomplete({
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      handleOptionSelected={(option, value1) => handleOptionSelected(option?.node?.code, value1)}
-      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue, 'language')}
+      handleOptionSelected={(option, value1) =>
+        handleOptionSelected(option?.node?.code, value1)
+      }
+      handleOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue, 'language')
+      }
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}

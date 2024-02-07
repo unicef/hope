@@ -1,15 +1,14 @@
-import {
-  Box, Button, DialogContent, Grid,
-} from '@mui/material';
+import { Box, Button, DialogContent, Grid } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { formatNumber } from '../../../../utils/utils';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { formatNumber } from '@utils/utils';
 import { AllChartsQuery } from '../../../../__generated__/graphql';
 import { IndividualsReachedByAgeAndGenderGroupsChart } from '../../charts/IndividualsReachedByAgeAndGenderGroupsChart';
 import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';

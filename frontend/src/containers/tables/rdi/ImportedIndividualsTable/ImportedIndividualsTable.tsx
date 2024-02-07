@@ -1,7 +1,5 @@
-import {
-  Box, Checkbox, FormControlLabel, Grid,
-} from '@mui/material';
-import React, { ReactElement, useState } from 'react';
+import { Box, Checkbox, FormControlLabel, Grid } from '@mui/material';
+import { ReactElement, useState } from 'react';
 import {
   AllImportedIndividualsQueryVariables,
   AllMergedIndividualsQueryVariables,
@@ -55,13 +53,13 @@ export function ImportedIndividualsTable({
           <Grid item>
             <Box p={3}>
               <FormControlLabel
-                control={(
+                control={
                   <Checkbox
                     color="primary"
                     checked={showDuplicates}
                     onChange={() => setShowDuplicates(!showDuplicates)}
                   />
-                )}
+                }
                 label="Show duplicates only"
               />
             </Box>
@@ -70,8 +68,8 @@ export function ImportedIndividualsTable({
       )}
       {isMerged ? (
         <UniversalTable<
-        MergedIndividualMinimalFragment,
-        AllMergedIndividualsQueryVariables
+          MergedIndividualMinimalFragment,
+          AllMergedIndividualsQueryVariables
         >
           title={title}
           headCells={mergedIndividualHeadCells}
@@ -91,8 +89,8 @@ export function ImportedIndividualsTable({
         />
       ) : (
         <UniversalTable<
-        ImportedIndividualMinimalFragment,
-        AllImportedIndividualsQueryVariables
+          ImportedIndividualMinimalFragment,
+          AllImportedIndividualsQueryVariables
         >
           title={title}
           headCells={importedIndividualHeadCells}

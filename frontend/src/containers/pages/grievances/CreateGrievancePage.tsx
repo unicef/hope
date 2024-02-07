@@ -2,7 +2,7 @@ import {
   Box, Button, FormHelperText, Grid,
 } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import  { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -14,30 +14,30 @@ import {
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { AddIndividualDataChange } from '../../../components/grievances/AddIndividualDataChange';
-import { CreateGrievanceStepper } from '../../../components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
-import { Description } from '../../../components/grievances/CreateGrievance/Description/Description';
-import { Selection } from '../../../components/grievances/CreateGrievance/Selection/Selection';
-import { Verification } from '../../../components/grievances/CreateGrievance/Verification/Verification';
-import { EditHouseholdDataChange } from '../../../components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
-import { EditIndividualDataChange } from '../../../components/grievances/EditIndividualDataChange/EditIndividualDataChange';
-import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
-import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
-import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlreadyExist';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { AddIndividualDataChange } from '@components/grievances/AddIndividualDataChange';
+import { CreateGrievanceStepper } from '@components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
+import { Description } from '@components/grievances/CreateGrievance/Description/Description';
+import { Selection } from '@components/grievances/CreateGrievance/Selection/Selection';
+import { Verification } from '@components/grievances/CreateGrievance/Verification/Verification';
+import { EditHouseholdDataChange } from '@components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
+import { EditIndividualDataChange } from '@components/grievances/EditIndividualDataChange/EditIndividualDataChange';
+import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
+import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
+import { TicketsAlreadyExist } from '@components/grievances/TicketsAlreadyExist';
 import {
   getGrievanceDetailsPath,
   prepareVariables,
   selectedIssueType,
-} from '../../../components/grievances/utils/createGrievanceUtils';
-import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
-import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
+} from '@components/grievances/utils/createGrievanceUtils';
+import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
+import { validationSchemaWithSteps } from '@components/grievances/utils/validationSchema';
 import {
   PERMISSIONS,
   hasPermissionInModule,
@@ -51,11 +51,11 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
-} from '../../../utils/constants';
+} from '@utils/constants';
 import {
   decodeIdString,
   thingForSpecificGrievanceType,
-} from '../../../utils/utils';
+} from '@utils/utils';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -85,8 +85,7 @@ export const dataChangeComponentDict = {
 
 export function CreateGrievancePage(): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
-  const {
+const navigate = useNavigate()  const {
     baseUrl, businessArea, programId, isAllPrograms,
   } = useBaseUrl();
   const permissions = usePermissions();

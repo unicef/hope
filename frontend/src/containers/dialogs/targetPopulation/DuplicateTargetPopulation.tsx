@@ -1,12 +1,12 @@
 import { Button, DialogContent, DialogTitle } from '@mui/material';
 import { Field, Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { LoadingButton } from '../../../components/core/LoadingButton';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
@@ -80,11 +80,7 @@ export function DuplicateTargetPopulation({
                 {t(
                   'Please use a unique name for the copy of this Target Population.',
                 )}
-                <br />
-                {' '}
-                <strong>{t('Note')}</strong>
-                :
-                {' '}
+                <br /> <strong>{t('Note')}</strong>:{' '}
                 {t(
                   'This duplicate will copy the Target Criteria of the Programme Population and update to the latest results from the system.',
                 )}

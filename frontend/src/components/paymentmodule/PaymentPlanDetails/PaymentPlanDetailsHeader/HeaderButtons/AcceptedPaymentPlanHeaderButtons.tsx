@@ -1,6 +1,6 @@
 import { Box, Button } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
 import {
@@ -31,19 +31,23 @@ export function AcceptedPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  const [mutateExport, { loading: loadingExport }] = useExportXlsxPpListPerFspMutation();
+  const [mutateExport, { loading: loadingExport }] =
+    useExportXlsxPpListPerFspMutation();
 
   const {
     mutatePaymentPlanAction: sendToPaymentGateway,
     loading: LoadingSendToPaymentGateway,
-  } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () => showMessage(t('Sending to Payment Gateway started')));
+  } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () =>
+    showMessage(t('Sending to Payment Gateway started')),
+  );
 
-  const shouldDisableExportXlsx = loadingExport
-    || !paymentPlan.hasFspDeliveryMechanismXlsxTemplate
-    || !canExportXlsx
-    || paymentPlan?.backgroundActionStatus
-      === PaymentPlanBackgroundActionStatus.XlsxExporting
-    || !isActiveProgram;
+  const shouldDisableExportXlsx =
+    loadingExport ||
+    !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
+    !canExportXlsx ||
+    paymentPlan?.backgroundActionStatus ===
+      PaymentPlanBackgroundActionStatus.XlsxExporting ||
+    !isActiveProgram;
 
   return (
     <Box display="flex" alignItems="center">
@@ -89,8 +93,8 @@ export function AcceptedPaymentPlanHeaderButtons({
               download
               href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
               disabled={
-                !paymentPlan.hasFspDeliveryMechanismXlsxTemplate
-                || !canDownloadXlsx
+                !paymentPlan.hasFspDeliveryMechanismXlsxTemplate ||
+                !canDownloadXlsx
               }
             >
               {t('Download XLSX')}

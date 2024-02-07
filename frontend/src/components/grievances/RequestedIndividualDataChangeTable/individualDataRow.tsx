@@ -2,9 +2,9 @@ import { Checkbox, TableCell, TableRow } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { CurrentValue } from './CurrentValue';
 import { NewValue } from './NewValue';
 
@@ -37,17 +37,20 @@ export const individualDataRow = (
   const individualValue = field.isFlexField
     ? ticket.individualDataUpdateTicketDetails?.individual?.flexFields[row[0]]
     : ticket.individualDataUpdateTicketDetails?.individual[
-      camelCase(fieldName)
-    ];
-  const currentValue = ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
-    ? valueDetails.previousValue
-    : individualValue;
+        camelCase(fieldName)
+      ];
+  const currentValue =
+    ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+      ? valueDetails.previousValue
+      : individualValue;
   return (
     <TableRow role="checkbox" aria-checked={isItemSelected} key={fieldName}>
       <TableCell>
         {isEdit ? (
           <Checkbox
-            onChange={(event) => handleSelectBioData(row[0], event.target.checked)}
+            onChange={(event) =>
+              handleSelectBioData(row[0], event.target.checked)
+            }
             color="primary"
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
             checked={isItemSelected}

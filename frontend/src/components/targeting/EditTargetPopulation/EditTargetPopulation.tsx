@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -13,8 +13,8 @@ import {
 } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '../../../utils/utils';
+import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '@utils/utils';
 import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '../../core/LoadingComponent';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
@@ -52,10 +52,11 @@ export function EditTargetPopulation({
   const [mutate, { loading }] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
-  const { data: allProgramsData, loading: loadingPrograms } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, status: [ProgramStatus.Active] },
+      fetchPolicy: 'cache-and-network',
+    });
 
   if (loadingPrograms) {
     return <LoadingComponent />;
@@ -86,7 +87,9 @@ export function EditTargetPopulation({
           return true;
         }
         const idsArr = ids.split(',');
-        return idsArr.every((el) => /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
+        return idsArr.every((el) =>
+          /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
+        );
       },
     ),
     exclusionReason: Yup.string().max(500, t('Too long')),
@@ -122,10 +125,11 @@ export function EditTargetPopulation({
     }
   };
 
-  const selectedProgram = (values): void => getFullNodeFromEdgesById(
-    allProgramsData?.allPrograms?.edges,
-    values.program,
-  );
+  const selectedProgram = (values): void =>
+    getFullNodeFromEdgesById(
+      allProgramsData?.allPrograms?.edges,
+      values.program,
+    );
 
   return (
     <Formik

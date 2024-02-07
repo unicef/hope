@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { Collapse, IconButton } from '@mui/material';
 import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
@@ -41,8 +42,7 @@ export function XlsxErrors({
             <strong>
               Row:
               {item.rowNumber}
-            </strong>
-            {' '}
+            </strong>{' '}
             {item.message}
           </Error>
         ))}

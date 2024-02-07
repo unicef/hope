@@ -1,6 +1,6 @@
 import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import {
   AllHouseholdsForPopulationTableQuery,
   HouseholdChoiceDataQuery,
@@ -19,8 +19,8 @@ interface LookUpHouseholdTableRowProps {
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
     event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     number,
   ) => void;
   selected?: Array<string>;
@@ -52,7 +52,8 @@ export function LookUpHouseholdTableRow({
     }
   };
 
-  const isSelectionDisabled = redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly || false;
+  const isSelectionDisabled =
+    redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly || false;
   return (
     <ClickableTableRow
       onClick={(event) => {

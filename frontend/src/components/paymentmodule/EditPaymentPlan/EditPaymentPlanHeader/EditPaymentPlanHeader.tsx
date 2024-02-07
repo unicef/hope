@@ -1,5 +1,5 @@
 import { Box, Button } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -7,7 +7,7 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
@@ -45,12 +45,9 @@ export function EditPaymentPlanHeader({
 
   return (
     <PageHeader
-      title={(
+      title={
         <Box display="flex" alignItems="center">
-          {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')}
-          {' '}
-          ID
-          {' '}
+          {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
           {paymentPlan.unicefId}
           <StatusWrapper>
             <StatusBox
@@ -67,7 +64,7 @@ export function EditPaymentPlanHeader({
             </StatusWrapper>
           )}
         </Box>
-      )}
+      }
       breadCrumbs={
         hasPermissions(PERMISSIONS.PM_VIEW_LIST, permissions)
           ? breadCrumbsItems

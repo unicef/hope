@@ -1,8 +1,8 @@
 import { TableCell } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { anon } from '../../../utils/utils';
+import { anon } from '@utils/utils';
 
 export function AnonTableCell({ children, ...props }): React.ReactElement {
   const permissions = usePermissions();

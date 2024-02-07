@@ -1,5 +1,5 @@
 import Autocomplete from '@mui/lab/Autocomplete';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { TextField } from '@mui/material';
@@ -87,7 +87,9 @@ export function AdminAreaFixedAutocomplete({
         if (value || reason === 'select-option') return;
         onInputTextChange(null);
       }}
-      getOptionSelected={(option, selectedValue) => selectedValue?.node?.id === option.node.id}
+      getOptionSelected={(option, selectedValue) =>
+        selectedValue?.node?.id === option.node.id
+      }
       getOptionLabel={(option) => {
         if (!option.node) {
           return '';

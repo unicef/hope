@@ -1,17 +1,15 @@
-import {
-  Box, Button, Paper, Typography,
-} from '@mui/material';
+import { Box, Button, Paper, Typography } from '@mui/material';
 import { Formik } from 'formik';
 import camelCase from 'lodash/camelCase';
 import mapKeys from 'lodash/mapKeys';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
+} from '@utils/constants';
 import {
   GrievanceTicketQuery,
   HouseholdNode,
@@ -58,7 +56,8 @@ export function RequestedIndividualDataChange({
   const identitiesToRemove = individualData.identities_to_remove || [];
   const identitiesToEdit = individualData.identities_to_edit || [];
   const paymentChannels = individualData?.payment_channels || [];
-  const paymentChannelsToRemove = individualData.payment_channels_to_remove || [];
+  const paymentChannelsToRemove =
+    individualData.payment_channels_to_remove || [];
   const paymentChannelsToEdit = individualData.payment_channels_to_edit || [];
   const flexFields = individualData.flex_fields || {};
   delete individualData.flex_fields;
@@ -102,9 +101,10 @@ export function RequestedIndividualDataChange({
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
-  const getConfirmationText = (allChangesLength): string => `You approved ${allChangesLength || 0} change${
-    allChangesLength === 1 ? '' : 's'
-  }, remaining proposed changes will be automatically rejected upon ticket closure.`;
+  const getConfirmationText = (allChangesLength): string =>
+    `You approved ${allChangesLength || 0} change${
+      allChangesLength === 1 ? '' : 's'
+    }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   const [mutate] = useApproveIndividualDataChangeMutation();
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
@@ -171,39 +171,45 @@ export function RequestedIndividualDataChange({
     }
   }
 
-  const isHeadOfHousehold = ticket.individual?.id === ticket.household?.headOfHousehold?.id;
+  const isHeadOfHousehold =
+    ticket.individual?.id === ticket.household?.headOfHousehold?.id;
 
-  const primaryCollectorRolesCount = ticket?.individual?.householdsAndRoles.filter(
-    (el) => el.role === IndividualRoleInHouseholdRole.Primary,
-  ).length + (isHeadOfHousehold ? 1 : 0);
+  const primaryCollectorRolesCount =
+    ticket?.individual?.householdsAndRoles.filter(
+      (el) => el.role === IndividualRoleInHouseholdRole.Primary,
+    ).length + (isHeadOfHousehold ? 1 : 0);
   const primaryColletorRolesReassignedCount = Object.values(
     JSON.parse(ticket.individualDataUpdateTicketDetails.roleReassignData),
   )?.filter(
-    (el: RoleReassignData) => el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
+    (el: RoleReassignData) =>
+      el.role === IndividualRoleInHouseholdRole.Primary || el.role === 'HEAD',
   ).length;
 
   let approveEnabled = false;
   if (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
-    approveEnabled = isForApproval
-      && primaryCollectorRolesCount === primaryColletorRolesReassignedCount;
+    approveEnabled =
+      isForApproval &&
+      primaryCollectorRolesCount === primaryColletorRolesReassignedCount;
   } else {
     approveEnabled = isForApproval;
   }
 
-  const shouldShowEditButton = (allChangesLength): boolean => allChangesLength && !isEdit && isForApproval;
+  const shouldShowEditButton = (allChangesLength): boolean =>
+    allChangesLength && !isEdit && isForApproval;
 
   const areAllApproved = (allSelected): boolean => {
-    const countAll = entries.length
-      + entriesFlexFields.length
-      + documents.length
-      + documentsToRemove.length
-      + documentsToEdit.length
-      + identities.length
-      + identitiesToRemove.length
-      + identitiesToEdit.length
-      + paymentChannels.length
-      + paymentChannelsToRemove.length
-      + paymentChannelsToEdit.length;
+    const countAll =
+      entries.length +
+      entriesFlexFields.length +
+      documents.length +
+      documentsToRemove.length +
+      documentsToEdit.length +
+      identities.length +
+      identitiesToRemove.length +
+      identitiesToEdit.length +
+      paymentChannels.length +
+      paymentChannelsToRemove.length +
+      paymentChannelsToEdit.length;
 
     return allSelected === countAll;
   };
@@ -224,12 +230,14 @@ export function RequestedIndividualDataChange({
     }
     return (
       <Button
-        onClick={() => confirm({
-          title: t('Warning'),
-          content: getConfirmationText(allSelected),
-        }).then(() => {
-          submitForm();
-        })}
+        onClick={() =>
+          confirm({
+            title: t('Warning'),
+            content: getConfirmationText(allSelected),
+          }).then(() => {
+            submitForm();
+          })
+        }
         variant="contained"
         color="primary"
         disabled={!approveEnabled}
@@ -284,8 +292,10 @@ export function RequestedIndividualDataChange({
         const approvedIdentitiesToRemove = values.selectedIdentitiesToRemove;
         const approvedIdentitiesToEdit = values.selectedIdentitiesToEdit;
         const approvedPaymentChannelsToCreate = values.selectedPaymentChannels;
-        const approvedPaymentChannelsToRemove = values.selectedPaymentChannelsToRemove;
-        const approvedPaymentChannelsToEdit = values.selectedPaymentChannelsToEdit;
+        const approvedPaymentChannelsToRemove =
+          values.selectedPaymentChannelsToRemove;
+        const approvedPaymentChannelsToEdit =
+          values.selectedPaymentChannelsToEdit;
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
@@ -337,8 +347,8 @@ export function RequestedIndividualDataChange({
                     {t('EDIT')}
                   </Button>
                 ) : (
-                  canApproveDataChange
-                  && getApprovalButton(allChangesLength, submitForm)
+                  canApproveDataChange &&
+                  getApprovalButton(allChangesLength, submitForm)
                 )}
               </Box>
             </Title>

@@ -1,6 +1,6 @@
 import { Box, Button, Typography } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GrievanceTicketQuery,
@@ -8,7 +8,7 @@ import {
 } from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
@@ -27,7 +27,8 @@ export function RequestedHouseholdDataChange({
   const { isActiveProgram } = useProgramContext();
 
   const getConfirmationText = (values): string => {
-    const allSelected = values.selected.length + values.selectedFlexFields.length || 0;
+    const allSelected =
+      values.selected.length + values.selectedFlexFields.length || 0;
     return `You approved ${allSelected} change${
       allSelected === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
@@ -49,12 +50,14 @@ export function RequestedHouseholdDataChange({
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
-  const shouldShowEditButton = (values): boolean => (values.selected.length || values.selectedFlexFields.length)
-    && !isEdit
-    && ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+  const shouldShowEditButton = (values): boolean =>
+    (values.selected.length || values.selectedFlexFields.length) &&
+    !isEdit &&
+    ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
 
   const areAllApproved = (values): boolean => {
-    const selectedCount = values.selected.length + values.selectedFlexFields.length;
+    const selectedCount =
+      values.selected.length + values.selectedFlexFields.length;
     const countAll = entries.length + flexFieldsEntries.length;
     return selectedCount === countAll;
   };
@@ -68,8 +71,8 @@ export function RequestedHouseholdDataChange({
           color="primary"
           data-cy="button-approve"
           disabled={
-            ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-            || !isActiveProgram
+            ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+            !isActiveProgram
           }
         >
           {t('Approve')}
@@ -78,12 +81,14 @@ export function RequestedHouseholdDataChange({
     }
     return (
       <Button
-        onClick={() => confirm({
-          title: t('Warning'),
-          content: getConfirmationText(values),
-        }).then(() => {
-          submitForm();
-        })}
+        onClick={() =>
+          confirm({
+            title: t('Warning'),
+            content: getConfirmationText(values),
+          }).then(() => {
+            submitForm();
+          })
+        }
         variant="contained"
         color="primary"
         data-cy="button-approve"
@@ -91,8 +96,8 @@ export function RequestedHouseholdDataChange({
           'Program has to be active to create a Linked Ticket to Feedback',
         )}
         disabled={
-          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-          || !isActiveProgram
+          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+          !isActiveProgram
         }
       >
         {t('Approve')}
@@ -103,10 +108,16 @@ export function RequestedHouseholdDataChange({
     <Formik
       initialValues={{
         selected: entries
-          .filter((row: [string, { approve_status: boolean }]) => row[1].approve_status)
+          .filter(
+            (row: [string, { approve_status: boolean }]) =>
+              row[1].approve_status,
+          )
           .map((row) => row[0]),
         selectedFlexFields: flexFieldsEntries
-          .filter((row: [string, { approve_status: boolean }]) => row[1].approve_status)
+          .filter(
+            (row: [string, { approve_status: boolean }]) =>
+              row[1].approve_status,
+          )
           .map((row) => row[0]),
       }}
       onSubmit={async (values) => {

@@ -1,6 +1,6 @@
 import { FormHelperText, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { EditDocumentationRow } from './EditDocumentationRow';
 
@@ -34,9 +34,9 @@ export function ExistingDocumentationFieldArray({
               />
             ))}
             {errors?.documentationToUpdate && (
-            <FormHelperText error>
-              {errors?.documentationToUpdate}
-            </FormHelperText>
+              <FormHelperText error>
+                {errors?.documentationToUpdate}
+              </FormHelperText>
             )}
           </>
         )}

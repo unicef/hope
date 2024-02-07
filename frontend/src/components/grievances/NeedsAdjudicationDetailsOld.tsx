@@ -8,7 +8,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import {
@@ -17,7 +17,7 @@ import {
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { BlackLink } from '../core/BlackLink';
 import { useConfirmation } from '../core/ConfirmationDialog';
 import { Title } from '../core/Title';
@@ -37,8 +37,7 @@ export function NeedsAdjudicationDetailsOld({
 }): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
-  const history = useHistory();
-  const confirm = useConfirmation();
+const navigate = useNavigate()  const confirm = useConfirmation();
   const { isActiveProgram } = useProgramContext();
 
   const [approve] = useApproveNeedsAdjudicationMutation({
@@ -104,7 +103,7 @@ export function NeedsAdjudicationDetailsOld({
           </Typography>
           <Box gridGap={24} display="flex">
             <Button
-              onClick={() => history.push({
+              onClick={() => navigate({
                 pathname: `/${baseUrl}/grievance/new-ticket`,
                 state: { linkedTicketId: ticket.id },
               })}

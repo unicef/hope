@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { Field } from 'formik';
-import React, { Fragment, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -17,8 +17,8 @@ import {
   DataCollectingTypeType,
   TargetPopulationQuery,
 } from '../../../__generated__/graphql';
-import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
+import { TargetCriteriaForm } from '@containers/forms/TargetCriteriaForm';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { Criteria } from './Criteria';
 import {
   ContentWrapper,
@@ -152,8 +152,8 @@ export function TargetingCriteria({
 
     // Disable household filters for social programs
     if (
-      selectedProgram?.dataCollectingType?.type?.toUpperCase()
-      === DataCollectingTypeType.Social
+      selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
+      DataCollectingTypeType.Social
     ) {
       householdFiltersAvailable = false;
     }
@@ -176,9 +176,7 @@ export function TargetingCriteria({
                     onClick={() => setOpen(true)}
                     data-cy="button-target-population-add-criteria"
                   >
-                    {t('Add')}
-                    {' '}
-                    &apos;Or&apos;
+                    {t('Add')} &apos;Or&apos;
                     {t('Filter')}
                   </Button>
                 )}
@@ -201,26 +199,26 @@ export function TargetingCriteria({
               <Box display="flex" flexWrap="wrap">
                 {rules.length ? (
                   rules.map((criteria, index) => (
-                      // eslint-disable-next-line
-                      <Fragment key={criteria.id || index}>
-                        <Criteria
-                          isEdit={isEdit}
-                          canRemove={rules.length > 1}
-                          rules={criteria.filters}
-                          individualsFiltersBlocks={
-                            criteria.individualsFiltersBlocks || []
-                          }
-                          editFunction={() => editCriteria(criteria, index)}
-                          removeFunction={() => helpers.remove(index)}
-                        />
+                    // eslint-disable-next-line
+                    <Fragment key={criteria.id || index}>
+                      <Criteria
+                        isEdit={isEdit}
+                        canRemove={rules.length > 1}
+                        rules={criteria.filters}
+                        individualsFiltersBlocks={
+                          criteria.individualsFiltersBlocks || []
+                        }
+                        editFunction={() => editCriteria(criteria, index)}
+                        removeFunction={() => helpers.remove(index)}
+                      />
 
-                        {index === rules.length - 1
-                        || (rules.length === 1 && index === 0) ? null : (
-                          <Divider>
-                            <DividerLabel>Or</DividerLabel>
-                          </Divider>
-                          )}
-                      </Fragment>
+                      {index === rules.length - 1 ||
+                      (rules.length === 1 && index === 0) ? null : (
+                        <Divider>
+                          <DividerLabel>Or</DividerLabel>
+                        </Divider>
+                      )}
+                    </Fragment>
                   ))
                 ) : (
                   <AddCriteria
@@ -239,7 +237,7 @@ export function TargetingCriteria({
                       <Grid item xs={6}>
                         <FormControlLabel
                           disabled
-                          control={(
+                          control={
                             <Checkbox
                               color="primary"
                               name="flagExcludeIfActiveAdjudicationTicket"
@@ -249,7 +247,7 @@ export function TargetingCriteria({
                                   ?.flagExcludeIfActiveAdjudicationTicket,
                               )}
                             />
-                          )}
+                          }
                           label={t(
                             'Exclude Households with Active Adjudication Ticket',
                           )}
@@ -259,13 +257,13 @@ export function TargetingCriteria({
                         {screenBeneficiary && (
                           <FormControlLabel
                             disabled
-                            control={(
+                            control={
                               <Checkbox
                                 data-cy="checkbox-exclude-if-on-sanction-list"
                                 color="primary"
                                 name="flagExcludeIfOnSanctionList"
                               />
-                            )}
+                            }
                             checked={Boolean(
                               targetPopulation?.targetingCriteria
                                 ?.flagExcludeIfOnSanctionList,

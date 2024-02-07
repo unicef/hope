@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCountryChartsLazyQuery } from '../../../../__generated__/graphql';
 import { LoadingComponent } from '../../../core/LoadingComponent';

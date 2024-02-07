@@ -1,13 +1,12 @@
-import {
-  Box, FormControlLabel, Radio, RadioGroup,
-} from '@mui/material';
-import React, { useState } from 'react';
+import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
-import { SurveyTabsValues } from '../../../../utils/constants';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { SurveyTabsValues } from '@utils/constants';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { LookUpProgrammesFiltersSurveys } from './LookUpProgrammesFiltersSurveys';
 import { LookUpSelectionTablesSurveys } from './LookUpSelectionTablesSurveys';
 import { LookUpTargetPopulationFiltersSurveys } from './LookUpTargetPopulationFiltersSurveys';
@@ -73,9 +72,10 @@ export function LookUpSelectionSurveys({
 
   const { t } = useTranslation();
 
-  const { data: choicesData, loading: choicesLoading } = useProgrammeChoiceDataQuery({
-    variables: { businessArea },
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useProgrammeChoiceDataQuery({
+      variables: { businessArea },
+    });
 
   const handleChange = (type: number, value: string): void => {
     setValues({

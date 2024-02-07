@@ -1,13 +1,13 @@
 import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { TargetPopulationStatus } from '../../__generated__/graphql';
 import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
@@ -29,20 +29,20 @@ export function TargetPopulationFilters({
   setAppliedFilter,
 }: TargetPopulationFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -91,7 +91,9 @@ export function TargetPopulationFilters({
             topLabel={t('Number of Households')}
             value={filter.totalHouseholdsCountMin}
             placeholder={t('From')}
-            onChange={(e) => handleFilterChange('totalHouseholdsCountMin', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('totalHouseholdsCountMin', e.target.value)
+            }
             icon={<Group />}
             data-cy="filters-total-households-count-min"
           />
@@ -100,7 +102,9 @@ export function TargetPopulationFilters({
           <NumberTextField
             value={filter.totalHouseholdsCountMax}
             placeholder={t('To')}
-            onChange={(e) => handleFilterChange('totalHouseholdsCountMax', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('totalHouseholdsCountMax', e.target.value)
+            }
             icon={<Group />}
             data-cy="filters-total-households-count-max"
           />

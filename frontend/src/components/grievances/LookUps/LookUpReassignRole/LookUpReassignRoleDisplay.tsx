@@ -1,6 +1,6 @@
 import { Box, Grid } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyledBox, BlueText, LightGrey } from '../LookUpStyles';
 
@@ -22,16 +22,11 @@ export function LookUpReassignRoleDisplay({
         <Grid item>
           <Box display="flex" flexDirection="column">
             <span>
-              {t('Household ID')}
-              :
-              <BlueText>
-                {' '}
-                {selectedHousehold?.unicefId || '-'}
-              </BlueText>
+              {t('Household ID')}:
+              <BlueText> {selectedHousehold?.unicefId || '-'}</BlueText>
             </span>
             <span>
-              {t('Individual ID')}
-              :
+              {t('Individual ID')}:
               <BlueText>{selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>

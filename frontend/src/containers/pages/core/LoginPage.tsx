@@ -1,9 +1,9 @@
 import { Button, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { Logo } from '../../../components/core/Logo';
+import { Logo } from '@components/core/Logo';
 import { LOGIN_URL } from '../../../config';
 
 const Container = styled.div`

@@ -1,14 +1,13 @@
-import {
-  Box, Button, Dialog, DialogActions, DialogTitle,
-} from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@mui/icons-material';
 import get from 'lodash/get';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { ImportErrors } from '../../../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   ImportXlsxPpListMutation,
@@ -41,9 +40,11 @@ export function ImportXlsxPaymentPlanPaymentList({
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
-  const [mutate, { data: uploadData, loading: fileLoading, error }] = useImportXlsxPpListMutation();
+  const [mutate, { data: uploadData, loading: fileLoading, error }] =
+    useImportXlsxPpListMutation();
 
-  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] = get(uploadData, 'importXlsxPaymentPlanPaymentList.errors');
+  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] =
+    get(uploadData, 'importXlsxPaymentPlanPaymentList.errors');
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -77,9 +78,10 @@ export function ImportXlsxPaymentPlanPaymentList({
     permissions,
   );
 
-  const shouldDisableUpload = paymentPlan.status !== PaymentPlanStatus.Locked
-    || !canUploadFile
-    || !isActiveProgram;
+  const shouldDisableUpload =
+    paymentPlan.status !== PaymentPlanStatus.Locked ||
+    !canUploadFile ||
+    !isActiveProgram;
 
   return (
     <>
@@ -122,8 +124,8 @@ export function ImportXlsxPaymentPlanPaymentList({
                 setFileToImport(file);
               }}
             />
-            {fileToImport
-            && (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
+            {fileToImport &&
+            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
               <Error data-cy="error-list">
                 <p>Errors</p>
                 {error
@@ -131,7 +133,7 @@ export function ImportXlsxPaymentPlanPaymentList({
                   : null}
                 <ImportErrors errors={xlsxErrors} />
               </Error>
-              ) : null}
+            ) : null}
           </>
           <DialogActions>
             <Button

@@ -1,5 +1,5 @@
 import { TFunctionResult } from 'i18next';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
 
@@ -8,7 +8,8 @@ const Label = styled.span`
 `;
 
 const Value = styled.span`
-  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
   color: #253b46;
   font-size: 14px;
   line-height: 19px;

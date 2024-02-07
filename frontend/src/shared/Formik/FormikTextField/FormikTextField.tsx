@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { InputAdornment, TextField } from '@mui/material';
 import styled from 'styled-components';
 import get from 'lodash/get';
@@ -27,8 +27,9 @@ export function FormikTextField({
   maxLength,
   ...otherProps
 }): React.ReactElement {
-  const isInvalid = get(form.errors, field.name)
-    && (get(form.touched, field.name) || form.submitCount > 0);
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount > 0);
   const handleKeyPress = (evt): void => {
     if (type === 'number' && ['e', 'E', '+', '-'].includes(evt.key)) {
       evt.preventDefault();
@@ -70,15 +71,15 @@ export function FormikTextField({
       InputProps={{
         onKeyPress: handleKeyPress,
         startAdornment: decoratorStart && (
-        <InputAdornment position="start">{decoratorStart}</InputAdornment>
+          <InputAdornment position="start">{decoratorStart}</InputAdornment>
         ),
 
         endAdornment: decoratorEnd && (
-        <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+          <InputAdornment position="end">{decoratorEnd}</InputAdornment>
         ),
       }}
-        // https://github.com/mui-org/material-ui/issues/12805
-        // eslint-disable-next-line react/jsx-no-duplicate-props
+      // https://github.com/mui-org/material-ui/issues/12805
+      // eslint-disable-next-line react/jsx-no-duplicate-props
       inputProps={{
         'data-cy': `input-${field.name}`,
         maxLength: maxLength || undefined,

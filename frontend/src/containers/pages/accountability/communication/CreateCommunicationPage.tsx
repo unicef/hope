@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, {
+import  {
   ReactElement, useCallback, useEffect, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,29 +28,29 @@ import {
   useCreateAccountabilityCommunicationMessageMutation,
   useSurveyAvailableFlowsLazyQuery,
 } from '../../../../__generated__/graphql';
-import { LookUpSelectionCommunication } from '../../../../components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
-import { FormikEffect } from '../../../../components/core/FormikEffect';
-import { LoadingButton } from '../../../../components/core/LoadingButton';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { TabPanel } from '../../../../components/core/TabPanel';
-import { PaperContainer } from '../../../../components/targeting/PaperContainer';
+import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { FormikEffect } from '@components/core/FormikEffect';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TabPanel } from '@components/core/TabPanel';
+import { PaperContainer } from '@components/targeting/PaperContainer';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '../../../../shared/Formik/FormikMultiSelectField';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   CommunicationSteps,
   CommunicationTabsValues,
-} from '../../../../utils/constants';
-import { getPercentage } from '../../../../utils/utils';
+} from '@utils/constants';
+import { getPercentage } from '@utils/utils';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -119,8 +119,7 @@ export function CreateCommunicationPage(): React.ReactElement {
   const { t } = useTranslation();
   const [mutate, { loading }] = useCreateAccountabilityCommunicationMessageMutation();
   const { showMessage } = useSnackbar();
-  const history = useHistory();
-  const { baseUrl, businessArea } = useBaseUrl();
+const navigate = useNavigate()  const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
 
@@ -161,7 +160,7 @@ export function CreateCommunicationPage(): React.ReactElement {
   useEffect(() => {
     // Redirect to error page if RapidPro unavailable available
     if (!flowsData?.surveyAvailableFlows?.length) {
-      history.push(`/error/${businessArea}`, {
+      navigate(`/error/${businessArea}`, {
         errorMessage: t(
           'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
         ),

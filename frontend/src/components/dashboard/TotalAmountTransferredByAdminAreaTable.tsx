@@ -1,9 +1,7 @@
-import {
-  Table, TableBody, TableCell, TableRow,
-} from '@mui/material';
-import React from 'react';
+import { Table, TableBody, TableCell, TableRow } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatCurrency, formatNumber } from '../../utils/utils';
+import { formatCurrency, formatNumber } from '@utils/utils';
 import { CountryChartsQuery } from '../../__generated__/graphql';
 import { EnhancedTableHead } from '../core/Table/EnhancedTableHead';
 
@@ -45,17 +43,16 @@ export function TotalAmountTransferredByAdminAreaTable({
   ];
   if (!data) return null;
 
-  const renderRows = (): Array<React.ReactElement> => data.map((el) => (
-    <TableRow key={el.id}>
-      <TableCell align="left">{el.admin2}</TableCell>
-      <TableCell align="right">
-        {formatCurrency(el.totalCashTransferred, true)}
-      </TableCell>
-      <TableCell align="right">
-        {formatNumber(el.totalHouseholds)}
-      </TableCell>
-    </TableRow>
-  ));
+  const renderRows = (): Array<React.ReactElement> =>
+    data.map((el) => (
+      <TableRow key={el.id}>
+        <TableCell align="left">{el.admin2}</TableCell>
+        <TableCell align="right">
+          {formatCurrency(el.totalCashTransferred, true)}
+        </TableCell>
+        <TableCell align="right">{formatNumber(el.totalHouseholds)}</TableCell>
+      </TableRow>
+    ));
 
   return (
     <Table>

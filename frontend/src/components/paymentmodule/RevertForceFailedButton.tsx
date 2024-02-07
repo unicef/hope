@@ -1,18 +1,17 @@
-import {
-  Box, Button, DialogContent, DialogTitle,
-} from '@mui/material';
-import React, { useState } from 'react';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { useRevertMarkPayAsFailedMutation } from '../../__generated__/graphql';
 
 export interface RevertForceFailedButtonProps {

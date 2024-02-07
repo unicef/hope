@@ -1,5 +1,5 @@
 import Autocomplete from '@mui/lab/Autocomplete';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TextField } from '@mui/material';
 
 export function FormikAsyncAutocomplete({
@@ -53,7 +53,9 @@ export function FormikAsyncAutocomplete({
       autoComplete
       noOptionsText="No results"
       options={options}
-      isOptionEqualToValue={(option, selectedValue) => option.value === selectedValue.value}
+      isOptionEqualToValue={(option, selectedValue) =>
+        option.value === selectedValue.value
+      }
       getOptionLabel={(choice) => choice.labelEn}
       value={value}
       onChange={handleChange}

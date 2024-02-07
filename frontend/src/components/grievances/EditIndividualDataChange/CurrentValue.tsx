@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
@@ -25,15 +25,18 @@ export function CurrentValue({
   let displayValue = value;
   switch (field?.type) {
     case 'SELECT_ONE':
-      displayValue = field.choices.find((item) => item.value === value)?.labelEn || '-';
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
       break;
     case 'SELECT_MANY':
-      displayValue = field.choices.find((item) => item.value === value)?.labelEn || '-';
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
       if (value instanceof Array) {
         displayValue = value
           .map(
-            (choice) => field.choices.find((item) => item.value === choice)?.labelEn
-              || '-',
+            (choice) =>
+              field.choices.find((item) => item.value === choice)?.labelEn ||
+              '-',
           )
           .join(', ');
       }

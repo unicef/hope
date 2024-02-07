@@ -1,16 +1,16 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
 import { useArrayToDict } from '../../../../hooks/useArrayToDict';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   GRIEVANCE_CATEGORIES_NAMES,
   GRIEVANCE_CATEGORY_DESCRIPTIONS,
   GRIEVANCE_ISSUE_TYPES_NAMES,
   GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
-} from '../../../../utils/constants';
+} from '@utils/constants';
 import { DividerLine } from '../../../core/DividerLine';
 import { LabelizedField } from '../../../core/LabelizedField';
 
@@ -43,12 +43,14 @@ export function Selection({
     { name: 'Individual Data Update', value: '14' },
   ];
 
-  const categoryDescription = GRIEVANCE_CATEGORY_DESCRIPTIONS[
-    GRIEVANCE_CATEGORIES_NAMES[values.category]
-  ] || '';
-  const issueTypeDescription = GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
-    GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
-  ] || '';
+  const categoryDescription =
+    GRIEVANCE_CATEGORY_DESCRIPTIONS[
+      GRIEVANCE_CATEGORIES_NAMES[values.category]
+    ] || '';
+  const issueTypeDescription =
+    GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS[
+      GRIEVANCE_ISSUE_TYPES_NAMES[values.issueType]
+    ] || '';
 
   return (
     <Grid container spacing={3}>

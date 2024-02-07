@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import {
   useMeQuery,
   useReportChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { NewReportForm } from '../../../components/reporting/NewReportForm';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { NewReportForm } from '@components/reporting/NewReportForm';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { ReportingFilters } from '../../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../../tables/ReportingTable/ReportingTable';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
@@ -30,10 +31,8 @@ export function ReportingPage(): React.ReactElement {
   const permissions = usePermissions();
   const location = useLocation();
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useReportChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useReportChoiceDataQuery();
 
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-first',
@@ -49,7 +48,8 @@ export function ReportingPage(): React.ReactElement {
   if (choicesLoading || meLoading) return <LoadingComponent />;
 
   if (!choicesData || !meData || permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions)) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions))
+    return <PermissionDenied />;
 
   return (
     <>

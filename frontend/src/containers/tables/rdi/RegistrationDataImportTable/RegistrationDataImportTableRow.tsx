@@ -1,13 +1,13 @@
 import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
-import React from 'react';
+import * as React from 'react';
 import { Radio } from '@mui/material';
 import { RegistrationDataImportNode } from '../../../../__generated__/graphql';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { registrationDataImportStatusToColor } from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { StatusBox } from '@components/core/StatusBox';
+import { registrationDataImportStatusToColor } from '@utils/utils';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface PaymentRecordTableRowProps {
@@ -23,14 +23,14 @@ export function RegistrationDataImportTableRow({
   selectedRDI,
   radioChangeHandler,
 }: PaymentRecordTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const importDetailsPath = `/${baseUrl}/registration-data-import/${registrationDataImport.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(registrationDataImport.id);
     } else {
-      history.push(importDetailsPath);
+      navigate(importDetailsPath);
     }
   };
   const renderImportedBy = (): string => {

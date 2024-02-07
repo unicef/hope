@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link,  useParams } from 'react-router-dom';
 import { FeedbackQuery } from '../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../core/BreadCrumbs';
 import { PageHeader } from '../../core/PageHeader';
@@ -22,8 +22,7 @@ export function FeedbackDetailsToolbar({
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
-  const history = useHistory();
-  const { isActiveProgram } = useProgramContext();
+const navigate = useNavigate()  const { isActiveProgram } = useProgramContext();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -62,7 +61,7 @@ export function FeedbackDetailsToolbar({
         {!hasLinkedGrievance && (
           <Box mr={3}>
             <ButtonTooltip
-              onClick={() => history.push({
+              onClick={() => navigate({
                 pathname: `/${baseUrl}/grievance/new-ticket`,
                 state: {
                   selectedHousehold: feedback?.householdLookup,

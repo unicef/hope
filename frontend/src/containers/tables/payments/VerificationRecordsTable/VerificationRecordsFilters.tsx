@@ -1,12 +1,12 @@
 import { Grid, MenuItem } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { usePaymentVerificationChoicesQuery } from '../../../../__generated__/graphql';
-import { FiltersSection } from '../../../../components/core/FiltersSection';
-import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { FiltersSection } from '@components/core/FiltersSection';
+import { SearchTextField } from '@components/core/SearchTextField';
+import { SelectFilter } from '@components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '@utils/utils';
 
 interface VerificationRecordsFiltersProps {
   filter;
@@ -25,19 +25,19 @@ export function VerificationRecordsFilters({
   setAppliedFilter,
 }: VerificationRecordsFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -87,7 +87,9 @@ export function VerificationRecordsFilters({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('verificationChannel', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('verificationChannel', e.target.value)
+            }
             label={t('Verification Channel')}
             value={filter.verificationChannel}
           >
@@ -102,7 +104,9 @@ export function VerificationRecordsFilters({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('paymentVerificationPlan', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('paymentVerificationPlan', e.target.value)
+            }
             label={t('Verification Plan Id')}
             value={filter.paymentVerificationPlan}
           >

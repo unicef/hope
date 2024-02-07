@@ -1,8 +1,8 @@
 import { Box, Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useParams } from 'react-router-dom';
+import {  useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   HouseholdNode,
@@ -11,24 +11,24 @@ import {
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { FlagTooltip } from '../../../components/core/FlagTooltip';
-import { LabelizedField } from '../../../components/core/LabelizedField';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { Title } from '../../../components/core/Title';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { WarningTooltip } from '../../../components/core/WarningTooltip';
-import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
-import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { FlagTooltip } from '@components/core/FlagTooltip';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { Title } from '@components/core/Title';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { WarningTooltip } from '@components/core/WarningTooltip';
+import { HouseholdDetails } from '@components/population/HouseholdDetails';
+import { HouseholdVulnerabilities } from '@components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import {
   isPermissionDeniedError,
   renderSomethingOrDash,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
@@ -62,8 +62,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
-  const history = useHistory();
-  const permissions = usePermissions();
+const navigate = useNavigate()  const permissions = usePermissions();
 
   const { data, loading, error } = useHouseholdQuery({
     variables: { id },

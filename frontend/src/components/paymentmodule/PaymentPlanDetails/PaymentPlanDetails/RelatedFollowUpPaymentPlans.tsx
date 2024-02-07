@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';

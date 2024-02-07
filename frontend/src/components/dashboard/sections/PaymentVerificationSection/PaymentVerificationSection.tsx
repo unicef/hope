@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllChartsQuery } from '../../../../__generated__/graphql';
 import { PaymentVerificationChart } from '../../charts/PaymentVerificationChart';
@@ -18,14 +18,11 @@ export function PaymentVerificationSection({
     <DashboardPaper title={t('Payment Verification')}>
       <Box mt={3}>
         <Typography variant="subtitle2">
-          {data.households}
-          {' '}
+          {data.households}{' '}
           {data.households === 1 ? t('Household') : t('Households contacted')}
         </Typography>
         <Typography variant="caption">
-          {(data.averageSampleSize * 100).toFixed(0)}
-          %
-          {t('average sampling')}
+          {(data.averageSampleSize * 100).toFixed(0)}%{t('average sampling')}
         </Typography>
       </Box>
       <PaymentVerificationChart data={data} />

@@ -11,7 +11,8 @@ import {
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
 import moment from 'moment';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import {
@@ -19,14 +20,14 @@ import {
   useCreateFollowUpPpMutation,
 } from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { DialogContainer } from '../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikDateField } from '../../../shared/Formik/FormikDateField';
-import { today, tomorrow } from '../../../utils/utils';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { today, tomorrow } from '@utils/utils';
 import { DividerLine } from '../../core/DividerLine';
 import { FieldBorder } from '../../core/FieldBorder';
 import { GreyText } from '../../core/GreyText';
@@ -49,7 +50,8 @@ export function CreateFollowUpPaymentPlan({
   const { isActiveProgram } = useProgramContext();
   const { showMessage } = useSnackbar();
 
-  const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } = paymentPlan;
+  const { id, totalWithdrawnHouseholdsCount, unsuccessfulPaymentsCount } =
+    paymentPlan;
 
   if (permissions === null) return null;
 
@@ -62,8 +64,9 @@ export function CreateFollowUpPaymentPlan({
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate: string, schema) => dispersionStartDate
-          && schema.min(
+        (dispersionStartDate: string, schema) =>
+          dispersionStartDate &&
+          schema.min(
             dispersionStartDate,
             `${t('Dispersion End Date has to be greater than')} ${moment(
               dispersionStartDate,
@@ -113,8 +116,8 @@ export function CreateFollowUpPaymentPlan({
               color="primary"
               onClick={() => setDialogOpen(true)}
               disabled={
-                !hasPermissions(PERMISSIONS.PM_CREATE, permissions)
-                || !isActiveProgram
+                !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
+                !isActiveProgram
               }
             >
               {t('Create Follow-up Payment Plan')}

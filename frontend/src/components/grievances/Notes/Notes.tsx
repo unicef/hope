@@ -1,14 +1,12 @@
-import {
-  Avatar, Box, Grid, Paper, Typography,
-} from '@mui/material';
+import { Avatar, Box, Grid, Paper, Typography } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { renderUserName } from '../../../utils/utils';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { renderUserName } from '@utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -86,12 +84,14 @@ export function Notes({
     </Grid>
   );
 
-  const mappedNotes = notes?.edges?.map((el) => note(
-    renderUserName(el.node.createdBy),
-    el.node.createdAt,
-    el.node.description,
-    el.node.id,
-  ));
+  const mappedNotes = notes?.edges?.map((el) =>
+    note(
+      renderUserName(el.node.createdBy),
+      el.node.createdAt,
+      el.node.description,
+      el.node.id,
+    ),
+  );
 
   const initialValues: { [key: string]: string } = {
     newNote: '',

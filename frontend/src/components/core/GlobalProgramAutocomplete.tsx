@@ -3,7 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Autocomplete from '@mui/lab/Autocomplete';
 import get from 'lodash/get';
 import { useHistory } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
@@ -55,8 +55,7 @@ export function GlobalProgramAutocomplete({
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const { baseUrl, businessArea } = useBaseUrl();
-  const history = useHistory();
-
+  const navigate = useNavigate();
   const [loadData, { data, loading }] = useAllProgramsForChoicesLazyQuery({
     variables: {
       businessArea,
@@ -79,7 +78,7 @@ export function GlobalProgramAutocomplete({
     }));
 
     if (selectedValue?.node?.id) {
-      history.push(`/${baseUrl}/${selectedValue?.node?.id}`);
+      navigate(`/${baseUrl}/${selectedValue?.node?.id}`);
     }
   };
   const programsOptions = [
@@ -102,7 +101,9 @@ export function GlobalProgramAutocomplete({
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      getOptionSelected={(option, value1) => value1?.node?.id === option.node.id}
+      getOptionSelected={(option, value1) =>
+        value1?.node?.id === option.node.id
+      }
       getOptionLabel={(option) => option.node.name}
       disabled={disabled}
       options={programsOptions}

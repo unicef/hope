@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { fakeApolloMe } from '../../../../../fixtures/core/fakeApolloMe';
 import { render } from '../../../../testUtils/testUtils';
 import { MessageDialog } from './MessageDialog';

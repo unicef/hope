@@ -3,7 +3,7 @@ import { ThemeProvider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
-import React from 'react';
+import * as React from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { theme } from '../theme';
 

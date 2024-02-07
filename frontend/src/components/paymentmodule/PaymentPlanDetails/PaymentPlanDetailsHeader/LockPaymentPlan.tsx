@@ -6,11 +6,12 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
@@ -27,12 +28,13 @@ export function LockPaymentPlan({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
-  const { mutatePaymentPlanAction: lock, loading: loadingLock } = usePaymentPlanAction(
-    Action.Lock,
-    paymentPlan.id,
-    () => showMessage(t('Payment Plan has been locked.')),
-    () => setLockDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: lock, loading: loadingLock } =
+    usePaymentPlanAction(
+      Action.Lock,
+      paymentPlan.id,
+      () => showMessage(t('Payment Plan has been locked.')),
+      () => setLockDialogOpen(false),
+    );
 
   return (
     <>
@@ -66,18 +68,14 @@ export function LockPaymentPlan({
             {paymentPlan.paymentsConflictsCount > 0 && (
               <Box p={5}>
                 <GreyText>
-                  {t('Note:')}
-                  {' '}
+                  {t('Note:')}{' '}
                   {paymentPlan.paymentsConflictsCount === 1
                     ? t('There is')
-                    : t('There are')}
-                  {' '}
-                  {paymentPlan.paymentsConflictsCount}
-                  {' '}
+                    : t('There are')}{' '}
+                  {paymentPlan.paymentsConflictsCount}{' '}
                   {paymentPlan.paymentsConflictsCount === 1
                     ? t('household')
-                    : t('households')}
-                  {' '}
+                    : t('households')}{' '}
                   {t('that will be ignored in this Payment Plan.')}
                 </GreyText>
               </Box>

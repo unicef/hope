@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { InputAdornment, Tooltip, TextField } from '@mui/material';
 import DatePicker from '@mui/lab/DatePicker';
 import moment from 'moment';
@@ -12,8 +12,9 @@ export function FormikDateField({
   tooltip = null,
   ...otherProps
 }): React.ReactElement {
-  const isInvalid = get(form.errors, field.name)
-    && (get(form.touched, field.name) || form.submitCount > 0);
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount > 0);
   const dateFormat = 'YYYY-MM-DD';
   let formattedValue = field.value === '' ? null : field.value;
   if (formattedValue) {

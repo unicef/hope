@@ -8,7 +8,7 @@ import { onError } from '@apollo/link-error';
 import { persistCache } from 'apollo-cache-persist';
 import { createUploadLink } from 'apollo-upload-client';
 import { GRAPHQL_URL } from '../config';
-import { clearCache } from '../utils/utils';
+import { clearCache } from '@utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
@@ -22,7 +22,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
       if (
         message.toLowerCase().includes('user does not have correct permission')
       ) {
-      // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.error('Permission denied for mutation');
       }
     });
@@ -31,16 +31,15 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   const maintenanceError =
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
-    networkError?.result?.message
-    === 'Migrations are running, please try again later';
+    networkError?.result?.message ===
+    'Migrations are running, please try again later';
 
   if (maintenanceError) {
     window.location.href = '/maintenance';
   }
 
-  if (networkError)
-  // eslint-disable-next-line no-console
-  {
+  if (networkError) {
+    // eslint-disable-next-line no-console
     console.error(
       `[Network error]: ${networkError}`,
       networkError,
@@ -49,23 +48,27 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   }
 });
 
-const isDataNull = (data): boolean => Object.values(data).some((value) => value === null);
+const isDataNull = (data): boolean =>
+  Object.values(data).some((value) => value === null);
 
-const hasResponseErrors = (response): boolean => response && (response?.error || response?.errors?.length > 0);
+const hasResponseErrors = (response): boolean =>
+  response && (response?.error || response?.errors?.length > 0);
 
 const redirectLink = new ApolloLink((operation, forward) => {
   // Check if the app is not running on localhost, dev, or stg environment
-  const isNotLocalhostDevOrStg = !window.location.hostname.includes('localhost')
-    && !window.location.href.includes('dev')
-    && !window.location.href.includes('stg');
+  const isNotLocalhostDevOrStg =
+    !window.location.hostname.includes('localhost') &&
+    !window.location.href.includes('dev') &&
+    !window.location.href.includes('stg');
 
   const businessArea = window.location.pathname.split('/')[1];
 
   return forward(operation).map((response) => {
     // Check if the operation is a mutation
     const isMutation = operation.query.definitions.some(
-      (definition) => definition.kind === 'OperationDefinition'
-        && definition.operation === 'mutation',
+      (definition) =>
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'mutation',
     );
 
     // Check if the error message is "Permission Denied"
@@ -121,39 +124,42 @@ function findValidationErrors(
   return errors;
 }
 
-const validationErrorMiddleware = new ApolloLink((operation, forward) => forward(operation).map((response) => {
-  if (response.data) {
-    const context = operation.getContext();
-    const {
-      response: { headers },
-    } = context;
-    if (headers) {
-      const backendVersion = headers.get('X-Hope-Backend-Version');
-      const oldBackendVersion = localStorage.getItem('backend-version') || '0';
-      if (backendVersion !== oldBackendVersion) {
+const validationErrorMiddleware = new ApolloLink((operation, forward) =>
+  forward(operation).map((response) => {
+    if (response.data) {
+      const context = operation.getContext();
+      const {
+        response: { headers },
+      } = context;
+      if (headers) {
+        const backendVersion = headers.get('X-Hope-Backend-Version');
+        const oldBackendVersion =
+          localStorage.getItem('backend-version') || '0';
+        if (backendVersion !== oldBackendVersion) {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
+          clearCache();
+          localStorage.setItem('backend-version', backendVersion);
+        }
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        clearCache();
-        localStorage.setItem('backend-version', backendVersion);
+        client.writeData({
+          data: { backendVersion },
+        });
       }
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      client.writeData({
-        data: { backendVersion },
-      });
     }
-  }
-  if (response.errors) {
+    if (response.errors) {
+      return response;
+    }
+    const validationErrors = findValidationErrors(response?.data);
+    if (Object.keys(validationErrors).length > 0) {
+      const error = new ValidationGraphQLError(
+        JSON.stringify(validationErrors),
+      );
+      error.validationErrors = validationErrors;
+      response.errors = [error];
+    }
     return response;
-  }
-  const validationErrors = findValidationErrors(response?.data);
-  if (Object.keys(validationErrors).length > 0) {
-    const error = new ValidationGraphQLError(
-      JSON.stringify(validationErrors),
-    );
-    error.validationErrors = validationErrors;
-    response.errors = [error];
-  }
-  return response;
-}));
+  }),
+);
 
 const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
   const businessAreaSlug = window.location.pathname.split('/')[1];
@@ -177,13 +183,14 @@ const link = ApolloLink.from([
 let client;
 
 export async function getClient(): Promise<
-ApolloClient<NormalizedCacheObject>
+  ApolloClient<NormalizedCacheObject>
 > {
   if (client) {
     return client;
   }
-  const cacheInitializedTimestamp = Number.parseInt(localStorage.getItem('cache-initialized-timestamp'), 10)
-    || 0;
+  const cacheInitializedTimestamp =
+    Number.parseInt(localStorage.getItem('cache-initialized-timestamp'), 10) ||
+    0;
   const cacheTtl = 2 * 24 * 60 * 60 * 1000;
   if (Date.now() - cacheInitializedTimestamp > cacheTtl) {
     await clearCache();

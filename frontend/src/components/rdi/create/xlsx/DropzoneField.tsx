@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import styled from 'styled-components';
 import { useField } from 'formik';
@@ -55,7 +55,7 @@ export function DropzoneField({ loading }): React.ReactElement {
   return (
     <div>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
-        <input {...getInputProps()} data-cy='file-input' />
+        <input {...getInputProps()} data-cy="file-input" />
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
     </div>

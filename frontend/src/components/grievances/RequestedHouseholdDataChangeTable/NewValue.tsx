@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { AllEditHouseholdFieldsQuery } from '../../../__generated__/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 
@@ -11,17 +11,20 @@ export function NewValue({ field, value }: NewValueProps): React.ReactElement {
   let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':
-      displayValue = field.choices.find((item) => item.value === value)?.labelEn
-        || value
-        || '-';
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn ||
+        value ||
+        '-';
       break;
     case 'SELECT_MANY':
-      displayValue = field.choices.find((item) => item.value === value)?.labelEn || '-';
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
       if (value instanceof Array) {
         displayValue = value
           .map(
-            (choice) => field.choices.find((item) => item.value === choice)?.labelEn
-              || '-',
+            (choice) =>
+              field.choices.find((item) => item.value === choice)?.labelEn ||
+              '-',
           )
           .join(', ');
       }

@@ -1,5 +1,5 @@
-import React from 'react';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import * as React from 'react';
+import { UniversalTable } from '@containers/tables/UniversalTable';
 import {
   AllSanctionListIndividualsQueryVariables,
   useAllSanctionListIndividualsQuery,
@@ -8,17 +8,15 @@ import {
 import { SanctionListIndividualsTableRow } from './SanctionListIndividualsTableRow';
 import { headCells } from './SanctionListIndividualsHeadCells';
 
-export function SanctionListIndividualsTable({
-  filter,
-}): React.ReactElement {
+export function SanctionListIndividualsTable({ filter }): React.ReactElement {
   const initialVariables = {
     fullNameContains: filter.fullName,
     referenceNumber: filter.referenceNumber,
   };
   return (
     <UniversalTable<
-    AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'],
-    AllSanctionListIndividualsQueryVariables
+      AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'],
+      AllSanctionListIndividualsQueryVariables
     >
       headCells={headCells}
       query={useAllSanctionListIndividualsQuery}

@@ -1,16 +1,16 @@
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   HouseholdChoiceDataQuery,
   IndividualNode,
 } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { IndividualFlags } from '../../../../components/population/IndividualFlags';
+import { BlackLink } from '@components/core/BlackLink';
+import { AnonTableCell } from '@components/core/Table/AnonTableCell';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { IndividualFlags } from '@components/population/IndividualFlags';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
+import { choicesToDict, sexToCapitalize } from '@utils/utils';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -23,7 +23,7 @@ export function IndividualsListTableRow({
   canViewDetails,
   choicesData,
 }: IndividualsListTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
 
   const relationshipChoicesDict = choicesToDict(
@@ -32,7 +32,7 @@ export function IndividualsListTableRow({
 
   const individualDetailsPath = `/${baseUrl}/population/individuals/${individual.id}`;
   const handleClick = (): void => {
-    history.push(individualDetailsPath);
+    navigate(individualDetailsPath);
   };
 
   return (

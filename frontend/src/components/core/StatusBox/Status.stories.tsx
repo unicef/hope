@@ -1,13 +1,15 @@
-import React from 'react';
+import * as React from 'react';
 import { ThemeProvider } from '@mui/material';
-import styled, { ThemeProvider as StyledThemeProvider } from 'styled-components';
+import styled, {
+  ThemeProvider as StyledThemeProvider,
+} from 'styled-components';
 import { theme } from '../../../theme';
 import { StatusBox } from './StatusBox';
 import {
   programStatusToColor,
   cashPlanStatusToColor,
   paymentRecordStatusToColor,
-} from '../../../utils/utils';
+} from '@utils/utils';
 
 export default {
   component: StatusBox,

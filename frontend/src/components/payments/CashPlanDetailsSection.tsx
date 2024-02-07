@@ -1,9 +1,9 @@
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { countPercentage } from '../../utils/utils';
+import { countPercentage } from '@utils/utils';
 import { CashPlanQuery, PaymentPlanQuery } from '../../__generated__/graphql';
 import { BlackLink } from '../core/BlackLink';
 import { LabelizedField } from '../core/LabelizedField';
@@ -90,16 +90,10 @@ export function CashPlanDetailsSection({
             <Grid item xs={3}>
               <Grid container direction="column">
                 <LabelizedField label={t('SUCCESSFUL')}>
-                  <p>
-                    {bankReconciliationSuccessPercentage}
-                    %
-                  </p>
+                  <p>{bankReconciliationSuccessPercentage}%</p>
                 </LabelizedField>
                 <LabelizedField label={t('ERRONEOUS')}>
-                  <p>
-                    {bankReconciliationErrorPercentage}
-                    %
-                  </p>
+                  <p>{bankReconciliationErrorPercentage}%</p>
                 </LabelizedField>
               </Grid>
             </Grid>

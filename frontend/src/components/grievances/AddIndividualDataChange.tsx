@@ -5,12 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, FieldArray } from 'formik';
 import camelCase from 'lodash/camelCase';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { FormikFileField } from '../../shared/Formik/FormikFileField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikFileField } from '@shared/Formik/FormikFileField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   AllAddIndividualFieldsQuery,
   useAllAddIndividualFieldsQuery,
@@ -173,11 +173,13 @@ export function AddIndividualDataChange({
                     <DocumentField
                       id={existingOrNewId}
                       key={`${existingOrNewId}-${item?.country}-${item?.type?.key}`}
-                      onDelete={() => removeItemById(
-                        values.individualData.documents,
-                        existingOrNewId,
-                        arrayHelpers,
-                      )}
+                      onDelete={() =>
+                        removeItemById(
+                          values.individualData.documents,
+                          existingOrNewId,
+                          arrayHelpers,
+                        )
+                      }
                       countryChoices={data.countriesChoices}
                       documentTypeChoices={data.documentTypeChoices}
                       baseName="individualData.documents"
@@ -219,11 +221,13 @@ export function AddIndividualDataChange({
                   return (
                     <AgencyField
                       id={existingOrNewId}
-                      onDelete={() => removeItemById(
-                        values.individualData.identities,
-                        existingOrNewId,
-                        arrayHelpers,
-                      )}
+                      onDelete={() =>
+                        removeItemById(
+                          values.individualData.identities,
+                          existingOrNewId,
+                          arrayHelpers,
+                        )
+                      }
                       countryChoices={data.countriesChoices}
                       identityTypeChoices={data.identityTypeChoices}
                       baseName="individualData.identities"

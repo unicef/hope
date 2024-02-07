@@ -1,11 +1,11 @@
 import { Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
-import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '../core/DatePickerFilter';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
@@ -27,18 +27,19 @@ export function RegistrationFilters({
   appliedFilter,
   setAppliedFilter,
 }: RegistrationFiltersProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };

@@ -1,22 +1,17 @@
-import {
-  Box, Grid, GridSize, Typography,
-} from '@mui/material';
-import React from 'react';
+import { Box, Grid, GridSize, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   GrievanceTicketQuery,
   GrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../utils/constants';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { ContentLink } from '../../core/ContentLink';
 import { LabelizedField } from '../../core/LabelizedField';
@@ -58,40 +53,42 @@ export function GrievancesDetails({
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
-      .filter((el) => el.category === ticket.category.toString())[0]
-      .subCategories.filter(
-        (el) => el.value === ticket.issueType.toString(),
-      )[0].name
+        .filter((el) => el.category === ticket.category.toString())[0]
+        .subCategories.filter(
+          (el) => el.value === ticket.issueType.toString(),
+        )[0].name
     : '-';
 
-  const showIssueType = ticket.category.toString()
-      === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString()
-    || ticket.category.toString()
-      === GRIEVANCE_CATEGORIES.DATA_CHANGE.toString()
-    || ticket.category.toString()
-      === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
-  const showPartner = ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
+  const showIssueType =
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE.toString() ||
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.DATA_CHANGE.toString() ||
+    ticket.category.toString() ===
+      GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT.toString();
+  const showPartner =
+    ticket.issueType === +GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT;
 
   const mappedDocumentation = (): React.ReactElement => (
     <Box display="flex" flexDirection="column">
       {ticket.documentation?.length
         ? ticket.documentation.map((doc) => {
-          if (doc.contentType.includes('image')) {
+            if (doc.contentType.includes('image')) {
+              return (
+                <PhotoModal
+                  key={doc.id}
+                  src={doc.filePath}
+                  variant="link"
+                  linkText={doc.name}
+                />
+              );
+            }
             return (
-              <PhotoModal
-                key={doc.id}
-                src={doc.filePath}
-                variant="link"
-                linkText={doc.name}
-              />
+              <ContentLink key={doc.id} download href={doc.filePath}>
+                {doc.name}
+              </ContentLink>
             );
-          }
-          return (
-            <ContentLink key={doc.id} download href={doc.filePath}>
-              {doc.name}
-            </ContentLink>
-          );
-        })
+          })
         : '-'}
     </Box>
   );
@@ -253,19 +250,19 @@ export function GrievancesDetails({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {ticket.household?.id
-                    && canViewHouseholdDetails
-                    && !isAllPrograms ? (
+                    {ticket.household?.id &&
+                    canViewHouseholdDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/household/${ticket.household.id}`}
                       >
                         {ticket.household.unicefId}
                       </BlackLink>
-                      ) : (
-                        <div>
-                          {ticket.household?.id ? ticket.household.unicefId : '-'}
-                        </div>
-                      )}
+                    ) : (
+                      <div>
+                        {ticket.household?.id ? ticket.household.unicefId : '-'}
+                      </div>
+                    )}
                   </span>
                 ),
                 size: 3,
@@ -274,21 +271,21 @@ export function GrievancesDetails({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {ticket.individual?.id
-                    && canViewIndividualDetails
-                    && !isAllPrograms ? (
+                    {ticket.individual?.id &&
+                    canViewIndividualDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/individuals/${ticket.individual.id}`}
                       >
                         {ticket.individual.unicefId}
                       </BlackLink>
-                      ) : (
-                        <div>
-                          {ticket.individual?.id
-                            ? ticket.individual.unicefId
-                            : '-'}
-                        </div>
-                      )}
+                    ) : (
+                      <div>
+                        {ticket.individual?.id
+                          ? ticket.individual.unicefId
+                          : '-'}
+                      </div>
+                    )}
                   </span>
                 ),
                 size: 3,

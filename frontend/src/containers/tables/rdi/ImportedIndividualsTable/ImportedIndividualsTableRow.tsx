@@ -1,14 +1,14 @@
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
+import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { DedupeResults } from '../../../../components/rdi/details/DedupeResults';
+import { BlackLink } from '@components/core/BlackLink';
+import { AnonTableCell } from '@components/core/Table/AnonTableCell';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { DedupeResults } from '@components/rdi/details/DedupeResults';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { choicesToDict, sexToCapitalize } from '../../../../utils/utils';
+import { choicesToDict, sexToCapitalize } from '@utils/utils';
 
 interface ImportedIndividualsTableRowProps {
   individual;
@@ -21,7 +21,7 @@ export function ImportedIndividualsTableRow({
   choices,
   isMerged,
 }: ImportedIndividualsTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
@@ -39,7 +39,7 @@ export function ImportedIndividualsTableRow({
 
   const handleClick = (e): void => {
     e.stopPropagation();
-    history.push(url);
+    navigate(url);
   };
   return (
     <ClickableTableRow
@@ -66,9 +66,7 @@ export function ImportedIndividualsTableRow({
         {individual.deduplicationBatchResults.length ? (
           <DedupeResults
             isInBatch
-            status={
-                deduplicationBatchDict[individual.deduplicationBatchStatus]
-              }
+            status={deduplicationBatchDict[individual.deduplicationBatchStatus]}
             results={individual.deduplicationBatchResults}
             individual={individual}
           />

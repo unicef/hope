@@ -1,15 +1,16 @@
+import * as React from 'react';
 import { MenuItem, Select } from '@mui/material';
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   AllProgramsForChoicesQuery,
   useAllProgramsForChoicesQuery,
 } from '../__generated__/graphql';
-import { LoadingComponent } from '../components/core/LoadingComponent';
+import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useBaseUrl } from '../hooks/useBaseUrl';
 import { useProgramContext } from '../programContext';
-import { isProgramNodeUuidFormat } from '../utils/utils';
+import { isProgramNodeUuidFormat } from '@utils/utils';
 
 const CountrySelect = styled(Select)`
   && {
@@ -51,7 +52,7 @@ const CountrySelect = styled(Select)`
 export function GlobalProgramSelect(): React.ReactElement {
   const { businessArea, programId } = useBaseUrl();
   const { selectedProgram, setSelectedProgram } = useProgramContext();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { data, loading } = useAllProgramsForChoicesQuery({
     variables: { businessArea, first: 100 },
     fetchPolicy: 'network-only',
@@ -67,13 +68,14 @@ export function GlobalProgramSelect(): React.ReactElement {
   }, []);
 
   const isOneOfAvailableProgramsId = useCallback(
-    (id: string): boolean => data?.allPrograms.edges.some((each) => each.node.id === id),
+    (id: string): boolean =>
+      data?.allPrograms.edges.some((each) => each.node.id === id),
     [data],
   );
 
   const getCurrentProgram = useCallback(():
-  | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
-  | null => {
+    | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
+    | null => {
     const obj = data?.allPrograms.edges.find((el) => el.node.id === programId);
     return obj ? obj.node : null;
   }, [data, programId]);
@@ -83,9 +85,8 @@ export function GlobalProgramSelect(): React.ReactElement {
       const program = getCurrentProgram();
       if (!selectedProgram || selectedProgram?.id !== programId) {
         if (program && isMounted.current) {
-          const {
-            id, name, status, individualDataNeeded, dataCollectingType,
-          } = program;
+          const { id, name, status, individualDataNeeded, dataCollectingType } =
+            program;
 
           setSelectedProgram({
             id,
@@ -113,21 +114,21 @@ export function GlobalProgramSelect(): React.ReactElement {
   useEffect(() => {
     // If the programId is not in a valid format or not one of the available programs, redirect to the access denied page
     if (
-      programId
-      && !loading
-      && (!isProgramNodeUuidFormat(programId)
-        || !isOneOfAvailableProgramsId(programId))
-      && programId !== 'all'
+      programId &&
+      !loading &&
+      (!isProgramNodeUuidFormat(programId) ||
+        !isOneOfAvailableProgramsId(programId)) &&
+      programId !== 'all'
     ) {
-      history.push(`/access-denied/${businessArea}`);
+      navigate(`/access-denied/${businessArea}`);
     }
-  }, [programId, history, businessArea, isOneOfAvailableProgramsId, loading]);
+  }, [programId, navigate, businessArea, isOneOfAvailableProgramsId, loading]);
 
   const onChange = (e): void => {
     if (e.target.value === 'all') {
-      history.push(`/${businessArea}/programs/all/list`);
+      navigate(`/${businessArea}/programs/all/list`);
     } else {
-      history.push(
+      navigate(
         `/${businessArea}/programs/${e.target.value}/details/${e.target.value}`,
       );
     }

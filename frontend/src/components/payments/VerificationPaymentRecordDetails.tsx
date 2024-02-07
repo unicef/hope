@@ -1,8 +1,8 @@
 import { Grid, Paper, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   choicesToDict,
   formatCurrencyWithSymbol,
@@ -10,7 +10,7 @@ import {
   paymentRecordStatusToColor,
   paymentStatusDisplayMap,
   verificationRecordsStatusToColor,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { PaymentRecordQuery } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
@@ -201,11 +201,11 @@ export function VerificationPaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('ENTITLEMENT CARD ISSUE DATE')}
-              value={(
+              value={
                 <UniversalMoment>
                   {paymentRecord.entitlementCardIssueDate}
                 </UniversalMoment>
-              )}
+              }
             />
           </Grid>
           <Grid item xs={3}>

@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import styled from 'styled-components';
-import React from 'react';
+import * as React from 'react';
 
 interface StyledTextFieldProps extends OutlinedTextFieldProps {
   borderRadius?: string;

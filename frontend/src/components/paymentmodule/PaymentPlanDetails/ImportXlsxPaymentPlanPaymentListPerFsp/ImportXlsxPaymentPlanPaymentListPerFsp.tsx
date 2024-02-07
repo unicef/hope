@@ -1,13 +1,12 @@
-import {
-  Box, Button, Dialog, DialogActions, DialogTitle,
-} from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
 import { Publish } from '@mui/icons-material';
 import get from 'lodash/get';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { ImportErrors } from '../../../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import {
   ImportXlsxPpListPerFspMutation,
@@ -56,13 +55,16 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
-  const [mutate, { data: uploadData, loading: fileLoading, error }] = useImportXlsxPpListPerFspMutation();
+  const [mutate, { data: uploadData, loading: fileLoading, error }] =
+    useImportXlsxPpListPerFspMutation();
 
-  const xlsxErrors: ImportXlsxPpListPerFspMutation['importXlsxPaymentPlanPaymentListPerFsp']['errors'] = get(uploadData, 'importXlsxPaymentPlanPaymentListPerFsp.errors');
-  const canUploadReconciliation = hasPermissions(
-    PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
-    permissions,
-  ) && allowedState.includes(paymentPlan.backgroundActionStatus);
+  const xlsxErrors: ImportXlsxPpListPerFspMutation['importXlsxPaymentPlanPaymentListPerFsp']['errors'] =
+    get(uploadData, 'importXlsxPaymentPlanPaymentListPerFsp.errors');
+  const canUploadReconciliation =
+    hasPermissions(
+      PERMISSIONS.PM_IMPORT_XLSX_WITH_RECONCILIATION,
+      permissions,
+    ) && allowedState.includes(paymentPlan.backgroundActionStatus);
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -82,8 +84,8 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
           ],
         });
         if (
-          !errors
-          && !data?.importXlsxPaymentPlanPaymentListPerFsp.errors?.length
+          !errors &&
+          !data?.importXlsxPaymentPlanPaymentListPerFsp.errors?.length
         ) {
           setOpenImport(false);
           showMessage(t('Your import was successful!'));
@@ -139,8 +141,8 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
                 setFileToImport(file);
               }}
             />
-            {fileToImport
-            && (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
+            {fileToImport &&
+            (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
               <Error>
                 <p>Errors</p>
                 {error
@@ -148,7 +150,7 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
                   : null}
                 <ImportErrors errors={xlsxErrors} />
               </Error>
-              ) : null}
+            ) : null}
           </>
           <DialogActions>
             <Button

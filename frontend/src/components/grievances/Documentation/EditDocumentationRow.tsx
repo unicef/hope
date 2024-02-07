@@ -1,9 +1,8 @@
-import {
-  Box, Button, Grid, IconButton,
-} from '@mui/material';
+import { Box, Button, Grid, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import Edit from '@mui/icons-material/Edit';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';

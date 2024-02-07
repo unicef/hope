@@ -1,6 +1,6 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationHouseholdHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationHouseholdRow';

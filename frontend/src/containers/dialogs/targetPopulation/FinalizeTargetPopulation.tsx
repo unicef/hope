@@ -1,7 +1,7 @@
 import { Button, DialogContent, DialogTitle } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useFinalizeTpMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';
@@ -50,10 +50,7 @@ export function FinalizeTargetPopulation({
       </DialogTitleWrapper>
       <DialogContent>
         <DialogDescription>
-          {t('Are you sure you want to push')}
-          {' '}
-          {totalHouseholds}
-          {' '}
+          {t('Are you sure you want to push')} {totalHouseholds}{' '}
           {t(
             'households to CashAssist? Target population will not be editable further.',
           )}

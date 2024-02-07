@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Button, IconButton } from '@mui/material';
 import {
@@ -38,7 +39,8 @@ export function OpenTargetPopulationHeaderButtons({
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
 
-  const [rebuildTargetPopulation, { loading: rebuildTargetPopulationLoading }] = useRebuildTpMutation();
+  const [rebuildTargetPopulation, { loading: rebuildTargetPopulationLoading }] =
+    useRebuildTpMutation();
   return (
     <Box display="flex" alignItems="center">
       {canDuplicate && (
@@ -82,9 +84,11 @@ export function OpenTargetPopulationHeaderButtons({
             color="primary"
             disabled={rebuildTargetPopulationLoading || !isActiveProgram}
             startIcon={<RefreshRounded />}
-            onClick={() => rebuildTargetPopulation({
-              variables: { id: targetPopulation.id },
-            })}
+            onClick={() =>
+              rebuildTargetPopulation({
+                variables: { id: targetPopulation.id },
+              })
+            }
           >
             Rebuild
           </Button>

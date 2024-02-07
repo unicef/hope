@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
-import React, { useEffect } from 'react';
+import  { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -12,7 +12,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
@@ -45,8 +45,7 @@ export function CreateImportFromXlsxForm({
   const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
-  const history = useHistory();
-  const [createImport] = useCreateRegistrationXlsxImportMutation();
+const navigate = useNavigate()  const [createImport] = useCreateRegistrationXlsxImportMutation();
 
   const onSubmit = async (values): Promise<void> => {
     setSubmitDisabled(true);
@@ -61,7 +60,7 @@ export function CreateImportFromXlsxForm({
           },
         },
       });
-      history.push(
+      navigate(
         `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
       );
     } catch (e) {

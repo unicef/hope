@@ -1,6 +1,6 @@
 import { Box, Button } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -43,17 +43,22 @@ export function VerificationPlanActions({
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
-  const [mutateExport, { loading: loadingExport }] = useExportXlsxPaymentVerificationPlanFileMutation();
+  const [mutateExport, { loading: loadingExport }] =
+    useExportXlsxPaymentVerificationPlanFileMutation();
 
-  const [mutateInvalid, { loading: loadingInvalid }] = useInvalidPaymentVerificationPlanMutation();
+  const [mutateInvalid, { loading: loadingInvalid }] =
+    useInvalidPaymentVerificationPlanMutation();
 
   if (!verificationPlan || !samplingChoicesData || !permissions) return null;
 
-  const isPending = verificationPlan.status === PaymentVerificationPlanStatus.Pending;
-  const isActive = verificationPlan.status === PaymentVerificationPlanStatus.Active;
+  const isPending =
+    verificationPlan.status === PaymentVerificationPlanStatus.Pending;
+  const isActive =
+    verificationPlan.status === PaymentVerificationPlanStatus.Active;
 
-  const verificationChannelXLSX = verificationPlan.verificationChannel
-    === PaymentVerificationPlanVerificationChannel.Xlsx;
+  const verificationChannelXLSX =
+    verificationPlan.verificationChannel ===
+    PaymentVerificationPlanVerificationChannel.Xlsx;
 
   const canEdit = hasPermissions(
     PERMISSIONS.PAYMENT_VERIFICATION_UPDATE,
@@ -80,12 +85,15 @@ export function VerificationPlanActions({
     PERMISSIONS.PAYMENT_VERIFICATION_IMPORT,
     permissions,
   );
-  const canExport = hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_EXPORT, permissions)
-    && !verificationPlan.hasXlsxFile;
-  const canDownload = hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_EXPORT, permissions)
-    && verificationPlan.hasXlsxFile
-    && !verificationPlan.xlsxFileExporting;
-  const canMarkInvalid = verificationPlan.xlsxFileWasDownloaded || verificationPlan.xlsxFileImported;
+  const canExport =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_EXPORT, permissions) &&
+    !verificationPlan.hasXlsxFile;
+  const canDownload =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_EXPORT, permissions) &&
+    verificationPlan.hasXlsxFile &&
+    !verificationPlan.xlsxFileExporting;
+  const canMarkInvalid =
+    verificationPlan.xlsxFileWasDownloaded || verificationPlan.xlsxFileImported;
 
   return (
     <Title>
@@ -182,13 +190,13 @@ export function VerificationPlanActions({
                 {canFinish && verificationPlan.xlsxFileImported && (
                   <FinishVerificationPlan verificationPlan={verificationPlan} />
                 )}
-                {canDiscard
-                  && !verificationPlan.xlsxFileWasDownloaded
-                  && !verificationPlan.xlsxFileImported && (
+                {canDiscard &&
+                  !verificationPlan.xlsxFileWasDownloaded &&
+                  !verificationPlan.xlsxFileImported && (
                     <DiscardVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
                     />
-                )}
+                  )}
                 {canMarkInvalid && (
                   <Box p={2}>
                     <LoadingButton

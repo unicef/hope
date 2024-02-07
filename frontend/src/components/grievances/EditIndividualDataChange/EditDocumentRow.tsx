@@ -3,7 +3,8 @@ import { Delete } from '@mui/icons-material';
 import Close from '@mui/icons-material/Close';
 import { useLocation } from 'react-router-dom';
 import Edit from '@mui/icons-material/Edit';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -13,7 +14,7 @@ import {
 import { LabelizedField } from '../../core/LabelizedField';
 import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
-import { removeItemById } from '../utils/helpers';
+import { removeItemById } from '@utils/helpers';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
@@ -48,11 +49,13 @@ export function EditDocumentRow({
       <DocumentField
         id={id}
         key={`${id}-${document.node.country}-${document.node.type.label}`}
-        onDelete={() => removeItemById(
-          values.individualDataUpdateDocumentsToEdit,
-          document.node.id,
-          arrayHelpers,
-        )}
+        onDelete={() =>
+          removeItemById(
+            values.individualDataUpdateDocumentsToEdit,
+            document.node.id,
+            arrayHelpers,
+          )
+        }
         countryChoices={addIndividualFieldsData.countriesChoices}
         documentTypeChoices={addIndividualFieldsData.documentTypeChoices}
         baseName="individualDataUpdateDocumentsToEdit"

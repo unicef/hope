@@ -1,13 +1,11 @@
-import {
-  Checkbox, FormControlLabel, Grid, MenuItem,
-} from '@mui/material';
-import React from 'react';
+import { Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { DatePickerFilter } from '../../../components/core/DatePickerFilter';
-import { FiltersSection } from '../../../components/core/FiltersSection';
-import { SelectFilter } from '../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../utils/utils';
+import { useLocation } from 'react-router-dom';
+import { DatePickerFilter } from '@components/core/DatePickerFilter';
+import { FiltersSection } from '@components/core/FiltersSection';
+import { SelectFilter } from '@components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '@utils/utils';
 
 interface ReportingFiltersProps {
   filter;
@@ -27,19 +25,19 @@ export function ReportingFilters({
   setAppliedFilter,
 }: ReportingFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -97,14 +95,16 @@ export function ReportingFilters({
         </Grid>
         <Grid item xs={12}>
           <FormControlLabel
-            control={(
+            control={
               <Checkbox
                 checked={filter.onlyMy}
-                onChange={(_e, checked) => handleFilterChange('onlyMy', checked)}
+                onChange={(_e, checked) =>
+                  handleFilterChange('onlyMy', checked)
+                }
                 value={filter.onlyMy}
                 color="primary"
               />
-            )}
+            }
             label="See my reports only"
           />
         </Grid>

@@ -11,13 +11,13 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import {
   useCreateDashboardReportMutation,
@@ -35,7 +35,8 @@ export function ExportModal({ filter, year }): React.ReactElement {
   const numSelected = selected.length;
   const isSelected = (id: string): boolean => selected.includes(id);
 
-  const { data: choicesData, loading: choicesLoading } = useDashboardReportChoiceDataQuery({ variables: { businessArea } });
+  const { data: choicesData, loading: choicesLoading } =
+    useDashboardReportChoiceDataQuery({ variables: { businessArea } });
   const [mutate] = useCreateDashboardReportMutation();
 
   useEffect(() => {
@@ -71,22 +72,23 @@ export function ExportModal({ filter, year }): React.ReactElement {
     setSelected(newSelected);
   };
 
-  const renderRows = (): Array<React.ReactElement> => data.map((el) => {
-    const isItemSelected = isSelected(el.id);
-    return (
-      <TableRow onClick={() => onCheckboxClick(el.id)} key={el.id}>
-        <TableCell align="left" padding="checkbox">
-          <Checkbox
-            color="primary"
-            onClick={() => onCheckboxClick(el.id)}
-            checked={isItemSelected}
-            inputProps={{ 'aria-labelledby': el.id }}
-          />
-        </TableCell>
-        <TableCell align="left">{el.name}</TableCell>
-      </TableRow>
-    );
-  });
+  const renderRows = (): Array<React.ReactElement> =>
+    data.map((el) => {
+      const isItemSelected = isSelected(el.id);
+      return (
+        <TableRow onClick={() => onCheckboxClick(el.id)} key={el.id}>
+          <TableCell align="left" padding="checkbox">
+            <Checkbox
+              color="primary"
+              onClick={() => onCheckboxClick(el.id)}
+              checked={isItemSelected}
+              inputProps={{ 'aria-labelledby': el.id }}
+            />
+          </TableCell>
+          <TableCell align="left">{el.name}</TableCell>
+        </TableRow>
+      );
+    });
 
   const submitFormHandler = async (): Promise<void> => {
     const response = await mutate({
@@ -140,8 +142,7 @@ export function ExportModal({ filter, year }): React.ReactElement {
             </Box>
             <Box mb={2}>
               <Typography variant="subtitle2">
-                {t('Select types of reports to be exported')}
-                :
+                {t('Select types of reports to be exported')}:
               </Typography>
             </Box>
             <Table>

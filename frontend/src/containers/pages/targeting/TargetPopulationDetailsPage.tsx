@@ -1,12 +1,13 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TargetPopulationCore } from '../../../components/targeting/TargetPopulationCore';
-import { TargetPopulationDetails } from '../../../components/targeting/TargetPopulationDetails';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore';
+import { TargetPopulationDetails } from '@components/targeting/TargetPopulationDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { isPermissionDeniedError } from '@utils/utils';
 import {
   TargetPopulationBuildStatus,
   useBusinessAreaDataQuery,
@@ -18,16 +19,11 @@ import { useBaseUrl } from '../../../hooks/useBaseUrl';
 export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
-  const {
-    data,
-    loading,
-    error,
-    startPolling,
-    stopPolling,
-  } = useTargetPopulationQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data, loading, error, startPolling, stopPolling } =
+    useTargetPopulationQuery({
+      variables: { id },
+      fetchPolicy: 'cache-and-network',
+    });
 
   const { businessArea } = useBaseUrl();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
@@ -57,8 +53,9 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
 
   const { targetPopulation } = data;
 
-  const canDuplicate = hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions)
-    && Boolean(targetPopulation.targetingCriteria);
+  const canDuplicate =
+    hasPermissions(PERMISSIONS.TARGETING_DUPLICATE, permissions) &&
+    Boolean(targetPopulation.targetingCriteria);
 
   return (
     <>

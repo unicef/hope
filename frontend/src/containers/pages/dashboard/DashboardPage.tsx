@@ -1,18 +1,19 @@
 import { Tab, Tabs, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useDashboardYearsChoiceDataQuery } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { DashboardFilters } from '../../../components/dashboard/DashboardFilters';
-import { DashboardPaper } from '../../../components/dashboard/DashboardPaper';
-import { ExportModal } from '../../../components/dashboard/ExportModal';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { DashboardFilters } from '@components/dashboard/DashboardFilters';
+import { DashboardPaper } from '@components/dashboard/DashboardPaper';
+import { ExportModal } from '@components/dashboard/ExportModal';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { DashboardYearPage } from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {

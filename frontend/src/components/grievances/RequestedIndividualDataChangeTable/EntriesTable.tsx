@@ -6,12 +6,12 @@ import {
   TableRow,
 } from '@mui/material';
 import camelCase from 'lodash/camelCase';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
-import { handleSelected } from '../utils/helpers';
+import { handleSelected } from '@utils/helpers';
 import { individualDataRow } from './individualDataRow';
 
 const StyledTable = styled(Table)`
@@ -40,8 +40,10 @@ export function EntriesTable({
   const { t } = useTranslation();
   const { selectedFlexFields } = values;
   const selectedBioData = values.selected;
-  const isSelected = (name: string): boolean => selectedBioData.includes(camelCase(name));
-  const isSelectedFlexfields = (name: string): boolean => selectedFlexFields.includes(name);
+  const isSelected = (name: string): boolean =>
+    selectedBioData.includes(camelCase(name));
+  const isSelectedFlexfields = (name: string): boolean =>
+    selectedFlexFields.includes(name);
   const handleSelectBioData = (name): void => {
     handleSelected(camelCase(name), 'selected', selectedBioData, setFieldValue);
   };
@@ -65,8 +67,7 @@ export function EntriesTable({
           <TableCell data-cy="table-cell-previous-current-value" align="left">
             {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
               ? t('Previous')
-              : t('Current')}
-            {' '}
+              : t('Current')}{' '}
             {t('Value')}
           </TableCell>
           <TableCell data-cy="table-cell-new-value" align="left">
@@ -75,24 +76,28 @@ export function EntriesTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) => individualDataRow(
-          row,
-          isSelected,
-          index,
-          ticket,
-          fieldsDict,
-          isEdit,
-          handleSelectBioData,
-        ))}
-        {entriesFlexFields.map((row, index) => individualDataRow(
-          row,
-          isSelectedFlexfields,
-          index,
-          ticket,
-          fieldsDict,
-          isEdit,
-          handleFlexFields,
-        ))}
+        {entries.map((row, index) =>
+          individualDataRow(
+            row,
+            isSelected,
+            index,
+            ticket,
+            fieldsDict,
+            isEdit,
+            handleSelectBioData,
+          ),
+        )}
+        {entriesFlexFields.map((row, index) =>
+          individualDataRow(
+            row,
+            isSelectedFlexfields,
+            index,
+            ticket,
+            fieldsDict,
+            isEdit,
+            handleFlexFields,
+          ),
+        )}
       </TableBody>
     </StyledTable>
   );

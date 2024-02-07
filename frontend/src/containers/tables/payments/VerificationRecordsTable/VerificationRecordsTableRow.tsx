@@ -1,14 +1,14 @@
 import { TableRow } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
-import React from 'react';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { AnonTableCell } from '../../../../components/core/Table/AnonTableCell';
+import * as React from 'react';
+import { BlackLink } from '@components/core/BlackLink';
+import { StatusBox } from '@components/core/StatusBox';
+import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
   verificationRecordsStatusToColor,
-} from '../../../../utils/utils';
+} from '@utils/utils';
 import { PaymentVerificationNode } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 

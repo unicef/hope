@@ -5,11 +5,11 @@ import Toolbar from '@mui/material/Toolbar';
 import MenuIcon from '@mui/icons-material/Menu';
 import TextsmsIcon from '@mui/icons-material/Textsms';
 import clsx from 'clsx';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
-import { BusinessAreaSelect } from '../../containers/BusinessAreaSelect';
-import { GlobalProgramSelect } from '../../containers/GlobalProgramSelect';
-import { UserProfileMenu } from '../../containers/UserProfileMenu';
+import { BusinessAreaSelect } from '@containers/BusinessAreaSelect';
+import { GlobalProgramSelect } from '@containers/GlobalProgramSelect';
+import { UserProfileMenu } from '@containers/UserProfileMenu';
 import { useCachedMe } from '../../hooks/useCachedMe';
 import { MiśTheme } from '../../theme';
 

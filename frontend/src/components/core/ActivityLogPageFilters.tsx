@@ -1,10 +1,10 @@
-import { Grid, MenuItem } from '@mui/material';
 import ViewModuleRoundedIcon from '@mui/icons-material/ViewModuleRounded';
-import React from 'react';
+import { Grid, MenuItem } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { AssigneeAutocomplete } from '../../shared/autocompletes/AssigneeAutocomplete';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';
 import { SelectFilter } from './SelectFilter';
@@ -24,18 +24,19 @@ export function ActivityLogPageFilters({
   setAppliedFilter,
 }: ActivityLogPageFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();

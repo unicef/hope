@@ -1,4 +1,5 @@
 module.exports = {
+  root: true,
   parser: '@typescript-eslint/parser',
   extends: [
     'airbnb-typescript',
@@ -13,8 +14,19 @@ module.exports = {
     sourceType: 'module',
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
+    ecmaFeatures: {
+      node: true,
+      es6: true,
+    },
   },
-  plugins: ['@typescript-eslint', 'react'],
+  plugins: ['@typescript-eslint', 'react', 'import', 'react-hooks'],
+  settings: {
+    'import/resolver': {
+      alias: {
+        map: [['@', './src']],
+      },
+    },
+  },
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unused-vars': 'warn',
@@ -29,5 +41,13 @@ module.exports = {
     ],
     'import/extensions': ['error', 'never'],
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+    'import/prefer-default-export': 'off',
+    'import/no-unresolved': 'off',
+    'import/no-named-as-default': 'off',
+    '@typescript-eslint/no-unsafe-argument': 'off',
+    '@typescript-eslint/indent': 'off',
+    '@typescript-eslint/no-unsafe-enum-comparison': 'off',
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
   },
 };

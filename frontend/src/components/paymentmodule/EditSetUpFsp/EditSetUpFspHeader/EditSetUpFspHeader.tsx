@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';

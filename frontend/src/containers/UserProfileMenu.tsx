@@ -8,10 +8,10 @@ import {
   Paper,
   Popper,
 } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { MeQuery } from '../__generated__/graphql';
-import { clearCache } from '../utils/utils';
+import { clearCache } from '@utils/utils';
 import { getClient } from '../apollo/client';
 
 const UserProfileButton = styled(Button)`
@@ -46,8 +46,8 @@ export function UserProfileMenu({
 
   const handleClose = (event: React.MouseEvent<EventTarget>): void => {
     if (
-      anchorRef.current
-      && anchorRef.current.contains(event.target as HTMLElement)
+      anchorRef.current &&
+      anchorRef.current.contains(event.target as HTMLElement)
     ) {
       return;
     }
@@ -88,10 +88,7 @@ export function UserProfileMenu({
         data-cy="menu-user-profile"
       >
         <Avatar alt={meData.me.email} src="/static/images/avatar/1.jpg" />
-        <MenuButtonText>
-          {' '}
-          {meData.me.email}
-        </MenuButtonText>
+        <MenuButtonText> {meData.me.email}</MenuButtonText>
       </UserProfileButton>
       <Popper
         open={open}

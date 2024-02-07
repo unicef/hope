@@ -3,17 +3,17 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketQuery,
   useAllEditHouseholdFieldsQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../core/LoadingComponent';
-import { handleSelected } from '../utils/helpers';
+import { handleSelected } from '@utils/helpers';
 import { householdDataRow } from './householdDataRow';
 
 interface RequestedHouseholdDataChangeTableProps {
@@ -67,7 +67,8 @@ export function RequestedHouseholdDataChangeTable({
   };
 
   const isSelected = (name: string): boolean => selectedBioData.includes(name);
-  const isSelectedFlexfields = (name: string): boolean => selectedFlexFields.includes(name);
+  const isSelectedFlexfields = (name: string): boolean =>
+    selectedFlexFields.includes(name);
   return (
     <StyledTable>
       <TableHead>
@@ -79,8 +80,7 @@ export function RequestedHouseholdDataChangeTable({
           <TableCell data-cy="table-cell-previous-current-value" align="left">
             {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
               ? t('Previous')
-              : t('Current')}
-            {' '}
+              : t('Current')}{' '}
             {t('Value')}
           </TableCell>
           <TableCell data-cy="table-cell-new-value" align="left">
@@ -89,26 +89,30 @@ export function RequestedHouseholdDataChangeTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) => householdDataRow(
-          row,
-          fieldsDict,
-          isSelected,
-          index,
-          countriesDict,
-          ticket,
-          isEdit,
-          handleSelectBioData,
-        ))}
-        {entriesFlexFields.map((row, index) => householdDataRow(
-          row,
-          fieldsDict,
-          isSelectedFlexfields,
-          index,
-          countriesDict,
-          ticket,
-          isEdit,
-          handleFlexFields,
-        ))}
+        {entries.map((row, index) =>
+          householdDataRow(
+            row,
+            fieldsDict,
+            isSelected,
+            index,
+            countriesDict,
+            ticket,
+            isEdit,
+            handleSelectBioData,
+          ),
+        )}
+        {entriesFlexFields.map((row, index) =>
+          householdDataRow(
+            row,
+            fieldsDict,
+            isSelectedFlexfields,
+            index,
+            countriesDict,
+            ticket,
+            isEdit,
+            handleFlexFields,
+          ),
+        )}
       </TableBody>
     </StyledTable>
   );

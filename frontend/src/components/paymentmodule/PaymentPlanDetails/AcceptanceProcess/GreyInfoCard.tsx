@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { UniversalMoment } from '../../../core/UniversalMoment';
 import { PaymentPlanQuery } from '../../../../__generated__/graphql';
@@ -36,18 +36,14 @@ export function GreyInfoCard({
   approvals,
 }: GreyInfoCardProps): React.ReactElement {
   const mappedApprovals = approvals.map((action) => {
-    const {
-      info, createdAt, comment, createdBy,
-    } = action;
+    const { info, createdAt, comment, createdBy } = action;
     return (
       info && (
         <Box alignItems="center" display="flex" key={createdAt}>
           {info}
           <Box ml={1}>
             <GreyText>
-              on
-              {' '}
-              <UniversalMoment>{createdAt}</UniversalMoment>
+              on <UniversalMoment>{createdAt}</UniversalMoment>
             </GreyText>
           </Box>
           <Box p={1} ml={1}>
@@ -70,9 +66,7 @@ export function GreyInfoCard({
     <Box display="flex" flexDirection="column">
       <Box p={3}>
         <GreyTitle>
-          {topMessage}
-          {' '}
-          on
+          {topMessage} on
           <UniversalMoment>{topDate}</UniversalMoment>
         </GreyTitle>
       </Box>

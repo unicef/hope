@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -10,18 +10,18 @@ import {
   useHouseholdChoiceDataQuery,
   useIndividualQuery,
 } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { IndividualBioData } from '../../../components/population/IndividualBioData/IndividualBioData';
-import { IndividualFlags } from '../../../components/population/IndividualFlags';
-import { IndividualPhotoModal } from '../../../components/population/IndividualPhotoModal';
-import { IndividualVulnerabilities } from '../../../components/population/IndividualVulnerabilities/IndividualVunerabilities';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { IndividualBioData } from '@components/population/IndividualBioData/IndividualBioData';
+import { IndividualFlags } from '@components/population/IndividualFlags';
+import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
+import { IndividualVulnerabilities } from '@components/population/IndividualVulnerabilities/IndividualVunerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 
 const Container = styled.div`
@@ -46,28 +46,33 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
-  const { data: flexFieldsData, loading: flexFieldsDataLoading } = useAllIndividualsFlexFieldsAttributesQuery();
+  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
+    useAllIndividualsFlexFieldsAttributesQuery();
 
-  const { data: grievancesChoices, loading: grievancesChoicesLoading } = useGrievancesChoiceDataQuery();
+  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   if (
-    loading
-    || choicesLoading
-    || flexFieldsDataLoading
-    || grievancesChoicesLoading
-  ) return <LoadingComponent />;
+    loading ||
+    choicesLoading ||
+    flexFieldsDataLoading ||
+    grievancesChoicesLoading
+  )
+    return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data
-    || !choicesData
-    || !flexFieldsData
-    || !grievancesChoices
-    || permissions === null
-  ) return null;
+    !data ||
+    !choicesData ||
+    !flexFieldsData ||
+    !grievancesChoices ||
+    permissions === null
+  )
+    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

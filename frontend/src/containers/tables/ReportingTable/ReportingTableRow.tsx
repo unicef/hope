@@ -1,13 +1,13 @@
 import { TableCell, TableRow } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Pointer } from '../../../components/core/Pointer';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { formatNumber, reportStatusToColor } from '../../../utils/utils';
+import { Pointer } from '@components/core/Pointer';
+import { StatusBox } from '@components/core/StatusBox';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { formatNumber, reportStatusToColor } from '@utils/utils';
 import { ReportNode } from '../../../__generated__/graphql';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
@@ -34,10 +34,9 @@ export function ReportingTableRow({
 }: ReportingTableRowProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-  const history = useHistory();
-  const handleClick = (): void => {
+const navigate = useNavigate()  const handleClick = (): void => {
     const path = `/${baseUrl}/reporting/${report.id}`;
-    history.push(path);
+    navigate(path);
   };
 
   return (

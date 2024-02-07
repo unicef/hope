@@ -1,8 +1,6 @@
-import {
-  Box, Step, StepButton, Stepper,
-} from '@mui/material';
+import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
@@ -12,14 +10,14 @@ import {
   useProgramQuery,
   useUserPartnerChoicesQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
-import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
+import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 
@@ -39,7 +37,8 @@ export function DuplicateProgramPage(): ReactElement {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } = useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
+    useUserPartnerChoicesQuery();
 
   const handleSubmit = async (values): Promise<void> => {
     try {
@@ -67,7 +66,8 @@ export function DuplicateProgramPage(): ReactElement {
     }
   };
 
-  if (loadingProgram || treeLoading || userPartnerChoicesLoading) return <LoadingComponent />;
+  if (loadingProgram || treeLoading || userPartnerChoicesLoading)
+    return <LoadingComponent />;
   if (!data || !treeData || !userPartnerChoicesData) return null;
 
   const {
@@ -132,9 +132,7 @@ export function DuplicateProgramPage(): ReactElement {
       }}
       validationSchema={programValidationSchema(t)}
     >
-      {({
-        submitForm, values, validateForm, setFieldTouched,
-      }) => {
+      {({ submitForm, values, validateForm, setFieldTouched }) => {
         const mappedPartnerChoices = userPartnerChoices
           .filter((partner) => partner.name !== 'UNICEF')
           .map((partner) => ({

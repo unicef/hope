@@ -1,7 +1,5 @@
-import {
-  Box, Button, Grid, Typography,
-} from '@mui/material';
-import React from 'react';
+import { Box, Button, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import {

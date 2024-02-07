@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
@@ -24,7 +24,10 @@ export function LockedPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  const { mutatePaymentPlanAction: unlock, loading: loadingUnlock } = usePaymentPlanAction(Action.Unlock, id, () => showMessage(t('Payment Plan has been unlocked.')));
+  const { mutatePaymentPlanAction: unlock, loading: loadingUnlock } =
+    usePaymentPlanAction(Action.Unlock, id, () =>
+      showMessage(t('Payment Plan has been unlocked.')),
+    );
 
   return (
     <Box display="flex" alignItems="center">

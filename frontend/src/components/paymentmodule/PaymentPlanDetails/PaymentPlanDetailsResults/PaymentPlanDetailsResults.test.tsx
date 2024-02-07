@@ -1,5 +1,5 @@
 import { MockedProvider } from '@apollo/react-testing';
-import React from 'react';
+import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import wait from 'waait';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
@@ -7,26 +7,22 @@ import { fakeActionPpMutation } from '../../../../../fixtures/paymentmodule/fake
 import { render } from '../../../../testUtils/testUtils';
 import { PaymentPlanDetailsResults } from './PaymentPlanDetailsResults';
 
-describe(
-  'components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/PaymentPlanDetailsResults',
-  () => {
-    it('should render', async () => {
-      const { container } = render(
-        <MockedProvider
-          addTypename={false}
-          mocks={fakeActionPpMutation}
-        >
-          <PaymentPlanDetailsResults paymentPlan={fakeApolloPaymentPlan} />
-        </MockedProvider>,
-      );
+describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/PaymentPlanDetailsResults', () => {
+  it('should render', async () => {
+    const { container } = render(
+      <MockedProvider addTypename={false} mocks={fakeActionPpMutation}>
+        <PaymentPlanDetailsResults paymentPlan={fakeApolloPaymentPlan} />
+      </MockedProvider>,
+    );
 
-      const chartContainer = container.querySelector('[data-cy="chart-container"]');
-      expect(chartContainer).toBeInTheDocument();
-      expect(chartContainer).not.toBeEmpty();
+    const chartContainer = container.querySelector(
+      '[data-cy="chart-container"]',
+    );
+    expect(chartContainer).toBeInTheDocument();
+    expect(chartContainer).not.toBeEmpty();
 
-      await act(() => wait(0)); // wait for the mutation to complete
+    await act(() => wait(0)); // wait for the mutation to complete
 
-      expect(container).toMatchSnapshot();
-    });
-  },
-);
+    expect(container).toMatchSnapshot();
+  });
+});

@@ -1,10 +1,10 @@
 import { Grid, MenuItem } from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
-import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import * as React from 'react';
+import { useLocation } from 'react-router-dom';
 import { ProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { FiltersSection } from '../../../core/FiltersSection';
 import { NumberTextField } from '../../../core/NumberTextField';
@@ -27,19 +27,19 @@ export function LookUpProgrammesFiltersSurveys({
   appliedFilter,
   setAppliedFilter,
 }: LookUpProgrammesFiltersSurveysProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -81,10 +81,12 @@ export function LookUpProgrammesFiltersSurveys({
           <DatePickerFilter
             label="Start Date"
             dataCy="filters-start-date"
-            onChange={(date) => handleFilterChange(
-              'startDate',
-              date ? moment(date).format('YYYY-MM-DD') : '',
-            )}
+            onChange={(date) =>
+              handleFilterChange(
+                'startDate',
+                date ? moment(date).format('YYYY-MM-DD') : '',
+              )
+            }
             value={filter.startDate}
           />
         </Grid>
@@ -92,10 +94,12 @@ export function LookUpProgrammesFiltersSurveys({
           <DatePickerFilter
             label="End Date"
             dataCy="filters-end-date"
-            onChange={(date) => handleFilterChange(
-              'endDate',
-              date ? moment(date).format('YYYY-MM-DD') : '',
-            )}
+            onChange={(date) =>
+              handleFilterChange(
+                'endDate',
+                date ? moment(date).format('YYYY-MM-DD') : '',
+              )
+            }
             value={filter.endDate}
           />
         </Grid>
@@ -120,7 +124,9 @@ export function LookUpProgrammesFiltersSurveys({
             placeholder="From"
             data-cy="filters-number-of-households-min"
             value={filter.numberOfHouseholdsMin}
-            onChange={(e) => handleFilterChange('numberOfHouseholdsMin', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('numberOfHouseholdsMin', e.target.value)
+            }
             icon={<GroupIcon />}
           />
         </Grid>
@@ -129,7 +135,9 @@ export function LookUpProgrammesFiltersSurveys({
             data-cy="filters-number-of-households-max"
             value={filter.numberOfHouseholdsMax}
             placeholder="To"
-            onChange={(e) => handleFilterChange('numberOfHouseholdsMax', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('numberOfHouseholdsMax', e.target.value)
+            }
             icon={<GroupIcon />}
           />
         </Grid>
@@ -152,7 +160,9 @@ export function LookUpProgrammesFiltersSurveys({
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('dataCollectingType', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('dataCollectingType', e.target.value)
+            }
             label="Data Collecting Type"
             value={filter.dataCollectingType}
             data-cy="filters-data-collecting-type"

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllIndividualsForPopulationTableQueryVariables,
@@ -7,8 +7,8 @@ import {
   IndividualNode,
   useAllIndividualsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { dateToIsoString } from '../../../../utils/utils';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { headCells } from './IndividualsListTableHeadCells';

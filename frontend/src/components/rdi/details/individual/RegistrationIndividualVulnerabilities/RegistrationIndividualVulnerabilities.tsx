@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useArrayToDict } from '../../../../../hooks/useArrayToDict';
@@ -37,7 +37,8 @@ export function RegistrationIndividualVulnerabilities({
     '*',
   );
 
-  const getLabelOrDash = (choices, value): string => choices.find((item) => item.value === value)?.labelEn || '-';
+  const getLabelOrDash = (choices, value): string =>
+    choices.find((item) => item.value === value)?.labelEn || '-';
 
   const fields = Object.entries(individual.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {

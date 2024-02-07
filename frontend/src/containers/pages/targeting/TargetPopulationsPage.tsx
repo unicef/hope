@@ -1,16 +1,17 @@
 import { IconButton } from '@mui/material';
 import { Info } from '@mui/icons-material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TargetPopulationFilters } from '../../../components/targeting/TargetPopulationFilters';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TargetPopulationFilters } from '@components/targeting/TargetPopulationFilters';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
 import { useProgramContext } from '../../../programContext';
@@ -43,7 +44,8 @@ export function TargetPopulationsPage(): React.ReactElement {
 
   const canCreate = hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions);
 
-  if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions)) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
+    return <PermissionDenied />;
 
   return (
     <>

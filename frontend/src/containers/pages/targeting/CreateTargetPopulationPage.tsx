@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -10,20 +10,20 @@ import {
   useBusinessAreaDataQuery,
   useCreateTpMutation,
 } from '../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { CreateTargetPopulationHeader } from '../../../components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
-import { Exclusions } from '../../../components/targeting/CreateTargetPopulation/Exclusions';
-import { PaperContainer } from '../../../components/targeting/PaperContainer';
-import { TargetingCriteria } from '../../../components/targeting/TargetingCriteria';
-import { TargetingCriteriaDisabled } from '../../../components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { CreateTargetPopulationHeader } from '@components/targeting/CreateTargetPopulation/CreateTargetPopulationHeader';
+import { Exclusions } from '@components/targeting/CreateTargetPopulation/Exclusions';
+import { PaperContainer } from '@components/targeting/PaperContainer';
+import { TargetingCriteria } from '@components/targeting/TargetingCriteria';
+import { TargetingCriteriaDisabled } from '@components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '../../../utils/utils';
+import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '@utils/utils';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -50,15 +50,17 @@ export function CreateTargetPopulationPage(): React.ReactElement {
     variables: { businessAreaSlug: businessArea },
   });
 
-  const { data: allProgramsData, loading: loadingPrograms } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, status: [ProgramStatus.Active] },
-    fetchPolicy: 'network-only',
-  });
+  const { data: allProgramsData, loading: loadingPrograms } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, status: [ProgramStatus.Active] },
+      fetchPolicy: 'network-only',
+    });
 
   if (loadingPrograms) return <LoadingComponent />;
   if (permissions === null) return null;
   if (!allProgramsData || !businessAreaData) return null;
-  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions)) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
+    return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
@@ -72,7 +74,9 @@ export function CreateTargetPopulationPage(): React.ReactElement {
           return true;
         }
         const idsArr = ids.split(',');
-        return idsArr.every((el) => /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el));
+        return idsArr.every((el) =>
+          /^\s*(IND|HH)-\d{2}-\d{4}\.\d{4}\s*$/.test(el),
+        );
       },
     ),
     exclusionReason: Yup.string().max(500, t('Too long')),

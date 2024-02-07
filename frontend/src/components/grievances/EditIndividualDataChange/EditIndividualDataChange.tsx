@@ -1,10 +1,9 @@
-import {
-  Box, Button, Grid, Typography,
-} from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -41,8 +40,10 @@ export function EditIndividualDataChange({
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
-  const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] = values.selectedIndividual;
-  const { data: addIndividualFieldsData, loading: addIndividualFieldsLoading } = useAllAddIndividualFieldsQuery();
+  const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
+    values.selectedIndividual;
+  const { data: addIndividualFieldsData, loading: addIndividualFieldsLoading } =
+    useAllAddIndividualFieldsQuery();
 
   const [
     getIndividual,
@@ -58,8 +59,8 @@ export function EditIndividualDataChange({
 
   useEffect(() => {
     if (
-      !values.individualDataUpdateFields
-      || values.individualDataUpdateFields.length === 0
+      !values.individualDataUpdateFields ||
+      values.individualDataUpdateFields.length === 0
     ) {
       setFieldValue('individualDataUpdateFields', [
         { fieldName: null, fieldValue: null },
@@ -71,10 +72,10 @@ export function EditIndividualDataChange({
     return <div>{t('You have to select an individual earlier')}</div>;
   }
   if (
-    addIndividualFieldsLoading
-    || fullIndividualLoading
-    || addIndividualFieldsLoading
-    || !fullIndividual
+    addIndividualFieldsLoading ||
+    fullIndividualLoading ||
+    addIndividualFieldsLoading ||
+    !fullIndividual
   ) {
     return <LoadingComponent />;
   }

@@ -1,7 +1,7 @@
 import { Box, TextField, InputAdornment } from '@mui/material';
 import DatePicker from '@mui/lab/DatePicker';
 import moment from 'moment';
-import React from 'react';
+import * as React from 'react';
 import { FieldLabel } from './FieldLabel';
 
 export function DatePickerFilter({

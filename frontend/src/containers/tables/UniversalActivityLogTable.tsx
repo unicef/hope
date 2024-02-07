@@ -1,7 +1,7 @@
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import { ActivityLogTable } from '../../components/core/ActivityLogTable/ActivityLogTable';
-import { decodeIdString } from '../../utils/utils';
+import { ActivityLogTable } from '@components/core/ActivityLogTable/ActivityLogTable';
+import { decodeIdString } from '@utils/utils';
 import {
   LogEntryNode,
   useAllLogEntriesQuery,

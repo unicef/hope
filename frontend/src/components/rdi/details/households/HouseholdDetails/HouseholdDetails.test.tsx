@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { fakeHouseholdChoices } from '../../../../../../fixtures/population/fakeHouseholdChoices';
 import { fakeImportedHouseholdDetailedFragment } from '../../../../../../fixtures/registration/fakeImportedHouseholdDetailedFragment';
 import { render } from '../../../../../testUtils/testUtils';

@@ -2,11 +2,9 @@ import { Box, Grid } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useLocation } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  BlueText, StyledBox, LightGrey, DarkGrey,
-} from '../LookUpStyles';
+import { BlueText, StyledBox, LightGrey, DarkGrey } from '../LookUpStyles';
 import { LinkedTicketIdDisplay } from './LinkedTicketIdDisplay';
 
 export function LookUpLinkedTicketsDisplay({
@@ -40,9 +38,7 @@ export function LookUpLinkedTicketsDisplay({
       <Grid container justifyContent="space-between">
         <Grid item>
           <Box display="flex" flexDirection="column">
-            {t('Ticket ID')}
-            :
-            {renderLinkedTickets()}
+            {t('Ticket ID')}:{renderLinkedTickets()}
           </Box>
         </Grid>
         {!isEditTicket && (

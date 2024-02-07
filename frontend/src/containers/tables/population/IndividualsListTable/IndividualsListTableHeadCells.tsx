@@ -1,4 +1,4 @@
-import { HeadCell } from '../../../../components/core/Table/EnhancedTableHead';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { IndividualNode } from '../../../../__generated__/graphql';
 
 export const headCells: HeadCell<IndividualNode>[] = [

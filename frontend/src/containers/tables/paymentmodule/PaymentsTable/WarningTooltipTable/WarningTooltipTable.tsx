@@ -12,15 +12,15 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { BlackLink } from '../../../../../components/core/BlackLink';
-import { LabelizedField } from '../../../../../components/core/LabelizedField';
-import { StatusBox } from '../../../../../components/core/StatusBox';
-import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../../components/core/UniversalMoment';
-import { paymentPlanStatusToColor } from '../../../../../utils/utils';
+import { BlackLink } from '@components/core/BlackLink';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { StatusBox } from '@components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { paymentPlanStatusToColor } from '@utils/utils';
 import {
   AllPaymentsForTableQuery,
   PaymentConflictDataNode,
@@ -117,12 +117,8 @@ export function WarningTooltipTable({
       </DialogTitleWrapper>
       <DialogContent>
         <Box mt={4} mb={2} display="flex">
-          {t('Payment Plan ID')}
-          {' '}
-          <Bold>{paymentPlan.unicefId}</Bold>
-          {' '}
-          {t('details')}
-          :
+          {t('Payment Plan ID')} <Bold>{paymentPlan.unicefId}</Bold>{' '}
+          {t('details')}:
         </Box>
         <GreyBox p={3}>
           <Grid container>
@@ -139,12 +135,8 @@ export function WarningTooltipTable({
           </Grid>
         </GreyBox>
         <Box mt={10} mb={10} display="flex">
-          {t('Household ID')}
-          {' '}
-          <Bold>{payment.household?.unicefId}</Bold>
-          {' '}
-          {t('is also included in the following Payment Plans')}
-          :
+          {t('Household ID')} <Bold>{payment.household?.unicefId}</Bold>{' '}
+          {t('is also included in the following Payment Plans')}:
         </Box>
         <StyledTable>
           <TableHead>

@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useArrayToDict } from '../../../hooks/useArrayToDict';
@@ -52,17 +52,19 @@ export function HouseholdVulnerabilities({
         );
       }
       if (
-        flexAttributesDict[key]?.type === 'SELECT_MANY'
-        || flexAttributesDict[key]?.type === 'SELECT_ONE'
+        flexAttributesDict[key]?.type === 'SELECT_MANY' ||
+        flexAttributesDict[key]?.type === 'SELECT_ONE'
       ) {
-        let newValue = flexAttributesDict[key].choices.find((item) => item.value === value)
-          ?.labelEn || '-';
+        let newValue =
+          flexAttributesDict[key].choices.find((item) => item.value === value)
+            ?.labelEn || '-';
         if (value instanceof Array) {
           newValue = value
             .map(
-              (choice) => flexAttributesDict[key].choices.find(
-                (item) => item.value === choice,
-              )?.labelEn || '-',
+              (choice) =>
+                flexAttributesDict[key].choices.find(
+                  (item) => item.value === choice,
+                )?.labelEn || '-',
             )
             .join(', ');
         }

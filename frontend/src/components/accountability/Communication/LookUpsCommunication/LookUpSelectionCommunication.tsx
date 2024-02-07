@@ -1,7 +1,6 @@
-import {
-  Box, FormControlLabel, Radio, RadioGroup,
-} from '@mui/material';
-import React, { useState } from 'react';
+import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -9,8 +8,8 @@ import {
   RegistrationDataImportStatus,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { CommunicationTabsValues } from '../../../../utils/constants';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { CommunicationTabsValues } from '@utils/constants';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { LookUpHouseholdFiltersCommunication } from './LookUpHouseholdFiltersCommunication';
 import { LookUpRegistrationFiltersCommunication } from './LookUpRegistrationFiltersCommunication';
 import { LookUpSelectionTablesCommunication } from './LookUpSelectionTablesCommunication';
@@ -93,9 +92,10 @@ export function LookUpSelectionCommunication({
 
   const { t } = useTranslation();
 
-  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery({
+      variables: { businessArea },
+    });
 
   const handleChange = (type: number, value: string[] | string): void => {
     setValues({
@@ -105,8 +105,8 @@ export function LookUpSelectionCommunication({
           ? value
           : [],
       targetPopulation:
-        type === CommunicationTabsValues.TARGET_POPULATION
-        && typeof value === 'string'
+        type === CommunicationTabsValues.TARGET_POPULATION &&
+        typeof value === 'string'
           ? value
           : '',
       registrationDataImport:

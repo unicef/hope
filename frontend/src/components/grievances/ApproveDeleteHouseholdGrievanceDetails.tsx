@@ -10,18 +10,19 @@ import {
 import styled from 'styled-components';
 import Edit from '@mui/icons-material/Edit';
 import { Field, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -46,7 +47,8 @@ export function ApproveDeleteHouseholdGrievanceDetails({
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
   const { showMessage } = useSnackbar();
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-  const { approveStatus, reasonHousehold } = ticket.deleteHouseholdTicketDetails;
+  const { approveStatus, reasonHousehold } =
+    ticket.deleteHouseholdTicketDetails;
 
   const validationSchema = Yup.object().shape({
     reasonHhId: Yup.string().when('withdrawReason', (withdrawReasonValue) => {
@@ -155,11 +157,11 @@ export function ApproveDeleteHouseholdGrievanceDetails({
                     <Typography variant="body2">
                       {showWithdraw()
                         ? t(
-                          'Please provide the reason of withdrawal of this household.',
-                        )
+                            'Please provide the reason of withdrawal of this household.',
+                          )
                         : t(
-                          'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
-                        )}
+                            'You did not approve the following household to be withdrawn. Are you sure you want to continue?',
+                          )}
                     </Typography>
                   </Box>
                   {showWithdraw() && (

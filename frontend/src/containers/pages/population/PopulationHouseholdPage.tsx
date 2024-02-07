@@ -1,16 +1,17 @@
 import { Box } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useHouseholdChoiceDataQuery } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { HouseholdFilters } from '../../../components/population/HouseholdFilter';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { HouseholdFilters } from '@components/population/HouseholdFilter';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { HouseholdTable } from '../../tables/population/HouseholdTable';
 
 export function PopulationHouseholdPage(): React.ReactElement {
@@ -37,15 +38,17 @@ export function PopulationHouseholdPage(): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
 
-  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-first',
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery({
+      variables: { businessArea },
+      fetchPolicy: 'cache-first',
+    });
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
 
-  if (!hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions)) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions))
+    return <PermissionDenied />;
 
   if (!choicesData) return null;
 

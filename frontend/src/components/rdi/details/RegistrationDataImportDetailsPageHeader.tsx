@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
@@ -41,8 +41,7 @@ export function RegistrationDataImportDetailsPageHeader({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
-  const history = useHistory();
-  const { isActiveProgram } = useProgramContext();
+const navigate = useNavigate()  const { isActiveProgram } = useProgramContext();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
@@ -137,7 +136,7 @@ export function RegistrationDataImportDetailsPageHeader({
       <PageHeader
         title={registration.name}
         breadCrumbs={canViewList ? breadCrumbsItems : null}
-        handleBack={() => history.push(`/${baseUrl}/registration-data-import/`)}
+        handleBack={() => navigate(`/${baseUrl}/registration-data-import/`)}
       >
         {registration.erased ? null : buttons}
       </PageHeader>

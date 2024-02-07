@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
-import { ClickableTableRow } from '../../../../../components/core/Table/ClickableTableRow';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 
 export function FlexFieldRow({ household }) {
   return (

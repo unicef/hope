@@ -1,7 +1,8 @@
 import { Box } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FormikFileField } from '../../../shared/Formik/FormikFileField';
+import { FormikFileField } from '@shared/Formik/FormikFileField';
 import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
@@ -36,9 +37,9 @@ export function GrievanceFlexFieldPhotoModalEditable({
 
   const flexFields = isIndividual
     ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-      ?.flex_fields
+        ?.flex_fields
     : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-      ?.flex_fields;
+        ?.flex_fields;
 
   const picUrl: string = isCurrent
     ? flexFields[flexField.name]?.previous_value

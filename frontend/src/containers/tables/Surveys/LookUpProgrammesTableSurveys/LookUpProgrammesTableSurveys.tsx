@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import styled from 'styled-components';
 import {
   AllActiveProgramsQueryVariables,
@@ -6,7 +6,7 @@ import {
   ProgrammeChoiceDataQuery,
   useAllActiveProgramsQuery,
 } from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpProgrammesHeadCellsSurveys';
 import { LookUpProgrammesTableRowSurveys } from './LookUpProgrammesTableRowSurveys';
@@ -59,8 +59,8 @@ export function LookUpProgrammesTableSurveys({
     <NoTableStyling>
       <TableWrapper>
         <UniversalTable<
-        AllProgramsQuery['allPrograms']['edges'][number]['node'],
-        AllActiveProgramsQueryVariables
+          AllProgramsQuery['allPrograms']['edges'][number]['node'],
+          AllActiveProgramsQueryVariables
         >
           headCells={headCells}
           query={useAllActiveProgramsQuery}

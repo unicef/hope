@@ -1,6 +1,6 @@
 import { Box, Button, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 
@@ -43,8 +43,8 @@ export function ExcludedItem({
       mt={2}
     >
       <IdDiv isDeleted={isDeleted}>{id}</IdDiv>
-      {isEdit
-        && (isDeleted ? (
+      {isEdit &&
+        (isDeleted ? (
           <Button variant="text" color="primary" onClick={onUndo}>
             {t('Undo')}
           </Button>

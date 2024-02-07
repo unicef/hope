@@ -1,7 +1,5 @@
-import {
-  Box, Grid, Paper, Typography,
-} from '@mui/material';
-import React from 'react';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -10,7 +8,7 @@ import {
   getPhoneNoLabel,
   renderBoolean,
   sexToCapitalize,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
@@ -104,13 +102,10 @@ export function IndividualBioData({
       <LabelizedField label={t('Linked Households')}>
         {individual?.householdsAndRoles?.length
           ? individual?.householdsAndRoles?.map((item) => (
-            <Box key={item.id}>
-              {item.household.unicefId}
-              {' '}
-              -
-              {roleChoicesDict[item.role]}
-            </Box>
-          ))
+              <Box key={item.id}>
+                {item.household.unicefId} -{roleChoicesDict[item.role]}
+              </Box>
+            ))
           : '-'}
       </LabelizedField>
     </Grid>
@@ -288,12 +283,12 @@ export function IndividualBioData({
               : 'Not Disabled'}
           </LabelizedField>
         </Grid>
-        {!mappedIndividualDocuments?.length
-        && !mappedIdentities?.length ? null : (
+        {!mappedIndividualDocuments?.length &&
+        !mappedIdentities?.length ? null : (
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
-          )}
+        )}
         {mappedIndividualDocuments}
         {mappedIdentities}
         <Grid item xs={12}>

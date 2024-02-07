@@ -6,11 +6,12 @@ import {
   DialogTitle,
   Grid,
 } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useDebounce } from '../../hooks/useDebounce';
 import { SearchTextField } from '../core/SearchTextField';
 import { SanctionListIndividualsTable } from './SanctionListIndividualsTable/SanctionListIndividualsTable';
@@ -33,7 +34,8 @@ export function ViewSanctionList({
 
   const debouncedFilter = useDebounce(filter, 500);
 
-  const handleFilterChange = (e, name): void => setFilter({ ...filter, [name]: e.target.value });
+  const handleFilterChange = (e, name): void =>
+    setFilter({ ...filter, [name]: e.target.value });
   return (
     <>
       <Button color="primary" onClick={() => setDialogOpen(true)}>

@@ -1,7 +1,7 @@
 import { Box, Checkbox, FormControlLabel } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
-import { FieldLabel } from '../../../components/core/FieldLabel';
+import * as React from 'react';
+import { FieldLabel } from '@components/core/FieldLabel';
 
 export function FormikCheckboxGroup({
   field,
@@ -18,12 +18,12 @@ export function FormikCheckboxGroup({
             value={each.value}
             key={each.name}
             as={FormControlLabel}
-            control={(
+            control={
               <Checkbox
                 color="primary"
                 checked={otherProps.values[field.name]?.includes(each.value)}
               />
-            )}
+            }
             label={each.name}
           />
         ))}

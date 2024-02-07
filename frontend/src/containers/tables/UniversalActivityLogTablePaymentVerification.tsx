@@ -1,6 +1,6 @@
-import React, { ReactElement, useState } from 'react';
-import { ActivityLogTablePaymentVerification } from '../../components/core/ActivityLogTablePaymentVerification/ActivityLogTablePaymentVerification';
-import { decodeIdString } from '../../utils/utils';
+import { ReactElement, useState } from 'react';
+import { ActivityLogTablePaymentVerification } from '@components/core/ActivityLogTablePaymentVerification/ActivityLogTablePaymentVerification';
+import { decodeIdString } from '@utils/utils';
 import {
   PaymentVerificationLogEntryNode,
   useAllPaymentVerificationLogEntriesQuery,

@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import * as React from 'react';
+import { useRef } from 'react';
 import Button from '@mui/material/Button';
 
 export function UploadButton({

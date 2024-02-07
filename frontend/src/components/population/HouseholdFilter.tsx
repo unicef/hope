@@ -2,21 +2,22 @@ import { Grid, MenuItem } from '@mui/material';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import GroupIcon from '@mui/icons-material/Group';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   HouseholdChoiceDataQuery,
   ProgramNode,
 } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
-import { householdTableOrderOptions } from '../../utils/constants';
-import { createHandleApplyFilterChange } from '../../utils/utils';
+import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
+import { householdTableOrderOptions } from '@utils/constants';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from '../core/FiltersSection';
 import { NumberTextField } from '../core/NumberTextField';
 import { SearchTextField } from '../core/SearchTextField';
 import { SelectFilter } from '../core/SelectFilter';
+import { AssignmentIndRounded } from '@mui/icons-material';
 
 interface HouseholdFiltersProps {
   filter;
@@ -40,19 +41,19 @@ export function HouseholdFilters({
   isOnPaper = true,
 }: HouseholdFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -117,7 +118,9 @@ export function HouseholdFilters({
         )}
         <Grid item xs={3}>
           <SelectFilter
-            onChange={(e) => handleFilterChange('residenceStatus', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('residenceStatus', e.target.value)
+            }
             label={t('Residence Status')}
             fullWidth
             value={filter.residenceStatus}
@@ -150,7 +153,9 @@ export function HouseholdFilters({
             placeholder={t('From')}
             icon={<GroupIcon />}
             fullWidth
-            onChange={(e) => handleFilterChange('householdSizeMin', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('householdSizeMin', e.target.value)
+            }
             data-cy="hh-filters-household-size-from"
           />
         </Grid>
@@ -160,7 +165,9 @@ export function HouseholdFilters({
             placeholder={t('To')}
             icon={<GroupIcon />}
             fullWidth
-            onChange={(e) => handleFilterChange('householdSizeMax', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('householdSizeMax', e.target.value)
+            }
             data-cy="hh-filters-household-size-to"
           />
         </Grid>
@@ -200,7 +207,9 @@ export function HouseholdFilters({
         {isAllPrograms && (
           <Grid item xs={3}>
             <SelectFilter
-              onChange={(e) => handleFilterChange('programState', e.target.value)}
+              onChange={(e) =>
+                handleFilterChange('programState', e.target.value)
+              }
               label={t('Programme State')}
               value={filter.programState}
               fullWidth

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -7,12 +7,12 @@ import {
   TargetPopulationStatus,
   useBusinessAreaDataQuery,
 } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { StatusBox } from '../../../components/core/StatusBox';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { StatusBox } from '@components/core/StatusBox';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { targetPopulationBuildStatusToColor } from '../../../utils/utils';
+import { targetPopulationBuildStatusToColor } from '@utils/utils';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
@@ -52,12 +52,10 @@ export function TargetPopulationPageHeader({
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
-  const {
-    data: businessAreaData,
-    loading: businessAreaDataLoading,
-  } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
+  const { data: businessAreaData, loading: businessAreaDataLoading } =
+    useBusinessAreaDataQuery({
+      variables: { businessAreaSlug: businessArea },
+    });
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Targeting',
@@ -109,20 +107,19 @@ export function TargetPopulationPageHeader({
   }
   return (
     <PageHeader
-      title={(
+      title={
         <HeaderWrapper>
           {t(`${targetPopulation.name}`)}
-          {targetPopulation.buildStatus
-              !== TargetPopulationBuildStatus.Ok && (
-              <StatusWrapper>
-                <StatusBox
-                  status={targetPopulation.buildStatus}
-                  statusToColor={targetPopulationBuildStatusToColor}
-                />
-              </StatusWrapper>
+          {targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok && (
+            <StatusWrapper>
+              <StatusBox
+                status={targetPopulation.buildStatus}
+                statusToColor={targetPopulationBuildStatusToColor}
+              />
+            </StatusWrapper>
           )}
         </HeaderWrapper>
-        )}
+      }
       breadCrumbs={breadCrumbsItems}
     >
       {buttons}

@@ -1,9 +1,9 @@
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,

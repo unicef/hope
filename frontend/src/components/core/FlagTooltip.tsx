@@ -1,10 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 import FlagIcon from '@mui/icons-material/Flag';
 import { Tooltip } from '@mui/material';
 import styled from 'styled-components';
 
 const StyledFlag = styled(FlagIcon)`
-  color: ${({ theme, confirmed }) => (confirmed ? 'deeppink' : theme.hctPalette.orange)};
+  color: ${({ theme, confirmed }) =>
+    confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
 interface FlagTooltipProps {
   confirmed?: boolean;

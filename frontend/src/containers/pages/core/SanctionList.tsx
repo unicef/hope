@@ -1,14 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import {
-  Button, Box, Paper, SnackbarContent, Snackbar,
-} from '@mui/material';
+import { Button, Box, Paper, SnackbarContent, Snackbar } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import { useCheckAgainstSanctionListUploadMutation } from '../../../__generated__/graphql';
-import { DropzoneField } from '../../../components/core/DropzoneField';
-import { PageHeader } from '../../../components/core/PageHeader';
+import { DropzoneField } from '@components/core/DropzoneField';
+import { PageHeader } from '@components/core/PageHeader';
 
 const ButtonsContainer = styled.div`
   width: 500px;
@@ -23,7 +22,8 @@ export function SanctionList(): React.ReactElement {
     setSnackbarMessage(message);
     setSnackbarShow(true);
   };
-  const [checkAgainstSanctionMutate, { loading: fileLoading }] = useCheckAgainstSanctionListUploadMutation();
+  const [checkAgainstSanctionMutate, { loading: fileLoading }] =
+    useCheckAgainstSanctionListUploadMutation();
 
   const { t } = useTranslation();
 

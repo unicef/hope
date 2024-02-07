@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { IconButton, Collapse } from '@mui/material';
 import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
@@ -38,12 +39,8 @@ export function ImportErrors({
         {errors.map((item) => (
           <Error>
             <strong>
-              {item.sheet}
-              {' '}
-              -
-              {item.coordinates}
-            </strong>
-            {' '}
+              {item.sheet} -{item.coordinates}
+            </strong>{' '}
             {item.message}
           </Error>
         ))}

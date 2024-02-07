@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import React from 'react';
+import * as React from 'react';
 import { Route } from 'react-router-dom';
 
 export interface SentryRouteProps {

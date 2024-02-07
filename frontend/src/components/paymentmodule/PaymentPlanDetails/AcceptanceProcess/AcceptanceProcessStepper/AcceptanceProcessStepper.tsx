@@ -2,7 +2,7 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import CancelIcon from '@mui/icons-material/Cancel';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { PaymentPlanQuery } from '../../../../../__generated__/graphql';

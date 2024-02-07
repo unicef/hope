@@ -1,15 +1,15 @@
 import { Box, Button } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { SurveyDetails } from '../../../../components/accountability/Surveys/SurveyDetails';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { SurveyDetails } from '@components/accountability/Surveys/SurveyDetails';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { usePermissions } from '../../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../../utils/utils';
+import { isPermissionDeniedError } from '@utils/utils';
 import {
   SurveyCategory,
   useExportSurveySampleMutation,
@@ -20,7 +20,7 @@ import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/Recipie
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 
 export function SurveyDetailsPage(): React.ReactElement {
@@ -33,9 +33,10 @@ export function SurveyDetailsPage(): React.ReactElement {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: choicesData, loading: choicesLoading } = useSurveysChoiceDataQuery({
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useSurveysChoiceDataQuery({
+      fetchPolicy: 'cache-and-network',
+    });
 
   const [mutate] = useExportSurveySampleMutation();
   const permissions = usePermissions();

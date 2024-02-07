@@ -1,6 +1,6 @@
 import { Box, Grid, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -8,7 +8,7 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { choicesToDict } from '../../utils/utils';
+import { choicesToDict } from '@utils/utils';
 import { BlackLink } from '../core/BlackLink';
 import { ContentLink } from '../core/ContentLink';
 import { LabelizedField } from '../core/LabelizedField';
@@ -32,7 +32,8 @@ export function DeleteHouseholdGrievanceDetails({
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
 
-  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   if (choicesLoading) return <LoadingComponent />;
   if (!choicesData) return null;
@@ -48,8 +49,8 @@ export function DeleteHouseholdGrievanceDetails({
       <Title>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">{t('Household to be withdrawn')}</Typography>
-          {approveStatus
-            && ticket.deleteHouseholdTicketDetails.reasonHousehold && (
+          {approveStatus &&
+            ticket.deleteHouseholdTicketDetails.reasonHousehold && (
               <Box display="flex" alignItems="center">
                 <Info />
                 <Box mr={2}>
@@ -79,7 +80,7 @@ export function DeleteHouseholdGrievanceDetails({
                   />
                 )}
               </Box>
-          )}
+            )}
           {canApproveDataChange && (
             <ApproveDeleteHouseholdGrievanceDetails
               type="button"

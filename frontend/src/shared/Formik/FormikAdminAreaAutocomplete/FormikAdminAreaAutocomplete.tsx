@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
-import React from 'react';
-import { FieldLabel } from '../../../components/core/FieldLabel';
+import * as React from 'react';
+import { FieldLabel } from '@components/core/FieldLabel';
 import { AdminAreaFixedAutocomplete } from '../../autocompletes/AdminAreaFixedAutocomplete';
 
 export function FormikAdminAreaAutocomplete({

@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -6,9 +6,9 @@ import {
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
 } from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { decodeIdString } from '../../../../utils/utils';
+import { decodeIdString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpRegistrationDataImportTableHeadCellsCommunication';
 import { LookUpRegistrationDataImportTableRowCommunication } from './LookUpRegistrationDataImportTableRowCommunication';
@@ -66,15 +66,17 @@ export function LookUpRegistrationDataImportTableCommunication({
   const renderTable = (): React.ReactElement => (
     <TableWrapper>
       <UniversalTable<
-      RegistrationDataImportNode,
-      AllRegistrationDataImportsQueryVariables
+        RegistrationDataImportNode,
+        AllRegistrationDataImportsQueryVariables
       >
         title={noTitle ? null : t('List of Imports')}
-        getTitle={(data) => (noTitle
-          ? null
-          : `${t('List of Imports')} (${
-            data.allRegistrationDataImports.totalCount
-          })`)}
+        getTitle={(data) =>
+          noTitle
+            ? null
+            : `${t('List of Imports')} (${
+                data.allRegistrationDataImports.totalCount
+              })`
+        }
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         defaultOrderBy="importDate"
         defaultOrderDirection="desc"

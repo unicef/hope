@@ -1,11 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
-import { useHistory } from 'react-router-dom';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { renderUserName } from '../../../../utils/utils';
+import { useNavigate } from 'react-router-dom';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { renderUserName } from '@utils/utils';
 import { CommunicationMessageNode } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../../components/core/BlackLink';
+import { BlackLink } from '@components/core/BlackLink';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 
 interface CommunicationTableRowProps {
@@ -17,11 +17,11 @@ export function CommunicationTableRow({
   message,
   canViewDetails,
 }: CommunicationTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const messageDetailsPath = `/${baseUrl}/accountability/communication/${message.id}`;
   const handleClick = (): void => {
-    history.push(messageDetailsPath);
+    navigate(messageDetailsPath);
   };
   return (
     <ClickableTableRow

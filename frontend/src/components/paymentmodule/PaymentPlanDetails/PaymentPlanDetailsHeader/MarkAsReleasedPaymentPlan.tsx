@@ -7,15 +7,16 @@ import {
   DialogTitle,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
 import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
 import { GreyText } from '../../../core/GreyText';
@@ -31,18 +32,22 @@ export function MarkAsReleasedPaymentPlan({
 }: MarkAsReleasedPaymentPlanProps): React.ReactElement {
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
-  const [markAsReleasedDialogOpen, setMarkAsReleasedDialogOpen] = useState(false);
+  const [markAsReleasedDialogOpen, setMarkAsReleasedDialogOpen] =
+    useState(false);
   const { showMessage } = useSnackbar();
-  const { mutatePaymentPlanAction: review, loading: loadingReview } = usePaymentPlanAction(
-    Action.Review,
-    paymentPlan.id,
-    () => showMessage(t('Payment Plan has been marked as reviewed.')),
-    () => setMarkAsReleasedDialogOpen(false),
-  );
+  const { mutatePaymentPlanAction: review, loading: loadingReview } =
+    usePaymentPlanAction(
+      Action.Review,
+      paymentPlan.id,
+      () => showMessage(t('Payment Plan has been marked as reviewed.')),
+      () => setMarkAsReleasedDialogOpen(false),
+    );
 
   const shouldShowLastReviewerMessage = (): boolean => {
-    const financeReleaseNumberRequired = paymentPlan.approvalProcess?.edges[0]?.node.financeReleaseNumberRequired;
-    const financeReleasesCount = paymentPlan.approvalProcess?.edges[0]?.node.actions.financeRelease.length;
+    const financeReleaseNumberRequired =
+      paymentPlan.approvalProcess?.edges[0]?.node.financeReleaseNumberRequired;
+    const financeReleasesCount =
+      paymentPlan.approvalProcess?.edges[0]?.node.actions.financeRelease.length;
 
     return financeReleaseNumberRequired - 1 === financeReleasesCount;
   };
@@ -96,13 +101,13 @@ export function MarkAsReleasedPaymentPlan({
                   )}
                 </Box>
                 {shouldShowLastReviewerMessage() && (
-                <Box p={5}>
-                  <GreyText>
-                    {t(
-                      'Note: You are the last reviewer. Upon proceeding, this Payment Plan will be automatically moved to accepted status',
-                    )}
-                  </GreyText>
-                </Box>
+                  <Box p={5}>
+                    <GreyText>
+                      {t(
+                        'Note: You are the last reviewer. Upon proceeding, this Payment Plan will be automatically moved to accepted status',
+                      )}
+                    </GreyText>
+                  </Box>
                 )}
                 <Form>
                   <Field

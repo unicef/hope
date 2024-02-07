@@ -1,5 +1,5 @@
 import { Box, Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -7,7 +7,7 @@ import {
   ProgrammeChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
-import { choicesToDict, programStatusToColor } from '../../../utils/utils';
+import { choicesToDict, programStatusToColor } from '@utils/utils';
 import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../../core/LabelizedField';
 import { OverviewContainer } from '../../core/OverviewContainer';
@@ -23,7 +23,8 @@ const NumberOfHouseHolds = styled.div`
   border-left-style: solid;
 `;
 const NumberOfHouseHoldsValue = styled.div`
-  font-family: ${({ theme }: { theme: MiśTheme }) => theme.hctTypography.fontFamily};
+  font-family: ${({ theme }: { theme: MiśTheme }) =>
+    theme.hctTypography.fontFamily};
   color: #253b46;
   font-size: 36px;
   line-height: 32px;

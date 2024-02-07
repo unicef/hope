@@ -1,17 +1,17 @@
-import React from 'react';
+import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import { Radio } from '@mui/material';
 import { TargetPopulationNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { StatusBox } from '../../../../components/core/StatusBox';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { StatusBox } from '@components/core/StatusBox';
 import {
   targetPopulationStatusToColor,
   targetPopulationStatusMapping,
-} from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
+} from '@utils/utils';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
 
 interface LookUpTargetPopulationTableRowCommunicationProps {
   targetPopulation: TargetPopulationNode;
@@ -26,14 +26,13 @@ export function LookUpTargetPopulationTableRowCommunication({
   radioChangeHandler,
   selectedTargetPopulation,
 }: LookUpTargetPopulationTableRowCommunicationProps): React.ReactElement {
-  const history = useHistory();
-  const businessArea = useBusinessArea();
+const navigate = useNavigate()  const businessArea = useBusinessArea();
   const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(targetPopulation.id);
     } else {
-      history.push(targetPopulationDetailsPath);
+      navigate(targetPopulationDetailsPath);
     }
   };
   return (

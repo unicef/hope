@@ -1,7 +1,7 @@
 import { Button, DialogContent, DialogTitle } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingButton } from '../../../components/core/LoadingButton';
+import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useLockTpMutation } from '../../../__generated__/graphql';
 import { Dialog } from '../Dialog';

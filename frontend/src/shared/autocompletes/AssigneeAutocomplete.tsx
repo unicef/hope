@@ -1,8 +1,7 @@
 import get from 'lodash/get';
-import React, {
-  useCallback, useEffect, useRef, useState,
-} from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import * as React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -12,7 +11,7 @@ import {
   handleAutocompleteChange,
   handleAutocompleteClose,
   handleOptionSelected,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
 export function AssigneeAutocomplete({
@@ -38,8 +37,8 @@ export function AssigneeAutocomplete({
   setFilter: (filter) => void;
   dataCy?: string;
 }): React.ReactElement {
-  const history = useHistory();
-  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
   const { businessArea } = useBaseUrl();
@@ -74,8 +73,8 @@ export function AssigneeAutocomplete({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
-    location,
+    navigate,
+    searchParams,
     filter,
     setFilter,
     appliedFilter,
@@ -105,9 +104,15 @@ export function AssigneeAutocomplete({
       }}
       handleOpen={() => setOpen(true)}
       open={open}
-      handleClose={(_, reason) => handleAutocompleteClose(setOpen, onInputTextChange, reason)}
-      handleOptionSelected={(option, value1) => handleOptionSelected(option.node?.id, value1)}
-      handleOptionLabel={(option) => getAutocompleteOptionLabel(option, allEdges, inputValue, 'individual')}
+      handleClose={(_, reason) =>
+        handleAutocompleteClose(setOpen, onInputTextChange, reason)
+      }
+      handleOptionSelected={(option, value1) =>
+        handleOptionSelected(option.node?.id, value1)
+      }
+      handleOptionLabel={(option) =>
+        getAutocompleteOptionLabel(option, allEdges, inputValue, 'individual')
+      }
       data={data}
       inputValue={inputValue}
       onInputTextChange={onInputTextChange}

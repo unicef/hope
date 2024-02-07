@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
@@ -33,7 +34,8 @@ export function BulkAssignModal({
 }: BulkAssignModalProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] = React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
+  const [value, setValue] =
+    React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
   const [inputValue, setInputValue] = useState('');
   const { data: usersData } = useAllUsersForFiltersQuery({

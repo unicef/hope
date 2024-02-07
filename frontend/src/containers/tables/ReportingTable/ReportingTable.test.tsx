@@ -1,6 +1,6 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
-import React from 'react';
+import * as React from 'react';
 import wait from 'waait';
 import { ReportingTable } from '.';
 import { fakeApolloAllReports } from '../../../../fixtures/reporting/fakeApolloAllReports';

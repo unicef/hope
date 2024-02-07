@@ -1,7 +1,7 @@
 import { Grid, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { targetPopulationStatusToColor } from '../../utils/utils';
+import { targetPopulationStatusToColor } from '@utils/utils';
 import { TargetPopulationQuery } from '../../__generated__/graphql';
 import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
 import { LabelizedField } from '../core/LabelizedField';
@@ -17,9 +17,8 @@ interface ProgramDetailsProps {
 export function TargetPopulationDetails({
   targetPopulation,
 }: ProgramDetailsProps): React.ReactElement {
-  const {
-    createdBy, finalizedBy, changeDate, finalizedAt, program,
-  } = targetPopulation;
+  const { createdBy, finalizedBy, changeDate, finalizedAt, program } =
+    targetPopulation;
   const { t } = useTranslation();
   const closeDate = changeDate ? (
     <UniversalMoment>{changeDate}</UniversalMoment>

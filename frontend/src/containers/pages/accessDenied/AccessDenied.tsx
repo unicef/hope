@@ -1,10 +1,10 @@
 import { Box, Button } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
-import { clearCache } from '../../../utils/utils';
+import { clearCache } from '@utils/utils';
 import AccessDeniedGraphic from './access_denied.png';
 import HopeLogo from './access_denied_hope_logo.png';
 

@@ -1,10 +1,8 @@
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import {
-  Table, TableBody, TableCell, TableRow,
-} from '@mui/material';
-import { EnhancedTableHead } from '../../../../../components/core/Table/EnhancedTableHead';
-import { getComparator, stableSort } from '../../../../../utils/utils';
+import { Table, TableBody, TableCell, TableRow } from '@mui/material';
+import { EnhancedTableHead } from '@components/core/Table/EnhancedTableHead';
+import { getComparator, stableSort } from '@utils/utils';
 import { AllFieldsAttributesQuery } from '../../../../../__generated__/graphql';
 import { headCells } from './HeadCells';
 
@@ -46,9 +44,9 @@ export function FlexFieldsTable({
       // eslint-disable-next-line
       for (const key in filters) {
         if (
-          each[key] === undefined
-          || (each[key] !== filters[key]
-            && !each[key].toLowerCase().includes(filters[key].toLowerCase()))
+          each[key] === undefined ||
+          (each[key] !== filters[key] &&
+            !each[key].toLowerCase().includes(filters[key].toLowerCase()))
         ) {
           return false;
         }
@@ -57,7 +55,8 @@ export function FlexFieldsTable({
     });
   };
   type orderedType = () => AllFieldsAttributesQuery['allFieldsAttributes'];
-  const orderResults: orderedType = () => stableSort(filterTable(), getComparator(order, orderBy));
+  const orderResults: orderedType = () =>
+    stableSort(filterTable(), getComparator(order, orderBy));
 
   return (
     <Table aria-label="simple table">

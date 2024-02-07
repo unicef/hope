@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
 import { useSnackbar } from '../../../../../hooks/useSnackBar';
@@ -23,11 +23,16 @@ export function LockedFspPaymentPlanHeaderButtons({
   const { showMessage } = useSnackbar();
   const { isActiveProgram } = useProgramContext();
 
-  const { mutatePaymentPlanAction: unlock, loading: loadingUnlock } = usePaymentPlanAction(Action.UnlockFsp, id, () => showMessage(t('Payment Plan FSPs have been unlocked.')));
+  const { mutatePaymentPlanAction: unlock, loading: loadingUnlock } =
+    usePaymentPlanAction(Action.UnlockFsp, id, () =>
+      showMessage(t('Payment Plan FSPs have been unlocked.')),
+    );
   const {
     mutatePaymentPlanAction: sendForApproval,
     loading: loadingSendForApproval,
-  } = usePaymentPlanAction(Action.SendForApproval, id, () => showMessage(t('Payment Plan has been sent for approval.')));
+  } = usePaymentPlanAction(Action.SendForApproval, id, () =>
+    showMessage(t('Payment Plan has been sent for approval.')),
+  );
 
   return (
     <Box display="flex" alignItems="center">

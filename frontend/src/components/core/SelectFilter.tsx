@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { makeStyles } from '@mui/material/styles';
 import { Close } from '@mui/icons-material';
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 
 import { StyledFormControl } from '../StyledFormControl';

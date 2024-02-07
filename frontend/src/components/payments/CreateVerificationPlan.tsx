@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
@@ -20,22 +20,22 @@ import {
   useCreatePaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { getPercentage } from '../../utils/utils';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { getPercentage } from '@utils/utils';
 import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 import { ButtonTooltip } from '../core/ButtonTooltip';
 import { FormikEffect } from '../core/FormikEffect';
@@ -122,8 +122,7 @@ export function CreateVerificationPlan({
 }: Props): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
-  const history = useHistory();
-  const [open, setOpen] = useState(false);
+const navigate = useNavigate()  const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
@@ -227,7 +226,7 @@ export function CreateVerificationPlan({
           !rapidProFlows?.allRapidProFlows?.length
           && values.verificationChannel === 'RAPIDPRO'
         ) {
-          history.push(`/error/${businessArea}`, {
+          navigate(`/error/${businessArea}`, {
             errorMessage: t(
               'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
             ),

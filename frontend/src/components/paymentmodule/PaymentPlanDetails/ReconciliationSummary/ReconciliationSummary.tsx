@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Grid, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
@@ -110,9 +110,7 @@ export function ReconciliationSummary({
                         datasets: [
                           {
                             data: datasets.map(({ value }) => value),
-                            backgroundColor: datasets.map(
-                              ({ color }) => color,
-                            ),
+                            backgroundColor: datasets.map(({ color }) => color),
                           },
                         ],
                       }}

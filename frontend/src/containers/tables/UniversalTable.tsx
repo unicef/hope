@@ -1,12 +1,9 @@
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import useDeepCompareEffect from 'use-deep-compare-effect';
-import { PermissionDenied } from '../../components/core/PermissionDenied';
-import { HeadCell } from '../../components/core/Table/EnhancedTableHead';
-import {
-  Order,
-  TableComponent,
-} from '../../components/core/Table/TableComponent';
-import { columnToOrderBy, isPermissionDeniedError } from '../../utils/utils';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { Order, TableComponent } from '@components/core/Table/TableComponent';
+import { columnToOrderBy, isPermissionDeniedError } from '@utils/utils';
 
 interface UniversalTableProps<T, K> {
   rowsPerPageOptions?: number[];
@@ -74,9 +71,7 @@ export function UniversalTable<T, K>({
     initVariables.orderBy = filterOrderBy;
   }
 
-  const {
-    data, refetch, loading, error,
-  } = query({
+  const { data, refetch, loading, error } = query({
     variables: initVariables,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',

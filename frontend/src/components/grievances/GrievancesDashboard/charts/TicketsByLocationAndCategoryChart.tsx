@@ -1,9 +1,10 @@
 import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import { formatThousands } from '../../../../utils/utils';
+import { formatThousands } from '@utils/utils';
 import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
 
 interface TicketsByLocationAndCategoryChartProps {
@@ -21,7 +22,8 @@ export function TicketsByLocationAndCategoryChart({
 
   const matchDataSize = (
     dataToSlice: number[] | string[],
-  ): number[] | string[] => (showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount));
+  ): number[] | string[] =>
+    showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount);
 
   const categoriesAndColors = [
     { category: 'Data Change', color: '#FFAA20' },

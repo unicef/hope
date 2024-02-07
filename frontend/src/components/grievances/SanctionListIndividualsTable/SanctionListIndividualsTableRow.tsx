@@ -1,5 +1,5 @@
 import { TableCell, TableRow } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import moment from 'moment';
 import { DATE_FORMAT } from '../../../config';
 import { AllSanctionListIndividualsQuery } from '../../../__generated__/graphql';

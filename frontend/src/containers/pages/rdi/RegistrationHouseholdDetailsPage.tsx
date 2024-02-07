@@ -1,16 +1,16 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { HouseholdDetails } from '../../../components/rdi/details/households/HouseholdDetails/HouseholdDetails';
-import { RegistrationDetails } from '../../../components/rdi/details/households/RegistrationDetails';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { HouseholdDetails } from '@components/rdi/details/households/HouseholdDetails/HouseholdDetails';
+import { RegistrationDetails } from '@components/rdi/details/households/RegistrationDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { isPermissionDeniedError } from '@utils/utils';
 import {
   useHouseholdChoiceDataQuery,
   useImportedHouseholdQuery,
@@ -36,25 +36,24 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data?.importedHousehold || !choicesData || permissions === null) return null;
+  if (!data?.importedHousehold || !choicesData || permissions === null)
+    return null;
 
   const { importedHousehold } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
-        {
-          title: t('Registration Data import'),
-          to: `/${baseUrl}/registration-data-import/`,
-        },
-      ]
+          {
+            title: t('Registration Data import'),
+            to: `/${baseUrl}/registration-data-import/`,
+          },
+        ]
       : []),
     {
       title: importedHousehold.registrationDataImport.name,

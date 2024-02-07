@@ -1,5 +1,6 @@
 import { Box, Tab, Tabs } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -10,8 +11,8 @@ import {
   useIndividualChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { LoadingComponent } from '../../../core/LoadingComponent';
 import { TabPanel } from '../../../core/TabPanel';
 import { HouseholdFilters } from '../../../population/HouseholdFilter';
@@ -74,7 +75,8 @@ export function LookUpHouseholdIndividualSelectionDetail({
     programState: 'active',
   };
 
-  const { data: householdChoicesData, loading: householdChoicesLoading } = useHouseholdChoiceDataQuery();
+  const { data: householdChoicesData, loading: householdChoicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [filterIND, setFilterIND] = useState(
     getFilterFromQueryParams(location, initialFilterIND),
@@ -90,14 +92,17 @@ export function LookUpHouseholdIndividualSelectionDetail({
     getFilterFromQueryParams(location, initialFilterHH),
   );
 
-  const { data: individualChoicesData, loading: individualChoicesLoading } = useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
-  const { data: programsData, loading: programsLoading } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, first: 100 },
-    fetchPolicy: 'cache-first',
-  });
+  const { data: programsData, loading: programsLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, first: 100 },
+      fetchPolicy: 'cache-first',
+    });
 
-  if (householdChoicesLoading || individualChoicesLoading || programsLoading) return <LoadingComponent />;
+  if (householdChoicesLoading || individualChoicesLoading || programsLoading)
+    return <LoadingComponent />;
 
   if (!individualChoicesData || !householdChoicesData || !programsData) {
     return null;
@@ -127,11 +132,11 @@ export function LookUpHouseholdIndividualSelectionDetail({
             <Tab label={t('LOOK UP HOUSEHOLD')} />
             <Tab
               disabled={
-                initialValues.issueType
-                  === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
-                || initialValues.issueType
-                  === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD
-                || initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
+                initialValues.issueType ===
+                  GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL ||
+                initialValues.issueType ===
+                  GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
+                initialValues.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
               }
               label={t('LOOK UP INDIVIDUAL')}
             />

@@ -1,9 +1,9 @@
 import { Box, Typography } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { Consent } from '../../Consent';
 import { HouseholdQuestionnaire } from '../../HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '../../IndividualQuestionnnaire/IndividualQuestionnaire';

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import {
   AllHouseholdsForPopulationTableQuery,
@@ -6,7 +7,7 @@ import {
   HouseholdChoiceDataQuery,
   useAllHouseholdsForPopulationTableQuery,
 } from '../../../../__generated__/graphql';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
+import { UniversalTable } from '@containers/tables/UniversalTable';
 import { useBaseUrl } from '../../../../hooks/useBaseUrl';
 import { TableWrapper } from '../../../core/TableWrapper';
 import { headCells } from './LookUpHouseholdTableHeadCells';
@@ -78,8 +79,8 @@ export function LookUpHouseholdTable({
 
   const handleCheckboxClick = (
     _event:
-    | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -140,21 +141,19 @@ export function LookUpHouseholdTable({
 
   const renderTable = (): React.ReactElement => (
     <UniversalTable<
-    AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
-    AllHouseholdsForPopulationTableQueryVariables
+      AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
+      AllHouseholdsForPopulationTableQueryVariables
     >
       headCells={
-          householdMultiSelect ? preparedHeadcells.slice(1) : preparedHeadcells
-        }
+        householdMultiSelect ? preparedHeadcells.slice(1) : preparedHeadcells
+      }
       rowsPerPageOptions={[5, 10, 15, 20]}
       query={useAllHouseholdsForPopulationTableQuery}
       queriedObjectName="allHouseholds"
       initialVariables={initialVariables}
       allowSort={false}
       filterOrderBy={filter.orderBy}
-      onSelectAllClick={
-          householdMultiSelect && handleSelectAllCheckboxesClick
-        }
+      onSelectAllClick={householdMultiSelect && handleSelectAllCheckboxesClick}
       numSelected={householdMultiSelect && selected.length}
       renderRow={(row) => (
         <LookUpHouseholdTableRow

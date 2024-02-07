@@ -1,8 +1,8 @@
 import { Button } from '@mui/material';
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Link, useHistory, useLocation, useParams,
+  Link,  useLocation, useParams,
 } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -10,16 +10,16 @@ import {
   useCashPlanVerificationSamplingChoicesQuery,
   usePaymentPlanQuery,
 } from '../../../__generated__/graphql';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { CashPlanDetailsSection } from '../../../components/payments/CashPlanDetailsSection';
-import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
-import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
-import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
+import { BlackLink } from '@components/core/BlackLink';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { CashPlanDetailsSection } from '@components/payments/CashPlanDetailsSection';
+import { CreateVerificationPlan } from '@components/payments/CreateVerificationPlan';
+import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
+import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import { usePermissions } from '../../../hooks/usePermissions';
@@ -27,7 +27,7 @@ import {
   decodeIdString,
   getFilterFromQueryParams,
   isPermissionDeniedError,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
@@ -62,8 +62,7 @@ const initialFilter = {
 
 export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
-  const permissions = usePermissions();
+const navigate = useNavigate()  const permissions = usePermissions();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const location = useLocation();
   const [filter, setFilter] = useState(
@@ -118,7 +117,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      handleBack={() => history.push(`/${baseUrl}/payment-verification`)}
+      handleBack={() => navigate(`/${baseUrl}/payment-verification`)}
       title={(
         <BlackLink
           data-cy="plan-link"

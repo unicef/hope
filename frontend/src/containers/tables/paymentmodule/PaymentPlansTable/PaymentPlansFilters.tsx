@@ -1,30 +1,28 @@
-import {
-  Box, Checkbox, FormControlLabel, Grid, MenuItem,
-} from '@mui/material';
+import { Box, Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
 import moment from 'moment';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import {
   AllPaymentPlansForTableQueryVariables,
   usePaymentPlanStatusChoicesQueryQuery,
 } from '../../../../__generated__/graphql';
-import { DatePickerFilter } from '../../../../components/core/DatePickerFilter';
-import { FiltersSection } from '../../../../components/core/FiltersSection';
-import { NumberTextField } from '../../../../components/core/NumberTextField';
-import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { DatePickerFilter } from '@components/core/DatePickerFilter';
+import { FiltersSection } from '@components/core/FiltersSection';
+import { NumberTextField } from '@components/core/NumberTextField';
+import { SearchTextField } from '@components/core/SearchTextField';
+import { SelectFilter } from '@components/core/SelectFilter';
+import { createHandleApplyFilterChange } from '@utils/utils';
 
 export type FilterProps = Pick<
-AllPaymentPlansForTableQueryVariables,
-| 'search'
-| 'status'
-| 'totalEntitledQuantityFrom'
-| 'totalEntitledQuantityTo'
-| 'dispersionStartDate'
-| 'dispersionEndDate'
-| 'isFollowUp'
+  AllPaymentPlansForTableQueryVariables,
+  | 'search'
+  | 'status'
+  | 'totalEntitledQuantityFrom'
+  | 'totalEntitledQuantityTo'
+  | 'dispersionStartDate'
+  | 'dispersionEndDate'
+  | 'isFollowUp'
 >;
 
 interface PaymentPlansFiltersProps {
@@ -42,19 +40,19 @@ export function PaymentPlansFilters({
   setAppliedFilter,
 }: PaymentPlansFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -105,7 +103,9 @@ export function PaymentPlansFilters({
             topLabel={t('Entitled Quantity')}
             value={filter.totalEntitledQuantityFrom}
             placeholder={t('From')}
-            onChange={(e) => handleFilterChange('totalEntitledQuantityFrom', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('totalEntitledQuantityFrom', e.target.value)
+            }
             data-cy="filters-total-entitled-quantity-from"
           />
         </Grid>
@@ -114,12 +114,14 @@ export function PaymentPlansFilters({
             id="totalEntitledQuantityToFilter"
             value={filter.totalEntitledQuantityTo}
             placeholder={t('To')}
-            onChange={(e) => handleFilterChange('totalEntitledQuantityTo', e.target.value)}
+            onChange={(e) =>
+              handleFilterChange('totalEntitledQuantityTo', e.target.value)
+            }
             error={Boolean(
-              filter.totalEntitledQuantityFrom
-                && filter.totalEntitledQuantityTo
-                && filter.totalEntitledQuantityFrom
-                  > filter.totalEntitledQuantityTo,
+              filter.totalEntitledQuantityFrom &&
+                filter.totalEntitledQuantityTo &&
+                filter.totalEntitledQuantityFrom >
+                  filter.totalEntitledQuantityTo,
             )}
             data-cy="filters-total-entitled-quantity-to"
           />
@@ -130,8 +132,8 @@ export function PaymentPlansFilters({
             placeholder={t('From')}
             onChange={(date) => {
               if (
-                filter.dispersionEndDate
-                && moment(date).isAfter(filter.dispersionEndDate)
+                filter.dispersionEndDate &&
+                moment(date).isAfter(filter.dispersionEndDate)
               ) {
                 handleFilterChange(
                   'dispersionStartDate',
@@ -151,10 +153,12 @@ export function PaymentPlansFilters({
         <Grid item xs={3}>
           <DatePickerFilter
             placeholder={t('To')}
-            onChange={(date) => handleFilterChange(
-              'dispersionEndDate',
-              date ? moment(date).format('YYYY-MM-DD') : '',
-            )}
+            onChange={(date) =>
+              handleFilterChange(
+                'dispersionEndDate',
+                date ? moment(date).format('YYYY-MM-DD') : '',
+              )
+            }
             value={filter.dispersionEndDate}
             minDate={filter.dispersionStartDate}
             minDateMessage={<span />}
@@ -163,7 +167,7 @@ export function PaymentPlansFilters({
         <Grid item xs={12}>
           <Box ml={2}>
             <FormControlLabel
-              control={(
+              control={
                 <Checkbox
                   checked={Boolean(filter.isFollowUp)}
                   value={filter.isFollowUp}
@@ -176,7 +180,7 @@ export function PaymentPlansFilters({
                     }
                   }}
                 />
-              )}
+              }
               label={t('Show only Follow-up plans')}
             />
           </Box>

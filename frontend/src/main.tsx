@@ -1,5 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import * as React from 'react';
+import * as React from 'react';DOM from 'react-dom';
 import './index.css';
 import * as Sentry from '@sentry/react';
 import ChartDataLabels from 'chartjs-plugin-datalabels';

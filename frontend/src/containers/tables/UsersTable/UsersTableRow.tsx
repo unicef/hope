@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import TableCell from '@mui/material/TableCell';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import {
-  Box, Collapse, IconButton, TableRow,
-} from '@mui/material';
+import { Box, Collapse, IconButton, TableRow } from '@mui/material';
 import { UserNode } from '../../../__generated__/graphql';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { userStatusToColor } from '../../../utils/utils';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { StatusBox } from '@components/core/StatusBox';
+import { userStatusToColor } from '@utils/utils';
 
 const GreyText = styled.p`
   color: #959698;
@@ -25,10 +24,7 @@ export function UsersTableRow({
 
   const mappedRoles = user?.userRoles?.map((el) => (
     <p key={el.role.name}>
-      {el.businessArea.name}
-      {' '}
-      /
-      {el.role.name}
+      {el.businessArea.name} /{el.role.name}
     </p>
   ));
   return (

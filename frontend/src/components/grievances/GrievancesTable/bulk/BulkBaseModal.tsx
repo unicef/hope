@@ -8,12 +8,13 @@ import {
   TableBody,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
 import { useProgramContext } from '../../../../programContext';
 
@@ -97,9 +98,7 @@ export function BulkBaseModal({
           <Box mt={2} mb={6}>
             <StyledTable>
               <Typography>
-                {t('Tickets ID')}
-                :
-                {' '}
+                {t('Tickets ID')}:{' '}
                 <Bold>
                   {selectedTickets.map((ticket) => ticket.unicefId).join(', ')}
                 </Bold>

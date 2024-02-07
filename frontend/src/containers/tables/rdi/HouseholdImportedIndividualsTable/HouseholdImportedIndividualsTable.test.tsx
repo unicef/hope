@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import wait from 'waait';

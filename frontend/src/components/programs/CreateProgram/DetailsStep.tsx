@@ -1,8 +1,8 @@
 import { Box, Button } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ProgramForm } from '../../../containers/forms/ProgramForm';
+import { ProgramForm } from '@containers/forms/ProgramForm';
 import { BaseSection } from '../../core/BaseSection';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 

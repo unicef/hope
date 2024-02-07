@@ -1,6 +1,6 @@
 import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import get from 'lodash/get';

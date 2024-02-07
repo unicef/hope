@@ -1,16 +1,16 @@
-import React from 'react';
+import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useHistory } from 'react-router-dom';
 import {
   FeedbackIssueType,
   FeedbackNode,
 } from '../../../__generated__/graphql';
-import { ClickableTableRow } from '../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { renderSomethingOrDash, renderUserName } from '../../../utils/utils';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
+import { renderSomethingOrDash, renderUserName } from '@utils/utils';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { getGrievanceDetailsPath } from '../../../components/grievances/utils/createGrievanceUtils';
+import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
 
 interface FeedbackTableRowProps {
   feedback: FeedbackNode;
@@ -21,8 +21,7 @@ export function FeedbackTableRow({
   feedback,
   canViewDetails,
 }: FeedbackTableRowProps): React.ReactElement {
-  const history = useHistory();
-  const { baseUrl, isAllPrograms } = useBaseUrl();
+const navigate = useNavigate()  const { baseUrl, isAllPrograms } = useBaseUrl();
   const feedbackDetailsPath = `/${baseUrl}/grievance/feedback/${feedback.id}`;
   const householdDetailsPath = `/${baseUrl}/population/household/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = feedback.linkedGrievance
@@ -33,7 +32,7 @@ export function FeedbackTableRow({
     )
     : null;
   const handleClick = (): void => {
-    history.push(feedbackDetailsPath);
+    navigate(feedbackDetailsPath);
   };
 
   return (

@@ -1,7 +1,7 @@
 import { Grid, GridSize, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { renderUserName } from '../../../../utils/utils';
+import { renderUserName } from '@utils/utils';
 import {
   FeedbackIssueType,
   FeedbackQuery,
@@ -57,21 +57,21 @@ export function FeedbackDetails({
                 label: t('Household ID'),
                 value: (
                   <span>
-                    {feedback.householdLookup?.id
-                    && canViewHouseholdDetails
-                    && !isAllPrograms ? (
+                    {feedback.householdLookup?.id &&
+                    canViewHouseholdDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/household/${feedback.householdLookup?.id}`}
                       >
                         {feedback.householdLookup?.unicefId}
                       </BlackLink>
-                      ) : (
-                        <div>
-                          {feedback.householdLookup?.id
-                            ? feedback.householdLookup?.unicefId
-                            : '-'}
-                        </div>
-                      )}
+                    ) : (
+                      <div>
+                        {feedback.householdLookup?.id
+                          ? feedback.householdLookup?.unicefId
+                          : '-'}
+                      </div>
+                    )}
                   </span>
                 ),
                 size: 3,
@@ -80,21 +80,21 @@ export function FeedbackDetails({
                 label: t('Individual ID'),
                 value: (
                   <span>
-                    {feedback.individualLookup?.id
-                    && canViewIndividualDetails
-                    && !isAllPrograms ? (
+                    {feedback.individualLookup?.id &&
+                    canViewIndividualDetails &&
+                    !isAllPrograms ? (
                       <BlackLink
                         to={`/${baseUrl}/population/individuals/${feedback.individualLookup?.id}`}
                       >
                         {feedback.individualLookup?.unicefId}
                       </BlackLink>
-                      ) : (
-                        <div>
-                          {feedback.individualLookup?.id
-                            ? feedback.individualLookup?.unicefId
-                            : '-'}
-                        </div>
-                      )}
+                    ) : (
+                      <div>
+                        {feedback.individualLookup?.id
+                          ? feedback.individualLookup?.unicefId
+                          : '-'}
+                      </div>
+                    )}
                   </span>
                 ),
                 size: 3,

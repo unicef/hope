@@ -9,14 +9,14 @@ import {
   Typography,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
 import { TableTitle } from '../../core/TableTitle';
-import { handleSelected } from '../utils/helpers';
+import { handleSelected } from '@utils/helpers';
 
 const StyledTable = styled(Table)`
   color: #9e9e9e;
@@ -95,16 +95,16 @@ export function DocumentsTable({
                       handleSelectDocument(index);
                     }}
                     disabled={
-                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                      }
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
                     checked={selectedDocuments.includes(index)}
                     inputProps={{ 'aria-labelledby': 'selected' }}
                   />
                 ) : (
                   selectedDocuments.includes(index) && (
-                  <GreenIcon data-cy="green-check-icon">
-                    <CheckCircleIcon />
-                  </GreenIcon>
+                    <GreenIcon data-cy="green-check-icon">
+                      <CheckCircleIcon />
+                    </GreenIcon>
                   )
                 )}
               </TableCell>

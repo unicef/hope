@@ -6,7 +6,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import React, { useEffect } from 'react';
+import  { useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
@@ -69,8 +69,7 @@ export function DrawerItems({
     fetchPolicy: 'cache-first',
   });
   const clearLocation = currentLocation.replace(`/${baseUrl}`, '');
-  const history = useHistory();
-  const initialIndex = menuItems.findIndex((item) => {
+const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) => {
     if (!item.secondaryActions) {
       return false;
     }
@@ -175,7 +174,7 @@ export function DrawerItems({
                     setExpandedItem(index);
                   }
                   if (hrefForCollapsibleItem) {
-                    history.push(`/${baseUrl}${hrefForCollapsibleItem}`);
+                    navigate(`/${baseUrl}${hrefForCollapsibleItem}`);
                   }
                 }}
               >

@@ -1,8 +1,9 @@
 import { Grid } from '@mui/material';
 import { Field } from 'formik';
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { ContentLink } from '../../core/ContentLink';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 import {
@@ -20,8 +21,10 @@ export function HouseholdQuestionnaire({
 }: HouseholdQuestionnaireProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
-  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] = values.selectedHousehold;
-  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] = useHouseholdLazyQuery({ variables: { id: household?.id } });
+  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
+    values.selectedHousehold;
+  const [getHousehold, { data: fullHousehold, loading: fullHouseholdLoading }] =
+    useHouseholdLazyQuery({ variables: { id: household?.id } });
 
   useEffect(() => {
     if (values.selectedHousehold) {

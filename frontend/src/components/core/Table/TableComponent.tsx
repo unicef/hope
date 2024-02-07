@@ -10,42 +10,44 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 
 export type Order = 'asc' | 'desc';
 
-const useStyles = makeStyles((theme: Theme) => createStyles({
-  root: {
-    width: '100%',
-  },
-  paper: {
-    width: '100%',
-    marginBottom: theme.spacing(2),
-  },
-  table: {
-    minWidth: 750,
-  },
-  empty: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'column',
-    color: 'rgba(0, 0, 0, 0.38)',
-    fontSize: '24px',
-    lineHeight: '28px',
-    textAlign: 'center',
-    padding: '70px',
-  },
-  smallerText: {
-    fontSize: '16px',
-  },
-  icon: {
-    fontSize: '50px',
-  },
-}));
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      width: '100%',
+    },
+    paper: {
+      width: '100%',
+      marginBottom: theme.spacing(2),
+    },
+    table: {
+      minWidth: 750,
+    },
+    empty: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'column',
+      color: 'rgba(0, 0, 0, 0.38)',
+      fontSize: '24px',
+      lineHeight: '28px',
+      textAlign: 'center',
+      padding: '70px',
+    },
+    smallerText: {
+      fontSize: '16px',
+    },
+    icon: {
+      fontSize: '50px',
+    },
+  }),
+);
 
 interface TableComponentProps<T> {
   data: T[];

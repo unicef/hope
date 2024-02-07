@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useField } from 'formik';
 import {
@@ -55,16 +55,15 @@ export function KoboProjectSelect(): React.ReactElement {
           label={t('Kobo Project')}
           disabled={loading}
           fullWidth
-          endAdornment={(
+          endAdornment={
             <>
               {loading ? (
                 <CircularProgressContainer>
-                  <CircularProgress color="inherit" size={20} />
-                  {' '}
+                  <CircularProgress color="inherit" size={20} />{' '}
                 </CircularProgressContainer>
               ) : null}
             </>
-          )}
+          }
         >
           {koboProjects.map((item) => (
             <MenuItem key={item.node.id} value={item.node.id}>

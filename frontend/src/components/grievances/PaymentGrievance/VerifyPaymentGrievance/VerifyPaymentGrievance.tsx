@@ -1,17 +1,16 @@
-import {
-  Box, Button, DialogContent, DialogTitle, Grid,
-} from '@mui/material';
+import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikRadioGroup } from '../../../../shared/Formik/FormikRadioGroup';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,

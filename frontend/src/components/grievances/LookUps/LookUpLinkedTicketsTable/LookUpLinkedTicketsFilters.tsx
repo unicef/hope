@@ -1,10 +1,10 @@
 import { Grid, MenuItem } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import {  useLocation } from 'react-router-dom';
 import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
-import { AdminAreaAutocomplete } from '../../../../shared/autocompletes/AdminAreaAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
+import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
+import { createHandleApplyFilterChange } from '@utils/utils';
 import { DatePickerFilter } from '../../../core/DatePickerFilter';
 import { FiltersSection } from '../../../core/FiltersSection';
 import { SearchTextField } from '../../../core/SearchTextField';
@@ -28,17 +28,16 @@ export function LookUpLinkedTicketsFilters({
 }: LookUpLinkedTicketsFiltersProps): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
-  const history = useHistory();
-  const { handleFilterChange, applyFilterChanges, clearFilter } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+const navigate = useNavigate()  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };

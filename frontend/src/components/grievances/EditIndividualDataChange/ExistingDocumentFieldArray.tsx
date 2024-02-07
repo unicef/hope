@@ -1,6 +1,6 @@
 import { Box, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   AllAddIndividualFieldsQuery,

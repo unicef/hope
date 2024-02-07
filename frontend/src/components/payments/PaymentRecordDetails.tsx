@@ -1,15 +1,15 @@
 import { Grid, Paper, Typography } from '@mui/material';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
   paymentRecordStatusToColor,
   paymentStatusDisplayMap,
   verificationRecordsStatusToColor,
-} from '../../utils/utils';
+} from '@utils/utils';
 import {
   PaymentRecordNode,
   PaymentVerificationNode,
@@ -203,11 +203,11 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label={t('ENTITLEMENT CARD ISSUE DATE')}
-              value={(
+              value={
                 <UniversalMoment>
                   {paymentRecord.entitlementCardIssueDate}
                 </UniversalMoment>
-              )}
+              }
             />
           </Grid>
           <Grid item xs={3}>
