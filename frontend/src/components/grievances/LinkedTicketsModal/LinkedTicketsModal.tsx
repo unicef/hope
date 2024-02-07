@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import  { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   AllGrievanceTicketQuery,

@@ -2,7 +2,7 @@ import { TextField } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Autocomplete from '@mui/lab/Autocomplete';
 import get from 'lodash/get';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';

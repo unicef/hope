@@ -16,7 +16,7 @@ import  {
   ReactElement, useCallback, useEffect, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
@@ -166,7 +166,7 @@ const navigate = useNavigate()  const { baseUrl, businessArea } = useBaseUrl();
         ),
       });
     }
-  }, [flowsData, businessArea, history, t]);
+  }, [flowsData, businessArea, navigate, t]);
 
   const validationSchema = useCallback(() => {
     const datum = {

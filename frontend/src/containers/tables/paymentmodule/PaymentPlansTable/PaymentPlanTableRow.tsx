@@ -1,6 +1,6 @@
 import { Box, TableCell } from '@mui/material';
 import * as React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
 import { BlackLink } from '@components/core/BlackLink';

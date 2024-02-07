@@ -2,7 +2,7 @@ import { Box, Button } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import * as React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import { clearCache } from '@utils/utils';

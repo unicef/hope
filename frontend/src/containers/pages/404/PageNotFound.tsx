@@ -2,7 +2,7 @@ import { Box, Button } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import * as React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import { clearCache } from '@utils/utils';

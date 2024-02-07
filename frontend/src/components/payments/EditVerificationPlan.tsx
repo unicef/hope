@@ -13,7 +13,7 @@ import { Field, Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   PaymentPlanQuery,
   useAllAdminAreasQuery,

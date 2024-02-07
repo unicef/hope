@@ -52,9 +52,17 @@ export function LanguageAutocomplete({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (isMounted.current) {
-      loadData({ variables: { code: debouncedInputText } });
-    }
+    const asyncLoadData = async () => {
+      if (isMounted.current) {
+        try {
+          await loadData({ variables: { code: debouncedInputText } });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    void asyncLoadData();
   }, [loadData, debouncedInputText]);
 
   useEffect(() => {

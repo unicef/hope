@@ -1,3 +1,4 @@
+/* eslint-disable */
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
@@ -21,6 +22,9 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'react', 'import', 'react-hooks'],
   settings: {
+    react: {
+      version: 'detect',
+    },
     'import/resolver': {
       alias: {
         map: [['@', './src']],
@@ -35,6 +39,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-member-access': 'off',
     '@typescript-eslint/no-unsafe-return': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-floating-promises': 'off',
     'react/jsx-filename-extension': [
       1,
       { extensions: ['.js', '.jsx', '.ts', '.tsx'] },
@@ -49,5 +54,6 @@ module.exports = {
     '@typescript-eslint/no-unsafe-enum-comparison': 'off',
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
+    'react/prop-types': 'off',
   },
 };

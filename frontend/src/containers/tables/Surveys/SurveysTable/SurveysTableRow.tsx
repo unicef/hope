@@ -1,6 +1,6 @@
 import TableCell from '@mui/material/TableCell';
 import * as React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';

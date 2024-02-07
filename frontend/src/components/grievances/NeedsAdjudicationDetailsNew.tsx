@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import  { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,

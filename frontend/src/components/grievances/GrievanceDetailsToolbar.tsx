@@ -2,7 +2,7 @@ import { Box, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   GrievanceTicketQuery,

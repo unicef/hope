@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import  { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';

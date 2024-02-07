@@ -2,7 +2,7 @@ import { TableCell, TableRow } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Pointer } from '@components/core/Pointer';
 import { StatusBox } from '@components/core/StatusBox';

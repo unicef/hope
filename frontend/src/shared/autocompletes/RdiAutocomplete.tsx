@@ -1,4 +1,5 @@
 import get from 'lodash/get';
+import * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -53,9 +54,19 @@ export function RdiAutocomplete({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (isMounted.current && businessArea) {
-      loadData({ variables: { businessArea, name: debouncedInputText } });
-    }
+    const asyncLoadData = async () => {
+      if (isMounted.current && businessArea) {
+        try {
+          await loadData({
+            variables: { businessArea, name: debouncedInputText },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    void asyncLoadData();
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {
@@ -69,7 +80,7 @@ export function RdiAutocomplete({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,

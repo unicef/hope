@@ -3,7 +3,7 @@ import { CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
 import  { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
