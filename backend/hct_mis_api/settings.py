@@ -489,7 +489,7 @@ if CACHE_ENABLED:
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"redis://{REDIS_INSTANCE}/1",
+            "LOCATION": env("CACHE_LOCATION", default=f"redis://{REDIS_INSTANCE}/1"),
             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         }
     }
@@ -583,7 +583,7 @@ ELASTICSEARCH_BASE_SETTINGS = {"number_of_shards": 1, "number_of_replicas": 0}
 RAPID_PRO_URL = env("RAPID_PRO_URL")
 
 # DJANGO CONSTANCE settings
-CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
+CONSTANCE_REDIS_CONNECTION = env("CONSTANCE_REDIS_CONNECTION", default=f"redis://{REDIS_INSTANCE}/0")
 CONSTANCE_REDIS_CACHE_TIMEOUT = 1
 CONSTANCE_ADDITIONAL_FIELDS = {
     "percentages": (
@@ -820,11 +820,11 @@ if SENTRY_DSN:
 
 CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
-CELERY_BROKER_URL = (f"redis://{REDIS_INSTANCE}/0",)
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=f"redis://{REDIS_INSTANCE}/0")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_RESULT_BACKEND = f"redis://{REDIS_INSTANCE}/0"
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=f"redis://{REDIS_INSTANCE}/0")
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 360 * 60
