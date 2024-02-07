@@ -381,26 +381,27 @@ class PaymentPlanService:
         if end_date > target_population.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
 
-        payment_plan = PaymentPlan.objects.create(
-            business_area=business_area,
-            created_by=user,
-            target_population=target_population,
-            program=target_population.program,
-            program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
-            currency=input_data["currency"],
-            dispersion_start_date=input_data["dispersion_start_date"],
-            dispersion_end_date=dispersion_end_date,
-            status_date=timezone.now(),
-            start_date=input_data["start_date"],
-            end_date=input_data["end_date"],
-            status=PaymentPlan.Status.PREPARING,
-        )
+        with transaction.atomic():
+            payment_plan = PaymentPlan.objects.create(
+                business_area=business_area,
+                created_by=user,
+                target_population=target_population,
+                program=target_population.program,
+                program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
+                currency=input_data["currency"],
+                dispersion_start_date=input_data["dispersion_start_date"],
+                dispersion_end_date=dispersion_end_date,
+                status_date=timezone.now(),
+                start_date=input_data["start_date"],
+                end_date=input_data["end_date"],
+                status=PaymentPlan.Status.PREPARING,
+            )
 
-        TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
-            status=TargetPopulation.STATUS_ASSIGNED
-        )
+            TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
+                status=TargetPopulation.STATUS_ASSIGNED
+            )
 
-        prepare_payment_plan_task.delay(payment_plan.id)
+            transaction.on_commit(lambda: prepare_payment_plan_task.delay(payment_plan.id))
 
         return payment_plan
 

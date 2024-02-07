@@ -8,7 +8,6 @@ import {
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import {
-  FinancialServiceProviderCommunicationChannel,
   PaymentPlanQuery,
   PaymentPlanStatus
 } from '../../../../__generated__/graphql';
