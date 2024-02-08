@@ -2,7 +2,7 @@ import logging
 from functools import wraps
 from typing import Any, Callable, Optional, Type
 
-from sentry_sdk import configure_scope
+from sentry_sdk import configure_scope, set_tag
 
 log = logging.getLogger(__name__)
 
@@ -21,6 +21,10 @@ def sentry_tags(func: Callable) -> Callable:
             return func(*args, **kwargs)
 
     return wrapper
+
+
+def set_sentry_business_area_tag(business_area_name: str = "NO_BA") -> None:
+    set_tag("business_area", business_area_name)
 
 
 class SentryFilter:
