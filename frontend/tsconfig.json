@@ -39,6 +39,6 @@
     "tsconfig.json",
     ".eslintrc.cjs"
   ],
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "**/*.test.tsx", "frontend/jest"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

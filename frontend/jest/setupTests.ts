@@ -1,5 +1,5 @@
 import replaceAllInserter from 'string.prototype.replaceall';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import 'jest-canvas-mock';
 import setupInternalization from '../src/i18n';
 import { fakeContextProgram, random, seed } from '../src/testUtils/testUtils';

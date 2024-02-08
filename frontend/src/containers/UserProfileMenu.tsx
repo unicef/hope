@@ -44,7 +44,18 @@ export function UserProfileMenu({
     setOpen((previousOpen) => !previousOpen);
   };
 
-  const handleClose = (event: React.MouseEvent<EventTarget>): void => {
+  const handleClearCache = async (): Promise<void> => {
+    const client = await getClient();
+    await clearCache(client);
+  };
+
+  const handleClose = (
+    event:
+      | React.MouseEvent<HTMLAnchorElement, MouseEvent>
+      | React.TouchEvent<HTMLAnchorElement>
+      | MouseEvent
+      | TouchEvent,
+  ): void => {
     if (
       anchorRef.current &&
       anchorRef.current.contains(event.target as HTMLElement)
@@ -55,21 +66,24 @@ export function UserProfileMenu({
     setOpen(false);
   };
 
-  const handleClearCache = async (): Promise<void> => {
-    const client = await getClient();
-    await clearCache(client);
+  const handleLogout = (
+    event:
+      | React.MouseEvent<HTMLAnchorElement, MouseEvent>
+      | React.TouchEvent<HTMLAnchorElement>
+      | MouseEvent
+      | TouchEvent,
+  ): void => {
+    window.location.assign('/api/logout');
+    localStorage.removeItem('AUTHENTICATED');
+    handleClose(event);
+    handleClearCache();
   };
 
   const handleClearCacheAndReloadWindow = async (): Promise<void> => {
     await handleClearCache();
     window.location.reload();
   };
-  const handleLogout = (event: React.MouseEvent<EventTarget>): void => {
-    window.location.assign('/api/logout');
-    localStorage.removeItem('AUTHENTICATED');
-    handleClose(event);
-    handleClearCache();
-  };
+
   function handleListKeyDown(event: React.KeyboardEvent): void {
     if (event.key === 'Tab') {
       event.preventDefault();
@@ -118,7 +132,11 @@ export function UserProfileMenu({
                   >
                     Clear Cache
                   </MenuItem>
-                  <MenuItem onClick={handleLogout} data-cy="menu-item-logout">
+                  <MenuItem
+                    href="/api/logout"
+                    onClick={handleLogout}
+                    data-cy="menu-item-logout"
+                  >
                     Logout
                   </MenuItem>
                 </MenuList>

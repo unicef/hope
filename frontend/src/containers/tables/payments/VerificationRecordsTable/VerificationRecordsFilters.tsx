@@ -1,7 +1,7 @@
 import { Grid, MenuItem } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { usePaymentVerificationChoicesQuery } from '@generated/graphql';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { SearchTextField } from '@components/core/SearchTextField';

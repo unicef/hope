@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src",
+    "__tests__",
+    "jest",
+    "vite.config.ts",
+    "tsconfig.json",
+    ".eslintrc.cjs",
+    "jest.config.js",
+    ".eslintrc.cjs"
+  ]
+}
