@@ -132,11 +132,11 @@ class TestPaymentPlanServices(APITestCase):
         )
 
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"
+            "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(6):
                 pp = PaymentPlanService.create(input_data=input_data, user=self.user)
-            self.assertEqual(mock_prepare_payment_plan_task.delay.call_args, mock.call(pp.id))
+            assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
         self.assertEqual(pp.status, PaymentPlan.Status.PREPARING)
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)
