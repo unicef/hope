@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from time import sleep
 
+from _pytest.nodes import Item
 from django.conf import settings
 from django.core.management import call_command
 
@@ -15,7 +16,6 @@ from requests import Session
 from selenium import webdriver
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
-from tomlkit.items import Item
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
