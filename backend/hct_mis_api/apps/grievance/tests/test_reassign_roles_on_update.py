@@ -7,7 +7,11 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.services.reassign_roles_services import (
     reassign_roles_on_update_service,
 )
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
+from hct_mis_api.apps.household.fixtures import (
+    HouseholdFactory,
+    IndividualFactory,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -144,14 +148,13 @@ class TestReassignRolesOnUpdate(APITestCase):
         self.assertIsNone(previous_role)
 
     def test_reassign_alternate_role_to_individual_with_primary_role_in_another_household(self) -> None:
-        household = HouseholdFactory.build(business_area=self.business_area, program=self.program_one)
-        household.household_collection.save()
-        household.registration_data_import.imported_by.save()
-        household.registration_data_import.program = household.program
-        household.registration_data_import.save()
-        hoh = IndividualFactory(household=household, program=self.program_one)
-        household.head_of_household = hoh
-        household.save()
+        household, _ = create_household_and_individuals(
+            household_data={
+                "business_area": self.business_area,
+                "program_id": self.program_one.pk,
+            },
+            individuals_data=[{}],
+        )
 
         IndividualRoleInHousehold.objects.create(
             household=household,
