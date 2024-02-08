@@ -46,6 +46,8 @@ services:
       context: ./
       dockerfile: docker/Dockerfile
       target: dist
+    ports:
+      - "8000:8000"
     command: |
       sh -c "
         waitforit -timeout 30 -host db -port 5432
