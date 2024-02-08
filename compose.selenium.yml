@@ -33,14 +33,7 @@ services:
       target: dev
     command: |
       sh -c "
-        waitforit -host backend -port 8000
-        waitforit -host db -port 5432
-        waitforit -host cash_assist_datahub_db -port 5432
-        waitforit -host mis_datahub_db -port 5432
-        waitforit -host erp_datahub_db -port 5432
-        waitforit -host registration_datahub_db -port 5432
-        waitforit -host redis -port 6379
-        waitforit -host elasticsearch -port 9200
+        waitforit -timeout 300 -host backend -port 8000
         pytest -sv selenium_tests
       "
     depends_on:
@@ -53,6 +46,18 @@ services:
       context: ./
       dockerfile: docker/Dockerfile
       target: dist
+    command: |
+      sh -c "
+        waitforit -timeout 30 -host db -port 5432
+        waitforit -timeout 30 -host cash_assist_datahub_db -port 5432
+        waitforit -timeout 30 -host mis_datahub_db -port 5432
+        waitforit -timeout 30 -host erp_datahub_db -port 5432
+        waitforit -timeout 30 -host registration_datahub_db -port 5432
+        waitforit -timeout 30 -host redis -port 6379
+        waitforit -timeout 30 -host elasticsearch -port 9200
+        python manage.py upgrade
+        entrypoint.sh
+      "
     depends_on:
       - db
       - redis
