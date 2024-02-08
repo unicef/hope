@@ -47,7 +47,17 @@ export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
             data-cy="input-programme-name"
           />
         </Grid>
-        <Grid item xs={6} />
+        <Grid item xs={6}>
+          <Field
+            name='programmeCode'
+            label={t('Programme Code')}
+            type='text'
+            fullWidth
+            variant='outlined'
+            component={FormikTextField}
+            data-cy='input-programme-code'
+          />
+        </Grid>
         <Grid item xs={6}>
           <Field
             name="startDate"

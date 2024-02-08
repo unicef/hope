@@ -61,9 +61,10 @@ class TestRoleReassignMutation(APITestCase):
 
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
-        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
+        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054", program=program_one)
         cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
+        cls.household.registration_data_import.program = program_one
         cls.household.registration_data_import.save()
         cls.household.programs.add(program_one)
 
@@ -76,6 +77,7 @@ class TestRoleReassignMutation(APITestCase):
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
                 "household": None,
+                "program": program_one,
             },
         )
 
@@ -179,9 +181,10 @@ class TestRoleReassignMutationNewTicket(APITestCase):
 
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
-        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
+        cls.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054", program=program_one)
         cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
+        cls.household.registration_data_import.program = program_one
         cls.household.registration_data_import.save()
         cls.household.programs.add(program_one)
 
@@ -194,6 +197,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
                 "household": None,
+                "program": program_one,
             },
         )
 
@@ -206,6 +210,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
                 "phone_no": "(853)692-4696",
                 "birth_date": "1963-09-12",
                 "household": None,
+                "program": program_one,
             },
         )
 
@@ -218,6 +223,7 @@ class TestRoleReassignMutationNewTicket(APITestCase):
                 "phone_no": "(953)682-1111",
                 "birth_date": "1913-01-31",
                 "household": None,
+                "program": program_one,
             },
         )
 

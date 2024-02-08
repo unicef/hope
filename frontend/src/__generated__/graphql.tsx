@@ -13742,6 +13742,7 @@ export const CreateProgramDocument = gql`
     program {
       id
       name
+      programmeCode
       status
       startDate
       endDate
@@ -20187,6 +20188,7 @@ export const ProgramDocument = gql`
   program(id: $id) {
     id
     name
+    programmeCode
     startDate
     endDate
     status

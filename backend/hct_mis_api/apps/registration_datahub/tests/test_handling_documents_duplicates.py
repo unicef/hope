@@ -46,7 +46,9 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             has_data_sharing_agreement=True,
         )
         cls.program = ProgramFactory(business_area=cls.business_area)
-        cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area, program=cls.program
+        )
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
@@ -65,7 +67,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": HEAD,
                     "sex": MALE,
                     "birth_date": "1955-09-07",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -78,7 +79,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": WIFE_HUSBAND,
                     "sex": FEMALE,
                     "birth_date": "1955-09-05",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -91,7 +91,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -104,7 +103,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -117,7 +115,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
-                    "program": cls.program,
                 },
                 {
                     "registration_data_import": cls.registration_data_import,
@@ -130,7 +127,6 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                     "relationship": SON_DAUGHTER,
                     "sex": MALE,
                     "birth_date": "1985-08-12",
-                    "program": cls.program,
                 },
             ],
         )
@@ -144,15 +140,28 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="ASD123",
             individual=cls.individuals[0],
             status=Document.STATUS_VALID,
+            program=cls.individuals[0].program,
         )
         cls.document2 = Document.objects.create(
-            type=dt, document_number="ASD123", individual=cls.individuals[1], country=country
+            type=dt,
+            document_number="ASD123",
+            individual=cls.individuals[1],
+            country=country,
+            program=cls.individuals[1].program,
         )
         cls.document3 = Document.objects.create(
-            type=dt, document_number="BBC999", individual=cls.individuals[2], country=country
+            type=dt,
+            document_number="BBC999",
+            individual=cls.individuals[2],
+            country=country,
+            program=cls.individuals[2].program,
         )
         cls.document4 = Document.objects.create(
-            type=dt, document_number="ASD123", individual=cls.individuals[3], country=country
+            type=dt,
+            document_number="ASD123",
+            individual=cls.individuals[3],
+            country=country,
+            program=cls.individuals[3].program,
         )
         cls.document5 = Document.objects.create(
             country=country,
@@ -160,6 +169,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="TOTALY UNIQ",
             individual=cls.individuals[4],
             status=Document.STATUS_VALID,
+            program=cls.individuals[4].program,
         )
         cls.document6 = Document.objects.create(
             country=country,
@@ -167,24 +177,28 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="ASD123",
             individual=cls.individuals[2],
             status=Document.STATUS_VALID,
+            program=cls.individuals[2].program,
         )
         cls.document7 = Document.objects.create(
             country=country,
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[1],
+            program=cls.individuals[1].program,
         )
         cls.document8 = Document.objects.create(
             country=country,
             type=dt,
             document_number="ASD123",
             individual=cls.individuals[4],
+            program=cls.individuals[4].program,
         )
         cls.document9 = Document.objects.create(
             country=country,
             type=dt,
             document_number="UNIQ",
             individual=cls.individuals[5],
+            program=cls.individuals[5].program,
         )
         cls.all_documents = [
             cls.document1,
@@ -208,7 +222,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_hard_documents_deduplication(self) -> None:
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([self.document2, self.document3, self.document4])
+            self.get_documents_query([self.document2, self.document3, self.document4]), self.registration_data_import
         )
         self.refresh_all_documents()
         self.assertEqual(self.document1.status, Document.STATUS_VALID)
@@ -232,7 +246,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 [
                     self.document5,
                 ]
-            )
+            ),
+            self.registration_data_import,
         )
         self.refresh_all_documents()
         self.assertEqual(self.document5.status, Document.STATUS_VALID)
@@ -240,10 +255,10 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_should_create_one_ticket(self) -> None:
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([self.document2, self.document3, self.document4])
+            self.get_documents_query([self.document2, self.document3, self.document4]), self.registration_data_import
         )
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([self.document2, self.document3, self.document4])
+            self.get_documents_query([self.document2, self.document3, self.document4]), self.registration_data_import
         )
         self.assertEqual(GrievanceTicket.objects.count(), 1)
 
@@ -254,7 +269,7 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
         )
         context = CaptureQueriesContext(connection=connections[DEFAULT_DB_ALIAS])
         with context:
-            HardDocumentDeduplication().deduplicate(documents1)
+            HardDocumentDeduplication().deduplicate(documents1, self.registration_data_import)
             first_dedup_query_count = len(context.captured_queries)
             HardDocumentDeduplication().deduplicate(documents2, self.registration_data_import)
             second_dedup_query_count = len(context.captured_queries) - first_dedup_query_count
@@ -278,7 +293,8 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
 
     def test_ticket_created_correctly(self) -> None:
         HardDocumentDeduplication().deduplicate(
-            self.get_documents_query([self.document2, self.document3, self.document4, self.document5])
+            self.get_documents_query([self.document2, self.document3, self.document4, self.document5]),
+            self.registration_data_import,
         )
         self.refresh_all_documents()
 
@@ -308,28 +324,35 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
             document_number="TAX_ID_DOC_123",
             individual=self.individuals[2],
             status=Document.STATUS_VALID,
+            program=self.program,
         )
         doc_national_id_1 = Document.objects.create(
             country=pl,
             type=dt_national_id,
             document_number="TAX_ID_DOC_123",  # the same doc number
             individual=self.individuals[2],
+            program=self.program,
         )
         doc_national_id_2 = Document.objects.create(
             country=pl,
             type=dt_national_id,
             document_number="TAX_ID_DOC_123",  # the same doc number
             individual=self.individuals[2],
+            program=self.program,
         )
 
-        HardDocumentDeduplication().deduplicate(self.get_documents_query([doc_national_id_1]))
+        HardDocumentDeduplication().deduplicate(
+            self.get_documents_query([doc_national_id_1]), self.registration_data_import
+        )
         doc_national_id_1.refresh_from_db()
         self.assertEqual(doc_national_id_1.status, Document.STATUS_NEED_INVESTIGATION)
 
         dt_national_id.valid_for_deduplication = True
         dt_national_id.save()
 
-        HardDocumentDeduplication().deduplicate(self.get_documents_query([doc_national_id_2]))
+        HardDocumentDeduplication().deduplicate(
+            self.get_documents_query([doc_national_id_2]), self.registration_data_import
+        )
         doc_national_id_2.refresh_from_db()
         self.assertEqual(doc_national_id_2.status, Document.STATUS_VALID)
 
@@ -342,7 +365,51 @@ class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
                 [
                     self.document9,
                 ]
-            )
+            ),
+            self.registration_data_import,
         )
         self.document9.refresh_from_db()
         self.assertEqual(self.document9.status, Document.STATUS_INVALID)
+
+    def test_hard_documents_deduplication_for_the_diff_program(self) -> None:
+        program_2 = ProgramFactory(business_area=self.business_area)
+
+        household, individuals = create_household_and_individuals(
+            household_data={
+                "registration_data_import": self.registration_data_import,
+                "business_area": self.business_area,
+                "program": program_2,
+            },
+            individuals_data=[
+                {
+                    "registration_data_import": self.registration_data_import,
+                    "given_name": "Test",
+                    "full_name": "Test Testowski",
+                    "middle_name": "",
+                    "family_name": "Testowski",
+                    "phone_no": "123-123-123",
+                    "phone_no_alternative": "",
+                    "relationship": HEAD,
+                    "sex": MALE,
+                    "birth_date": "1955-09-07",
+                }
+            ],
+        )
+        individual = individuals[0]
+        new_document_from_other_program = Document.objects.create(
+            country=geo_models.Country.objects.get(iso_code2="PL"),
+            type=DocumentType.objects.get(key="national_id"),
+            document_number="ASD123",
+            individual=individual,
+            status=Document.STATUS_PENDING,
+            # now filtering is by Individual.program
+            # program=program_2,
+        )
+        individual.refresh_from_db()
+        self.assertEqual(str(individual.program_id), str(program_2.pk))
+        new_document_from_other_program.refresh_from_db()
+        self.assertEqual(new_document_from_other_program.status, Document.STATUS_PENDING)
+
+        HardDocumentDeduplication().deduplicate(self.get_documents_query([new_document_from_other_program]))
+        new_document_from_other_program.refresh_from_db()
+        self.assertEqual(new_document_from_other_program.status, Document.STATUS_VALID)

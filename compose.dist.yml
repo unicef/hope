@@ -1,0 +1,118 @@
+version: '3.7'
+
+volumes:
+  backend-data:
+  db:
+  db_ca:
+  db_mis:
+  db_erp:
+  db_reg:
+  data_es:
+  data_es_test:
+  ipython_data_local:
+
+
+services:
+  redis:
+    restart: always
+    image: redis:4.0.11-alpine3.8
+    expose:
+      - "6379"
+
+  backend:
+    stdin_open: true
+    entrypoint: entrypoint.sh
+    command: dev
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+      - PYTHONUNBUFFERED=1
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+      target: dist
+    ports:
+      - "80:80"
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+
+  celery_worker:
+    stdin_open: true
+    tty: true
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+      target: be-dist
+    command: celery -A hct_mis_api.apps.core.celery worker -E -l info -Q default,priority
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    restart: always
+    depends_on:
+      - backend
+      - db
+      - redis
+      - elasticsearch
+
+  celery-beat:
+    stdin_open: true
+    tty: true
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+      target: be-dist
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    restart: always
+    command: "celery-beat"
+    depends_on:
+      - backend
+      - db
+      - redis
+      - elasticsearch
+
+  db:
+    image: kartoza/postgis:14-3
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+
+  elasticsearch:
+    container_name: elasticsearch
+    build:
+      context: elasticsearch
+      dockerfile: Dockerfile
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - cluster.initial_master_nodes=es01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data_es:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200

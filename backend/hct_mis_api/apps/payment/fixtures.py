@@ -1,3 +1,5 @@
+import random
+import string
 from datetime import timedelta
 from decimal import Decimal
 from random import choice, randint
@@ -386,6 +388,9 @@ class RealProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     individual_data_needed = factory.fuzzy.FuzzyChoice((True, False))
+    programme_code = factory.LazyAttribute(
+        lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+    )
 
     @factory.post_generation
     def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:
@@ -673,12 +678,15 @@ def create_payment_verification_plan_with_status(
     if verification_channel:
         payment_verification_plan.verification_channel = verification_channel
     payment_verification_plan.save(update_fields=("status", "verification_channel"))
-    registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
+    registration_data_import = RegistrationDataImportFactory(
+        imported_by=user, business_area=business_area, program=program
+    )
     for n in range(5):
         household, _ = create_household(
             {
                 "registration_data_import": registration_data_import,
                 "admin_area": Area.objects.order_by("?").first(),
+                "program": program,
             },
             {"registration_data_import": registration_data_import},
         )
@@ -863,6 +871,7 @@ def generate_payment_plan() -> None:
         sector=Program.MULTI_PURPOSE,
         scope=Program.SCOPE_UNICEF,
         data_collecting_type=DataCollectingType.objects.get(code="full"),
+        programme_code="T3ST",
     )[0]
     program_cycle = ProgramCycleFactory(
         program=program,

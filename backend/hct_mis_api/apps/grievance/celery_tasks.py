@@ -5,13 +5,11 @@ from typing import Any, List
 from django.db.models import Q
 from django.utils import timezone
 
-from sentry_sdk import configure_scope
-
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import sentry_tags
+from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +24,12 @@ def deduplicate_and_check_against_sanctions_list_task(
         from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
             DeduplicateAndCheckAgainstSanctionsListTask,
         )
+        from hct_mis_api.apps.household.models import Individual
+
+        individual = Individual.objects.filter(id__in=individuals_ids[:1]).first()
+        if individual:
+            business_area_name = individual.business_area.name
+            set_sentry_business_area_tag(business_area_name)
 
         DeduplicateAndCheckAgainstSanctionsListTask().execute(should_populate_index, individuals_ids)
     except Exception as e:
@@ -34,6 +38,7 @@ def deduplicate_and_check_against_sanctions_list_task(
 
 
 @app.task
+@log_start_and_end
 @sentry_tags
 def periodic_grievances_notifications() -> None:
     sensitive_tickets_one_day_date = timezone.now() - timedelta(days=1)
@@ -56,17 +61,15 @@ def periodic_grievances_notifications() -> None:
         .exclude(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
     )
     for ticket in sensitive_tickets_to_notify:
-        with configure_scope() as scope:
-            scope.set_tag("business_area", ticket.business_area)
-            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
-            notification.send_email_notification()
-            ticket.last_notification_sent = timezone.now()
-            ticket.save()
+        set_sentry_business_area_tag(ticket.business_area.name)
+        notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+        notification.send_email_notification()
+        ticket.last_notification_sent = timezone.now()
+        ticket.save()
 
     for ticket in other_tickets_to_notify:
-        with configure_scope() as scope:
-            scope.set_tag("business_area", ticket.business_area)
-            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
-            notification.send_email_notification()
-            ticket.last_notification_sent = timezone.now()
-            ticket.save()
+        set_sentry_business_area_tag(ticket.business_area.name)
+        notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
+        notification.send_email_notification()
+        ticket.last_notification_sent = timezone.now()
+        ticket.save()
