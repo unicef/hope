@@ -1,28 +1,32 @@
 import * as Yup from 'yup';
 import moment from 'moment';
 import { today } from '@utils/utils';
+import { TFunction } from 'i18next';
 
-export const programValidationSchema = (t): Yup.ObjectSchema =>
+export const programValidationSchema = (
+  t: TFunction<'translation', undefined>,
+): Yup.ObjectSchema<any, any, any, any> =>
   Yup.object().shape({
     name: Yup.string()
       .required(t('Programme name is required'))
       .min(3, t('Too short'))
       .max(150, t('Too long')),
+    programmeCode: Yup.string()
+      .min(4, t('Too short'))
+      .max(4, t('Too long')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
       .required(t('End Date is required'))
       .min(today, t('End Date cannot be in the past'))
-      .when(
-        'startDate',
-        (startDate, schema) =>
-          startDate &&
-          schema.min(
-            startDate,
-            `${t('End date have to be greater than')} ${moment(
+      .when('startDate', (startDate, schema) =>
+        startDate
+          ? schema.min(
               startDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
+              `${t('End date have to be greater than')} ${moment(
+                startDate,
+              ).format('YYYY-MM-DD')}`,
+            )
+          : schema,
       ),
     sector: Yup.string().required(t('Sector is required')),
     dataCollectingTypeCode: Yup.string().required(

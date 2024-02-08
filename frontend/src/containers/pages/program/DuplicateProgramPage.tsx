@@ -87,6 +87,7 @@ export function DuplicateProgramPage(): ReactElement {
 
   const initialValues = {
     name: `Copy of Programme: (${name})`,
+    programmeCode: '',
     startDate,
     endDate,
     sector,

@@ -34,7 +34,7 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refresh_stats
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import sentry_tags
+from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
 
@@ -101,11 +101,13 @@ def upload_new_kobo_template_and_update_flex_fields_task(self: Any, xlsx_kobo_te
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
 @sentry_tags
 def create_target_population_task(self: Any, storage_id: str, program_id: str, tp_name: str) -> None:
     storage_obj = StorageFile.objects.get(id=storage_id)
     file_path = None
     program = Program.objects.get(id=program_id)
+    set_sentry_business_area_tag(program.business_area.name)
 
     try:
         with transaction.atomic(), transaction.atomic("registration_datahub"):

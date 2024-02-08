@@ -4,6 +4,7 @@ from django.core.management import call_command
 
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -26,41 +27,66 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         )
 
         manager = RegistrationDataXlsxImportCeleryManager()
+        program = ProgramFactory()
         rdi_import_scheduled = RegistrationDataImportFactory(
             name="IMPORT_SCHEDULED",
             status=RegistrationDataImport.IMPORT_SCHEDULED,
             data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         rdi_importing = RegistrationDataImportFactory(
-            name="IMPORTING", status=RegistrationDataImport.IMPORTING, data_source=RegistrationDataImport.XLS
+            name="IMPORTING",
+            status=RegistrationDataImport.IMPORTING,
+            data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         RegistrationDataImportFactory(
-            name="IMPORT_ERROR", status=RegistrationDataImport.IMPORT_ERROR, data_source=RegistrationDataImport.XLS
+            name="IMPORT_ERROR",
+            status=RegistrationDataImport.IMPORT_ERROR,
+            data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         RegistrationDataImportFactory(
-            name="REFUSED_IMPORT", status=RegistrationDataImport.REFUSED_IMPORT, data_source=RegistrationDataImport.XLS
+            name="REFUSED_IMPORT",
+            status=RegistrationDataImport.REFUSED_IMPORT,
+            data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         RegistrationDataImportFactory(
-            name="DEDUPLICATION", status=RegistrationDataImport.DEDUPLICATION, data_source=RegistrationDataImport.XLS
+            name="DEDUPLICATION",
+            status=RegistrationDataImport.DEDUPLICATION,
+            data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         RegistrationDataImportFactory(
             name="DEDUPLICATION_FAILED",
             status=RegistrationDataImport.DEDUPLICATION_FAILED,
             data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         RegistrationDataImportFactory(
             name="MERGE_SCHEDULED",
             status=RegistrationDataImport.MERGE_SCHEDULED,
             data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         RegistrationDataImportFactory(
-            name="MERGING", status=RegistrationDataImport.MERGING, data_source=RegistrationDataImport.XLS
+            name="MERGING",
+            status=RegistrationDataImport.MERGING,
+            data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         RegistrationDataImportFactory(
-            name="MERGE_ERROR", status=RegistrationDataImport.MERGE_ERROR, data_source=RegistrationDataImport.XLS
+            name="MERGE_ERROR",
+            status=RegistrationDataImport.MERGE_ERROR,
+            data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         RegistrationDataImportFactory(
-            name="MERGED", status=RegistrationDataImport.MERGED, data_source=RegistrationDataImport.XLS
+            name="MERGED",
+            status=RegistrationDataImport.MERGED,
+            data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         self.assertEqual(manager.pending_queryset.count(), 1)
         self.assertEqual(manager.pending_queryset.first(), rdi_import_scheduled)
@@ -79,10 +105,13 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         )
 
         mock_get_all_celery_tasks.return_value = []
+        program = ProgramFactory()
+
         rdi = RegistrationDataImportFactory(
             name="IMPORT_SCHEDULED",
             status=RegistrationDataImport.IMPORT_SCHEDULED,
             data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         import_data = ImportData.objects.create()
         rdi_datahub = RegistrationDataImportDatahub.objects.create(hct_id=rdi.id, import_data=import_data)
@@ -97,6 +126,7 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
                 "registration_data_import_id": str(rdi_datahub.id),
                 "import_data_id": str(rdi_datahub.import_data_id),
                 "business_area_id": str(rdi.business_area_id),
+                "program_id": str(rdi.program_id),
             }
         )
 
@@ -112,10 +142,13 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
         )
 
         mock_get_all_celery_tasks.return_value = []
+        program = ProgramFactory()
+
         rdi = RegistrationDataImportFactory(
             name="IMPORTING",
             status=RegistrationDataImport.IMPORTING,
             data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         import_data = ImportData.objects.create()
         rdi_datahub = RegistrationDataImportDatahub.objects.create(hct_id=rdi.id, import_data=import_data)
@@ -130,6 +163,7 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
                 "registration_data_import_id": str(rdi_datahub.id),
                 "import_data_id": str(rdi_datahub.import_data_id),
                 "business_area_id": str(rdi.business_area_id),
+                "program_id": str(rdi.program_id),
             }
         )
 
@@ -144,10 +178,12 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
             RegistrationDataXlsxImportCeleryManager,
         )
 
+        program = ProgramFactory()
         rdi = RegistrationDataImportFactory(
             name="IMPORTING",
             status=RegistrationDataImport.IMPORTING,
             data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         import_data = ImportData.objects.create()
         rdi_datahub = RegistrationDataImportDatahub.objects.create(hct_id=rdi.id, import_data=import_data)
@@ -156,6 +192,7 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
             "registration_data_import_id": str(rdi_datahub.id),
             "import_data_id": str(rdi_datahub.import_data_id),
             "business_area_id": str(rdi.business_area_id),
+            "program_id": str(rdi.program_id),
         }
 
         mock_get_all_celery_tasks.return_value = [
@@ -182,10 +219,12 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
             RegistrationDataXlsxImportCeleryManager,
         )
 
+        program = ProgramFactory()
         rdi = RegistrationDataImportFactory(
             name="IMPORT_SCHEDULED",
             status=RegistrationDataImport.IMPORT_SCHEDULED,
             data_source=RegistrationDataImport.XLS,
+            program=program,
         )
         import_data = ImportData.objects.create()
         rdi_datahub = RegistrationDataImportDatahub.objects.create(hct_id=rdi.id, import_data=import_data)
@@ -194,6 +233,7 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
             "registration_data_import_id": str(rdi_datahub.id),
             "import_data_id": str(rdi_datahub.import_data_id),
             "business_area_id": str(rdi.business_area_id),
+            "program_id": str(rdi.program_id),
         }
 
         mock_get_all_celery_tasks.return_value = [
@@ -220,11 +260,13 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
             RegistrationDataXlsxImportCeleryManager,
         )
 
+        program = ProgramFactory()
         rdi = RegistrationDataImportFactory(
             name="IMPORT_SCHEDULED afghanistan",
             status=RegistrationDataImport.IMPORT_SCHEDULED,
             data_source=RegistrationDataImport.XLS,
             business_area=BusinessArea.objects.get(slug="afghanistan"),
+            program=program,
         )
         import_data = ImportData.objects.create()
         rdi_datahub = RegistrationDataImportDatahub.objects.create(hct_id=rdi.id, import_data=import_data)
@@ -236,6 +278,7 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
             status=RegistrationDataImport.IMPORT_SCHEDULED,
             data_source=RegistrationDataImport.XLS,
             business_area=BusinessArea.objects.get(slug="sudan"),
+            program=program,
         )
 
         import_data2 = ImportData.objects.create()
@@ -254,5 +297,6 @@ class TestRegistrationDataXlsxImportCeleryManager(APITestCase):
                 "registration_data_import_id": str(rdi_datahub.id),
                 "import_data_id": str(rdi_datahub.import_data_id),
                 "business_area_id": str(rdi.business_area_id),
+                "program_id": str(rdi.program_id),
             }
         )

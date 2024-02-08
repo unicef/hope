@@ -49,10 +49,10 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
         )
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.registration_data_import = RegistrationDataImportFactory(
-            business_area=cls.business_area,
+            business_area=cls.business_area, program=cls.program
         )
         cls.household, cls.individuals = create_household_and_individuals(
-            household_data={"registration_data_import": cls.registration_data_import},
+            household_data={"registration_data_import": cls.registration_data_import, "program": cls.program},
             individuals_data=[
                 {
                     # DUPLICATE
@@ -61,7 +61,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Won Ho",
                     "birth_date": "1964-07-17",
-                    "program": cls.program,
                 },
                 {
                     "given_name": "Choo",
@@ -69,7 +68,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Ryong",
                     "birth_date": "1960-04-04",
-                    "program": cls.program,
                 },
                 {
                     "given_name": "Tescik",
@@ -77,7 +75,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Testowski",
                     "birth_date": "1996-12-12",
-                    "program": cls.program,
                 },
                 {
                     # DUPLICATE
@@ -86,7 +83,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Testowski",
                     "birth_date": "1997-07-07",
-                    "program": cls.program,
                 },
                 {
                     # DUPLICATE
@@ -95,7 +91,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Testowski",
                     "birth_date": "1955-09-04",
-                    "program": cls.program,
                 },
                 {
                     "given_name": "Test",
@@ -103,7 +98,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Example",
                     "birth_date": "1997-08-08",
-                    "program": cls.program,
                 },
                 {
                     # DUPLICATE
@@ -112,7 +106,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Testowski",
                     "birth_date": "1997-07-07",
-                    "program": cls.program,
                 },
                 {
                     "given_name": "Abdul",
@@ -120,7 +113,6 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
                     "middle_name": "",
                     "family_name": "Afghanistan",
                     "birth_date": "1997-07-07",
-                    "program": cls.program,
                 },
             ],
         )
@@ -130,7 +122,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
         doc_type = DocumentTypeFactory(
             label="National ID", key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
         )
-        DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country)
+        DocumentFactory(document_number="55130", individual=ind, type=doc_type, country=country, program=ind.program)
         super().setUpTestData()
 
     def test_execute(self) -> None:

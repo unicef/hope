@@ -50,12 +50,14 @@ class TestChangeHeadOfHousehold(BaseElasticSearchTestCase, APITestCase):
         admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="sfds323")
 
         cls.household = HouseholdFactory.build()
+        cls.household.program.save()
         cls.household.household_collection.save()
         cls.household.registration_data_import.imported_by.save()
+        cls.household.registration_data_import.program = cls.household.program
         cls.household.registration_data_import.save()
 
-        cls.individual1: Individual = IndividualFactory(household=cls.household)
-        cls.individual2: Individual = IndividualFactory(household=cls.household)
+        cls.individual1: Individual = IndividualFactory(household=cls.household, program=cls.household.program)
+        cls.individual2: Individual = IndividualFactory(household=cls.household, program=cls.household.program)
         cls.individual1.relationship = HEAD
         cls.individual2.relationship = BROTHER_SISTER
         cls.individual1.save()
