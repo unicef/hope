@@ -64,7 +64,7 @@ def browser(driver: Chrome) -> Chrome:
 @pytest.fixture
 def login(browser: Chrome) -> Chrome:
     browser.get(f"{browser.live_server.url}/api/unicorn/")
-    get_cookies = browser.get_cookies()
+    get_cookies = browser.get_cookies()  # type: ignore
     create_session(browser.live_server.url, "superuser", "testtest2", get_cookies[0]["value"])
     browser.add_cookie({"name": "csrftoken", "value": pytest.CSRF})
     browser.add_cookie({"name": "sessionid", "value": pytest.SESSION_ID})
