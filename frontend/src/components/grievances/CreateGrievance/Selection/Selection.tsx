@@ -2,8 +2,8 @@ import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { GrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
-import { useArrayToDict } from '../../../../hooks/useArrayToDict';
+import { GrievancesChoiceDataQuery } from '@generated/graphql';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   GRIEVANCE_CATEGORIES_NAMES,
@@ -11,8 +11,8 @@ import {
   GRIEVANCE_ISSUE_TYPES_NAMES,
   GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
 } from '@utils/constants';
-import { DividerLine } from '../../../core/DividerLine';
-import { LabelizedField } from '../../../core/LabelizedField';
+import { DividerLine } from '@core/DividerLine';
+import { LabelizedField } from '@core/LabelizedField';
 
 export interface SelectionProps {
   handleChange: (e: React.ChangeEvent) => void;

@@ -1,10 +1,10 @@
 import { ReactElement } from 'react';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import {
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { DocumentsTable } from './DocumentsTable';
 import { DocumentsToEditTable } from './DocumentsToEditTable';
 import { DocumentsToRemoveTable } from './DocumentsToRemoveTable';

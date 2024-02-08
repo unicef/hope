@@ -1,7 +1,7 @@
 import { TableCell } from '@mui/material';
 import * as React from 'react';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { anon } from '@utils/utils';
 
 export function AnonTableCell({ children, ...props }): React.ReactElement {

@@ -1,14 +1,14 @@
 import { Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { renderUserName } from '@utils/utils';
-import { BlackLink } from '../../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface FollowUpPaymentPlanDetailsProps {
   baseUrl: string;

@@ -3,11 +3,11 @@ import WarningIcon from '@mui/icons-material/Warning';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useExistingGrievanceTicketsQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { decodeIdString } from '@utils/utils';
-import { ContentLink } from '../core/ContentLink';
-import { LoadingComponent } from '../core/LoadingComponent';
+import { ContentLink } from '@core/ContentLink';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { getGrievanceDetailsPath } from './utils/createGrievanceUtils';
 
 const StyledBox = styled(Paper)`

@@ -9,15 +9,15 @@ import { CreatePaymentPlanHeader } from '@components/paymentmodule/CreatePayment
 import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
 import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   useAllTargetPopulationsQuery,
   useCreatePpMutation,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { today } from '@utils/utils';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function CreatePaymentPlanPage(): React.ReactElement {
   const { t } = useTranslation();

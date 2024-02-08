@@ -1,10 +1,10 @@
 import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
-import { HouseholdNode } from '../../../../__generated__/graphql';
+import { HouseholdNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { AnonTableCell } from '@components/core/Table/AnonTableCell';
 import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;

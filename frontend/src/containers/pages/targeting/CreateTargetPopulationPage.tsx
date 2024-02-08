@@ -9,7 +9,7 @@ import {
   useAllProgramsForChoicesQuery,
   useBusinessAreaDataQuery,
   useCreateTpMutation,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -19,9 +19,9 @@ import { PaperContainer } from '@components/targeting/PaperContainer';
 import { TargetingCriteria } from '@components/targeting/TargetingCriteria';
 import { TargetingCriteriaDisabled } from '@components/targeting/TargetingCriteria/TargetingCriteriaDisabled';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
 import { getFullNodeFromEdgesById } from '@utils/utils';
 

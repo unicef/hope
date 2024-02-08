@@ -13,15 +13,15 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApprovePaymentDetailsMutation,
-} from '../../../../__generated__/graphql';
-import { useConfirmation } from '../../../core/ConfirmationDialog';
-import { Title } from '../../../core/Title';
+} from '@generated/graphql';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { Title } from '@core/Title';
 import { VerifyPaymentGrievance } from '../VerifyPaymentGrievance/VerifyPaymentGrievance';
 
 const StyledBox = styled(Paper)`

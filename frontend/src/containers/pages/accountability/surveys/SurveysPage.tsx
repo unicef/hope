@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useSurveysChoiceDataQuery } from '../../../../__generated__/graphql';
+import { useSurveysChoiceDataQuery } from '@generated/graphql';
 import { CreateSurveyMenu } from '@components/accountability/Surveys/CreateSurveyMenu';
 import { SurveysFilters } from '@components/accountability/Surveys/SurveysTable/SurveysFilters';
 import { PageHeader } from '@components/core/PageHeader';
@@ -11,7 +11,7 @@ import {
   hasPermissionInModule,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { SurveysTable } from '../../../tables/Surveys/SurveysTable/SurveysTable';
 

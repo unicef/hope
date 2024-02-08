@@ -18,11 +18,11 @@ import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveSystemFlaggingMutation,
-} from '../../__generated__/graphql';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { FlagTooltip } from '../core/FlagTooltip';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
+} from '@generated/graphql';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { FlagTooltip } from '@core/FlagTooltip';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
 

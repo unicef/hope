@@ -11,12 +11,12 @@ import { useTranslation } from 'react-i18next';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   RegistrationDetailedFragment,
   useRerunDedupeMutation,
-} from '../../../__generated__/graphql';
-import { LoadingButton } from '../../core/LoadingButton';
+} from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
 
 interface RerunDedupeProps {

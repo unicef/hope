@@ -3,9 +3,9 @@ import { useState } from 'react';
 import Button from '@mui/material/Button';
 import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../core/BlackLink';
-import { LabelizedField } from '../../../core/LabelizedField';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { LabelizedField } from '@core/LabelizedField';
 
 interface RelatedFollowUpPaymentPlansProps {
   baseUrl: string;

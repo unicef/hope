@@ -9,17 +9,17 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { PaymentRecordDetails } from '@components/payments/PaymentRecordDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   PaymentRecordNode,
   PaymentRecordStatus,
   useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
   usePaymentRecordQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ForceFailedButton } from '@components/payments/ForceFailedButton';
 import { RevertForceFailedButton } from '@components/payments/RevertForceFailedButton';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function PaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();

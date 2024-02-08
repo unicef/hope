@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
+import { AllGrievanceTicketQuery } from '@generated/graphql';
 import { useProgramContext } from '../../../../programContext';
 
 export const StyledLink = styled.div`

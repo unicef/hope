@@ -2,11 +2,11 @@ import { Box, Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { paymentVerificationStatusToColor } from '@utils/utils';
-import { CashPlanQuery, PaymentPlanQuery } from '../../__generated__/graphql';
-import { LabelizedField } from '../core/LabelizedField';
-import { StatusBox } from '../core/StatusBox';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
+import { CashPlanQuery, PaymentPlanQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface VerificationPlansSummaryProps {
   planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];

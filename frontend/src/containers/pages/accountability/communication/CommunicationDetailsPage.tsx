@@ -7,14 +7,14 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
-import { useAccountabilityCommunicationMessageQuery } from '../../../../__generated__/graphql';
+import { useAccountabilityCommunicationMessageQuery } from '@generated/graphql';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { CommunicationDetails } from '@components/accountability/Communication/CommunicationDetails';
 import { CommunicationMessageDetails } from '@components/accountability/Communication/CommunicationMessageDetails';
 import { RecipientsTable } from '../../../tables/Communication/RecipientsTable/RecipientsTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function CommunicationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();

@@ -6,7 +6,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { getIndexForId } from './utils/helpers';
 
 export interface AgencyFieldProps {

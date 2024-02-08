@@ -5,8 +5,8 @@ import {
   CashPlanAndPaymentPlanNode,
   ProgramQuery,
   useAllCashPlansAndPaymentPlansQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CashPlanTableHeadCells';
 import { CashPlanTableRow } from './CashPlanTableRow';

@@ -16,14 +16,14 @@ import {
   PaymentPlanQuery,
   PaymentPlanStatus,
   useExcludeHouseholdsPpMutation,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { StyledTextField } from '@shared/StyledTextField';
-import { ButtonTooltip } from '../../../core/ButtonTooltip';
-import { GreyText } from '../../../core/GreyText';
+import { ButtonTooltip } from '@core/ButtonTooltip';
+import { GreyText } from '@core/GreyText';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { useProgramContext } from '../../../../programContext';
 import { ExcludedItem } from './ExcludedItem';

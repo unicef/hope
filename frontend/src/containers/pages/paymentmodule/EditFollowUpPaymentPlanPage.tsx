@@ -8,7 +8,7 @@ import {
   useAllTargetPopulationsQuery,
   usePaymentPlanQuery,
   useUpdatePpMutation,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -16,9 +16,9 @@ import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPl
 import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
 import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { today } from '@utils/utils';
 
 export function EditFollowUpPaymentPlanPage(): React.ReactElement {

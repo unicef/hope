@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { BusinessAreaSelect } from '@containers/BusinessAreaSelect';
 import { GlobalProgramSelect } from '@containers/GlobalProgramSelect';
 import { UserProfileMenu } from '@containers/UserProfileMenu';
-import { useCachedMe } from '../../hooks/useCachedMe';
+import { useCachedMe } from '@hooks/useCachedMe';
 import { MiśTheme } from '../../theme';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({

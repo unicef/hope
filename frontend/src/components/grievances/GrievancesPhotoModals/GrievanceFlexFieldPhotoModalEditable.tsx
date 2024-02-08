@@ -6,8 +6,8 @@ import { FormikFileField } from '@shared/Formik/FormikFileField';
 import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
-} from '../../../__generated__/graphql';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+} from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalEditableProps {
   flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];

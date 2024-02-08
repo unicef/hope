@@ -5,7 +5,7 @@ import mapKeys from 'lodash/mapKeys';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
@@ -16,9 +16,9 @@ import {
   IndividualNode,
   IndividualRoleInHouseholdRole,
   useApproveIndividualDataChangeMutation,
-} from '../../__generated__/graphql';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { Title } from '../core/Title';
+} from '@generated/graphql';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { Title } from '@core/Title';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable/RequestedIndividualDataChangeTable';
 
 const StyledBox = styled(Paper)`

@@ -3,8 +3,8 @@ import * as React from 'react';
 import {
   AllEditHouseholdFieldsQuery,
   useHouseholdFlexFieldsQuery,
-} from '../../../__generated__/graphql';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+} from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalNewHouseholdProps {
   flexField: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];

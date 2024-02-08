@@ -4,13 +4,10 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { ContentLink } from '../../core/ContentLink';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import {
-  AllHouseholdsQuery,
-  useHouseholdLazyQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
+import { ContentLink } from '@core/ContentLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { AllHouseholdsQuery, useHouseholdLazyQuery } from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
 
 interface HouseholdQuestionnaireProps {
   values;

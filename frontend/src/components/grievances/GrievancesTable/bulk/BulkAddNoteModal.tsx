@@ -3,11 +3,11 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import CommentIcon from '@mui/icons-material/Comment';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAddNoteMutation,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`

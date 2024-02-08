@@ -1,4 +1,4 @@
-import { AllPaymentsForTableQuery } from '../../../../__generated__/graphql';
+import { AllPaymentsForTableQuery } from '@generated/graphql';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 
 export const headCells: HeadCell<

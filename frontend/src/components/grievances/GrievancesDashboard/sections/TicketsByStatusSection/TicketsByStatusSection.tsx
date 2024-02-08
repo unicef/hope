@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AllGrievanceDashboardChartsQuery } from '../../../../../__generated__/graphql';
+import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
 import { TicketsByStatusChart } from '../../charts/TicketsByStatusChart';
 import { DashboardPaper } from '../../DashboardPaper';
 

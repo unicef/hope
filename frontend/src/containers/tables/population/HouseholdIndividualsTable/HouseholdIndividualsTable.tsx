@@ -16,8 +16,8 @@ import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
   IndividualNode,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {

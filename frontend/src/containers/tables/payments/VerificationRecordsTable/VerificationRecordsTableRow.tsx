@@ -9,8 +9,8 @@ import {
   householdStatusToColor,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { PaymentVerificationNode } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { PaymentVerificationNode } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface VerificationRecordsTableRowProps {
   paymentVerification: PaymentVerificationNode;

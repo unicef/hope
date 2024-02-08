@@ -12,11 +12,8 @@ import {
   opacityToHex,
   renderSomethingOrDash,
 } from '@utils/utils';
-import {
-  AllPaymentsForTableQuery,
-  PaymentStatus,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { AllPaymentsForTableQuery, PaymentStatus } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export const StyledLink = styled.div`
   color: #000;

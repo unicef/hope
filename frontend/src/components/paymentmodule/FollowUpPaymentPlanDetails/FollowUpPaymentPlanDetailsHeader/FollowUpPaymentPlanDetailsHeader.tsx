@@ -7,10 +7,10 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
-import { StatusBox } from '../../../core/StatusBox';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { StatusBox } from '@core/StatusBox';
 import { AcceptedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
 import { InApprovalPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { InAuthorizationPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';

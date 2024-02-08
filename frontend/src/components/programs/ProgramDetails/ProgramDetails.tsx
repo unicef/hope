@@ -2,19 +2,16 @@ import { Box, Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  ProgramQuery,
-  ProgrammeChoiceDataQuery,
-} from '../../../__generated__/graphql';
+import { ProgramQuery, ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { MiśTheme } from '../../../theme';
 import { choicesToDict, programStatusToColor } from '@utils/utils';
-import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../core/LabelizedField';
-import { OverviewContainer } from '../../core/OverviewContainer';
-import { StatusBox } from '../../core/StatusBox';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
-import { DividerLine } from '../../core/DividerLine';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { DividerLine } from '@core/DividerLine';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)}px;

@@ -6,7 +6,7 @@ import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanStatus,
   usePaymentPlanQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { AcceptanceProcess } from '@components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcess';
@@ -18,8 +18,8 @@ import { PaymentPlanDetailsHeader } from '@components/paymentmodule/PaymentPlanD
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';

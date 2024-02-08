@@ -3,11 +3,11 @@ import EditIcon from '@mui/icons-material/EditRounded';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link,  useParams } from 'react-router-dom';
-import { FeedbackQuery } from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../core/BreadCrumbs';
-import { PageHeader } from '../../core/PageHeader';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { ButtonTooltip } from '../../core/ButtonTooltip';
+import { FeedbackQuery } from '@generated/graphql';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
 
 interface FeedbackDetailsToolbarProps {

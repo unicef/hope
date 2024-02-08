@@ -4,11 +4,11 @@ import * as React from 'react';
 import {
   AllHouseholdsForPopulationTableQuery,
   HouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { BlackLink } from '../../../core/BlackLink';
-import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { BlackLink } from '@core/BlackLink';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface LookUpHouseholdTableRowProps {
   household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];

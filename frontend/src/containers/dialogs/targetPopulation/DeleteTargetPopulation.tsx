@@ -10,12 +10,12 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useDeleteTargetPopulationMutation } from '../../../__generated__/graphql';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useDeleteTargetPopulationMutation } from '@generated/graphql';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface DeleteTargetPopulation {
   open: boolean;

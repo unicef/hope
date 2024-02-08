@@ -6,7 +6,7 @@ import {
   MergedHouseholdMinimalFragment,
   useAllImportedHouseholdsQuery,
   useAllMergedHouseholdsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as importedHeadCells } from './ImportedHouseholdTableHeadCells';

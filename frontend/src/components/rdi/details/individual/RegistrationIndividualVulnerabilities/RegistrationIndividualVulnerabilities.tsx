@@ -4,13 +4,13 @@ import Paper from '@mui/material/Paper';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useArrayToDict } from '../../../../../hooks/useArrayToDict';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import {
   AllIndividualsFlexFieldsAttributesQuery,
   ImportedIndividualDetailedFragment,
-} from '../../../../../__generated__/graphql';
-import { LabelizedField } from '../../../../core/LabelizedField';
-import { Title } from '../../../../core/Title';
+} from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
 import { ImportedIndividualFlexFieldPhotoModal } from '../ImportedIndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`

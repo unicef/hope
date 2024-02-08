@@ -2,14 +2,14 @@ import { Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { FieldBorder } from '../../../core/FieldBorder';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { FieldBorder } from '@core/FieldBorder';
 import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
 
 interface PaymentPlanDetailsProps {

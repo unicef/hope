@@ -11,7 +11,7 @@ import {
   useFeedbackIssueTypeChoicesQuery,
   useFeedbackQuery,
   useUpdateFeedbackTicketMutation,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
@@ -25,9 +25,9 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';

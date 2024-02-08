@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import styled from 'styled-components';
 import { useField } from 'formik';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { useTranslation } from 'react-i18next';
 
 const DropzoneContainer = styled.div`

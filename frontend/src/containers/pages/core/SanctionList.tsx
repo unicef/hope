@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Button, Box, Paper, SnackbarContent, Snackbar } from '@mui/material';
 import * as Sentry from '@sentry/react';
-import { useCheckAgainstSanctionListUploadMutation } from '../../../__generated__/graphql';
+import { useCheckAgainstSanctionListUploadMutation } from '@generated/graphql';
 import { DropzoneField } from '@components/core/DropzoneField';
 import { PageHeader } from '@components/core/PageHeader';
 

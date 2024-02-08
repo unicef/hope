@@ -5,24 +5,23 @@ import { ApolloError } from 'apollo-client';
 import {
   ImportedIndividualFieldsQuery,
   useImportedIndividualFieldsLazyQuery,
-} from '../__generated__/graphql';
+} from '@generated/graphql';
 
-export function useCachedImportedIndividualFieldsQuery(
-  businessArea,
-): {
-    loading: boolean;
-    data: ImportedIndividualFieldsQuery;
-    error: ApolloError;
-  } {
+export function useCachedImportedIndividualFieldsQuery(businessArea): {
+  loading: boolean;
+  data: ImportedIndividualFieldsQuery;
+  error: ApolloError;
+} {
   const [loading, setLoading] = useState(true);
   const [oldBusinessArea, setOldBusinessArea] = useState('');
   const [cache, setCache] = useState(null);
-  const lastUpdatedTimestamp = Number.parseInt(
-    localStorage.getItem(
-      `cache-targeting-core-fields-attributes-${businessArea}-timestamp`,
-    ),
-    10,
-  ) || 0;
+  const lastUpdatedTimestamp =
+    Number.parseInt(
+      localStorage.getItem(
+        `cache-targeting-core-fields-attributes-${businessArea}-timestamp`,
+      ),
+      10,
+    ) || 0;
   const ttl = 2 * 60 * 60 * 1000;
   const [getAttributes, results] = useImportedIndividualFieldsLazyQuery({
     variables: {

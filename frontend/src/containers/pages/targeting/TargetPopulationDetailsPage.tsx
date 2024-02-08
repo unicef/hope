@@ -6,15 +6,15 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TargetPopulationCore } from '@components/targeting/TargetPopulationCore';
 import { TargetPopulationDetails } from '@components/targeting/TargetPopulationDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import {
   TargetPopulationBuildStatus,
   useBusinessAreaDataQuery,
   useTargetPopulationQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { TargetPopulationPageHeader } from '../headers/TargetPopulationPageHeader';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();

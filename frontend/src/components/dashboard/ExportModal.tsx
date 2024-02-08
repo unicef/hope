@@ -11,6 +11,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
@@ -18,13 +19,13 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   useCreateDashboardReportMutation,
   useDashboardReportChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function ExportModal({ filter, year }): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);

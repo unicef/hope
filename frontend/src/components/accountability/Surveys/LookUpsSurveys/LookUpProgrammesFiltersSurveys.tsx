@@ -3,13 +3,13 @@ import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
-import { ProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { FiltersSection } from '../../../core/FiltersSection';
-import { NumberTextField } from '../../../core/NumberTextField';
-import { SearchTextField } from '../../../core/SearchTextField';
-import { SelectFilter } from '../../../core/SelectFilter';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 
 interface LookUpProgrammesFiltersSurveysProps {
   filter;

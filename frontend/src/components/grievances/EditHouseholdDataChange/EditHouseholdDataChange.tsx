@@ -9,9 +9,9 @@ import {
   AllHouseholdsQuery,
   useAllEditHouseholdFieldsQuery,
   useHouseholdLazyQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
-import { Title } from '../../core/Title';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
 import { EditHouseholdDataChangeFieldRow } from './EditHouseholdDataChangeFieldRow';
 
 export interface EditHouseholdDataChangeProps {

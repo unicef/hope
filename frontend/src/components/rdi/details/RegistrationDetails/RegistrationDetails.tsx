@@ -2,19 +2,19 @@ import { Box, Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { StatusBox } from '../../../core/StatusBox';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { StatusBox } from '@core/StatusBox';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { MiśTheme } from '../../../../theme';
 import { registrationDataImportStatusToColor } from '@utils/utils';
 import {
   RegistrationDetailedFragment,
   RegistrationDataImportStatus,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { DedupeBox } from '../DedupeBox';
-import { Title } from '../../../core/Title';
+import { Title } from '@core/Title';
 
 export const BigValueContainer = styled.div`
   padding: ${({ theme }) => theme.spacing(6)}px;

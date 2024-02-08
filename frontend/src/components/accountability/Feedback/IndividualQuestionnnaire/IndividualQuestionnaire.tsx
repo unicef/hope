@@ -2,9 +2,9 @@ import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
-import { ContentLink } from '../../../core/ContentLink';
+import { ContentLink } from '@core/ContentLink';
 
 interface IndividualQuestionnaireProps {
   values;

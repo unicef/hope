@@ -12,11 +12,11 @@ import {
   FeedbackQuery,
   useCreateFeedbackMsgMutation,
   useMeQuery,
-} from '../../../../__generated__/graphql';
-import { LoadingButton } from '../../../core/LoadingButton';
-import { OverviewContainerColumn } from '../../../core/OverviewContainerColumn';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+} from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
+import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 const Name = styled.span`
   font-size: 16px;

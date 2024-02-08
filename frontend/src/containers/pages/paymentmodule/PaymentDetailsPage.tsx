@@ -7,17 +7,17 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   PaymentPlanStatus,
   PaymentStatus,
   useCashAssistUrlPrefixQuery,
   usePaymentQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { PaymentDetails } from '@components/paymentmodule/PaymentDetails';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
 import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function PaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();

@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import * as React from 'react';
 import styled from 'styled-components';
-import { MeQuery } from '../__generated__/graphql';
+import { MeQuery } from '@generated/graphql';
 import { clearCache } from '@utils/utils';
 import { getClient } from '../apollo/client';
 

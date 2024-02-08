@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';
-import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
+import { useAllFieldsAttributesQuery } from '@generated/graphql';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 
 export function FlexFieldTab(): React.ReactElement {

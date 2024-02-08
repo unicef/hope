@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import {
   AllPaymentPlansForTableQueryVariables,
   usePaymentPlanStatusChoicesQueryQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';

@@ -15,17 +15,17 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { BlackLink } from '../../core/BlackLink';
+import { BlackLink } from '@core/BlackLink';
 import { MiśTheme } from '../../../theme';
 import { decodeIdString } from '@utils/utils';
 import {
   DeduplicationResultNode,
   ImportedIndividualMinimalFragment,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};

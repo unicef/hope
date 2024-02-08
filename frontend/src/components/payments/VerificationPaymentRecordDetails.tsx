@@ -11,14 +11,14 @@ import {
   paymentStatusDisplayMap,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { PaymentRecordQuery } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../core/LabelizedField';
-import { StatusBox } from '../core/StatusBox';
-import { UniversalMoment } from '../core/UniversalMoment';
-import { BlackLink } from '../core/BlackLink';
-import { Title } from '../core/Title';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { PaymentRecordQuery } from '@generated/graphql';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { BlackLink } from '@core/BlackLink';
+import { Title } from '@core/Title';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
   margin: 20px;

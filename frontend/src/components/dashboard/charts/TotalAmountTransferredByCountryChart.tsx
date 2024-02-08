@@ -9,7 +9,7 @@ import {
   formatThousands,
   getPercentage,
 } from '@utils/utils';
-import { GlobalAreaChartsQuery } from '../../../__generated__/graphql';
+import { GlobalAreaChartsQuery } from '@generated/graphql';
 
 interface TotalAmountTransferredByCountryChartProps {
   data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];

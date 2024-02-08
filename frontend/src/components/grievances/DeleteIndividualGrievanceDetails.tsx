@@ -2,7 +2,7 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import snakeCase from 'lodash/snakeCase';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
@@ -12,12 +12,12 @@ import {
   IndividualRoleInHouseholdRole,
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
-} from '../../__generated__/graphql';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
+} from '@generated/graphql';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export type RoleReassignData = {

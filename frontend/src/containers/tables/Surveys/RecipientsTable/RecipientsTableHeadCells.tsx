@@ -1,5 +1,5 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { RecipientNode } from '../../../../__generated__/graphql';
+import { RecipientNode } from '@generated/graphql';
 
 export const headCells: HeadCell<RecipientNode>[] = [
   {

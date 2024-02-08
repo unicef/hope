@@ -1,7 +1,7 @@
 import { ReactElement, useState } from 'react';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 import { Order, TableComponent } from '@components/core/Table/TableComponent';
-import { ImportedIndividualMinimalFragment } from '../../../../__generated__/graphql';
+import { ImportedIndividualMinimalFragment } from '@generated/graphql';
 import { ImportedIndividualsTableRow } from '../ImportedIndividualsTable/ImportedIndividualsTableRow';
 
 const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [

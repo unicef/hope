@@ -5,9 +5,9 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { SetUpFspCore } from '@components/paymentmodule/CreateSetUpFsp/SetUpFspCore/SetUpFspCore';
 import { EditSetUpFspHeader } from '@components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { usePaymentPlanQuery } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { usePaymentPlanQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function EditSetUpFspPage(): React.ReactElement {
   const { id } = useParams();

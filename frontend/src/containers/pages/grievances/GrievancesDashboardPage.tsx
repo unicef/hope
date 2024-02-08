@@ -10,9 +10,9 @@ import { TicketsByCategorySection } from '@components/grievances/GrievancesDashb
 import { TicketsByLocationAndCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
 import { TicketsByStatusSection } from '@components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useAllGrievanceDashboardChartsQuery } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useAllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function GrievancesDashboardPage(): React.ReactElement {
   const { t } = useTranslation();

@@ -5,13 +5,13 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LoadingButton } from '@components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   BusinessAreaDataQuery,
   ProgramStatus,
   TargetPopulationQuery,
   useUnlockTpMutation,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
 import { FinalizeTargetPopulationPaymentPlan } from '../../dialogs/targetPopulation/FinalizeTargetPopulationPaymentPlan';

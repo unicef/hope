@@ -1,5 +1,5 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { UserNode } from '../../../__generated__/graphql';
+import { UserNode } from '@generated/graphql';
 
 export const headCells: HeadCell<UserNode>[] = [
   {

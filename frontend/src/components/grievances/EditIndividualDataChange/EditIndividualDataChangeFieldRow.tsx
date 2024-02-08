@@ -9,7 +9,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllAddIndividualFieldsQuery,
   IndividualQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { EditIndividualDataChangeField } from './EditIndividualDataChangeField';
 import { CurrentValue } from './CurrentValue';
 

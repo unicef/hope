@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
@@ -24,13 +24,13 @@ import {
   useAllSteficonRulesQuery,
   useExportXlsxPpListMutation,
   useSetSteficonRuleOnPpListMutation,
-} from '../../../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { LoadingButton } from '../../../core/LoadingButton';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+} from '@generated/graphql';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingButton } from '@core/LoadingButton';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { BigValue } from '../../../rdi/details/RegistrationDetails/RegistrationDetails';
 import { ImportXlsxPaymentPlanPaymentList } from '../ImportXlsxPaymentPlanPaymentList/ImportXlsxPaymentPlanPaymentList';
 import { useProgramContext } from '../../../../programContext';

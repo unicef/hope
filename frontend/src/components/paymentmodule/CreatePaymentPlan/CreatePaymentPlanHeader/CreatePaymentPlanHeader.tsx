@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { LoadingButton } from '@core/LoadingButton';
 
 interface CreatePaymentPlanHeaderProps {
   handleSubmit: () => Promise<void>;

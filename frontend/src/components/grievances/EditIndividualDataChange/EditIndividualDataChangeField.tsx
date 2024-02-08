@@ -8,7 +8,7 @@ import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
 import { FormikFileField } from '@shared/Formik/FormikFileField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
 

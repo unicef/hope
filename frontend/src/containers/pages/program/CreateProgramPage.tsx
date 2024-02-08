@@ -7,17 +7,17 @@ import {
   useAllAreasTreeQuery,
   useCreateProgramMutation,
   useUserPartnerChoicesQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 
 export function CreateProgramPage(): ReactElement {

@@ -4,12 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   FeedbackIssueType,
   FeedbackNode,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
 import { renderSomethingOrDash, renderUserName } from '@utils/utils';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
 
 interface FeedbackTableRowProps {

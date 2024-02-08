@@ -10,9 +10,9 @@ import {
   AllIndividualsQuery,
   useAllAddIndividualFieldsQuery,
   useIndividualLazyQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
-import { Title } from '../../core/Title';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
 import { EditIndividualDataChangeFieldRow } from './EditIndividualDataChangeFieldRow';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';

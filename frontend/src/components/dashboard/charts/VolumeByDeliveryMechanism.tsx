@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { formatCurrencyWithSymbol, getPercentage } from '@utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface VolumeByDeliveryMechanismProps {
   data: AllChartsQuery['chartVolumeByDeliveryMechanism'];

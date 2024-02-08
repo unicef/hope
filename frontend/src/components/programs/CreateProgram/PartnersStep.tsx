@@ -4,10 +4,10 @@ import { FieldArray } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { AllAreasTreeQuery } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { BaseSection } from '../../core/BaseSection';
-import { ButtonTooltip } from '../../core/ButtonTooltip';
+import { AllAreasTreeQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { BaseSection } from '@core/BaseSection';
+import { ButtonTooltip } from '@core/ButtonTooltip';
 import { ProgramPartnerCard } from './ProgramPartnerCard';
 
 interface PartnersStepProps {

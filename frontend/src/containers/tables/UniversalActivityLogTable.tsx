@@ -2,11 +2,8 @@ import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { ActivityLogTable } from '@components/core/ActivityLogTable/ActivityLogTable';
 import { decodeIdString } from '@utils/utils';
-import {
-  LogEntryNode,
-  useAllLogEntriesQuery,
-} from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { LogEntryNode, useAllLogEntriesQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const TableWrapper = styled.div`
   display: flex;

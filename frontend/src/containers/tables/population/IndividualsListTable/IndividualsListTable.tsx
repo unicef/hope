@@ -6,11 +6,11 @@ import {
   HouseholdChoiceDataQuery,
   IndividualNode,
   useAllIndividualsForPopulationTableQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './IndividualsListTableHeadCells';
 import { IndividualsListTableRow } from './IndividualsListTableRow';
 

@@ -10,7 +10,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllEditHouseholdFieldsQuery,
   HouseholdQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
 

@@ -8,10 +8,10 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDiscardPaymentVerificationPlanMutation } from '../../__generated__/graphql';
-import { ErrorButton } from '../core/ErrorButton';
-import { ErrorButtonContained } from '../core/ErrorButtonContained';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useDiscardPaymentVerificationPlanMutation } from '@generated/graphql';
+import { ErrorButton } from '@core/ErrorButton';
+import { ErrorButtonContained } from '@core/ErrorButtonContained';
 import { useProgramContext } from '../../programContext';
 
 export interface DiscardVerificationPlanProps {

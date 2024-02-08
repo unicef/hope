@@ -14,13 +14,10 @@ import { Delete } from '@mui/icons-material';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import {
-  PaymentPlanQuery,
-  useDeletePpMutation,
-} from '../../../../__generated__/graphql';
-import { LoadingButton } from '../../../core/LoadingButton';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { PaymentPlanQuery, useDeletePpMutation } from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../../../programContext';
 
 export interface DeletePaymentPlanProps {

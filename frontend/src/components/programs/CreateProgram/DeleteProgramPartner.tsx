@@ -13,9 +13,9 @@ import styled from 'styled-components';
 import { DialogDescription } from '@containers/dialogs/DialogDescription';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { GreyText } from '../../core/GreyText';
-import { LoadingButton } from '../../core/LoadingButton';
-import { ErrorButton } from '../../core/ErrorButton';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
+import { ErrorButton } from '@core/ErrorButton';
 
 const WhiteDeleteIcon = styled(Delete)`
   color: #fff;

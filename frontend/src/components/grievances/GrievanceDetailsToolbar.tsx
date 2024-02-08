@@ -7,20 +7,20 @@ import styled from 'styled-components';
 import {
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
-} from '../../__generated__/graphql';
-import { useSnackbar } from '../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '@utils/constants';
-import { BreadCrumbsItem } from '../core/BreadCrumbs';
-import { ButtonDialog } from '../core/ButtonDialog';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { LoadingButton } from '../core/LoadingButton';
-import { PageHeader } from '../core/PageHeader';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { ButtonDialog } from '@core/ButtonDialog';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { LoadingButton } from '@core/LoadingButton';
+import { PageHeader } from '@core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../programContext';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 

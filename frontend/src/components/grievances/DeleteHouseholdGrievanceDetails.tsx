@@ -6,14 +6,14 @@ import styled from 'styled-components';
 import {
   GrievanceTicketQuery,
   useHouseholdChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { choicesToDict } from '@utils/utils';
-import { BlackLink } from '../core/BlackLink';
-import { ContentLink } from '../core/ContentLink';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { Title } from '../core/Title';
+import { BlackLink } from '@core/BlackLink';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
 import { ApproveDeleteHouseholdGrievanceDetails } from './ApproveDeleteHouseholdGrievanceDetails';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 

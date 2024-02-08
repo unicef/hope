@@ -2,8 +2,8 @@ import { TableCell, TableRow } from '@mui/material';
 import * as React from 'react';
 import moment from 'moment';
 import { DATE_FORMAT } from '../../../config';
-import { AllSanctionListIndividualsQuery } from '../../../__generated__/graphql';
-import { UniversalMoment } from '../../core/UniversalMoment';
+import { AllSanctionListIndividualsQuery } from '@generated/graphql';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 export function SanctionListIndividualsTableRow({
   individual,

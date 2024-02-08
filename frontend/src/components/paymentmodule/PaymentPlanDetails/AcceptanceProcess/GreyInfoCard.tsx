@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
 import * as React from 'react';
 import styled from 'styled-components';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { MessageDialog } from './MessageDialog';
 
 const GreyText = styled.div`

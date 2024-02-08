@@ -15,7 +15,7 @@ import {
   useGrievancesChoiceDataQuery,
   useMeQuery,
   useUpdateGrievanceMutation,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { BlackLink } from '@components/core/BlackLink';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -49,10 +49,10 @@ import {
   hasCreatorOrOwnerPermissions,
   hasPermissions,
 } from '../../../config/permissions';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';

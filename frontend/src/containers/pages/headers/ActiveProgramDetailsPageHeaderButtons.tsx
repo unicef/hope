@@ -1,10 +1,7 @@
 import { Box, Button } from '@mui/material';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import * as React from 'react';
-import {
-  ProgramQuery,
-  useCashAssistUrlPrefixQuery,
-} from '../../../__generated__/graphql';
+import { ProgramQuery, useCashAssistUrlPrefixQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
 import { EditProgramButtonLink } from '../../dialogs/programs/EditProgramButtonLink';

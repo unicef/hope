@@ -2,7 +2,7 @@ import * as React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { formatNumber, formatThousands, getPercentage } from '@utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
   data: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];

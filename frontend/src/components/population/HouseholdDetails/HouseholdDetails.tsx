@@ -6,12 +6,12 @@ import {
   GrievancesChoiceDataQuery,
   HouseholdChoiceDataQuery,
   HouseholdNode,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { useProgramContext } from '../../../programContext';
 import { choicesToDict, formatCurrencyWithSymbol } from '@utils/utils';
-import { ContentLink } from '../../core/ContentLink';
-import { LabelizedField } from '../../core/LabelizedField';
-import { Title } from '../../core/Title';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
 import {
   BigValue,
   BigValueContainer,

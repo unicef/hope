@@ -3,10 +3,10 @@ import { EditRounded } from '@mui/icons-material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { DeletePaymentPlan } from '../DeletePaymentPlan';
 import { LockPaymentPlan } from '../LockPaymentPlan';
-import { useBaseUrl } from '../../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../../../programContext';
 
 export interface OpenPaymentPlanHeaderButtonsProps {

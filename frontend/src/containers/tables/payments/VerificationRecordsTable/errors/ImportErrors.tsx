@@ -3,7 +3,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { IconButton, Collapse } from '@mui/material';
 import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
-import { XlsxErrorNode } from '../../../../../__generated__/graphql';
+import { XlsxErrorNode } from '@generated/graphql';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};

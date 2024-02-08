@@ -2,14 +2,14 @@ import { Box, Typography } from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useExistingGrievanceTicketsQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { decodeIdString } from '@utils/utils';
-import { ContentLink } from '../core/ContentLink';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { Title } from '../core/Title';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
 import {
   ApproveBox,
   BlueBold,

@@ -8,8 +8,8 @@ import { Pointer } from '@components/core/Pointer';
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { formatNumber, reportStatusToColor } from '@utils/utils';
-import { ReportNode } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { ReportNode } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const UnderlinedTableCell = styled(TableCell)`
   text-decoration: underline;

@@ -8,7 +8,7 @@ import {
   MergedIndividualMinimalFragment,
   useAllImportedIndividualsQuery,
   useAllMergedIndividualsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells as importedIndividualHeadCells } from './ImportedIndividualsTableHeadCells';
 import { headCells as mergedIndividualHeadCells } from './MergedIndividualsTableHeadCells';

@@ -9,9 +9,9 @@ import * as Yup from 'yup';
 import {
   ImportDataStatus,
   useCreateRegistrationXlsxImportMutation,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';

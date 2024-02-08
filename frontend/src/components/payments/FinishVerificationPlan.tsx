@@ -13,12 +13,12 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { getPercentage } from '@utils/utils';
 import {
   PaymentPlanQuery,
   useFinishPaymentVerificationPlanMutation,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { useProgramContext } from '../../programContext';
 
 export interface FinishVerificationPlanProps {

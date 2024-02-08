@@ -14,13 +14,13 @@ import * as Yup from 'yup';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
-import { GreyText } from '../../../core/GreyText';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { GreyText } from '@core/GreyText';
+import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../../programContext';
 
 export interface MarkAsReleasedPaymentPlanProps {

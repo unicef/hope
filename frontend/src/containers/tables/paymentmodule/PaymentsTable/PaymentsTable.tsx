@@ -11,7 +11,7 @@ import {
   PaymentPlanQuery,
   PaymentPlanStatus,
   useAllPaymentsForTableQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentsTableHeadCells';
 import { PaymentsTableRow } from './PaymentsTableRow';

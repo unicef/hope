@@ -6,10 +6,10 @@ import styled from 'styled-components';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { MiśTheme } from '../../theme';
-import { FieldBorder } from '../core/FieldBorder';
-import { LabelizedField } from '../core/LabelizedField';
+import { FieldBorder } from '@core/FieldBorder';
+import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 
 const colors = {

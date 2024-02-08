@@ -27,7 +27,7 @@ import {
   useAllAdminAreasQuery,
   useCreateAccountabilityCommunicationMessageMutation,
   useSurveyAvailableFlowsLazyQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { useConfirmation } from '@components/core/ConfirmationDialog';
@@ -38,9 +38,9 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TabPanel } from '@components/core/TabPanel';
 import { PaperContainer } from '@components/targeting/PaperContainer';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';

@@ -6,8 +6,8 @@ import {
   SaveKoboImportDataAsyncMutationVariables,
   useKoboImportDataLazyQuery,
   useSaveKoboImportDataAsyncMutation,
-} from '../../../../__generated__/graphql';
-import { useLazyInterval } from '../../../../hooks/useInterval';
+} from '@generated/graphql';
+import { useLazyInterval } from '@hooks/useInterval';
 
 export interface UseSaveKoboImportDataAndCheckStatusReturnType {
   saveAndStartPolling: (
@@ -20,25 +20,23 @@ export interface UseSaveKoboImportDataAndCheckStatusReturnType {
 
 export function useSaveKoboImportDataAndCheckStatus(): UseSaveKoboImportDataAndCheckStatusReturnType {
   const [loading, setLoading] = useState(false);
-  const [
-    saveKoboImportDataMutate,
-    { data: koboImportDataFromMutation },
-  ] = useSaveKoboImportDataAsyncMutation();
-  const [
-    loadImportData,
-    { data: koboImportData },
-  ] = useKoboImportDataLazyQuery({
-    variables: {
-      id: koboImportDataFromMutation?.saveKoboImportDataAsync?.importData?.id,
-    },
-    fetchPolicy: 'network-only',
-  });
-  const [startPollingImportData, stopPollingImportData] = useLazyInterval(
-    (args) => loadImportData({
+  const [saveKoboImportDataMutate, { data: koboImportDataFromMutation }] =
+    useSaveKoboImportDataAsyncMutation();
+  const [loadImportData, { data: koboImportData }] = useKoboImportDataLazyQuery(
+    {
       variables: {
-        id: args.id,
+        id: koboImportDataFromMutation?.saveKoboImportDataAsync?.importData?.id,
       },
-    }),
+      fetchPolicy: 'network-only',
+    },
+  );
+  const [startPollingImportData, stopPollingImportData] = useLazyInterval(
+    (args) =>
+      loadImportData({
+        variables: {
+          id: args.id,
+        },
+      }),
     3000,
   );
   useEffect(() => {

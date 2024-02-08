@@ -1,12 +1,12 @@
 import { Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import * as React from 'react';
-import { AllIndividualsForPopulationTableQuery } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { AllIndividualsForPopulationTableQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { sexToCapitalize } from '@utils/utils';
-import { BlackLink } from '../../../core/BlackLink';
-import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+import { BlackLink } from '@core/BlackLink';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];

@@ -9,7 +9,7 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { formatNumber } from '@utils/utils';
-import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 import { IndividualsReachedByAgeAndGenderGroupsChart } from '../../charts/IndividualsReachedByAgeAndGenderGroupsChart';
 import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
 import {

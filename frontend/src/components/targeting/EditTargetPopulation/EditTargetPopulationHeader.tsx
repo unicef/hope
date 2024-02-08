@@ -3,11 +3,11 @@ import { Field } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { TargetPopulationQuery } from '../../../__generated__/graphql';
+import { TargetPopulationQuery } from '@generated/graphql';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { BreadCrumbsItem } from '../../core/BreadCrumbs';
-import { LoadingButton } from '../../core/LoadingButton';
-import { PageHeader } from '../../core/PageHeader';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { LoadingButton } from '@core/LoadingButton';
+import { PageHeader } from '@core/PageHeader';
 
 interface EditTargetPopulationProps {
   handleSubmit: () => Promise<void>;

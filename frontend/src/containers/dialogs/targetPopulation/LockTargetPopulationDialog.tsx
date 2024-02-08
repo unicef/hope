@@ -2,14 +2,14 @@ import { Button, DialogContent, DialogTitle } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingButton } from '@components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useLockTpMutation } from '../../../__generated__/graphql';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useLockTpMutation } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface ApproveCandidateListPropTypes {
   open: boolean;

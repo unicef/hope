@@ -2,13 +2,10 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import {
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-} from '../../../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { DividerLine } from '../../../core/DividerLine';
-import { LabelizedField } from '../../../core/LabelizedField';
+import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { DividerLine } from '@core/DividerLine';
+import { LabelizedField } from '@core/LabelizedField';
 import { useProgramContext } from '../../../../programContext';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
 

@@ -5,9 +5,9 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
-import { LabelizedField } from '../../core/LabelizedField';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+import { GrievanceTicketQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { DocumentationField } from './DocumentationField';
 
 const DisabledDiv = styled.div`

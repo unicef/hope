@@ -5,11 +5,11 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
+import { OverviewContainer } from '@core/OverviewContainer';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { Title } from '../../../core/Title';
+import { Title } from '@core/Title';
 import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
-import { useTargetPopulationLazyQuery } from '../../../../__generated__/graphql';
+import { useTargetPopulationLazyQuery } from '@generated/graphql';
 import { tomorrow } from '@utils/utils';
 
 interface PaymentPlanParametersProps {

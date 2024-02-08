@@ -8,7 +8,7 @@ import {
   useProgramQuery,
   useUpdateProgramMutation,
   useUserPartnerChoicesQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -16,12 +16,12 @@ import { PageHeader } from '@components/core/PageHeader';
 import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
 import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
 import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { decodeIdString } from '@utils/utils';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 
 export function EditProgramPage(): ReactElement {
   const { t } = useTranslation();

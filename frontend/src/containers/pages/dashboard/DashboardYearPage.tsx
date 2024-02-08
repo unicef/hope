@@ -7,7 +7,7 @@ import {
   AllChartsQueryVariables,
   useAllChartsQuery,
   useGlobalAreaChartsLazyQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { TabPanel } from '@components/core/TabPanel';
 import { DashboardPaper } from '@components/dashboard/DashboardPaper';
@@ -23,7 +23,7 @@ import { TotalAmountTransferredSection } from '@components/dashboard/sections/To
 import { TotalNumberOfChildrenReachedSection } from '@components/dashboard/sections/TotalNumberOfChildrenReachedSection/TotalNumberOfChildrenReachedSection';
 import { TotalNumberOfHouseholdsReachedSection } from '@components/dashboard/sections/TotalNumberOfHouseholdsReachedSection/TotalNumberOfHouseholdsReachedSection';
 import { TotalNumberOfIndividualsReachedSection } from '@components/dashboard/sections/TotalNumberOfIndividualsReachedSection/TotalNumberOfIndividualsReachedSection';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const PaddingContainer = styled.div`
   padding: 20px;

@@ -1,10 +1,7 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  PaymentPlanStatus,
-  usePaymentPlanQuery,
-} from '../../../__generated__/graphql';
+import { PaymentPlanStatus, usePaymentPlanQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { FollowUpPaymentPlanDetails } from '@components/paymentmodule/FollowUpPaymentPlanDetails/FollowUpPaymentPlanDetails';
@@ -15,12 +12,12 @@ import { FspSection } from '@components/paymentmodule/PaymentPlanDetails/FspSect
 import { PaymentPlanDetailsResults } from '@components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsResults';
 import { ReconciliationSummary } from '@components/paymentmodule/PaymentPlanDetails/ReconciliationSummary';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { PaymentsTable } from '../../tables/paymentmodule/PaymentsTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { ExcludeSection } from '@components/paymentmodule/PaymentPlanDetails/ExcludeSection';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function FollowUpPaymentPlanDetailsPage(): React.ReactElement {
   const { id } = useParams();

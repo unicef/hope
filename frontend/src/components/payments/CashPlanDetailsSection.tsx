@@ -4,12 +4,12 @@ import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { countPercentage } from '@utils/utils';
-import { CashPlanQuery, PaymentPlanQuery } from '../../__generated__/graphql';
-import { BlackLink } from '../core/BlackLink';
-import { LabelizedField } from '../core/LabelizedField';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { CashPlanQuery, PaymentPlanQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const ChartContainer = styled.div`
   width: 100%;

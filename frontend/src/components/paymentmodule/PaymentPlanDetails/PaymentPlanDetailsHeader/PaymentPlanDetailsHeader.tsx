@@ -11,10 +11,10 @@ import {
   FinancialServiceProviderCommunicationChannel,
   PaymentPlanQuery,
   PaymentPlanStatus,
-} from '../../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
-import { StatusBox } from '../../../core/StatusBox';
+} from '@generated/graphql';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { StatusBox } from '@core/StatusBox';
 import { AcceptedPaymentPlanHeaderButtons } from './HeaderButtons/AcceptedPaymentPlanHeaderButtons';
 import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
 import { InAuthorizationPaymentPlanHeaderButtons } from './HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';

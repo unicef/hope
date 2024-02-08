@@ -4,9 +4,9 @@ import {
   AllAccountabilityCommunicationMessagesQueryVariables,
   CommunicationMessageNode,
   useAllAccountabilityCommunicationMessagesQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './CommunicationTableHeadCells';

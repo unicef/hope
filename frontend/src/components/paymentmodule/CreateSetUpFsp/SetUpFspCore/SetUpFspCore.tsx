@@ -7,7 +7,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AvailableFspsForDeliveryMechanismsDocument,
   PaymentPlanDocument,
@@ -15,10 +15,10 @@ import {
   useAssignFspToDeliveryMechMutation,
   useAvailableFspsForDeliveryMechanismsQuery,
   useChooseDeliveryMechForPaymentPlanMutation,
-} from '../../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LoadingComponent } from '../../../core/LoadingComponent';
+} from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { DeliveryMechanismRow } from '../DeliveryMechanismRow';
 import { SetUpFspButtonActions } from '../SetUpFspButtonActions/SetUpFspButtonActions';
 

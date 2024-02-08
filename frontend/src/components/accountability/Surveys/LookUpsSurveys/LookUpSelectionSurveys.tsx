@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { useProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
+import { useProgrammeChoiceDataQuery } from '@generated/graphql';
 import { SurveyTabsValues } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { LookUpProgrammesFiltersSurveys } from './LookUpProgrammesFiltersSurveys';

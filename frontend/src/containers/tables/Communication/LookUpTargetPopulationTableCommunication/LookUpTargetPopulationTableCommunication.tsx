@@ -2,14 +2,14 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBusinessArea } from '@hooks/useBusinessArea';
 import { decodeIdString } from '@utils/utils';
 import {
   AllActiveTargetPopulationsQueryVariables,
   TargetPopulationNode,
   TargetPopulationStatus,
   useAllActiveTargetPopulationsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpTargetPopulationTableHeadCellsCommunication';
 import { LookUpTargetPopulationTableRowCommunication } from './LookUpTargetPopulationTableRowCommunication';

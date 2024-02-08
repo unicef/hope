@@ -25,7 +25,7 @@ import {
   AllPaymentsForTableQuery,
   PaymentConflictDataNode,
   PaymentPlanQuery,
-} from '../../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { DialogFooter } from '../../../../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../dialogs/DialogTitleWrapper';
 

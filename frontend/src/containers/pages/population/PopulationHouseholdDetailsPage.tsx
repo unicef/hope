@@ -10,7 +10,7 @@ import {
   useGrievancesChoiceDataQuery,
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { FlagTooltip } from '@components/core/FlagTooltip';
 import { LabelizedField } from '@components/core/LabelizedField';
@@ -23,8 +23,8 @@ import { WarningTooltip } from '@components/core/WarningTooltip';
 import { HouseholdDetails } from '@components/population/HouseholdDetails';
 import { HouseholdVulnerabilities } from '@components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   isPermissionDeniedError,
   renderSomethingOrDash,

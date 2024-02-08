@@ -4,7 +4,7 @@ import {
   AllSanctionListIndividualsQueryVariables,
   useAllSanctionListIndividualsQuery,
   AllSanctionListIndividualsQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { SanctionListIndividualsTableRow } from './SanctionListIndividualsTableRow';
 import { headCells } from './SanctionListIndividualsHeadCells';
 

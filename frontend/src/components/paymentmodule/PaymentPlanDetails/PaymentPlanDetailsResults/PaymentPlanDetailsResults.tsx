@@ -4,10 +4,10 @@ import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../../theme';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { LabelizedField } from '../../../core/LabelizedField';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { FieldBorder } from '../../../core/FieldBorder';
+import { FieldBorder } from '@core/FieldBorder';
 
 const colors = {
   femaleChildren: '#5F02CF',

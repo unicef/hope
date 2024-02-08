@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
-import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
+import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
 
 const CriteriaElement = styled.div`
   width: auto;

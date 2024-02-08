@@ -8,13 +8,10 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  AllAreasTreeQuery,
-  UserPartnerChoicesQuery,
-} from '../../../__generated__/graphql';
+import { AllAreasTreeQuery, UserPartnerChoicesQuery } from '@generated/graphql';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { DividerLine } from '../../core/DividerLine';
+import { DividerLine } from '@core/DividerLine';
 import { DeleteProgramPartner } from './DeleteProgramPartner';
 import { AreaTreeNode } from './AreaTreeNode';
 

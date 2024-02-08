@@ -10,15 +10,15 @@ import { ImportedIndividualPhotoModal } from '@components/population/ImportedInd
 import { RegistrationIndividualBioData } from '@components/rdi/details/individual/RegistrationIndividualBioData/RegistrationIndividualBioData';
 import { RegistrationIndividualVulnerabilities } from '@components/rdi/details/individual/RegistrationIndividualVulnerabilities/RegistrationIndividualVulnerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import {
   ImportedIndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
   useHouseholdChoiceDataQuery,
   useImportedIndividualQuery,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;

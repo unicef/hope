@@ -3,10 +3,10 @@ import Paper from '@mui/material/Paper';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
-import { Title } from '../../../core/Title';
+import { LabelizedField } from '@core/LabelizedField';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useRegistrationDataImportQuery } from '@generated/graphql';
+import { Title } from '@core/Title';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px

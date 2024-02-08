@@ -3,12 +3,12 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceUrgencyMutation,
   useGrievancesChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`

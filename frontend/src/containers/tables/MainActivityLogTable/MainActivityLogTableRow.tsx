@@ -7,17 +7,14 @@ import moment from 'moment';
 import { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  AllLogEntriesQuery,
-  LogEntryAction,
-} from '../../../__generated__/graphql';
+import { AllLogEntriesQuery, LogEntryAction } from '@generated/graphql';
 import {
   ButtonPlaceHolder,
   Cell,
   Row,
 } from '@components/core/ActivityLogTable/TableStyledComponents';
 import { Dashable } from '@components/core/Dashable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { MiśTheme } from '../../../theme';
 import { headCells } from './MainActivityLogTableHeadCells';
 

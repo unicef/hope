@@ -4,14 +4,14 @@ import { Grid, MenuItem } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { HouseholdChoiceDataQuery } from '../../../../__generated__/graphql';
+import { HouseholdChoiceDataQuery } from '@generated/graphql';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { householdTableOrderOptions } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { FiltersSection } from '../../../core/FiltersSection';
-import { NumberTextField } from '../../../core/NumberTextField';
-import { SearchTextField } from '../../../core/SearchTextField';
-import { SelectFilter } from '../../../core/SelectFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 
 interface LookUpHouseholdFiltersCommunicationProps {
   filter;

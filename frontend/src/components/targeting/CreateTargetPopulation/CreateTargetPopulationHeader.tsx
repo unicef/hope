@@ -4,9 +4,9 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { BreadCrumbsItem } from '../../core/BreadCrumbs';
-import { LoadingButton } from '../../core/LoadingButton';
-import { PageHeader } from '../../core/PageHeader';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { LoadingButton } from '@core/LoadingButton';
+import { PageHeader } from '@core/PageHeader';
 
 interface CreateTargetPopulationHeaderProps {
   handleSubmit: () => Promise<void>;

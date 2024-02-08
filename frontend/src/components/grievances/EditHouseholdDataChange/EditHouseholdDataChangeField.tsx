@@ -11,12 +11,12 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   AllEditHouseholdFieldsQuery,
   useAllAdminAreasLazyQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
 import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
 import { FormikAsyncAutocomplete } from '@shared/Formik/FormikAsyncAutocomplete';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface EditHouseholdDataChangeField {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];

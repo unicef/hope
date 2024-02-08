@@ -9,12 +9,12 @@ import {
   useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { TabPanel } from '../../../core/TabPanel';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { TabPanel } from '@core/TabPanel';
 import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';

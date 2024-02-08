@@ -5,9 +5,9 @@ import {
   PaymentRecordAndPaymentNode,
   useAllPaymentRecordsAndPaymentsQuery,
   useLookUpPaymentRecordsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpPaymentRecordTableHeadCells';
 import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
 

@@ -7,8 +7,8 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AllIndividualsQuery } from '../../../__generated__/graphql';
-import { LabelizedField } from '../../core/LabelizedField';
+import { AllIndividualsQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
 import { PaymentChannelField } from '../PaymentChannelField';
 import { removeItemById } from '@utils/helpers';
 

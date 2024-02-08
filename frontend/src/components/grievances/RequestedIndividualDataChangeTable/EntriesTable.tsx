@@ -10,7 +10,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { GrievanceTicketQuery } from '@generated/graphql';
 import { handleSelected } from '@utils/helpers';
 import { individualDataRow } from './individualDataRow';
 

@@ -9,14 +9,14 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { HouseholdDetails } from '@components/rdi/details/households/HouseholdDetails/HouseholdDetails';
 import { RegistrationDetails } from '@components/rdi/details/households/RegistrationDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import {
   useHouseholdChoiceDataQuery,
   useImportedHouseholdQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { HouseholdImportedIndividualsTable } from '../../tables/rdi/HouseholdImportedIndividualsTable/HouseholdImportedIndividualsTable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Container = styled.div`
   padding: 20px;

@@ -12,10 +12,10 @@ import { useTranslation } from 'react-i18next';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
 

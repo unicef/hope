@@ -8,7 +8,7 @@ import {
   BusinessAreaDataQuery,
   TargetPopulationQuery,
   useCashAssistUrlPrefixQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 

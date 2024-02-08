@@ -12,8 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useDebounce } from '../../hooks/useDebounce';
-import { SearchTextField } from '../core/SearchTextField';
+import { useDebounce } from '@hooks/useDebounce';
+import { SearchTextField } from '@core/SearchTextField';
 import { SanctionListIndividualsTable } from './SanctionListIndividualsTable/SanctionListIndividualsTable';
 
 export function ViewSanctionList({

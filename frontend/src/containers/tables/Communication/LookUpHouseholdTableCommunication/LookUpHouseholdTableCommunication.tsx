@@ -6,9 +6,9 @@ import {
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   useAllHouseholdsForPopulationTableQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpHouseholdComunicationTableHeadCells';
 import { LookUpHouseholdTableRowCommunication } from './LookUpHouseholdTableRowCommunication';

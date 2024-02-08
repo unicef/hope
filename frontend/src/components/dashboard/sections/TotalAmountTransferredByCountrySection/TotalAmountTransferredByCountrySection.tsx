@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { GlobalAreaChartsQuery } from '../../../../__generated__/graphql';
+import { GlobalAreaChartsQuery } from '@generated/graphql';
 import { TotalAmountTransferredByCountryChart } from '../../charts/TotalAmountTransferredByCountryChart';
 import { CardTextLightLarge } from '../../DashboardCard';
 import { DashboardPaper } from '../../DashboardPaper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface TotalAmountTransferredByCountrySectionProps {
   data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];

@@ -5,7 +5,7 @@ import TableCell from '@mui/material/TableCell';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { Box, Collapse, IconButton, TableRow } from '@mui/material';
-import { UserNode } from '../../../__generated__/graphql';
+import { UserNode } from '@generated/graphql';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { StatusBox } from '@components/core/StatusBox';
 import { userStatusToColor } from '@utils/utils';

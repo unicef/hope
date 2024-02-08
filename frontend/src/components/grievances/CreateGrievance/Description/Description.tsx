@@ -7,18 +7,18 @@ import {
   AllProgramsForChoicesQuery,
   GrievancesChoiceDataQuery,
   usePartnerForGrievanceChoicesQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { choicesToDict } from '@utils/utils';
-import { BlackLink } from '../../../core/BlackLink';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
+import { BlackLink } from '@core/BlackLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';

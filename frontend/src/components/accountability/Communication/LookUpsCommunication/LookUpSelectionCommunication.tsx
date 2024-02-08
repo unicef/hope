@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
   useHouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { CommunicationTabsValues } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { LookUpHouseholdFiltersCommunication } from './LookUpHouseholdFiltersCommunication';

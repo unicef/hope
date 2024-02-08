@@ -5,7 +5,7 @@ import {
   AllProgramsQuery,
   ProgrammeChoiceDataQuery,
   useAllActiveProgramsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './LookUpProgrammesHeadCellsSurveys';

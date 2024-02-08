@@ -7,7 +7,7 @@ import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityL
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';

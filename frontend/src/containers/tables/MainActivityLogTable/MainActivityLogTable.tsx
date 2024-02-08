@@ -3,15 +3,12 @@ import styled from 'styled-components';
 import Collapse from '@mui/material/Collapse';
 import { Paper } from '@mui/material';
 import TablePagination from '@mui/material/TablePagination';
-import {
-  AllLogEntriesQuery,
-  LogEntryNode,
-} from '../../../__generated__/graphql';
+import { AllLogEntriesQuery, LogEntryNode } from '@generated/graphql';
 import {
   ButtonPlaceHolder,
   Row,
 } from '@components/core/ActivityLogTable/TableStyledComponents';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
 

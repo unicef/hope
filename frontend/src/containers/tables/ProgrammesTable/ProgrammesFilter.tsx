@@ -3,7 +3,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import moment from 'moment';
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
-import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { NumberTextField } from '@components/core/NumberTextField';

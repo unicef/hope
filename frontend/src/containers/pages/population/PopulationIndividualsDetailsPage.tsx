@@ -9,7 +9,7 @@ import {
   useGrievancesChoiceDataQuery,
   useHouseholdChoiceDataQuery,
   useIndividualQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -19,8 +19,8 @@ import { IndividualFlags } from '@components/population/IndividualFlags';
 import { IndividualPhotoModal } from '@components/population/IndividualPhotoModal';
 import { IndividualVulnerabilities } from '@components/population/IndividualVulnerabilities/IndividualVunerabilities';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 

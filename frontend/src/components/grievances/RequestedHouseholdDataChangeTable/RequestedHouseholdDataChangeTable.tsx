@@ -6,13 +6,13 @@ import TableRow from '@mui/material/TableRow';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketQuery,
   useAllEditHouseholdFieldsQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { handleSelected } from '@utils/helpers';
 import { householdDataRow } from './householdDataRow';
 

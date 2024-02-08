@@ -3,7 +3,7 @@ import {
   PaymentPlanStatus,
   ProgramStatus,
   TargetPopulationStatus,
-} from '../__generated__/graphql';
+} from '@generated/graphql';
 
 export const TARGETING_STATES = {
   NONE: 'None',

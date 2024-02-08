@@ -6,11 +6,11 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { PaymentPlansTable } from '../../tables/paymentmodule/PaymentPlansTable';
 import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTable/PaymentPlansFilters';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
 

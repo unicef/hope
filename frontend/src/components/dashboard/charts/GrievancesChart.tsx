@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { formatNumber, getPercentage } from '@utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface GrievancesChartProps {
   data: AllChartsQuery['chartGrievances'];

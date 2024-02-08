@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useLoggedCheckerQuery } from '../../../__generated__/graphql';
+import { useLoggedCheckerQuery } from '@generated/graphql';
 import { LOGIN_URL } from '../../../config';
 
 export const ProfilePage = (): React.ReactElement | null => {

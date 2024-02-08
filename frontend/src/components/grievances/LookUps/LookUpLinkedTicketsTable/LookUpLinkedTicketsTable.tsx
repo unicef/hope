@@ -7,8 +7,8 @@ import {
   AllGrievanceTicketQueryVariables,
   useAllGrievanceTicketQuery,
   useGrievancesChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../core/TableWrapper';
+} from '@generated/graphql';
+import { TableWrapper } from '@core/TableWrapper';
 import { headCells } from './LookUpLinkedTicketsHeadCells';
 import { LookUpLinkedTicketsTableRow } from './LookUpLinkedTicketsTableRow';
 

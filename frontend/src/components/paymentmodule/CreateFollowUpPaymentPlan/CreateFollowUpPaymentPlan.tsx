@@ -18,21 +18,21 @@ import * as Yup from 'yup';
 import {
   PaymentPlanQuery,
   useCreateFollowUpPpMutation,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { today, tomorrow } from '@utils/utils';
-import { DividerLine } from '../../core/DividerLine';
-import { FieldBorder } from '../../core/FieldBorder';
-import { GreyText } from '../../core/GreyText';
-import { LabelizedField } from '../../core/LabelizedField';
-import { LoadingButton } from '../../core/LoadingButton';
+import { DividerLine } from '@core/DividerLine';
+import { FieldBorder } from '@core/FieldBorder';
+import { GreyText } from '@core/GreyText';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
 
 export interface CreateFollowUpPaymentPlanProps {

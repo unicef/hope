@@ -11,12 +11,12 @@ import {
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { PaymentQuery } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../core/LabelizedField';
-import { StatusBox } from '../core/StatusBox';
-import { UniversalMoment } from '../core/UniversalMoment';
-import { Title } from '../core/Title';
+import { PaymentQuery } from '@generated/graphql';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { Title } from '@core/Title';
 
 const Overview = styled(Paper)`
   margin: 20px;

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import {
   useDataCollectionTypeChoiceDataQuery,
   useProgrammeChoiceDataQuery,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';

@@ -18,15 +18,15 @@ import styled from 'styled-components';
 import {
   AllGrievanceTicketQuery,
   useRelatedGrievanceTicketsLazyQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { grievanceTicketStatusToColor } from '@utils/utils';
-import { BlackLink } from '../../core/BlackLink';
-import { LoadingComponent } from '../../core/LoadingComponent';
-import { StatusBox } from '../../core/StatusBox';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+import { BlackLink } from '@core/BlackLink';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '@utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`

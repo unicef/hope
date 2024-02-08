@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { Title } from '../../../core/Title';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { Title } from '@core/Title';
 
 export function TotalAmount(): React.ReactElement {
   const { t } = useTranslation();

@@ -5,15 +5,15 @@ import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql';
+import { useCopyTargetPopulationMutation } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;

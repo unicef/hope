@@ -1,12 +1,12 @@
 import TableCell from '@mui/material/TableCell';
 import * as React from 'react';
 import { Checkbox } from '@mui/material';
-import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
-import { StatusBox } from '../../../core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { StatusBox } from '@core/StatusBox';
 import { grievanceTicketStatusToColor, renderUserName } from '@utils/utils';
-import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { AllGrievanceTicketQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { getGrievanceDetailsPath } from '@utils/createGrievanceUtils';
 
 interface LookUpLinkedTicketsTableRowProps {

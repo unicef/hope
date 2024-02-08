@@ -10,8 +10,8 @@ import styled from 'styled-components';
 import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
-} from '../../../__generated__/graphql';
-import { LabelizedField } from '../../core/LabelizedField';
+} from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
 import { AgencyField } from '../AgencyField';
 import { removeItemById } from '@utils/helpers';
 

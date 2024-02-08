@@ -2,7 +2,7 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import capitalize from 'lodash/capitalize';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { getFlexFieldTextValue, renderBoolean } from '@utils/utils';
 import {
@@ -10,11 +10,11 @@ import {
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
-} from '../../__generated__/graphql';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { Title } from '../core/Title';
+} from '@generated/graphql';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export function AddIndividualGrievanceDetails({

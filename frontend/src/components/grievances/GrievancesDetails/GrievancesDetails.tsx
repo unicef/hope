@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   GrievanceTicketQuery,
   GrievancesChoiceDataQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   choicesToDict,
@@ -12,16 +12,16 @@ import {
   grievanceTicketStatusToColor,
   renderUserName,
 } from '@utils/utils';
-import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
-import { ContentLink } from '../../core/ContentLink';
-import { LabelizedField } from '../../core/LabelizedField';
-import { OverviewContainer } from '../../core/OverviewContainer';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
-import { StatusBox } from '../../core/StatusBox';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { BlackLink } from '../../core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { BlackLink } from '@core/BlackLink';
 
 interface GrievancesDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];

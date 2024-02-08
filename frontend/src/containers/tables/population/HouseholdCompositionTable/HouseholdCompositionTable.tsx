@@ -11,7 +11,7 @@ import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { Title } from '@components/core/Title';
-import { HouseholdNode } from '../../../../__generated__/graphql';
+import { HouseholdNode } from '@generated/graphql';
 
 const GreyTableCell = styled(TableCell)`
   background-color: #eeeeee;

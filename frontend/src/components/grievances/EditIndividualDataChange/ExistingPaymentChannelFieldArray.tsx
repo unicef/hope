@@ -2,7 +2,7 @@ import { Box, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import * as React from 'react';
-import { IndividualQuery } from '../../../__generated__/graphql';
+import { IndividualQuery } from '@generated/graphql';
 import { EditPaymentChannelRow } from './EditPaymentChannelRow';
 
 export interface ExistingPaymentChannelFieldArrayProps {

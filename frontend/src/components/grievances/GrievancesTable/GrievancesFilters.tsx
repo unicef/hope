@@ -6,9 +6,9 @@ import { useLocation } from 'react-router-dom';
 import {
   GrievancesChoiceDataQuery,
   useGrievanceTicketAreaScopeQuery,
-} from '../../../__generated__/graphql';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
 import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
@@ -22,11 +22,11 @@ import {
   GrievanceTypes,
 } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { DatePickerFilter } from '../../core/DatePickerFilter';
-import { FiltersSection } from '../../core/FiltersSection';
-import { NumberTextField } from '../../core/NumberTextField';
-import { SearchTextField } from '../../core/SearchTextField';
-import { SelectFilter } from '../../core/SelectFilter';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 
 interface GrievancesFiltersProps {
   filter;

@@ -6,9 +6,9 @@ import styled from 'styled-components';
 import {
   AllProgramsForChoicesQuery,
   useAllProgramsForChoicesQuery,
-} from '../__generated__/graphql';
+} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { useBaseUrl } from '../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../programContext';
 import { isProgramNodeUuidFormat } from '@utils/utils';
 

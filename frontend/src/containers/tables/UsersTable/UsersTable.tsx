@@ -4,9 +4,9 @@ import {
   AllUsersQueryVariables,
   useAllUsersQuery,
   UserNode,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './UsersTableHeadCells';
 import { UsersTableRow } from './UsersTableRow';

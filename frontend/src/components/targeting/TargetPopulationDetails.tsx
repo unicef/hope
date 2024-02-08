@@ -2,13 +2,13 @@ import { Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { targetPopulationStatusToColor } from '@utils/utils';
-import { TargetPopulationQuery } from '../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../core/LabelizedField';
-import { OverviewContainer } from '../core/OverviewContainer';
-import { StatusBox } from '../core/StatusBox';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
+import { TargetPopulationQuery } from '@generated/graphql';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface ProgramDetailsProps {
   targetPopulation: TargetPopulationQuery['targetPopulation'];

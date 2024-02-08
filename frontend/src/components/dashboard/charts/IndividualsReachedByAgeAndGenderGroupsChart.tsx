@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface IndividualsReachedByAgeAndGenderGroupsChartProps {
   data: AllChartsQuery['chartIndividualsReachedByAgeAndGender'];

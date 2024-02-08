@@ -7,8 +7,8 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { targetPopulationStatusToColor } from '@utils/utils';
-import { TargetPopulationNode } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { TargetPopulationNode } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface TargetPopulationTableRowProps {
   targetPopulation: TargetPopulationNode;

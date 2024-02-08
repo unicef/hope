@@ -8,18 +8,18 @@ import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import {
   SurveyCategory,
   useExportSurveySampleMutation,
   useSurveyQuery,
   useSurveysChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 

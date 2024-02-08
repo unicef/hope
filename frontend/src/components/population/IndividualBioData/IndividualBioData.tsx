@@ -14,11 +14,11 @@ import {
   HouseholdChoiceDataQuery,
   IndividualDisability,
   IndividualNode,
-} from '../../../__generated__/graphql';
-import { ContentLink } from '../../core/ContentLink';
-import { LabelizedField } from '../../core/LabelizedField';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
+} from '@generated/graphql';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 

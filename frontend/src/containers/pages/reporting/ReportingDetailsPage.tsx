@@ -20,16 +20,16 @@ import { StatusBox } from '@components/core/StatusBox';
 import { Title } from '@components/core/Title';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { REPORTING_STATES } from '@utils/constants';
 import { choicesToDict, reportStatusToColor } from '@utils/utils';
 import {
   useReportChoiceDataQuery,
   useReportQuery,
   useRestartCreateReportMutation,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const IconContainer = styled.div`
   color: #d1d1d1;

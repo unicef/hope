@@ -11,12 +11,12 @@ import {
   PaymentVerificationPlanVerificationChannel,
   useExportXlsxPaymentVerificationPlanFileMutation,
   useInvalidPaymentVerificationPlanMutation,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { PERMISSIONS, hasPermissions } from '../../config/permissions';
-import { usePermissions } from '../../hooks/usePermissions';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { LoadingButton } from '../core/LoadingButton';
-import { Title } from '../core/Title';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { LoadingButton } from '@core/LoadingButton';
+import { Title } from '@core/Title';
 import { ActivateVerificationPlan } from './ActivateVerificationPlan';
 import { DeleteVerificationPlan } from './DeleteVerificationPlan';
 import { DiscardVerificationPlan } from './DiscardVerificationPlan';

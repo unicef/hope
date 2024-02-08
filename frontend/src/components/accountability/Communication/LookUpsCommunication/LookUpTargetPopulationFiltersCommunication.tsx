@@ -3,16 +3,16 @@ import { Group, Person } from '@mui/icons-material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { TargetPopulationStatus } from '../../../../__generated__/graphql';
+import { TargetPopulationStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
 } from '@utils/utils';
-import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { FiltersSection } from '../../../core/FiltersSection';
-import { NumberTextField } from '../../../core/NumberTextField';
-import { SearchTextField } from '../../../core/SearchTextField';
-import { SelectFilter } from '../../../core/SelectFilter';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 
 interface LookUpTargetPopulationFiltersCommunicationProps {
   filter;

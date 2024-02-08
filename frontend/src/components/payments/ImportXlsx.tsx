@@ -6,15 +6,15 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   useImportXlsxPaymentVerificationPlanFileMutation,
   ImportXlsxPaymentVerificationPlanFileMutation,
   XlsxErrorNode,
-} from '../../__generated__/graphql';
-import { DropzoneField } from '../core/DropzoneField';
-import { LoadingButton } from '../core/LoadingButton';
+} from '@generated/graphql';
+import { DropzoneField } from '@core/DropzoneField';
+import { LoadingButton } from '@core/LoadingButton';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};

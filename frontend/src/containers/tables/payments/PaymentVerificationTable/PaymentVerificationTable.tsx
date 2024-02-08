@@ -4,8 +4,8 @@ import {
   AllCashPlansAndPaymentPlansQueryVariables,
   CashPlanAndPaymentPlanNode,
   useAllCashPlansAndPaymentPlansQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';

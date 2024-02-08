@@ -1,10 +1,10 @@
 import { Box } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
-import { useSnackbar } from '../../../../../hooks/useSnackBar';
-import { Action, PaymentPlanQuery } from '../../../../../__generated__/graphql';
-import { LoadingButton } from '../../../../core/LoadingButton';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../../../programContext';
 
 export interface LockedFspPaymentPlanHeaderButtonsProps {

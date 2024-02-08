@@ -12,11 +12,11 @@ import {
 import {
   HouseholdChoiceDataQuery,
   ImportedIndividualDetailedFragment,
-} from '../../../../../__generated__/graphql';
-import { ContentLink } from '../../../../core/ContentLink';
-import { LabelizedField } from '../../../../core/LabelizedField';
-import { Title } from '../../../../core/Title';
-import { UniversalMoment } from '../../../../core/UniversalMoment';
+} from '@generated/graphql';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
 
 const Overview = styled(Paper)`

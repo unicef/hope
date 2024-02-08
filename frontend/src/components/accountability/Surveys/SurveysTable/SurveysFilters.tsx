@@ -5,9 +5,9 @@ import { useLocation } from 'react-router-dom';
 import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
 import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { FiltersSection } from '../../../core/FiltersSection';
-import { SearchTextField } from '../../../core/SearchTextField';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { SearchTextField } from '@core/SearchTextField';
 
 interface SurveysFiltersProps {
   filter;

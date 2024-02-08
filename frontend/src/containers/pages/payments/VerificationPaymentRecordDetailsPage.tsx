@@ -5,7 +5,7 @@ import {
   PaymentVerificationPlanStatus,
   usePaymentRecordQuery,
   usePaymentVerificationChoicesQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -13,8 +13,8 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { VerificationPaymentRecordDetails } from '@components/payments/VerificationPaymentRecordDetails';
 import { VerifyManual } from '@components/payments/VerifyManual';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 
 export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
