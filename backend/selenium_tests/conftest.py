@@ -2,12 +2,12 @@ import os
 from datetime import datetime
 from time import sleep
 
-from _pytest.nodes import Item
 from django.conf import settings
 from django.core.management import call_command
 
 import pytest
 from _pytest.fixtures import FixtureRequest
+from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
