@@ -23,7 +23,8 @@ export function LookUpRegistrationDataImportTableRowCommunication({
   selectedRDI,
   radioChangeHandler,
 }: LookUpRegistrationDataImportTableRowCommunicationProps): React.ReactElement {
-const navigate = useNavigate()  const businessArea = useBusinessArea();
+  const navigate = useNavigate();
+  const businessArea = useBusinessArea();
   const importDetailsPath = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {

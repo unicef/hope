@@ -15,10 +15,7 @@ import {
   formatCurrencyWithSymbol,
   householdStatusToColor,
 } from '@utils/utils';
-import {
-  HouseholdChoiceDataQuery,
-  HouseholdNode,
-} from '@generated/graphql';
+import { HouseholdChoiceDataQuery, HouseholdNode } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface HouseholdTableRowProps {
@@ -32,7 +29,8 @@ export function HouseholdTableRow({
   choicesData,
   canViewDetails,
 }: HouseholdTableRowProps): React.ReactElement {
-const navigate = useNavigate()  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const residenceStatusChoiceDict = choicesToDict(
     choicesData.residenceStatusChoices,

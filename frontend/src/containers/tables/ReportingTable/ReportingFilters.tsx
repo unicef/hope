@@ -1,7 +1,7 @@
 import { Checkbox, FormControlLabel, Grid, MenuItem } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { FiltersSection } from '@components/core/FiltersSection';
 import { SelectFilter } from '@components/core/SelectFilter';

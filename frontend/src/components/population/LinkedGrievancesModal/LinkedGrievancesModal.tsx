@@ -11,17 +11,14 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import  { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import {
-  grievanceTicketStatusToColor,
-  choicesToDict,
-} from '@utils/utils';
+import { grievanceTicketStatusToColor, choicesToDict } from '@utils/utils';
 import {
   GrievancesChoiceDataQuery,
   HouseholdNode,
@@ -66,7 +63,8 @@ export function LinkedGrievancesModal({
   grievancesChoices,
 }: LinkedGrievancesModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
-const navigate = useNavigate()  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { data: grievances } = useAllGrievanceTicketQuery({
     variables: { businessArea, household: household.unicefId },
@@ -110,26 +108,26 @@ const navigate = useNavigate()  const { t } = useTranslation();
 
   const allGrievances = grievances ? grievances.allGrievanceTicket.edges : [];
 
-  const renderGrievances = (): Array<React.ReactElement> => (allGrievances.length
-    ? allGrievances.map((el) => {
-      const grievanceDetailsPath = getGrievanceDetailsPath(
-        el.node.id,
-        el.node.category,
-        baseUrl,
-      );
-      return (
-        <span key={el.node.id}>
-          <ContentLink href={grievanceDetailsPath}>
-            {`${el.node.unicefId} - ${
-              categoryChoices[el.node.category]
-            } - ${statusChoices[el.node.status]}`}
-          </ContentLink>
-          {' '}
-          <br />
-        </span>
-      );
-    })
-    : [<span>-</span>]);
+  const renderGrievances = (): Array<React.ReactElement> =>
+    allGrievances.length
+      ? allGrievances.map((el) => {
+          const grievanceDetailsPath = getGrievanceDetailsPath(
+            el.node.id,
+            el.node.category,
+            baseUrl,
+          );
+          return (
+            <span key={el.node.id}>
+              <ContentLink href={grievanceDetailsPath}>
+                {`${el.node.unicefId} - ${
+                  categoryChoices[el.node.category]
+                } - ${statusChoices[el.node.status]}`}
+              </ContentLink>{' '}
+              <br />
+            </span>
+          );
+        })
+      : [<span key="empty">-</span>];
 
   const renderLink = (): React.ReactElement => {
     if (allGrievances.length === 0) {

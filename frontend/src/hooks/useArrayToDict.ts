@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as React from 'react';
 import { useEffect, useState } from 'react';
 import get from 'lodash/get';
 import isFunction from 'lodash/isFunction';
@@ -22,14 +21,12 @@ export function useArrayToDict<T>(
     let key;
     let value;
     if (isFunction(keyExtractor)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       key = keyExtractor(currentValue);
     } else {
       key = get(currentValue, keyExtractor);
     }
     if (isFunction(valueExtractor)) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       value = valueExtractor(currentValue);
     } else {

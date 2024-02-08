@@ -1,6 +1,6 @@
 import { Tab, Tabs } from '@mui/material';
-import  { useState } from 'react';
-import {  useLocation, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -22,7 +22,8 @@ export function GrievancesTablePage(): React.ReactElement {
   const permissions = usePermissions();
   const { id, cashPlanId } = useParams();
   const location = useLocation();
-const navigate = useNavigate()  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
+  const navigate = useNavigate();
+  const isUserGenerated = location.pathname.indexOf('user-generated') !== -1;
 
   const initialFilter = {
     search: '',
@@ -62,7 +63,8 @@ const navigate = useNavigate()  const isUserGenerated = location.pathname.indexO
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery({ fetchPolicy: 'cache-and-network' });
 
   const grievanceTicketsTypes = ['USER-GENERATED', 'SYSTEM-GENERATED'];
   const userGeneratedPath = `/${baseUrl}/grievance/tickets/user-generated`;
@@ -74,7 +76,7 @@ const navigate = useNavigate()  const isUserGenerated = location.pathname.indexO
   const tabs = (
     <Tabs
       value={selectedTab}
-      onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
+      onChange={(_event, newValue: number) => {
         setSelectedTab(newValue);
         setFilter({
           ...filter,
@@ -96,7 +98,8 @@ const navigate = useNavigate()  const isUserGenerated = location.pathname.indexO
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)) return <PermissionDenied />;
+  if (!hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions))
+    return <PermissionDenied />;
   if (!choicesData) return null;
 
   return (

@@ -2,7 +2,7 @@ import { Box, Grid, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import {  useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   HouseholdNode,
@@ -25,10 +25,7 @@ import { HouseholdVulnerabilities } from '@components/population/HouseholdVulner
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
-import {
-  isPermissionDeniedError,
-  renderSomethingOrDash,
-} from '@utils/utils';
+import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
@@ -58,36 +55,42 @@ const SubTitle = styled(Typography)`
   }
 `;
 
-export function PopulationHouseholdDetailsPage(): React.ReactElement {
+export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
-const navigate = useNavigate()  const permissions = usePermissions();
+  const location = useLocation();
+  const permissions = usePermissions();
 
   const { data, loading, error } = useHouseholdQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const { data: flexFieldsData, loading: flexFieldsDataLoading } = useAllHouseholdsFlexFieldsAttributesQuery();
-  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery();
-  const { data: grievancesChoices, loading: grievancesChoicesLoading } = useGrievancesChoiceDataQuery();
+  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
+    useAllHouseholdsFlexFieldsAttributesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
+  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   if (
-    loading
-    || choicesLoading
-    || flexFieldsDataLoading
-    || grievancesChoicesLoading
-  ) return <LoadingComponent />;
+    loading ||
+    choicesLoading ||
+    flexFieldsDataLoading ||
+    grievancesChoicesLoading
+  )
+    return <LoadingComponent />;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (
-    !data
-    || !choicesData
-    || !grievancesChoices
-    || !flexFieldsData
-    || permissions === null
-  ) return null;
+    !data ||
+    !choicesData ||
+    !grievancesChoices ||
+    !flexFieldsData ||
+    permissions === null
+  )
+    return null;
 
   let breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -95,8 +98,8 @@ const navigate = useNavigate()  const permissions = usePermissions();
       to: `/${baseUrl}/population/household`,
     },
   ];
-  const breadcrumbTitle = history.location?.state?.breadcrumbTitle;
-  const breadcrumbUrl = history.location?.state?.breadcrumbUrl;
+  const breadcrumbTitle = location?.state?.breadcrumbTitle;
+  const breadcrumbUrl = location?.state?.breadcrumbUrl;
 
   if (breadcrumbTitle && breadcrumbUrl) {
     breadCrumbsItems = [
@@ -123,7 +126,7 @@ const navigate = useNavigate()  const permissions = usePermissions();
             ? breadCrumbsItems
             : null
         }
-        flags={(
+        flags={
           <>
             <Box mr={2}>
               {household?.hasDuplicates && (
@@ -147,7 +150,7 @@ const navigate = useNavigate()  const permissions = usePermissions();
               )}
             </Box>
           </>
-        )}
+        }
       />
       <HouseholdDetails
         choicesData={choicesData}
@@ -244,4 +247,4 @@ const navigate = useNavigate()  const permissions = usePermissions();
       )}
     </>
   );
-}
+};

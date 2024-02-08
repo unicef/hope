@@ -24,7 +24,7 @@ export function AdminAreaFixedAutocomplete({
   additionalOnChange,
   dataCy,
 }: {
-  value: string | AllAdminAreasQuery['allAdminAreas']['edges'][number];
+  value: string | AllAdminAreasQuery['allAdminAreas']['edges'][number]['node'];
   onChange;
   disabled?;
   level?;
@@ -60,6 +60,7 @@ export function AdminAreaFixedAutocomplete({
       );
     }
   }, [data, value]);
+
   const onChangeMiddleware = (e, selectedValue, reason): void => {
     onInputTextChange(selectedValue?.node?.name);
     onChange(e, selectedValue, reason);
@@ -70,7 +71,9 @@ export function AdminAreaFixedAutocomplete({
       onClear();
     }
   };
+
   return (
+    // @ts-ignore
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       open={open}
       filterOptions={(options1) => options1}

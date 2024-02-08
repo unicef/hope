@@ -1,24 +1,23 @@
-import { Box } from '@mui/material';
-import Collapse from '@mui/material/Collapse';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import  { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
 } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import { Box, ListItemButton, Theme } from '@mui/material';
+import Collapse from '@mui/material/Collapse';
+import List from '@mui/material/List';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import { ElementType, useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { usePermissions } from '@hooks/usePermissions';
 import { MenuItem, menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
@@ -37,8 +36,15 @@ const Icon = styled(ListItemIcon)`
   }
 `;
 
-const SubList = styled(List)`
-  padding-left: ${({ theme, open }) => (open ? `${theme.spacing(10)}px !important` : 0)};
+interface SubListProps {
+  theme: Theme;
+  open: boolean;
+  component: ElementType;
+}
+
+const SubList = styled(List)<SubListProps>`
+  padding-left: ${({ theme, open }) =>
+    open ? `${theme.spacing(10)}px !important` : 0};
 `;
 
 export const StyledLink = styled.a`
@@ -60,24 +66,25 @@ export function DrawerItems({
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
-  const {
-    baseUrl, businessArea, programId, isAllPrograms,
-  } = useBaseUrl();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
     fetchPolicy: 'cache-first',
   });
   const clearLocation = currentLocation.replace(`/${baseUrl}`, '');
-const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) => {
+  const navigate = useNavigate();
+  const initialIndex = menuItems.findIndex((item) => {
     if (!item.secondaryActions) {
       return false;
     }
     return (
-      item.secondaryActions.findIndex((secondaryItem) => Boolean(secondaryItem.selectedRegexp.exec(clearLocation))) !== -1
+      item.secondaryActions.findIndex((secondaryItem) =>
+        Boolean(secondaryItem.selectedRegexp.exec(clearLocation)),
+      ) !== -1
     );
   });
-  const [expandedItem, setExpandedItem] = React.useState(
+  const [expandedItem, setExpandedItem] = useState(
     initialIndex !== -1 ? initialIndex : null,
   );
 
@@ -90,7 +97,8 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
     const updatedMenuItems = [...items];
-    const getIndexByName = (name: string): number => updatedMenuItems.findIndex((item) => item?.name === name);
+    const getIndexByName = (name: string): number =>
+      updatedMenuItems.findIndex((item) => item?.name === name);
     const cashAssistIndex = getIndexByName('Cash Assist');
     const programDetailsIndex = getIndexByName('Programme Details');
     const reportingIndex = getIndexByName('Reporting');
@@ -101,7 +109,8 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
     }
 
     // Set CashAssist URL
-    updatedMenuItems[cashAssistIndex].href = cashAssistUrlData?.cashAssistUrlPrefix;
+    updatedMenuItems[cashAssistIndex].href =
+      cashAssistUrlData?.cashAssistUrlPrefix;
 
     // When GlobalProgramFilter applied
     if (!isAllPrograms) {
@@ -116,14 +125,17 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
         'Grievance',
         'Activity Log',
       ];
-      return updatedMenuItems.filter((item) => pagesAvailableForAllPrograms.includes(item.name));
+      return updatedMenuItems.filter((item) =>
+        pagesAvailableForAllPrograms.includes(item.name),
+      );
     }
     return updatedMenuItems;
   };
 
   const preparedMenuItems = prepareMenuItems(menuItems);
 
-  const { isPaymentPlanApplicable, isAccountabilityApplicable } = businessAreaData.businessArea;
+  const { isPaymentPlanApplicable, isAccountabilityApplicable } =
+    businessAreaData.businessArea;
   const flags = {
     isPaymentPlanApplicable,
     isAccountabilityApplicable,
@@ -133,8 +145,8 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
     let resultHref = '';
     for (const item of secondaryActions) {
       if (
-        item.permissionModule
-        && hasPermissionInModule(item.permissionModule, permissions)
+        item.permissionModule &&
+        hasPermissionInModule(item.permissionModule, permissions)
       ) {
         resultHref = item.href;
         break;
@@ -147,11 +159,13 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
     <div>
       {preparedMenuItems?.map((item, index) => {
         if (
-          item.permissionModule
-          && !hasPermissionInModule(item.permissionModule, permissions)
-        ) return null;
+          item.permissionModule &&
+          !hasPermissionInModule(item.permissionModule, permissions)
+        )
+          return null;
 
-        if (item.permissions && !hasPermissions(item.permissions, permissions)) return null;
+        if (item.permissions && !hasPermissions(item.permissions, permissions))
+          return null;
 
         if (item.flag && !flags[item.flag]) {
           return null;
@@ -164,9 +178,10 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
 
           return (
             <div key={item?.name + hrefForCollapsibleItem}>
-              <ListItem
-                button
+              <ListItemButton
+                component={NavLink}
                 data-cy={`nav-${item?.name}`}
+                to={`/${baseUrl}${hrefForCollapsibleItem}`}
                 onClick={() => {
                   if (index === expandedItem) {
                     setExpandedItem(null);
@@ -185,19 +200,19 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
                 ) : (
                   <ExpandMore />
                 )}
-              </ListItem>
+              </ListItemButton>
               <Collapse in={expandedItem !== null && expandedItem === index}>
                 <SubList open={open} component="div">
-                  {item.secondaryActions
-                    && item.secondaryActions.map(
-                      (secondary) => secondary.permissionModule
-                        && hasPermissionInModule(
+                  {item.secondaryActions &&
+                    item.secondaryActions.map(
+                      (secondary) =>
+                        secondary.permissionModule &&
+                        hasPermissionInModule(
                           secondary.permissionModule,
                           permissions,
                         ) && (
-                          <ListItem
-                            button
-                            component={Link}
+                          <ListItemButton
+                            component={NavLink}
                             data-cy={`nav-${secondary.name}`}
                             key={secondary.name}
                             to={`/${baseUrl}${secondary.href}`}
@@ -207,8 +222,8 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
                           >
                             <Icon>{secondary.icon}</Icon>
                             <Text primary={secondary.name} />
-                          </ListItem>
-                      ),
+                          </ListItemButton>
+                        ),
                     )}
                 </SubList>
               </Collapse>
@@ -216,10 +231,11 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
           );
         }
         return item.external ? (
-          <ListItem
+          <ListItemButton
             data-cy={`nav-${item?.name}`}
-            button
+            component={NavLink}
             key={item?.name + item.href}
+            to={item.href}
           >
             <StyledLink target="_blank" href={item.href}>
               <Box display="flex">
@@ -227,12 +243,11 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
                 <Text primary={item?.name} />
               </Box>
             </StyledLink>
-          </ListItem>
+          </ListItemButton>
         ) : (
-          <ListItem
-            button
+          <ListItemButton
             data-cy={`nav-${item?.name}`}
-            component={Link}
+            component={NavLink}
             key={item?.name + item.href}
             to={`/${baseUrl}${item.href}`}
             onClick={() => {
@@ -242,7 +257,7 @@ const navigate = useNavigate()  const initialIndex = menuItems.findIndex((item) 
           >
             <Icon>{item.icon}</Icon>
             <Text primary={item?.name} />
-          </ListItem>
+          </ListItemButton>
         );
       })}
     </div>

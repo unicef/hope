@@ -29,7 +29,6 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   }
 
   const maintenanceError =
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     networkError?.result?.message ===
     'Migrations are running, please try again later';
@@ -204,7 +203,6 @@ export async function getClient(): Promise<
   const cache = new InMemoryCache();
   await persistCache({
     cache,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     storage: localForage,
     maxSize: false,

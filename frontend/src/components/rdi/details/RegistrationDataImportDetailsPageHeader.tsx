@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import  { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -41,7 +41,8 @@ export function RegistrationDataImportDetailsPageHeader({
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
-const navigate = useNavigate()  const { isActiveProgram } = useProgramContext();
+  const navigate = useNavigate();
+  const { isActiveProgram } = useProgramContext();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
   const [showRefuseRdiForm, setShowRefuseRdiForm] = useState(false);
@@ -51,16 +52,18 @@ const navigate = useNavigate()  const { isActiveProgram } = useProgramContext();
   const eraseButton = (
     <LoadingButton
       loading={eraseLoading}
-      onClick={() => confirm({
-        title: t('Warning'),
-        content: t(
-          'Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data',
-        ),
-      }).then(async () => {
-        await eraseRdiMutate({
-          variables: { id: registration.id },
-        });
-      })}
+      onClick={() =>
+        confirm({
+          title: t('Warning'),
+          content: t(
+            'Are you sure you want to erase RDI? Erasing RDI causes deletion of all related datahub RDI data',
+          ),
+        }).then(async () => {
+          await eraseRdiMutate({
+            variables: { id: registration.id },
+          });
+        })
+      }
       variant="contained"
       color="primary"
       disabled={!isActiveProgram}

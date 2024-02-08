@@ -1,6 +1,5 @@
-import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { get } from 'lodash';
 import { removeBracketsAndQuotes } from '@utils/utils';
 
@@ -25,12 +24,12 @@ export const useSnackbar = (): {
     if (location.state && location.state.showSnackbar) {
       setShow(true);
       setMessage(location.state.message);
-      history.replace({
-        ...location,
+      navigate(location.pathname, {
         state: { ...location.state, showSnackbar: false },
+        replace: true,
       });
     }
-  }, [location, history]);
+  }, [location, navigate]);
 
   const showMessage = (
     messageContent: string,
@@ -44,14 +43,14 @@ export const useSnackbar = (): {
     setShow(true);
     setMessage(formattedMessage);
     history[get(options, 'historyMethod', 'replace')]({
-      pathname: get(options, 'pathname', history.location.pathname),
+      pathname: get(options, 'pathname', location.pathname),
       state: {
         showSnackbar: true,
         message: formattedMessage,
         dataCy: get(options, 'dataCy'),
       },
     });
-    navigate(get(options, 'pathname', history.location.pathname));
+    navigate(get(options, 'pathname', location.pathname));
   };
 
   return {

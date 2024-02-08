@@ -26,7 +26,8 @@ export function LookUpTargetPopulationTableRowCommunication({
   radioChangeHandler,
   selectedTargetPopulation,
 }: LookUpTargetPopulationTableRowCommunicationProps): React.ReactElement {
-const navigate = useNavigate()  const businessArea = useBusinessArea();
+  const navigate = useNavigate();
+  const businessArea = useBusinessArea();
   const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
@@ -85,8 +86,7 @@ const navigate = useNavigate()  const businessArea = useBusinessArea();
         <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        {targetPopulation.createdBy?.firstName}
-        {' '}
+        {targetPopulation.createdBy?.firstName}{' '}
         {targetPopulation.createdBy?.lastName}
       </TableCell>
     </ClickableTableRow>

@@ -10,7 +10,7 @@ export function FormikAdminAreaAutocomplete({
   ...props
 }): React.ReactElement {
   const { label } = props;
-  const handleChange = (e, option): void => {
+  const handleChange = (_, option): void => {
     if (!option) {
       form.setFieldValue(field.name, null);
     } else {

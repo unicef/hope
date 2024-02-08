@@ -245,13 +245,11 @@ export function TargetCriteriaForm({
             </DialogTitleWrapper>
             <DialogContent>
               {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
                 // @ts-ignore
                 errors.nonFieldErrors && (
                   <DialogError>
                     <ul>
                       {
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
                         // @ts-ignore
                         errors.nonFieldErrors.map((message) => (
                           <li key={message}>{message}</li>

@@ -36,8 +36,7 @@ export function ImportedHouseholdTableRow({
   const url = isMerged ? mergedHouseholdPath : importedHouseholdPath;
 
   const handleClick = (): void => {
-    navigate({
-      pathname: url,
+    navigate(url, {
       state: {
         breadcrumbTitle: `Registration Data Import: ${rdi.name}`,
         breadcrumbUrl: `/${businessArea}/registration-data-import/${rdi.id}`,

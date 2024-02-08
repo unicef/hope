@@ -1,6 +1,4 @@
-import { WatchQueryFetchPolicy } from 'apollo-client';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { QueryResult } from '@apollo/react-common';
+import { QueryResult, WatchQueryFetchPolicy } from '@apollo/client';
 import { MeQuery, MeQueryVariables, useMeQuery } from '@generated/graphql';
 
 export function useCachedMe(): QueryResult<MeQuery, MeQueryVariables> {

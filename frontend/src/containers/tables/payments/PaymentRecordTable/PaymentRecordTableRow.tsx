@@ -25,7 +25,8 @@ export function PaymentRecordTableRow({
   openInNewTab,
 }: PaymentRecordTableRowProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
-const navigate = useNavigate()  const paymentRecordPath = `/${baseUrl}/payment-records/${paymentRecord.id}`;
+  const navigate = useNavigate();
+  const paymentRecordPath = `/${baseUrl}/payment-records/${paymentRecord.id}`;
   const handleClick = (): void => {
     if (openInNewTab) {
       window.open(paymentRecordPath);

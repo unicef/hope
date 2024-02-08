@@ -25,11 +25,13 @@ export function PaymentRecordAndPaymentHouseholdTableRow({
   canViewDetails,
 }: PaymentRecordAndPaymentTableRowProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
-const navigate = useNavigate()  const paymentRecordDetailsPath = `/${baseUrl}/payment-records/${paymentRecordOrPayment.id}`;
+  const navigate = useNavigate();
+  const paymentRecordDetailsPath = `/${baseUrl}/payment-records/${paymentRecordOrPayment.id}`;
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${paymentRecordOrPayment.id}`;
-  const detailsPath = paymentRecordOrPayment.objType === 'PaymentRecord'
-    ? paymentRecordDetailsPath
-    : paymentDetailsPath;
+  const detailsPath =
+    paymentRecordOrPayment.objType === 'PaymentRecord'
+      ? paymentRecordDetailsPath
+      : paymentDetailsPath;
   const handleClick = (): void => {
     if (openInNewTab) {
       window.open(detailsPath);

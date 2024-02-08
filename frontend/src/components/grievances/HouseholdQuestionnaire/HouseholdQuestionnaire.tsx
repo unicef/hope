@@ -123,7 +123,7 @@ export function HouseholdQuestionnaire({
           size: 3,
         },
       ].map((el) => (
-        <Grid item xs={3}>
+        <Grid key={el.name} item xs={3}>
           <Field
             name={el.name}
             data-cy={`input-${el.name}`}
