@@ -13,12 +13,12 @@ import {
   ProgramQuery,
   ProgramStatus,
   useUpdateProgramMutation,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
 import { LoadingButton } from '@components/core/LoadingButton';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { programCompare } from '@utils/utils';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';

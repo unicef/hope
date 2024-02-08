@@ -1,5 +1,5 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { SurveyNode } from '../../../../__generated__/graphql';
+import { SurveyNode } from '@generated/graphql';
 
 export const headCells: HeadCell<SurveyNode>[] = [
   {

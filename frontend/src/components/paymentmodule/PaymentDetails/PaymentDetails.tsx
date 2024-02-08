@@ -7,9 +7,9 @@ import {
   PaymentQuery,
   PaymentStatus,
   PaymentVerificationStatus,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { useBusinessArea } from '@hooks/useBusinessArea';
 import {
   formatCurrencyWithSymbol,
   getPhoneNoLabel,
@@ -17,14 +17,14 @@ import {
   paymentStatusToColor,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { BlackLink } from '../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
-import { DividerLine } from '../../core/DividerLine';
-import { LabelizedField } from '../../core/LabelizedField';
-import { StatusBox } from '../../core/StatusBox';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { DividerLine } from '@core/DividerLine';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
   margin: 20px;

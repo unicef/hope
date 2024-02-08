@@ -2,8 +2,8 @@ import { Table, TableBody, TableCell, TableRow } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatNumber } from '@utils/utils';
-import { CountryChartsQuery } from '../../__generated__/graphql';
-import { EnhancedTableHead } from '../core/Table/EnhancedTableHead';
+import { CountryChartsQuery } from '@generated/graphql';
+import { EnhancedTableHead } from '@core/Table/EnhancedTableHead';
 
 interface TotalAmountTransferredByAdminAreaTableProps {
   data: CountryChartsQuery['tableTotalCashTransferredByAdministrativeArea']['data'];

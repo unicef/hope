@@ -3,7 +3,7 @@ import * as React from 'react';
 import {
   GrievanceTicketQuery,
   PaymentRecordAndPaymentNode,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   camelizeArrayObjects,

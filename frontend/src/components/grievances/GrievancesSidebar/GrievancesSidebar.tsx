@@ -10,7 +10,7 @@ import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { GrievanceTicketQuery } from '@generated/graphql';
 
 export function GrievancesSidebar({
   ticket,

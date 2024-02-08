@@ -7,8 +7,8 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { useMarkPrAsFailedMutation } from '../../__generated__/graphql';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useMarkPrAsFailedMutation } from '@generated/graphql';
 
 export interface ForceFailedButtonProps {
   paymentRecordId: string;

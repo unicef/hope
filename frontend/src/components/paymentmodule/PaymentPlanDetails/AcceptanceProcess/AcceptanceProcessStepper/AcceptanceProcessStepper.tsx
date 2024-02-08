@@ -5,7 +5,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 
 const StyledCancelIcon = styled(CancelIcon)`
   color: #e90202;

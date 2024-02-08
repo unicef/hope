@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
-} from '../../__generated__/graphql';
-import { useSnackbar } from '../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { Title } from '../core/Title';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable/RequestedHouseholdDataChangeTable';
 

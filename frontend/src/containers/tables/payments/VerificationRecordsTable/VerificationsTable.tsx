@@ -4,7 +4,7 @@ import {
   AllPaymentVerificationsQueryVariables,
   PaymentVerificationNode,
   useAllPaymentVerificationsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './VerificationsHeadCells';
 import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';

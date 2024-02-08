@@ -5,11 +5,11 @@ import get from 'lodash/get';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { AllTargetPopulationsQuery } from '../../../../__generated__/graphql';
-import { GreyText } from '../../../core/GreyText';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
+import { AllTargetPopulationsQuery } from '@generated/graphql';
+import { GreyText } from '@core/GreyText';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 
 const StyledBox = styled(Box)`

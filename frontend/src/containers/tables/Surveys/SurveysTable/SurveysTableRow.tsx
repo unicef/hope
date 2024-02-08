@@ -5,8 +5,8 @@ import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { renderUserName } from '@utils/utils';
-import { SurveyNode } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { SurveyNode } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface SurveysTableRowProps {
   survey: SurveyNode;

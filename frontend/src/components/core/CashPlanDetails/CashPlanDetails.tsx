@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
 import { cashPlanStatusToColor } from '@utils/utils';
-import { CashPlanNode } from '../../../__generated__/graphql';
+import { CashPlanNode } from '@generated/graphql';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { ContentLink } from '../ContentLink';
 import { LabelizedField } from '../LabelizedField';

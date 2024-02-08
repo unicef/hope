@@ -5,7 +5,7 @@ import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
   useMeQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievanceDetailsToolbar } from '@components/grievances/GrievanceDetailsToolbar';
@@ -14,8 +14,8 @@ import { GrievancesDetails } from '@components/grievances/GrievancesDetails/Grie
 import { GrievancesSidebar } from '@components/grievances/GrievancesSidebar/GrievancesSidebar';
 import { Notes } from '@components/grievances/Notes/Notes';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
 import { grievancePermissions } from './grievancePermissions';

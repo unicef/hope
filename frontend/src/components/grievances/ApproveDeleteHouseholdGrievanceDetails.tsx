@@ -19,7 +19,7 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
@@ -27,7 +27,7 @@ import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveDeleteHouseholdDataChangeMutation,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 
 export interface ApproveDeleteHouseholdGrievanceDetails {
   ticket: GrievanceTicketQuery['grievanceTicket'];

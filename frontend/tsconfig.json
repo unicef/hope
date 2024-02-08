@@ -22,9 +22,12 @@
     "baseUrl": ".",
     "paths": {
       "@components/*": ["src/components/*"],
+      "@core/*": ["src/components/core/*"],
       "@containers/*": ["src/containers/*"],
       "@shared/*": ["src/shared/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@generated/*": ["src/__generated__/*"]
     }
   },
   "include": [

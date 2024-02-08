@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { AgencyField } from '../AgencyField';
 import { removeItemById } from '@utils/helpers';
 

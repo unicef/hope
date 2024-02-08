@@ -2,17 +2,14 @@ import { Grid, GridSize, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
-import {
-  FeedbackIssueType,
-  FeedbackQuery,
-} from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { FeedbackIssueType, FeedbackQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface FeedbackDetailsProps {
   feedback: FeedbackQuery['feedback'];

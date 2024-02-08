@@ -26,12 +26,12 @@ import {
   GrievancesChoiceDataQuery,
   HouseholdNode,
   useAllGrievanceTicketQuery,
-} from '../../../__generated__/graphql';
-import { BlackLink } from '../../core/BlackLink';
-import { ContentLink } from '../../core/ContentLink';
-import { LabelizedField } from '../../core/LabelizedField';
-import { StatusBox } from '../../core/StatusBox';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+} from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`

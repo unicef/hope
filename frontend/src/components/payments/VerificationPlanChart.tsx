@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '../../__generated__/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 
 interface VerificationPlanDetailsChartProps {
   verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];

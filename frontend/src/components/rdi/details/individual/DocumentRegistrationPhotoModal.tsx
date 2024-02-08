@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { PhotoModal } from '../../../core/PhotoModal/PhotoModal';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import {
   ImportedIndividualDetailedFragment,
   useImportedIndividualPhotosQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 
 interface DocumentRegistrationPhotoModalProps {
   individual: ImportedIndividualDetailedFragment;

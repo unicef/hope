@@ -9,9 +9,9 @@ import get from 'lodash/get';
 import * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useAllUsersForFiltersLazyQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDebounce } from '@hooks/useDebounce';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
 export function AssigneeAutocomplete({

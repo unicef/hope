@@ -8,8 +8,8 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Tooltip } from '@mui/material';
-import { SurveyCategory } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { SurveyCategory } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
 
 const StyledMenu = withStyles({

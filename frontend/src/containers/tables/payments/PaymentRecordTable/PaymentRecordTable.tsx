@@ -5,7 +5,7 @@ import {
   CashPlanNode,
   PaymentRecordNode,
   useAllPaymentRecordsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentRecordTableHeadCells';
 import { PaymentRecordTableRow } from './PaymentRecordTableRow';

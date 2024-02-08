@@ -3,11 +3,11 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   GrievanceTicketDocument,
   useReassignRoleGrievanceMutation,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 
 const ReassignRoleButton = styled.button`
   padding: 25px;

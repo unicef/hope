@@ -2,8 +2,8 @@ import { MenuItem, Select } from '@mui/material';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useCachedMe } from '../hooks/useCachedMe';
-import { useBaseUrl } from '../hooks/useBaseUrl';
+import { useCachedMe } from '@hooks/useCachedMe';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const CountrySelect = styled(Select)`
   && {

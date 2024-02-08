@@ -20,15 +20,15 @@ import {
   useAllRapidProFlowsLazyQuery,
   useEditPaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
@@ -36,10 +36,10 @@ import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
-import { FormikEffect } from '../core/FormikEffect';
-import { LoadingButton } from '../core/LoadingButton';
-import { TabPanel } from '../core/TabPanel';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { FormikEffect } from '@core/FormikEffect';
+import { LoadingButton } from '@core/LoadingButton';
+import { TabPanel } from '@core/TabPanel';
 
 const StyledTabs = styled(Tabs)`
   && {

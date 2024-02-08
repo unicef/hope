@@ -5,7 +5,7 @@ import {
   AllAccountabilityCommunicationMessageRecipientsQueryVariables,
   CommunicationMessageRecipientMapNode,
   useAllAccountabilityCommunicationMessageRecipientsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';

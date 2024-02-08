@@ -7,7 +7,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { RegistrationDataImportCreateDialog } from '@components/rdi/create/RegistrationDataImportCreateDialog';
 import { RegistrationFilters } from '@components/rdi/RegistrationFilters';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { RegistrationDataImportTable } from '../../tables/rdi/RegistrationDataImportTable';
 

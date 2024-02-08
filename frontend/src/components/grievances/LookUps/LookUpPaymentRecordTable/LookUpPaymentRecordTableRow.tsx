@@ -1,15 +1,15 @@
 import { Checkbox } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import * as React from 'react';
-import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { PaymentRecordAndPaymentNode } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '@utils/utils';
-import { BlackLink } from '../../../core/BlackLink';
-import { StatusBox } from '../../../core/StatusBox';
-import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
+import { BlackLink } from '@core/BlackLink';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 
 interface LookUpPaymentRecordTableRowProps {
   paymentRecord: PaymentRecordAndPaymentNode;

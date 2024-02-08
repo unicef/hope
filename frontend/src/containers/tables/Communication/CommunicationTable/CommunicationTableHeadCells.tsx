@@ -1,5 +1,5 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { CommunicationMessageNode } from '../../../../__generated__/graphql';
+import { CommunicationMessageNode } from '@generated/graphql';
 
 export const headCells: HeadCell<CommunicationMessageNode>[] = [
   {

@@ -12,13 +12,13 @@ import styled from 'styled-components';
 import {
   useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { MenuItem, menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`

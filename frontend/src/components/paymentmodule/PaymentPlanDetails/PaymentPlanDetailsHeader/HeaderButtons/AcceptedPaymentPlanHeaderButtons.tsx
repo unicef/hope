@@ -2,17 +2,17 @@ import { Box, Button } from '@mui/material';
 import { GetApp } from '@mui/icons-material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '../../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   Action,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
   useExportXlsxPpListPerFspMutation,
-} from '../../../../../__generated__/graphql';
-import { LoadingButton } from '../../../../core/LoadingButton';
+} from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
 import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
 import { useProgramContext } from '../../../../../programContext';
-import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;

@@ -5,8 +5,8 @@ import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import {
   GrievanceTicketQuery,
   useIndividualLazyQuery,
-} from '../../../../__generated__/graphql';
-import { LoadingComponent } from '../../../core/LoadingComponent';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { LookUpButton } from '../../LookUpButton';
 import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
 import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';

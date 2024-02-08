@@ -5,10 +5,10 @@ import {
   SurveyNode,
   SurveysChoiceDataQuery,
   useAllSurveysQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { choicesToDict, dateToIsoString } from '@utils/utils';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';

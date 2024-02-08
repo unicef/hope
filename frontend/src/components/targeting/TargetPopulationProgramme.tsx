@@ -4,9 +4,9 @@ import get from 'lodash/get';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { AllProgramsForChoicesQuery } from '../../__generated__/graphql';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { OverviewContainer } from '../core/OverviewContainer';
+import { AllProgramsForChoicesQuery } from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { OverviewContainer } from '@core/OverviewContainer';
 import { FormikSelectFieldConfirmProgram } from './FormikSelectFieldConfirmProgram';
 import { PaperContainer } from './PaperContainer';
 

@@ -10,13 +10,13 @@ import {
   TargetPopulationStatus,
   useAllProgramsForChoicesQuery,
   useUpdateTpMutation,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
 import { getFullNodeFromEdgesById } from '@utils/utils';
-import { AutoSubmitFormOnEnter } from '../../core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '../../core/LoadingComponent';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';

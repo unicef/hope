@@ -6,7 +6,7 @@ import moment from 'moment';
 import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
-import { PaymentVerificationLogEntryNode } from '../../../__generated__/graphql';
+import { PaymentVerificationLogEntryNode } from '@generated/graphql';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
 

@@ -1,10 +1,10 @@
 import { Grid } from '@mui/material';
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { FiltersSection } from '../core/FiltersSection';
+import { FiltersSection } from '@core/FiltersSection';
 import { ProgramAutocomplete } from '@shared/autocompletes/ProgramAutocomplete';
 
 interface DashboardFiltersProps {

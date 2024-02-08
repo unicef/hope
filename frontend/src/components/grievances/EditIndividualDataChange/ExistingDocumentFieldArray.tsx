@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import {
   AllAddIndividualFieldsQuery,
   IndividualQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { EditDocumentRow } from './EditDocumentRow';
 
 export interface ExistingDocumentFieldArrayProps {

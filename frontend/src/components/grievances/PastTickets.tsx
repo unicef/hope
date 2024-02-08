@@ -2,11 +2,11 @@ import { Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContainerColumnWithBorder } from '../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../core/LabelizedField';
-import { Missing } from '../core/Missing';
-import { OverviewContainer } from '../core/OverviewContainer';
-import { Title } from '../core/Title';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { Missing } from '@core/Missing';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
 
 const PastContainer = styled.div`
   padding: 22px 22px 22px 0;

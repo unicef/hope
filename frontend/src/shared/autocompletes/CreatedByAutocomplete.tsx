@@ -3,9 +3,9 @@ import * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useAllUsersForFiltersLazyQuery } from '@generated/graphql';
+import { useBusinessArea } from '@hooks/useBusinessArea';
+import { useDebounce } from '@hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
   getAutocompleteOptionLabel,

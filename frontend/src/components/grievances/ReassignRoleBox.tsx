@@ -5,11 +5,11 @@ import isEmpty from 'lodash/isEmpty';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { GrievanceTicketQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
-import { ContentLink } from '../core/ContentLink';
-import { LabelizedField } from '../core/LabelizedField';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
 

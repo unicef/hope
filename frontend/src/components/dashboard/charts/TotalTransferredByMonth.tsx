@@ -5,7 +5,7 @@ import {
   formatThousands,
   getPercentage,
 } from '@utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface TotalTransferredByMonthProps {
   data: AllChartsQuery['chartTotalTransferredByMonth'];

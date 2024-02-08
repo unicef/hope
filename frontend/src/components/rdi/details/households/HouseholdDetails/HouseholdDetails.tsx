@@ -2,15 +2,15 @@ import { Grid, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { ContainerColumnWithBorder } from '../../../../core/ContainerColumnWithBorder';
-import { ContentLink } from '../../../../core/ContentLink';
-import { LabelizedField } from '../../../../core/LabelizedField';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
 import { choicesToDict } from '@utils/utils';
 import {
   HouseholdChoiceDataQuery,
   ImportedHouseholdDetailedFragment,
-} from '../../../../../__generated__/graphql';
-import { Title } from '../../../../core/Title';
+} from '@generated/graphql';
+import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../../programContext';
 
 const Overview = styled.div`

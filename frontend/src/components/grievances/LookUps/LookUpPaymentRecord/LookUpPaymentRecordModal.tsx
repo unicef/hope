@@ -10,7 +10,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { LookUpPaymentRecordTable } from '../LookUpPaymentRecordTable/LookUpPaymentRecordTable';
 
 export function LookUpPaymentRecordModal({

@@ -7,18 +7,18 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   ImportXlsxPpListPerFspMutation,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanDocument,
   PaymentPlanQuery,
   useImportXlsxPpListPerFspMutation,
-} from '../../../../__generated__/graphql';
-import { DropzoneField } from '../../../core/DropzoneField';
+} from '@generated/graphql';
+import { DropzoneField } from '@core/DropzoneField';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { useProgramContext } from '../../../../programContext';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { LoadingButton } from '@core/LoadingButton';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};

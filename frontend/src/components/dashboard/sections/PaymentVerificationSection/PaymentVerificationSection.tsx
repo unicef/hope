@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 import { PaymentVerificationChart } from '../../charts/PaymentVerificationChart';
 import { DashboardPaper } from '../../DashboardPaper';
 

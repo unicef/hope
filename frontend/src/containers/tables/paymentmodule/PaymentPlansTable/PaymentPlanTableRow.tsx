@@ -2,7 +2,7 @@ import { Box, TableCell } from '@mui/material';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
+import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
@@ -11,7 +11,7 @@ import {
   formatCurrencyWithSymbol,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const StatusContainer = styled.div`
   min-width: 120px;

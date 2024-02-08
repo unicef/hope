@@ -1,11 +1,11 @@
 import { Checkbox, Radio } from '@mui/material';
 import TableCell from '@mui/material/TableCell';
 import * as React from 'react';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { useBusinessArea } from '@hooks/useBusinessArea';
 import {
   AllHouseholdsQuery,
   HouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';

@@ -6,13 +6,13 @@ import {
   hasPermissionInModule,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { FeedbackTable } from '../../../tables/Feedback/FeedbackTable';
 import { FeedbackFilters } from '@components/accountability/Feedback/FeedbackTable/FeedbackFilters';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 

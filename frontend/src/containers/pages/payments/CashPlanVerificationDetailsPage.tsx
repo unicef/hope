@@ -8,7 +8,7 @@ import {
   PaymentVerificationPlanStatus,
   useCashPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -20,8 +20,8 @@ import { CreateVerificationPlan } from '@components/payments/CreateVerificationP
 import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
 import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   decodeIdString,
   getFilterFromQueryParams,

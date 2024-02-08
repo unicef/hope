@@ -9,13 +9,13 @@ import {
   PaymentPlanQuery,
   PaymentPlanStatus,
   useExportPdfPpSummaryMutation,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LoadingButton } from '../../../core/LoadingButton';
-import { Title } from '../../../core/Title';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LoadingButton } from '@core/LoadingButton';
+import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../programContext';
 import { AcceptanceProcessRow } from './AcceptanceProcessRow';
 

@@ -5,8 +5,8 @@ import { Field } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { AllIndividualsQuery } from '../../__generated__/graphql';
-import { LabelizedField } from '../core/LabelizedField';
+import { AllIndividualsQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
 
 export interface PaymentChannelProps {

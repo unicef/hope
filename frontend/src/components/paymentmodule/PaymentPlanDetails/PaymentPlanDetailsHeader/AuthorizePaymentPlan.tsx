@@ -14,13 +14,13 @@ import { useTranslation } from 'react-i18next';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikTextField } from '@shared/Formik/FormikTextField/FormikTextField';
-import { LoadingButton } from '../../../core/LoadingButton';
-import { GreyText } from '../../../core/GreyText';
-import { usePaymentPlanAction } from '../../../../hooks/usePaymentPlanAction';
-import { Action, PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
+import { LoadingButton } from '@core/LoadingButton';
+import { GreyText } from '@core/GreyText';
+import { usePaymentPlanAction } from '@hooks/usePaymentPlanAction';
+import { Action, PaymentPlanQuery } from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 import { useProgramContext } from '../../../../programContext';
 
 export interface AuthorizePaymentPlanProps {

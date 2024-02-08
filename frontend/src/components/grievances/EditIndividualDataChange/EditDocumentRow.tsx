@@ -10,9 +10,9 @@ import styled from 'styled-components';
 import {
   AllAddIndividualFieldsQuery,
   AllIndividualsQuery,
-} from '../../../__generated__/graphql';
-import { LabelizedField } from '../../core/LabelizedField';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+} from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { DocumentField } from '../DocumentField';
 import { removeItemById } from '@utils/helpers';
 

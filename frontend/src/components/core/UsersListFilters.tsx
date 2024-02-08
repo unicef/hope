@@ -2,7 +2,7 @@ import { Grid, MenuItem } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useUserChoiceDataQuery } from '../../__generated__/graphql';
+import { useUserChoiceDataQuery } from '@generated/graphql';
 import { createHandleApplyFilterChange } from '@utils/utils';
 import { FiltersSection } from './FiltersSection';
 import { SearchTextField } from './SearchTextField';

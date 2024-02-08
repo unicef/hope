@@ -1,13 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  PaymentRecordNode,
-  PaymentVerificationNode,
-} from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { ContentLink } from '../core/ContentLink';
-import { Title } from '../core/Title';
+import { PaymentRecordNode, PaymentVerificationNode } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ContentLink } from '@core/ContentLink';
+import { Title } from '@core/Title';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 type VerificationId = {

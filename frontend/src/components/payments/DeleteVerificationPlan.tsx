@@ -8,11 +8,11 @@ import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDeletePaymentVerificationPlanMutation } from '../../__generated__/graphql';
-import { ErrorButton } from '../core/ErrorButton';
-import { ErrorButtonContained } from '../core/ErrorButtonContained';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useDeletePaymentVerificationPlanMutation } from '@generated/graphql';
+import { ErrorButton } from '@core/ErrorButton';
+import { ErrorButtonContained } from '@core/ErrorButtonContained';
+import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
 import { useProgramContext } from '../../programContext';
 
 export interface DeleteVerificationPlanProps {

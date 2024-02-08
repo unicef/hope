@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import * as React from 'react';
-import { ProgramQuery } from '../../../__generated__/graphql';
+import { ProgramQuery } from '@generated/graphql';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';

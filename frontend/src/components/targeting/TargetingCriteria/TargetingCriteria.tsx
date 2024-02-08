@@ -16,7 +16,7 @@ import styled from 'styled-components';
 import {
   DataCollectingTypeType,
   TargetPopulationQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { TargetCriteriaForm } from '@containers/forms/TargetCriteriaForm';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { Criteria } from './Criteria';

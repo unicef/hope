@@ -2,13 +2,13 @@ import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import * as React from 'react';
 import { Radio } from '@mui/material';
-import { RegistrationDataImportNode } from '../../../../__generated__/graphql';
+import { RegistrationDataImportNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import { registrationDataImportStatusToColor } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentRecordTableRowProps {
   registrationDataImport: RegistrationDataImportNode;

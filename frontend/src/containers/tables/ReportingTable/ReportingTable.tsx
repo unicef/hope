@@ -7,7 +7,7 @@ import {
   ReportChoiceDataQuery,
   ReportNode,
   useAllReportsQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './ReportingHeadCells';
 import { ReportingTableRow } from './ReportingTableRow';

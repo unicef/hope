@@ -11,11 +11,11 @@ import {
 import {
   TargetPopulationQuery,
   useRebuildTpMutation,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { LockTargetPopulationDialog } from '../../dialogs/targetPopulation/LockTargetPopulationDialog';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
 
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {

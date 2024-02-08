@@ -3,12 +3,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Autocomplete from '@mui/lab/Autocomplete';
 import get from 'lodash/get';
 import { useNavigate } from 'react-router-dom';
+import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
-import { useDebounce } from '../../hooks/useDebounce';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useAllProgramsForChoicesLazyQuery } from '@generated/graphql';
+import { useDebounce } from '@hooks/useDebounce';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
   && {
@@ -101,7 +102,7 @@ export function GlobalProgramAutocomplete({
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      getOptionSelected={(option, value1) =>
+      isOptionEqualToValue={(option, value1) =>
         value1?.node?.id === option.node.id
       }
       getOptionLabel={(option) => option.node.name}

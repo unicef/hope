@@ -15,17 +15,17 @@ import {
   GrievanceTicketDocument,
   useIndividualChoiceDataQuery,
   useReassignRoleGrievanceMutation,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '../../../core/LoadingComponent';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function LookUpReassignRoleModal({
   onValueChange,

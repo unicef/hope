@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { LogEntryNode } from '../../../__generated__/graphql';
+import { LogEntryNode } from '@generated/graphql';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';

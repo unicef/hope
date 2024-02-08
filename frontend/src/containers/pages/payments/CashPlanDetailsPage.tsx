@@ -11,16 +11,16 @@ import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { TableWrapper } from '@components/core/TableWrapper';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import {
   CashPlanNode,
   useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
   useCashPlanQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { PaymentRecordTable } from '../../tables/payments/PaymentRecordTable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Container = styled.div`
   && {

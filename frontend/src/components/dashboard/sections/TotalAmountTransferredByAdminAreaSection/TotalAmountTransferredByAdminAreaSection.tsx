@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCountryChartsLazyQuery } from '../../../../__generated__/graphql';
-import { LoadingComponent } from '../../../core/LoadingComponent';
+import { useCountryChartsLazyQuery } from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { CardTextLightLarge } from '../../DashboardCard';
 import { DashboardPaper } from '../../DashboardPaper';
 import { TotalAmountTransferredByAdminAreaTable } from '../../TotalAmountTransferredByAdminAreaTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface TotalAmountTransferredSectionByAdminAreaSectionProps {
   year: string;

@@ -3,7 +3,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrencyWithSymbol } from '@utils/utils';
-import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 import {
   CardAmount,
   CardTextLight,

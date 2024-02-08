@@ -8,10 +8,10 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '@utils/utils';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
-import { StatusBox } from '../../../core/StatusBox';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { StatusBox } from '@core/StatusBox';
 
 const StatusWrapper = styled.div`
   width: 140px;

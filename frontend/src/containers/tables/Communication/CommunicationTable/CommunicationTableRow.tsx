@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { renderUserName } from '@utils/utils';
-import { CommunicationMessageNode } from '../../../../__generated__/graphql';
+import { CommunicationMessageNode } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface CommunicationTableRowProps {
   message: CommunicationMessageNode;

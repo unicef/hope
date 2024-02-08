@@ -15,16 +15,16 @@ import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
-} from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useSnackbar } from '../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { arraysHaveSameContent } from '@utils/utils';
-import { BlackLink } from '../core/BlackLink';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
+import { BlackLink } from '@core/BlackLink';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import {
   ApproveBox,
   StyledTable,

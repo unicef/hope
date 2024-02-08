@@ -1,7 +1,7 @@
 import { FormHelperText, Grid } from '@mui/material';
 import { FieldArray } from 'formik';
 import * as React from 'react';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { GrievanceTicketQuery } from '@generated/graphql';
 import { EditDocumentationRow } from './EditDocumentationRow';
 
 export interface ExistingDocumentationFieldArrayProps {

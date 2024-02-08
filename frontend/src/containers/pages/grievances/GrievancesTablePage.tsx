@@ -1,15 +1,15 @@
 import { Tab, Tabs } from '@mui/material';
 import  { useState } from 'react';
 import {  useLocation, useParams } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { GrievancesFilters } from '@components/grievances/GrievancesTable/GrievancesFilters';
 import { GrievancesTable } from '@components/grievances/GrievancesTable/GrievancesTable';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   GRIEVANCE_TICKETS_TYPES,
   GrievanceStatuses,

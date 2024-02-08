@@ -9,16 +9,16 @@ import {
   DataCollectingTypeType,
   IndividualChoiceDataQuery,
   ProgramNode,
-} from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { individualTableOrderOptions } from '@utils/constants';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { DatePickerFilter } from '../core/DatePickerFilter';
-import { FiltersSection } from '../core/FiltersSection';
-import { NumberTextField } from '../core/NumberTextField';
-import { SearchTextField } from '../core/SearchTextField';
-import { SelectFilter } from '../core/SelectFilter';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
 
 interface IndividualsFilterProps {

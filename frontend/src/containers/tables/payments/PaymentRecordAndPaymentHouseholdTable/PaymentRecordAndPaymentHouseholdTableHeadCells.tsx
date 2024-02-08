@@ -1,5 +1,5 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
+import { PaymentRecordAndPaymentNode } from '@generated/graphql';
 
 export const headCells: HeadCell<PaymentRecordAndPaymentNode>[] = [
   {

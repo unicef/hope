@@ -8,7 +8,7 @@ import {
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { getFullNodeFromEdgesById } from '@utils/utils';
-import { useConfirmation } from '../core/ConfirmationDialog';
+import { useConfirmation } from '@core/ConfirmationDialog';
 
 export function FormikSelectFieldConfirmProgram({
   field,

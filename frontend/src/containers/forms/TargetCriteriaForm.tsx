@@ -15,8 +15,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
 import {
   chooseFieldType,
   clearField,

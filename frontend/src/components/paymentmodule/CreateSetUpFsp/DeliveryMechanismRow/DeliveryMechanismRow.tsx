@@ -3,7 +3,7 @@ import { Field } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
-import { LabelizedField } from '../../../core/LabelizedField';
+import { LabelizedField } from '@core/LabelizedField';
 
 interface DeliveryMechanismRowProps {
   index: number;

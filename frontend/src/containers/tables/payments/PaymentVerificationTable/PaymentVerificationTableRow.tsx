@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   CashPlanAndPaymentPlanNode,
   useCashPlanVerificationStatusChoicesQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import {
   formatCurrencyWithSymbol,
@@ -13,7 +13,7 @@ import {
 import { StatusBox } from '@components/core/StatusBox';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentVerificationTableRowProps {
   plan: CashPlanAndPaymentPlanNode;

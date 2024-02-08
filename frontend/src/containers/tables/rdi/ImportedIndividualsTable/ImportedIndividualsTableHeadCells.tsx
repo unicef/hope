@@ -1,5 +1,5 @@
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
-import { ImportedIndividualMinimalFragment } from '../../../../__generated__/graphql';
+import { ImportedIndividualMinimalFragment } from '@generated/graphql';
 
 export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   {

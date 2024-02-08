@@ -10,8 +10,8 @@ import {
 } from '@mui/material';
 import styled from 'styled-components';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useAllKoboProjectsQuery } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useAllKoboProjectsQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const ComboBox = styled(Select)`
   & {

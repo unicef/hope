@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { formatNumber } from '@utils/utils';
-import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { AllChartsQuery } from '@generated/graphql';
 import { GrievancesChart } from '../../charts/GrievancesChart';
 import { DashboardPaper } from '../../DashboardPaper';
 

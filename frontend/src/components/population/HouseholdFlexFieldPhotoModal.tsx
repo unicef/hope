@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { useHouseholdFlexFieldsQuery } from '../../__generated__/graphql';
-import { PhotoModal } from '../core/PhotoModal/PhotoModal';
+import { useHouseholdFlexFieldsQuery } from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 export function HouseholdFlexFieldPhotoModal({ field }): React.ReactElement {
   const { id } = useParams();

@@ -14,9 +14,9 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   AllAddIndividualFieldsQuery,
   useAllAddIndividualFieldsQuery,
-} from '../../__generated__/graphql';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { Title } from '../core/Title';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
 import { AgencyField } from './AgencyField';
 import { DocumentField } from './DocumentField';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';

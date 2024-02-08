@@ -3,14 +3,14 @@ import GroupIcon from '@mui/icons-material/Group';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useRegistrationChoicesQuery } from '../../__generated__/graphql';
+import { useRegistrationChoicesQuery } from '@generated/graphql';
 import { AssigneeAutocomplete } from '@shared/autocompletes/AssigneeAutocomplete';
 import { createHandleApplyFilterChange } from '@utils/utils';
-import { DatePickerFilter } from '../core/DatePickerFilter';
-import { NumberTextField } from '../core/NumberTextField';
-import { SearchTextField } from '../core/SearchTextField';
-import { SelectFilter } from '../core/SelectFilter';
-import { FiltersSection } from '../core/FiltersSection';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
+import { FiltersSection } from '@core/FiltersSection';
 
 interface RegistrationFiltersProps {
   filter;

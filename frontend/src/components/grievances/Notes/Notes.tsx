@@ -12,11 +12,11 @@ import {
   GrievanceTicketQuery,
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
-} from '../../../__generated__/graphql';
-import { LoadingButton } from '../../core/LoadingButton';
-import { OverviewContainerColumn } from '../../core/OverviewContainerColumn';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
+} from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
+import { OverviewContainerColumn } from '@core/OverviewContainerColumn';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { useProgramContext } from '../../../programContext';
 
 const Name = styled.span`

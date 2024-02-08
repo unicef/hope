@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Table, TableBody, TableCell, TableRow } from '@mui/material';
 import { EnhancedTableHead } from '@components/core/Table/EnhancedTableHead';
 import { getComparator, stableSort } from '@utils/utils';
-import { AllFieldsAttributesQuery } from '../../../../../__generated__/graphql';
+import { AllFieldsAttributesQuery } from '@generated/graphql';
 import { headCells } from './HeadCells';
 
 const StyledCell = styled(TableCell)`

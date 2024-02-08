@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { useCachedMe } from '../hooks/useCachedMe';
+import { useCachedMe } from '@hooks/useCachedMe';
 
 export const DefaultRoute = (): React.ReactElement | null => {
   const { data } = useCachedMe();

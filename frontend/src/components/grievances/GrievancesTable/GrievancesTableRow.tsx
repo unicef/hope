@@ -6,19 +6,19 @@ import {
   AllGrievanceTicketDocument,
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAssigneeMutation,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   grievanceTicketBadgeColors,
   grievanceTicketStatusToColor,
   renderUserName,
 } from '@utils/utils';
-import { BlackLink } from '../../core/BlackLink';
-import { StatusBox } from '../../core/StatusBox';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../core/UniversalMoment';
+import { BlackLink } from '@core/BlackLink';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
 import { getGrievanceDetailsPath } from '@utils/createGrievanceUtils';
 import { AssignedToDropdown } from './AssignedToDropdown';

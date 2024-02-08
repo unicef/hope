@@ -1,4 +1,4 @@
-import { AllProgramsQuery } from '../../../../__generated__/graphql';
+import { AllProgramsQuery } from '@generated/graphql';
 import { HeadCell } from '@components/core/Table/EnhancedTableHead';
 
 export const headCells: HeadCell<

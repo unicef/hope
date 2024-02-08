@@ -1,14 +1,12 @@
 import Autocomplete from '@mui/lab/Autocomplete';
+import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { TextField } from '@mui/material';
-import { useDebounce } from '../../hooks/useDebounce';
-import {
-  AllAdminAreasQuery,
-  useAllAdminAreasQuery,
-} from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { CircularProgress, TextField } from '@mui/material';
+import { useDebounce } from '@hooks/useDebounce';
+import { AllAdminAreasQuery, useAllAdminAreasQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
   .MuiFormControl-marginDense {
@@ -87,7 +85,7 @@ export function AdminAreaFixedAutocomplete({
         if (value || reason === 'select-option') return;
         onInputTextChange(null);
       }}
-      getOptionSelected={(option, selectedValue) =>
+      isOptionEqualToValue={(option, selectedValue) =>
         selectedValue?.node?.id === option.node.id
       }
       getOptionLabel={(option) => {

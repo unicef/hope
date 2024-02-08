@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
+import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { CommunicationFilters } from '@components/accountability/Communication/CommunicationTable/CommunicationFilters';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PageHeader } from '@components/core/PageHeader';
@@ -11,10 +11,10 @@ import {
   PERMISSIONS,
   hasPermissionInModule,
 } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 

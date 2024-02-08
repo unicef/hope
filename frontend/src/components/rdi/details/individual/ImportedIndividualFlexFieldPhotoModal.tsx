@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { PhotoModal } from '../../../core/PhotoModal/PhotoModal';
-import { useImportedIndividualFlexFieldsQuery } from '../../../../__generated__/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
+import { useImportedIndividualFlexFieldsQuery } from '@generated/graphql';
 
 export function ImportedIndividualFlexFieldPhotoModal({
   field,

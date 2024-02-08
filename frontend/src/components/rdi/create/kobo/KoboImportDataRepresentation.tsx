@@ -2,7 +2,7 @@ import * as React from 'react';
 import {
   KoboErrorNode,
   KoboImportDataQueryHookResult,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ImportCounters } from '../ImportCounters';
 import { ErrorsKobo } from './KoboErrors';
 

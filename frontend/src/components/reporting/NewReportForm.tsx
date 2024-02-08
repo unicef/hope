@@ -18,7 +18,7 @@ import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikAdminAreaAutocompleteMultiple } from '@shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
 import { FormikDateField } from '@shared/Formik/FormikDateField';
@@ -28,12 +28,12 @@ import {
   useAllProgramsQuery,
   useCreateReportMutation,
   useReportChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
-import { FieldLabel } from '../core/FieldLabel';
-import { LoadingButton } from '../core/LoadingButton';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { FieldLabel } from '@core/FieldLabel';
+import { LoadingButton } from '@core/LoadingButton';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function NewReportForm(): React.ReactElement {
   const { t } = useTranslation();

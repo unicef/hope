@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
+import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
 
 interface TicketsByStatusChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];

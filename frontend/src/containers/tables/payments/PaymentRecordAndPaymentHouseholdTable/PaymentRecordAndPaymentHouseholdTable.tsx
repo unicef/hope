@@ -5,7 +5,7 @@ import {
   HouseholdNode,
   PaymentRecordAndPaymentNode,
   useAllPaymentRecordsAndPaymentsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentRecordAndPaymentHouseholdTableHeadCells';
 import { PaymentRecordAndPaymentHouseholdTableRow } from './PaymentRecordAndPaymentHouseholdTableRow';

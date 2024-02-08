@@ -1,15 +1,12 @@
 import TableCell from '@mui/material/TableCell';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  AllProgramsQuery,
-  ProgrammeChoiceDataQuery,
-} from '../../../__generated__/graphql';
+import { AllProgramsQuery, ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { BlackLink } from '@components/core/BlackLink';
 import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import {
   choicesToDict,
   formatCurrency,

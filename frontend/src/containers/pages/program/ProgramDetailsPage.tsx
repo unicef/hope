@@ -7,13 +7,13 @@ import {
   useBusinessAreaDataQuery,
   useProgrammeChoiceDataQuery,
   useProgramQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { ProgramDetails } from '@components/programs/ProgramDetails/ProgramDetails';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 import { CashPlanTable } from '../../tables/payments/CashPlanTable';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';

@@ -3,10 +3,10 @@ import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { renderUserName } from '@utils/utils';
-import { AccountabilityCommunicationMessageQuery } from '../../../__generated__/graphql';
-import { OverviewContainer } from '../../core/OverviewContainer';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
+import { AccountabilityCommunicationMessageQuery } from '@generated/graphql';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 const StyledBox = styled(Paper)`
   display: flex;

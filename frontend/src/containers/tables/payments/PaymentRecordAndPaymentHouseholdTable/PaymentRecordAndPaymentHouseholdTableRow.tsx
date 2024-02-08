@@ -1,7 +1,7 @@
 import TableCell from '@mui/material/TableCell';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
+import { PaymentRecordAndPaymentNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentRecordAndPaymentTableRowProps {
   paymentRecordOrPayment: PaymentRecordAndPaymentNode;

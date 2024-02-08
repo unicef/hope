@@ -5,7 +5,7 @@ import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { chooseFieldType, clearField } from '@utils/targetingUtils';
-import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
+import { ImportedIndividualFieldsQuery } from '@generated/graphql';
 import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
 
 const Divider = styled.div`

@@ -6,12 +6,12 @@ import styled from 'styled-components';
 import {
   useAllBusinessAreasQuery,
   useAllProgramsForChoicesQuery,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { AppBar } from '@components/core/AppBar';
 import { Drawer } from '@components/core/Drawer/Drawer';
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
 
 const Root = styled.div`

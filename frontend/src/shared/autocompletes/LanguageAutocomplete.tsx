@@ -3,8 +3,8 @@ import get from 'lodash/get';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useLanguageAutocompleteLazyQuery } from '../../__generated__/graphql';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useLanguageAutocompleteLazyQuery } from '@generated/graphql';
+import { useDebounce } from '@hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
   getAutocompleteOptionLabel,

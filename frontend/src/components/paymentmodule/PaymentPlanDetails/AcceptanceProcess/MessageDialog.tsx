@@ -12,11 +12,11 @@ import MessageIcon from '@mui/icons-material/Message';
 import styled from 'styled-components';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
-import { DividerLine } from '../../../core/DividerLine';
+import { DividerLine } from '@core/DividerLine';
 import { renderUserName } from '@utils/utils';
-import { UserNode } from '../../../../__generated__/graphql';
+import { UserNode } from '@generated/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

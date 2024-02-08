@@ -2,7 +2,7 @@ import { Grid, MenuItem } from '@mui/material';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useCashPlanVerificationStatusChoicesQuery } from '../../../../__generated__/graphql';
+import { useCashPlanVerificationStatusChoicesQuery } from '@generated/graphql';
 import { DatePickerFilter } from '@components/core/DatePickerFilter';
 import { SearchTextField } from '@components/core/SearchTextField';
 import { SelectFilter } from '@components/core/SelectFilter';

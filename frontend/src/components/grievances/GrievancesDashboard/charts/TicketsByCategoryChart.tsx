@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import { formatThousands } from '@utils/utils';
-import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
+import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
 
 interface TicketsByCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];

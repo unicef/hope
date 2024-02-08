@@ -5,7 +5,7 @@ import { IconButton, makeStyles } from '@mui/material';
 import clsx from 'clsx';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import Collapse from '@mui/material/Collapse';
-import { LogEntryNode } from '../../../__generated__/graphql';
+import { LogEntryNode } from '@generated/graphql';
 import { MiśTheme } from '../../../theme';
 import { headCells } from './headCells';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';

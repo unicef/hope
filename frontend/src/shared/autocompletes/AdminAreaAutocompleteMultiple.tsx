@@ -1,16 +1,14 @@
+import * as React from 'react';
 import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useDebounce } from '../../hooks/useDebounce';
-import {
-  AllAdminAreasQuery,
-  useAllAdminAreasQuery,
-} from '../../__generated__/graphql';
+import { useDebounce } from '@hooks/useDebounce';
+import { AllAdminAreasQuery, useAllAdminAreasQuery } from '@generated/graphql';
 import { FieldLabel } from '@components/core/FieldLabel';
 import { LoadingComponent } from '@components/core/LoadingComponent';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;
@@ -70,7 +68,7 @@ export function AdminAreaAutocompleteMultiple({
         onClose={() => {
           setOpen(false);
         }}
-        getOptionSelected={(option, value1) =>
+        isOptionEqualToValue={(option, value1) =>
           value1?.node?.id === option.node.id
         }
         getOptionLabel={(option) => {

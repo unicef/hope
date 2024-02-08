@@ -4,11 +4,11 @@ import {
   AllIndividualsForPopulationTableQuery,
   AllIndividualsForPopulationTableQueryVariables,
   useAllIndividualsForPopulationTableQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '@containers/tables/UniversalTable';
 import { decodeIdString } from '@utils/utils';
-import { TableWrapper } from '../../../core/TableWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { TableWrapper } from '@core/TableWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
 

@@ -10,13 +10,13 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
+import { useGrievancesChoiceDataQuery } from '@generated/graphql';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { getFilterFromQueryParams } from '@utils/utils';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '../../../core/LoadingComponent';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { LookUpLinkedTicketsFilters } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsFilters';
 import { LookUpLinkedTicketsTable } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsTable';
 

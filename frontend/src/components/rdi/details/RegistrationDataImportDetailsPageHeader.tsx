@@ -8,12 +8,12 @@ import {
   RegistrationDetailedFragment,
   useEraseRdiMutation,
   useRefuseRdiMutation,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { BreadCrumbsItem } from '../../core/BreadCrumbs';
-import { useConfirmation } from '../../core/ConfirmationDialog';
-import { LoadingButton } from '../../core/LoadingButton';
-import { PageHeader } from '../../core/PageHeader';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { LoadingButton } from '@core/LoadingButton';
+import { PageHeader } from '@core/PageHeader';
 import { useProgramContext } from '../../../programContext';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';

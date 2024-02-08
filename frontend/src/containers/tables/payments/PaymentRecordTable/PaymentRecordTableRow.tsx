@@ -12,8 +12,8 @@ import {
   paymentRecordStatusToColor,
   paymentStatusDisplayMap,
 } from '@utils/utils';
-import { PaymentRecordNode } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { PaymentRecordNode } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;

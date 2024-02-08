@@ -2,7 +2,7 @@ import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { Radio } from '@mui/material';
-import { TargetPopulationNode } from '../../../../__generated__/graphql';
+import { TargetPopulationNode } from '@generated/graphql';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@utils/utils';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { BlackLink } from '@components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface LookUpTargetPopulationTableRowSurveysProps {
   targetPopulation: TargetPopulationNode;

@@ -2,8 +2,8 @@ import * as React from 'react';
 import {
   ImportedIndividualNode,
   useImportedIndividualPhotosQuery,
-} from '../../__generated__/graphql';
-import { PhotoModal } from '../core/PhotoModal/PhotoModal';
+} from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 interface ImportedIndividualPhotoModalProps {
   individual: ImportedIndividualNode;

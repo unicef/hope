@@ -1,5 +1,5 @@
 import camelCase from 'lodash/camelCase';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,

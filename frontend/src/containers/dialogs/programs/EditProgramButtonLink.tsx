@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/EditRounded';
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ProgramQuery } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { ProgramQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface EditProgramButtonLinkProps {
   program: ProgramQuery['program'];

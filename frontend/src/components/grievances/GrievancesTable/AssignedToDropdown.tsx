@@ -1,8 +1,9 @@
+import * as React from 'react';
 import { useEffect, useState } from 'react';
 import Autocomplete from '@mui/lab/Autocomplete';
 import styled from 'styled-components';
 import { TextField } from '@mui/material';
-import { useDebounce } from '../../../hooks/useDebounce';
+import { useDebounce } from '@hooks/useDebounce';
 import { useProgramContext } from '../../../programContext';
 
 const StyledAutocomplete = styled(Autocomplete)`
@@ -85,7 +86,7 @@ export function AssignedToDropdown({
         if (reason === 'select-option') return;
         onInputTextChange('');
       }}
-      getOptionSelected={(option, value1) => option.node.id === value1.id}
+      isOptionEqualToValue={(option, value1) => option.node.id === value1.id}
       getOptionLabel={(option) => {
         if (option.node) {
           return `${option.node.email}`;

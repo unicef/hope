@@ -2,8 +2,8 @@ import * as React from 'react';
 import TableCell from '@mui/material/TableCell';
 import { useNavigate } from 'react-router-dom';
 import { Radio } from '@mui/material';
-import { TargetPopulationNode } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { TargetPopulationNode } from '@generated/graphql';
+import { useBusinessArea } from '@hooks/useBusinessArea';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { StatusBox } from '@components/core/StatusBox';
 import {

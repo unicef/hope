@@ -4,8 +4,8 @@ import { decodeIdString } from '@utils/utils';
 import {
   PaymentVerificationLogEntryNode,
   useAllPaymentVerificationLogEntriesQuery,
-} from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface UniversalActivityLogTablePaymentVerificationProps {
   objectId: string;

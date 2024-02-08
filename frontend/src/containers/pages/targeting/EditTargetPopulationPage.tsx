@@ -5,12 +5,12 @@ import {
   TargetPopulationBuildStatus,
   useBusinessAreaDataQuery,
   useTargetPopulationQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { EditTargetPopulation } from '@components/targeting/EditTargetPopulation/EditTargetPopulation';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
 
 export function EditTargetPopulationPage(): React.ReactElement {

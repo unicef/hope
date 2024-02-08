@@ -6,12 +6,12 @@ import {
   CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
   PaymentPlanQuery,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { choicesToDict, paymentVerificationStatusToColor } from '@utils/utils';
-import { LabelizedField } from '../core/LabelizedField';
-import { StatusBox } from '../core/StatusBox';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { VerificationPlanActions } from './VerificationPlanActions';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 

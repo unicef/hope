@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { formatThousands } from '@utils/utils';
-import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
+import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
 
 interface TicketsByLocationAndCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByLocationAndCategory'];

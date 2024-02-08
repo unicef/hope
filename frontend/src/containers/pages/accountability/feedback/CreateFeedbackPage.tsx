@@ -22,7 +22,7 @@ import {
   useAllUsersQuery,
   useCreateFeedbackTicketMutation,
   useFeedbackIssueTypeChoicesQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { HouseholdQuestionnaire } from '@components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '@components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
@@ -40,9 +40,9 @@ import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
 import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { FormikSelectField } from '@shared/Formik/FormikSelectField';
