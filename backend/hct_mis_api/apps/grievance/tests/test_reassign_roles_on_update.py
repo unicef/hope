@@ -61,9 +61,7 @@ class TestReassignRolesOnUpdate(APITestCase):
             role=ROLE_ALTERNATE,
         )
 
-        cls.no_role_individual = IndividualFactory(household=None, program=cls.program_one)
-        cls.no_role_individual.household = cls.household
-        cls.no_role_individual.save()
+        cls.no_role_individual = IndividualFactory(household=cls.household, program=cls.program_one)
 
     def test_reassign_role_to_another_individual(self) -> None:
         individual = IndividualFactory(household=self.household, program=self.program_one)
