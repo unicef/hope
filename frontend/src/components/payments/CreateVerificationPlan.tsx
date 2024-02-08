@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
@@ -80,29 +80,29 @@ function prepareVariables(
       fullListArguments:
         selectedTab === 0
           ? {
-            excludedAdminAreas: values.excludedAdminAreasFull || [],
-          }
+              excludedAdminAreas: values.excludedAdminAreasFull || [],
+            }
           : null,
       verificationChannel: values.verificationChannel,
       rapidProArguments:
         values.verificationChannel === 'RAPIDPRO'
           ? {
-            flowId: values.rapidProFlow,
-          }
+              flowId: values.rapidProFlow,
+            }
           : null,
       randomSamplingArguments:
         selectedTab === 1
           ? {
-            confidenceInterval: values.confidenceInterval * 0.01,
-            marginOfError: values.marginOfError * 0.01,
-            excludedAdminAreas: values.adminCheckbox
-              ? values.excludedAdminAreasRandom
-              : [],
-            age: values.ageCheckbox
-              ? { min: values.filterAgeMin, max: values.filterAgeMax }
-              : null,
-            sex: values.sexCheckbox ? values.filterSex : null,
-          }
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              excludedAdminAreas: values.adminCheckbox
+                ? values.excludedAdminAreasRandom
+                : [],
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
           : null,
       businessAreaSlug: businessArea,
     },
@@ -122,7 +122,8 @@ export function CreateVerificationPlan({
 }: Props): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
-const navigate = useNavigate()  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
   const [mutate, { loading }] = useCreatePaymentVerificationPlanMutation();
@@ -130,11 +131,12 @@ const navigate = useNavigate()  const [open, setOpen] = useState(false);
   const { isActiveProgram } = useProgramContext();
   const [formValues, setFormValues] = useState(initialValues);
 
-  const [loadRapidProFlows, { data: rapidProFlows }] = useAllRapidProFlowsLazyQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-    },
-  });
+  const [loadRapidProFlows, { data: rapidProFlows }] =
+    useAllRapidProFlowsLazyQuery({
+      variables: {
+        businessAreaSlug: businessArea,
+      },
+    });
   const { data } = useAllAdminAreasQuery({
     variables: {
       first: 100,
@@ -156,8 +158,8 @@ const navigate = useNavigate()  const [open, setOpen] = useState(false);
     if (open) {
       loadSampleSize();
       if (
-        formValues.verificationChannel
-        === PaymentVerificationPlanVerificationChannel.Rapidpro
+        formValues.verificationChannel ===
+        PaymentVerificationPlanVerificationChannel.Rapidpro
       ) {
         loadRapidProFlows();
       }
@@ -192,19 +194,20 @@ const navigate = useNavigate()  const [open, setOpen] = useState(false);
 
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
     ? data.allAdminAreas.edges.map((el) => ({
-      value: el.node.id,
-      name: el.node.name,
-    }))
+        value: el.node.id,
+        name: el.node.name,
+      }))
     : [];
 
   const handleFormChange = (values): void => {
     setFormValues(values);
   };
 
-  const getSampleSizePercentage = (): string => `(${getPercentage(
-    sampleSizesData?.sampleSize?.sampleSize,
-    sampleSizesData?.sampleSize?.paymentRecordCount,
-  )})`;
+  const getSampleSizePercentage = (): string =>
+    `(${getPercentage(
+      sampleSizesData?.sampleSize?.sampleSize,
+      sampleSizesData?.sampleSize?.paymentRecordCount,
+    )})`;
 
   const getTooltipTitle = (): string => {
     if (!canCreatePaymentVerificationPlan) {
@@ -223,13 +226,15 @@ const navigate = useNavigate()  const [open, setOpen] = useState(false);
       {({ submitForm, values, setValues }) => {
         // Redirect to error page if no flows available
         if (
-          !rapidProFlows?.allRapidProFlows?.length
-          && values.verificationChannel === 'RAPIDPRO'
+          !rapidProFlows?.allRapidProFlows?.length &&
+          values.verificationChannel === 'RAPIDPRO'
         ) {
           navigate(`/error/${businessArea}`, {
-            errorMessage: t(
-              'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
-            ),
+            state: {
+              errorMessage: t(
+                'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
+              ),
+            },
           });
         }
 
@@ -271,7 +276,7 @@ const navigate = useNavigate()  const [open, setOpen] = useState(false);
                       data-cy="tabs"
                       value={selectedTab}
                       onChange={(
-                        event: React.ChangeEvent<{}>,
+                        event: React.ChangeEvent<unknown>,
                         newValue: number,
                       ) => {
                         setValues(initialValues);
@@ -304,14 +309,8 @@ const navigate = useNavigate()  const [open, setOpen] = useState(false);
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size:
-                        {' '}
-                        {sampleSizesData?.sampleSize?.sampleSize}
-                        {' '}
-                        out of
-                        {' '}
-                        {sampleSizesData?.sampleSize?.paymentRecordCount}
-                        {' '}
+                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
+                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
                         {getSampleSizePercentage()}
                       </Box>
                       <Box fontSize={12} color="#797979">
@@ -444,13 +443,8 @@ const navigate = useNavigate()  const [open, setOpen] = useState(false);
                         fontSize={16}
                         fontWeight="fontWeightBold"
                       >
-                        Sample size:
-                        {' '}
-                        {sampleSizesData?.sampleSize?.sampleSize}
-                        {' '}
-                        out of
-                        {' '}
-                        {sampleSizesData?.sampleSize?.paymentRecordCount}
+                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
+                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}
                         {getSampleSizePercentage()}
                       </Box>
                       <Field
@@ -472,9 +466,9 @@ const navigate = useNavigate()  const [open, setOpen] = useState(false);
                           choices={
                             rapidProFlows
                               ? rapidProFlows.allRapidProFlows.map((flow) => ({
-                                value: flow.id,
-                                name: flow.name,
-                              }))
+                                  value: flow.id,
+                                  name: flow.name,
+                                }))
                               : []
                           }
                           component={FormikSelectField}

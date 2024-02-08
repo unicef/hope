@@ -20,8 +20,8 @@ import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { LinkedTicketsModal } from '../LinkedTicketsModal/LinkedTicketsModal';
-import { getGrievanceDetailsPath } from '@utils/createGrievanceUtils';
 import { AssignedToDropdown } from './AssignedToDropdown';
+import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 
 interface GrievancesTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
@@ -55,7 +55,8 @@ export function GrievancesTableRow({
   initialVariables,
 }: GrievancesTableRowProps): React.ReactElement {
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
-const navigate = useNavigate()  const { showMessage } = useSnackbar();
+  const navigate = useNavigate();
+  const { showMessage } = useSnackbar();
   const detailsPath = getGrievanceDetailsPath(
     ticket.id,
     ticket.category,
@@ -63,9 +64,9 @@ const navigate = useNavigate()  const { showMessage } = useSnackbar();
   );
   const issueType = ticket.issueType
     ? issueTypeChoicesData
-      .find((el) => el.category === ticket.category.toString())
-      .subCategories.find((el) => el.value === ticket.issueType.toString())
-      .name
+        .find((el) => el.category === ticket.category.toString())
+        .subCategories.find((el) => el.value === ticket.issueType.toString())
+        .name
     : '-';
 
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();

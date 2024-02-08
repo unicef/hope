@@ -31,7 +31,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export function LookUpTargetPopulationTableCommunication({
+export const LookUpTargetPopulationTableCommunication = ({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -39,7 +39,7 @@ export function LookUpTargetPopulationTableCommunication({
   handleChange,
   noTableStyling,
   noTitle,
-}: LookUpTargetPopulationTableCommunicationProps): ReactElement {
+}: LookUpTargetPopulationTableCommunicationProps): ReactElement => {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const initialVariables: AllActiveTargetPopulationsQueryVariables = {
@@ -102,4 +102,4 @@ export function LookUpTargetPopulationTableCommunication({
   ) : (
     renderTable()
   );
-}
+};

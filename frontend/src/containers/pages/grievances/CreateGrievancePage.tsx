@@ -1,19 +1,3 @@
-import {
-  Box, Button, FormHelperText, Grid,
-} from '@mui/material';
-import { Formik } from 'formik';
-import  { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  useAllAddIndividualFieldsQuery,
-  useAllEditHouseholdFieldsQuery,
-  useAllProgramsForChoicesQuery,
-  useAllUsersQuery,
-  useCreateGrievanceMutation,
-  useGrievancesChoiceDataQuery,
-} from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
@@ -39,23 +23,34 @@ import {
 import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
 import { validationSchemaWithSteps } from '@components/grievances/utils/validationSchema';
 import {
-  PERMISSIONS,
-  hasPermissionInModule,
-  hasPermissions,
-} from '../../../config/permissions';
+  useAllAddIndividualFieldsQuery,
+  useAllEditHouseholdFieldsQuery,
+  useAllProgramsForChoicesQuery,
+  useAllUsersQuery,
+  useCreateGrievanceMutation,
+  useGrievancesChoiceDataQuery,
+} from '@generated/graphql';
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Button, FormHelperText, Grid } from '@mui/material';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GrievanceSteps,
 } from '@utils/constants';
+import { decodeIdString, thingForSpecificGrievanceType } from '@utils/utils';
+import { Formik } from 'formik';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 import {
-  decodeIdString,
-  thingForSpecificGrievanceType,
-} from '@utils/utils';
+  PERMISSIONS,
+  hasPermissionInModule,
+  hasPermissions,
+} from '../../../config/permissions';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -83,24 +78,24 @@ export const dataChangeComponentDict = {
   },
 };
 
-export function CreateGrievancePage(): React.ReactElement {
+export const CreateGrievancePage = (): React.ReactElement => {
   const { t } = useTranslation();
-const navigate = useNavigate()  const {
-    baseUrl, businessArea, programId, isAllPrograms,
-  } = useBaseUrl();
+  const location = useLocation();
+  const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
   const [validateData, setValidateData] = useState(false);
 
-  const linkedTicketId = history.location.state?.linkedTicketId;
-  const selectedHousehold = history.location.state?.selectedHousehold;
-  const selectedIndividual = history.location.state?.selectedIndividual;
-  const category = history.location.state?.category;
-  const linkedFeedbackId = history.location.state?.linkedFeedbackId;
+  const linkedTicketId = location.state?.linkedTicketId;
+  const selectedHousehold = location.state?.selectedHousehold;
+  const selectedIndividual = location.state?.selectedIndividual;
+  const category = location.state?.category;
+  const linkedFeedbackId = location.state?.linkedFeedbackId;
   const redirectedFromRelatedTicket = Boolean(category);
-  const isFeedbackWithHouseholdOnly = history.location.state?.isFeedbackWithHouseholdOnly;
+  const isFeedbackWithHouseholdOnly =
+    location.state?.isFeedbackWithHouseholdOnly;
 
   const initialValues = {
     description: '',
@@ -129,21 +124,24 @@ const navigate = useNavigate()  const {
     variables: { businessArea, first: 1000 },
   });
 
-  const { data: choicesData, loading: choicesLoading } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
-  const { data: programsData, loading: programsDataLoading } = useAllProgramsForChoicesQuery({
-    variables: {
-      first: 100,
-      businessArea,
-    },
-  });
+  const { data: programsData, loading: programsDataLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: {
+        first: 100,
+        businessArea,
+      },
+    });
 
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const { data: householdFieldsData, loading: householdFieldsLoading } = useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, loading: householdFieldsLoading } =
+    useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -155,32 +153,34 @@ const navigate = useNavigate()  const {
     '*',
   );
 
-  const showIssueType = (values): boolean => (
-    values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE
-      || values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE
-      || values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
-  );
+  const showIssueType = (values): boolean =>
+    values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
   if (
-    userDataLoading
-    || choicesLoading
-    || allAddIndividualFieldsDataLoading
-    || householdFieldsLoading
-    || programsDataLoading
-  ) return <LoadingComponent />;
+    userDataLoading ||
+    choicesLoading ||
+    allAddIndividualFieldsDataLoading ||
+    householdFieldsLoading ||
+    programsDataLoading
+  )
+    return <LoadingComponent />;
   if (permissions === null) return null;
 
-  if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions)) return <PermissionDenied />;
+  if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))
+    return <PermissionDenied />;
 
   if (
-    !choicesData
-    || !userData
-    || !allAddIndividualFieldsData
-    || !householdFieldsData
-    || !householdFieldsDict
-    || !individualFieldsDict
-    || !programsData
-  ) return null;
+    !choicesData ||
+    !userData ||
+    !allAddIndividualFieldsData ||
+    !householdFieldsData ||
+    !householdFieldsDict ||
+    !individualFieldsDict ||
+    !programsData
+  )
+    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -189,17 +189,18 @@ const navigate = useNavigate()  const {
     },
   ];
 
-  const dataChangeErrors = (errors): ReactElement[] => [
-    'householdDataUpdateFields',
-    'individualDataUpdateFields',
-    'individualDataUpdateFieldsDocuments',
-    'individualDataUpdateFieldsIdentities',
-    'verificationRequired',
-  ].map((fieldname) => (
-    <FormHelperText key={fieldname} error>
-      {errors[fieldname]}
-    </FormHelperText>
-  ));
+  const dataChangeErrors = (errors): ReactElement[] =>
+    [
+      'householdDataUpdateFields',
+      'individualDataUpdateFields',
+      'individualDataUpdateFieldsDocuments',
+      'individualDataUpdateFieldsIdentities',
+      'verificationRequired',
+    ].map((fieldname) => (
+      <FormHelperText key={fieldname} error>
+        {errors[fieldname]}
+      </FormHelperText>
+    ));
 
   const handleNext = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -258,10 +259,10 @@ const navigate = useNavigate()  const {
           handleNext();
           // if creating a linked G&F ticket from Feedback page and IND and HH selected skip Look Up
           if (
-            activeStep === 0
-            && linkedFeedbackId
-            && selectedHousehold
-            && selectedIndividual
+            activeStep === 0 &&
+            linkedFeedbackId &&
+            selectedHousehold &&
+            selectedIndividual
           ) {
             handleNext();
           }
@@ -271,14 +272,16 @@ const navigate = useNavigate()  const {
         activeStep < GrievanceSteps.Verification || validateData
       }
       validateOnBlur={activeStep < GrievanceSteps.Verification || validateData}
-      validate={(values) => validateUsingSteps(
-        values,
-        allAddIndividualFieldsData,
-        individualFieldsDict,
-        householdFieldsDict,
-        activeStep,
-        setValidateData,
-      )}
+      validate={(values) =>
+        validateUsingSteps(
+          values,
+          allAddIndividualFieldsData,
+          individualFieldsDict,
+          householdFieldsDict,
+          activeStep,
+          setValidateData,
+        )
+      }
       validationSchema={validationSchemaWithSteps(activeStep)}
     >
       {({
@@ -295,10 +298,11 @@ const navigate = useNavigate()  const {
           EmptyComponent,
         );
 
-        const issueTypeToDisplay = (): string => selectedIssueType(
-          values,
-          choicesData.grievanceTicketIssueTypeChoices,
-        );
+        const issueTypeToDisplay = (): string =>
+          selectedIssueType(
+            values,
+            choicesData.grievanceTicketIssueTypeChoices,
+          );
 
         return (
           <>
@@ -424,4 +428,4 @@ const navigate = useNavigate()  const {
       }}
     </Formik>
   );
-}
+};

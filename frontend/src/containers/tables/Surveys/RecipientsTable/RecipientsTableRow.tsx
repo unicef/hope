@@ -21,16 +21,17 @@ interface RecipientsTableRowProps {
   canViewDetails: boolean;
 }
 
-export function RecipientsTableRow({
+export const RecipientsTableRow = ({
   household,
   headOfHousehold,
   canViewDetails,
-}: RecipientsTableRowProps): React.ReactElement {
-const navigate = useNavigate()  const { baseUrl, businessArea } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-first',
-  });
+}: RecipientsTableRowProps): React.ReactElement => {
+  const navigate = useNavigate();
+  const { baseUrl } = useBaseUrl();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery({
+      fetchPolicy: 'cache-first',
+    });
   const householdDetailsPath = `/${baseUrl}/population/household/${household.id}`;
   const handleClick = (): void => {
     navigate(householdDetailsPath);
@@ -69,4 +70,4 @@ const navigate = useNavigate()  const { baseUrl, businessArea } = useBaseUrl();
       </TableCell>
     </ClickableTableRow>
   );
-}
+};

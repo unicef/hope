@@ -7,10 +7,7 @@ import { StatusBox } from '@components/core/StatusBox';
 import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
 import { UniversalMoment } from '@components/core/UniversalMoment';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import {
-  paymentPlanStatusToColor,
-  renderSomethingOrDash,
-} from '@utils/utils';
+import { paymentPlanStatusToColor, renderSomethingOrDash } from '@utils/utils';
 
 interface CashPlanTableRowProps {
   cashAndPaymentPlan: CashPlanAndPaymentPlanNode;
@@ -19,10 +16,12 @@ interface CashPlanTableRowProps {
 export function CashPlanTableRow({
   cashAndPaymentPlan,
 }: CashPlanTableRowProps): React.ReactElement {
-const navigate = useNavigate()  const { baseUrl, isAllPrograms } = useBaseUrl();
-  const objectPath = cashAndPaymentPlan.objType === 'PaymentPlan'
-    ? `/${baseUrl}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
-    : `/${baseUrl}/cashplans/${cashAndPaymentPlan.id}`;
+  const navigate = useNavigate();
+  const { baseUrl, isAllPrograms } = useBaseUrl();
+  const objectPath =
+    cashAndPaymentPlan.objType === 'PaymentPlan'
+      ? `/${baseUrl}/payment-module/payment-plans/${cashAndPaymentPlan.id}`
+      : `/${baseUrl}/cashplans/${cashAndPaymentPlan.id}`;
 
   const handleClick = (): void => {
     navigate(objectPath);

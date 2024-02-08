@@ -91,8 +91,8 @@ export function ExportModal({ filter, year }): React.ReactElement {
       );
     });
 
-  const submitFormHandler = async (): Promise<void> => {
-    const response = await mutate({
+  const submitFormHandler = (): void => {
+    mutate({
       variables: {
         reportData: {
           businessAreaSlug: businessArea,
@@ -102,14 +102,19 @@ export function ExportModal({ filter, year }): React.ReactElement {
           program: isAllPrograms ? null : programId,
         },
       },
-    });
-    if (!response.errors && response.data.createDashboardReport.success) {
-      showMessage(t('Report was created.'));
-    } else {
-      showMessage(t('Report create action failed.'));
-    }
-    setSelected([]);
-    setDialogOpen(false);
+    })
+      .then((response) => {
+        if (!response.errors && response.data.createDashboardReport.success) {
+          showMessage(t('Report was created.'));
+        } else {
+          showMessage(t('Report create action failed.'));
+        }
+        setSelected([]);
+        setDialogOpen(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (

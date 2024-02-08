@@ -2,13 +2,21 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import { Tooltip } from '@mui/material';
 
-export function ButtonTooltip({
+interface ButtonTooltipProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  title?: string;
+  disabled?: boolean;
+  [key: string]: any;
+}
+
+export const ButtonTooltip: React.FC<ButtonTooltipProps> = ({
   children,
   onClick = () => null,
   title = 'Permission denied',
   disabled,
   ...otherProps
-}): React.ReactElement {
+}) => {
   return disabled ? (
     <Tooltip title={title}>
       <span>
@@ -22,4 +30,4 @@ export function ButtonTooltip({
       {children}
     </Button>
   );
-}
+};

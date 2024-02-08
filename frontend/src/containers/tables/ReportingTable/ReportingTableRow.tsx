@@ -34,7 +34,8 @@ export function ReportingTableRow({
 }: ReportingTableRowProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
-const navigate = useNavigate()  const handleClick = (): void => {
+  const navigate = useNavigate();
+  const handleClick = (): void => {
     const path = `/${baseUrl}/reporting/${report.id}`;
     navigate(path);
   };
@@ -45,10 +46,7 @@ const navigate = useNavigate()  const handleClick = (): void => {
         <Pointer>{typeChoices[report.reportType]}</Pointer>
       </UnderlinedTableCell>
       <TableCell align="left">
-        <UniversalMoment>{report.dateFrom}</UniversalMoment>
-        {' '}
-        -
-        {' '}
+        <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
         <UniversalMoment>{report.dateTo}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
@@ -64,9 +62,7 @@ const navigate = useNavigate()  const handleClick = (): void => {
         <UniversalMoment>{report.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell align="left">
-        {report.createdBy.firstName}
-        {' '}
-        {report.createdBy.lastName}
+        {report.createdBy.firstName} {report.createdBy.lastName}
       </TableCell>
       <DownloadTableCell
         align="left"

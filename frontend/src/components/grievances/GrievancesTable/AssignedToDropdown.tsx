@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { TextField } from '@mui/material';
 import { useDebounce } from '@hooks/useDebounce';
 import { useProgramContext } from '../../../programContext';
+import { AllUsersForFiltersQuery } from '@generated/graphql';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '180px')}
@@ -18,7 +19,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function AssignedToDropdown({
+export const AssignedToDropdown = ({
   fullWidth,
   onFilterChange,
   value,
@@ -36,7 +37,7 @@ export function AssignedToDropdown({
   ids?;
   label?;
   disableClearable?: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
@@ -69,7 +70,8 @@ export function AssignedToDropdown({
   const sortedOptions = sortOptionsDataByEmail(optionsData);
 
   return (
-    <StyledAutocomplete
+    //@ts-ignore
+    <StyledAutocomplete<AllUsersForFiltersQuery['allUsers']['edges']>
       fullWidth={fullWidth}
       open={open}
       disableClearable={disableClearable}
@@ -79,7 +81,7 @@ export function AssignedToDropdown({
         e.stopPropagation();
         setOpen(true);
       }}
-      onClose={(e, reason) => {
+      onClose={(e, reason: string) => {
         e.preventDefault();
         e.stopPropagation();
         setOpen(false);
@@ -119,4 +121,4 @@ export function AssignedToDropdown({
       )}
     />
   );
-}
+};

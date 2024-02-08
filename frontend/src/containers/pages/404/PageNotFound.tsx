@@ -2,7 +2,7 @@ import { Box, Button } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import * as React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
 import { clearCache } from '@utils/utils';
@@ -50,13 +50,16 @@ const Paragraph = styled.p`
 `;
 
 export const PageNotFound: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const pathSegments = location.pathname.split('/');
+  const businessArea = pathSegments[2];
+
   const goBackAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);
-    window.history.back();
+    navigate(-1);
   };
-const navigate = useNavigate()  const pathSegments = history.location.pathname.split('/');
-  const businessArea = pathSegments[2];
 
   return (
     <Container>
@@ -85,7 +88,9 @@ const navigate = useNavigate()  const pathSegments = history.location.pathname.s
             endIcon={<Refresh />}
             variant="outlined"
             color="primary"
-            onClick={goBackAndClearCache}
+            onClick={() => {
+              goBackAndClearCache();
+            }}
             data-cy="button-refresh-page"
           >
             REFRESH PAGE

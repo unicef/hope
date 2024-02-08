@@ -35,7 +35,7 @@ export function BulkAssignModal({
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] =
-    React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
+    useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
   const [inputValue, setInputValue] = useState('');
   const { data: usersData } = useAllUsersForFiltersQuery({

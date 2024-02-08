@@ -10,9 +10,9 @@ interface IndividualQuestionnaireProps {
   values;
 }
 
-export function IndividualQuestionnaire({
+export const IndividualQuestionnaire = ({
   values,
-}: IndividualQuestionnaireProps): React.ReactElement {
+}: IndividualQuestionnaireProps): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const selectedIndividualData =
@@ -57,7 +57,7 @@ export function IndividualQuestionnaire({
           size: 3,
         },
       ].map((el) => (
-        <Grid item xs={3}>
+        <Grid key={el.name} item xs={3}>
           <Field
             data-cy={`input-${el.name}`}
             name={el.name}
@@ -70,4 +70,4 @@ export function IndividualQuestionnaire({
       ))}
     </Grid>
   );
-}
+};

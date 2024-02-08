@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link,  useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FeedbackQuery } from '@generated/graphql';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
@@ -22,7 +22,8 @@ export function FeedbackDetailsToolbar({
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl } = useBaseUrl();
-const navigate = useNavigate()  const { isActiveProgram } = useProgramContext();
+  const navigate = useNavigate();
+  const { isActiveProgram } = useProgramContext();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -61,15 +62,16 @@ const navigate = useNavigate()  const { isActiveProgram } = useProgramContext();
         {!hasLinkedGrievance && (
           <Box mr={3}>
             <ButtonTooltip
-              onClick={() => navigate({
-                pathname: `/${baseUrl}/grievance/new-ticket`,
-                state: {
-                  selectedHousehold: feedback?.householdLookup,
-                  selectedIndividual: feedback?.individualLookup,
-                  linkedFeedbackId: id,
-                  isFeedbackWithHouseholdOnly,
-                },
-              })}
+              onClick={() =>
+                navigate(`/${baseUrl}/grievance/new-ticket`, {
+                  state: {
+                    selectedHousehold: feedback?.householdLookup,
+                    selectedIndividual: feedback?.individualLookup,
+                    linkedFeedbackId: id,
+                    isFeedbackWithHouseholdOnly,
+                  },
+                })
+              }
               variant="contained"
               color="primary"
               data-cy="button-create-linked-ticket"

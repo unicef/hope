@@ -26,11 +26,13 @@ export function RecipientsTableRow({
   headOfHousehold,
   canViewDetails,
 }: RecipientsTableRowProps): React.ReactElement {
-const navigate = useNavigate()  const { baseUrl, businessArea } = useBaseUrl();
-  const { data: choicesData, loading: choicesLoading } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-    fetchPolicy: 'cache-first',
-  });
+  const navigate = useNavigate();
+  const { baseUrl, businessArea } = useBaseUrl();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery({
+      variables: { businessArea },
+      fetchPolicy: 'cache-first',
+    });
   const residenceStatusChoiceDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );

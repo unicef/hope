@@ -45,7 +45,8 @@ const CountrySelect = styled(Select)`
 export function BusinessAreaSelect(): React.ReactElement {
   const { data } = useCachedMe();
   const { businessArea } = useBaseUrl();
-const navigate = useNavigate()  const onChange = (e): void => {
+  const navigate = useNavigate();
+  const onChange = (e): void => {
     navigate(`/${e.target.value}/programs/all/list`);
   };
   if (!data) {

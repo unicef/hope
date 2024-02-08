@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
-import  { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -45,7 +45,8 @@ export function CreateImportFromKoboForm({
   } = useSaveKoboImportDataAndCheckStatus();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
-const navigate = useNavigate()  const { baseUrl, businessArea } = useBaseUrl();
+  const navigate = useNavigate();
+  const { baseUrl, businessArea } = useBaseUrl();
   const [createImport] = useCreateRegistrationKoboImportMutation();
 
   const onSubmit = async (values): Promise<void> => {

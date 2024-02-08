@@ -11,7 +11,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,7 +27,7 @@ import { BlackLink } from '@core/BlackLink';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { StatusBox } from '@core/StatusBox';
 import { ClickableTableRow } from '@core/Table/ClickableTableRow';
-import { getGrievanceDetailsPath } from '@utils/createGrievanceUtils';
+import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -65,12 +65,14 @@ export function LinkedTicketsModal({
   issueTypeChoicesData,
 }: LinkedTicketsModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
-const navigate = useNavigate()  const { t } = useTranslation();
-  const [loadRelatedTickets, { data, loading }] = useRelatedGrievanceTicketsLazyQuery({
-    variables: {
-      id: ticket.id,
-    },
-  });
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [loadRelatedTickets, { data, loading }] =
+    useRelatedGrievanceTicketsLazyQuery({
+      variables: {
+        id: ticket.id,
+      },
+    });
   useEffect(() => {
     if (dialogOpen) {
       loadRelatedTickets();
@@ -133,9 +135,7 @@ const navigate = useNavigate()  const { t } = useTranslation();
           setDialogOpen(true);
         }}
       >
-        {ticketsCount}
-        {' '}
-        linked ticket
+        {ticketsCount} linked ticket
         {ticketsCount === 1 ? '' : 's'}
       </StyledLink>
     );
@@ -145,7 +145,7 @@ const navigate = useNavigate()  const { t } = useTranslation();
     if (loading) return <LoadingComponent />;
     if (!data) return null;
 
-    const { relatedTickets } = data?.grievanceTicket;
+    const { relatedTickets } = data?.grievanceTicket || {};
     return (
       <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>
     );

@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import localForage from 'localforage';
-import { ApolloError } from 'apollo-client';
 import {
   ImportedIndividualFieldsQuery,
   useImportedIndividualFieldsLazyQuery,
 } from '@generated/graphql';
+import { ApolloError } from '@apollo/client';
 
 export function useCachedImportedIndividualFieldsQuery(businessArea): {
   loading: boolean;

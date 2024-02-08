@@ -1,11 +1,11 @@
-import { Box, Button } from '@mui/material';
 import { Refresh } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Box, Button } from '@mui/material';
+import { clearCache } from '@utils/utils';
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
-import { clearCache } from '@utils/utils';
 import SomethingWentWrongGraphic from './something_went_wrong_graphic.png';
 import HopeLogo from './something_went_wrong_hope_logo.png';
 
@@ -55,7 +55,8 @@ export const SomethingWentWrong: React.FC = () => {
     await clearCache(client);
     window.history.back();
   };
-const navigate = useNavigate()  const errorMessage = history.location.state?.errorMessage;
+  const location = useLocation();
+  const errorMessage = location.state?.errorMessage;
 
   const handleGoBack = (): void => {
     if (window.history.length > 2) {

@@ -10,14 +10,11 @@ function getSelectedText(): string {
   if (window.getSelection !== undefined) {
     text = window.getSelection().toString();
   } else if (
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     document.selection !== undefined &&
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     document.selection.type === 'Text'
   ) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     text = document.selection.createRange().text;
   }

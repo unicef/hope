@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { Formik } from 'formik';
+import { Formik, FormikValues } from 'formik';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,12 +20,12 @@ import { LoadingComponent } from '@core/LoadingComponent';
 import { LookUpLinkedTicketsFilters } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsFilters';
 import { LookUpLinkedTicketsTable } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsTable';
 
-export function LookUpLinkedTicketsModal({
+export const LookUpLinkedTicketsModal = ({
   onValueChange,
   initialValues,
   lookUpDialogOpen,
   setLookUpDialogOpen,
-}): React.ReactElement {
+}): React.ReactElement => {
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const location = useLocation();
@@ -52,12 +52,16 @@ export function LookUpLinkedTicketsModal({
   if (choicesLoading) {
     return <LoadingComponent />;
   }
+  const handleSubmit = (values: FormikValues): void => {
+    onValueChange('selectedLinkedTickets', values.selectedLinkedTickets);
+    setLookUpDialogOpen(false);
+  };
+
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        onValueChange('selectedLinkedTickets', values.selectedLinkedTickets);
-        setLookUpDialogOpen(false);
+        handleSubmit(values);
       }}
     >
       {({ submitForm, setFieldValue }) => (
@@ -101,7 +105,9 @@ export function LookUpLinkedTicketsModal({
                 type="submit"
                 color="primary"
                 variant="contained"
-                onClick={submitForm}
+                onClick={() => {
+                  submitForm();
+                }}
                 data-cy="button-submit"
               >
                 {t('SAVE')}
@@ -112,4 +118,4 @@ export function LookUpLinkedTicketsModal({
       )}
     </Formik>
   );
-}
+};
