@@ -1,40 +1,55 @@
 import * as React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
+import { useRoutes, useLocation } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { PopulationHouseholdDetailsPage } from '../pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from '../pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from '../pages/population/PopulationIndividualsDetailsPage';
 import { PopulationIndividualsPage } from '../pages/population/PopulationIndividualsPage';
 
-export function PopulationRoutes(): React.ReactElement {
-  const { path } = useRouteMatch();
+export const PopulationRoutes = (): React.ReactElement => {
+  const location = useLocation();
+  const path = location.pathname;
 
   const populationRoutes = [
     {
       path: `${path}/population/household/:id`,
-      component: <PopulationHouseholdDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/population/household/:id`}
+          element={<PopulationHouseholdDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/population/individuals/:id`,
-      component: <PopulationIndividualsDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/population/individuals/:id`}
+          element={<PopulationIndividualsDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/population/household`,
-      component: <PopulationHouseholdPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/population/household`}
+          element={<PopulationHouseholdPage />}
+        />
+      ),
     },
     {
       path: `${path}/population/individuals`,
-      component: <PopulationIndividualsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/population/individuals`}
+          element={<PopulationIndividualsPage />}
+        />
+      ),
     },
   ];
 
-  return (
-    <Switch>
-      {populationRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
-}
+  const routes = useRoutes(populationRoutes);
+
+  return routes;
+};

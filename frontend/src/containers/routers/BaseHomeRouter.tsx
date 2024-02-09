@@ -1,7 +1,8 @@
-import { makeStyles, Snackbar, SnackbarContent } from '@mui/material';
+import { Snackbar, SnackbarContent } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import * as React from 'react';
-import { Redirect, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   useAllBusinessAreasQuery,
@@ -27,11 +28,16 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
   appBarSpacer: theme.mixins.toolbar,
 }));
 
-export function BaseHomeRouter({ children }): React.ReactElement {
+interface BaseHomeRouterProps {
+  children: React.ReactNode;
+}
+
+export const BaseHomeRouter: React.FC<BaseHomeRouterProps> = ({ children }) => {
   const [open, setOpen] = React.useState(true);
   const { businessArea } = useBaseUrl();
-  const classes = useStyles({});
+  const classes = useStyles();
   const location = useLocation();
+  const navigate = useNavigate();
   const snackBar = useSnackbar();
   const handleDrawerOpen = (): void => {
     setOpen(true);
@@ -53,28 +59,23 @@ export function BaseHomeRouter({ children }): React.ReactElement {
       fetchPolicy: 'cache-first',
     });
 
-  if (!businessAreaData) {
-    return null;
-  }
-
-  if (businessAreaLoading) {
+  if (
+    !businessAreaData ||
+    businessAreaLoading ||
+    !programsData ||
+    programsLoading
+  ) {
     return <LoadingComponent />;
   }
 
-  if (!businessAreaData || !programsData) {
-    return null;
-  }
-
-  if (businessAreaLoading || programsLoading) {
-    return <LoadingComponent />;
-  }
   const allBusinessAreasSlugs = businessAreaData.allBusinessAreas.edges.map(
     (el) => el.node.slug,
   );
   const isBusinessAreaValid = allBusinessAreasSlugs.includes(businessArea);
 
   if (!isBusinessAreaValid) {
-    return <Redirect to="/" noThrow />;
+    navigate('/');
+    return null;
   }
 
   return (
@@ -105,4 +106,4 @@ export function BaseHomeRouter({ children }): React.ReactElement {
       )}
     </Root>
   );
-}
+};

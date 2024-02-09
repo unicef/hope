@@ -45,19 +45,19 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
-function TabPanel({
+const TabPanel = ({
   children,
   index,
   value,
-}: TabPanelProps): React.ReactElement {
-  const style = {};
-  if (index !== value) {
-    // eslint-disable-next-line dot-notation
-    style.display = 'none';
-  }
-  return <div style={style}>{children}</div>;
-}
-export function RegistrationDataImportDetailsPage(): React.ReactElement {
+}: TabPanelProps): React.ReactElement => {
+  return (
+    <div style={{ display: index !== value ? 'none' : 'block' }}>
+      {children}
+    </div>
+  );
+};
+
+export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -119,9 +119,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
               <TabsContainer>
                 <StyledTabs
                   value={selectedTab}
-                  onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
-                    setSelectedTab(newValue)
-                  }
+                  onChange={(_, newValue: number) => setSelectedTab(newValue)}
                   indicatorColor="primary"
                   textColor="primary"
                   variant="fullWidth"
@@ -171,4 +169,4 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
       <RegistrationContainer isErased={data.registrationDataImport.erased} />
     </div>
   );
-}
+};

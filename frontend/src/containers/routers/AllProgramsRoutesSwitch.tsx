@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
+import { useRoutes, useLocation } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
@@ -8,26 +8,53 @@ import { ReportingPage } from '../pages/reporting/ReportingPage';
 import { GrievanceRoutes } from './GrievanceRoutes';
 import { ProgramRoutes } from './ProgramRoutes';
 
-export function AllProgramsRoutesSwitch(): React.ReactElement {
-  const { path } = useRouteMatch();
+export const AllProgramsRoutesSwitch = (): React.ReactElement => {
+  const location = useLocation();
+  const path = location.pathname;
+
+  const allProgramsRoutes = [
+    {
+      path: `${path}/country-dashboard`,
+      element: (
+        <SentryRoute
+          path={`${path}/country-dashboard`}
+          element={<DashboardPage />}
+        />
+      ),
+    },
+    {
+      path: `${path}/reporting/:id`,
+      element: (
+        <SentryRoute
+          path={`${path}/reporting/:id`}
+          element={<ReportingDetailsPage />}
+        />
+      ),
+    },
+    {
+      path: `${path}/reporting`,
+      element: (
+        <SentryRoute path={`${path}/reporting`} element={<ReportingPage />} />
+      ),
+    },
+    {
+      path: `${path}/activity-log`,
+      element: (
+        <SentryRoute
+          path={`${path}/activity-log`}
+          element={<ActivityLogPage />}
+        />
+      ),
+    },
+  ];
+
+  const routes = useRoutes(allProgramsRoutes);
+
   return (
     <>
-      <Switch>
-        <SentryRoute label="/ - Dashboard" path={`${path}/country-dashboard`}>
-          <DashboardPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/reporting/:id`}>
-          <ReportingDetailsPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/reporting`}>
-          <ReportingPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/activity-log`}>
-          <ActivityLogPage />
-        </SentryRoute>
-      </Switch>
+      {routes}
       <GrievanceRoutes />
       <ProgramRoutes />
     </>
   );
-}
+};

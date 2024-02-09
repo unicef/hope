@@ -3,27 +3,28 @@ import * as React from 'react';
 import { Route } from 'react-router-dom';
 
 export interface SentryRouteProps {
-  children: React.ReactElement;
+  element: React.ReactElement;
   path: string;
   label?: string;
-  exact?: boolean;
 }
 
-export function SentryRoute({
+export const SentryRoute = ({
   path,
-  children,
+  element,
   label,
-  exact,
-}: SentryRouteProps): React.ReactElement {
+}: SentryRouteProps): React.ReactElement => {
   return (
-    <Route exact={exact} path={path}>
-      <Sentry.ErrorBoundary
-        beforeCapture={(scope) => {
-          scope.setTag('location', label || path);
-        }}
-      >
-        {children}
-      </Sentry.ErrorBoundary>
-    </Route>
+    <Route
+      path={path}
+      element={
+        <Sentry.ErrorBoundary
+          beforeCapture={(scope) => {
+            scope.setTag('location', label || path);
+          }}
+        >
+          {element}
+        </Sentry.ErrorBoundary>
+      }
+    />
   );
-}
+};

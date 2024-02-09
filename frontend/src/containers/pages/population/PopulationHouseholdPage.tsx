@@ -40,7 +40,6 @@ export function PopulationHouseholdPage(): React.ReactElement {
 
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery({
-      variables: { businessArea },
       fetchPolicy: 'cache-first',
     });
 
