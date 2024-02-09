@@ -505,13 +505,13 @@ class Household(
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
-    registration_id = models.CharField(
-        max_length=50,
+    registration_id = CICharField(
+        max_length=100,
         blank=True,
         null=True,
         unique=True,
         db_index=True,
-        verbose_name="Registration ID (Aurora) and Program Registration Id",
+        verbose_name=_("Beneficiary Program Registration Id"),
     )
     total_cash_received_usd = models.DecimalField(
         null=True,
@@ -1002,8 +1002,11 @@ class Individual(
     detail_id = models.CharField(
         max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
     )
-    registration_id = models.CharField(
-        max_length=50, blank=True, null=True, verbose_name="Registration ID (Aurora) and Program Registration Id"
+    registration_id = CICharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name=_("Beneficiary Program Registration Id"),
     )
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
