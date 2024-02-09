@@ -8,8 +8,9 @@ from selenium.webdriver.common.by import By
 class TestAdminPanel:
     def test_login_superuser(self, browser: Chrome, logout: Chrome, PageAdminPanel: AdminPanel) -> None:
         browser.get("http://localhost:8082/api/unicorn/")
-        PageAdminPanel.getLogin().send_keys("root")
-        PageAdminPanel.getPassword().send_keys("fKXRA1FRYTA1lKfdg")
+        # ToDo: Use super user from fixtures:
+        PageAdminPanel.getLogin().send_keys("")
+        PageAdminPanel.getPassword().send_keys("")
         PageAdminPanel.getLoginButton().click()
         assert "Permissions" in PageAdminPanel.getPermissionText().text
 
