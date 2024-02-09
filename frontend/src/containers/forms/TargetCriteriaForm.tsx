@@ -87,6 +87,7 @@ const validationSchema = Yup.object().shape({
 });
 interface ArrayFieldWrapperProps {
   arrayHelpers;
+  children: React.ReactNode;
 }
 class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
   getArrayHelpers(): object {
@@ -159,8 +160,8 @@ export function TargetCriteriaForm({
         filter.value.length === 0);
 
     const filterEmptyFromTo = (filter): boolean =>
-      filter.value?.hasOwnProperty('from') &&
-      filter.value?.hasOwnProperty('to') &&
+      Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
+      Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
       !filter.value.from &&
       !filter.value.to;
 
@@ -237,7 +238,7 @@ export function TargetCriteriaForm({
           >
             {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
-              <DialogTitle disableTypography>
+              <DialogTitle component="div">
                 <Typography data-cy="title-add-filter" variant="h6">
                   {t('Add Filter')}
                 </Typography>

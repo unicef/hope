@@ -1,4 +1,5 @@
-import { IconButton, makeStyles } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { IconButton } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import clsx from 'clsx';
@@ -90,7 +91,7 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
 
       <CollapseContainer in={expanded}>
         {keys.map((key) => (
-          <Row key={logEntry + key}>
+          <Row key={logEntry.id}>
             <Cell weight={headCells[0].weight} />
             <Cell weight={headCells[1].weight} />
             <Cell weight={headCells[2].weight} />

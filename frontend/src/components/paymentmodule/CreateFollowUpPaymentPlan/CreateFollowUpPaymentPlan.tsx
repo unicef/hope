@@ -64,23 +64,24 @@ export function CreateFollowUpPaymentPlan({
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate: string, schema) =>
-          dispersionStartDate &&
-          schema.min(
-            dispersionStartDate,
-            `${t('Dispersion End Date has to be greater than')} ${moment(
-              dispersionStartDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
+        (dispersionStartDate: any, schema: Yup.DateSchema) =>
+          dispersionStartDate
+            ? schema.min(
+                new Date(dispersionStartDate),
+                `${t('Dispersion End Date has to be greater than')} ${moment(
+                  dispersionStartDate,
+                ).format('YYYY-MM-DD')}`,
+              )
+            : schema,
       ),
   });
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    dispersionStartDate: '',
-    dispersionEndDate: '',
+    dispersionStartDate: null,
+    dispersionEndDate: null,
   };
+
   const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
       const res = await mutate({

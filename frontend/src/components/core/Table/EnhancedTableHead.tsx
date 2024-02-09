@@ -4,7 +4,6 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import styled from 'styled-components';
 import TableSortLabel from '@mui/material/TableSortLabel';
-import { createStyles, makeStyles } from '@mui/material/styles';
 import { Checkbox } from '@mui/material';
 
 type Order = 'asc' | 'desc';
@@ -19,21 +18,17 @@ export interface HeadCell<T> {
   disableSort?: boolean;
 }
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    visuallyHidden: {
-      border: 0,
-      clip: 'rect(0 0 0 0)',
-      height: 1,
-      margin: -1,
-      overflow: 'hidden',
-      padding: 0,
-      position: 'absolute',
-      top: 20,
-      width: 1,
-    },
-  }),
-);
+const VisuallyHidden = styled.span`
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  top: 20px;
+  width: 1px;
+`;
 
 const TableSortLabelStyled = styled(TableSortLabel)`
   & {
@@ -78,7 +73,6 @@ export function EnhancedTableHead<T>(
     (property: keyof T | string) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
-  const classes = useStyles();
   return (
     <TableHead>
       <TableRow>
@@ -110,11 +104,11 @@ export function EnhancedTableHead<T>(
               >
                 {headCell.label}
                 {orderBy === headCell.id && (
-                  <span className={classes.visuallyHidden}>
+                  <VisuallyHidden>
                     {order === 'desc'
                       ? 'sorted descending'
                       : 'sorted ascending'}
-                  </span>
+                  </VisuallyHidden>
                 )}
               </TableSortLabelStyled>
             ) : (

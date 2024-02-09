@@ -28,6 +28,7 @@ export function CriteriaAutocomplete({
     get(otherProps.form.errors, field.name) &&
     get(otherProps.form.touched, field.name);
   return (
+    // @ts-ignore
     <StyledAutocomplete<Option>
       {...field}
       {...otherProps}
@@ -67,15 +68,20 @@ export function CriteriaAutocomplete({
         />
       )}
       data-cy="autocomplete-target-criteria"
-      PaperComponent={React.forwardRef((props, ref) => (
-        <Paper
-          {...{
-            ...props,
-            ref,
-          }}
-          data-cy="autocomplete-target-criteria-options"
-        />
-      ))}
+      component={React.forwardRef(function CriteriaAutocompletePaperComponent(
+        props,
+        ref,
+      ) {
+        return (
+          <Paper
+            {...{
+              ...props,
+              ref,
+            }}
+            data-cy="autocomplete-target-criteria-options"
+          />
+        );
+      })}
     />
   );
 }

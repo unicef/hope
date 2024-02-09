@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { makeStyles } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 import Grid from '@mui/material/Grid';
 import Slider from '@mui/material/Slider';
 import { Typography } from '@mui/material';
@@ -10,7 +10,7 @@ const useStyles = makeStyles({
   },
 });
 
-export function FormikSliderField({
+export const FormikSliderField = ({
   field,
   form,
   suffix,
@@ -18,10 +18,10 @@ export function FormikSliderField({
   max,
   dataCy,
   ...otherProps
-}): React.ReactElement {
+}): React.ReactElement => {
   const classes = useStyles();
 
-  const handleSliderChange = (event, newValue): void => {
+  const handleSliderChange = (_, newValue): void => {
     form.setFieldValue(field.name, newValue);
   };
 
@@ -49,4 +49,4 @@ export function FormikSliderField({
       </Grid>
     </div>
   );
-}
+};

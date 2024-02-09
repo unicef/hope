@@ -55,6 +55,7 @@ export function AdminAreaAutocompleteMultiple({
   return (
     <Box display="flex" flexDirection="column">
       <FieldLabel>{t('Administrative Level 2')}</FieldLabel>
+      {/*@ts-ignore */}
       <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
         open={open}
         multiple

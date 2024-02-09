@@ -67,20 +67,18 @@ export function EditPaymentPlanPage(): React.ReactElement {
 
   const validationSchema = Yup.object().shape({
     targetingId: Yup.string().required(t('Target Population is required')),
-    startDate: Yup.date().required(t('Start Date is required')),
+    startDate: Yup.date(),
     endDate: Yup.date()
       .required(t('End Date is required'))
-      .when(
-        'startDate',
-        (startDate, schema) =>
-          startDate &&
-          schema.min(
-            startDate,
-            `${t('End date has to be greater than')} ${moment(startDate).format(
-              'YYYY-MM-DD',
-            )}`,
-          ),
-        '',
+      .when('startDate', (startDate: any, schema: Yup.DateSchema) =>
+        startDate
+          ? schema.min(
+              startDate as Date,
+              `${t('End date has to be greater than')} ${moment(
+                startDate,
+              ).format('YYYY-MM-DD')}`,
+            )
+          : schema,
       ),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -90,15 +88,15 @@ export function EditPaymentPlanPage(): React.ReactElement {
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate, schema) =>
-          dispersionStartDate &&
-          schema.min(
-            dispersionStartDate,
-            `${t('Dispersion End Date has to be greater than')} ${moment(
-              dispersionStartDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
+        (dispersionStartDate: any, schema: Yup.DateSchema) =>
+          dispersionStartDate
+            ? schema.min(
+                dispersionStartDate as Date,
+                `${t('Dispersion End Date has to be greater than')} ${moment(
+                  dispersionStartDate,
+                ).format('YYYY-MM-DD')}`,
+              )
+            : schema,
       ),
   });
 
