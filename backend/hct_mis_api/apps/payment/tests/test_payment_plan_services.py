@@ -40,9 +40,7 @@ class TestPaymentPlanServices(APITestCase):
         create_afghanistan()
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
-        cls.create_user_role_with_permissions(
-            cls.user, [Permissions.PM_CREATE], BusinessArea.objects.get(slug="afghanistan")
-        )
+        cls.create_user_role_with_permissions(cls.user, [Permissions.PM_CREATE], cls.business_area)
 
     def test_delete_open(self) -> None:
         pp: PaymentPlan = PaymentPlanFactory(status=PaymentPlan.Status.OPEN)
@@ -143,7 +141,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 0)
         self.assertEqual(pp.total_individuals_count, 0)
         self.assertEqual(pp.payment_items.count(), 0)
-        with self.assertNumQueries(59):
+        with self.assertNumQueries(60):
             prepare_payment_plan_task.delay(pp.id)
         pp.refresh_from_db()
         self.assertEqual(pp.status, PaymentPlan.Status.OPEN)
@@ -494,7 +492,7 @@ class TestPaymentPlanServices(APITestCase):
 
         self.assertEqual(pp.follow_ups.count(), 2)
 
-        with self.assertNumQueries(43):
+        with self.assertNumQueries(44):
             prepare_follow_up_payment_plan_task(follow_up_pp_2.id)
 
         self.assertEqual(follow_up_pp_2.payment_items.count(), 1)

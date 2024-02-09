@@ -29,6 +29,7 @@ def sync_sanction_list_task(self: Any) -> None:
 
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
 @sentry_tags
 def check_against_sanction_list_task(self: Any, uploaded_file_id: UUID, original_file_name: str) -> None:
     try:
