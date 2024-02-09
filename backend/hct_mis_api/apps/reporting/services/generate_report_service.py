@@ -440,7 +440,6 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def format_payments_for_individuals_row(cls, individual: Individual) -> tuple:
-        print("individual.payment_currency = ", individual.payment_currency)
         return (
             individual.household.unicef_id,
             individual.household.country_origin.name if individual.household.country_origin else "",
