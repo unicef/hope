@@ -117,8 +117,10 @@ export function Results({
                       width={100}
                       height={100}
                       options={{
-                        legend: {
-                          display: false,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
                         },
                       }}
                       data={{

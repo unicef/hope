@@ -2,7 +2,7 @@ import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { TargetPopulationStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,
@@ -21,13 +21,13 @@ interface TargetPopulationFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export function TargetPopulationFilters({
+export const TargetPopulationFilters = ({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: TargetPopulationFiltersProps): React.ReactElement {
+}: TargetPopulationFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -127,4 +127,4 @@ export function TargetPopulationFilters({
       </Grid>
     </FiltersSection>
   );
-}
+};

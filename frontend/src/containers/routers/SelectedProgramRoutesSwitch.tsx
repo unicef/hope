@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
+import { useRoutes } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { UsersPage } from '../pages/core/UsersPage';
@@ -16,30 +16,52 @@ import { RegistrationRoutes } from './RegistrationRoutes';
 import { TargetingRoutes } from './TargetingRoutes';
 import { AccountabilityRoutes } from './AccountabilityRoutes';
 
-export function SelectedProgramRoutesSwitch(): React.ReactElement {
-  const { path } = useRouteMatch();
+export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
+  const routes = useRoutes([
+    {
+      path: 'country-dashboard',
+      element: (
+        <SentryRoute
+          label="/ - Dashboard"
+          path="country-dashboard"
+          element={<DashboardPage />}
+        />
+      ),
+    },
+    {
+      path: 'payment-records/:id',
+      element: (
+        <SentryRoute
+          path="payment-records/:id"
+          element={<PaymentRecordDetailsPage />}
+        />
+      ),
+    },
+    {
+      path: 'reporting/:id',
+      element: (
+        <SentryRoute path="reporting/:id" element={<ReportingDetailsPage />} />
+      ),
+    },
+    {
+      path: 'reporting',
+      element: <SentryRoute path="reporting" element={<ReportingPage />} />,
+    },
+    {
+      path: 'users-list',
+      element: <SentryRoute path="users-list" element={<UsersPage />} />,
+    },
+    {
+      path: 'activity-log',
+      element: (
+        <SentryRoute path="activity-log" element={<ActivityLogPage />} />
+      ),
+    },
+  ]);
+
   return (
     <>
-      <Switch>
-        <SentryRoute label="/ - Dashboard" path={`${path}/country-dashboard`}>
-          <DashboardPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/payment-records/:id`}>
-          <PaymentRecordDetailsPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/reporting/:id`}>
-          <ReportingDetailsPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/reporting`}>
-          <ReportingPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/users-list`}>
-          <UsersPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/activity-log`}>
-          <ActivityLogPage />
-        </SentryRoute>
-      </Switch>
+      {routes}
       <AccountabilityRoutes />
       <RegistrationRoutes />
       <PopulationRoutes />
@@ -50,4 +72,4 @@ export function SelectedProgramRoutesSwitch(): React.ReactElement {
       <GrievanceRoutes />
     </>
   );
-}
+};
