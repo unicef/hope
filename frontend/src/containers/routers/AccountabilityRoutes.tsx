@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
+import { useRoutes, useLocation } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
 import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
@@ -8,45 +8,68 @@ import { CreateSurveyPage } from '../pages/accountability/surveys/CreateSurveyPa
 import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetailsPage';
 import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
 
-export function AccountabilityRoutes(): React.ReactElement {
-  const { path } = useRouteMatch();
+export const AccountabilityRoutes = (): React.ReactElement => {
+  const location = useLocation();
+  const path = location.pathname;
 
   const accountabilityRoutes = [
     {
       path: `${path}/accountability/surveys/create`,
-      component: <CreateSurveyPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/accountability/surveys/create`}
+          element={<CreateSurveyPage />}
+        />
+      ),
     },
     {
       path: `${path}/accountability/surveys/:id`,
-      component: <SurveyDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/accountability/surveys/:id`}
+          element={<SurveyDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/accountability/surveys`,
-      component: <SurveysPage />,
-      exact: true,
+      element: (
+        <SentryRoute
+          path={`${path}/accountability/surveys`}
+          element={<SurveysPage />}
+        />
+      ),
     },
     {
       path: `${path}/accountability/communication/create`,
-      component: <CreateCommunicationPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/accountability/communication/create`}
+          element={<CreateCommunicationPage />}
+        />
+      ),
     },
     {
       path: `${path}/accountability/communication/:id`,
-      component: <CommunicationDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/accountability/communication/:id`}
+          element={<CommunicationDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/accountability/communication`,
-      component: <CommunicationPage />,
-      exact: true,
+      element: (
+        <SentryRoute
+          path={`${path}/accountability/communication`}
+          element={<CommunicationPage />}
+        />
+      ),
     },
   ];
 
-  return (
-    <Switch>
-      {accountabilityRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path} exact={route.exact}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
-}
+  const routes = useRoutes(accountabilityRoutes);
+
+  return routes;
+};

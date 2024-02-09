@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
+import { useRoutes, useLocation } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { ProgramDetailsPage } from '../pages/program/ProgramDetailsPage';
 import { ProgramsPage } from '../pages/program/ProgramsPage';
@@ -7,39 +7,48 @@ import { CreateProgramPage } from '../pages/program/CreateProgramPage';
 import { EditProgramPage } from '../pages/program/EditProgramPage';
 import { DuplicateProgramPage } from '../pages/program/DuplicateProgramPage';
 
-export function ProgramRoutes(): React.ReactElement {
-  const { path } = useRouteMatch();
+export const ProgramRoutes = (): React.ReactElement => {
+  const location = useLocation();
+  const path = location.pathname;
 
   const programRoutes = [
     {
       path: `${path}/list`,
-      component: <ProgramsPage />,
+      element: <SentryRoute path={`${path}/list`} element={<ProgramsPage />} />,
     },
     {
       path: `${path}/create`,
-      component: <CreateProgramPage />,
+      element: (
+        <SentryRoute path={`${path}/create`} element={<CreateProgramPage />} />
+      ),
     },
     {
       path: `${path}/edit/:id`,
-      component: <EditProgramPage />,
+      element: (
+        <SentryRoute path={`${path}/edit/:id`} element={<EditProgramPage />} />
+      ),
     },
     {
       path: `${path}/duplicate/:id`,
-      component: <DuplicateProgramPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/duplicate/:id`}
+          element={<DuplicateProgramPage />}
+        />
+      ),
     },
     {
       path: `${path}/details/:id`,
-      component: <ProgramDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/details/:id`}
+          element={<ProgramDetailsPage />}
+        />
+      ),
     },
   ];
 
-  return (
-    <Switch>
-      {programRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
-}
+  const routes = useRoutes(programRoutes);
+
+  return routes;
+};

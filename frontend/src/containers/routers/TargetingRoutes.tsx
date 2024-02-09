@@ -1,41 +1,55 @@
 import * as React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
+import { useRoutes, useLocation } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopulationPage';
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
 import { TargetPopulationsPage } from '../pages/targeting/TargetPopulationsPage';
 
-export function TargetingRoutes(): React.ReactElement {
-  const { path } = useRouteMatch();
+export const TargetingRoutes = (): React.ReactElement => {
+  const location = useLocation();
+  const path = location.pathname;
 
   const targetingRoutes = [
     {
       path: `${path}/target-population`,
-      component: <TargetPopulationsPage />,
-      exact: true,
+      element: (
+        <SentryRoute
+          path={`${path}/target-population`}
+          element={<TargetPopulationsPage />}
+        />
+      ),
     },
     {
       path: `${path}/target-population/create`,
-      component: <CreateTargetPopulationPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/target-population/create`}
+          element={<CreateTargetPopulationPage />}
+        />
+      ),
     },
     {
       path: `${path}/target-population/edit-tp/:id`,
-      component: <EditTargetPopulationPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/target-population/edit-tp/:id`}
+          element={<EditTargetPopulationPage />}
+        />
+      ),
     },
     {
       path: `${path}/target-population/:id`,
-      component: <TargetPopulationDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/target-population/:id`}
+          element={<TargetPopulationDetailsPage />}
+        />
+      ),
     },
   ];
 
-  return (
-    <Switch>
-      {targetingRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path} exact={route.exact}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
-}
+  const routes = useRoutes(targetingRoutes);
+
+  return routes;
+};

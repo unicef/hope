@@ -1,40 +1,55 @@
 import * as React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
+import { useRoutes, useLocation } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { RegistrationDataImportDetailsPage } from '../pages/rdi/RegistrationDataImportDetailsPage';
 import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportPage';
 import { RegistrationHouseholdDetailsPage } from '../pages/rdi/RegistrationHouseholdDetailsPage';
 import { RegistrationIndividualDetailsPage } from '../pages/rdi/RegistrationIndividualDetailsPage';
 
-export function RegistrationRoutes(): React.ReactElement {
-  const { path } = useRouteMatch();
+export const RegistrationRoutes = (): React.ReactElement => {
+  const location = useLocation();
+  const path = location.pathname;
 
   const registrationRoutes = [
     {
       path: `${path}/registration-data-import/household/:id`,
-      component: <RegistrationHouseholdDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/registration-data-import/household/:id`}
+          element={<RegistrationHouseholdDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/registration-data-import/individual/:id`,
-      component: <RegistrationIndividualDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/registration-data-import/individual/:id`}
+          element={<RegistrationIndividualDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/registration-data-import/:id`,
-      component: <RegistrationDataImportDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/registration-data-import/:id`}
+          element={<RegistrationDataImportDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/registration-data-import`,
-      component: <RegistrationDataImportPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/registration-data-import`}
+          element={<RegistrationDataImportPage />}
+        />
+      ),
     },
   ];
 
-  return (
-    <Switch>
-      {registrationRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
-}
+  const routes = useRoutes(registrationRoutes);
+
+  return routes;
+};
