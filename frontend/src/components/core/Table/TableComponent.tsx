@@ -2,7 +2,8 @@ import { Box } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/lab/Skeleton';
-import { createStyles, makeStyles, Theme } from '@mui/material/styles';
+import { Theme } from '@mui/system';
+import { makeStyles } from '@mui/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -17,37 +18,35 @@ import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 
 export type Order = 'asc' | 'desc';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: '100%',
-    },
-    paper: {
-      width: '100%',
-      marginBottom: theme.spacing(2),
-    },
-    table: {
-      minWidth: 750,
-    },
-    empty: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
-      color: 'rgba(0, 0, 0, 0.38)',
-      fontSize: '24px',
-      lineHeight: '28px',
-      textAlign: 'center',
-      padding: '70px',
-    },
-    smallerText: {
-      fontSize: '16px',
-    },
-    icon: {
-      fontSize: '50px',
-    },
-  }),
-);
+const useStyles = makeStyles((theme: Theme) => ({
+  root: {
+    width: '100%',
+  },
+  paper: {
+    width: '100%',
+    marginBottom: theme.spacing(2),
+  },
+  table: {
+    minWidth: 750,
+  },
+  empty: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    color: 'rgba(0, 0, 0, 0.38)',
+    fontSize: '24px',
+    lineHeight: '28px',
+    textAlign: 'center',
+    padding: '70px',
+  },
+  smallerText: {
+    fontSize: '16px',
+  },
+  icon: {
+    fontSize: '50px',
+  },
+}));
 
 interface TableComponentProps<T> {
   data: T[];
@@ -111,7 +110,7 @@ export function TableComponent<T>({
         style={{ height: 70, minHeight: 70 }}
       >
         <TableCell colSpan={headCells.length}>
-          <Skeleton variant="rect" width="100%" height={70} />
+          <Skeleton variant="rectangular" width="100%" height={70} />
         </TableCell>
       </TableRow>
     ));

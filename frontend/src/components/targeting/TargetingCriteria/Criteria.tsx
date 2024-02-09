@@ -7,7 +7,10 @@ import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
 import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
 
-const CriteriaElement = styled.div`
+interface CriteriaElementProps {
+  alternative?: boolean;
+}
+const CriteriaElement = styled.div<CriteriaElementProps>`
   width: auto;
   max-width: 380px;
   position: relative;
@@ -183,8 +186,10 @@ export function Criteria({
         <CriteriaField key={index} field={each} />
       ))}
       {individualsFiltersBlocks.map((item) => (
+        // eslint-disable-next-line
         <CriteriaSetBox>
           {item.individualBlockFilters.map((filter) => (
+            // eslint-disable-next-line
             <CriteriaField field={filter} />
           ))}
         </CriteriaSetBox>
