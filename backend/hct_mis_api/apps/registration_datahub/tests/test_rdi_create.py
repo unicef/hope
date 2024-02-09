@@ -374,7 +374,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         individuals = ImportedIndividual.objects.all()
         for individual in individuals:
-            self.assertTrue(individual.detail_id in [3, 4, 5, 7, 8, 9])
+            self.assertTrue(int(individual.detail_id) in [3, 4, 5, 7, 8, 9])
 
     def test_create_bank_account(self) -> None:
         task = self.RdiXlsxCreateTask()
