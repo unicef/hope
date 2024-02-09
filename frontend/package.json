@@ -25,6 +25,7 @@
     "@mui/lab": "^5.0.0-alpha.163",
     "@mui/material": "^5.15.7",
     "@mui/styled-engine-sc": "^6.0.0-alpha.14",
+    "@mui/styles": "^5.15.9",
     "@sentry/react": "^7.99.0",
     "@types/apollo-upload-client": "^18.0.0",
     "@types/chart.js": "^2.9.41",

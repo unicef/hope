@@ -1,29 +1,30 @@
 import * as React from 'react';
-import { makeStyles, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import Input from '@mui/material/Input';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
+import styled from 'styled-components';
 
-const useStyles = makeStyles((theme) => ({
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 300,
-    maxWidth: 500,
-  },
-  chips: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-  chip: {
-    margin: 2,
-  },
-  noLabel: {
-    marginTop: theme.spacing(3),
-  },
-}));
+const StyledFormControl = styled(FormControl)`
+  margin: ${(props) => props.theme.spacing(1)}px;
+  min-width: 300px;
+  max-width: 500px;
+`;
+
+const StyledChips = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+`;
+
+const StyledChip = styled(Chip)`
+  margin: 2px;
+`;
+const StyledNoLabel = styled.div`
+  margin-top: ${(props) => props.theme.spacing(3)}px;
+`;
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -53,7 +54,6 @@ export function FormikMultiSelectField({
   choices,
   ...otherProps
 }): React.ReactElement {
-  const classes = useStyles();
   const theme = useTheme();
 
   const handleChange = (event): void => {
@@ -63,8 +63,12 @@ export function FormikMultiSelectField({
     return null;
   }
   return (
-    <FormControl className={classes.formControl}>
-      <InputLabel id="mutiple-chip-label">{label}</InputLabel>
+    <StyledFormControl>
+      {label ? (
+        <InputLabel id="mutiple-chip-label">{label}</InputLabel>
+      ) : (
+        <StyledNoLabel />
+      )}
       <Select
         labelId="mutiple-chip-label"
         id="mutiple-chip"
@@ -74,15 +78,14 @@ export function FormikMultiSelectField({
         onChange={handleChange}
         input={<Input id="select-multiple-chip" />}
         renderValue={(selected: string[]) => (
-          <div className={classes.chips}>
+          <StyledChips>
             {selected.map((value) => (
-              <Chip
+              <StyledChip
                 key={value}
                 label={choices.find((el) => el.value === value)?.name || ''}
-                className={classes.chip}
               />
             ))}
-          </div>
+          </StyledChips>
         )}
         MenuProps={MenuProps}
         {...otherProps}
@@ -97,6 +100,6 @@ export function FormikMultiSelectField({
           </MenuItem>
         ))}
       </Select>
-    </FormControl>
+    </StyledFormControl>
   );
 }

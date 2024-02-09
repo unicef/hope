@@ -1,7 +1,8 @@
 import { ReactElement, useState } from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
-import { IconButton, makeStyles } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { IconButton } from '@mui/material';
 import clsx from 'clsx';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import Collapse from '@mui/material/Collapse';
@@ -17,7 +18,7 @@ const ButtonContainer = styled.div`
 const CollapseContainer = styled(Collapse)`
   background-color: #fafafa;
 `;
-// transitions not working in styled components
+
 const useStyles = makeStyles((theme: MiśTheme) => ({
   expanded: {},
   expandIcon: {
@@ -41,10 +42,10 @@ const formatted = (value): string => {
   return value;
 };
 
-export function LogRow({ logEntry }: LogRowProps): ReactElement {
+export const LogRow = ({ logEntry }: LogRowProps): ReactElement => {
   const { changes } = logEntry;
   const [expanded, setExpanded] = useState(false);
-  const classes = useStyles({});
+  const classes = useStyles();
 
   if (!changes) return null;
 
@@ -100,7 +101,7 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
 
       <CollapseContainer in={expanded}>
         {keys.map((key) => (
-          <Row key={logEntry + key}>
+          <Row key={`${logEntry.id}${key}`}>
             <Cell weight={headCells[0].weight} />
             <Cell weight={headCells[1].weight} />
             <Cell weight={headCells[2].weight}>{key}</Cell>
@@ -116,4 +117,4 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
       </CollapseContainer>
     </>
   );
-}
+};

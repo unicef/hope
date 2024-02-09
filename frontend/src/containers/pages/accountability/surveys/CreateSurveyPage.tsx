@@ -204,9 +204,11 @@ export function CreateSurveyPage(): React.ReactElement {
       category === SurveyCategory.RapidPro
     ) {
       navigate(`/error/${businessArea}`, {
-        errorMessage: t(
-          'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
-        ),
+        state: {
+          errorMessage: t(
+            'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
+          ),
+        },
       });
     }
   }, [flowsData, category, businessArea, navigate, t]);

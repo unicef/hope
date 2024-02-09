@@ -1,10 +1,5 @@
-import {
-  Box,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  makeStyles,
-} from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { Box, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import DrawerMaterial from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';

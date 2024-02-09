@@ -19,7 +19,7 @@ import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { today } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export function CreatePaymentPlanPage(): React.ReactElement {
+export const CreatePaymentPlanPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
@@ -47,17 +47,15 @@ export function CreatePaymentPlanPage(): React.ReactElement {
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
       .required(t('End Date is required'))
-      .when(
-        'startDate',
-        (startDate: string, schema) =>
-          startDate &&
-          schema.min(
-            startDate,
-            `${t('End date has to be greater than')} ${moment(startDate).format(
-              'YYYY-MM-DD',
-            )}`,
-          ),
-        '',
+      .when('startDate', (startDate: any, schema: Yup.DateSchema) =>
+        startDate
+          ? schema.min(
+              new Date(startDate),
+              `${t('End date has to be greater than')} ${moment(
+                startDate,
+              ).format('YYYY-MM-DD')}`,
+            )
+          : schema,
       ),
     currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
@@ -68,31 +66,34 @@ export function CreatePaymentPlanPage(): React.ReactElement {
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate: string, schema) =>
-          dispersionStartDate &&
-          schema.min(
-            dispersionStartDate,
-            `${t('Dispersion End Date has to be greater than')} ${moment(
-              dispersionStartDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
+        (dispersionStartDate: any, schema: Yup.DateSchema) =>
+          dispersionStartDate
+            ? schema.min(
+                new Date(dispersionStartDate),
+                `${t('Dispersion End Date has to be greater than')} ${moment(
+                  dispersionStartDate,
+                ).format('YYYY-MM-DD')}`,
+              )
+            : schema,
       ),
   });
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
     targetingId: '',
-    startDate: '',
-    endDate: '',
+    startDate: null,
+    endDate: null,
     currency: null,
-    dispersionStartDate: '',
-    dispersionEndDate: '',
+    dispersionStartDate: null,
+    dispersionEndDate: null,
   };
+
   const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
       const res = await mutate({
         variables: {
+          //@ts-ignore
+          //Currency will not be null here because it is required in thevalidation schema
           input: {
             businessAreaSlug: businessArea,
             ...values,
@@ -134,4 +135,4 @@ export function CreatePaymentPlanPage(): React.ReactElement {
       )}
     </Formik>
   );
-}
+};

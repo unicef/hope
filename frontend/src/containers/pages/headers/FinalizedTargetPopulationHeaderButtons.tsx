@@ -59,7 +59,7 @@ export function FinalizedTargetPopulationHeaderButtons({
             disabled={!targetPopulation.caHashId}
             target="_blank"
             href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_targetpopulation&id=${targetPopulation.caHashId}`}
-            startIcon={<OpenInNewRounded />}
+            startIcon={<OpenInNewRoundedIcon />}
           >
             Open in CashAssist
           </Button>

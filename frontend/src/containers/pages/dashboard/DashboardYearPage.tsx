@@ -28,13 +28,27 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 const PaddingContainer = styled.div`
   padding: 20px;
 `;
-const ChartWrapper = styled.div`
+interface ChartWrapperProps {
+  numberOfProgrammes: number;
+}
+
+const ChartWrapper = styled.div<ChartWrapperProps>`
   height: ${(props) => (props.numberOfProgrammes <= 3 ? '200px' : '400px')};
 `;
-const PadddingLeftContainer = styled.div`
-  padding-left: 20px;
+
+interface PaddingLeftContainerProps {
+  paddingLeft?: string;
+}
+
+const PaddingLeftContainer = styled.div<PaddingLeftContainerProps>`
+  padding-left: ${(props) => props.paddingLeft || '20px'};
 `;
-const CardTextLight = styled.div`
+
+interface CardTextLightProps {
+  large?: boolean;
+}
+
+const CardTextLight = styled.div<CardTextLightProps>`
   text-transform: capitalize;
   color: #a4a4a4;
   font-weight: 500;
@@ -131,7 +145,7 @@ export function DashboardYearPage({
             <PaymentVerificationSection data={data.chartPaymentVerification} />
           </Grid>
           <Grid item xs={4}>
-            <PadddingLeftContainer>
+            <PaddingLeftContainer>
               <Grid container spacing={6}>
                 <Grid item xs={12}>
                   <TotalNumberOfHouseholdsReachedSection
@@ -173,7 +187,7 @@ export function DashboardYearPage({
                   </DashboardPaper>
                 </Grid>
               </Grid>
-            </PadddingLeftContainer>
+            </PaddingLeftContainer>
           </Grid>
         </Grid>
       </PaddingContainer>
