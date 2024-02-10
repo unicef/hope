@@ -8,7 +8,7 @@ import {
 } from '../__generated__/graphql';
 
 export function useCachedImportedIndividualFieldsQuery(
-  businessArea,
+  businessArea, selectedProgramName
 ): {
   loading: boolean;
   data: ImportedIndividualFieldsQuery;
@@ -16,7 +16,9 @@ export function useCachedImportedIndividualFieldsQuery(
 } {
   const [loading, setLoading] = useState(true);
   const [oldBusinessArea, setOldBusinessArea] = useState('');
+  const [oldSelectedProgramName, setOldSelectedProgramName] = useState('');
   const [cache, setCache] = useState(null);
+
   const lastUpdatedTimestamp =
     Number.parseInt(
       localStorage.getItem(
@@ -43,10 +45,11 @@ export function useCachedImportedIndividualFieldsQuery(
   }, [results.loading]);
 
   useEffect(() => {
-    if (businessArea === oldBusinessArea) {
+    if (businessArea === oldBusinessArea && selectedProgramName === oldSelectedProgramName) {
       return;
     }
     setOldBusinessArea(businessArea);
+    setOldSelectedProgramName(selectedProgramName);
     localForage
       .getItem(`cache-targeting-core-fields-attributes-${businessArea}`)
       .then((value) => {
@@ -54,7 +57,7 @@ export function useCachedImportedIndividualFieldsQuery(
           setCache(value);
         }
       });
-  }, [businessArea]);
+  }, [businessArea, selectedProgramName]);
   useEffect(() => {
     if (!results.data) {
       return;
