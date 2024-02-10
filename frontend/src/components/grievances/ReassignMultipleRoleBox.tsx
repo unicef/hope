@@ -154,7 +154,7 @@ export const ReassignMultipleRoleBox = ({
         </OrangeTitle>
         <Typography variant='body2'>
           {t(
-            'Upon removing you will need to select new individual(s) for this role.',
+            'Upon changing you will need to select new individual(s) for this role.',
           )}
         </Typography>
         <Box mt={3} display='flex' flexDirection='column'>

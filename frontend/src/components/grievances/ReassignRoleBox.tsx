@@ -136,11 +136,15 @@ export const ReassignRoleBox = ({
           {t('Individual is the HOH or the collector for the household')}
         </Typography>
       </OrangeTitle>
-      <Typography variant='body2'>
-        {t(
-          'Upon removing you will need to select new individual(s) for this role.',
-        )}
-      </Typography>
+      {
+        ticket?.individualDataUpdateTicketDetails?.individualData?.role.value === "NO_ROLE" ? (
+           <Typography variant='body2'>
+            {t(
+              'Upon removing you will need to select new individual(s) for this role.',
+            )}
+          </Typography>
+        ) : null
+      }
       <Box mt={3} display='flex' flexDirection='column'>
         {shouldShowReassignHoH && (
           <Box mb={2} mt={2}>
