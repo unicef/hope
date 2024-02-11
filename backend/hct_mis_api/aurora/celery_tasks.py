@@ -118,6 +118,7 @@ def automate_rdi_creation_task(
 
 
 @app.task
+@log_start_and_end
 @sentry_tags
 def clean_old_record_files_task(default_timedelta: int = 60) -> None:
     """This task once a month clears (sets to null) Record's files field"""
