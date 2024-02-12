@@ -71,7 +71,6 @@ services:
       - erp_datahub_db
       - registration_datahub_db
       - elasticsearch
-      - frontend
 
   cash_assist_datahub_db:
     image: postgis/postgis:14-3.3-alpine
