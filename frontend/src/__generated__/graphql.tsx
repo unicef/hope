@@ -3088,8 +3088,8 @@ export type ImportedIndividualNode = Node & {
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   misUnicefId?: Maybe<Scalars['String']>,
-  ageAtRegistration?: Maybe<Scalars['Int']>,
   programId?: Maybe<Scalars['UUID']>,
+  ageAtRegistration?: Maybe<Scalars['Int']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
@@ -6261,7 +6261,8 @@ export type QueryAllBusinessAreasArgs = {
 
 export type QueryAllFieldsAttributesArgs = {
   flexField?: Maybe<Scalars['Boolean']>,
-  businessAreaSlug?: Maybe<Scalars['String']>
+  businessAreaSlug?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['String']>
 };
 
 
@@ -11851,7 +11852,8 @@ export type FlexFieldsQuery = (
 );
 
 export type ImportedIndividualFieldsQueryVariables = {
-  businessAreaSlug?: Maybe<Scalars['String']>
+  businessAreaSlug?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['String']>
 };
 
 
@@ -21751,8 +21753,8 @@ export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
 export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
 export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
 export const ImportedIndividualFieldsDocument = gql`
-    query ImportedIndividualFields($businessAreaSlug: String) {
-  allFieldsAttributes(businessAreaSlug: $businessAreaSlug) {
+    query ImportedIndividualFields($businessAreaSlug: String, $programId: String) {
+  allFieldsAttributes(businessAreaSlug: $businessAreaSlug, programId: $programId) {
     isFlexField
     id
     type
@@ -21808,6 +21810,7 @@ export function withImportedIndividualFields<TProps, TChildProps = {}>(operation
  * const { data, loading, error } = useImportedIndividualFieldsQuery({
  *   variables: {
  *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      programId: // value for 'programId'
  *   },
  * });
  */
@@ -31020,8 +31023,8 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,

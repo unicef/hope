@@ -8,7 +8,7 @@ import {
 } from '../__generated__/graphql';
 
 export function useCachedImportedIndividualFieldsQuery(
-  businessArea, selectedProgramName
+  businessArea, selectedProgramId
 ): {
   loading: boolean;
   data: ImportedIndividualFieldsQuery;
@@ -16,7 +16,7 @@ export function useCachedImportedIndividualFieldsQuery(
 } {
   const [loading, setLoading] = useState(true);
   const [oldBusinessArea, setOldBusinessArea] = useState('');
-  const [oldSelectedProgramName, setOldSelectedProgramName] = useState('');
+  const [oldSelectedProgramId, setOldSelectedProgramId] = useState('');
   const [cache, setCache] = useState(null);
 
   const lastUpdatedTimestamp =
@@ -30,6 +30,7 @@ export function useCachedImportedIndividualFieldsQuery(
   const [getAttributes, results] = useImportedIndividualFieldsLazyQuery({
     variables: {
       businessAreaSlug: businessArea,
+      programId: selectedProgramId
     },
   });
   useEffect(() => {
@@ -45,11 +46,11 @@ export function useCachedImportedIndividualFieldsQuery(
   }, [results.loading]);
 
   useEffect(() => {
-    if (businessArea === oldBusinessArea && selectedProgramName === oldSelectedProgramName) {
+    if (businessArea === oldBusinessArea && selectedProgramId === oldSelectedProgramId) {
       return;
     }
     setOldBusinessArea(businessArea);
-    setOldSelectedProgramName(selectedProgramName);
+    setOldSelectedProgramId(selectedProgramId);
     localForage
       .getItem(`cache-targeting-core-fields-attributes-${businessArea}`)
       .then((value) => {
@@ -57,7 +58,7 @@ export function useCachedImportedIndividualFieldsQuery(
           setCache(value);
         }
       });
-  }, [businessArea, selectedProgramName]);
+  }, [businessArea, selectedProgramId]);
   useEffect(() => {
     if (!results.data) {
       return;

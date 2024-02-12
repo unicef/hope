@@ -316,6 +316,7 @@ class Query(graphene.ObjectType):
         FieldAttributeNode,
         flex_field=graphene.Boolean(),
         business_area_slug=graphene.String(required=False, description="The business area slug"),
+        program_id=graphene.String(required=False, description="program id"),
         description="All field datatype meta.",
     )
     all_groups_with_fields = graphene.List(

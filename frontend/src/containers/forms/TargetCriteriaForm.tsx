@@ -124,10 +124,8 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const { selectedProgram: { name } } = useProgramContext();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(
-    businessArea, name
-  );
+  const { selectedProgram: { id } } = useProgramContext();
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(businessArea, id);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
