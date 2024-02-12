@@ -4,7 +4,7 @@
     "types": ["jest", "node"],
     "useDefineForClassFields": true,
     "lib": ["es2021", "DOM", "DOM.Iterable"],
-    "allowJs": false,
+    "allowJs": true,
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": false,
@@ -20,6 +20,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
+    "maxNodeModuleJsDepth": 10,
     "baseUrl": ".",
     "paths": {
       "@components/*": ["src/components/*"],

@@ -1,3 +1,5 @@
+//TODO: fix imports
+//@ts-ignore
 import {
   ApolloLink,
   ApolloClient,
@@ -9,6 +11,7 @@ import { persistCache } from 'apollo-cache-persist';
 import { GRAPHQL_URL } from '../config';
 import { clearCache } from '@utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
@@ -39,7 +42,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) {
     // eslint-disable-next-line no-console
     console.error(
-      `[Network error]: ${networkError}`,
+      `[Network error]: ${String(networkError)}`,
       networkError,
       graphQLErrors,
     );
