@@ -2,11 +2,9 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from sentry_sdk import configure_scope
-
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import sentry_tags
+from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +20,10 @@ def report_export_task(self: Any, report_id: UUID) -> None:
         )
 
         report_obj = Report.objects.get(id=report_id)
-        with configure_scope() as scope:
-            scope.set_tag("business_area", report_obj.business_area)
+        set_sentry_business_area_tag(report_obj.business_area.name)
 
-            service = GenerateReportService(report=report_obj)
-            service.generate_report()
+        service = GenerateReportService(report=report_obj)
+        service.generate_report()
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -43,10 +40,9 @@ def dashboard_report_export_task(self: Any, dashboard_report_id: UUID) -> None:
         )
 
         report_obj = DashboardReport.objects.get(id=dashboard_report_id)
-        with configure_scope() as scope:
-            scope.set_tag("business_area", report_obj.business_area)
-            service = GenerateDashboardReportService(report=report_obj)
-            service.generate_report()
+        set_sentry_business_area_tag(report_obj.business_area.name)
+        service = GenerateDashboardReportService(report=report_obj)
+        service.generate_report()
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)

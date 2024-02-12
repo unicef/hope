@@ -134,7 +134,7 @@ class HouseholdFactory(DjangoModelFactory):
     male_age_group_18_59_count = factory.fuzzy.FuzzyInteger(0, 3)
     male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
     household_collection = factory.SubFactory(HouseholdCollectionFactory)
-    # program = factory.SubFactory(ProgramFactory)
+    program = factory.SubFactory(ProgramFactory)
 
     @classmethod
     def build(cls, **kwargs: Any) -> Household:
@@ -267,13 +267,17 @@ def create_household(
     household_args["registration_data_import__imported_by__partner"] = partner
 
     household = HouseholdFactory.build(**household_args)
-    individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
+    individuals = IndividualFactory.create_batch(
+        household.size, household=None, program=household.program, **individual_args
+    )
 
     household.head_of_household = individuals[0]
     household.household_collection.save()
     # household.registration_data_import.imported_by.partner.save()
     household.registration_data_import.imported_by.save()
+    household.registration_data_import.program.save()
     household.registration_data_import.save()
+    household.program.save()
     household.save()
 
     individuals_to_update = []
@@ -286,7 +290,7 @@ def create_household(
     Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
 
     primary_collector, alternate_collector = IndividualFactory.create_batch(
-        2, household=None, relationship="NON_BENEFICIARY"
+        2, household=None, program=household.program, relationship="NON_BENEFICIARY"
     )
     primary_collector_irh = IndividualRoleInHousehold(
         individual=primary_collector, household=household, role=ROLE_PRIMARY
@@ -308,12 +312,16 @@ def create_household_for_fixtures(
     if individual_args is None:
         individual_args = {}
     household = HouseholdFactory.build(**household_args)
-    individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
+    individuals = IndividualFactory.create_batch(
+        household.size, household=None, program=household.program, **individual_args
+    )
 
     household.household_collection.save()
     household.head_of_household = individuals[0]
     household.registration_data_import.imported_by.save()
+    household.registration_data_import.program.save()
     household.registration_data_import.save()
+    household.program.save()
     household.save()
 
     individuals_to_update = []
@@ -330,7 +338,7 @@ def create_household_for_fixtures(
         IndividualRoleInHousehold.objects.create(individual=individuals[1], household=household, role=ROLE_ALTERNATE)
     else:
         primary_collector, alternate_collector = IndividualFactory.create_batch(
-            2, household=None, relationship="NON_BENEFICIARY"
+            2, household=None, program=household.program, relationship="NON_BENEFICIARY"
         )
         primary_collector_irh = IndividualRoleInHousehold(
             individual=primary_collector, household=household, role=ROLE_PRIMARY
@@ -356,9 +364,12 @@ def create_household_and_individuals(
     household: Household = HouseholdFactory.build(**household_data)
     household.household_collection.save()
     household.registration_data_import.imported_by.save()
+    household.registration_data_import.program.save()
     household.registration_data_import.save()
+    household.program.save()
     individuals: List[Individual] = [
-        IndividualFactory(household=household, **individual_data) for individual_data in individuals_data
+        IndividualFactory(household=household, program=household.program, **individual_data)
+        for individual_data in individuals_data
     ]
     household.head_of_household = individuals[0]
     household.save()

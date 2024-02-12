@@ -1,3 +1,5 @@
+import random
+import string
 from datetime import timedelta
 from random import randint
 from typing import Any
@@ -82,6 +84,9 @@ class ProgramFactory(DjangoModelFactory):
     )
     individual_data_needed = fuzzy.FuzzyChoice((True, False))
     data_collecting_type = factory.LazyAttribute(lambda o: DataCollectingType.objects.first())
+    programme_code = factory.LazyAttribute(
+        lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+    )
 
     @factory.post_generation
     def program_cycle(self, create: bool, extracted: bool, **kwargs: Any) -> None:

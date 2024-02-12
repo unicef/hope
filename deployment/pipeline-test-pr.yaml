@@ -14,7 +14,6 @@ variables:
   Docker.registryConnection: "ICTD-HOPE-DEV-ACR"
   tag: '$(System.PullRequest.PullRequestId)'
   Docker.backend.repository: "hope-backend"
-  Docker.frontend.repository: "hope-frontend"
   Docker.cypress.repository: "hope-cypress"
   Docker.url: "uniappsakshopedev.azurecr.io"
   DOCKER_BUILDKIT: 1
@@ -44,11 +43,10 @@ stages:
             workingDirectory: 'frontend'
             displayName: "Test"
 
-  - stage: check_format
-    dependsOn: []
+  - stage: check_backend_format
     displayName: Check BE format
     jobs:
-      - job: check_format
+      - job: check_backend_format
         pool:
           vmImage: ubuntu-latest
         displayName: "[CHECK FORMAT]"
@@ -68,8 +66,8 @@ stages:
             displayName: "Check imports order"
 
 
-  - stage: build_and_push
-    dependsOn: check_format
+  - stage: build_and_push_backend
+    dependsOn: check_backend_format
     displayName: BUILD and PUSH
     jobs:
       - job: build_push_backend
@@ -92,8 +90,8 @@ stages:
               -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
               -t $(Docker.url)/$(Docker.backend.repository):latest \
               --push \
-              -f ./backend/docker/Dockerfile \
-              ./backend
+              -f ./docker/Dockerfile \
+              ./
             displayName: Docker build
           - script: |
               docker buildx create --use
@@ -104,38 +102,11 @@ stages:
               --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
               -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
               --push --target dev \
-              -f ./backend/docker/Dockerfile \
-              ./backend
+              -f ./docker/Dockerfile \
+              ./
             displayName: Docker build dev
 
-  - stage: build_and_push_frontend
-    dependsOn: test_frontend
-    displayName: BUILD and PUSH Frontend
-    jobs:
-      - job: build_and_push_frontend
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[Build_Frontend]"
-        steps:
-          - task: Docker@2
-            inputs:
-              containerRegistry: '$(Docker.registryConnection)'
-              command: 'login'
-          - script: |
-              docker buildx create --use
-              docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(tag) \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
-              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:$(tag) \
-              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
-              -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
-              -t $(Docker.url)/$(Docker.frontend.repository):latest \
-              --push \
-              ./frontend
-            displayName: Docker build
-
   - stage: build_and_push_cypress
-    dependsOn: test_frontend
     displayName: BUILD and PUSH cypress
     jobs:
       - job: build_and_push_cypress
@@ -161,7 +132,7 @@ stages:
             displayName: Docker build
 
   - stage: lint_backend
-    dependsOn: build_and_push
+    dependsOn: build_and_push_backend
     displayName: Lint-Backend
     jobs:
       - job: django_lint
@@ -198,7 +169,7 @@ stages:
               testRunTitle: 'Lint results'
 
   - stage: mypy_backend
-    dependsOn: build_and_push
+    dependsOn: build_and_push_backend
     displayName: Mypy-Backend
     jobs:
       - job: django_mypy
@@ -293,11 +264,27 @@ stages:
               arguments: 'backend/coverage.xml $(System.ArtifactsDirectory)/old_coverage/coverage.xml'
               pythonInterpreter: 'python3'
 
-
-
+  - stage: trivy
+    dependsOn: [build_and_push_backend]
+    displayName: Trivy
+    jobs:
+      - job: run_trivy
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[TRIVY]"
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registryConnection)
+          - script: |
+              docker pull $(Docker.url)/$(Docker.backend.repository):$(tag)
+              docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 -e TRIVY_SEVERITY=HIGH,CRITICAL aquasec/trivy:0.47.0 image $(Docker.url)/$(Docker.backend.repository):$(tag)
+            continueOnError: true
 
   - stage: e2e_tests
-    dependsOn: [build_and_push, build_and_push_frontend, test_frontend, build_and_push_cypress]
+    dependsOn: [build_and_push_backend, build_and_push_cypress]
     displayName: E2E-Tests
     jobs:
       - job: cypress_tests
@@ -322,7 +309,6 @@ stages:
               dockerComposeCommand: 'run cypress ci-test'
               dockerComposeFileArgs: |
                BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
-               FRONTEND_IMAGE=$(Docker.url)/$(Docker.frontend.repository):$(tag)
                CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
                BRANCH_NAME=$(System.PullRequest.SourceBranch)
                BUILD_ID=$(Build.BuildId)

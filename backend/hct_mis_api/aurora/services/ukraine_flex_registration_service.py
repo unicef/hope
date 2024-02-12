@@ -9,6 +9,7 @@ from django_countries.fields import Country
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
+    build_flex_arg_dict_from_list_if_exists,
 )
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -318,3 +319,19 @@ class UkraineRegistrationService(UkraineBaseRegistrationService):
         "admin3": "admin3_h_c",
         "admin4": "admin4_h_c",
     }
+
+
+class Registration2024(UkraineBaseRegistrationService):
+    INDIVIDUAL_FLEX_FIELDS: List[str] = ["low_income_hh_h_f", "single_headed_hh_h_f"]
+
+    def _prepare_individual_data(
+        self,
+        individual_dict: Dict,
+        household: ImportedHousehold,
+        registration_data_import: RegistrationDataImportDatahub,
+    ) -> Dict:
+        individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
+        individual_data["flex_fields"] = build_flex_arg_dict_from_list_if_exists(
+            individual_dict, self.INDIVIDUAL_FLEX_FIELDS
+        )
+        return individual_data

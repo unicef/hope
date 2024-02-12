@@ -25,6 +25,7 @@ def pull_from_cashassist_datahub_task(self: Any) -> None:
 
 
 @app.task(bind=True, queue="priority", default_retry_delay=60, max_retries=3)
+@log_start_and_end
 @sentry_tags
 def fix_exchange_rates_task(self: Any) -> None:
     try:

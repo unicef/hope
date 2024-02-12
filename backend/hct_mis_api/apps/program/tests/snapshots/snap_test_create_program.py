@@ -174,3 +174,23 @@ snapshots['TestCreateProgram::test_create_program_without_dct 1'] = {
         }
     ]
 }
+
+snapshots['TestCreateProgram::test_programme_code_should_be_unique_among_the_same_business_area 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "['Programme code is already used.']",
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}

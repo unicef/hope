@@ -58,6 +58,10 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             raise ValidationError("DataCollectingType is required for creating new Program")
         data_collecting_type = DataCollectingType.objects.get(code=data_collecting_type_code)
         partners_data = program_data.pop("partners", [])
+        programme_code = program_data.get("programme_code", "")
+        if programme_code:
+            programme_code = programme_code.upper()
+            program_data["programme_code"] = programme_code
 
         partners_ids = [int(partner["id"]) for partner in partners_data]
         partner = info.context.user.partner
@@ -70,6 +74,12 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             data_collecting_type=data_collecting_type,
             business_area=business_area,
         )
+
+        if (
+            programme_code
+            and Program.objects.filter(business_area=business_area, programme_code=programme_code).exists()
+        ):
+            raise ValidationError("Programme code is already used.")
 
         program = Program(
             **program_data, status=Program.DRAFT, business_area=business_area, data_collecting_type=data_collecting_type
@@ -108,6 +118,10 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
         partners_data = program_data.pop("partners", [])
         partners_ids = [int(partner["id"]) for partner in partners_data]
         partner = info.context.user.partner
+        programme_code = program_data.get("programme_code", "")
+        if programme_code:
+            programme_code = programme_code.upper()
+            program_data["programme_code"] = programme_code
 
         # status update permissions if status is passed
         status_to_set = program_data.get("status")
@@ -136,6 +150,14 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
             end_date=program_data.get("end_date"),
             data_collecting_type=data_collecting_type,
         )
+
+        if (
+            programme_code
+            and Program.objects.exclude(id=program_id)
+            .filter(business_area=business_area, programme_code=programme_code)
+            .exists()
+        ):
+            raise ValidationError("Programme code is already used.")
 
         if program.status == Program.FINISHED:
             # Only reactivation is possible
@@ -198,12 +220,21 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
         program_id = decode_id_string_required(program_data.pop("id"))
         partners_data = program_data.pop("partners", [])
         business_area = Program.objects.get(id=program_id).business_area
+        programme_code = program_data.get("programme_code", "")
+        if programme_code:
+            programme_code = programme_code.upper()
+            program_data["programme_code"] = programme_code
         cls.has_permission(info, Permissions.PROGRAMME_DUPLICATE, business_area)
 
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
         )
+        if (
+            programme_code
+            and Program.objects.filter(business_area=business_area, programme_code=programme_code).exists()
+        ):
+            raise ValidationError("Programme code is already used.")
         program = copy_program_object(program_id, program_data)
 
         for partner in partners_data:

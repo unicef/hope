@@ -106,8 +106,14 @@ def verify_flex_fields(flex_fields_to_verify: Dict, associated_with: str) -> Non
 
 
 def handle_role(role: str, household: Household, individual: Individual) -> None:
-    if individual_role := IndividualRoleInHousehold.objects.filter(household=household, individual=individual).first():
-        individual_role.delete(soft=False)
+    if already_with_another_role := IndividualRoleInHousehold.objects.filter(
+        household=household,
+        individual=individual,
+    ).first():
+        if already_with_another_role.role == ROLE_PRIMARY:
+            raise ValidationError("Ticket cannot be closed, primary collector role has to be reassigned")
+        else:
+            already_with_another_role.delete(soft=False)
 
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         IndividualRoleInHousehold.objects.update_or_create(
@@ -527,6 +533,7 @@ def reassign_roles_on_disable_individual(
     is_new_ticket: bool = False,
 ) -> Household:
     roles_to_bulk_update = []
+    roles_to_delete = []
     for role_data in role_reassign_data.values():
         if is_new_ticket:
             (
@@ -562,8 +569,15 @@ def reassign_roles_on_disable_individual(
                     new_individual,
                 )
 
-        if role_name == ROLE_ALTERNATE and new_individual.role == ROLE_PRIMARY:
-            raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
+        if new_individual_current_role := IndividualRoleInHousehold.objects.filter(
+            household=household, individual=new_individual
+        ).first():
+            if role_name == ROLE_ALTERNATE and new_individual_current_role.role == ROLE_PRIMARY:
+                raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
+            elif (
+                role_name == ROLE_PRIMARY and new_individual_current_role.role == ROLE_ALTERNATE
+            ):  # remove alternate role if the new individual is being assigned as primary
+                roles_to_delete.append(new_individual_current_role)
 
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
@@ -588,8 +602,10 @@ def reassign_roles_on_disable_individual(
         and individual_to_remove.is_head()
         and not is_one_individual
     ):
-        raise ValidationError("Ticket cannot be closed head of household has not been reassigned")
+        raise ValidationError("Ticket cannot be closed, head of household has not been reassigned")
 
+    for role_to_delete in roles_to_delete:
+        role_to_delete.delete(soft=False)
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
@@ -600,6 +616,7 @@ def reassign_roles_on_update(
     individual: Individual, role_reassign_data: Dict, program_id: "UUID", info: Optional[Any] = None
 ) -> None:
     roles_to_bulk_update = []
+    roles_to_delete = []
     for role_data in role_reassign_data.values():
         (
             role_name,
@@ -623,8 +640,15 @@ def reassign_roles_on_update(
                     new_individual,
                 )
 
-        if role_name == ROLE_ALTERNATE and new_individual.role == ROLE_PRIMARY:
-            raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
+        if new_individual_current_role := IndividualRoleInHousehold.objects.filter(
+            household=household, individual=new_individual
+        ).first():
+            if role_name == ROLE_ALTERNATE and new_individual_current_role.role == ROLE_PRIMARY:
+                raise ValidationError("Cannot reassign the role. Selected individual has primary collector role.")
+            elif (
+                role_name == ROLE_PRIMARY and new_individual_current_role.role == ROLE_ALTERNATE
+            ):  # remove alternate role if the new individual is being assigned as primary
+                roles_to_delete.append(new_individual_current_role)
 
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
@@ -636,6 +660,8 @@ def reassign_roles_on_update(
             role.individual = new_individual
             roles_to_bulk_update.append(role)
 
+    for role_to_delete in roles_to_delete:
+        role_to_delete.delete(soft=False)
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
