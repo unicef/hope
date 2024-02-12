@@ -13,13 +13,15 @@ services:
       context: ./
       dockerfile: docker/Dockerfile
       target: selenium
-    ports:
-      - "8000:8000"
     volumes:
       - ./backend/screenshot/:/code/screenshot/
       - backend-data:/data
       - ipython_data_local:/root/.ipython
-    command: "dev"
+    command: |
+      sh -c "
+        waitforit -host=db -port=5432 -timeout=30 &&
+        pytest -sv selenium_tests
+      "
     depends_on:
       - db
       - redis
