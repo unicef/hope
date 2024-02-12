@@ -1,131 +1,26 @@
 version: '3.7'
-
-x-django-envs: &django_envs
-  environment:
-    - ENV=dev
-    - DEBUG=true
-    - SECRET_KEY=31283012-38dasda
-    - POSTGRES_DB=postgres
-    - POSTGRES_USER=postgres
-    - POSTGRES_PASSWORD=postgres
-    - DATABASE_URL=postgis://postgres:postgres@db:5432/postgres
-    - DATABASE_URL_HUB_MIS=postgis://postgres:postgres@mis_datahub_db:5432/postgres
-    - DATABASE_URL_HUB_CA=postgis://postgres:postgres@cash_assist_datahub_db:5432/postgres
-    - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@erp_datahub_db:5432/postgres
-    - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@registration_datahub_db:5432/postgres
-    - POSTGRES_SSL_MODE=off
-    - EMAIL_HOST=TBD
-    - EMAIL_HOST_USER=TBD
-    - EMAIL_HOST_PASSWORD=TBD
-    - KOBO_KF_URL=https://kobo.humanitarianresponse.info
-    - KOBO_KC_URL=https://kobo.humanitarianresponse.info
-    - KOBO_MASTER_API_TOKEN=token
-    - EXCHANGE_RATES_API_KEY=token
-    - REDIS_INSTANCE=redis:6379
-    - PYTHONUNBUFFERED=1
-
 services:
   selenium:
-    <<: *django_envs
+    stdin_open: true
+    entrypoint: entrypoint.sh
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+      - PYTHONUNBUFFERED=1
     build:
       context: ./
       dockerfile: docker/Dockerfile
-      target: dev
-    command: |
-      sh -c "
-        waitforit -timeout 300 -host backend -port 8000
-        pytest -svvv -x selenium_tests
-      "
-    depends_on:
-      - backend
-    volumes:
-      - ./backend/screenshot:/code/screenshot
-      - ./backend:/code
-
-
-  backend:
-    <<: *django_envs
-    build:
-      context: ./
-      dockerfile: docker/Dockerfile
-      target: dist
+      target: selenium
     ports:
       - "8000:8000"
-    command: |
-      sh -c "
-        waitforit -timeout 30 -host db -port 5432
-        waitforit -timeout 30 -host cash_assist_datahub_db -port 5432
-        waitforit -timeout 30 -host mis_datahub_db -port 5432
-        waitforit -timeout 30 -host erp_datahub_db -port 5432
-        waitforit -timeout 30 -host registration_datahub_db -port 5432
-        waitforit -timeout 30 -host redis -port 6379
-        waitforit -timeout 30 -host elasticsearch -port 9200
-        python manage.py upgrade
-        entrypoint.sh
-      "
+    volumes:
+      - ./backend/screenshot/:/code/screenshot/
+      - backend-data:/data
+      - ipython_data_local:/root/.ipython
+    command: "dev"
     depends_on:
       - db
       - redis
-      - cash_assist_datahub_db
-      - mis_datahub_db
-      - erp_datahub_db
-      - registration_datahub_db
       - elasticsearch
-
-  cash_assist_datahub_db:
-    image: postgis/postgis:14-3.3-alpine
-    <<: *django_envs
-
-  mis_datahub_db:
-    image: postgis/postgis:14-3.3-alpine
-    <<: *django_envs
-
-  erp_datahub_db:
-    image: postgis/postgis:14-3.3-alpine
-    <<: *django_envs
-
-  registration_datahub_db:
-    image: postgis/postgis:14-3.3-alpine
-    <<: *django_envs
-
-  db:
-    image: postgis/postgis:14-3.3-alpine
-    <<: *django_envs
-
-  celery_worker:
-    <<: *django_envs
-    build:
-      context: ./
-      dockerfile: docker/Dockerfile
-      target: dist
-    restart: unless-stopped
-    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
-    depends_on:
-      - backend
-      - db
-      - cash_assist_datahub_db
-      - mis_datahub_db
-      - erp_datahub_db
-      - registration_datahub_db
-      - redis
-      - elasticsearch
-
-  redis:
-    restart: unless-stopped
-    image: redis:4.0.11-alpine3.8
-
-  elasticsearch:
-    <<: *django_envs
-    build:
-      context: ./elasticsearch
-    environment:
-      - node.name=es01
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=es01
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=false
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
