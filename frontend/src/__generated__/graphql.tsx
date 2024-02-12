@@ -3088,8 +3088,8 @@ export type ImportedIndividualNode = Node & {
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   misUnicefId?: Maybe<Scalars['String']>,
-  ageAtRegistration?: Maybe<Scalars['Int']>,
   programId?: Maybe<Scalars['UUID']>,
+  ageAtRegistration?: Maybe<Scalars['Int']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
@@ -11059,23 +11059,7 @@ export type CreateReportMutation = (
     { __typename?: 'CreateReport' }
     & { report: Maybe<(
       { __typename?: 'ReportNode' }
-      & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl'>
-      & { createdBy: (
-        { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
-      ), adminArea: (
-        { __typename?: 'AreaNodeConnection' }
-        & { edges: Array<Maybe<(
-          { __typename?: 'AreaNodeEdge' }
-          & { node: Maybe<(
-            { __typename?: 'AreaNode' }
-            & Pick<AreaNode, 'name'>
-          )> }
-        )>> }
-      ), program: Maybe<(
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'name'>
-      )> }
+      & Pick<ReportNode, 'id'>
     )> }
   )> }
 );
@@ -19537,26 +19521,6 @@ export const CreateReportDocument = gql`
   createReport(reportData: $reportData) {
     report {
       id
-      status
-      reportType
-      createdAt
-      dateFrom
-      dateTo
-      fileUrl
-      createdBy {
-        firstName
-        lastName
-      }
-      adminArea {
-        edges {
-          node {
-            name
-          }
-        }
-      }
-      program {
-        name
-      }
     }
   }
 }
@@ -31020,8 +30984,8 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
