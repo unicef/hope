@@ -260,7 +260,7 @@ if DEBUG:
     CSP_MANIFEST_SRC += (FRONTEND_HOST,)
 
 if DEBUG:
-    ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
+    ALLOWED_HOSTS.extend(["backend", "localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 

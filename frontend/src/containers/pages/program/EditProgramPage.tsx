@@ -113,7 +113,7 @@ export function EditProgramPage(): ReactElement {
 
   const initialValues = {
     name,
-    programmeCode,
+    programmeCode: '',
     startDate,
     endDate,
     sector,

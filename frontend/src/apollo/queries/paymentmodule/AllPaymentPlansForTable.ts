@@ -45,6 +45,7 @@ export const AllPaymentPlansForTable = gql`
         node {
           id
           unicefId
+          name
           isFollowUp
           followUps {
             totalCount
