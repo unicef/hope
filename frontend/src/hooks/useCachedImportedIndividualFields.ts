@@ -27,23 +27,25 @@ export function useCachedImportedIndividualFieldsQuery(
       10,
     ) || 0;
   const ttl = 2 * 60 * 60 * 1000;
-  const [getAttributes, results] = useImportedIndividualFieldsLazyQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-      programId: selectedProgramId
-    },
-  });
+  const [getAttributes, results] = useImportedIndividualFieldsLazyQuery();
+
   useEffect(() => {
     if (Date.now() - lastUpdatedTimestamp < ttl) {
       return;
     }
-    getAttributes();
-  }, []);
+    getAttributes({
+      variables: {
+        businessAreaSlug: businessArea,
+        programId: selectedProgramId
+      },
+    });
+  }, [businessArea, selectedProgramId, getAttributes]);
+
   useEffect(() => {
     if (results.data || results.error) {
       setLoading(results.loading);
     }
-  }, [results.loading]);
+  }, [results.loading, results.data, results.error]);
 
   useEffect(() => {
     if (businessArea === oldBusinessArea && selectedProgramId === oldSelectedProgramId) {
