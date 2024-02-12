@@ -34,10 +34,13 @@ services:
     command: |
       sh -c "
         waitforit -timeout 300 -host backend -port 8000
-        pytest -sv selenium_tests
+        pytest -svvv -x selenium_tests
       "
     depends_on:
       - backend
+    volumes:
+      - ./backend/screenshot:/code/screenshot
+      - ./backend:/code
 
 
   backend:
@@ -68,6 +71,7 @@ services:
       - erp_datahub_db
       - registration_datahub_db
       - elasticsearch
+      - frontend
 
   cash_assist_datahub_db:
     image: postgis/postgis:14-3.3-alpine
