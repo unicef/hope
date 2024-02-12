@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
+import { useRoutes, useLocation } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
@@ -11,75 +11,140 @@ import { GrievancesDashboardPage } from '../pages/grievances/GrievancesDashboard
 import { GrievancesDetailsPage } from '../pages/grievances/GrievancesDetailsPage/GrievancesDetailsPage';
 import { GrievancesTablePage } from '../pages/grievances/GrievancesTablePage';
 
-export function GrievanceRoutes(): React.ReactElement {
-  const { path } = useRouteMatch();
+export const GrievanceRoutes = (): React.ReactElement => {
+  const location = useLocation();
+  const path = location.pathname;
 
   const grievanceRoutes = [
     {
       path: `${path}/grievance/new-ticket`,
-      component: <CreateGrievancePage />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/new-ticket`}
+          element={<CreateGrievancePage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/edit-ticket/user-generated/:id`,
-      component: <EditGrievancePage key="user" />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/edit-ticket/user-generated/:id`}
+          element={<EditGrievancePage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/edit-ticket/system-generated/:id`,
-      component: <EditGrievancePage key="system" />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/edit-ticket/system-generated/:id`}
+          element={<EditGrievancePage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/tickets/user-generated/:id`,
-      component: <GrievancesDetailsPage key="user" />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/tickets/user-generated/:id`}
+          element={<GrievancesDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/tickets/system-generated/:id`,
-      component: <GrievancesDetailsPage key="system" />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/tickets/system-generated/:id`}
+          element={<GrievancesDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/rdi/:id`,
-      component: <GrievancesTablePage key="rdi" />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/rdi/:id`}
+          element={<GrievancesTablePage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/payment-verification/:cashPlanId`,
-      component: <GrievancesTablePage key="verificationId" />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/payment-verification/:cashPlanId`}
+          element={<GrievancesTablePage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/tickets/user-generated`,
-      component: <GrievancesTablePage key="user" />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/tickets/user-generated`}
+          element={<GrievancesTablePage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/tickets/system-generated`,
-      component: <GrievancesTablePage key="system" />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/tickets/system-generated`}
+          element={<GrievancesTablePage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/dashboard`,
-      component: <GrievancesDashboardPage key="all" />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/dashboard`}
+          element={<GrievancesDashboardPage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/feedback/create`,
-      component: <CreateFeedbackPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/feedback/create`}
+          element={<CreateFeedbackPage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/feedback/edit-ticket/:id`,
-      component: <EditFeedbackPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/feedback/edit-ticket/:id`}
+          element={<EditFeedbackPage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/feedback/:id`,
-      component: <FeedbackDetailsPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/feedback/:id`}
+          element={<FeedbackDetailsPage />}
+        />
+      ),
     },
     {
       path: `${path}/grievance/feedback`,
-      component: <FeedbackPage />,
+      element: (
+        <SentryRoute
+          path={`${path}/grievance/feedback`}
+          element={<FeedbackPage />}
+        />
+      ),
     },
   ];
 
-  return (
-    <Switch>
-      {grievanceRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
-}
+  const routes = useRoutes(grievanceRoutes);
+
+  return routes;
+};

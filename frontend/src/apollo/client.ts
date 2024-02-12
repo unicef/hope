@@ -6,7 +6,6 @@ import {
 } from '@apollo/client';
 import { onError } from '@apollo/link-error';
 import { persistCache } from 'apollo-cache-persist';
-import { createUploadLink } from 'apollo-upload-client';
 import { GRAPHQL_URL } from '../config';
 import { clearCache } from '@utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
