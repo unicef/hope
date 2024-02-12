@@ -353,7 +353,7 @@ class PaymentPlanFilter(FilterSet):
     )
 
     def search_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
-        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value))
+        return qs.filter(Q(id__icontains=value) | Q(unicef_id__icontains=value) | Q(name__iexact=value))
 
     def source_payment_plan_filter(self, qs: QuerySet, name: str, value: str) -> "QuerySet[PaymentPlan]":
         return PaymentPlan.objects.filter(source_payment_plan_id=decode_id_string(value))
