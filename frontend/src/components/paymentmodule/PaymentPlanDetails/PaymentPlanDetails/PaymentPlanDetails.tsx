@@ -32,6 +32,7 @@ export function PaymentPlanDetails({
     dispersionStartDate,
     dispersionEndDate,
     followUps,
+    name
   } = paymentPlan;
 
   return (
@@ -62,6 +63,11 @@ export function PaymentPlanDetails({
                   >
                     {targetPopulation.name}
                   </BlackLink>
+                </LabelizedField>
+              </Grid>
+              <Grid item xs={3}>
+                <LabelizedField label={t('Name')}>
+                  {name}
                 </LabelizedField>
               </Grid>
               <Grid item xs={3}>

@@ -247,3 +247,16 @@ class TestCreateProgram(APITestCase):
         program = Program.objects.get(name="Test")
         self.assertIsNotNone(program.programme_code)
         self.assertEqual(len(program.programme_code), 4)
+
+    def test_create_program_with_programme_code_lowercase(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["programmeCode"] = "abc2"
+
+        self.graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+        program = Program.objects.get(name="Test")
+        self.assertIsNotNone(program.programme_code)
+        self.assertEqual(len(program.programme_code), 4)
+        self.assertEqual(program.programme_code, "ABC2")

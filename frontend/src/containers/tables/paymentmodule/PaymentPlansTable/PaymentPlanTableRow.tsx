@@ -23,10 +23,10 @@ interface PaymentPlanTableRowProps {
   canViewDetails: boolean;
 }
 
-export function PaymentPlanTableRow({
+export const PaymentPlanTableRow = ({
   plan,
   canViewDetails,
-}: PaymentPlanTableRowProps): React.ReactElement {
+}: PaymentPlanTableRowProps): React.ReactElement => {
   const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const paymentPlanPath = `/${baseUrl}/payment-module/${
@@ -47,7 +47,7 @@ export function PaymentPlanTableRow({
         {plan.followUps?.edges?.map((followUp) => {
           const followUpPaymentPlanPath = `/${baseUrl}/payment-module/followup-payment-plans/${followUp?.node?.id}`;
           return (
-            <Box mb={1}>
+            <Box key={followUp?.node?.id} mb={1}>
               <BlackLink key={followUp?.node?.id} to={followUpPaymentPlanPath}>
                 {followUp?.node?.unicefId}
               </BlackLink>
@@ -72,6 +72,10 @@ export function PaymentPlanTableRow({
         ) : (
           plan.unicefId
         )}
+      </TableCell>
+      <TableCell align="left">
+        {(plan.name.length > 10 ? `${plan.name.slice(0, 10)}...` : plan.name) ||
+          '-'}
       </TableCell>
       <TableCell align="left">
         <StatusContainer>
@@ -110,4 +114,4 @@ export function PaymentPlanTableRow({
       <TableCell align="left">{followUpLinks()}</TableCell>
     </ClickableTableRow>
   );
-}
+};

@@ -398,6 +398,7 @@ class TestPaymentPlanReconciliation(APITestCase):
                 "input": {
                     "businessAreaSlug": self.business_area.slug,
                     "targetingId": target_population_id,
+                    "name": "paymentPlanName",
                     "startDate": timezone.datetime(2022, 8, 25, tzinfo=utc),
                     "endDate": timezone.datetime(2022, 8, 30, tzinfo=utc),
                     "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),

@@ -376,7 +376,8 @@ def check_rdi_import_periodic_task(business_area_slug: Optional[str] = None) -> 
         )
 
         business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
-        set_sentry_business_area_tag(business_area.name)
+        if business_area:
+            set_sentry_business_area_tag(business_area.name)
         manager = RegistrationDataXlsxImportCeleryManager(business_area=business_area)
         manager.execute()
         return True
