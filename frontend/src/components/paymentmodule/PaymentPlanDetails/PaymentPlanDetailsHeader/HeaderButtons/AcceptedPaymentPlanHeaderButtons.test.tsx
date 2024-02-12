@@ -17,7 +17,7 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={false}
           canExportXlsx={false}
-          canSendToFsp={false}
+          canSendToPaymentGateway={false}
           paymentPlan={fakeApolloPaymentPlan}
         />
       </MockedProvider>,
@@ -36,7 +36,7 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/H
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx
           canExportXlsx
-          canSendToFsp
+          canSendToPaymentGateway
           paymentPlan={fakeApolloPaymentPlan}
         />
       </MockedProvider>,

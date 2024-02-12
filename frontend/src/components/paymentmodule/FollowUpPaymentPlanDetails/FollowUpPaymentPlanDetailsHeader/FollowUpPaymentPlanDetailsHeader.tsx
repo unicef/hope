@@ -7,7 +7,11 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
+import {
+  FinancialServiceProviderCommunicationChannel,
+  PaymentPlanQuery,
+  PaymentPlanStatus
+} from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import { StatusBox } from '../../../core/StatusBox';
@@ -71,14 +75,8 @@ export const FollowUpPaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
     permissions,
   );
-  const canSendToFsp = false; // TODO: disabled for now
-  // hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-  // paymentPlan.status === PaymentPlanStatus.Accepted &&
-  // paymentPlan.deliveryMechanisms.some(
-  //   ({ fsp: { communicationChannel } }) =>
-  //     communicationChannel ===
-  //     FinancialServiceProviderCommunicationChannel.Api,
-  // );
+  const canSendToPaymentGateway = hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) && paymentPlan.canSendToPaymentGateway;
+
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -151,7 +149,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
           canExportXlsx={canExportXlsx}
-          canSendToPaymentGateway={canSendToFsp}
+          canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
         />
       );
@@ -161,7 +159,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
           canExportXlsx={canExportXlsx}
-          canSendToPaymentGateway={canSendToFsp}
+          canSendToPaymentGateway={canSendToPaymentGateway}
           paymentPlan={paymentPlan}
         />
       );

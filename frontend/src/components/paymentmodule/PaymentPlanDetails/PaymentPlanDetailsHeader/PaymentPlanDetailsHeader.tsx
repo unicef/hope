@@ -74,15 +74,7 @@ export const PaymentPlanDetailsHeader = ({
     PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
     permissions,
   );
-  const canSendToPaymentGateway = hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
-  paymentPlan.status === PaymentPlanStatus.Accepted &&
-  paymentPlan.deliveryMechanisms.some(
-    (deliveryMechanism) => {
-      const { sentToPaymentGateway, fsp } = deliveryMechanism;
-      const {communicationChannel} = fsp;
-      return !sentToPaymentGateway && communicationChannel === FinancialServiceProviderCommunicationChannel.Api ;
-    }
-  );
+  const canSendToPaymentGateway = hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) && paymentPlan.canSendToPaymentGateway;
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {

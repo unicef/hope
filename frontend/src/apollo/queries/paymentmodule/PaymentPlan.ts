@@ -149,6 +149,7 @@ export const PAYMENT_PLAN_QUERY = gql`
           communicationChannel
         }
       }
+      canSendToPaymentGateway
       volumeByDeliveryMechanism {
         deliveryMechanism {
           id

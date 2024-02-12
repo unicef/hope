@@ -92,6 +92,7 @@ from hct_mis_api.apps.payment.models import (
     Payment,
     PaymentHouseholdSnapshot,
     PaymentPlan,
+    PaymentPlanSplit,
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -460,6 +461,21 @@ class DeliveryMechanismNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class PaymentPlanSplitNode(DjangoObjectType):
+    split_type = graphene.String()
+    chunks_no = graphene.Int()
+
+    class Meta:
+        model = PaymentPlanSplit
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class PaymentPlanSplitChoices(graphene.ObjectType):
+    chunks_range = graphene.List(graphene.Int)
+    split_types = graphene.List(ChoiceObject)
+
+
 def _calculate_volume(
     delivery_mechanism_per_payment_plan: "DeliveryMechanismPerPaymentPlan", field: str
 ) -> Optional[Decimal]:
@@ -528,6 +544,11 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
+    splits = graphene.List(PaymentPlanSplitNode)
+    split_choices = graphene.List(
+        PaymentPlanSplitChoices,
+        payment_plan_id=graphene.ID(required=True),
+    )
     verification_plans = DjangoPermissionFilterConnectionField(
         "hct_mis_api.apps.program.schema.PaymentVerificationPlanNode",  # type: ignore
         filterset_class=PaymentVerificationPlanFilter,
@@ -546,6 +567,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     total_withdrawn_households_count = graphene.Int()
     unsuccessful_payments_count = graphene.Int()
     name = graphene.String()
+    can_send_to_payment_gateway = graphene.Boolean()
 
     class Meta:
         model = PaymentPlan
@@ -563,6 +585,30 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_delivery_mechanisms(self, info: Any) -> graphene.List:
         return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
+
+    def resolve_splits(self, info: Any) -> graphene.List:
+        return self.splits.all()
+
+    def resolve_split_choices(self, info: Any, input: Dict, **kwargs: Any) -> Dict:
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
+        payments = payment_plan.eligible_payments
+
+        def get_chunks_for_payment_plan(payments_count: int) -> List[int]:
+            if payments_count < 2:
+                return []
+            chunks = []
+            chunk = payments_count // 2
+            while chunk > PaymentPlanSplit.MAX_CHUNKS:
+                chunk = chunk // 2
+            while chunk > 1:
+                chunks.append(chunk)
+                chunk = chunk // 2
+            return chunks
+
+        return {
+            "split_types": to_choice_object(PaymentPlanSplit.SplitType.choices),
+            "chunks_range": get_chunks_for_payment_plan(payments.count()),
+        }
 
     def resolve_has_payment_list_export_file(self, info: Any) -> graphene.Boolean:
         return self.has_export_file
@@ -641,6 +687,26 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_unsuccessful_payments_count(self, info: Any) -> int:
         return self.unsuccessful_payments_for_follow_up().count()
+
+    def resolve_can_send_to_payment_gateway(self, info: Any) -> bool:
+        if self.status != PaymentPlan.Status.ACCEPTED:
+            return False
+
+        if self.splits.exists():
+            has_payment_gateway_fsp = self.delivery_mechanisms.filter(
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                financial_service_provider__payment_gateway_id__isnull=False,
+            ).exists()
+            has_not_sent_to_payment_gateway_splits = self.splits.filter(
+                sent_to_payment_gateway=False,
+            ).exists()
+            return has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
+        else:
+            return self.delivery_mechanisms.filter(
+                sent_to_payment_gateway=False,
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                financial_service_provider__payment_gateway_id__isnull=False,
+            ).exists()
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):

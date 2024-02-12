@@ -1,6 +1,6 @@
 import graphene
 
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentPlanSplit
 
 
 class FullListArguments(graphene.InputObjectType):
@@ -102,3 +102,9 @@ class AssignFspToDeliveryMechanismInput(graphene.InputObjectType):
 
 class AvailableFspsForDeliveryMechanismsInput(graphene.InputObjectType):
     payment_plan_id = graphene.ID(required=True)
+
+
+class SplitPaymentPlanInput(graphene.InputObjectType):
+    payment_plan_id = graphene.ID(required=True)
+    split_type = graphene.Enum.from_enum(PaymentPlanSplit.SplitType)(required=True)
+    chunks_no = graphene.Int(required=False)

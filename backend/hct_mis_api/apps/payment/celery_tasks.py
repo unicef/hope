@@ -229,7 +229,7 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
                 service.import_payment_list()
                 payment_plan.imported_file_date = timezone.now()
                 payment_plan.background_action_status_none()
-                payment_plan.remove_export_file()
+                payment_plan.remove_export_files()
                 payment_plan.save()
                 payment_plan.update_money_fields()
         except Exception as e:
@@ -261,7 +261,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
             service.open_workbook()
             with transaction.atomic():
                 service.import_payment_list()
-                payment_plan.remove_export_file()
+                payment_plan.remove_export_files()
                 payment_plan.background_action_status_none()
                 payment_plan.update_money_fields()
 
@@ -387,7 +387,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
             payment_plan.steficon_applied_date = timezone.now()
             payment_plan.background_action_status_none()
             with disable_concurrency(payment_plan):
-                payment_plan.remove_export_file()
+                payment_plan.remove_export_files()
                 payment_plan.remove_imported_file()
                 payment_plan.save()
                 payment_plan.update_money_fields()

@@ -377,6 +377,43 @@ class GenericPayment(TimeStampedUUIDModel):
         return status
 
 
+class PaymentPlanSplitPayments(TimeStampedUUIDModel):
+    payment_plan_split = models.ForeignKey(
+        "payment.PaymentPlanSplit", on_delete=models.CASCADE, related_name="payment_plan_split"
+    )
+    payment = models.ForeignKey("payment.Payment", on_delete=models.CASCADE, related_name="payment_plan_split_payment")
+
+    class Meta:
+        unique_together = ("payment_plan_split", "payment")
+
+
+class PaymentPlanSplit(TimeStampedUUIDModel):
+    MAX_CHUNKS = 50
+
+    class SplitType(models.TextChoices):
+        BY_RECORDS = "BY_RECORDS", "By Records"
+        BY_COLLECTOR = "BY_COLLECTOR", "By Collector"
+        BY_ADMIN_AREA2 = "BY_ADMIN_AREA2", "By Admin Area 2"
+
+    payment_plan = models.ForeignKey(
+        "payment.PaymentPlan",
+        on_delete=models.CASCADE,
+        related_name="splits",
+    )
+    split_type = models.CharField(choices=SplitType.choices, max_length=24)
+    chunks_no = models.IntegerField(null=True, blank=True)
+    payments = models.ManyToManyField(
+        "payment.Payment",
+        through="PaymentPlanSplitPayments",
+        related_name="+",
+    )
+    sent_to_payment_gateway = models.BooleanField(default=False)
+
+    @property
+    def financial_service_provider(self) -> "FinancialServiceProvider":
+        return self.payment_plan.delivery_mechanisms.first().financial_service_provider
+
+
 class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
@@ -871,17 +908,23 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
             == self.eligible_payments.count()
         )
 
-    def remove_export_file(self) -> None:
+    def remove_export_file_entitlement(self) -> None:
+        self.export_file_entitlement.file.delete(save=False)
+        self.export_file_entitlement.delete()
+        self.export_file_entitlement = None
+
+    def remove_export_file_per_fsp(self) -> None:
+        self.export_file_per_fsp.file.delete(save=False)
+        self.export_file_per_fsp.delete()
+        self.export_file_per_fsp = None
+
+    def remove_export_files(self) -> None:
         # remove export_file_entitlement
         if self.status == PaymentPlan.Status.LOCKED and self.export_file_entitlement:
-            self.export_file_entitlement.file.delete(save=False)
-            self.export_file_entitlement.delete()
-            self.export_file_entitlement = None
+            self.remove_export_file_entitlement()
         # remove export_file_per_fsp
         if self.status in (PaymentPlan.Status.ACCEPTED, PaymentPlan.Status.FINISHED) and self.export_file_per_fsp:
-            self.export_file_per_fsp.file.delete(save=False)
-            self.export_file_per_fsp.delete()
-            self.export_file_per_fsp = None
+            self.remove_export_file_per_fsp()
 
     def remove_imported_file(self) -> None:
         if self.imported_file:
