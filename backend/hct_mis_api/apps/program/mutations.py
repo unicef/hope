@@ -35,12 +35,19 @@ from hct_mis_api.apps.program.utils import (
 )
 from hct_mis_api.apps.program.validators import (
     ProgramDeletionValidator,
+    ProgrammeCodeValidator,
     ProgramValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 
-class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMutation, ValidationErrorMutationMixin):
+class CreateProgram(
+    CommonValidator,
+    ProgrammeCodeValidator,
+    DataCollectingTypeValidator,
+    PermissionMutation,
+    ValidationErrorMutationMixin,
+):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -73,13 +80,8 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
             data_collecting_type=data_collecting_type,
             business_area=business_area,
+            programme_code=programme_code,
         )
-
-        if (
-            programme_code
-            and Program.objects.filter(business_area=business_area, programme_code=programme_code).exists()
-        ):
-            raise ValidationError("Programme code is already used.")
 
         program = Program(
             **program_data, status=Program.DRAFT, business_area=business_area, data_collecting_type=data_collecting_type
@@ -99,7 +101,13 @@ class CreateProgram(CommonValidator, DataCollectingTypeValidator, PermissionMuta
         return CreateProgram(program=program)
 
 
-class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMutation, ValidationErrorMutationMixin):
+class UpdateProgram(
+    ProgramValidator,
+    ProgrammeCodeValidator,
+    DataCollectingTypeValidator,
+    PermissionMutation,
+    ValidationErrorMutationMixin,
+):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -149,15 +157,9 @@ class UpdateProgram(ProgramValidator, DataCollectingTypeValidator, PermissionMut
             start_date=program_data.get("start_date"),
             end_date=program_data.get("end_date"),
             data_collecting_type=data_collecting_type,
+            business_area=business_area,
+            programme_code=programme_code,
         )
-
-        if (
-            programme_code
-            and Program.objects.exclude(id=program_id)
-            .filter(business_area=business_area, programme_code=programme_code)
-            .exists()
-        ):
-            raise ValidationError("Programme code is already used.")
 
         if program.status == Program.FINISHED:
             # Only reactivation is possible
@@ -208,7 +210,7 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
         return cls(ok=True)
 
 
-class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMixin):
+class CopyProgram(CommonValidator, ProgrammeCodeValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -229,12 +231,9 @@ class CopyProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMi
         cls.validate(
             start_date=datetime.combine(program_data["start_date"], datetime.min.time()),
             end_date=datetime.combine(program_data["end_date"], datetime.min.time()),
+            programme_code=programme_code,
+            business_area=business_area,
         )
-        if (
-            programme_code
-            and Program.objects.filter(business_area=business_area, programme_code=programme_code).exists()
-        ):
-            raise ValidationError("Programme code is already used.")
         program = copy_program_object(program_id, program_data)
 
         for partner in partners_data:

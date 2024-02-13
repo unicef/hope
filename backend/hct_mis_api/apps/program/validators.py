@@ -42,8 +42,32 @@ class ProgramDeletionValidator(BaseValidator):
             raise ValidationError("Only Draft Program can be deleted.")
 
 
-class CashPlanValidator(BaseValidator):
-    pass
+class ProgrammeCodeValidator(BaseValidator):
+    @classmethod
+    def validate_programme_code(
+        cls,
+        programme_code: str,
+        business_area: "BusinessArea",
+        program: Optional[Program] = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        if programme_code:
+            programme_code = programme_code.upper()
+
+            if not programme_code.isalnum():
+                raise ValidationError("Programme code should be alphanumeric.")
+
+            if len(programme_code) != 4:
+                raise ValidationError("Programme code should be 4 alphanumeric characters.")
+
+            qs = Program.objects.filter(business_area=business_area, programme_code=programme_code)
+
+            if program:
+                qs = qs.exclude(id=program.id)
+
+            if qs.exists():
+                raise ValidationError("Programme code is already used.")
 
 
 def validate_data_collecting_type(
