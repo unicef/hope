@@ -9,7 +9,7 @@ volumes:
 services:
   selenium:
     stdin_open: true
-    image: unicef/hct-mis-backend
+    image: unicef/hct-mis-backend-dev
     environment:
       - REDIS_INSTANCE=redis:6379
       - PYTHONUNBUFFERED=1
@@ -32,11 +32,15 @@ services:
     volumes:
       - ./backend/screenshot/:/code/screenshot/
       - backend-data:/data
-      - backend-web-app:/code/hct_mis_api/apps/web/
+      - type: volume
+        source: backend-web-app
+        target: /code/hct_mis_api/apps/web/static
+        volume:
+          nocopy: false
     command: |
       sh -c "
         waitforit -host=db -port=5432 -timeout=30 &&
-        pytest -sv selenium_tests
+        pytest -svvv selenium_tests
       "
     depends_on:
       db:
@@ -49,16 +53,16 @@ services:
         condition: service_completed_successfully
 
   init_fe:
-    image: unicef/hct-mis-backend
+    image: unicef/hct-mis-backend-dist
     build:
       context: ./
       dockerfile: docker/Dockerfile
       target: dist
     volumes:
-      - backend-web-app:/web-app
+      - backend-web-app:/tmp
     command: |
       sh -c "
-        cp -r /web-app/static ./hct_mis_api/apps/web/static
+        cp -r ./hct_mis_api/apps/web/static/* /tmp/
       "
     restart: "no"
 
