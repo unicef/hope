@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogTitle,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -38,6 +37,10 @@ const Bold = styled.span`
   font-size: 16px;
 `;
 
+const StyledTable = styled(Table)`
+  min-width: 100;
+`;
+
 interface DedupeResultsProps {
   individual: ImportedIndividualMinimalFragment;
   status: string;
@@ -54,12 +57,7 @@ export function DedupeResults({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
-  const useStyles = makeStyles(() => ({
-    table: {
-      minWidth: 100,
-    },
-  }));
-  const classes = useStyles();
+
   function createData(
     hitId,
     fullName,
@@ -135,7 +133,7 @@ export function DedupeResults({
               {t('are listed below.')}
             </div>
           </DialogDescription>
-          <Table className={classes.table}>
+          <StyledTable>
             <TableHead>
               <TableRow>
                 <TableCell style={{ width: 100 }}>
@@ -180,7 +178,7 @@ export function DedupeResults({
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </StyledTable>
         </DialogContent>
         <DialogFooter>
           <DialogActions>

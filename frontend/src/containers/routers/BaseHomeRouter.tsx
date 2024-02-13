@@ -1,5 +1,4 @@
 import { Snackbar, SnackbarContent } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import * as React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -13,7 +12,8 @@ import { Drawer } from '@components/core/Drawer/Drawer';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
-import { MiśTheme } from '../../theme';
+import { styled as MuiStyled } from '@mui/system';
+import { theme } from 'src/theme';
 
 const Root = styled.div`
   display: flex;
@@ -24,8 +24,8 @@ const MainContent = styled.div`
   overflow: auto;
 `;
 
-const useStyles = makeStyles((theme: MiśTheme) => ({
-  appBarSpacer: theme.mixins.toolbar,
+const AppBarSpacer = MuiStyled('div')(() => ({
+  ...theme.mixins.toolbar,
 }));
 
 interface BaseHomeRouterProps {
@@ -35,7 +35,6 @@ interface BaseHomeRouterProps {
 export const BaseHomeRouter: React.FC<BaseHomeRouterProps> = ({ children }) => {
   const [open, setOpen] = React.useState(true);
   const { businessArea } = useBaseUrl();
-  const classes = useStyles();
   const location = useLocation();
   const navigate = useNavigate();
   const snackBar = useSnackbar();
@@ -89,7 +88,7 @@ export const BaseHomeRouter: React.FC<BaseHomeRouterProps> = ({ children }) => {
         dataCy="side-nav"
       />
       <MainContent data-cy="main-content">
-        <div className={classes.appBarSpacer} />
+        <AppBarSpacer />
         {children}
       </MainContent>
       {snackBar.show && (
