@@ -3,6 +3,7 @@ from typing import Any, List
 from unittest import skip
 from unittest.mock import patch
 
+from django.core.cache import cache
 from django.core.management import call_command
 from django.utils import timezone
 
@@ -590,6 +591,7 @@ class TestGrievanceQuery(APITestCase):
             [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
             self.business_area,
         )
+        cache.clear()
         self.snapshot_graphql_request(
             request_string=self.ALL_GRIEVANCE_QUERY,
             context={
