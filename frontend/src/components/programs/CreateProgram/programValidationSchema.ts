@@ -10,7 +10,8 @@ export const programValidationSchema = (t): Yup.ObjectSchema =>
       .max(150, t('Too long')),
     programmeCode: Yup.string()
       .min(4, t('Too short'))
-      .max(4, t('Too long')),
+      .max(4, t('Too long'))
+      .nullable(),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
       .required(t('End Date is required'))

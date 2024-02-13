@@ -69,7 +69,6 @@ def login(browser: Chrome) -> Chrome:
     browser.add_cookie({"name": "csrftoken", "value": pytest.CSRF})
     browser.add_cookie({"name": "sessionid", "value": pytest.SESSION_ID})
     browser.get(f"{browser.live_server.url}")
-    screenshot(browser, "po_logowaniu")
     return browser
 
 
