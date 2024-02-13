@@ -276,7 +276,7 @@ stages:
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
-              dockerComposeFile: '**/compose.selenium.yml'
+              dockerComposeFile: '**/docker-compose.selenium.yml'
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run selenium'
               dockerComposeFileArgs: |
