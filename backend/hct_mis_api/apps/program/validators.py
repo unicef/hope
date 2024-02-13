@@ -42,10 +42,6 @@ class ProgramDeletionValidator(BaseValidator):
             raise ValidationError("Only Draft Program can be deleted.")
 
 
-class CashPlanValidator(BaseValidator):
-    pass
-
-
 def validate_data_collecting_type(
     business_area: "BusinessArea",
     original_program_data_collecting_type: Optional["DataCollectingType"] = None,
