@@ -93,7 +93,3 @@ RUN NODE_ENV="production" yarn build
 FROM be-dist AS dist
 
 COPY --chown=hope:hope --from=frontend-builder /backend/hct_mis_api/apps/web/ ./hct_mis_api/apps/web/
-
-FROM dev as selenium
-
-COPY --chown=hope:hope --from=frontend-builder /backend/hct_mis_api/apps/web/ ./hct_mis_api/apps/web/

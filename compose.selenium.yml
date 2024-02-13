@@ -2,13 +2,13 @@ version: '3.7'
 
 volumes:
   backend-data:
+  backend-web-app:
   db:
   data_es:
 
 services:
   selenium:
     stdin_open: true
-    entrypoint: entrypoint.sh
     image: unicef/hct-mis-backend
     environment:
       - REDIS_INSTANCE=redis:6379
@@ -28,19 +28,40 @@ services:
     build:
       context: ./
       dockerfile: docker/Dockerfile
-      target: selenium
+      target: dev
     volumes:
       - ./backend/screenshot/:/code/screenshot/
       - backend-data:/data
+      - backend-web-app:/code/hct_mis_api/apps/web/
     command: |
       sh -c "
         waitforit -host=db -port=5432 -timeout=30 &&
         pytest -sv selenium_tests
       "
     depends_on:
-      - db
-      - redis
-      - elasticsearch
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+      elasticsearch:
+        condition: service_started
+      init_fe:
+        condition: service_completed_successfully
+
+  init_fe:
+    image: unicef/hct-mis-backend
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+      target: dist
+    volumes:
+      - backend-web-app:/web-app
+    command: |
+      sh -c "
+        cp -r /web-app/static ./hct_mis_api/apps/web/static
+      "
+    restart: "no"
+
 
   redis:
     restart: always
