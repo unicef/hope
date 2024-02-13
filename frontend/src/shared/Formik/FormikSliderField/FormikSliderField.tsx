@@ -1,13 +1,11 @@
 import * as React from 'react';
-import { makeStyles } from '@mui/styles';
+import { styled } from '@mui/system';
 import Grid from '@mui/material/Grid';
 import Slider from '@mui/material/Slider';
-import { Typography } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 
-const useStyles = makeStyles({
-  root: {
-    width: 400,
-  },
+const StyledBox = styled(Box)({
+  width: 400,
 });
 
 export const FormikSliderField = ({
@@ -19,14 +17,12 @@ export const FormikSliderField = ({
   dataCy,
   ...otherProps
 }): React.ReactElement => {
-  const classes = useStyles();
-
   const handleSliderChange = (_, newValue): void => {
     form.setFieldValue(field.name, newValue);
   };
 
   return (
-    <div className={classes.root}>
+    <StyledBox>
       <Typography variant="caption">{otherProps.label}</Typography>
       <Grid container spacing={2} alignItems="center">
         <Grid item xs>
@@ -47,6 +43,6 @@ export const FormikSliderField = ({
           </p>
         </Grid>
       </Grid>
-    </div>
+    </StyledBox>
   );
 };

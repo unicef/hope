@@ -1,4 +1,3 @@
-import { makeStyles } from '@mui/styles';
 import { Box, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import DrawerMaterial from '@mui/material/Drawer';
@@ -8,14 +7,103 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { useBackendVersion } from '@hooks/useBackendVersion';
 import { useFrontendVersion } from '@hooks/useFrontendVersion';
-import { theme as themeObj } from '../../../theme';
 import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
+import { theme } from '../../../theme';
+
+import { styled } from '@mui/system';
+
+const ToolbarHeader = styled('div')(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingLeft: '51px',
+  backgroundColor: matchColorToWindowOrigin(),
+  color: 'white',
+  borderRight: '2px solid #02367D',
+  boxShadow:
+    '0px 2px 4px 0px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
+  ...theme.mixins.toolbar,
+}));
+
+const CollapseIcon = styled('div')({
+  color: '#fff',
+  opacity: 0.54,
+});
+
+const DrawerPaper = styled('div')(() => ({
+  height: '100vh',
+  position: 'relative',
+  whiteSpace: 'nowrap',
+  width: theme.drawer.width,
+  transition: theme.transitions.create('width', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+  borderWidth: 0,
+}));
+
+const DrawerPaperClose = styled(DrawerPaper)(() => ({
+  overflowX: 'hidden',
+  transition: theme.transitions.create('width', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  width: theme.spacing(16),
+  [theme.breakpoints.up('sm')]: {
+    width: theme.spacing(14),
+  },
+}));
+
+const Version = styled('div')({
+  color: '#aaa',
+  padding: 4,
+  textAlign: 'center',
+});
+
+const StyledLink = styled('a')({
+  color: '#233944',
+  fontSize: '14px',
+  fontWeight: 500,
+  lineHeight: '16px',
+  textDecoration: 'none',
+});
+
+const Text = styled(ListItemText)({
+  '.MuiTypography-body1': {
+    color: '#233944',
+    fontSize: '14px',
+    fontWeight: 500,
+    lineHeight: '16px',
+  },
+});
+
+const ResourcesText = styled('p')({
+  textAlign: 'left',
+  fontSize: '14px',
+  color: '#aaa',
+  marginLeft: '16px',
+});
+
+const ToolbarScrollBox = styled(Box)({
+  overflowY: 'auto',
+  height: '100%',
+  borderRight: '2px solid #e1e1e1',
+});
+
+const Icon = styled(ListItemIcon)(() => ({
+  minWidth: 0,
+  paddingRight: theme.spacing(4),
+}));
+
+const CollapseIconButton = styled(IconButton)({
+  color: '#fff',
+  opacity: 0.54,
+});
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
@@ -34,104 +122,19 @@ const matchColorToWindowOrigin = (): string => {
   return '#00ADEF';
 };
 
-const useStyles = makeStyles((theme: typeof themeObj) => ({
-  toolbarHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingLeft: '51px',
-    backgroundColor: matchColorToWindowOrigin(),
-    color: 'white',
-    borderRightWidth: 2,
-    borderRightColor: '#02367D',
-    borderRightStyle: 'solid',
-    boxShadow:
-      '0px 2px 4px 0px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
-    ...theme.mixins.toolbar,
-  },
-  collapseIcon: {
-    color: '#fff',
-    opacity: 0.54,
-  },
-  drawerPaper: {
-    height: '100vh',
-    position: 'relative',
-    whiteSpace: 'nowrap',
-    width: theme.drawer.width,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    borderWidth: 0,
-  },
-  drawerPaperClose: {
-    overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: theme.spacing(16),
-    [theme.breakpoints.up('sm')]: {
-      width: theme.spacing(14),
-    },
-  },
-  version: {
-    color: '#aaa',
-    padding: 4,
-    textAlign: 'center',
-  },
-}));
-
-const StyledLink = styled.a`
-  color: #233944;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 16px;
-  text-decoration: none;
-`;
-
-const Text = styled(ListItemText)`
-  .MuiTypography-body1 {
-    color: #233944;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 16px;
-  }
-`;
-
-const ResourcesText = styled('p')`
-  text-align: left;
-  font-size: 14px;
-  color: #aaa;
-  margin-left: 16px;
-`;
-
-const ToolbarScrollBox = styled(Box)`
-  overflow-y: auto;
-  height: 100%;
-  border-right: 2px solid #e1e1e1;
-`;
-
-const Icon = styled(ListItemIcon)`
-  && {
-    min-width: 0;
-    padding-right: ${({ theme }) => theme.spacing(4)}px;
-  }
-`;
-interface Props {
+interface DrawerProps {
   open: boolean;
   handleDrawerClose: () => void;
   currentLocation: string;
   dataCy: string;
 }
 
-export function Drawer({
+export const Drawer = ({
   open,
   handleDrawerClose,
   currentLocation,
   dataCy,
-}: Props): React.ReactElement {
-  const classes = useStyles({});
+}: DrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
   const backendVersion = useBackendVersion();
@@ -149,25 +152,20 @@ export function Drawer({
   return (
     <DrawerMaterial
       variant="permanent"
-      classes={{
-        paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-      }}
+      className={clsx(DrawerPaper, !open && DrawerPaperClose)}
       style={{ height: '100vh' }}
       open={open}
       data-cy={dataCy}
     >
-      <div className={classes.toolbarHeader}>
+      <ToolbarHeader>
         <Logo
           transparent={matchColorToWindowOrigin() !== '#00ADEF'}
           displayLogoWithoutSubtitle
         />
-        <IconButton
-          onClick={handleDrawerClose}
-          className={classes.collapseIcon}
-        >
+        <CollapseIconButton onClick={handleDrawerClose}>
           <ChevronLeftIcon />
-        </IconButton>
-      </div>
+        </CollapseIconButton>
+      </ToolbarHeader>
       <Divider />
       <ToolbarScrollBox>
         <List>
@@ -196,7 +194,7 @@ export function Drawer({
           </ListItem>
         ))}
         {open && (
-          <div className={classes.version}>
+          <Version>
             <div>
               Backend Version:
               {backendVersion}
@@ -205,7 +203,7 @@ export function Drawer({
               Frontend Version:
               {frontendVersion}
             </div>
-          </div>
+          </Version>
         )}
       </ToolbarScrollBox>
       <AlertDialog
@@ -214,4 +212,4 @@ export function Drawer({
       />
     </DrawerMaterial>
   );
-}
+};
