@@ -1,26 +1,26 @@
-import { Box, Button } from '@material-ui/core';
-import { GetApp } from '@material-ui/icons';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '../../../../../hooks/useSnackBar';
+import { Box, Button } from "@material-ui/core";
+import { GetApp } from "@material-ui/icons";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { useSnackbar } from "../../../../../hooks/useSnackBar";
 import {
   Action,
   PaymentPlanBackgroundActionStatus,
   PaymentPlanQuery,
-  useExportXlsxPpListPerFspMutation,
-} from '../../../../../__generated__/graphql';
-import { LoadingButton } from '../../../../core/LoadingButton';
-import { CreateFollowUpPaymentPlan } from '../../../CreateFollowUpPaymentPlan';
-import { useProgramContext } from '../../../../../programContext';
-import { usePaymentPlanAction } from '../../../../../hooks/usePaymentPlanAction';
-import { SplitIntoPaymentLists } from '../SplitIntoPaymentLists';
+  useExportXlsxPpListPerFspMutation
+} from "../../../../../__generated__/graphql";
+import { LoadingButton } from "../../../../core/LoadingButton";
+import { CreateFollowUpPaymentPlan } from "../../../CreateFollowUpPaymentPlan";
+import { useProgramContext } from "../../../../../programContext";
+import { usePaymentPlanAction } from "../../../../../hooks/usePaymentPlanAction";
+import { SplitIntoPaymentLists } from "../SplitIntoPaymentLists";
 
 export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
   canExportXlsx: boolean;
   canSendToPaymentGateway: boolean;
   canSplit: boolean;
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanQuery["paymentPlan"];
 }
 
 export const AcceptedPaymentPlanHeaderButtons = ({
@@ -28,7 +28,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
   canExportXlsx,
   canSendToPaymentGateway,
   canSplit,
-  paymentPlan,
+  paymentPlan
 }: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
@@ -36,14 +36,14 @@ export const AcceptedPaymentPlanHeaderButtons = ({
 
   const [
     mutateExport,
-    { loading: loadingExport },
+    { loading: loadingExport }
   ] = useExportXlsxPpListPerFspMutation();
 
   const {
     mutatePaymentPlanAction: sendToPaymentGateway,
-    loading: LoadingSendToPaymentGateway,
+    loading: LoadingSendToPaymentGateway
   } = usePaymentPlanAction(Action.SendToPaymentGateway, paymentPlan.id, () =>
-    showMessage(t('Sending to Payment Gateway started')),
+    showMessage(t("Sending to Payment Gateway started"))
   );
 
   const shouldDisableExportXlsx =
@@ -55,7 +55,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
     !isActiveProgram;
 
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       <>
         {paymentPlan.canCreateFollowUp && (
           <Box p={2}>
@@ -63,41 +63,44 @@ export const AcceptedPaymentPlanHeaderButtons = ({
           </Box>
         )}
         <Box p={2}>
-          <SplitIntoPaymentLists paymentPlan={paymentPlan} canSplit={canSplit}/>
+          <SplitIntoPaymentLists
+            paymentPlan={paymentPlan}
+            canSplit={canSplit}
+          />
         </Box>
         {!paymentPlan.hasPaymentListExportFile && (
           <Box m={2}>
             <LoadingButton
               loading={loadingExport}
               disabled={shouldDisableExportXlsx}
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               startIcon={<GetApp />}
-              data-cy='button-export-xlsx'
+              data-cy="button-export-xlsx"
               onClick={async () => {
                 try {
                   await mutateExport({
                     variables: {
-                      paymentPlanId: paymentPlan.id,
-                    },
+                      paymentPlanId: paymentPlan.id
+                    }
                   });
-                  showMessage(t('Exporting XLSX started'));
+                  showMessage(t("Exporting XLSX started"));
                 } catch (e) {
                   e.graphQLErrors.map((x) => showMessage(x.message));
                 }
               }}
             >
-              {t('Export Xlsx')}
+              {t("Export Xlsx")}
             </LoadingButton>
           </Box>
         )}
         {paymentPlan.hasPaymentListExportFile && (
           <Box m={2}>
             <Button
-              color='primary'
-              component='a'
-              variant='contained'
-              data-cy='button-download-xlsx'
+              color="primary"
+              component="a"
+              variant="contained"
+              data-cy="button-download-xlsx"
               download
               href={`/api/download-payment-plan-payment-list/${paymentPlan.id}`}
               disabled={
@@ -105,20 +108,20 @@ export const AcceptedPaymentPlanHeaderButtons = ({
                 !canDownloadXlsx
               }
             >
-              {t('Download XLSX')}
+              {t("Download XLSX")}
             </Button>
           </Box>
         )}
         <Box m={2}>
           <Button
-            type='button'
-            color='primary'
-            variant='contained'
+            type="button"
+            color="primary"
+            variant="contained"
             onClick={() => sendToPaymentGateway()}
-            data-cy='button-send-to-payment-gateway'
+            data-cy="button-send-to-payment-gateway"
             disabled={!canSendToPaymentGateway || LoadingSendToPaymentGateway}
           >
-            {t('Send to FSP')}
+            {t("Send to FSP")}
           </Button>
         </Box>
       </>

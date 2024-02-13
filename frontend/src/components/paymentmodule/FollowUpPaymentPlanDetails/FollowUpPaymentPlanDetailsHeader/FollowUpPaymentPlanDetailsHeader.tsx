@@ -1,27 +1,23 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { Box } from "@material-ui/core";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import styled from "styled-components";
+import { PaymentPlanQuery } from "../../../../__generated__/graphql";
+import { hasPermissions, PERMISSIONS } from "../../../../config/permissions";
 import {
   paymentPlanBackgroundActionStatusToColor,
-  paymentPlanStatusToColor,
-} from '../../../../utils/utils';
-import {
-  FinancialServiceProviderCommunicationChannel,
-  PaymentPlanQuery,
-  PaymentPlanStatus
-} from '../../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
-import { StatusBox } from '../../../core/StatusBox';
-import { AcceptedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons';
-import { InApprovalPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons';
-import { InAuthorizationPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
-import { InReviewPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InReviewPaymentPlanHeaderButtons';
-import { LockedFspPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons';
-import { LockedPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons';
-import { OpenPaymentPlanHeaderButtons } from '../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons';
+  paymentPlanStatusToColor
+} from "../../../../utils/utils";
+import { BreadCrumbsItem } from "../../../core/BreadCrumbs";
+import { PageHeader } from "../../../core/PageHeader";
+import { StatusBox } from "../../../core/StatusBox";
+import { AcceptedPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons";
+import { InApprovalPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InApprovalPaymentPlanHeaderButtons";
+import { InAuthorizationPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InAuthorizationPaymentPlanHeaderButtons";
+import { InReviewPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/InReviewPaymentPlanHeaderButtons";
+import { LockedFspPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons";
+import { LockedPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons";
+import { OpenPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons";
 
 const StatusWrapper = styled.div`
   width: 140px;
@@ -31,20 +27,20 @@ const StatusWrapper = styled.div`
 interface FollowUpPaymentPlanDetailsHeaderProps {
   baseUrl: string;
   permissions: string[];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanQuery["paymentPlan"];
 }
 
 export const FollowUpPaymentPlanDetailsHeader = ({
   baseUrl,
   permissions,
-  paymentPlan,
+  paymentPlan
 }: FollowUpPaymentPlanDetailsHeaderProps): React.ReactElement => {
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
-    },
+      title: t("Payment Module"),
+      to: `/${baseUrl}/payment-module/`
+    }
   ];
 
   const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
@@ -53,34 +49,36 @@ export const FollowUpPaymentPlanDetailsHeader = ({
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canSendForApproval = hasPermissions(
     PERMISSIONS.PM_SEND_FOR_APPROVAL,
-    permissions,
+    permissions
   );
   const canApprove = hasPermissions(
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
-    permissions,
+    permissions
   );
   const canAuthorize = hasPermissions(
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-    permissions,
+    permissions
   );
   const canMarkAsReleased = hasPermissions(
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-    permissions,
+    permissions
   );
   const canDownloadXlsx = hasPermissions(
     PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP,
-    permissions,
+    permissions
   );
   const canExportXlsx = hasPermissions(
     PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
-    permissions,
+    permissions
   );
-  const canSendToPaymentGateway = hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) && paymentPlan.canSendToPaymentGateway;
+  const canSendToPaymentGateway =
+    hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
+    paymentPlan.canSendToPaymentGateway;
   const canSplit = hasPermissions(PERMISSIONS.PM_SPLIT, permissions); // TODO split button requirements
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
-    case 'OPEN':
+    case "OPEN":
       buttons = (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -90,7 +88,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'LOCKED':
+    case "LOCKED":
       buttons = (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -99,7 +97,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'LOCKED_FSP':
+    case "LOCKED_FSP":
       buttons = (
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -108,43 +106,43 @@ export const FollowUpPaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'IN_APPROVAL':
+    case "IN_APPROVAL":
       buttons = (
         <InApprovalPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
             PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
-            permissions,
+            permissions
           )}
           canApprove={canApprove}
         />
       );
       break;
-    case 'IN_AUTHORIZATION':
+    case "IN_AUTHORIZATION":
       buttons = (
         <InAuthorizationPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
             PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-            permissions,
+            permissions
           )}
           canAuthorize={canAuthorize}
         />
       );
       break;
-    case 'IN_REVIEW':
+    case "IN_REVIEW":
       buttons = (
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
             PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            permissions,
+            permissions
           )}
           canMarkAsReleased={canMarkAsReleased}
         />
       );
       break;
-    case 'ACCEPTED':
+    case "ACCEPTED":
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
@@ -155,7 +153,7 @@ export const FollowUpPaymentPlanDetailsHeader = ({
         />
       );
       break;
-    case 'FINISHED': // TODO: may create another one for that explicitly but good for now
+    case "FINISHED": // TODO: may create another one for that explicitly but good for now
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
@@ -173,10 +171,10 @@ export const FollowUpPaymentPlanDetailsHeader = ({
   return (
     <PageHeader
       title={
-        <Box display='flex' alignItems='center'>
-          {t('Follow-up Payment Plan')} ID:{' '}
+        <Box display="flex" alignItems="center">
+          {t("Follow-up Payment Plan")} ID:{" "}
           <Box ml={1}>
-            <span data-cy='pp-unicef-id'>{paymentPlan.unicefId}</span>
+            <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>
           <StatusWrapper>
             <StatusBox

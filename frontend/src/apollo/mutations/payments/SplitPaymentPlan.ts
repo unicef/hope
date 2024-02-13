@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from "apollo-boost";
 
 export const SPLIT_PAYMENT_PLAN = gql`
   mutation SplitPP(
