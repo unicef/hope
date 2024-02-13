@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 
 @pytest.mark.skip
 class TestAdminPanel:
-    def test_login_superuser(self, browser: Chrome, logout: Chrome, PageAdminPanel: AdminPanel) -> None:
+    def test_login_superuser(self, browser: Chrome, PageAdminPanel: AdminPanel) -> None:
         browser.get("http://localhost:8082/api/unicorn/")
         # ToDo: Use super user from fixtures:
         PageAdminPanel.getLogin().send_keys("")

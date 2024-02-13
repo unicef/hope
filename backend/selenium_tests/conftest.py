@@ -9,6 +9,8 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+
+from hct_mis_api.apps.account.permissions import Permissions
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from pytest_django.live_server_helper import LiveServer
@@ -44,7 +46,7 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
     return pytest.session
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="class")
 def driver() -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -56,9 +58,10 @@ def driver() -> Chrome:
 @pytest.fixture(autouse=True, scope="class")
 def browser(driver: Chrome) -> Chrome:
     driver.live_server = LiveServer("localhost")
-    driver.get(f"{driver.live_server.url}")
     yield driver
     driver.close()
+    pytest.CSRF = ""
+    pytest.SESSION_ID = ""
 
 
 @pytest.fixture
@@ -82,155 +85,23 @@ def pageProgrammeDetails(request: FixtureRequest, browser: Chrome) -> ProgrammeD
     yield ProgrammeDetails(browser)
 
 
+@pytest.fixture
+def change_super_user() -> User:
+    user = User.objects.filter(email="test@example.com").first()
+    user.partner = Partner.objects.get(name="UNHCR")
+    user.save()
+    return user
+
+
 @pytest.fixture(autouse=True)
-def create_super_user() -> None:
+def create_super_user() -> User:
     Partner.objects.get_or_create(name="TEST")
     Partner.objects.get_or_create(name="UNICEF")
     Partner.objects.get_or_create(name="UNHCR")
 
     partner = Partner.objects.get(name="UNICEF")
 
-    permission_list = [
-        "RDI_VIEW_LIST",
-        "RDI_VIEW_DETAILS",
-        "RDI_IMPORT_DATA",
-        "RDI_RERUN_DEDUPE",
-        "RDI_MERGE_IMPORT",
-        "RDI_REFUSE_IMPORT",
-        "POPULATION_VIEW_HOUSEHOLDS_LIST",
-        "POPULATION_VIEW_HOUSEHOLDS_DETAILS",
-        "POPULATION_VIEW_INDIVIDUALS_LIST",
-        "POPULATION_VIEW_INDIVIDUALS_DETAILS",
-        "PROGRAMME_VIEW_LIST_AND_DETAILS",
-        "PROGRAMME_MANAGEMENT_VIEW",
-        "PROGRAMME_DUPLICATE",
-        "PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS",
-        "PROGRAMME_CREATE",
-        "PROGRAMME_UPDATE",
-        "PROGRAMME_REMOVE",
-        "PROGRAMME_ACTIVATE",
-        "PROGRAMME_FINISH",
-        "TARGETING_VIEW_LIST",
-        "TARGETING_VIEW_DETAILS",
-        "TARGETING_CREATE",
-        "TARGETING_UPDATE",
-        "TARGETING_DUPLICATE",
-        "TARGETING_REMOVE",
-        "TARGETING_LOCK",
-        "TARGETING_UNLOCK",
-        "TARGETING_SEND",
-        "PAYMENT_VERIFICATION_VIEW_LIST",
-        "PAYMENT_VERIFICATION_VIEW_DETAILS",
-        "PAYMENT_VERIFICATION_CREATE",
-        "PAYMENT_VERIFICATION_UPDATE",
-        "PAYMENT_VERIFICATION_ACTIVATE",
-        "PAYMENT_VERIFICATION_DISCARD",
-        "PAYMENT_VERIFICATION_FINISH",
-        "PAYMENT_VERIFICATION_EXPORT",
-        "PAYMENT_VERIFICATION_IMPORT",
-        "PAYMENT_VERIFICATION_VERIFY",
-        "PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS",
-        "PAYMENT_VERIFICATION_DELETE",
-        "PAYMENT_VERIFICATION_MARK_AS_FAILED",
-        "USER_MANAGEMENT_VIEW_LIST",
-        "DASHBOARD_VIEW_COUNTRY",
-        "DASHBOARD_EXPORT",
-        "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE",
-        "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR",
-        "GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER",
-        "GRIEVANCES_VIEW_LIST_SENSITIVE",
-        "GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR",
-        "GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER",
-        "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE",
-        "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR",
-        "GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER",
-        "GRIEVANCES_VIEW_DETAILS_SENSITIVE",
-        "GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR",
-        "GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER",
-        "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS",
-        "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR",
-        "GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER",
-        "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS",
-        "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR",
-        "GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER",
-        "GRIEVANCES_CREATE",
-        "GRIEVANCES_UPDATE",
-        "GRIEVANCES_UPDATE_AS_CREATOR",
-        "GRIEVANCES_UPDATE_AS_OWNER",
-        "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE",
-        "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR",
-        "GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER",
-        "GRIEVANCES_ADD_NOTE",
-        "GRIEVANCES_ADD_NOTE_AS_CREATOR",
-        "GRIEVANCES_ADD_NOTE_AS_OWNER",
-        "GRIEVANCES_SET_IN_PROGRESS",
-        "GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR",
-        "GRIEVANCES_SET_IN_PROGRESS_AS_OWNER",
-        "GRIEVANCES_SET_ON_HOLD",
-        "GRIEVANCES_SET_ON_HOLD_AS_CREATOR",
-        "GRIEVANCES_SET_ON_HOLD_AS_OWNER",
-        "GRIEVANCES_SEND_FOR_APPROVAL",
-        "GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR",
-        "GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER",
-        "GRIEVANCES_SEND_BACK",
-        "GRIEVANCES_SEND_BACK_AS_CREATOR",
-        "GRIEVANCES_SEND_BACK_AS_OWNER",
-        "GRIEVANCES_APPROVE_DATA_CHANGE",
-        "GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR",
-        "GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER",
-        "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK",
-        "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR",
-        "GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER",
-        "GRIEVANCES_CLOSE_TICKET_FEEDBACK",
-        "GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR",
-        "GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER",
-        "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE",
-        "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR",
-        "GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER",
-        "GRIEVANCE_ASSIGN",
-        "REPORTING_EXPORT",
-        "ALL_VIEW_PII_DATA_ON_LISTS",
-        "ACTIVITY_LOG_VIEW",
-        "ACTIVITY_LOG_DOWNLOAD",
-        "PM_CREATE",
-        "PM_VIEW_DETAILS",
-        "PM_VIEW_LIST",
-        "PM_EXPORT_XLSX_FOR_FSP",
-        "PM_DOWNLOAD_XLSX_FOR_FSP",
-        "PM_SENDING_PAYMENT_PLAN_TO_FSP",
-        "PM_MARK_PAYMENT_AS_FAILED",
-        "PM_EXPORT_PDF_SUMMARY",
-        "PAYMENT_VERIFICATION_INVALID",
-        "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION",
-        "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_CREATOR",
-        "GRIEVANCES_APPROVE_PAYMENT_VERIFICATION_AS_OWNER",
-        "GRIEVANCE_DOCUMENTS_UPLOAD",
-        "PM_IMPORT_XLSX_WITH_ENTITLEMENTS",
-        "PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS",
-        "PM_ADMIN_FINANCIAL_SERVICE_PROVIDER_UPDATE",
-        "PM_LOCK_AND_UNLOCK",
-        "PM_LOCK_AND_UNLOCK_FSP",
-        "PM_EXCLUDE_BENEFICIARIES_FROM_FOLLOW_UP_PP",
-        "PM_SEND_FOR_APPROVAL",
-        "PM_ACCEPTANCE_PROCESS_APPROVE",
-        "PM_ACCEPTANCE_PROCESS_AUTHORIZE",
-        "PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW",
-        "PM_IMPORT_XLSX_WITH_RECONCILIATION",
-        "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_LIST",
-        "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS",
-        "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE",
-        "ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR",
-        "GRIEVANCES_FEEDBACK_VIEW_CREATE",
-        "GRIEVANCES_FEEDBACK_VIEW_LIST",
-        "GRIEVANCES_FEEDBACK_VIEW_DETAILS",
-        "GRIEVANCES_FEEDBACK_VIEW_UPDATE",
-        "ACCOUNTABILITY_SURVEY_VIEW_CREATE",
-        "ACCOUNTABILITY_SURVEY_VIEW_LIST",
-        "ACCOUNTABILITY_SURVEY_VIEW_DETAILS",
-        "GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE",
-        "CAN_ADD_BUSINESS_AREA_TO_PARTNER",
-        "GRIEVANCES_CROSS_AREA_FILTER",
-    ]
+    permission_list = [role.value for role in Permissions]
 
     role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
 
@@ -294,6 +165,7 @@ def create_super_user() -> None:
         }
     }
     partner.save()
+    return user
 
 
 # set up a hook to be able to check if a test has failed
@@ -317,7 +189,7 @@ def test_failed_check(request: FixtureRequest, browser: Chrome) -> None:
 
 # make a screenshot with a name of the test, date and time
 def screenshot(driver: Chrome, node_id: str) -> None:
-    sleep(1)
+    # sleep(1)
     if not os.path.exists("screenshot"):
         os.makedirs("screenshot")
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H:%M")}.png'.replace("/", "_").replace("::", "__")
