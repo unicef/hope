@@ -50,7 +50,6 @@ export const useSnackbar = (): {
         dataCy: get(options, 'dataCy'),
       },
     });
-    history.push(get(options, 'pathname', history.location.pathname));
   };
 
   return {
