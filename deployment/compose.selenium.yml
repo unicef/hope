@@ -9,7 +9,6 @@ volumes:
 services:
   selenium:
     stdin_open: true
-    image: unicef/hct-mis-backend
     environment:
       - REDIS_INSTANCE=redis:6379
       - PYTHONUNBUFFERED=1
@@ -25,10 +24,7 @@ services:
       - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@db:5432/erp_datahub
       - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@db:5432/rdi_datahub
       - USE_DUMMY_EXCHANGE_RATES=yes
-    build:
-      context: ./
-      dockerfile: docker/Dockerfile
-      target: dev
+    image: ${dev_backend_image}
     volumes:
       - ./backend/screenshot/:/code/screenshot/
       - backend-data:/data
@@ -49,11 +45,7 @@ services:
         condition: service_completed_successfully
 
   init_fe:
-    image: unicef/hct-mis-backend
-    build:
-      context: ./
-      dockerfile: docker/Dockerfile
-      target: dist
+    image: ${dist_backend_image}
     volumes:
       - backend-web-app:/web-app
     command: |
@@ -89,7 +81,7 @@ services:
     image: unicef/hct-elasticsearch
     container_name: elasticsearch
     build:
-      context: elasticsearch
+      context: ../elasticsearch
       dockerfile: Dockerfile
     environment:
       - node.name=es01

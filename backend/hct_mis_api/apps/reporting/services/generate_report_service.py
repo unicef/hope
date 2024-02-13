@@ -6,9 +6,26 @@ from typing import TYPE_CHECKING, List
 
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
+from django.contrib.postgres.fields import ArrayField
 from django.core.files import File
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import Count, DecimalField, Max, Min, Q, QuerySet, Sum
+from django.db import models
+from django.db.models import (
+    Case,
+    Count,
+    DateTimeField,
+    DecimalField,
+    F,
+    IntegerField,
+    Max,
+    Min,
+    Q,
+    QuerySet,
+    Sum,
+    Value,
+    When,
+)
+from django.db.models.functions import Coalesce, Concat, Greatest, Least
 from django.template.loader import render_to_string
 
 import openpyxl
@@ -337,45 +354,94 @@ class GenerateReportContentHelpers:
 
         date_to_time = datetime.fromordinal(report.date_to.toordinal())
         date_to_time += timedelta(days=1)
-        filter_vars = {
-            # "household__program": report.program # TODO Uncomment after add program to household
-            "household__paymentrecord__business_area": report.business_area,
-            "household__paymentrecord__delivery_date__gte": report.date_from,
-            "household__paymentrecord__delivery_date__lt": date_to_time,
-        }
+        filter_q = Q(
+            #  Q(household__program=report.program) & # TODO Uncomment after add program to household
+            Q(
+                Q(household__paymentrecord__business_area=report.business_area)
+                | Q(household__payment__business_area=report.business_area)
+            )
+            & Q(
+                Q(household__paymentrecord__delivery_date__gte=report.date_from)
+                | Q(household__payment__delivery_date__gte=report.date_from)
+            )
+            & Q(
+                Q(household__paymentrecord__delivery_date__lt=date_to_time)
+                | Q(household__payment__delivery_date__lt=date_to_time)
+            )
+        )
         if report.admin_area.all().exists():
-            filter_vars["household__admin_area__in"] = report.admin_area.all()
+            filter_q &= Q(household__admin_area__in=report.admin_area.all())
         if report.program:
-            filter_vars["household__paymentrecord__parent__program"] = report.program
+            filter_q &= Q(
+                Q(household__paymentrecord__parent__program=report.program)
+                | Q(household__payment__parent__program=report.program)
+            )
 
         return (
-            Individual.objects.filter(**filter_vars)
-            .annotate(first_delivery_date=Min("household__paymentrecord__delivery_date"))
-            .annotate(last_delivery_date=Max("household__paymentrecord__delivery_date"))
+            Individual.objects.filter(filter_q)
+            .annotate(first_delivery_date_paymentrecord=Min("household__paymentrecord__delivery_date"))
+            .annotate(first_delivery_date_payment=Min("household__payment__delivery_date"))
+            .annotate(
+                first_delivery_date=Least(
+                    F("first_delivery_date_paymentrecord"),
+                    F("first_delivery_date_payment"),
+                    output_field=DateTimeField(),
+                )
+            )
+            .annotate(last_delivery_date_paymentrecord=Max("household__paymentrecord__delivery_date"))
+            .annotate(last_delivery_date_payment=Max("household__payment__delivery_date"))
+            .annotate(
+                last_delivery_date=Greatest(
+                    F("last_delivery_date_paymentrecord"),
+                    F("last_delivery_date_payment"),
+                    output_field=DateTimeField(),
+                )
+            )
             .annotate(
                 payments_made=Count(
-                    "household__paymentrecord",
-                    filter=Q(household__paymentrecord__delivered_quantity__gte=0),
+                    Case(
+                        When(
+                            Q(household__paymentrecord__delivered_quantity__gte=0),
+                            then=F("household__paymentrecord__id"),
+                        ),
+                        When(
+                            Q(household__payment__delivered_quantity__gte=0),
+                            then=F("household__payment__id"),
+                        ),
+                        output_field=IntegerField(),
+                    )
                 )
             )
-            .annotate(payment_currency=ArrayAgg("household__paymentrecord__currency"))
             .annotate(
-                total_delivered_quantity_local=Sum(
-                    "household__paymentrecord__delivered_quantity", output_field=DecimalField()
+                payment_currency=ArrayAgg(
+                    Concat(
+                        "household__paymentrecord__currency",
+                        Value(" "),
+                        "household__payment__currency",
+                        output_field=ArrayField(models.CharField()),
+                    )
                 )
             )
             .annotate(
-                total_delivered_quantity_usd=Sum(
-                    "household__paymentrecord__delivered_quantity_usd", output_field=DecimalField()
+                total_delivered_quantity_local=Coalesce(
+                    Sum("household__paymentrecord__delivered_quantity"), Value(0), output_field=DecimalField()
                 )
+                + Coalesce(Sum("household__payment__delivered_quantity"), Value(0), output_field=DecimalField())
+            )
+            .annotate(
+                total_delivered_quantity_usd=Coalesce(
+                    Sum("household__paymentrecord__delivered_quantity_usd"), Value(0), output_field=DecimalField()
+                )
+                + Coalesce(Sum("household__payment__delivered_quantity_usd"), Value(0), output_field=DecimalField())
             )
             .order_by("household__id")
+            .distinct()
         )
 
     @classmethod
     def format_payments_for_individuals_row(cls, individual: Individual) -> tuple:
         return (
-            individual.household.id,
+            individual.household.unicef_id,
             individual.household.country_origin.name if individual.household.country_origin else "",
             individual.household.admin1.name if individual.household.admin1 else "",
             individual.household.admin1.p_code if individual.household.admin1 else "",
@@ -386,7 +452,7 @@ class GenerateReportContentHelpers:
             cls._format_date(individual.first_delivery_date),
             cls._format_date(individual.last_delivery_date),
             individual.payments_made,
-            ", ".join(individual.payment_currency),
+            " ".join(individual.payment_currency).strip().replace("  ", " ").replace(" ", ", "),
             individual.total_delivered_quantity_local,
             individual.total_delivered_quantity_usd or individual.total_delivered_quantity_local,
             individual.birth_date,
