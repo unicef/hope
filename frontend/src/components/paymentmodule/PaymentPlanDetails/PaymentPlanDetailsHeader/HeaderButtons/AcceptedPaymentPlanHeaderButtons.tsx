@@ -19,6 +19,7 @@ export interface AcceptedPaymentPlanHeaderButtonsProps {
   canDownloadXlsx: boolean;
   canExportXlsx: boolean;
   canSendToPaymentGateway: boolean;
+  canSplit: boolean;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
@@ -26,6 +27,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
   canDownloadXlsx,
   canExportXlsx,
   canSendToPaymentGateway,
+  canSplit,
   paymentPlan,
 }: AcceptedPaymentPlanHeaderButtonsProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -61,7 +63,7 @@ export const AcceptedPaymentPlanHeaderButtons = ({
           </Box>
         )}
         <Box p={2}>
-          <SplitIntoPaymentLists paymentPlan={paymentPlan} />
+          <SplitIntoPaymentLists paymentPlan={paymentPlan} canSplit={canSplit}/>
         </Box>
         {!paymentPlan.hasPaymentListExportFile && (
           <Box m={2}>

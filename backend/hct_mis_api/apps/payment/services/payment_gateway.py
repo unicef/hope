@@ -45,9 +45,12 @@ class PaymentInstructionStatus(Enum):
 class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyModelSerializer):
     remote_id = serializers.CharField(source="id")
     unicef_id = serializers.CharField(source="payment_plan.unicef_id")
-    fsp = serializers.CharField(source="financial_service_provider.payment_gateway_id")
+    fsp = serializers.SerializerMethodField()
     payload = serializers.SerializerMethodField()
     extra = serializers.SerializerMethodField()
+
+    def get_fsp(self, obj: Any) -> str:
+        return obj.financial_service_provider.payment_gateway_id
 
     def get_extra(self, obj: Any) -> Dict:
         return {
@@ -72,11 +75,6 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
 
 
 class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer):
-    fsp = serializers.CharField()
-
-    def get_fsp(self, obj: Any) -> str:
-        return obj.financial_service_provider.payment_gateway_id
-
     class Meta:
         model = PaymentPlanSplit
         fields = [
@@ -349,23 +347,30 @@ class PaymentGatewayService:
 
             _payment.status = matching_pg_payment.hope_status
             _payment.status_date = now()
+            update_fields = ["status", "status_date"]
 
             delivered_quantity = matching_pg_payment.extra_data.get("delivered_quantity", None)
-            try:
-                delivered_quantity = int(delivered_quantity) / 100
-                _payment.delivered_quantity = delivered_quantity
-                _payment.delivered_quantity_usd = get_quantity_in_usd(
-                    amount=Decimal(delivered_quantity),
-                    currency=_payment_plan.currency,
-                    exchange_rate=Decimal(exchange_rate),
-                    currency_exchange_date=_payment_plan.currency_exchange_date,
-                )
-            except (ValueError, TypeError):
-                logger.error(f"Invalid delivered_amount for Payment {_payment.id}: {delivered_quantity}")
-                _payment.delivered_quantity = None
-                _payment.delivered_quantity_usd = None
+            if _payment.status in [
+                Payment.STATUS_SUCCESS,
+                Payment.STATUS_DISTRIBUTION_SUCCESS,
+                Payment.STATUS_DISTRIBUTION_PARTIAL,
+            ]:
+                update_fields.extend(["delivered_quantity", "delivered_quantity_usd"])
+                try:
+                    delivered_quantity = int(delivered_quantity) / 100
+                    _payment.delivered_quantity = delivered_quantity
+                    _payment.delivered_quantity_usd = get_quantity_in_usd(
+                        amount=Decimal(delivered_quantity),
+                        currency=_payment_plan.currency,
+                        exchange_rate=Decimal(exchange_rate),
+                        currency_exchange_date=_payment_plan.currency_exchange_date,
+                    )
+                except (ValueError, TypeError):
+                    logger.error(f"Invalid delivered_amount for Payment {_payment.id}: {delivered_quantity}")
+                    _payment.delivered_quantity = None
+                    _payment.delivered_quantity_usd = None
 
-            _payment.save(update_fields=["status", "status_date", "delivered_quantity", "delivered_quantity_usd"])
+            _payment.save(update_fields=update_fields)
 
         payment_plans = PaymentPlan.objects.filter(
             Q(delivery_mechanisms__sent_to_payment_gateway=True) | Q(splits__sent_to_payment_gateway=True),

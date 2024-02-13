@@ -8,7 +8,7 @@ import {
   PaymentVerificationPlanSampling,
   PaymentVerificationPlanStatus,
   PaymentVerificationPlanVerificationChannel,
-} from '../../src/__generated__/graphql';
+} from "../../src/__generated__/graphql";
 
 export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   id:
@@ -128,6 +128,33 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
   importedFileName: '',
   totalEntitledQuantityUsd: 376,
   paymentsConflictsCount: 0,
+  canSendToPaymentGateway: false,
+  splitChoices: {
+        paymentParts: [
+          21,
+          10,
+          5,
+          2
+        ],
+        splitTypes: [
+          {
+            name: "By Admin Area 2",
+            value: "BY_ADMIN_AREA2",
+            __typename: "ChoiceObject"
+          },
+          {
+            name: "By Collector",
+            value: "BY_COLLECTOR",
+            __typename: "ChoiceObject"
+          },
+          {
+            name: "By Records",
+            value: "BY_RECORDS",
+            __typename: "ChoiceObject"
+          }
+        ],
+        __typename: "PaymentPlanSplitChoices"
+      },
   deliveryMechanisms: [
     {
       id:

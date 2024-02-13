@@ -2687,7 +2687,7 @@ type Mutations {
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
   chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
   assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
-  splitPaymentPlan(input: SplitPaymentPlanInput!): SplitPaymentPlanMutation
+  splitPaymentPlan(paymentParts: Int, paymentPlanId: ID!, splitType: String!): SplitPaymentPlanMutation
   exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
   exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
@@ -3125,7 +3125,6 @@ type PaymentPlanNode implements Node {
   exclusionReason: String!
   excludeHouseholdError: String!
   name: String
-  splits: [PaymentPlanSplitNode]
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   deliveryMechanisms: [DeliveryMechanismNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -3136,7 +3135,7 @@ type PaymentPlanNode implements Node {
   importedFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
-  splitChoices(paymentPlanId: ID!): [PaymentPlanSplitChoices]
+  splitChoices: PaymentPlanSplitChoices
   verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int, programId: String): PaymentVerificationPlanNodeConnection
   paymentVerificationSummary: PaymentVerificationSummaryNode
   bankReconciliationSuccess: Int
@@ -3164,19 +3163,8 @@ type PaymentPlanNodeEdge {
 }
 
 type PaymentPlanSplitChoices {
-  chunksRange: [Int]
+  paymentParts: [Int]
   splitTypes: [ChoiceObject]
-}
-
-type PaymentPlanSplitNode implements Node {
-  id: ID!
-  createdAt: DateTime!
-  updatedAt: DateTime!
-  paymentPlan: PaymentPlanNode!
-  splitType: String
-  chunksNo: Int
-  payments(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
-  sentToPaymentGateway: Boolean!
 }
 
 enum PaymentPlanStatus {
@@ -4276,20 +4264,8 @@ type SimpleApproveMutation {
   grievanceTicket: GrievanceTicketNode
 }
 
-input SplitPaymentPlanInput {
-  paymentPlanId: ID!
-  splitType: SplitType!
-  chunksNo: Int
-}
-
 type SplitPaymentPlanMutation {
   paymentPlan: PaymentPlanNode
-}
-
-enum SplitType {
-  BY_RECORDS
-  BY_COLLECTOR
-  BY_ADMIN_AREA2
 }
 
 type SteficonRuleNode implements Node {

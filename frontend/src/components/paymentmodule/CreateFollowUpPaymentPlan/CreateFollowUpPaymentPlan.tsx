@@ -14,10 +14,6 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import {
-  PaymentPlanQuery,
-  useCreateFollowUpPpMutation,
-} from '../../../__generated__/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { DialogContainer } from '../../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
@@ -33,6 +29,7 @@ import { GreyText } from '../../core/GreyText';
 import { LabelizedField } from '../../core/LabelizedField';
 import { LoadingButton } from '../../core/LoadingButton';
 import { useProgramContext } from "../../../programContext";
+import {PaymentPlanQuery, useCreateFollowUpPpMutation} from "../../../__generated__/graphql";
 
 export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];

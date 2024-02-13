@@ -461,18 +461,8 @@ class DeliveryMechanismNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class PaymentPlanSplitNode(DjangoObjectType):
-    split_type = graphene.String()
-    chunks_no = graphene.Int()
-
-    class Meta:
-        model = PaymentPlanSplit
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
 class PaymentPlanSplitChoices(graphene.ObjectType):
-    chunks_range = graphene.List(graphene.Int)
+    payment_parts = graphene.List(graphene.Int)
     split_types = graphene.List(ChoiceObject)
 
 
@@ -544,11 +534,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
-    splits = graphene.List(PaymentPlanSplitNode)
-    split_choices = graphene.List(
-        PaymentPlanSplitChoices,
-        payment_plan_id=graphene.ID(required=True),
-    )
+    split_choices = graphene.Field(PaymentPlanSplitChoices)
     verification_plans = DjangoPermissionFilterConnectionField(
         "hct_mis_api.apps.program.schema.PaymentVerificationPlanNode",  # type: ignore
         filterset_class=PaymentVerificationPlanFilter,
@@ -574,26 +560,10 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_verification_plans(self, info: Any) -> graphene.List:
-        return self.get_payment_verification_plans
+    def resolve_split_choices(self, info: Any, **kwargs: Any) -> Dict:
+        payments = self.eligible_payments
 
-    def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
-        return self.payment_items.filter(excluded=False, payment_plan_hard_conflicted=True).count()
-
-    def resolve_currency_name(self, info: Any) -> graphene.String:
-        return self.get_currency_display()
-
-    def resolve_delivery_mechanisms(self, info: Any) -> graphene.List:
-        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
-
-    def resolve_splits(self, info: Any) -> graphene.List:
-        return self.splits.all()
-
-    def resolve_split_choices(self, info: Any, input: Dict, **kwargs: Any) -> Dict:
-        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
-        payments = payment_plan.eligible_payments
-
-        def get_chunks_for_payment_plan(payments_count: int) -> List[int]:
+        def get_payment_parts(payments_count: int) -> List[int]:
             if payments_count < 2:
                 return []
             chunks = []
@@ -607,8 +577,20 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
         return {
             "split_types": to_choice_object(PaymentPlanSplit.SplitType.choices),
-            "chunks_range": get_chunks_for_payment_plan(payments.count()),
+            "payment_parts": get_payment_parts(payments.count()),
         }
+
+    def resolve_verification_plans(self, info: Any) -> graphene.List:
+        return self.get_payment_verification_plans
+
+    def resolve_payments_conflicts_count(self, info: Any) -> graphene.Int:
+        return self.payment_items.filter(excluded=False, payment_plan_hard_conflicted=True).count()
+
+    def resolve_currency_name(self, info: Any) -> graphene.String:
+        return self.get_currency_display()
+
+    def resolve_delivery_mechanisms(self, info: Any) -> graphene.List:
+        return DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=self).order_by("delivery_mechanism_order")
 
     def resolve_has_payment_list_export_file(self, info: Any) -> graphene.Boolean:
         return self.has_export_file

@@ -99,10 +99,7 @@
             "name": "SurveyNode"
           },
           {
-            "name": "PaymentPlanSplitNode"
-          },
-          {
-            "name": "PaymentNode"
+            "name": "DeliveryMechanismNode"
           },
           {
             "name": "FinancialServiceProviderNode"
@@ -114,7 +111,7 @@
             "name": "FinancialServiceProviderXlsxReportNode"
           },
           {
-            "name": "DeliveryMechanismNode"
+            "name": "PaymentNode"
           },
           {
             "name": "PaymentHouseholdSnapshotNode"

@@ -7,11 +7,6 @@ import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
-import {
-  FinancialServiceProviderCommunicationChannel,
-  PaymentPlanQuery,
-  PaymentPlanStatus
-} from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
 import { PageHeader } from '../../../core/PageHeader';
 import { StatusBox } from '../../../core/StatusBox';
@@ -22,6 +17,7 @@ import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymen
 import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
+import {PaymentPlanQuery} from "../../../../__generated__/graphql";
 
 const StatusWrapper = styled(Box)`
   width: 150px;
@@ -75,6 +71,7 @@ export const PaymentPlanDetailsHeader = ({
     permissions,
   );
   const canSendToPaymentGateway = hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) && paymentPlan.canSendToPaymentGateway;
+  const canSplit = hasPermissions(PERMISSIONS.PM_SPLIT, permissions); // TODO split button requirements
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -148,6 +145,7 @@ export const PaymentPlanDetailsHeader = ({
           canDownloadXlsx={canDownloadXlsx}
           canExportXlsx={canExportXlsx}
           canSendToPaymentGateway={canSendToPaymentGateway}
+          canSplit={canSplit}
           paymentPlan={paymentPlan}
         />
       );
@@ -157,7 +155,8 @@ export const PaymentPlanDetailsHeader = ({
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
           canExportXlsx={canExportXlsx}
-          canSendToPaymentGateway={canSendToPaymentGateway}
+          canSendToPaymentGateway={false}
+          canSplit={false}
           paymentPlan={paymentPlan}
         />
       );

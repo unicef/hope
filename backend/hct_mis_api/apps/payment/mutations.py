@@ -38,7 +38,6 @@ from hct_mis_api.apps.payment.inputs import (
     CreatePaymentPlanInput,
     CreatePaymentVerificationInput,
     EditPaymentVerificationInput,
-    SplitPaymentPlanInput,
     UpdatePaymentPlanInput,
 )
 from hct_mis_api.apps.payment.models import (
@@ -1238,13 +1237,17 @@ class SplitPaymentPlanMutation(PermissionMutation):
     payment_plan = graphene.Field(PaymentPlanNode)
 
     class Arguments:
-        input = SplitPaymentPlanInput(required=True)
+        payment_plan_id = graphene.ID(required=True)
+        split_type = graphene.String(required=True)
+        payment_parts = graphene.Int(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root: Any, info: Any, input: Dict, **kwargs: Any) -> "SplitPaymentPlanMutation":
-        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input.get("payment_plan_id")))
+    def mutate(
+        cls, root: Any, info: Any, payment_plan_id: str, split_type: str, payment_parts: Optional[int], **kwargs: Any
+    ) -> "SplitPaymentPlanMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PM_SPLIT, payment_plan.business_area)
 
         if payment_plan.delivery_mechanisms.count() > 1:
@@ -1261,18 +1264,15 @@ class SplitPaymentPlanMutation(PermissionMutation):
         if payment_plan.status != PaymentPlan.Status.ACCEPTED:
             raise GraphQLError("Payment plan must be accepted to make a split")
 
-        split_type = input["split_type"]
-        chunks_no = input.get("chunks_no", None)
-
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
-            if not chunks_no:
-                raise GraphQLError("Chunks number is required for split by records")
-            if chunks_no > PaymentPlanSplit.MAX_CHUNKS:
-                raise GraphQLError(f"Chunks number must be less than {PaymentPlanSplit.MAX_CHUNKS}")
+            if not payment_parts:
+                raise GraphQLError("Payment Parts number is required for split by records")
+            if payment_parts > PaymentPlanSplit.MAX_CHUNKS:
+                raise GraphQLError(f"Payment Parts number must be less than {PaymentPlanSplit.MAX_CHUNKS}")
 
         with transaction.atomic():
             payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
-            payment_plan_service.split(split_type, chunks_no)
+            payment_plan_service.split(split_type, payment_parts)
 
         return cls(payment_plan=payment_plan)
 

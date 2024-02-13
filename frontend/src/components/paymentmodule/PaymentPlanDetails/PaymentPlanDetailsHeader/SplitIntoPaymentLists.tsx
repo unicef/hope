@@ -11,56 +11,87 @@ import { Field, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
 import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
 import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
+import {useSnackbar} from "../../../../hooks/useSnackBar";
+import {PaymentPlanQuery, useSplitPpMutation} from "../../../../__generated__/graphql";
+import {LoadingButton} from "../../../core/LoadingButton";
+import {GRIEVANCE_TICKET_STATES} from "../../../../utils/constants";
 
 interface FormValues {
-  splitBy: string;
-  numberOfRecords: number;
+  splitType: string;
+  paymentParts: number;
 }
 
 const initialValues: FormValues = {
-  splitBy: '',
-  numberOfRecords: 0,
+  splitType: '',
+  paymentParts: 0,
 };
 
 const validationSchema = Yup.object().shape({
-  splitBy: Yup.string().required('Split By is required'),
-  numberOfRecords: Yup.number().when('splitBy', {
-    is: 'Number of Records',
-    then: Yup.number().required('Number of Records is required'),
+  splitType: Yup.string().required('Split Type is required'),
+  paymentParts: Yup.number().when('splitType', {
+    is: 'BY_RECORDS',
+    then: Yup.number().required('Payment Parts number is required'),
   }),
 });
 
 interface SplitIntoPaymentListsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
+  canSplit: boolean;
 }
+
 
 export const SplitIntoPaymentLists = ({
   paymentPlan,
+  canSplit,
 }: SplitIntoPaymentListsProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
+  const { splitTypes, paymentParts } = paymentPlan.splitChoices;
+  const paymentPartChoices = paymentParts.map((part) => ({
+    value: part,
+    name: part,
+  }));
+  const [mutate, { loading }] = useSplitPpMutation();
+  const { showMessage } = useSnackbar();
+
+  const handleSplit = async (values): Promise<void> => {
+    try {
+      const { errors } = await mutate({
+        variables: {
+          paymentPlanId: paymentPlan.id,
+          splitType: values.splitType,
+          paymentParts: values.paymentParts,
+        },
+      });
+      if (!errors) {
+        setDialogOpen(false);
+        showMessage(t('Split was successful!'));
+      }
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
+  };
 
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values) => {
-        console.log(values);
-        console.log(paymentPlan);
+      onSubmit={async (values) => {
+        await handleSplit(values);
       }}
     >
-      {({ values }) => (
+      {({ values , submitForm}) => (
         <Form>
           <Button
             variant='contained'
             color='primary'
             onClick={() => setDialogOpen(true)}
             endIcon={<ReorderIcon />}
+            disabled={!canSplit}
           >
             {t('Split')}
           </Button>
@@ -79,28 +110,18 @@ export const SplitIntoPaymentLists = ({
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <Field
-                      name='splitBy'
-                      label='Split By'
-                      choices={[
-                        { value: 'admin2', name: 'Admin Area 2' },
-                        { value: 'collector', name: 'Collector' },
-                        {
-                          value: 'numberOfRecords',
-                          name: 'Number of Records per Payment List',
-                        },
-                      ]}
+                      name='splitType'
+                      label='Split Type'
+                      choices={splitTypes}
                       component={FormikSelectField}
                     />
                   </Grid>
                   <Grid item xs={12}>
-                    {values.splitBy === 'numberOfRecords' && (
+                    {values.splitType === 'BY_RECORDS' && (
                       <Field
-                        name='numberOfRecords'
-                        label='Number of Records'
-                        choices={[
-                          { value: 10, name: '10' },
-                          { value: 20, name: '20' },
-                        ]}
+                        name='paymentParts'
+                        label='Payment Parts'
+                        choices={paymentPartChoices}
                         component={FormikSelectField}
                       />
                     )}
@@ -113,9 +134,15 @@ export const SplitIntoPaymentLists = ({
                 <Button onClick={() => setDialogOpen(false)}>
                   {t('Cancel')}
                 </Button>
-                <Button type='submit' color='primary' variant='contained'>
+                <LoadingButton
+                  loading={loading}
+                  color='primary'
+                  variant='contained'
+                  onClick={submitForm}
+                  data-cy='button-split'
+                >
                   {t('Split')}
-                </Button>
+                </LoadingButton>
               </DialogActions>
             </DialogFooter>
           </Dialog>

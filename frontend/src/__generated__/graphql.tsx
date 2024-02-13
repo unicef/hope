@@ -4193,7 +4193,9 @@ export type MutationsAssignFspToDeliveryMechanismArgs = {
 
 
 export type MutationsSplitPaymentPlanArgs = {
-  input: SplitPaymentPlanInput
+  paymentParts?: Maybe<Scalars['Int']>,
+  paymentPlanId: Scalars['ID'],
+  splitType: Scalars['String']
 };
 
 
@@ -4847,7 +4849,6 @@ export type PaymentPlanNode = Node & {
   exclusionReason: Scalars['String'],
   excludeHouseholdError: Scalars['String'],
   name?: Maybe<Scalars['String']>,
-  splits?: Maybe<Array<Maybe<PaymentPlanSplitNode>>>,
   followUps: PaymentPlanNodeConnection,
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
   paymentItems: PaymentNodeConnection,
@@ -4858,7 +4859,7 @@ export type PaymentPlanNode = Node & {
   importedFileName?: Maybe<Scalars['String']>,
   paymentsConflictsCount?: Maybe<Scalars['Int']>,
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>,
-  splitChoices?: Maybe<Array<Maybe<PaymentPlanSplitChoices>>>,
+  splitChoices?: Maybe<PaymentPlanSplitChoices>,
   verificationPlans?: Maybe<PaymentVerificationPlanNodeConnection>,
   paymentVerificationSummary?: Maybe<PaymentVerificationSummaryNode>,
   bankReconciliationSuccess?: Maybe<Scalars['Int']>,
@@ -4901,11 +4902,6 @@ export type PaymentPlanNodeApprovalProcessArgs = {
 };
 
 
-export type PaymentPlanNodeSplitChoicesArgs = {
-  paymentPlanId: Scalars['ID']
-};
-
-
 export type PaymentPlanNodeVerificationPlansArgs = {
   offset?: Maybe<Scalars['Int']>,
   before?: Maybe<Scalars['String']>,
@@ -4931,29 +4927,8 @@ export type PaymentPlanNodeEdge = {
 
 export type PaymentPlanSplitChoices = {
    __typename?: 'PaymentPlanSplitChoices',
-  chunksRange?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  paymentParts?: Maybe<Array<Maybe<Scalars['Int']>>>,
   splitTypes?: Maybe<Array<Maybe<ChoiceObject>>>,
-};
-
-export type PaymentPlanSplitNode = Node & {
-   __typename?: 'PaymentPlanSplitNode',
-  id: Scalars['ID'],
-  createdAt: Scalars['DateTime'],
-  updatedAt: Scalars['DateTime'],
-  paymentPlan: PaymentPlanNode,
-  splitType?: Maybe<Scalars['String']>,
-  chunksNo?: Maybe<Scalars['Int']>,
-  payments: PaymentNodeConnection,
-  sentToPaymentGateway: Scalars['Boolean'],
-};
-
-
-export type PaymentPlanSplitNodePaymentsArgs = {
-  offset?: Maybe<Scalars['Int']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 export enum PaymentPlanStatus {
@@ -7557,22 +7532,10 @@ export type SimpleApproveMutation = {
   grievanceTicket?: Maybe<GrievanceTicketNode>,
 };
 
-export type SplitPaymentPlanInput = {
-  paymentPlanId: Scalars['ID'],
-  splitType: SplitType,
-  chunksNo?: Maybe<Scalars['Int']>,
-};
-
 export type SplitPaymentPlanMutation = {
    __typename?: 'SplitPaymentPlanMutation',
   paymentPlan?: Maybe<PaymentPlanNode>,
 };
-
-export enum SplitType {
-  ByRecords = 'BY_RECORDS',
-  ByCollector = 'BY_COLLECTOR',
-  ByAdminArea2 = 'BY_ADMIN_AREA2'
-}
 
 export type SteficonRuleNode = Node & {
    __typename?: 'SteficonRuleNode',
@@ -10828,6 +10791,24 @@ export type RevertMarkPrAsFailedMutation = (
   )> }
 );
 
+export type SplitPpMutationVariables = {
+  paymentPlanId: Scalars['ID'],
+  splitType: Scalars['String'],
+  paymentParts: Scalars['Int']
+};
+
+
+export type SplitPpMutation = (
+  { __typename?: 'Mutations' }
+  & { splitPaymentPlan: Maybe<(
+    { __typename?: 'SplitPaymentPlanMutation' }
+    & { paymentPlan: Maybe<(
+      { __typename?: 'PaymentPlanNode' }
+      & Pick<PaymentPlanNode, 'id'>
+    )> }
+  )> }
+);
+
 export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables = {
   paymentVerificationId: Scalars['ID'],
   receivedAmount: Scalars['Decimal'],
@@ -12519,7 +12500,14 @@ export type PaymentPlanQuery = (
         { __typename?: 'FinancialServiceProviderNode' }
         & Pick<FinancialServiceProviderNode, 'id' | 'name' | 'communicationChannel'>
       )> }
-    )>>>, volumeByDeliveryMechanism: Maybe<Array<Maybe<(
+    )>>>, splitChoices: Maybe<(
+      { __typename?: 'PaymentPlanSplitChoices' }
+      & Pick<PaymentPlanSplitChoices, 'paymentParts'>
+      & { splitTypes: Maybe<Array<Maybe<(
+        { __typename?: 'ChoiceObject' }
+        & Pick<ChoiceObject, 'name' | 'value'>
+      )>>> }
+    )>, volumeByDeliveryMechanism: Maybe<Array<Maybe<(
       { __typename?: 'VolumeByDeliveryMechanismNode' }
       & Pick<VolumeByDeliveryMechanismNode, 'volume' | 'volumeUsd'>
       & { deliveryMechanism: Maybe<(
@@ -18672,6 +18660,59 @@ export function useRevertMarkPrAsFailedMutation(baseOptions?: ApolloReactHooks.M
 export type RevertMarkPrAsFailedMutationHookResult = ReturnType<typeof useRevertMarkPrAsFailedMutation>;
 export type RevertMarkPrAsFailedMutationResult = ApolloReactCommon.MutationResult<RevertMarkPrAsFailedMutation>;
 export type RevertMarkPrAsFailedMutationOptions = ApolloReactCommon.BaseMutationOptions<RevertMarkPrAsFailedMutation, RevertMarkPrAsFailedMutationVariables>;
+export const SplitPpDocument = gql`
+    mutation SplitPP($paymentPlanId: ID!, $splitType: String!, $paymentParts: Int!) {
+  splitPaymentPlan(paymentPlanId: $paymentPlanId, splitType: $splitType, paymentParts: $paymentParts) {
+    paymentPlan {
+      id
+    }
+  }
+}
+    `;
+export type SplitPpMutationFn = ApolloReactCommon.MutationFunction<SplitPpMutation, SplitPpMutationVariables>;
+export type SplitPpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<SplitPpMutation, SplitPpMutationVariables>, 'mutation'>;
+
+    export const SplitPpComponent = (props: SplitPpComponentProps) => (
+      <ApolloReactComponents.Mutation<SplitPpMutation, SplitPpMutationVariables> mutation={SplitPpDocument} {...props} />
+    );
+    
+export type SplitPpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<SplitPpMutation, SplitPpMutationVariables> & TChildProps;
+export function withSplitPp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SplitPpMutation,
+  SplitPpMutationVariables,
+  SplitPpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, SplitPpMutation, SplitPpMutationVariables, SplitPpProps<TChildProps>>(SplitPpDocument, {
+      alias: 'splitPp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSplitPpMutation__
+ *
+ * To run a mutation, you first call `useSplitPpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSplitPpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [splitPpMutation, { data, loading, error }] = useSplitPpMutation({
+ *   variables: {
+ *      paymentPlanId: // value for 'paymentPlanId'
+ *      splitType: // value for 'splitType'
+ *      paymentParts: // value for 'paymentParts'
+ *   },
+ * });
+ */
+export function useSplitPpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SplitPpMutation, SplitPpMutationVariables>) {
+        return ApolloReactHooks.useMutation<SplitPpMutation, SplitPpMutationVariables>(SplitPpDocument, baseOptions);
+      }
+export type SplitPpMutationHookResult = ReturnType<typeof useSplitPpMutation>;
+export type SplitPpMutationResult = ApolloReactCommon.MutationResult<SplitPpMutation>;
+export type SplitPpMutationOptions = ApolloReactCommon.BaseMutationOptions<SplitPpMutation, SplitPpMutationVariables>;
 export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
     mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, received: $received) {
@@ -23285,6 +23326,13 @@ export const PaymentPlanDocument = gql`
       }
     }
     canSendToPaymentGateway
+    splitChoices {
+      paymentParts
+      splitTypes {
+        name
+        value
+      }
+    }
     volumeByDeliveryMechanism {
       deliveryMechanism {
         id
@@ -28717,12 +28765,7 @@ export type ResolversTypes = {
   SurveyCategory: SurveyCategory,
   SurveySamplingType: SurveySamplingType,
   PaymentPlanCurrency: PaymentPlanCurrency,
-  PaymentPlanSplitNode: ResolverTypeWrapper<PaymentPlanSplitNode>,
-  PaymentNodeConnection: ResolverTypeWrapper<PaymentNodeConnection>,
-  PaymentNodeEdge: ResolverTypeWrapper<PaymentNodeEdge>,
-  PaymentNode: ResolverTypeWrapper<PaymentNode>,
-  PaymentStatus: PaymentStatus,
-  PaymentDeliveryType: PaymentDeliveryType,
+  DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
   FinancialServiceProviderNode: ResolverTypeWrapper<FinancialServiceProviderNode>,
   FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
   FinancialServiceProviderXlsxTemplateNodeConnection: ResolverTypeWrapper<FinancialServiceProviderXlsxTemplateNodeConnection>,
@@ -28735,10 +28778,14 @@ export type ResolversTypes = {
   FinancialServiceProviderXlsxReportNode: ResolverTypeWrapper<FinancialServiceProviderXlsxReportNode>,
   DeliveryMechanismNodeConnection: ResolverTypeWrapper<DeliveryMechanismNodeConnection>,
   DeliveryMechanismNodeEdge: ResolverTypeWrapper<DeliveryMechanismNodeEdge>,
-  DeliveryMechanismNode: ResolverTypeWrapper<DeliveryMechanismNode>,
-  DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
+  PaymentNodeConnection: ResolverTypeWrapper<PaymentNodeConnection>,
+  PaymentNodeEdge: ResolverTypeWrapper<PaymentNodeEdge>,
+  PaymentNode: ResolverTypeWrapper<PaymentNode>,
+  PaymentStatus: PaymentStatus,
+  PaymentDeliveryType: PaymentDeliveryType,
   PaymentHouseholdSnapshotNode: ResolverTypeWrapper<PaymentHouseholdSnapshotNode>,
   PaymentConflictDataNode: ResolverTypeWrapper<PaymentConflictDataNode>,
+  DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
   ApprovalProcessNodeConnection: ResolverTypeWrapper<ApprovalProcessNodeConnection>,
   ApprovalProcessNodeEdge: ResolverTypeWrapper<ApprovalProcessNodeEdge>,
   ApprovalProcessNode: ResolverTypeWrapper<ApprovalProcessNode>,
@@ -29038,8 +29085,6 @@ export type ResolversTypes = {
   AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
   FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
   AssignFspToDeliveryMechanismMutation: ResolverTypeWrapper<AssignFspToDeliveryMechanismMutation>,
-  SplitPaymentPlanInput: SplitPaymentPlanInput,
-  SplitType: SplitType,
   SplitPaymentPlanMutation: ResolverTypeWrapper<SplitPaymentPlanMutation>,
   ExportXLSXPaymentPlanPaymentListMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListMutation>,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ResolverTypeWrapper<ExportXlsxPaymentPlanPaymentListPerFspMutation>,
@@ -29235,12 +29280,7 @@ export type ResolversParentTypes = {
   SurveyCategory: SurveyCategory,
   SurveySamplingType: SurveySamplingType,
   PaymentPlanCurrency: PaymentPlanCurrency,
-  PaymentPlanSplitNode: PaymentPlanSplitNode,
-  PaymentNodeConnection: PaymentNodeConnection,
-  PaymentNodeEdge: PaymentNodeEdge,
-  PaymentNode: PaymentNode,
-  PaymentStatus: PaymentStatus,
-  PaymentDeliveryType: PaymentDeliveryType,
+  DeliveryMechanismNode: DeliveryMechanismNode,
   FinancialServiceProviderNode: FinancialServiceProviderNode,
   FinancialServiceProviderCommunicationChannel: FinancialServiceProviderCommunicationChannel,
   FinancialServiceProviderXlsxTemplateNodeConnection: FinancialServiceProviderXlsxTemplateNodeConnection,
@@ -29253,10 +29293,14 @@ export type ResolversParentTypes = {
   FinancialServiceProviderXlsxReportNode: FinancialServiceProviderXlsxReportNode,
   DeliveryMechanismNodeConnection: DeliveryMechanismNodeConnection,
   DeliveryMechanismNodeEdge: DeliveryMechanismNodeEdge,
-  DeliveryMechanismNode: DeliveryMechanismNode,
-  DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
+  PaymentNodeConnection: PaymentNodeConnection,
+  PaymentNodeEdge: PaymentNodeEdge,
+  PaymentNode: PaymentNode,
+  PaymentStatus: PaymentStatus,
+  PaymentDeliveryType: PaymentDeliveryType,
   PaymentHouseholdSnapshotNode: PaymentHouseholdSnapshotNode,
   PaymentConflictDataNode: PaymentConflictDataNode,
+  DeliveryMechanismPerPaymentPlanDeliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism,
   ApprovalProcessNodeConnection: ApprovalProcessNodeConnection,
   ApprovalProcessNodeEdge: ApprovalProcessNodeEdge,
   ApprovalProcessNode: ApprovalProcessNode,
@@ -29556,8 +29600,6 @@ export type ResolversParentTypes = {
   AssignFspToDeliveryMechanismInput: AssignFspToDeliveryMechanismInput,
   FSPToDeliveryMechanismMappingInput: FspToDeliveryMechanismMappingInput,
   AssignFspToDeliveryMechanismMutation: AssignFspToDeliveryMechanismMutation,
-  SplitPaymentPlanInput: SplitPaymentPlanInput,
-  SplitType: SplitType,
   SplitPaymentPlanMutation: SplitPaymentPlanMutation,
   ExportXLSXPaymentPlanPaymentListMutation: ExportXlsxPaymentPlanPaymentListMutation,
   ExportXLSXPaymentPlanPaymentListPerFSPMutation: ExportXlsxPaymentPlanPaymentListPerFspMutation,
@@ -31430,7 +31472,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   deletePaymentPlan?: Resolver<Maybe<ResolversTypes['DeletePaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsDeletePaymentPlanArgs, 'paymentPlanId'>>,
   chooseDeliveryMechanismsForPaymentPlan?: Resolver<Maybe<ResolversTypes['ChooseDeliveryMechanismsForPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsChooseDeliveryMechanismsForPaymentPlanArgs, 'input'>>,
   assignFspToDeliveryMechanism?: Resolver<Maybe<ResolversTypes['AssignFspToDeliveryMechanismMutation']>, ParentType, ContextType, RequireFields<MutationsAssignFspToDeliveryMechanismArgs, 'input'>>,
-  splitPaymentPlan?: Resolver<Maybe<ResolversTypes['SplitPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsSplitPaymentPlanArgs, 'input'>>,
+  splitPaymentPlan?: Resolver<Maybe<ResolversTypes['SplitPaymentPlanMutation']>, ParentType, ContextType, RequireFields<MutationsSplitPaymentPlanArgs, 'paymentPlanId' | 'splitType'>>,
   exportXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListArgs, 'paymentPlanId'>>,
   exportXlsxPaymentPlanPaymentListPerFsp?: Resolver<Maybe<ResolversTypes['ExportXLSXPaymentPlanPaymentListPerFSPMutation']>, ParentType, ContextType, RequireFields<MutationsExportXlsxPaymentPlanPaymentListPerFspArgs, 'paymentPlanId'>>,
   importXlsxPaymentPlanPaymentList?: Resolver<Maybe<ResolversTypes['ImportXLSXPaymentPlanPaymentListMutation']>, ParentType, ContextType, RequireFields<MutationsImportXlsxPaymentPlanPaymentListArgs, 'file' | 'paymentPlanId'>>,
@@ -31468,7 +31510,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'HouseholdNode' | 'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserBusinessAreaNode' | 'DataCollectingTypeNode' | 'ProgramNode' | 'RegistrationDataImportNode' | 'PaymentPlanNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'SurveyNode' | 'PaymentPlanSplitNode' | 'PaymentNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'DeliveryMechanismNode' | 'PaymentHouseholdSnapshotNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'GrievanceDocumentNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'CommunicationMessageRecipientMapNode' | 'RecipientNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'CommunicationMessageNode' | 'UserNode' | 'IndividualIdentityNode' | 'IndividualNode' | 'HouseholdNode' | 'AreaNode' | 'AreaTypeNode' | 'GrievanceTicketNode' | 'UserBusinessAreaNode' | 'DataCollectingTypeNode' | 'ProgramNode' | 'RegistrationDataImportNode' | 'PaymentPlanNode' | 'TargetPopulationNode' | 'RuleCommitNode' | 'SteficonRuleNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ServiceProviderNode' | 'PaymentVerificationPlanNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'PaymentVerificationSummaryNode' | 'TicketComplaintDetailsNode' | 'TicketSensitiveDetailsNode' | 'PaymentVerificationLogEntryNode' | 'SurveyNode' | 'DeliveryMechanismNode' | 'FinancialServiceProviderNode' | 'FinancialServiceProviderXlsxTemplateNode' | 'FinancialServiceProviderXlsxReportNode' | 'PaymentNode' | 'PaymentHouseholdSnapshotNode' | 'ApprovalProcessNode' | 'VolumeByDeliveryMechanismNode' | 'ReportNode' | 'FeedbackNode' | 'FeedbackMessageNode' | 'TicketNoteNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketDeleteHouseholdDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'TicketPositiveFeedbackDetailsNode' | 'TicketNegativeFeedbackDetailsNode' | 'TicketReferralDetailsNode' | 'GrievanceDocumentNode' | 'DocumentNode' | 'BankAccountInfoNode' | 'CommunicationMessageRecipientMapNode' | 'RecipientNode' | 'LogEntryNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'KoboImportDataNode' | 'ImportedDocumentNode' | 'ImportedIndividualIdentityNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -31665,7 +31707,6 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   excludeHouseholdError?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  splits?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentPlanSplitNode']>>>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, PaymentPlanNodeFollowUpsArgs>,
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanNodePaymentItemsArgs>,
@@ -31676,7 +31717,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   importedFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>,
-  splitChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['PaymentPlanSplitChoices']>>>, ParentType, ContextType, RequireFields<PaymentPlanNodeSplitChoicesArgs, 'paymentPlanId'>>,
+  splitChoices?: Resolver<Maybe<ResolversTypes['PaymentPlanSplitChoices']>, ParentType, ContextType>,
   verificationPlans?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, PaymentPlanNodeVerificationPlansArgs>,
   paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationSummaryNode']>, ParentType, ContextType>,
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -31704,19 +31745,8 @@ export type PaymentPlanNodeEdgeResolvers<ContextType = any, ParentType extends R
 };
 
 export type PaymentPlanSplitChoicesResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanSplitChoices'] = ResolversParentTypes['PaymentPlanSplitChoices']> = {
-  chunksRange?: Resolver<Maybe<Array<Maybe<ResolversTypes['Int']>>>, ParentType, ContextType>,
+  paymentParts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Int']>>>, ParentType, ContextType>,
   splitTypes?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-};
-
-export type PaymentPlanSplitNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanSplitNode'] = ResolversParentTypes['PaymentPlanSplitNode']> = {
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  paymentPlan?: Resolver<ResolversTypes['PaymentPlanNode'], ParentType, ContextType>,
-  splitType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  chunksNo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  payments?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanSplitNodePaymentsArgs>,
-  sentToPaymentGateway?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
 };
 
 export type PaymentRecordAndPaymentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordAndPaymentNode'] = ResolversParentTypes['PaymentRecordAndPaymentNode']> = {
@@ -33495,7 +33525,6 @@ export type Resolvers<ContextType = any> = {
   PaymentPlanNodeConnection?: PaymentPlanNodeConnectionResolvers<ContextType>,
   PaymentPlanNodeEdge?: PaymentPlanNodeEdgeResolvers<ContextType>,
   PaymentPlanSplitChoices?: PaymentPlanSplitChoicesResolvers<ContextType>,
-  PaymentPlanSplitNode?: PaymentPlanSplitNodeResolvers<ContextType>,
   PaymentRecordAndPaymentNode?: PaymentRecordAndPaymentNodeResolvers<ContextType>,
   PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
   PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,
