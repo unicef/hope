@@ -249,7 +249,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             self._prepare_birth_certificate(individual_data_dict, imported_individual)
         household.size = len(individuals_to_create) + 1
         household.head_of_household = head_of_household
-        household.kobo_asset_id = record.source_id
+        household.detail_id = record.source_id
         household.save()
 
         record.mark_as_imported()
