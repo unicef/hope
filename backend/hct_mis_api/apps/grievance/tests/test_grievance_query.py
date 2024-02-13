@@ -394,10 +394,9 @@ class TestGrievanceQuery(APITestCase):
             ("without_permission", []),
         ]
     )
-    @skip(reason="Unstable test")
     def test_grievance_query_all(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area, self.program)
-
+        cache.clear()
         self.snapshot_graphql_request(
             request_string=self.ALL_GRIEVANCE_QUERY,
             context={
