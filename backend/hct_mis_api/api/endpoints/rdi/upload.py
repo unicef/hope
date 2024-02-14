@@ -29,6 +29,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     ROLE_PRIMARY,
 )
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
@@ -200,6 +201,9 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
 class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     households = HouseholdSerializer(many=True, required=True)
+    program = serializers.SlugRelatedField(
+        slug_field="id", required=True, queryset=Program.objects.all(), write_only=True
+    )
 
     class Meta:
         model = RegistrationDataImportDatahub
@@ -218,6 +222,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
     def create(self, validated_data: Dict) -> Dict:
         created_by = validated_data.pop("user")
         households = validated_data.pop("households")
+        program = validated_data.pop("program")
 
         rdi_datahub = RegistrationDataImportDatahub.objects.create(
             **validated_data, business_area_slug=self.business_area.slug
@@ -231,6 +236,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
             number_of_households=info.households,
             datahub_id=str(rdi_datahub.pk),
             business_area=self.business_area,
+            program=program
         )
         rdi_datahub.hct_id = rdi_mis.id
         rdi_datahub.save()
