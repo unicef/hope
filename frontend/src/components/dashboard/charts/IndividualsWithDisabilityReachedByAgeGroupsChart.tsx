@@ -1,96 +1,97 @@
 import * as React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { formatNumber, formatThousands, getPercentage } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
+import {
+  CategoryScaleOptions,
+  ChartOptions,
+  LinearScaleOptions,
+} from 'chart.js';
 
 interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
   data: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];
 }
 
-export function IndividualsWithDisabilityReachedByAgeGroupsChart({
+export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
   data,
-}: IndividualsWithDisabilityReachedByAgeGroupsChartProps): React.ReactElement {
+}: IndividualsWithDisabilityReachedByAgeGroupsChartProps): React.ReactElement => {
   if (!data) return null;
 
   const chartData = {
     labels: data.labels,
     datasets: [
       {
-        barPercentage: 0.4,
         label: data.datasets[0]?.label,
         backgroundColor: '#FFAA1D',
         data: [...data.datasets[0]?.data],
-        stack: 2,
       },
       {
-        barPercentage: 0.4,
         label: data.datasets[1]?.label,
         backgroundColor: '#C3D1D8',
         data: [...data.datasets[1]?.data],
-        stack: 2,
       },
     ],
   };
 
   const options = {
-    legend: {
-      labels: {
-        padding: 40,
-      },
-    },
-    tooltips: {
-      mode: 'point',
-      callbacks: {
-        label: (tooltipItem, tooltipData) =>
-          ` ${
-            tooltipData.datasets[tooltipItem.datasetIndex].label
-          }: ${formatNumber(tooltipItem.xLabel)} (${getPercentage(
-            tooltipItem.xLabel,
-            data.datasets[2].data[tooltipItem.index],
-          )})`,
-      },
-    },
+    indexAxis: 'y',
     scales: {
-      xAxes: [
-        {
-          position: 'top',
-          ticks: {
-            beginAtZero: true,
-            callback: formatThousands,
-            precision: 0,
-            suggestedMax: Math.max(...data.datasets[2].data) + 10,
-          },
+      x: {
+        type: 'linear',
+        position: 'top',
+        min: 0,
+        max: Math.max(...data.datasets[2].data) + 10,
+        ticks: {
+          callback: formatThousands,
+          precision: 0,
         },
-      ],
-      yAxes: [
-        {
-          position: 'left',
-          gridLines: {
-            display: false,
-          },
+        grid: {
+          display: false,
         },
-      ],
+      } as any,
+      y: {
+        type: 'category',
+        position: 'left',
+        grid: {
+          display: false,
+        },
+      } as any,
     },
     plugins: {
       datalabels: {
         align: 'end',
         anchor: 'end',
-        formatter: (value, { datasetIndex, dataIndex }) => {
+        formatter: (_, context) => {
+          const dataIndex = context.dataIndex;
+          const datasetIndex = context.datasetIndex;
           if (datasetIndex === 1 && data.datasets[2].data[dataIndex]) {
             return formatNumber(data.datasets[2].data[dataIndex]);
           }
           return null;
         },
       },
+      legend: {
+        labels: {
+          padding: 40,
+        },
+      },
+      tooltip: {
+        mode: 'point',
+        callbacks: {
+          label: (context) => {
+            const tooltipItem = context.parsed;
+            const tooltipData = context.chart.data;
+            return ` ${
+              tooltipData.datasets[context.datasetIndex].label
+            }: ${formatNumber(tooltipItem.x)} (${getPercentage(
+              tooltipItem.x,
+              data.datasets[2].data[context.dataIndex],
+            )})`;
+          },
+        },
+      },
     },
-  };
-
-  return (
-    <HorizontalBar
-      data={chartData}
-      options={options}
-      plugins={[ChartDataLabels]}
-    />
-  );
-}
+  } as any;
+  return <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />;
+};

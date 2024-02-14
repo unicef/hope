@@ -10,7 +10,11 @@ import { LabelizedField } from '@core/LabelizedField';
 import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 import { DocumentationField } from './DocumentationField';
 
-const DisabledDiv = styled.div`
+interface DisabledDivProps {
+  disabled: boolean;
+}
+
+const DisabledDiv = styled.div<DisabledDivProps>`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
 `;
 

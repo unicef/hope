@@ -3,7 +3,11 @@ import styled from 'styled-components';
 import { Tooltip, TooltipProps } from '@mui/material';
 import WarningIcon from '@mui/icons-material/Warning';
 
-const StyledWarning = styled(WarningIcon)`
+interface StyledWarningProps {
+  confirmed: boolean;
+}
+
+const StyledWarning = styled(WarningIcon)<StyledWarningProps>`
   color: ${({ theme, confirmed }) =>
     confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
@@ -21,7 +25,7 @@ export function WarningTooltip({
 }: WarningTooltipProps): React.ReactElement {
   return (
     <Tooltip onClick={handleClick} title={message}>
-      <StyledWarning confirmed={confirmed ? 1 : 0} />
+      <StyledWarning confirmed={confirmed} />
     </Tooltip>
   );
 }

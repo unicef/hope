@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
 import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
 import { createHandleApplyFilterChange } from '@utils/utils';

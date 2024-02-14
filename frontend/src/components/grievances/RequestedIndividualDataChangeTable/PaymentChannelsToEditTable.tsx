@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { GrievanceTicketQuery } from '@generated/graphql';
 import { TableTitle } from '@core/TableTitle';
-import { handleSelected } from '@utils/helpers';
+import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
   color: #28cb15;

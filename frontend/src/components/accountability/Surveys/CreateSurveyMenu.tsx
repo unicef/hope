@@ -1,47 +1,28 @@
+import { styled } from '@mui/system';
+import { Menu, MenuItem, Button, Tooltip, ListItemText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import ListItemText from '@mui/material/ListItemText';
-import Menu, { MenuProps } from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import { withStyles } from '@mui/material/styles';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Tooltip } from '@mui/material';
 import { SurveyCategory } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
 
-const StyledMenu = withStyles({
-  paper: {
+const StyledMenu = styled(Menu)(({ theme }) => ({
+  '.MuiPaper-root': {
     border: '1px solid #d3d4d5',
   },
-})((props: MenuProps) => (
-  <Menu
-    elevation={0}
-    getContentAnchorEl={null}
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: 'center',
-    }}
-    transformOrigin={{
-      vertical: 'top',
-      horizontal: 'center',
-    }}
-    {...props}
-  />
-));
+}));
 
-const StyledMenuItem = withStyles((theme) => ({
-  root: {
-    '&:focus': {
-      backgroundColor: theme.palette.primary.main,
-      '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-        color: theme.palette.common.white,
-      },
+const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
+  '&:focus': {
+    backgroundColor: theme.palette.primary.main,
+    '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+      color: theme.palette.common.white,
     },
   },
-}))(MenuItem);
+}));
 
 export function CreateSurveyMenu(): React.ReactElement {
   const { t } = useTranslation();

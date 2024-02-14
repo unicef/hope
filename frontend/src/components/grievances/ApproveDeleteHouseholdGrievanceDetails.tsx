@@ -51,14 +51,18 @@ export function ApproveDeleteHouseholdGrievanceDetails({
     ticket.deleteHouseholdTicketDetails;
 
   const validationSchema = Yup.object().shape({
-    reasonHhId: Yup.string().when('withdrawReason', (withdrawReasonValue) => {
-      if (withdrawReasonValue === 'duplicate' && !approveStatus) {
-        return Yup.string()
-          .required('Household Unicef Id is required')
-          .max(15, 'Too long');
-      }
-      return Yup.string();
-    }),
+    reasonHhId: Yup.string().when(
+      'withdrawReason',
+      (withdrawReasonValue: any) => {
+        const value = String(withdrawReasonValue);
+        if (value === 'duplicate' && !approveStatus) {
+          return Yup.string()
+            .required('Household Unicef Id is required')
+            .max(15, 'Too long');
+        }
+        return Yup.string();
+      },
+    ),
   });
 
   const matchDialogTitle = (): string => {

@@ -2,7 +2,11 @@ import * as React from 'react';
 import styled from 'styled-components';
 import { CircularProgress } from '@mui/material';
 
-const Container = styled.div`
+interface ContainerProps {
+  absolute?: boolean;
+}
+
+const Container = styled.div<ContainerProps>`
   width: 100%;
   height: 100%;
   display: flex;

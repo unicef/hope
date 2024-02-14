@@ -74,7 +74,7 @@ export function AddIndividualGrievanceDetails({
         <Grid key={key} item xs={6}>
           <LabelizedField
             label={key === 'sex' ? t('GENDER') : key.replace(/_/g, ' ')}
-            value={textValue}
+            value={<span>{textValue as React.ReactNode}</span>}
           />
         </Grid>
       );

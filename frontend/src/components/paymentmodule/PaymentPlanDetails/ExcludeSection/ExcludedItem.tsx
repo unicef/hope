@@ -11,7 +11,11 @@ const StyledBox = styled(Box)`
   color: '#404040';
 `;
 
-const IdDiv = styled.div`
+interface IdDivProps {
+  isDeleted: boolean;
+}
+
+const IdDiv = styled.div<IdDivProps>`
   text-decoration: ${({ isDeleted }) => (isDeleted ? 'line-through' : 'none')};
 `;
 interface ExcludedItemProps {

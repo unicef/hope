@@ -1,4 +1,4 @@
-import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AutoLogout } from './components/core/AutoLogout';
 import { SentryRoute } from './components/core/SentryRoute';
 import { DefaultRoute } from './containers/DefaultRoute';
@@ -19,59 +19,45 @@ export const App: React.FC = () => (
   <Providers>
     <AutoLogout />
     <Router>
-      <Switch>
-        <SentryRoute path="/login">
-          <LoginPage />
-        </SentryRoute>
-        <SentryRoute path="/maintenance">
-          <MaintenancePage />
-        </SentryRoute>
-        <SentryRoute path="/404">
-          <PageNotFound />
-        </SentryRoute>
-        <SentryRoute path="/error">
-          <SomethingWentWrong />
-        </SentryRoute>
-        <SentryRoute path="/access-denied">
-          <AccessDenied />
-        </SentryRoute>
-        <SentryRoute path="/sentry-check">
-          <button
-            type="button"
-            onClick={() => {
-              throw new Error('Am I working?');
-            }}
-          >
-            Throw new error
-          </button>
-        </SentryRoute>
-        <ProtectedRoute
-          path="/sanction-list"
-          component={SanctionList}
-          location={window.location}
+      <Routes>
+        <SentryRoute path="/login" element={<LoginPage />} />
+        <SentryRoute path="/maintenance" element={<MaintenancePage />} />
+        <SentryRoute path="/404" element={<PageNotFound />} />
+        <SentryRoute path="/error" element={<SomethingWentWrong />} />
+        <SentryRoute path="/access-denied" element={<AccessDenied />} />
+        <SentryRoute
+          path="/sentry-check"
+          element={
+            <button
+              type="button"
+              onClick={() => {
+                throw new Error('Am I working?');
+              }}
+            >
+              Throw new error
+            </button>
+          }
         />
-        <SentryRoute path="/accounts/profile/">
-          <ProfilePage />
-        </SentryRoute>
-        <Route path="/:businessArea/programs/all">
-          <BaseHomeRouter>
-            <AllProgramsRoutesSwitch />
-          </BaseHomeRouter>
-        </Route>
-        <Route path="/:businessArea/programs/:programId">
-          <BaseHomeRouter>
-            <SelectedProgramRoutesSwitch />
-          </BaseHomeRouter>
-          <ProtectedRoute
-            path="/sanction-list"
-            component={SanctionList}
-            location={window.location}
-          />
-        </Route>
-        <Route path="/">
-          <DefaultRoute />
-        </Route>
-      </Switch>
+        <ProtectedRoute path="/sanction-list" element={<SanctionList />} />
+        <SentryRoute path="/accounts/profile/" element={<ProfilePage />} />
+        <Route
+          path="/:businessArea/programs/all"
+          element={
+            <BaseHomeRouter>
+              <AllProgramsRoutesSwitch />
+            </BaseHomeRouter>
+          }
+        />
+        <Route
+          path="/:businessArea/programs/:programId"
+          element={
+            <BaseHomeRouter>
+              <SelectedProgramRoutesSwitch />
+            </BaseHomeRouter>
+          }
+        />
+        <Route path="/" element={<DefaultRoute />} />
+      </Routes>
     </Router>
   </Providers>
 );

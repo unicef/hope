@@ -7,7 +7,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { DocumentField } from '../DocumentField';
-import { removeItemById } from '@utils/helpers';
+import { removeItemById } from '../utils/helpers';
 
 export interface NewDocumentFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;

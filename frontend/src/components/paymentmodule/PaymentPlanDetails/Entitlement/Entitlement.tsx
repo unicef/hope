@@ -168,11 +168,17 @@ export function Entitlement({
                 <Select
                   disabled={shouldDisableEntitlementSelect}
                   MenuProps={{
-                    getContentAnchorEl: null,
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
                   }}
                   value={steficonRuleValue}
                   data-cy="input-entitlement-formula"
-                  labelWidth={180}
                   onChange={(event) => setSteficonRuleValue(event.target.value)}
                 >
                   {steficonData.allSteficonRules.edges.map((each, index) => (

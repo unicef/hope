@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import * as React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import { AllChartsQuery } from '@generated/graphql';
 
 interface PaymentVerificationChartProps {
@@ -67,50 +67,48 @@ export function PaymentVerificationChart({
         data: [...datasets.PENDING],
       },
     ],
-  };
+  } as any;
 
   const options = {
+    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
-    legend: {
-      position: 'bottom',
-      labels: {
-        padding: 30,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 30,
+        },
       },
-    },
-    tooltips: {
-      mode: 'point',
-      callbacks: {
-        title: () => '',
-        label: (tooltipItem, dataArgs) =>
-          dataArgs.datasets[tooltipItem.datasetIndex].label,
+      tooltip: {
+        mode: 'point',
+        callbacks: {
+          title: () => '',
+          label: (context) => context.dataset.label,
+        },
       },
     },
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            callback: () => '',
-          },
-          gridLines: {
-            display: false,
-          },
+      x: {
+        ticks: {
+          callback: () => '',
         },
-      ],
-      yAxes: [
-        {
-          gridLines: {
-            display: false,
-          },
-          position: 'right',
+        grid: {
+          display: false,
         },
-      ],
+      },
+      y: {
+        grid: {
+          display: false,
+        },
+        position: 'right',
+      },
     },
-  };
+  } as any;
 
   return (
     <Box height="150px">
-      <HorizontalBar data={chartData} options={options} />
+      <Bar data={chartData} options={options} />
     </Box>
   );
 }

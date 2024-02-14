@@ -18,7 +18,11 @@ const Table = styled.div`
   flex-direction: column;
 `;
 
-const HeadingCell = styled.div`
+interface HeadingCellProps {
+  weight?: number;
+}
+
+const HeadingCell = styled.div<HeadingCellProps>`
   display: flex;
   flex: ${({ weight }) => weight || 1};
   padding: 16px;
