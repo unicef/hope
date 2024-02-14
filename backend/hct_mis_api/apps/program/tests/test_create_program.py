@@ -200,7 +200,7 @@ class TestCreateProgram(APITestCase):
         self.assertEqual(program.programme_code, "ABC2")
 
     def test_programme_code_should_be_unique_among_the_same_business_area(self) -> None:
-        ProgramFactory(programme_code="ABC2")
+        ProgramFactory(programme_code="ABC2", business_area=self.business_area)
 
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
         self.program_data["programData"]["programmeCode"] = "ABC2"
@@ -260,3 +260,27 @@ class TestCreateProgram(APITestCase):
         self.assertIsNotNone(program.programme_code)
         self.assertEqual(len(program.programme_code), 4)
         self.assertEqual(program.programme_code, "ABC2")
+
+    def test_create_program_with_programme_code_not_alphanumeric(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["programmeCode"] = "A@C2"
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+    def test_create_program_with_programme_code_less_than_4_chars(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["programmeCode"] = "Ab2"
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
+
+    def test_create_program_with_programme_code_greater_than_4_chars(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.program_data["programData"]["programmeCode"] = "AbCd2"
+
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
+        )
