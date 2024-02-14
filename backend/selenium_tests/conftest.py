@@ -11,6 +11,7 @@ from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 
 from hct_mis_api.apps.account.permissions import Permissions
+from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from pytest_django.live_server_helper import LiveServer
@@ -46,7 +47,7 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
     return pytest.session
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture
 def driver() -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -55,7 +56,7 @@ def driver() -> Chrome:
     return webdriver.Chrome(options=chrome_options)
 
 
-@pytest.fixture(autouse=True, scope="class")
+@pytest.fixture(autouse=True)
 def browser(driver: Chrome) -> Chrome:
     driver.live_server = LiveServer("localhost")
     yield driver
@@ -83,6 +84,11 @@ def pageProgrammeManagement(request: FixtureRequest, browser: Chrome) -> Program
 @pytest.fixture
 def pageProgrammeDetails(request: FixtureRequest, browser: Chrome) -> ProgrammeDetails:
     yield ProgrammeDetails(browser)
+
+
+@pytest.fixture
+def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
+    yield AdminPanel(browser)
 
 
 @pytest.fixture
