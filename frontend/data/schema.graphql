@@ -4387,6 +4387,7 @@ type TargetPopulationNode implements Node {
   totalFamilySize: Int
   householdList(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   totalHouseholdsCountWithValidPhoneNo: Int
+  hasEmptyCriteria: Boolean
 }
 
 type TargetPopulationNodeConnection {

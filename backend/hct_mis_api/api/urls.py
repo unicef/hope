@@ -38,6 +38,11 @@ urlpatterns = [
         "<slug:business_area>/rdi/<uuid:rdi>/completed/", endpoints.rdi.CompleteRDIView().as_view(), name="rdi-complete"
     ),
     path(
+        "<slug:business_area>/program/",
+        endpoints.rdi.ProgramViewSet.as_view({"get": "list"}),
+        name="program-list",
+    ),
+    path(
         "<slug:business_area>/program/create/",
         endpoints.rdi.ProgramViewSet.as_view({"post": "create"}),
         name="program-create",
