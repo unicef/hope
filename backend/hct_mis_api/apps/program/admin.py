@@ -55,7 +55,7 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdm
     ordering = ("name",)
 
     @button(
-        permission="targeting.add_target_population",
+        permission="targeting.add_targetpopulation",
     )
     def create_target_population_from_list(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         context = self.get_common_context(request, title="Create TargetPopulation")
