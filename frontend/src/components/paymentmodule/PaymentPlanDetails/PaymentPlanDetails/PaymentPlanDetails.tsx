@@ -17,10 +17,10 @@ interface PaymentPlanDetailsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function PaymentPlanDetails({
+export const PaymentPlanDetails = ({
   baseUrl,
   paymentPlan,
-}: PaymentPlanDetailsProps): React.ReactElement {
+}: PaymentPlanDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const {
     createdBy,
@@ -32,7 +32,7 @@ export function PaymentPlanDetails({
     dispersionStartDate,
     dispersionEndDate,
     followUps,
-    name
+    name,
   } = paymentPlan;
 
   return (
@@ -66,9 +66,7 @@ export function PaymentPlanDetails({
                 </LabelizedField>
               </Grid>
               <Grid item xs={3}>
-                <LabelizedField label={t('Name')}>
-                  {name}
-                </LabelizedField>
+                <LabelizedField label={t('Name')}>{name}</LabelizedField>
               </Grid>
               <Grid item xs={3}>
                 <LabelizedField label={t('Currency')}>
@@ -111,4 +109,4 @@ export function PaymentPlanDetails({
       </ContainerColumnWithBorder>
     </Grid>
   );
-}
+};

@@ -50,9 +50,9 @@ export const getDeliveryMechanismColor = (
   return '#CCC';
 };
 
-export function VolumeByDeliveryMechanismSection({
-  paymentPlan,
-}: VolumeByDeliveryMechanismSectionProps): React.ReactElement {
+export const VolumeByDeliveryMechanismSection: React.FC<
+  VolumeByDeliveryMechanismSectionProps
+> = ({ paymentPlan }) => {
   const { t } = useTranslation();
   const { volumeByDeliveryMechanism } = paymentPlan;
 
@@ -90,6 +90,22 @@ export function VolumeByDeliveryMechanismSection({
     return defaultColorsArray;
   };
 
+  const data = {
+    labels: chartLabels,
+    datasets: [
+      {
+        data: chartData,
+        backgroundColor: chartColors(),
+      },
+    ],
+  } as any;
+
+  const options = {
+    legend: {
+      display: false,
+    },
+  } as any;
+
   return (
     <Box display="flex" flexDirection="column">
       <Title>
@@ -109,28 +125,11 @@ export function VolumeByDeliveryMechanismSection({
         >
           <Grid item xs={4}>
             <ChartContainer>
-              <Pie
-                width={100}
-                height={100}
-                options={{
-                  legend: {
-                    display: false,
-                  },
-                }}
-                data={{
-                  labels: chartLabels,
-                  datasets: [
-                    {
-                      data: chartData,
-                      backgroundColor: chartColors,
-                    },
-                  ],
-                }}
-              />
+              <Pie data={data} options={options} />
             </ChartContainer>
           </Grid>
         </Grid>
       </ContentWrapper>
     </Box>
   );
-}
+};

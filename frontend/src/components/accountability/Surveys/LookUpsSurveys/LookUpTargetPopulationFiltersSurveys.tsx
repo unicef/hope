@@ -2,7 +2,7 @@ import { Grid, MenuItem } from '@mui/material';
 import { Group, Person } from '@mui/icons-material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { TargetPopulationStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,

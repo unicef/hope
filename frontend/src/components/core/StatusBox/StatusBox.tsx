@@ -14,7 +14,13 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 
-const StatusBoxContainer = styled.div`
+interface StatusBoxContainerProps {
+  status: string;
+  statusToColor: (theme: any, status: string) => string;
+  theme: any;
+}
+
+const StatusBoxContainer = styled.div<StatusBoxContainerProps>`
   color: ${({ status, statusToColor, theme }) => statusToColor(theme, status)};
   background-color: ${({ status, statusToColor, theme }) =>
     `${statusToColor(theme, status)}${opacityToHex(0.15)}`};

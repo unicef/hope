@@ -3,7 +3,11 @@ import FlagIcon from '@mui/icons-material/Flag';
 import { Tooltip } from '@mui/material';
 import styled from 'styled-components';
 
-const StyledFlag = styled(FlagIcon)`
+interface StyledFlagProps {
+  confirmed?: boolean;
+}
+
+const StyledFlag = styled(FlagIcon)<StyledFlagProps>`
   color: ${({ theme, confirmed }) =>
     confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
@@ -19,7 +23,7 @@ export function FlagTooltip({
 }: FlagTooltipProps): React.ReactElement {
   return (
     <Tooltip onClick={handleClick} title={message}>
-      <StyledFlag confirmed={confirmed ? 1 : 0} />
+      <StyledFlag confirmed={confirmed} />
     </Tooltip>
   );
 }

@@ -73,7 +73,7 @@ export function AddIndividualDataChangeField({
     case 'DATE':
       fieldProps = {
         component: FormikDateField,
-        decoratorEnd: <CalendarTodayRounded color="disabled" />,
+        decoratorEnd: <CalendarTodayRoundedIcon color="disabled" />,
       };
       break;
 

@@ -17,10 +17,13 @@ const Table = styled.div`
   display: flex;
   flex-direction: column;
 `;
-const HeadingCell = styled.div`
+interface HeadingCellProps {
+  weight?: number;
+}
+
+const HeadingCell = styled.div<HeadingCellProps>`
   display: flex;
   flex: ${({ weight }) => weight || 1};
-
   padding: 16px;
   font-size: 12px;
   text-align: left;

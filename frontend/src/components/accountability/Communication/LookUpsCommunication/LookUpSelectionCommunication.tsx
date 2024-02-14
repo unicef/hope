@@ -93,9 +93,7 @@ export function LookUpSelectionCommunication({
   const { t } = useTranslation();
 
   const { data: choicesData, loading: choicesLoading } =
-    useHouseholdChoiceDataQuery({
-      variables: { businessArea },
-    });
+    useHouseholdChoiceDataQuery();
 
   const handleChange = (type: number, value: string[] | string): void => {
     setValues({

@@ -5,12 +5,18 @@ import { useInterval } from '@hooks/useInterval';
 
 const red = '#f00';
 const black = '#253b46';
-const Value = styled.span`
+
+interface ValueProps {
+  missing?: boolean;
+}
+
+const Value = styled.span<ValueProps>`
   color: #253b46;
   font-size: 14px;
   line-height: 19px;
-  color: ${({ missing }) => (missing ? red : black)};
+  color: ${({ missing }) => (missing ? 'red' : 'black')};
 `;
+
 export function Missing(): React.ReactElement {
   const [missing, setMissing] = useState(false);
   useInterval(() => {

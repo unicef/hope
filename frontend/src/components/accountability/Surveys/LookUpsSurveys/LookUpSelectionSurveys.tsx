@@ -73,9 +73,7 @@ export function LookUpSelectionSurveys({
   const { t } = useTranslation();
 
   const { data: choicesData, loading: choicesLoading } =
-    useProgrammeChoiceDataQuery({
-      variables: { businessArea },
-    });
+    useProgrammeChoiceDataQuery();
 
   const handleChange = (type: number, value: string): void => {
     setValues({

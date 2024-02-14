@@ -196,7 +196,7 @@ export function ExcludeSection({
       !hasExcludePermission ||
       !hasOpenOrLockedStatus ||
       excludedIds.length === 0 ||
-      backgroundActionStatus;
+      Boolean(backgroundActionStatus);
 
     const editExclusionsDisabled =
       !hasExcludePermission || !hasOpenOrLockedStatus;
@@ -290,7 +290,9 @@ export function ExcludeSection({
 
   const renderInputAndApply = (): React.ReactElement => {
     const applyDisabled =
-      !hasExcludePermission || !hasOpenOrLockedStatus || backgroundActionStatus;
+      !hasExcludePermission ||
+      !hasOpenOrLockedStatus ||
+      Boolean(backgroundActionStatus);
 
     if (isEdit || numberOfExcluded === 0) {
       return (

@@ -1,6 +1,6 @@
 import { Grid } from '@mui/material';
 import * as React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
 import { createHandleApplyFilterChange } from '@utils/utils';
@@ -15,13 +15,13 @@ interface DashboardFiltersProps {
   setAppliedFilter;
 }
 
-export function DashboardFilters({
+export const DashboardFilters = ({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: DashboardFiltersProps): React.ReactElement {
+}: DashboardFiltersProps): React.ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
@@ -77,4 +77,4 @@ export function DashboardFilters({
       </Grid>
     </FiltersSection>
   );
-}
+};

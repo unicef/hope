@@ -23,7 +23,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
     language: Yup.string(),
     selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
     selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
-  };
+  } as any;
 
   if (currentStep === GrievanceSteps.Description) {
     datum.description = Yup.string().required(

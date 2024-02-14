@@ -7,17 +7,17 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { AgencyField } from '../AgencyField';
-import { removeItemById } from '@utils/helpers';
+import { removeItemById } from '../utils/helpers';
 
 export interface NewIdentityFieldArrayProps {
   addIndividualFieldsData: AllAddIndividualFieldsQuery;
   values;
 }
 
-export function NewIdentityFieldArray({
+export const NewIdentityFieldArray = ({
   addIndividualFieldsData,
   values,
-}: NewIdentityFieldArrayProps): React.ReactElement {
+}: NewIdentityFieldArrayProps): React.ReactElement => {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const { t } = useTranslation();
@@ -73,4 +73,4 @@ export function NewIdentityFieldArray({
       />
     </Grid>
   );
-}
+};

@@ -28,7 +28,12 @@ export const StyledImage = styled.img`
   transition: 0.4s ease-in-out;
 `;
 
-export const MiniImage = styled.div`
+interface MiniImageProps {
+  src?: string;
+  alt?: string;
+}
+
+export const MiniImage = styled.div<MiniImageProps>`
   height: 45px;
   width: 45px;
   cursor: pointer;
@@ -45,8 +50,10 @@ export function PhotoModal({
   title = 'Photo',
   closeHandler,
   showRotate = true,
+  alt = 'photo',
 }: {
   src: string;
+  alt?: string;
   linkText?: string;
   variant?: 'picture' | 'button' | 'link' | 'pictureClose';
   title?: string;
@@ -64,7 +71,7 @@ export function PhotoModal({
         element = (
           <MiniImage
             data-cy="mini-image"
-            alt="photo"
+            alt={alt}
             src={src}
             onClick={() => setDialogOpen(true)}
           />
@@ -91,6 +98,7 @@ export function PhotoModal({
             onClick={() => {
               setDialogOpen(true);
             }}
+            to={null}
           >
             {linkText}
           </StyledLink>
@@ -101,7 +109,7 @@ export function PhotoModal({
           <Box display="flex" alignItems="center">
             <MiniImage
               data-cy="mini-image-close"
-              alt="photo"
+              alt={alt}
               src={src}
               onClick={() => setDialogOpen(true)}
             />

@@ -6,7 +6,7 @@ import { FieldArray } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaymentChannelField } from '../PaymentChannelField';
-import { removeItemById } from '@utils/helpers';
+import { removeItemById } from '../utils/helpers';
 
 export interface NewPaymentChannelFieldArrayProps {
   values;

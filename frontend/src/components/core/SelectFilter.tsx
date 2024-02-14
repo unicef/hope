@@ -5,7 +5,6 @@ import {
   InputLabel,
   Select,
 } from '@mui/material';
-import { makeStyles } from '@mui/material/styles';
 import { Close } from '@mui/icons-material';
 import * as React from 'react';
 import styled from 'styled-components';
@@ -23,20 +22,19 @@ const XIcon = styled(Close)`
   color: #707070;
 `;
 
-const useStyles = makeStyles(() => ({
-  selectWrapper: {
-    flex: 1,
-    display: 'flex',
-    maxWidth: '100%',
-  },
-  select: {
-    flex: 1,
-    maxWidth: '100%',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-}));
+const SelectWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  max-width: 100%;
+`;
+
+const StyledSelect = styled(Select)`
+  flex: 1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 export function SelectFilter({
   label,
@@ -48,8 +46,6 @@ export function SelectFilter({
   disableClearable = false,
   ...otherProps
 }): React.ReactElement {
-  const classes = useStyles();
-
   const checkValue = (value): boolean => {
     if (Array.isArray(value)) {
       return value.length > 0;
@@ -60,7 +56,7 @@ export function SelectFilter({
   const isValue = checkValue(otherProps.value);
 
   return (
-    <div className={classes.selectWrapper}>
+    <SelectWrapper>
       <StyledFormControl
         theme={{ borderRadius }}
         fullWidth={fullWidth}
@@ -69,24 +65,29 @@ export function SelectFilter({
       >
         <Box display="grid">
           <InputLabel>{label}</InputLabel>
-          <Select
-            /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-            // @ts-ignore
-            className={classes.select}
+          <StyledSelect
             onChange={onChange}
             variant="outlined"
             label={label}
             MenuProps={{
-              getContentAnchorEl: null,
+              anchorOrigin: {
+                vertical: 'bottom',
+                horizontal: 'left',
+              },
+              transformOrigin: {
+                vertical: 'top',
+                horizontal: 'left',
+              },
             }}
-            InputProps={{
-              startAdornment: icon ? (
-                <StartInputAdornment position="start">
-                  {icon}
-                </StartInputAdornment>
-              ) : null,
-              endAdornment:
-                isValue && !disableClearable ? (
+            renderValue={(selected) => (
+              <div>
+                {icon && (
+                  <StartInputAdornment position="start">
+                    {icon}
+                  </StartInputAdornment>
+                )}
+                {String(selected)}
+                {isValue && !disableClearable && (
                   <EndInputAdornment position="end">
                     <IconButton
                       size="small"
@@ -99,14 +100,15 @@ export function SelectFilter({
                       <XIcon fontSize="small" />
                     </IconButton>
                   </EndInputAdornment>
-                ) : null,
-            }}
+                )}
+              </div>
+            )}
             {...otherProps}
           >
             {children}
-          </Select>
+          </StyledSelect>
         </Box>
       </StyledFormControl>
-    </div>
+    </SelectWrapper>
   );
 }

@@ -13,12 +13,15 @@ import {
 } from '@generated/graphql';
 import { LabelizedField } from '@core/LabelizedField';
 import { AgencyField } from '../AgencyField';
-import { removeItemById } from '@utils/helpers';
+import { removeItemById } from '../utils/helpers';
 
-const DisabledDiv = styled.div`
+interface DisabledDivProps {
+  disabled: boolean;
+}
+
+const DisabledDiv = styled.div<DisabledDivProps>`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});
 `;
-
 export interface EditIdentityRowProps {
   setFieldValue;
   values;

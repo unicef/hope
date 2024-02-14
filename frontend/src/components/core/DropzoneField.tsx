@@ -1,12 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Box } from '@mui/material';
 import { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { Accept, useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LoadingComponent } from './LoadingComponent';
 
-const DropzoneContainer = styled.div`
+interface DropzoneContainerProps {
+  disabled: boolean;
+}
+
+const DropzoneContainer = styled.div<DropzoneContainerProps>`
   width: 500px;
   height: 100px;
   background-color: rgba(2, 62, 144, 0.1);
@@ -37,9 +41,11 @@ export function DropzoneField({
   const onDrop = useCallback((acceptedFiles: File[]) => {
     onChange(acceptedFiles);
   }, []);
+
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
-    accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    accept:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' as unknown as Accept,
     onDrop,
   });
   const acceptedFilename =

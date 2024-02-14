@@ -1,4 +1,3 @@
-import { TFunctionResult } from 'i18next';
 import * as React from 'react';
 import styled from 'styled-components';
 import { MiśTheme } from '../../theme';
@@ -18,7 +17,7 @@ const Value = styled.span`
 
 export interface Props {
   value?: React.ReactNode;
-  children?: React.ReactElement | string | number | boolean | TFunctionResult;
+  children?: React.ReactNode;
   label: string;
   dataCy?: string;
   dashed?: boolean;
