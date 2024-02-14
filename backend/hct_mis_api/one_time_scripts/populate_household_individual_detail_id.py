@@ -32,7 +32,7 @@ def update_detail_id(
 
 def populate_household_individual_detail_id(batch_size: Optional[int] = 1000) -> None:
     for model in [Household, ImportedHousehold, Individual, ImportedIndividual]:
-        logger.info(f"Updating {model}")
+        logger.info(f"Starting update {model.__name__}")
         update_detail_id(model, batch_size)
 
     logger.info("Finished updating detail_id")
