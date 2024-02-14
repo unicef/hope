@@ -143,9 +143,13 @@ class ImportedHousehold(TimeStampedUUIDModel):
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
+    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    detail_id = models.CharField(
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
+    )
     enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
     flex_registrations_record = models.ForeignKey(
         "registration_datahub.Record",
@@ -270,8 +274,12 @@ class ImportedIndividual(TimeStampedUUIDModel):
     comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
+    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    detail_id = models.CharField(
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
+    )
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
