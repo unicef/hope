@@ -34,8 +34,14 @@ services:
         volume:
           nocopy: false
     command: |
-      sh -c "
-        waitforit -host=db -port=5432 -timeout=30 &&
+      bash -c "
+        waitforit -host=db -port=5432 -timeout=30
+        if [ ! -f /code/hct_mis_api/apps/web/templates/web/index.html ]; then
+          echo 'index.html does not exist'
+          exit 1
+        else
+          echo 'index.html exists'
+        fi
         pytest -svvv selenium_tests
       "
     depends_on:
