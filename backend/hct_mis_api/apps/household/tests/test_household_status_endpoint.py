@@ -77,7 +77,7 @@ class TestDetails(TestCase):
         imported_household = ImportedHouseholdFactory(registration_data_import=rdi_datahub)
         imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
         imported_household.head_of_household = imported_individual
-        imported_household.kobo_asset_id = "HOPE-2022530111222"
+        imported_household.detail_id = "HOPE-2022530111222"
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
             individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household

@@ -370,7 +370,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         households = ImportedHousehold.objects.all()
         for household in households:
-            self.assertTrue(household.row_id in [3, 4, 6])
+            self.assertTrue(int(household.detail_id) in [3, 4, 6])
 
         individuals = ImportedIndividual.objects.all()
         for individual in individuals:

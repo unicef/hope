@@ -1,5 +1,7 @@
 from typing import Dict, Optional
 
+from django.db.models import Q
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -55,7 +57,7 @@ def get_household(registration_id: str, business_area_code: Optional[str]) -> Im
         Household.objects.all()
         if not business_area_code
         else Household.objects.filter(business_area__code=business_area_code)
-    ).filter(kobo_asset_id__endswith=kobo_asset_value)
+    ).filter(Q(kobo_asset_id__endswith=kobo_asset_value) | Q(detail_id__endswith=kobo_asset_value))
     if households.count() > 1:
         raise Exception(f"Multiple households ({households.count()}) with given registration_id found")
     if households.count() == 1:
@@ -72,7 +74,9 @@ def get_household(registration_id: str, business_area_code: Optional[str]) -> Im
             registration_data_import__business_area_slug=business_area.slug
         )
 
-    imported_households = imported_households_by_business_area.filter(kobo_asset_id__endswith=kobo_asset_value)
+    imported_households = imported_households_by_business_area.filter(
+        Q(kobo_asset_id__endswith=kobo_asset_value) | Q(detail_id__endswith=kobo_asset_value)
+    )
     if imported_households.count() > 1:
         raise Exception(
             f"Multiple imported households ({imported_households.count()}) with given registration_id found"
