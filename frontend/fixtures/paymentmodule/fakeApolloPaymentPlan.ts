@@ -129,6 +129,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
   totalEntitledQuantityUsd: 376,
   paymentsConflictsCount: 0,
   canSendToPaymentGateway: false,
+  canSplit: false,
   splitChoices: {
     paymentParts: [21, 10, 5, 2],
     splitTypes: [

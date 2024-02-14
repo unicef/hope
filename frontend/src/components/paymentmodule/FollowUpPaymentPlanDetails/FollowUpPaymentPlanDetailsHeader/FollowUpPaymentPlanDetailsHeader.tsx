@@ -2,7 +2,6 @@ import { Box } from "@material-ui/core";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
-import { PaymentPlanQuery } from "../../../../__generated__/graphql";
 import { hasPermissions, PERMISSIONS } from "../../../../config/permissions";
 import {
   paymentPlanBackgroundActionStatusToColor,
@@ -18,6 +17,7 @@ import { InReviewPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/Payme
 import { LockedFspPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedFspPaymentPlanHeaderButtons";
 import { LockedPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/LockedPaymentPlanHeaderButtons";
 import { OpenPaymentPlanHeaderButtons } from "../../PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/OpenPaymentPlanHeaderButtons";
+import {PaymentPlanQuery} from "../../../../__generated__/graphql";
 
 const StatusWrapper = styled.div`
   width: 140px;
@@ -74,7 +74,8 @@ export const FollowUpPaymentPlanDetailsHeader = ({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
-  const canSplit = hasPermissions(PERMISSIONS.PM_SPLIT, permissions); // TODO split button requirements
+  const canSplit = hasPermissions(PERMISSIONS.PM_SPLIT, permissions) &&
+    paymentPlan.canSplit;
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {

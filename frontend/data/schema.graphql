@@ -3148,6 +3148,7 @@ type PaymentPlanNode implements Node {
   totalWithdrawnHouseholdsCount: Int
   unsuccessfulPaymentsCount: Int
   canSendToPaymentGateway: Boolean
+  canSplit: Boolean
 }
 
 type PaymentPlanNodeConnection {

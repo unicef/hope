@@ -554,6 +554,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     unsuccessful_payments_count = graphene.Int()
     name = graphene.String()
     can_send_to_payment_gateway = graphene.Boolean()
+    can_split = graphene.Boolean()
 
     class Meta:
         model = PaymentPlan
@@ -689,6 +690,17 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
                 financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
                 financial_service_provider__payment_gateway_id__isnull=False,
             ).exists()
+
+    def resolve_can_split(self, info: Any) -> bool:
+        if self.status != PaymentPlan.Status.ACCEPTED:
+            return False
+
+        if self.splits.filter(
+            sent_to_payment_gateway=True,
+        ).exists():
+            return False
+
+        return True
 
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):

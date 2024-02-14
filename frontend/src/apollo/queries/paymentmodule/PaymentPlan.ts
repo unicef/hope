@@ -150,6 +150,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         }
       }
       canSendToPaymentGateway
+      canSplit
       splitChoices {
         paymentParts
         splitTypes {
