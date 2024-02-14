@@ -57,6 +57,7 @@ def get_household(registration_id: str, business_area_code: Optional[str]) -> Im
         Household.objects.all()
         if not business_area_code
         else Household.objects.filter(business_area__code=business_area_code)
+        # TODO: remove filtering by kobo_asset_id after remove field
     ).filter(Q(kobo_asset_id__endswith=kobo_asset_value) | Q(detail_id__endswith=kobo_asset_value))
     if households.count() > 1:
         raise Exception(f"Multiple households ({households.count()}) with given registration_id found")
@@ -75,7 +76,9 @@ def get_household(registration_id: str, business_area_code: Optional[str]) -> Im
         )
 
     imported_households = imported_households_by_business_area.filter(
-        Q(kobo_asset_id__endswith=kobo_asset_value) | Q(detail_id__endswith=kobo_asset_value)
+        # TODO: remove filtering by kobo_asset_id after remove field
+        Q(kobo_asset_id__endswith=kobo_asset_value)
+        | Q(detail_id__endswith=kobo_asset_value)
     )
     if imported_households.count() > 1:
         raise Exception(
