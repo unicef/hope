@@ -107,15 +107,17 @@ class ProgrammeManagement(BaseComponents):
     def chooseInputEndDateViaCalendar(self, day: int) -> None:
         self.find_in_element(self.getLabelEndDate(), self.calendarIcon)[0].click()
         self.getCalendar()
-        self.get(
+        self.get_elements(
             '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersCalendarHeader-iconButton"]', By.XPATH
-        ).click()
+        )[0].click()
+        sleep(3)
         self.get_elements(
             '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
             'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
             'MuiPickersDay-daySelected" '
             'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
-            'MuiPickersDay-dayDisabled"]',
+            'MuiPickersDay-dayDisabled"]'
+            ,
             By.XPATH,
         )[day - 1].click()
         self.wait_for_disappear(self.calendar)

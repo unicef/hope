@@ -336,7 +336,7 @@ class TestProgrammeManagement:
 
 # ToDo: Check Unicef partner! and delete classes
 @pytest.mark.usefixtures("login")
-class TestUNHCRPartner0:
+class TestBusinessAreas:
 
     @pytest.mark.parametrize(
         "test_data",
@@ -377,7 +377,7 @@ class TestUNHCRPartner0:
 
 
 @pytest.mark.usefixtures("login")
-class TestUNHCRPartner1:
+class TestAdminAreas:
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -419,7 +419,7 @@ class TestUNHCRPartner1:
 
 
 @pytest.mark.usefixtures("login")
-class TestUNHCRPartner2:
+class TestComeBackScenarios:
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -474,9 +474,8 @@ class TestUNHCRPartner2:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
 
-@pytest.mark.skip
 @pytest.mark.usefixtures("login")
-class TestUNHCRPartner2:
+class TestManualCalendar:
     @pytest.mark.parametrize(
         "test_data",
         [
