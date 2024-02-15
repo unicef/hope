@@ -2277,6 +2277,7 @@ export type HouseholdNode = Node & {
   userFields: Scalars['JSONString'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  detailId?: Maybe<Scalars['String']>,
   registrationId?: Maybe<Scalars['Int']>,
   totalCashReceivedUsd?: Maybe<Scalars['Decimal']>,
   totalCashReceived?: Maybe<Scalars['Decimal']>,
@@ -2934,9 +2935,10 @@ export type ImportedHouseholdNode = Node & {
   currency: ImportedHouseholdCurrency,
   unhcrId: Scalars['String'],
   koboSubmissionUuid?: Maybe<Scalars['UUID']>,
-  koboAssetId: Scalars['String'],
   koboSubmissionTime?: Maybe<Scalars['DateTime']>,
+  koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  detailId?: Maybe<Scalars['String']>,
   enumeratorRecId?: Maybe<Scalars['Int']>,
   misUnicefId?: Maybe<Scalars['String']>,
   programId?: Maybe<Scalars['UUID']>,
@@ -3087,6 +3089,7 @@ export type ImportedIndividualNode = Node & {
   whoAnswersAltPhone: Scalars['String'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  detailId?: Maybe<Scalars['String']>,
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   misUnicefId?: Maybe<Scalars['String']>,
@@ -3315,6 +3318,7 @@ export type IndividualNode = Node & {
   childHoh: Scalars['Boolean'],
   koboAssetId: Scalars['String'],
   rowId?: Maybe<Scalars['Int']>,
+  detailId?: Maybe<Scalars['String']>,
   registrationId?: Maybe<Scalars['Int']>,
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
@@ -4194,8 +4198,8 @@ export type MutationsAssignFspToDeliveryMechanismArgs = {
 
 
 export type MutationsSplitPaymentPlanArgs = {
-  paymentParts?: Maybe<Scalars['Int']>,
   paymentPlanId: Scalars['ID'],
+  paymentsNo?: Maybe<Scalars['Int']>,
   splitType: Scalars['String']
 };
 
@@ -4860,7 +4864,7 @@ export type PaymentPlanNode = Node & {
   importedFileName?: Maybe<Scalars['String']>,
   paymentsConflictsCount?: Maybe<Scalars['Int']>,
   volumeByDeliveryMechanism?: Maybe<Array<Maybe<VolumeByDeliveryMechanismNode>>>,
-  splitChoices?: Maybe<PaymentPlanSplitChoices>,
+  splitChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   verificationPlans?: Maybe<PaymentVerificationPlanNodeConnection>,
   paymentVerificationSummary?: Maybe<PaymentVerificationSummaryNode>,
   bankReconciliationSuccess?: Maybe<Scalars['Int']>,
@@ -4925,12 +4929,6 @@ export type PaymentPlanNodeEdge = {
    __typename?: 'PaymentPlanNodeEdge',
   node?: Maybe<PaymentPlanNode>,
   cursor: Scalars['String'],
-};
-
-export type PaymentPlanSplitChoices = {
-   __typename?: 'PaymentPlanSplitChoices',
-  paymentParts?: Maybe<Array<Maybe<Scalars['Int']>>>,
-  splitTypes?: Maybe<Array<Maybe<ChoiceObject>>>,
 };
 
 export enum PaymentPlanStatus {
@@ -10796,7 +10794,7 @@ export type RevertMarkPrAsFailedMutation = (
 export type SplitPpMutationVariables = {
   paymentPlanId: Scalars['ID'],
   splitType: Scalars['String'],
-  paymentParts: Scalars['Int']
+  paymentsNo: Scalars['Int']
 };
 
 
@@ -12502,14 +12500,10 @@ export type PaymentPlanQuery = (
         { __typename?: 'FinancialServiceProviderNode' }
         & Pick<FinancialServiceProviderNode, 'id' | 'name' | 'communicationChannel' | 'isPaymentGateway'>
       )> }
-    )>>>, splitChoices: Maybe<(
-      { __typename?: 'PaymentPlanSplitChoices' }
-      & Pick<PaymentPlanSplitChoices, 'paymentParts'>
-      & { splitTypes: Maybe<Array<Maybe<(
-        { __typename?: 'ChoiceObject' }
-        & Pick<ChoiceObject, 'name' | 'value'>
-      )>>> }
-    )>, volumeByDeliveryMechanism: Maybe<Array<Maybe<(
+    )>>>, splitChoices: Maybe<Array<Maybe<(
+      { __typename?: 'ChoiceObject' }
+      & Pick<ChoiceObject, 'name' | 'value'>
+    )>>>, volumeByDeliveryMechanism: Maybe<Array<Maybe<(
       { __typename?: 'VolumeByDeliveryMechanismNode' }
       & Pick<VolumeByDeliveryMechanismNode, 'volume' | 'volumeUsd'>
       & { deliveryMechanism: Maybe<(
@@ -18663,8 +18657,8 @@ export type RevertMarkPrAsFailedMutationHookResult = ReturnType<typeof useRevert
 export type RevertMarkPrAsFailedMutationResult = ApolloReactCommon.MutationResult<RevertMarkPrAsFailedMutation>;
 export type RevertMarkPrAsFailedMutationOptions = ApolloReactCommon.BaseMutationOptions<RevertMarkPrAsFailedMutation, RevertMarkPrAsFailedMutationVariables>;
 export const SplitPpDocument = gql`
-    mutation SplitPP($paymentPlanId: ID!, $splitType: String!, $paymentParts: Int!) {
-  splitPaymentPlan(paymentPlanId: $paymentPlanId, splitType: $splitType, paymentParts: $paymentParts) {
+    mutation SplitPP($paymentPlanId: ID!, $splitType: String!, $paymentsNo: Int!) {
+  splitPaymentPlan(paymentPlanId: $paymentPlanId, splitType: $splitType, paymentsNo: $paymentsNo) {
     paymentPlan {
       id
     }
@@ -18705,7 +18699,7 @@ export function withSplitPp<TProps, TChildProps = {}>(operationOptions?: ApolloR
  *   variables: {
  *      paymentPlanId: // value for 'paymentPlanId'
  *      splitType: // value for 'splitType'
- *      paymentParts: // value for 'paymentParts'
+ *      paymentsNo: // value for 'paymentsNo'
  *   },
  * });
  */
@@ -23331,11 +23325,8 @@ export const PaymentPlanDocument = gql`
     canSendToPaymentGateway
     canSplit
     splitChoices {
-      paymentParts
-      splitTypes {
-        name
-        value
-      }
+      name
+      value
     }
     volumeByDeliveryMechanism {
       deliveryMechanism {
@@ -28796,7 +28787,6 @@ export type ResolversTypes = {
   FilteredActionsListNode: ResolverTypeWrapper<FilteredActionsListNode>,
   ApprovalNode: ResolverTypeWrapper<ApprovalNode>,
   VolumeByDeliveryMechanismNode: ResolverTypeWrapper<VolumeByDeliveryMechanismNode>,
-  PaymentPlanSplitChoices: ResolverTypeWrapper<PaymentPlanSplitChoices>,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   ReconciliationSummaryNode: ResolverTypeWrapper<ReconciliationSummaryNode>,
   ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
@@ -29311,7 +29301,6 @@ export type ResolversParentTypes = {
   FilteredActionsListNode: FilteredActionsListNode,
   ApprovalNode: ApprovalNode,
   VolumeByDeliveryMechanismNode: VolumeByDeliveryMechanismNode,
-  PaymentPlanSplitChoices: PaymentPlanSplitChoices,
   ChoiceObject: ChoiceObject,
   ReconciliationSummaryNode: ReconciliationSummaryNode,
   ReportNodeConnection: ReportNodeConnection,
@@ -30834,6 +30823,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  detailId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   registrationId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalCashReceivedUsd?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
@@ -31015,9 +31005,10 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   currency?: Resolver<ResolversTypes['ImportedHouseholdCurrency'], ParentType, ContextType>,
   unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboSubmissionUuid?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
-  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  detailId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   enumeratorRecId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
@@ -31102,6 +31093,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  detailId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -31236,6 +31228,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   childHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   rowId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  detailId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   registrationId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -31722,7 +31715,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   importedFileName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   paymentsConflictsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   volumeByDeliveryMechanism?: Resolver<Maybe<Array<Maybe<ResolversTypes['VolumeByDeliveryMechanismNode']>>>, ParentType, ContextType>,
-  splitChoices?: Resolver<Maybe<ResolversTypes['PaymentPlanSplitChoices']>, ParentType, ContextType>,
+  splitChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   verificationPlans?: Resolver<Maybe<ResolversTypes['PaymentVerificationPlanNodeConnection']>, ParentType, ContextType, PaymentPlanNodeVerificationPlansArgs>,
   paymentVerificationSummary?: Resolver<Maybe<ResolversTypes['PaymentVerificationSummaryNode']>, ParentType, ContextType>,
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -31748,11 +31741,6 @@ export type PaymentPlanNodeConnectionResolvers<ContextType = any, ParentType ext
 export type PaymentPlanNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanNodeEdge'] = ResolversParentTypes['PaymentPlanNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['PaymentPlanNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-};
-
-export type PaymentPlanSplitChoicesResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentPlanSplitChoices'] = ResolversParentTypes['PaymentPlanSplitChoices']> = {
-  paymentParts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Int']>>>, ParentType, ContextType>,
-  splitTypes?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
 };
 
 export type PaymentRecordAndPaymentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordAndPaymentNode'] = ResolversParentTypes['PaymentRecordAndPaymentNode']> = {
@@ -33530,7 +33518,6 @@ export type Resolvers<ContextType = any> = {
   PaymentPlanNode?: PaymentPlanNodeResolvers<ContextType>,
   PaymentPlanNodeConnection?: PaymentPlanNodeConnectionResolvers<ContextType>,
   PaymentPlanNodeEdge?: PaymentPlanNodeEdgeResolvers<ContextType>,
-  PaymentPlanSplitChoices?: PaymentPlanSplitChoicesResolvers<ContextType>,
   PaymentRecordAndPaymentNode?: PaymentRecordAndPaymentNodeResolvers<ContextType>,
   PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
   PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,

@@ -10,6 +10,7 @@ import {
 import { BreadCrumbsItem } from "../../../core/BreadCrumbs";
 import { PageHeader } from "../../../core/PageHeader";
 import { StatusBox } from "../../../core/StatusBox";
+import { PaymentPlanQuery } from "../../../../__generated__/graphql";
 import { AcceptedPaymentPlanHeaderButtons } from "./HeaderButtons/AcceptedPaymentPlanHeaderButtons";
 import { InApprovalPaymentPlanHeaderButtons } from "./HeaderButtons/InApprovalPaymentPlanHeaderButtons";
 import { InAuthorizationPaymentPlanHeaderButtons } from "./HeaderButtons/InAuthorizationPaymentPlanHeaderButtons";
@@ -17,7 +18,6 @@ import { InReviewPaymentPlanHeaderButtons } from "./HeaderButtons/InReviewPaymen
 import { LockedFspPaymentPlanHeaderButtons } from "./HeaderButtons/LockedFspPaymentPlanHeaderButtons";
 import { LockedPaymentPlanHeaderButtons } from "./HeaderButtons/LockedPaymentPlanHeaderButtons";
 import { OpenPaymentPlanHeaderButtons } from "./HeaderButtons/OpenPaymentPlanHeaderButtons";
-import { PaymentPlanQuery } from "../../../../__generated__/graphql";
 
 const StatusWrapper = styled(Box)`
   width: 150px;

@@ -467,11 +467,6 @@ class DeliveryMechanismNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class PaymentPlanSplitChoices(graphene.ObjectType):
-    payment_parts = graphene.List(graphene.Int)
-    split_types = graphene.List(ChoiceObject)
-
-
 def _calculate_volume(
     delivery_mechanism_per_payment_plan: "DeliveryMechanismPerPaymentPlan", field: str
 ) -> Optional[Decimal]:
@@ -540,7 +535,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     payments_conflicts_count = graphene.Int()
     delivery_mechanisms = graphene.List(DeliveryMechanismNode)
     volume_by_delivery_mechanism = graphene.List(VolumeByDeliveryMechanismNode)
-    split_choices = graphene.Field(PaymentPlanSplitChoices)
+    split_choices = graphene.List(ChoiceObject)
     verification_plans = DjangoPermissionFilterConnectionField(
         "hct_mis_api.apps.program.schema.PaymentVerificationPlanNode",  # type: ignore
         filterset_class=PaymentVerificationPlanFilter,
@@ -567,25 +562,8 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_split_choices(self, info: Any, **kwargs: Any) -> Dict:
-        payments = self.eligible_payments
-
-        def get_payment_parts(payments_count: int) -> List[int]:
-            if payments_count < 2:
-                return []
-            chunks = []
-            chunk = payments_count // 2
-            while chunk > PaymentPlanSplit.MAX_CHUNKS:
-                chunk = chunk // 2
-            while chunk > 1:
-                chunks.append(chunk)
-                chunk = chunk // 2
-            return chunks
-
-        return {
-            "split_types": to_choice_object(PaymentPlanSplit.SplitType.choices),
-            "payment_parts": get_payment_parts(payments.count()),
-        }
+    def resolve_split_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
+        return to_choice_object(PaymentPlanSplit.SplitType.choices)
 
     def resolve_verification_plans(self, info: Any) -> graphene.List:
         return self.get_payment_verification_plans

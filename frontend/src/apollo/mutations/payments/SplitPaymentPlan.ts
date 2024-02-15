@@ -4,12 +4,12 @@ export const SPLIT_PAYMENT_PLAN = gql`
   mutation SplitPP(
     $paymentPlanId: ID!
     $splitType: String!
-    $paymentParts: Int!
+    $paymentsNo: Int!
   ) {
     splitPaymentPlan(
       paymentPlanId: $paymentPlanId
       splitType: $splitType
-      paymentParts: $paymentParts
+      paymentsNo: $paymentsNo
     ) {
       paymentPlan {
         id

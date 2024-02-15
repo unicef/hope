@@ -3,7 +3,6 @@ import logging
 from decimal import Decimal
 from functools import partial
 from itertools import groupby
-from math import ceil
 from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -681,11 +680,10 @@ class PaymentPlanService:
             Payment.objects.bulk_update(payments, ("signature_hash",))
 
     def split(self, split_type: str, chunks_no: Optional[int] = None) -> PaymentPlan:
-        def chunk_list(_list: List, _chunks_no: int) -> List[List]:
-            list_length = len(_list)
-            chunk_size = ceil(list_length / _chunks_no)
-            chunks = [_list[i : i + chunk_size] for i in range(0, list_length, chunk_size)]
-            return chunks
+        def chunks(lst: List, n: int) -> List:
+            """Yield successive n-sized chunks from lst."""
+            for i in range(0, len(lst), n):
+                yield lst[i : i + n]
 
         payments_chunks = []
         payments = self.payment_plan.eligible_payments.all()
@@ -695,11 +693,11 @@ class PaymentPlanService:
 
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
             if not chunks_no:
-                raise GraphQLError("Payment Parts number is required for split by records")
+                raise GraphQLError("Payments Number is required for split by records")
 
             if chunks_no > payments_count or chunks_no < 2:
                 raise GraphQLError("Payment Parts number should be between 2 and total number of payments")
-            payments_chunks = chunk_list(list(payments.order_by("unicef_id").values_list("id", flat=True)), chunks_no)
+            payments_chunks = list(chunks(list(payments.order_by("unicef_id").values_list("id", flat=True)), chunks_no))
 
         elif split_type == PaymentPlanSplit.SplitType.BY_ADMIN_AREA2:
             grouped_payments = payments.order_by("household__admin2", "unicef_id").select_related("household__admin2")
@@ -716,7 +714,7 @@ class PaymentPlanService:
         payments_chunks_count = len(payments_chunks)
         if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
             raise GraphQLError(
-                f"Too Payment Parts to split: {payments_chunks_count}, maximum is {PaymentPlanSplit.MAX_CHUNKS}"
+                f"Too many Payment Parts to split: {payments_chunks_count}, maximum is {PaymentPlanSplit.MAX_CHUNKS}"
             )
 
         with transaction.atomic():

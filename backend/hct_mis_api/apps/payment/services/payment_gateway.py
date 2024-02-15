@@ -134,6 +134,7 @@ class PaymentRecordData:
     status: str
     hope_status: str
     extra_data: dict
+    fsp_code: str
 
 
 @dataclass

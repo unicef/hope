@@ -1239,13 +1239,13 @@ class SplitPaymentPlanMutation(PermissionMutation):
     class Arguments:
         payment_plan_id = graphene.ID(required=True)
         split_type = graphene.String(required=True)
-        payment_parts = graphene.Int(required=False)
+        payments_no = graphene.Int(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root: Any, info: Any, payment_plan_id: str, split_type: str, payment_parts: Optional[int], **kwargs: Any
+        cls, root: Any, info: Any, payment_plan_id: str, split_type: str, payments_no: Optional[int], **kwargs: Any
     ) -> "SplitPaymentPlanMutation":
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
         cls.has_permission(info, Permissions.PM_SPLIT, payment_plan.business_area)
@@ -1265,14 +1265,14 @@ class SplitPaymentPlanMutation(PermissionMutation):
             raise GraphQLError("Payment plan must be accepted to make a split")
 
         if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
-            if not payment_parts:
-                raise GraphQLError("Payment Parts number is required for split by records")
-            if payment_parts > PaymentPlanSplit.MAX_CHUNKS:
-                raise GraphQLError(f"Payment Parts number must be less than {PaymentPlanSplit.MAX_CHUNKS}")
+            if not payments_no:
+                raise GraphQLError("Payment Number is required for split by records")
+            if (payment_plan.eligible_payments.count() // payments_no) > PaymentPlanSplit.MAX_CHUNKS:
+                raise GraphQLError(f"Cannot split Payment Plan into more than {PaymentPlanSplit.MAX_CHUNKS} parts")
 
         with transaction.atomic():
             payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
-            payment_plan_service.split(split_type, payment_parts)
+            payment_plan_service.split(split_type, payments_no)
 
         return cls(payment_plan=payment_plan)
 

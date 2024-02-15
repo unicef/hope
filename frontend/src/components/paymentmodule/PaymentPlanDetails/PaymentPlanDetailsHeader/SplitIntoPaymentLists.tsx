@@ -21,24 +21,18 @@ import {
   useSplitPpMutation
 } from "../../../../__generated__/graphql";
 import { LoadingButton } from "../../../core/LoadingButton";
+import {FormikTextField} from "../../../../shared/Formik/FormikTextField";
 
 interface FormValues {
   splitType: string;
-  paymentParts: number;
+  paymentsNo: number;
 }
 
 const initialValues: FormValues = {
   splitType: "",
-  paymentParts: 0
+  paymentsNo: 0
 };
 
-const validationSchema = Yup.object().shape({
-  splitType: Yup.string().required("Split Type is required"),
-  paymentParts: Yup.number().when("splitType", {
-    is: "BY_RECORDS",
-    then: (schema) => schema.required("Payment Parts number is required")
-  })
-});
 interface SplitIntoPaymentListsProps {
   paymentPlan: PaymentPlanQuery["paymentPlan"];
   canSplit: boolean;
@@ -50,13 +44,16 @@ export const SplitIntoPaymentLists = ({
 }: SplitIntoPaymentListsProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
-  const { splitTypes, paymentParts } = paymentPlan.splitChoices;
-  const paymentPartChoices = paymentParts.map((part) => ({
-    value: part,
-    name: part
-  }));
   const [mutate, { loading }] = useSplitPpMutation();
   const { showMessage } = useSnackbar();
+
+  const validationSchema = Yup.object().shape({
+    splitType: Yup.string().required("Split Type is required"),
+    paymentsNo: Yup.number().when("splitType", {
+      is: "BY_RECORDS",
+      then: (schema) => schema.required("Payments Number is required")
+    }).min(10, "Payments Number must be greater than 10").max(paymentPlan.paymentItems.totalCount, `Payments Number must be less than ${paymentPlan.paymentItems.totalCount}`)
+  });
 
   const handleSplit = async (values): Promise<void> => {
     try {
@@ -64,7 +61,7 @@ export const SplitIntoPaymentLists = ({
         variables: {
           paymentPlanId: paymentPlan.id,
           splitType: values.splitType,
-          paymentParts: values.paymentParts
+          paymentsNo: values.paymentsNo
         }
       });
       if (!errors) {
@@ -87,42 +84,43 @@ export const SplitIntoPaymentLists = ({
       {({ values, submitForm }) => (
         <Form>
           <Button
-            variant="contained"
-            color="primary"
+            variant='contained'
+            color='primary'
             onClick={() => setDialogOpen(true)}
             endIcon={<ReorderIcon />}
             disabled={!canSplit}
           >
-            {t("Split")}
+            {t('Split')}
           </Button>
           <Dialog
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
-            scroll="paper"
-            aria-labelledby="form-dialog-title"
-            maxWidth="md"
+            scroll='paper'
+            aria-labelledby='form-dialog-title'
+            maxWidth='md'
           >
             <DialogTitleWrapper>
-              <DialogTitle>{t("Split into Payment Lists")}</DialogTitle>
+              <DialogTitle>{t('Split into Payment Lists')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
               <DialogContainer>
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <Field
-                      name="splitType"
-                      label="Split Type"
-                      choices={splitTypes}
+                      name='splitType'
+                      label='Split Type'
+                      choices={paymentPlan.splitChoices}
                       component={FormikSelectField}
                     />
                   </Grid>
                   <Grid item xs={12}>
-                    {values.splitType === "BY_RECORDS" && (
+                    {values.splitType === 'BY_RECORDS' && (
                       <Field
-                        name="paymentParts"
-                        label="Payment Parts"
-                        choices={paymentPartChoices}
-                        component={FormikSelectField}
+                        name='paymentsNo'
+                        label='Payments Number'
+                        component={FormikTextField}
+                        type='number'
+                        variant='outlined'
                       />
                     )}
                   </Grid>
@@ -132,16 +130,16 @@ export const SplitIntoPaymentLists = ({
             <DialogFooter>
               <DialogActions>
                 <Button onClick={() => setDialogOpen(false)}>
-                  {t("Cancel")}
+                  {t('Cancel')}
                 </Button>
                 <LoadingButton
                   loading={loading}
-                  color="primary"
-                  variant="contained"
+                  color='primary'
+                  variant='contained'
                   onClick={submitForm}
-                  data-cy="button-split"
+                  data-cy='button-split'
                 >
-                  {t("Split")}
+                  {t('Split')}
                 </LoadingButton>
               </DialogActions>
             </DialogFooter>

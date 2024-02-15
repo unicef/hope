@@ -130,27 +130,23 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery["paymentPlan"] = {
   paymentsConflictsCount: 0,
   canSendToPaymentGateway: false,
   canSplit: false,
-  splitChoices: {
-    paymentParts: [21, 10, 5, 2],
-    splitTypes: [
-      {
-        name: "By Admin Area 2",
-        value: "BY_ADMIN_AREA2",
-        __typename: "ChoiceObject"
-      },
-      {
-        name: "By Collector",
-        value: "BY_COLLECTOR",
-        __typename: "ChoiceObject"
-      },
-      {
-        name: "By Records",
-        value: "BY_RECORDS",
-        __typename: "ChoiceObject"
-      }
+  splitChoices: [
+        {
+          "name": "By Admin Area 2",
+          "value": "BY_ADMIN_AREA2",
+          "__typename": "ChoiceObject"
+        },
+        {
+          "name": "By Collector",
+          "value": "BY_COLLECTOR",
+          "__typename": "ChoiceObject"
+        },
+        {
+          "name": "By Records",
+          "value": "BY_RECORDS",
+          "__typename": "ChoiceObject"
+        }
     ],
-    __typename: "PaymentPlanSplitChoices"
-  },
   deliveryMechanisms: [
     {
       id:

@@ -1591,6 +1591,7 @@ type HouseholdNode implements Node {
   userFields: JSONString!
   koboAssetId: String!
   rowId: Int
+  detailId: String
   registrationId: Int
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
@@ -2040,9 +2041,10 @@ type ImportedHouseholdNode implements Node {
   currency: ImportedHouseholdCurrency!
   unhcrId: String!
   koboSubmissionUuid: UUID
-  koboAssetId: String!
   koboSubmissionTime: DateTime
+  koboAssetId: String!
   rowId: Int
+  detailId: String
   enumeratorRecId: Int
   misUnicefId: String
   programId: UUID
@@ -2178,6 +2180,7 @@ type ImportedIndividualNode implements Node {
   whoAnswersAltPhone: String!
   koboAssetId: String!
   rowId: Int
+  detailId: String
   disabilityCertificatePicture: String
   preferredLanguage: String
   misUnicefId: String
@@ -2354,6 +2357,7 @@ type IndividualNode implements Node {
   childHoh: Boolean!
   koboAssetId: String!
   rowId: Int
+  detailId: String
   registrationId: Int
   disabilityCertificatePicture: String
   preferredLanguage: String
@@ -2688,7 +2692,7 @@ type Mutations {
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
   chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
   assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
-  splitPaymentPlan(paymentParts: Int, paymentPlanId: ID!, splitType: String!): SplitPaymentPlanMutation
+  splitPaymentPlan(paymentPlanId: ID!, paymentsNo: Int, splitType: String!): SplitPaymentPlanMutation
   exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
   exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
@@ -3136,7 +3140,7 @@ type PaymentPlanNode implements Node {
   importedFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
-  splitChoices: PaymentPlanSplitChoices
+  splitChoices: [ChoiceObject]
   verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int, programId: String): PaymentVerificationPlanNodeConnection
   paymentVerificationSummary: PaymentVerificationSummaryNode
   bankReconciliationSuccess: Int
@@ -3162,11 +3166,6 @@ type PaymentPlanNodeConnection {
 type PaymentPlanNodeEdge {
   node: PaymentPlanNode
   cursor: String!
-}
-
-type PaymentPlanSplitChoices {
-  paymentParts: [Int]
-  splitTypes: [ChoiceObject]
 }
 
 enum PaymentPlanStatus {
