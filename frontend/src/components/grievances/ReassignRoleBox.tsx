@@ -128,6 +128,29 @@ export const ReassignRoleBox = ({
       </Box>
     ));
 
+  const showMessage = () => {
+    if (
+        (
+            ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+            (ticket.individual?.role === "PRIMARY" || ticket.individual?.relationship === "HEAD")
+        ) || (
+            ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
+            ticket.individualDataUpdateTicketDetails?.individualData?.role?.previous_value === "PRIMARY" &&
+            (
+                ticket.individualDataUpdateTicketDetails?.individualData?.role?.value === "ALTERNATE" ||
+                ticket.individualDataUpdateTicketDetails?.individualData?.role?.value === "NO_ROLE"
+            )
+        )
+    ) {
+      return (
+        <Typography variant='body2'>
+          {t('Upon removing you will need to select new individual(s) for this role.')}
+        </Typography>
+      )
+    }
+    return null
+  }
+
   return (
     <StyledBox>
       <OrangeTitle>
@@ -136,15 +159,7 @@ export const ReassignRoleBox = ({
           {t('Individual is the HOH or the collector for the household')}
         </Typography>
       </OrangeTitle>
-      {
-        ticket?.individualDataUpdateTicketDetails?.individualData?.role.value === "NO_ROLE" ? (
-           <Typography variant='body2'>
-            {t(
-              'Upon removing you will need to select new individual(s) for this role.',
-            )}
-          </Typography>
-        ) : null
-      }
+      {showMessage()}
       <Box mt={3} display='flex' flexDirection='column'>
         {shouldShowReassignHoH && (
           <Box mb={2} mt={2}>
