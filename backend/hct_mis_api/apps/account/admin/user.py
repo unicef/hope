@@ -76,31 +76,31 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         "is_superuser",
         "kobo_user",
     )
-    fieldsets = (
+    base_fieldset = (
         (
             _("Personal info"),
             {
                 "fields": (
-                    "partner",
+                    "first_name",
+                    "last_name",
+                    "email",
                     "username",
-                    "password",
-                    (
-                        "first_name",
-                        "last_name",
-                    ),
-                    ("email", "ad_uuid"),
+                    "job_title",
+                    "partner",
                 )
             },
         ),
+    )
+    extra_fieldsets = (
         (
             _("Custom Fields"),
-            {"classes": ["collapse"], "fields": ("custom_fields", "doap_hash")},
+            {"classes": ["collapse"], "fields": ("custom_fields", "doap_hash", "ad_uuid")},
         ),
         (
             _("Permissions"),
             {
-                "classes": ["collapse"],
                 "fields": (
+                    ("password",),
                     (
                         "is_active",
                         "is_staff",
@@ -122,7 +122,6 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
                 ),
             },
         ),
-        (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
     actions = ["create_kobo_user_qs", "add_business_area_role"]
@@ -144,23 +143,18 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
         )
 
     def get_readonly_fields(self, request: HttpRequest, obj: Optional[Any] = ...) -> Sequence[str]:
-        if request.user.is_superuser:
+        if request.user.has_perm("account.restrict_help_desk"):
             return super().get_readonly_fields(request, obj)
         return self.get_fields(request)
 
     def get_fields(self, request: HttpRequest, obj: Optional[Any] = None) -> List[str]:
-        return [
-            "last_name",
-            "first_name",
-            "email",
-            "partner",
-            "job_title",
-        ]
+        return ["last_name", "first_name", "email", "username", "job_title", "last_login"]
 
     def get_fieldsets(self, request: HttpRequest, obj: Optional[Any] = None) -> Any:
+        fieldsets = self.base_fieldset
         if request.user.is_superuser:
-            return super().get_fieldsets(request, obj)
-        return [(None, {"fields": self.get_fields(request, obj)})]
+            fieldsets += self.extra_fieldsets  # type: ignore
+        return fieldsets
 
     def kobo_user(self, obj: Any) -> str:
         return obj.custom_fields.get("kobo_username")

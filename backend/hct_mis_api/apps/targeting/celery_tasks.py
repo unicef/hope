@@ -13,6 +13,7 @@ from concurrency.api import disable_concurrency
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.targeting.services.targeting_stats_refresher import (
     full_rebuild,
@@ -124,10 +125,10 @@ def target_population_full_rebuild(self: Any, target_population_id: UUID) -> Non
 @app.task()
 @log_start_and_end
 @sentry_tags
-def create_tp_from_list(form_data: Dict[str, str], user_id: str) -> None:
-    form = CreateTargetPopulationTextForm(form_data)
+def create_tp_from_list(form_data: Dict[str, str], user_id: str, program_pk: str) -> None:
+    program = Program.objects.get(pk=program_pk)
+    form = CreateTargetPopulationTextForm(form_data, program=program)
     if form.is_valid():
-        ba = form.cleaned_data["business_area"]
         population = form.cleaned_data["criteria"]
         set_sentry_business_area_tag(ba.name)
         try:
@@ -136,7 +137,8 @@ def create_tp_from_list(form_data: Dict[str, str], user_id: str) -> None:
                     targeting_criteria=form.cleaned_data["targeting_criteria"],
                     created_by=User.objects.get(pk=user_id),
                     name=form.cleaned_data["name"],
-                    business_area=ba,
+                    business_area=program.business_area,
+                    program=program,
                 )
                 tp.households.set(population)
                 refresh_stats(tp)
