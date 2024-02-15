@@ -370,17 +370,17 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
 
         households = ImportedHousehold.objects.all()
         for household in households:
-            self.assertTrue(household.row_id in [3, 4, 6])
+            self.assertTrue(int(household.detail_id) in [3, 4, 6])
 
         individuals = ImportedIndividual.objects.all()
         for individual in individuals:
-            self.assertTrue(individual.row_id in [3, 4, 5, 7, 8, 9])
+            self.assertTrue(int(individual.detail_id) in [3, 4, 5, 7, 8, 9])
 
     def test_create_bank_account(self) -> None:
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        bank_account_info = ImportedBankAccountInfo.objects.get(individual__row_id=7)
+        bank_account_info = ImportedBankAccountInfo.objects.get(individual__detail_id=7)
         self.assertEqual(bank_account_info.bank_name, "Bank testowy")
         self.assertEqual(bank_account_info.bank_account_number, "PL70 1410 2006 0000 3200 0926 4671")
         self.assertEqual(bank_account_info.debit_card_number, "5241 6701 2345 6789")
@@ -389,7 +389,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        document = ImportedDocument.objects.filter(individual__row_id=5).first()
+        document = ImportedDocument.objects.filter(individual__detail_id=5).first()
         self.assertEqual(document.type.key, IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID])
         self.assertEqual(document.document_number, "CD1247246Q12W")
 
@@ -397,7 +397,7 @@ class TestRdiCreateTask(BaseElasticSearchTestCase):
         task = self.RdiXlsxCreateTask()
         task.execute(self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id)
 
-        individual = ImportedIndividual.objects.get(row_id=3)
+        individual = ImportedIndividual.objects.get(detail_id=3)
         self.assertEqual(individual.seeing_disability, "")
         self.assertEqual(individual.hearing_disability, "")
 
