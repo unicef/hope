@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  makeStyles,
   Table,
   TableBody,
   TableCell,
@@ -9,6 +8,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+import styled from 'styled-components';
 import moment from 'moment';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,20 +26,20 @@ import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 import { ViewSanctionList } from './ViewSanctionList';
 
-export function FlagDetails({
+const StyledTable = styled(Table)`
+  min-width: 100px;
+`;
+
+export const FlagDetails = ({
   ticket,
   canApproveFlag,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApproveFlag: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const confirm = useConfirmation();
-  const useStyles = makeStyles(() => ({
-    table: {
-      minWidth: 100,
-    },
-  }));
+
   const [approve] = useApproveSystemFlaggingMutation({
     refetchQueries: () => [
       {
@@ -48,7 +48,6 @@ export function FlagDetails({
       },
     ],
   });
-  const classes = useStyles();
   const confirmationText = t(
     'Are you sure you want to confirm flag (sanction list match) ?',
   );
@@ -90,7 +89,7 @@ export function FlagDetails({
           </Box>
         </Box>
       </Title>
-      <Table className={classes.table}>
+      <StyledTable>
         <TableHead>
           <TableRow>
             <TableCell align="left" />
@@ -151,7 +150,7 @@ export function FlagDetails({
             <TableCell align="left">{t('Sanction List')}</TableCell>
           </TableRow>
         </TableBody>
-      </Table>
+      </StyledTable>
     </ApproveBox>
   );
-}
+};

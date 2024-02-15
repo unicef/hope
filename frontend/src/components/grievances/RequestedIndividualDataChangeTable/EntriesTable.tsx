@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import { GrievanceTicketQuery } from '@generated/graphql';
-import { handleSelected } from '@utils/helpers';
+import { handleSelected } from '../utils/helpers';
 import { individualDataRow } from './individualDataRow';
 
 const StyledTable = styled(Table)`

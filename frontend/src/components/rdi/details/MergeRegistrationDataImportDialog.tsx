@@ -46,7 +46,7 @@ export function MergeRegistrationDataImportDialog({
   return (
     <span>
       <Button
-        startIcon={<MergeTypeRounded />}
+        startIcon={<MergeTypeRoundedIcon />}
         color="primary"
         variant="contained"
         onClick={() => setOpen(true)}

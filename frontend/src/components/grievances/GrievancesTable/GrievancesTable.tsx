@@ -246,7 +246,14 @@ export function GrievancesTable({
       <TableWrapper>
         <Paper>
           <EnhancedTableToolbar title={t('Grievance Tickets List')} />
-          <Box display="flex" flexDirection="row" marginX={6} gridGap={16}>
+          <Box
+            display="flex"
+            flexDirection="row"
+            marginX={6}
+            gap={16}
+            component="div"
+          >
+            {' '}
             <BulkAssignModal
               selectedTickets={selectedTickets}
               businessArea={businessArea}

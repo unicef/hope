@@ -32,7 +32,12 @@ export const CardAmount = styled.div`
   font-weight: 600;
   font-size: 24px;
 `;
-export const IconContainer = styled.div`
+
+interface IconContainerProps {
+  bg: string;
+  color: string;
+}
+export const IconContainer = styled.div<IconContainerProps>`
   height: 40px;
   width: 40px;
   padding: 8px;
@@ -54,7 +59,11 @@ export const CardAmountLink = styled.div`
   font-weight: 600;
   font-size: 20px;
 `;
-const StyledPaper = styled(Paper)`
+interface StyledPaperProps {
+  color: string;
+}
+
+const StyledPaper = styled(Paper)<StyledPaperProps>`
   border-left: 4px solid ${({ color }) => color};
   padding: 20px 24px;
 `;

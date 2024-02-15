@@ -1,12 +1,14 @@
-/* eslint-disable */
 import { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { Accept, useDropzone } from 'react-dropzone';
 import styled from 'styled-components';
 import { useField } from 'formik';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useTranslation } from 'react-i18next';
 
-const DropzoneContainer = styled.div`
+interface DropzoneContainerProps {
+  disabled?: boolean;
+}
+const DropzoneContainer = styled.div<DropzoneContainerProps>`
   width: 100%;
   height: 100px;
   background-color: rgba(2, 62, 144, 0.1);
@@ -20,12 +22,11 @@ const DropzoneContainer = styled.div`
   align-items: center;
   margin-top: ${({ theme }) => theme.spacing(5)}px;
   cursor: pointer;
-
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
 export function DropzoneField({ loading }): React.ReactElement {
-  const [field, meta, helpers] = useField('file');
+  const [_field, _meta, helpers] = useField('file');
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const onDrop = useCallback((acceptedFiles) => {
@@ -46,7 +47,8 @@ export function DropzoneField({ loading }): React.ReactElement {
   }, []);
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
-    accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    accept:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' as unknown as Accept,
     onDrop,
   });
 

@@ -21,16 +21,15 @@ interface RecipientsTableRowProps {
   canViewDetails: boolean;
 }
 
-export function RecipientsTableRow({
+export const RecipientsTableRow = ({
   household,
   headOfHousehold,
   canViewDetails,
-}: RecipientsTableRowProps): React.ReactElement {
+}: RecipientsTableRowProps): React.ReactElement => {
   const navigate = useNavigate();
-  const { baseUrl, businessArea } = useBaseUrl();
+  const { baseUrl } = useBaseUrl();
   const { data: choicesData, loading: choicesLoading } =
     useHouseholdChoiceDataQuery({
-      variables: { businessArea },
       fetchPolicy: 'cache-first',
     });
   const residenceStatusChoiceDict = choicesToDict(
@@ -68,4 +67,4 @@ export function RecipientsTableRow({
       </TableCell>
     </ClickableTableRow>
   );
-}
+};

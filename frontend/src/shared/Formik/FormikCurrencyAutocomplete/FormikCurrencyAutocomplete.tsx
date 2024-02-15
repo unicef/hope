@@ -41,7 +41,7 @@ export function FormikCurrencyAutocomplete({
       <StyledAutocomplete
         options={data?.currencyChoices || []}
         defaultValue={field.value}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option: any) => option.name}
         onChange={handleChange}
         disabled={disabled}
         fullWidth

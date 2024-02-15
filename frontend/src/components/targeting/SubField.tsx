@@ -54,7 +54,7 @@ export function SubField({ field, index, baseName }): React.ReactElement {
               label={`${field.fieldAttribute.labelEn} from`}
               fullWidth
               component={FormikDateField}
-              decoratorEnd={<CalendarTodayRounded color="disabled" />}
+              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
               data-cy="date-from"
             />
           </InlineField>
@@ -64,7 +64,7 @@ export function SubField({ field, index, baseName }): React.ReactElement {
               label={`${field.fieldAttribute.labelEn} to`}
               fullWidth
               component={FormikDateField}
-              decoratorEnd={<CalendarTodayRounded color="disabled" />}
+              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
               data-cy="date-to"
             />
           </InlineField>

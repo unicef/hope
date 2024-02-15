@@ -101,9 +101,13 @@ export function ReconciliationSummary({
                       width={100}
                       height={100}
                       options={{
-                        legend: {
-                          display: false,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
                         },
+                        responsive: true,
+                        maintainAspectRatio: false,
                       }}
                       data={{
                         labels: datasets.map(({ label }) => label),

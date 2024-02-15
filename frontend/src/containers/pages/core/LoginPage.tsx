@@ -60,6 +60,7 @@ export function LoginPage(): React.ReactElement {
           <LoginButton
             variant="contained"
             size="large"
+            //@ts-ignore
             component="a"
             href={
               next

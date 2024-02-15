@@ -16,7 +16,11 @@ const Table = styled.div`
   display: flex;
   flex-direction: column;
 `;
-const HeadingCell = styled.div`
+interface HeadingCellProps {
+  weight?: number;
+}
+
+const HeadingCell = styled.div<HeadingCellProps>`
   display: flex;
   flex: ${({ weight }) => weight || 1};
   padding: 16px;
@@ -28,6 +32,7 @@ const HeadingCell = styled.div`
   letter-spacing: 0.01071em;
   vertical-align: inherit;
 `;
+
 const PaperContainer = styled(Paper)`
   width: 100%;
   padding: ${({ theme }) => theme.spacing(5)}px 0;

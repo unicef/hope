@@ -252,8 +252,8 @@ export function RequestedIndividualDataChange({
     <Formik
       initialValues={{
         selected: entries
-          .filter((row) => {
-            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+          .filter((row: [string, Record<string, unknown>]) => {
+            const valueDetails = mapKeys(row[1], (_v, k) => camelCase(k)) as {
               value: string;
               approveStatus: boolean;
             };
@@ -261,8 +261,8 @@ export function RequestedIndividualDataChange({
           })
           .map((row) => camelCase(row[0])),
         selectedFlexFields: entriesFlexFields
-          .filter((row) => {
-            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+          .filter((row: [string, Record<string, unknown>]) => {
+            const valueDetails = mapKeys(row[1], (_v, k) => camelCase(k)) as {
               value: string;
               approveStatus: boolean;
             };

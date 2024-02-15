@@ -7,7 +7,7 @@ import { grievanceTicketStatusToColor, renderUserName } from '@utils/utils';
 import { AllGrievanceTicketQuery } from '@generated/graphql';
 import { BlackLink } from '@core/BlackLink';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { getGrievanceDetailsPath } from '@utils/createGrievanceUtils';
+import { getGrievanceDetailsPath } from '@components/grievances/utils/createGrievanceUtils';
 
 interface LookUpLinkedTicketsTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];

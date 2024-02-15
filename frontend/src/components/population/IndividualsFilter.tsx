@@ -4,7 +4,7 @@ import FlashOnIcon from '@mui/icons-material/FlashOn';
 import WcIcon from '@mui/icons-material/Wc';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   DataCollectingTypeType,
   IndividualChoiceDataQuery,

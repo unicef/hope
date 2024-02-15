@@ -22,9 +22,11 @@ export function VerificationPlanDetailsChart({
       <Doughnut
         options={{
           maintainAspectRatio: false,
-          cutoutPercentage: 80,
-          legend: {
-            display: false,
+          cutout: 80,
+          plugins: {
+            legend: {
+              display: false,
+            },
           },
         }}
         data={{

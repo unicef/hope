@@ -13,8 +13,8 @@ import {
   useAllEditHouseholdFieldsQuery,
 } from '@generated/graphql';
 import { LoadingComponent } from '@core/LoadingComponent';
-import { handleSelected } from '@utils/helpers';
 import { householdDataRow } from './householdDataRow';
+import { handleSelected } from '../utils/helpers';
 
 interface RequestedHouseholdDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];

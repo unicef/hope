@@ -1,12 +1,10 @@
-/* eslint-disable prefer-template */
-import { IconButton, makeStyles } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import ExpandMore from '@mui/icons-material/ExpandMoreRounded';
-import clsx from 'clsx';
 import moment from 'moment';
 import { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { AllLogEntriesQuery, LogEntryAction } from '@generated/graphql';
 import {
   ButtonPlaceHolder,
@@ -15,30 +13,33 @@ import {
 } from '@components/core/ActivityLogTable/TableStyledComponents';
 import { Dashable } from '@components/core/Dashable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { MiśTheme } from '../../../theme';
 import { headCells } from './MainActivityLogTableHeadCells';
 
 const ButtonContainer = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
-// random color chosen by Przemek
 const CollapseContainer = styled(Collapse)`
   background-color: #fafafa;
 `;
 const StyledLink = styled(Link)`
   color: #000;
 `;
-// transitions not working in styled components
-const useStyles = makeStyles((theme: MiśTheme) => ({
-  expanded: {},
-  expandIcon: {
-    transform: 'rotate(0deg)',
-    transition: theme.transitions.create('transform', { duration: 400 }),
-    '&$expanded': {
-      transform: 'rotate(180deg)',
-    },
-  },
-}));
+
+interface StyledIconButtonProps {
+  expanded: boolean;
+}
+
+const StyledIconButton = styled(IconButton)<StyledIconButtonProps>`
+  transform: rotate(0deg);
+  transition: ${(props) =>
+    props.theme.transitions.create('transform', { duration: 400 })};
+
+  ${(props) =>
+    props.expanded &&
+    css`
+      transform: rotate(180deg);
+    `}
+`;
 
 function snakeToFieldReadable(str: string): string {
   if (!str) {
@@ -110,7 +111,6 @@ export function MainActivityLogTableRow({
 }: LogRowProps): ReactElement {
   const changes = logEntry.changes || {};
   const [expanded, setExpanded] = useState(false);
-  const classes = useStyles({});
   const keys = Object.keys(changes);
   const { length } = keys;
   if (length <= 1) {
@@ -166,14 +166,12 @@ export function MainActivityLogTableRow({
         <Cell />
         <Cell />
         <ButtonContainer>
-          <IconButton
-            className={clsx(classes.expandIcon, {
-              [classes.expanded]: expanded,
-            })}
+          <StyledIconButton
+            expanded={expanded}
             onClick={() => setExpanded(!expanded)}
           >
             <ExpandMore />
-          </IconButton>
+          </StyledIconButton>
         </ButtonContainer>
       </Row>
 
