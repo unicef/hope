@@ -1,27 +1,23 @@
-import { Box } from '@mui/material';
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { Box } from "@mui/material";
+import * as React from "react";
+import { useTranslation } from "react-i18next";
+import styled from "styled-components";
+import { hasPermissions, PERMISSIONS } from "../../../../config/permissions";
 import {
   paymentPlanBackgroundActionStatusToColor,
-  paymentPlanStatusToColor,
-} from '@utils/utils';
-import {
-  FinancialServiceProviderCommunicationChannel,
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-} from '@generated/graphql';
-import { BreadCrumbsItem } from '@core/BreadCrumbs';
-import { PageHeader } from '@core/PageHeader';
-import { StatusBox } from '@core/StatusBox';
-import { AcceptedPaymentPlanHeaderButtons } from './HeaderButtons/AcceptedPaymentPlanHeaderButtons';
-import { InApprovalPaymentPlanHeaderButtons } from './HeaderButtons/InApprovalPaymentPlanHeaderButtons';
-import { InAuthorizationPaymentPlanHeaderButtons } from './HeaderButtons/InAuthorizationPaymentPlanHeaderButtons';
-import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymentPlanHeaderButtons';
-import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaymentPlanHeaderButtons';
-import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
-import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
+  paymentPlanStatusToColor
+} from "@utils/utils";
+import { PaymentPlanQuery, PaymentPlanStatus } from "@generated/graphql";
+import { BreadCrumbsItem } from "@core/BreadCrumbs";
+import { PageHeader } from "@core/PageHeader";
+import { StatusBox } from "@core/StatusBox";
+import { AcceptedPaymentPlanHeaderButtons } from "./HeaderButtons/AcceptedPaymentPlanHeaderButtons";
+import { InApprovalPaymentPlanHeaderButtons } from "./HeaderButtons/InApprovalPaymentPlanHeaderButtons";
+import { InAuthorizationPaymentPlanHeaderButtons } from "./HeaderButtons/InAuthorizationPaymentPlanHeaderButtons";
+import { InReviewPaymentPlanHeaderButtons } from "./HeaderButtons/InReviewPaymentPlanHeaderButtons";
+import { LockedFspPaymentPlanHeaderButtons } from "./HeaderButtons/LockedFspPaymentPlanHeaderButtons";
+import { LockedPaymentPlanHeaderButtons } from "./HeaderButtons/LockedPaymentPlanHeaderButtons";
+import { OpenPaymentPlanHeaderButtons } from "./HeaderButtons/OpenPaymentPlanHeaderButtons";
 
 const StatusWrapper = styled(Box)`
   width: 150px;
@@ -30,20 +26,20 @@ const StatusWrapper = styled(Box)`
 interface PaymentPlanDetailsHeaderProps {
   baseUrl: string;
   permissions: string[];
-  paymentPlan: PaymentPlanQuery['paymentPlan'];
+  paymentPlan: PaymentPlanQuery["paymentPlan"];
 }
 
 export function PaymentPlanDetailsHeader({
   baseUrl,
   permissions,
-  paymentPlan,
+  paymentPlan
 }: PaymentPlanDetailsHeaderProps): React.ReactElement {
   const { t } = useTranslation();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: t('Payment Module'),
-      to: `/${baseUrl}/payment-module/`,
-    },
+      title: t("Payment Module"),
+      to: `/${baseUrl}/payment-module/`
+    }
   ];
 
   const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
@@ -52,44 +48,40 @@ export function PaymentPlanDetailsHeader({
   const canUnlock = hasPermissions(PERMISSIONS.PM_LOCK_AND_UNLOCK, permissions);
   const canSendForApproval = hasPermissions(
     PERMISSIONS.PM_SEND_FOR_APPROVAL,
-    permissions,
+    permissions
   );
   const canApprove = hasPermissions(
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
-    permissions,
+    permissions
   );
   const canAuthorize = hasPermissions(
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-    permissions,
+    permissions
   );
   const canMarkAsReleased = hasPermissions(
     PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-    permissions,
+    permissions
   );
   const canDownloadXlsx = hasPermissions(
     PERMISSIONS.PM_DOWNLOAD_XLSX_FOR_FSP,
-    permissions,
+    permissions
   );
   const canExportXlsx = hasPermissions(
     PERMISSIONS.PM_EXPORT_XLSX_FOR_FSP,
-    permissions,
+    permissions
   );
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.status === PaymentPlanStatus.Accepted &&
     paymentPlan.deliveryMechanisms.some((deliveryMechanism) => {
       const { sentToPaymentGateway, fsp } = deliveryMechanism;
-      const { communicationChannel } = fsp;
-      return (
-        !sentToPaymentGateway &&
-        communicationChannel ===
-          FinancialServiceProviderCommunicationChannel.Api
-      );
+      const { isPaymentGateway } = fsp;
+      return isPaymentGateway && !sentToPaymentGateway;
     });
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
-    case 'OPEN':
+    case "OPEN":
       buttons = (
         <OpenPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -99,7 +91,7 @@ export function PaymentPlanDetailsHeader({
         />
       );
       break;
-    case 'LOCKED':
+    case "LOCKED":
       buttons = (
         <LockedPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -108,7 +100,7 @@ export function PaymentPlanDetailsHeader({
         />
       );
       break;
-    case 'LOCKED_FSP':
+    case "LOCKED_FSP":
       buttons = (
         <LockedFspPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
@@ -117,43 +109,43 @@ export function PaymentPlanDetailsHeader({
         />
       );
       break;
-    case 'IN_APPROVAL':
+    case "IN_APPROVAL":
       buttons = (
         <InApprovalPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
             PERMISSIONS.PM_ACCEPTANCE_PROCESS_APPROVE,
-            permissions,
+            permissions
           )}
           canApprove={canApprove}
         />
       );
       break;
-    case 'IN_AUTHORIZATION':
+    case "IN_AUTHORIZATION":
       buttons = (
         <InAuthorizationPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
             PERMISSIONS.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
-            permissions,
+            permissions
           )}
           canAuthorize={canAuthorize}
         />
       );
       break;
-    case 'IN_REVIEW':
+    case "IN_REVIEW":
       buttons = (
         <InReviewPaymentPlanHeaderButtons
           paymentPlan={paymentPlan}
           canReject={hasPermissions(
             PERMISSIONS.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
-            permissions,
+            permissions
           )}
           canMarkAsReleased={canMarkAsReleased}
         />
       );
       break;
-    case 'ACCEPTED':
+    case "ACCEPTED":
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
@@ -163,7 +155,7 @@ export function PaymentPlanDetailsHeader({
         />
       );
       break;
-    case 'FINISHED': // TODO: may create another one for that explicitly but good for now
+    case "FINISHED": // TODO: may create another one for that explicitly but good for now
       buttons = (
         <AcceptedPaymentPlanHeaderButtons
           canDownloadXlsx={canDownloadXlsx}
@@ -181,7 +173,7 @@ export function PaymentPlanDetailsHeader({
     <PageHeader
       title={
         <Box display="flex" alignItems="center">
-          {t('Payment Plan')} ID:{' '}
+          {t("Payment Plan")} ID:{" "}
           <Box ml={1}>
             <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
           </Box>

@@ -47,12 +47,19 @@ class ValidatorTest(TestCase):
             {
                 "households": ["This field is required."],
                 "name": ["This field is required."],
+                "program": ["This field is required."],
             },
         )
 
     def test_empty_households(self) -> None:
         data = {"households": [], "name": "Test1"}
-        self.assertErrors(data, {"households": ["This field is required."]})
+        self.assertErrors(
+            data,
+            {
+                "households": ["This field is required."],
+                "program": ["This field is required."],
+            },
+        )
 
     def test_empty_household_value(self) -> None:
         data = {"households": [{}], "name": "Test1"}
@@ -70,7 +77,8 @@ class ValidatorTest(TestCase):
                             }
                         ]
                     }
-                ]
+                ],
+                "program": ["This field is required."],
             },
         )
 
@@ -81,7 +89,13 @@ class ValidatorTest(TestCase):
             ],
             "name": "Test1",
         }
-        self.assertErrors(data, {"households": [{"Household #1": [{"members": ["This field is required"]}]}]})
+        self.assertErrors(
+            data,
+            {
+                "households": [{"Household #1": [{"members": ["This field is required"]}]}],
+                "program": ["This field is required."],
+            },
+        )
 
     def test_double_entries(self) -> None:
         h1 = dict(**HOUSEHOLD)
@@ -100,7 +114,8 @@ class ValidatorTest(TestCase):
                             },
                         ]
                     }
-                ]
+                ],
+                "program": ["This field is required."],
             },
         )
 
@@ -120,6 +135,7 @@ class ValidatorTest(TestCase):
                             },
                         ]
                     }
-                ]
+                ],
+                "program": ["This field is required."],
             },
         )

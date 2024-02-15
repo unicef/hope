@@ -108,6 +108,7 @@ export function DuplicateProgramPage(): ReactElement {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',
