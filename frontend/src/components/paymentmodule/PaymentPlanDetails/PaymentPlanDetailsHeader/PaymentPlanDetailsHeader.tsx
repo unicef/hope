@@ -8,7 +8,6 @@ import {
   paymentPlanStatusToColor,
 } from '../../../../utils/utils';
 import {
-  FinancialServiceProviderCommunicationChannel,
   PaymentPlanQuery,
   PaymentPlanStatus
 } from '../../../../__generated__/graphql';
@@ -79,8 +78,8 @@ export const PaymentPlanDetailsHeader = ({
   paymentPlan.deliveryMechanisms.some(
     (deliveryMechanism) => {
       const { sentToPaymentGateway, fsp } = deliveryMechanism;
-      const {communicationChannel} = fsp;
-      return !sentToPaymentGateway && communicationChannel === FinancialServiceProviderCommunicationChannel.Api ;
+      const { isPaymentGateway } = fsp;
+      return isPaymentGateway && !sentToPaymentGateway;
     }
   );
 
