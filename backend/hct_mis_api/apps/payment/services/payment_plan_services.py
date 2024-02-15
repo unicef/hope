@@ -387,27 +387,28 @@ class PaymentPlanService:
         if not input_data.get("name"):
             raise GraphQLError("Payment plan name is required")
 
-        payment_plan = PaymentPlan.objects.create(
-            business_area=business_area,
-            created_by=user,
-            target_population=target_population,
-            program=target_population.program,
-            program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
-            name=input_data["name"],
-            currency=input_data["currency"],
-            dispersion_start_date=input_data["dispersion_start_date"],
-            dispersion_end_date=dispersion_end_date,
-            status_date=timezone.now(),
-            start_date=input_data["start_date"],
-            end_date=input_data["end_date"],
-            status=PaymentPlan.Status.PREPARING,
-        )
+        with transaction.atomic():
+            payment_plan = PaymentPlan.objects.create(
+                business_area=business_area,
+                created_by=user,
+                target_population=target_population,
+                program=target_population.program,
+                program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
+                name=input_data["name"],
+                currency=input_data["currency"],
+                dispersion_start_date=input_data["dispersion_start_date"],
+                dispersion_end_date=dispersion_end_date,
+                status_date=timezone.now(),
+                start_date=input_data["start_date"],
+                end_date=input_data["end_date"],
+                status=PaymentPlan.Status.PREPARING,
+            )
 
-        TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
-            status=TargetPopulation.STATUS_ASSIGNED
-        )
+            TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
+                status=TargetPopulation.STATUS_ASSIGNED
+            )
 
-        prepare_payment_plan_task.delay(payment_plan.id)
+            transaction.on_commit(lambda: prepare_payment_plan_task.delay(payment_plan.id))
 
         return payment_plan
 

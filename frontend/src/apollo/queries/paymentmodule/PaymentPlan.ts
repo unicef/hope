@@ -147,6 +147,7 @@ export const PAYMENT_PLAN_QUERY = gql`
           id
           name
           communicationChannel
+          isPaymentGateway
         }
       }
       canSendToPaymentGateway

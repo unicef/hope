@@ -1229,6 +1229,7 @@ type FinancialServiceProviderNode implements Node {
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
+  isPaymentGateway: Boolean
 }
 
 type FinancialServiceProviderNodeConnection {

@@ -109,6 +109,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
             "phone_no": str(obj.collector.phone_no),
             "last_name": obj.collector.family_name,
             "first_name": obj.collector.given_name,
+            "full_name": obj.full_name,
             "destination_currency": obj.currency,
         }
 
