@@ -22,7 +22,7 @@ export function useCachedImportedIndividualFieldsQuery(
   const lastUpdatedTimestamp =
     Number.parseInt(
       localStorage.getItem(
-        `cache-targeting-core-fields-attributes-${businessArea}-timestamp`,
+        `cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}-timestamp`,
       ),
       10,
     ) || 0;
@@ -54,7 +54,7 @@ export function useCachedImportedIndividualFieldsQuery(
     setOldBusinessArea(businessArea);
     setOldSelectedProgramId(selectedProgramId);
     localForage
-      .getItem(`cache-targeting-core-fields-attributes-${businessArea}`)
+      .getItem(`cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}`)
       .then((value) => {
         if (value) {
           setCache(value);
@@ -66,11 +66,11 @@ export function useCachedImportedIndividualFieldsQuery(
       return;
     }
     localForage.setItem(
-      `cache-targeting-core-fields-attributes-${businessArea}`,
+      `cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}`,
       results.data,
     );
     localStorage.setItem(
-      `cache-targeting-core-fields-attributes-${businessArea}-timestamp`,
+      `cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}-timestamp`,
       Date.now().toString(),
     );
   }, [results.data]);
