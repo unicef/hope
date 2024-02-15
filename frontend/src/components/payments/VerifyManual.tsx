@@ -17,7 +17,7 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import {
-  PaymentStatus,
+  PaymentVerificationStatus,
   useUpdatePaymentVerificationReceivedAndReceivedAmountMutation
 } from '../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
@@ -82,7 +82,7 @@ export function VerifyManual({
               data-cy='button-ed-plan'
               disabled={!enabled}
             >
-              {status === PaymentStatus.Pending ? t('Verify') : t('Edit')}
+              {status === PaymentVerificationStatus.Pending ? t('Verify') : t('Edit')}
             </Button>
           </Box>
           <Dialog
