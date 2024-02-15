@@ -8,7 +8,6 @@ from django.utils import timezone
 
 from concurrency.api import disable_concurrency
 from constance import config
-from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.models import (
@@ -21,7 +20,7 @@ from hct_mis_api.apps.household.services.household_recalculate_data import (
 )
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
-from hct_mis_api.apps.utils.sentry import sentry_tags
+from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
 
@@ -35,29 +34,28 @@ def recalculate_population_fields_chunk_task(households_ids: List[UUID]) -> None
     # memory optimization
     paginator = Paginator(households_ids, 200)
 
-    with configure_scope() as scope:
-        with disable_concurrency(Household), disable_concurrency(Individual):
-            with transaction.atomic():
-                for page in paginator.page_range:
-                    logger.info(
-                        f"recalculate_population_fields_chunk_task: Processing page {page} of {paginator.num_pages}"
-                    )
-                    households_ids_page = paginator.page(page).object_list
-                    households_to_update = []
-                    fields_to_update = []
-                    for hh in (
-                        Household.objects.filter(pk__in=households_ids_page)
-                        .only("id", "collect_individual_data")
-                        .prefetch_related("individuals")
-                        .select_for_update(of=("self",), skip_locked=True)
-                        .order_by("pk")
-                    ):
-                        scope.set_tag("business_area", hh.business_area)
-                        household, updated_fields = recalculate_data(hh, save=False)
-                        households_to_update.append(household)
-                        fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
-                    if fields_to_update:
-                        Household.objects.bulk_update(households_to_update, fields_to_update)
+    with disable_concurrency(Household), disable_concurrency(Individual):
+        with transaction.atomic():
+            for page in paginator.page_range:
+                logger.info(
+                    f"recalculate_population_fields_chunk_task: Processing page {page} of {paginator.num_pages}"
+                )
+                households_ids_page = paginator.page(page).object_list
+                households_to_update = []
+                fields_to_update = []
+                for hh in (
+                    Household.objects.filter(pk__in=households_ids_page)
+                    .only("id", "collect_individual_data")
+                    .prefetch_related("individuals")
+                    .select_for_update(of=("self",), skip_locked=True)
+                    .order_by("pk")
+                ):
+                    set_sentry_business_area_tag(hh.business_area.name)
+                    household, updated_fields = recalculate_data(hh, save=False)
+                    households_to_update.append(household)
+                    fields_to_update.extend(x for x in updated_fields if x not in fields_to_update)
+                if fields_to_update:
+                    Household.objects.bulk_update(households_to_update, fields_to_update)
 
 
 @app.task()
@@ -105,6 +103,7 @@ def interval_recalculate_population_fields_task() -> None:
 
 
 @app.task()
+@log_start_and_end
 @sentry_tags
 def calculate_children_fields_for_not_collected_individual_data() -> int:
     from django.db.models.functions import Coalesce
@@ -144,6 +143,7 @@ def calculate_children_fields_for_not_collected_individual_data() -> int:
 
 
 @app.task()
+@log_start_and_end
 @sentry_tags
 def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_by_id: UUID) -> None:
     from hct_mis_api.apps.account.models import User
@@ -155,16 +155,16 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
     uploaded_by = User.objects.get(id=uploaded_by_id)
     try:
         xlsx_update_file = XlsxUpdateFile.objects.get(id=xlsx_update_file_id)
-        with configure_scope() as scope:
-            scope.set_tag("business_area", xlsx_update_file.business_area)
-            updater = IndividualsIBANXlsxUpdate(xlsx_update_file)
-            updater.validate()
-            if updater.validation_errors:
-                updater.send_failure_email()
-                return
 
-            updater.update()
-            updater.send_success_email()
+        set_sentry_business_area_tag(xlsx_update_file.business_area.name)
+        updater = IndividualsIBANXlsxUpdate(xlsx_update_file)
+        updater.validate()
+        if updater.validation_errors:
+            updater.send_failure_email()
+            return
+
+        updater.update()
+        updater.send_success_email()
 
     except Exception as e:
         IndividualsIBANXlsxUpdate.send_error_email(
@@ -173,6 +173,7 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
 
 
 @app.task()
+@log_start_and_end
 @sentry_tags
 def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
     individuals_to_update = []

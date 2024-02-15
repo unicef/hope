@@ -17,7 +17,7 @@ from hct_mis_api.apps.core.kobo.common import (
     get_field_name,
 )
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import rename_dict_keys
+from hct_mis_api.apps.core.utils import chunks, rename_dict_keys
 from hct_mis_api.apps.household.models import (
     HEAD,
     NON_BENEFICIARY,
@@ -169,7 +169,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         collectors_to_bulk_create = []
         for hash_key, collectors_list in collectors_dict.items():
             for collector in collectors_list:
-                collector.individual = individuals_dict.get(hash_key)
+                collector.individual_id = individuals_dict.get(hash_key)
                 collectors_to_bulk_create.append(collector)
         ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
 
@@ -198,127 +198,62 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         submissions_json = import_data.file.read()
         submissions = json.loads(submissions_json)
         self.reduced_submissions = rename_dict_keys(submissions, get_field_name)
-
         head_of_households_mapping = {}
         households_to_create = []
-        individuals_to_create = {}
+        individuals_ids_hash_dict = {}
         bank_accounts_to_create = []
         collectors_to_create = defaultdict(list)
-        for household in self.reduced_submissions:
-            individuals_to_create_list = []
-            documents_and_identities_to_create = []
-            submission_meta_data = get_submission_metadata(household)
-            if self.business_area.get_sys_option("ignore_amended_kobo_submissions"):
-                submission_meta_data["amended"] = False
+        household_batch_size = 50
+        for reduced_submission_chunk in chunks(self.reduced_submissions, household_batch_size):
+            for household in reduced_submission_chunk:
+                submission_meta_data = get_submission_metadata(household)
+                if self.business_area.get_sys_option("ignore_amended_kobo_submissions"):
+                    submission_meta_data["amended"] = False
 
-            if KoboImportedSubmission.objects.filter(**submission_meta_data).exists():
-                continue
+                if KoboImportedSubmission.objects.filter(**submission_meta_data).exists():
+                    continue
 
-            submission_meta_data.pop("amended", None)
-            household_obj = ImportedHousehold(**submission_meta_data)
-            self.attachments = household.get("_attachments", [])
-            registration_date = None
-            current_individuals = []
-            for hh_field, hh_value in household.items():
-                if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
-                    for individual in hh_value:
-                        current_individual_docs_and_identities = defaultdict(dict)
-                        current_individual_bank_account = {}
-                        individual_obj = ImportedIndividual()
-                        only_collector_flag = False
-                        role = None
-                        for i_field, i_value in individual.items():
-                            if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
-                                key = (
-                                    i_field.replace("_photo_i_c", "")
-                                    .replace("_no_i_c", "")
-                                    .replace("_issuer_i_c", "")
-                                    .replace("_i_c", "")
-                                )
-                                if i_field.endswith("_type_i_c"):
-                                    value_key = "name"
-                                elif i_field.endswith("_photo_i_c"):
-                                    value_key = "photo"
-                                elif i_field.endswith("_issuer_i_c"):
-                                    value_key = "issuing_country"
-                                else:
-                                    value_key = "number"
-                                current_individual_docs_and_identities[key][value_key] = i_value
-                                current_individual_docs_and_identities[key]["individual"] = individual_obj
-                            elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
-                                only_collector_flag = True
-                            elif i_field == "role_i_c":
-                                role = i_value.upper()
-                            elif i_field in ("bank_name_i_c", "bank_account_number_i_c"):
-                                name = i_field.replace("_i_c", "")
-                                current_individual_bank_account["individual"] = individual_obj
-                                current_individual_bank_account[name] = i_value
-                            elif i_field.endswith("_h_c") or i_field.endswith("_h_f"):
-                                try:
-                                    self._cast_and_assign(i_value, i_field, household_obj)
-                                except Exception as e:
-                                    self._handle_exception("Household", i_field, e)
-                            else:
-                                try:
-                                    self._cast_and_assign(i_value, i_field, individual_obj)
-                                except Exception as e:
-                                    self._handle_exception("Individual", i_field, e)
-                        individual_obj.last_registration_date = individual_obj.first_registration_date
-                        individual_obj.registration_data_import = registration_data_import
-                        individual_obj.age_at_registration = calculate_age_at_registration(
-                            registration_data_import, str(individual_obj.birth_date)
-                        )
+                submission_meta_data.pop("amended", None)
+                self.handle_household(
+                    bank_accounts_to_create,
+                    collectors_to_create,
+                    head_of_households_mapping,
+                    household,
+                    households_to_create,
+                    individuals_ids_hash_dict,
+                    registration_data_import,
+                    submission_meta_data,
+                )
+            self.bulk_creates(bank_accounts_to_create, head_of_households_mapping, households_to_create)
+            bank_accounts_to_create = []
+            head_of_households_mapping = {}
+            households_to_create = []
+        self._handle_collectors(collectors_to_create, individuals_ids_hash_dict)
+        registration_data_import.import_done = RegistrationDataImportDatahub.DONE
+        registration_data_import.save()
+        rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        rdi_mis.status = RegistrationDataImport.IN_REVIEW
+        rdi_mis.save()
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            None,
+            rdi_mis.program_id,
+            old_rdi_mis,
+            rdi_mis,
+        )
+        if not self.business_area.postpone_deduplication:
+            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
+                registration_data_import_datahub=registration_data_import
+            )
 
-                        if individual_obj.relationship == HEAD:
-                            head_of_households_mapping[household_obj] = individual_obj
-
-                        individual_obj.household = household_obj if only_collector_flag is False else None
-
-                        individuals_to_create[individual_obj.get_hash_key] = individual_obj
-                        individuals_to_create_list.append(individual_obj)
-                        current_individuals.append(individual_obj)
-                        documents_and_identities_to_create.append(current_individual_docs_and_identities)
-                        if current_individual_bank_account:
-                            bank_accounts_to_create.append(ImportedBankAccountInfo(**current_individual_bank_account))
-                        if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
-                            role_obj = ImportedIndividualRoleInHousehold(
-                                individual=individual_obj,
-                                household_id=household_obj.pk,
-                                role=role,
-                            )
-                            collectors_to_create[individual_obj.get_hash_key].append(role_obj)
-                        if individual_obj.household is None:
-                            individual_obj.relationship = NON_BENEFICIARY
-
-                elif hh_field == "end":
-                    registration_date = parse(hh_value)
-                elif hh_field == "start":
-                    household_obj.start = parse(hh_value)
-                elif hh_field == "_submission_time":
-                    household_obj.kobo_submission_time = parse(hh_value)
-                else:
-                    try:
-                        self._cast_and_assign(hh_value, hh_field, household_obj)
-                    except Exception as e:
-                        self._handle_exception("Household", hh_field, e)
-
-            household_obj.first_registration_date = registration_date
-            household_obj.last_registration_date = registration_date
-            household_obj.registration_data_import = registration_data_import
-            household_obj.set_admin_areas()
-            households_to_create.append(household_obj)
-
-            for ind in current_individuals:
-                ind.first_registration_date = registration_date
-                ind.last_registration_date = registration_date
-                ind.kobo_asset_id = household_obj.kobo_asset_id
-
-            ImportedIndividual.objects.bulk_create(individuals_to_create_list)
-            self._handle_documents_and_identities(documents_and_identities_to_create)
-
+    def bulk_creates(
+        self,
+        bank_accounts_to_create: list[ImportedBankAccountInfo],
+        head_of_households_mapping: dict,
+        households_to_create: list[ImportedHousehold],
+    ) -> None:
         ImportedHousehold.objects.bulk_create(households_to_create)
-        self._handle_collectors(collectors_to_create, individuals_to_create)
-
         households_to_update = []
         for household, individual in head_of_households_mapping.items():
             household.head_of_household = individual
@@ -326,22 +261,119 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedHousehold.objects.bulk_update(
             households_to_update,
             ["head_of_household"],
-            1000,
         )
         ImportedBankAccountInfo.objects.bulk_create(bank_accounts_to_create)
-        registration_data_import.import_done = RegistrationDataImportDatahub.DONE
-        registration_data_import.save()
 
-        rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
-        rdi_mis.status = RegistrationDataImport.IN_REVIEW
-        rdi_mis.save()
-        log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, rdi_mis.program_id, old_rdi_mis, rdi_mis
-        )
-        if not self.business_area.postpone_deduplication:
-            DeduplicateTask(self.business_area.slug, str(program_id)).deduplicate_imported_individuals(
-                registration_data_import_datahub=registration_data_import
-            )
+    def handle_household(
+        self,
+        bank_accounts_to_create: list[ImportedBankAccountInfo],
+        collectors_to_create: dict,
+        head_of_households_mapping: dict,
+        household: dict,
+        households_to_create: list[ImportedHousehold],
+        individuals_ids_hash_dict: dict,
+        registration_data_import: RegistrationDataImportDatahub,
+        submission_meta_data: dict,
+    ) -> None:
+        individuals_to_create_list = []
+        documents_and_identities_to_create = []
+        household_obj = ImportedHousehold(**submission_meta_data)
+        self.attachments = household.get("_attachments", [])
+        registration_date = None
+        current_individuals = []
+        for hh_field, hh_value in household.items():
+            if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
+                for individual in hh_value:
+                    current_individual_docs_and_identities = defaultdict(dict)
+                    current_individual_bank_account = {}
+                    individual_obj = ImportedIndividual()
+                    only_collector_flag = False
+                    role = None
+                    for i_field, i_value in individual.items():
+                        if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
+                            key = (
+                                i_field.replace("_photo_i_c", "")
+                                .replace("_no_i_c", "")
+                                .replace("_issuer_i_c", "")
+                                .replace("_i_c", "")
+                            )
+                            if i_field.endswith("_type_i_c"):
+                                value_key = "name"
+                            elif i_field.endswith("_photo_i_c"):
+                                value_key = "photo"
+                            elif i_field.endswith("_issuer_i_c"):
+                                value_key = "issuing_country"
+                            else:
+                                value_key = "number"
+                            current_individual_docs_and_identities[key][value_key] = i_value
+                            current_individual_docs_and_identities[key]["individual"] = individual_obj
+                        elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
+                            only_collector_flag = True
+                        elif i_field == "role_i_c":
+                            role = i_value.upper()
+                        elif i_field in ("bank_name_i_c", "bank_account_number_i_c"):
+                            name = i_field.replace("_i_c", "")
+                            current_individual_bank_account["individual"] = individual_obj
+                            current_individual_bank_account[name] = i_value
+                        elif i_field.endswith("_h_c") or i_field.endswith("_h_f"):
+                            try:
+                                self._cast_and_assign(i_value, i_field, household_obj)
+                            except Exception as e:
+                                self._handle_exception("Household", i_field, e)
+                        else:
+                            try:
+                                self._cast_and_assign(i_value, i_field, individual_obj)
+                            except Exception as e:
+                                self._handle_exception("Individual", i_field, e)
+                    individual_obj.last_registration_date = individual_obj.first_registration_date
+                    individual_obj.registration_data_import = registration_data_import
+                    individual_obj.age_at_registration = calculate_age_at_registration(
+                        registration_data_import, str(individual_obj.birth_date)
+                    )
+
+                    if individual_obj.relationship == HEAD:
+                        head_of_households_mapping[household_obj] = individual_obj
+
+                    individual_obj.household = household_obj if only_collector_flag is False else None
+
+                    individuals_ids_hash_dict[individual_obj.get_hash_key] = individual_obj.id
+                    individuals_to_create_list.append(individual_obj)
+                    current_individuals.append(individual_obj)
+                    documents_and_identities_to_create.append(current_individual_docs_and_identities)
+                    if current_individual_bank_account:
+                        bank_accounts_to_create.append(ImportedBankAccountInfo(**current_individual_bank_account))
+                    if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
+                        role_obj = ImportedIndividualRoleInHousehold(
+                            individual_id=individual_obj.pk,
+                            household_id=household_obj.pk,
+                            role=role,
+                        )
+                        collectors_to_create[individual_obj.get_hash_key].append(role_obj)
+                    if individual_obj.household is None:
+                        individual_obj.relationship = NON_BENEFICIARY
+
+            elif hh_field == "end":
+                registration_date = parse(hh_value)
+            elif hh_field == "start":
+                household_obj.start = parse(hh_value)
+            elif hh_field == "_submission_time":
+                household_obj.kobo_submission_time = parse(hh_value)
+            else:
+                try:
+                    self._cast_and_assign(hh_value, hh_field, household_obj)
+                except Exception as e:
+                    self._handle_exception("Household", hh_field, e)
+        household_obj.first_registration_date = registration_date
+        household_obj.last_registration_date = registration_date
+        household_obj.registration_data_import = registration_data_import
+        household_obj.set_admin_areas()
+        households_to_create.append(household_obj)
+        for ind in current_individuals:
+            ind.first_registration_date = registration_date
+            ind.last_registration_date = registration_date
+            ind.detail_id = household_obj.detail_id
+        ImportedIndividual.objects.bulk_create(individuals_to_create_list)
+        self._handle_documents_and_identities(documents_and_identities_to_create)
 
     def _handle_exception(self, assigned_to: str, field_name: str, e: BaseException) -> None:
         logger.warning(e)

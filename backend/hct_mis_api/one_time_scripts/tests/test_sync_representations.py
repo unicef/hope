@@ -1,4 +1,3 @@
-import logging
 from unittest import skip
 
 from django.core.files.base import ContentFile
@@ -50,10 +49,6 @@ from hct_mis_api.one_time_scripts.tests.test_migrate_data_to_representations imp
 from hct_mis_api.one_time_scripts.tests.test_migrate_grievance_to_representations import (
     BaseGrievanceTestCase,
 )
-
-logger = logging.getLogger(__name__)
-logging.disable(logging.NOTSET)
-logger.setLevel(logging.INFO)
 
 
 class TestSyncRepresentations(BaseMigrateDataTestCase, BaseGrievanceTestCase, TestCase):

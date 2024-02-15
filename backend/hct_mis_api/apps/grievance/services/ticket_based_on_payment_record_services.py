@@ -1,7 +1,6 @@
 from base64 import b64decode
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
-from django.contrib.admin.options import get_content_type_for_model
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
@@ -23,50 +22,48 @@ def create_tickets_based_on_payment_records_service(
     household_encoded_id = details.get("household")
     household = decode_and_get_object(household_encoded_id, Household, False)
     # Payment or PaymentRecord ids
-    payment_record_encoded_ids_list = details.get("payment_record") or []
-
-    payment_record = None
-    if payment_record_encoded_ids_list:
-        payment_record_encoded_id = payment_record_encoded_ids_list.pop(0)
-        node_name, obj_id = b64decode(payment_record_encoded_id).decode().split(":")
-
-        payment_record: Union["Payment", "PaymentRecord"] = get_object_or_404(  # type: ignore
-            Payment if node_name == "PaymentNode" else PaymentRecord, id=obj_id
+    payment_record_encoded_ids_list = details.get("payment_record", [])
+    grievance_tickets_to_return = []
+    # create only one ticket details if no payment ids
+    if not payment_record_encoded_ids_list:
+        model.objects.create(
+            individual=individual,
+            household=household,
+            payment_content_type=None,
+            payment_object_id=None,
+            ticket=grievance_ticket,
         )
+        grievance_ticket.refresh_from_db()
+        grievance_tickets_to_return = [grievance_ticket]
 
-    model.objects.create(
-        individual=individual,
-        household=household,
-        payment_content_type=get_content_type_for_model(payment_record) if payment_record else None,  # type: ignore
-        payment_object_id=payment_record.pk if payment_record else None,
-        ticket=grievance_ticket,
-    )
-    grievance_ticket.refresh_from_db()
-    grievance_tickets_to_return = [grievance_ticket]
+    # for the first ticket_details use already create grievance_ticket
+    ticket: Optional[GrievanceTicket] = grievance_ticket
+    # create linked tickets for all payment ids
     for payment_record_encoded_id in payment_record_encoded_ids_list:
         node_name, obj_id = b64decode(payment_record_encoded_id).decode().split(":")
 
         payment_record: Union["Payment", "PaymentRecord"] = get_object_or_404(  # type: ignore
             Payment if node_name == "PaymentNode" else PaymentRecord, id=obj_id
         )
-
         # copy GrievanceTicket object and assign linked tickets
-        ticket = grievance_ticket
-        linked_tickets = grievance_ticket.linked_tickets.all()
-        ticket.pk = None
-        ticket.save()
-        ticket.linked_tickets.set(linked_tickets)
+        if not ticket:
+            ticket = grievance_ticket
+            linked_tickets = grievance_ticket.linked_tickets.all()
+            programs_ticket = grievance_ticket.programs.all()
+            ticket.pk = None
+            ticket.save()
+            ticket.linked_tickets.set(linked_tickets)
+            ticket.programs.set(programs_ticket)
 
         model.objects.create(
             individual=individual,
             household=household,
-            payment_content_type=get_content_type_for_model(payment_record),  # type: ignore
-            payment_object_id=payment_record.pk,
+            payment_obj=payment_record,
             ticket=ticket,
         )
-
         ticket.refresh_from_db()
         grievance_tickets_to_return.append(ticket)
+        ticket = None
 
     return grievance_tickets_to_return
 

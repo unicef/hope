@@ -1,4 +1,3 @@
-import logging
 from contextlib import contextmanager
 from typing import Dict, Iterator, List
 
@@ -79,9 +78,6 @@ class TestGPFMigrationToES(BaseElasticSearchTestCase):
         super().setUpTestData()
 
     def test_migrate_program_id_to_household_es(self) -> None:
-        logging.disable(logging.INFO)
-        logging.disable(logging.ERROR)
-
         with use_es():
             migrate_program_es_db()
 
@@ -97,9 +93,6 @@ class TestGPFMigrationToES(BaseElasticSearchTestCase):
             self.assertEqual(hits[2]["_source"]["program_id"], str(self.program_3.id))
 
     def test_migrate_program_id_to_individual_es(self) -> None:
-        logging.disable(logging.INFO)
-        logging.disable(logging.ERROR)
-
         with use_es():
             migrate_program_es_db()
 

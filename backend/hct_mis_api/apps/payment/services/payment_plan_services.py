@@ -23,10 +23,12 @@ from hct_mis_api.apps.payment.celery_tasks import (
     import_payment_plan_payment_list_per_fsp_from_xlsx,
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
+    send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
     Approval,
     ApprovalProcess,
+    FinancialServiceProvider,
     Payment,
     PaymentPlan,
 )
@@ -62,6 +64,7 @@ class PaymentPlanService:
             PaymentPlan.Action.AUTHORIZE.value: self.acceptance_process,
             PaymentPlan.Action.REVIEW.value: self.acceptance_process,
             PaymentPlan.Action.REJECT.value: self.acceptance_process,
+            PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.value: self.send_to_payment_gateway,
         }
 
     def get_required_number_by_approval_type(self, approval_process: ApprovalProcess) -> Optional[int]:
@@ -119,6 +122,23 @@ class PaymentPlanService:
             authorization_number_required=self.payment_plan.authorization_number_required,
             finance_release_number_required=self.payment_plan.finance_release_number_required,
         )
+        return self.payment_plan
+
+    def send_to_payment_gateway(self) -> PaymentPlan:
+        if self.payment_plan.background_action_status == PaymentPlan.BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY:
+            raise GraphQLError("Sending in progress")
+
+        # send to payment gateway if applicable
+        not_sent_pg_delivery_mechanisms = self.payment_plan.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
+            sent_to_payment_gateway=False,
+        )
+        if not_sent_pg_delivery_mechanisms.exists():
+            send_to_payment_gateway.delay(self.payment_plan.pk, self.user.pk)
+        else:
+            raise GraphQLError("Already sent to Payment Gateway")
+
         return self.payment_plan
 
     def lock(self) -> PaymentPlan:
@@ -361,26 +381,31 @@ class PaymentPlanService:
         if end_date > target_population.program.end_date:
             raise GraphQLError("End date cannot be later that end date in the program")
 
-        payment_plan = PaymentPlan.objects.create(
-            business_area=business_area,
-            created_by=user,
-            target_population=target_population,
-            program=target_population.program,
-            program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
-            currency=input_data["currency"],
-            dispersion_start_date=input_data["dispersion_start_date"],
-            dispersion_end_date=dispersion_end_date,
-            status_date=timezone.now(),
-            start_date=input_data["start_date"],
-            end_date=input_data["end_date"],
-            status=PaymentPlan.Status.PREPARING,
-        )
+        if not input_data.get("name"):
+            raise GraphQLError("Payment plan name is required")
 
-        TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
-            status=TargetPopulation.STATUS_ASSIGNED
-        )
+        with transaction.atomic():
+            payment_plan = PaymentPlan.objects.create(
+                business_area=business_area,
+                created_by=user,
+                target_population=target_population,
+                program=target_population.program,
+                program_cycle=target_population.program.cycles.first(),  # TODO add specific cycle
+                name=input_data["name"],
+                currency=input_data["currency"],
+                dispersion_start_date=input_data["dispersion_start_date"],
+                dispersion_end_date=dispersion_end_date,
+                status_date=timezone.now(),
+                start_date=input_data["start_date"],
+                end_date=input_data["end_date"],
+                status=PaymentPlan.Status.PREPARING,
+            )
 
-        prepare_payment_plan_task.delay(payment_plan.id)
+            TargetPopulation.objects.filter(id=payment_plan.target_population_id).update(
+                status=TargetPopulation.STATUS_ASSIGNED
+            )
+
+            transaction.on_commit(lambda: prepare_payment_plan_task.delay(payment_plan.id))
 
         return payment_plan
 
@@ -448,6 +473,9 @@ class PaymentPlanService:
             self.payment_plan.currency = input_data["currency"]
             recreate_payments = True
             recalculate_payments = True
+
+        if input_data.get("name") and input_data["name"] != self.payment_plan.name:
+            self.payment_plan.name = input_data["name"]
 
         start_date = input_data.get("start_date")
         start_date = start_date.date() if isinstance(start_date, (timezone.datetime, datetime.datetime)) else start_date

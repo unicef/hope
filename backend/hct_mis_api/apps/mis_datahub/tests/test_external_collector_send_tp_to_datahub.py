@@ -22,8 +22,7 @@ from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refres
 
 
 class TestExternalCollectorSendTpToDatahub(TestCase):
-    multi_db = True
-    databases = "__all__"
+    databases = {"default", "registration_datahub", "cash_assist_datahub_mis"}
 
     @staticmethod
     def _pre_test_commands() -> None:
@@ -76,7 +75,9 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         )
 
         rdi = RegistrationDataImportFactory()
+        rdi.program.save()
         rdi_second = RegistrationDataImportFactory()
+        rdi_second.program.save()
 
         cls.create_first_household(admin_area, rdi)
 
@@ -111,12 +112,14 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             size=4,
             registration_data_import=rdi,
             admin_area=admin_area,
+            program=rdi.program,
         )
         cls.household.household_collection.save()
         cls.household1_individual_primary_and_head = IndividualFactory(
             household=cls.household,
             relationship="HEAD",
             registration_data_import=rdi,
+            program=rdi.program,
         )
         IndividualRoleInHousehold.objects.create(
             individual=cls.household1_individual_primary_and_head,
@@ -126,6 +129,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls.household1_individual_alternate = IndividualFactory(
             household=cls.household,
             registration_data_import=rdi,
+            program=rdi.program,
         )
         IndividualRoleInHousehold.objects.create(
             individual=cls.household1_individual_alternate,
@@ -135,6 +139,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         cls.individual_no_role_first = IndividualFactory(
             household=cls.household,
             registration_data_import=rdi,
+            program=rdi.program,
         )
         cls.individual_no_role_second = IndividualFactory(
             household=cls.household,
@@ -149,28 +154,33 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             size=1,
             registration_data_import=rdi_second,
             admin_area=admin_area,
+            program=rdi_second.program,
         )
         cls.household_second.household_collection.save()
         cls.external_primary_collector_household = HouseholdFactory.build(
             size=1,
             registration_data_import=rdi_second,
             admin_area=admin_area,
+            program=rdi_second.program,
         )
         cls.external_primary_collector_household.household_collection.save()
         cls.second_household_head = IndividualFactory(
             household=cls.household_second,
             relationship="HEAD",
             registration_data_import=rdi_second,
+            program=rdi_second.program,
         )
         cls.external_primary_collector = IndividualFactory(
             household=cls.external_primary_collector_household,
             registration_data_import=rdi_second,
+            program=rdi_second.program,
         )
         cls.external_primary_collector_household.head_of_household = cls.external_primary_collector
         cls.external_primary_collector_household.save()
         cls.external_alternate_collector = IndividualFactory(
             registration_data_import=rdi_second,
             household=cls.external_primary_collector_household,
+            program=rdi_second.program,
         )
         IndividualRoleInHousehold.objects.create(
             individual=cls.external_primary_collector,
@@ -192,28 +202,33 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             size=1,
             registration_data_import=rdi_second,
             admin_area=admin_area,
+            program=rdi_second.program,
         )
         household_third.household_collection.save()
         external_primary_collector_household = HouseholdFactory.build(
             size=1,
             registration_data_import=rdi_second,
             admin_area=admin_area,
+            program=rdi_second.program,
         )
         external_primary_collector_household.household_collection.save()
         household_third_head = IndividualFactory(
             household=household_third,
             relationship="HEAD",
             registration_data_import=rdi_second,
+            program=rdi_second.program,
         )
         external_primary_collector = IndividualFactory(
             household=external_primary_collector_household,
             registration_data_import=rdi_second,
+            program=rdi_second.program,
         )
         external_primary_collector_household.head_of_household = external_primary_collector
         external_primary_collector_household.save()
         external_alternate_collector = IndividualFactory(
             registration_data_import=rdi_second,
             household=external_primary_collector_household,
+            program=rdi_second.program,
         )
         IndividualRoleInHousehold.objects.create(
             individual=external_primary_collector,

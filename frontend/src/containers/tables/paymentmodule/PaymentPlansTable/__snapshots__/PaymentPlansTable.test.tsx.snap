@@ -75,6 +75,30 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   role="button"
                   tabindex="0"
                 >
+                  Name
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  data-cy="table-label"
+                  role="button"
+                  tabindex="0"
+                >
                   Status
                   <svg
                     aria-hidden="true"
@@ -292,7 +316,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body"
-                colspan="10"
+                colspan="11"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
@@ -307,7 +331,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body"
-                colspan="10"
+                colspan="11"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
@@ -322,7 +346,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body"
-                colspan="10"
+                colspan="11"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
@@ -337,7 +361,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body"
-                colspan="10"
+                colspan="11"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
@@ -352,7 +376,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body"
-                colspan="10"
+                colspan="11"
               >
                 <span
                   class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
@@ -523,6 +547,30 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   tabindex="0"
                 >
                   Payment Plan ID
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                    />
+                  </svg>
+                </span>
+              </th>
+              <th
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                scope="col"
+              >
+                <span
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  data-cy="table-label"
+                  role="button"
+                  tabindex="0"
+                >
+                  Name
                   <svg
                     aria-hidden="true"
                     class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
@@ -762,7 +810,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body"
-                colspan="10"
+                colspan="11"
               />
             </tr>
           </tbody>

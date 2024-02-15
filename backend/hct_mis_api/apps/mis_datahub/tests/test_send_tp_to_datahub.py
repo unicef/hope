@@ -39,7 +39,7 @@ from hct_mis_api.apps.targeting.services.targeting_stats_refresher import refres
 
 
 class TestSendTpToDatahub(TestCase):
-    databases = "__all__"
+    databases = {"default", "registration_datahub", "cash_assist_datahub_mis"}
 
     @staticmethod
     def _pre_test_commands() -> None:
@@ -97,24 +97,26 @@ class TestSendTpToDatahub(TestCase):
             business_area=business_area_with_data_sharing,
         )
         rdi = RegistrationDataImportFactory()
+        rdi.program.save()
         rdi_second = RegistrationDataImportFactory()
+        rdi_second.program.save()
 
         cls.household = HouseholdFactory.build(
             size=4,
             registration_data_import=rdi,
             admin_area=admin_area,
+            program=rdi.program,
         )
         cls.household.household_collection.save()
         cls.household_second = HouseholdFactory.build(
-            size=1,
-            registration_data_import=rdi_second,
-            admin_area=admin_area,
+            size=1, registration_data_import=rdi_second, admin_area=admin_area, program=rdi_second.program
         )
         cls.household_second.household_collection.save()
         cls.second_household_head = IndividualFactory(
             household=cls.household_second,
             relationship="HEAD",
             registration_data_import=rdi_second,
+            program=rdi_second.program,
         )
         unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
         IndividualRoleInHousehold.objects.create(
@@ -126,9 +128,7 @@ class TestSendTpToDatahub(TestCase):
         cls.household_second.save()
 
         cls.individual_primary = IndividualFactory(
-            household=cls.household,
-            relationship="HEAD",
-            registration_data_import=rdi,
+            household=cls.household, relationship="HEAD", registration_data_import=rdi, program=rdi.program
         )
         IndividualRoleInHousehold.objects.create(
             individual=cls.individual_primary,
@@ -140,6 +140,7 @@ class TestSendTpToDatahub(TestCase):
             photo="",
             individual=cls.individual_primary,
             type=DocumentType.objects.filter(key="national_id").first(),
+            program=cls.individual_primary.program,
         )
         IndividualIdentity.objects.create(
             partner=cls.unhcr,
@@ -149,8 +150,7 @@ class TestSendTpToDatahub(TestCase):
         )
 
         cls.individual_alternate = IndividualFactory(
-            household=cls.household,
-            registration_data_import=rdi,
+            household=cls.household, registration_data_import=rdi, program=rdi.program
         )
         IndividualRoleInHousehold.objects.create(
             individual=cls.individual_alternate,
@@ -167,6 +167,7 @@ class TestSendTpToDatahub(TestCase):
         cls.individual_no_role_first = IndividualFactory(
             household=cls.household,
             registration_data_import=rdi,
+            program=rdi.program,
         )
         IndividualIdentity.objects.create(
             individual=cls.individual_no_role_first,
@@ -176,8 +177,7 @@ class TestSendTpToDatahub(TestCase):
         )
 
         cls.individual_no_role_second = IndividualFactory(
-            household=cls.household,
-            registration_data_import=rdi,
+            household=cls.household, registration_data_import=rdi, program=rdi.program
         )
         IndividualIdentity.objects.create(
             individual=cls.individual_no_role_second,

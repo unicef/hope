@@ -20,7 +20,6 @@ variables:
   #                          Mandatory variables 
   # ========================================================================
   Docker.backend.repository: "hope-backend"
-  Docker.frontend.repository: "hope-frontend"
   Docker.registryConnection.trn: "ICTD-HOPE-DEV-ACR"
   Docker.url.trn: "uniappsakshopedev.azurecr.io"
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
@@ -102,8 +101,8 @@ stages:
               -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
               -t $(Docker.url)/$(Docker.backend.repository):latest \
               --push \
-              -f ./backend/docker/Dockerfile \
-              ./backend
+              -f ./docker/Dockerfile \
+              ./
             displayName: Docker build
           - script: |
               docker buildx create --use
@@ -115,8 +114,8 @@ stages:
               -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
               --push \
               --target dev \
-              -f ./backend/docker/Dockerfile \
-              ./backend
+              -f ./docker/Dockerfile \
+              ./
             displayName: Docker build dev
           - script: |
               docker buildx create --use
@@ -126,82 +125,8 @@ stages:
               --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:$(additionalTag) \
               -t $(Docker.url.trn)/$(Docker.backend.repository):$(tag) \
               --push \
-              -f ./backend/docker/Dockerfile \
-              ./backend
-            displayName: Docker build trn
-            condition: and(succeeded(), eq(variables.isTraining, true))
-
-  - stage: build_and_push_frontend
-    dependsOn: []
-    displayName: BUILD and PUSH frontend
-    jobs:
-      - job: build_and_push
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[FRONTEND_BUILD]"
-        steps:
-          - task: Docker@2
-            inputs:
-              containerRegistry: '$(Docker.registryConnection)'
-              command: 'login'
-          - task: Docker@2
-            condition: and(succeeded(), eq(variables.isTraining, true))
-            inputs:
-              containerRegistry: '$(Docker.registryConnection.trn)'
-              command: 'login'
-          - script: |
-              docker buildx create --use
-              docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
-              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
-              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
-              -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
-              -t $(Docker.url)/$(Docker.frontend.repository):latest \
-              --build-arg SENTRY_DSN=$(SENTRY_DSN) \
-              --build-arg SENTRY_ENVIRONMENT=$(sentryEnvironment) \
-              --push \
-              ./frontend
-            displayName: Docker build dev
-          - script: |
-              docker buildx create --use
-              docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
-              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
-              --cache-to=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
-              -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
-              -t $(Docker.url)/$(Docker.frontend.repository):latest \
-              --build-arg SENTRY_DSN=$(SENTRY_DSN) \
-              --build-arg SENTRY_ENVIRONMENT=staging \
-              --push \
-              ./frontend
-            displayName: Docker build staging
-            condition: and(succeeded(), eq(variables.isStaging, true))
-          - script: |
-              docker buildx create --use
-              docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
-              -t $(Docker.url)/$(Docker.frontend.repository):$(tag) \
-              -t $(Docker.url)/$(Docker.frontend.repository):latest \
-              --build-arg SENTRY_DSN=$(SENTRY_DSN) \
-              --build-arg SENTRY_ENVIRONMENT=ephemeral \
-              --push \
-              ./frontend
-            displayName: Docker build ephemeral
-            condition: and(succeeded(), eq(variables.isEphemeral, true))
-          - script: |
-              docker buildx create --use
-              docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:$(additionalTag) \
-              --cache-from=$(Docker.url)/$(Docker.frontend.repository)-cache:latest \
-              -t $(Docker.url.trn)/$(Docker.frontend.repository):$(tag) \
-              -t $(Docker.url.trn)/$(Docker.frontend.repository):latest \
-              --build-arg SENTRY_DSN=$(SENTRY_DSN) \
-              --build-arg SENTRY_ENVIRONMENT=training \
-              --push \
-              ./frontend
+              -f ./docker/Dockerfile \
+              ./
             displayName: Docker build trn
             condition: and(succeeded(), eq(variables.isTraining, true))
 

@@ -2,7 +2,8 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from hct_mis_api.apps.account.fixtures import BusinessAreaFactory
+from hct_mis_api.apps.core.fixtures import create_afghanistan
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
@@ -13,14 +14,16 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 class TestTargetingSteficon(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        create_afghanistan()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         rule, __ = Rule.objects.update_or_create(
             name="TestRule1", defaults={"definition": "result.value=Decimal('1.3')"}
         )
         rule.commit(is_release=True, force=True)
         assert rule.latest  # sanity check
-        cls.target_population = TargetPopulationFactory(steficon_rule=rule.latest)
+        cls.target_population = TargetPopulationFactory(steficon_rule=rule.latest, business_area=cls.business_area)
         if not cls.target_population.households.exists():
-            hoh = IndividualFactory(household=None, business_area=BusinessAreaFactory())
+            hoh = IndividualFactory(household=None, business_area=cls.business_area)
             households = [HouseholdFactory(head_of_household=hoh)]
             cls.target_population.households.add(*households)
 

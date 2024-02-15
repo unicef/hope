@@ -46,6 +46,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
     name: 'Report should property early adult.',
     __typename: 'TargetPopulationNode',
   },
+  name: "paymentPlanName",
   currency: PaymentPlanCurrency.Pln,
   currencyName: 'Polish złoty',
   startDate: '2020-10-27',
@@ -139,6 +140,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
         communicationChannel: FinancialServiceProviderCommunicationChannel.Api,
         __typename: 'FinancialServiceProviderNode',
       },
+      sentToPaymentGateway: false,
       __typename: 'DeliveryMechanismNode',
     },
     {
@@ -152,6 +154,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
         communicationChannel: FinancialServiceProviderCommunicationChannel.Xlsx,
         __typename: 'FinancialServiceProviderNode',
       },
+      sentToPaymentGateway: false,
       __typename: 'DeliveryMechanismNode',
     },
     {
@@ -165,6 +168,7 @@ export const fakeApolloPaymentPlan: PaymentPlanQuery['paymentPlan'] = {
         communicationChannel: FinancialServiceProviderCommunicationChannel.Xlsx,
         __typename: 'FinancialServiceProviderNode',
       },
+      sentToPaymentGateway: false,
       __typename: 'DeliveryMechanismNode',
     },
   ],

@@ -3,6 +3,7 @@ import { Field } from 'formik';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import PaymentIcon from '@material-ui/icons/Payment';
 import { FormikDateField } from '../../../../shared/Formik/FormikDateField';
 import { OverviewContainer } from '../../../core/OverviewContainer';
 import { PaperContainer } from '../../../targeting/PaperContainer';
@@ -10,6 +11,7 @@ import { Title } from '../../../core/Title';
 import { FormikCurrencyAutocomplete } from '../../../../shared/Formik/FormikCurrencyAutocomplete';
 import { useTargetPopulationLazyQuery } from '../../../../__generated__/graphql';
 import { tomorrow } from '../../../../utils/utils';
+import { FormikTextField } from "../../../../shared/Formik/FormikTextField";
 
 interface PaymentPlanParametersProps {
   values;
@@ -43,6 +45,19 @@ export const PaymentPlanParameters = ({
       </Title>
       <OverviewContainer>
         <Grid spacing={3} container>
+          <Grid item xs={4}>
+            <Field
+              name='name'
+              label={t('Name')}
+              type='text'
+              fullWidth
+              required
+              variant='outlined'
+              component={FormikTextField}
+              decoratorEnd={<PaymentIcon color='disabled' />}
+              data-cy='input-payment-plan-name'
+            />
+          </Grid>
           <Grid item xs={4}>
             <Field
               name='startDate'

@@ -247,7 +247,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                   'Grievance Tickets created',
                 )}.`,
                 {
-                  pathname: `/${baseUrl}/grievance/tickets`,
+                  pathname: `/${baseUrl}/grievance/tickets/user-generated`,
                   historyMethod: 'push',
                 },
               );

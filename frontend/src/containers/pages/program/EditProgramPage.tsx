@@ -68,6 +68,7 @@ export const EditProgramPage = (): ReactElement => {
   if (!data || !treeData || !userPartnerChoicesData) return null;
   const {
     name,
+    programmeCode,
     startDate,
     endDate,
     sector,
@@ -114,6 +115,7 @@ export const EditProgramPage = (): ReactElement => {
 
   const initialValues = {
     name,
+    programmeCode,
     startDate,
     endDate,
     sector,
@@ -138,6 +140,7 @@ export const EditProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',
