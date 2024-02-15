@@ -16,6 +16,8 @@ from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     SON_DAUGHTER,
 )
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     COLLECT_TYPE_FULL,
@@ -37,10 +39,12 @@ class UploadRDITests(HOPEApiTestCase):
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
         cls.url = reverse("api:rdi-upload", args=[cls.business_area.slug])
+        cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
 
     def test_upload_single_household(self) -> None:
         data = {
             "name": "aaaa",
+            "program": str(self.program.id),
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -75,6 +79,7 @@ class UploadRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hrdi)
         rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
         self.assertIsNotNone(rdi)
+        self.assertEqual(rdi.program, self.program)
 
         hh = ImportedHousehold.objects.filter(registration_data_import=hrdi).first()
         self.assertIsNotNone(hh)
@@ -90,6 +95,7 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_external_collector(self) -> None:
         data = {
             "name": "aaaa",
+            "program": str(self.program.id),
             "collect_individual_data": COLLECT_TYPE_FULL,
             "households": [
                 {
@@ -140,6 +146,7 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_with_documents(self) -> None:
         data = {
             "name": "aaaa",
+            "program": str(self.program.id),
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -199,6 +206,7 @@ class UploadRDITests(HOPEApiTestCase):
 
         data = {
             "name": "aaaa",
+            "program": str(self.program.id),
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -236,6 +244,7 @@ class UploadRDITests(HOPEApiTestCase):
             ],
         }
         response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         data = response.json()
         hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(hrdi)
@@ -259,6 +268,7 @@ class UploadRDITests(HOPEApiTestCase):
 
         data = {
             "name": "aaaa",
+            "program": str(self.program.id),
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -373,6 +383,7 @@ class UploadRDITests(HOPEApiTestCase):
             ],
         }
         response = self.client.post(self.url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
         data = response.json()
         hrdi = RegistrationDataImportDatahub.objects.filter(id=data["id"]).first()
         self.assertIsNotNone(hrdi)
@@ -395,6 +406,7 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_error_too_many_hoh(self) -> None:
         data = {
             "name": "aaaa",
+            "program": str(self.program.id),
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -436,6 +448,7 @@ class UploadRDITests(HOPEApiTestCase):
     def test_upload_error_missing_primary(self) -> None:
         data = {
             "name": "aaaa",
+            "program": str(self.program.id),
             "collect_individual_data": "FULL",
             "households": [
                 {
@@ -617,7 +630,8 @@ class UploadRDITests(HOPEApiTestCase):
                             }
                         ]
                     },
-                ]
+                ],
+                "program": ["This field is required."],
             },
             f"""
 ==== RESULT ====

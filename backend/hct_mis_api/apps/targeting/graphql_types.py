@@ -137,6 +137,7 @@ class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
     household_list = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
     households = DjangoFilterConnectionField(HouseholdNode, filterset_class=HouseholdFilter)
     total_households_count_with_valid_phone_no = graphene.Int()
+    has_empty_criteria = graphene.Boolean()
 
     def resolve_total_households_count_with_valid_phone_no(self, info: Any) -> int:
         return self.households.exclude(
