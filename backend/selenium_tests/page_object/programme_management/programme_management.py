@@ -1,8 +1,8 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from time import sleep
-
 from selenium.webdriver.remote.webelement import WebElement
 
 
@@ -94,23 +94,30 @@ class ProgrammeManagement(BaseComponents):
     def chooseInputStartDateViaCalendar(self, day: int) -> None:
         self.find_in_element(self.getLabelStartDate(), self.calendarIcon)[0].click()
         self.getCalendar()
-        self.get_elements('//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
-                          'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
-                          'MuiPickersDay-daySelected" '
-                          'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
-                          'MuiPickersDay-dayDisabled"]',
-                          By.XPATH)[day - 1].click()
+        self.get_elements(
+            '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
+            'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
+            'MuiPickersDay-daySelected" '
+            'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
+            'MuiPickersDay-dayDisabled"]',
+            By.XPATH,
+        )[day - 1].click()
         self.wait_for_disappear(self.calendar)
 
     def chooseInputEndDateViaCalendar(self, day: int) -> None:
         self.find_in_element(self.getLabelEndDate(), self.calendarIcon)[0].click()
         self.getCalendar()
-        self.get('//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersCalendarHeader-iconButton"]', By.XPATH).click()
-        self.get_elements('//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
-                          'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
-                          'MuiPickersDay-daySelected" '
-                          'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
-                          'MuiPickersDay-dayDisabled"]', By.XPATH)[day-1].click()
+        self.get(
+            '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersCalendarHeader-iconButton"]', By.XPATH
+        ).click()
+        self.get_elements(
+            '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
+            'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
+            'MuiPickersDay-daySelected" '
+            'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
+            'MuiPickersDay-dayDisabled"]',
+            By.XPATH,
+        )[day - 1].click()
         self.wait_for_disappear(self.calendar)
 
     def getLabelStartDate(self) -> WebElement:
@@ -156,6 +163,13 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.headerTitle)
 
     def getButtonNewProgram(self) -> WebElement:
+        # Workaround because elements overlapped even though Selenium saw that they were available:
+        self.driver.execute_script(
+            """
+            container = document.querySelector("div[data-cy='main-content']")
+            container.scrollBy(0,600)
+            """
+        )
         return self.wait_for(self.buttonNewProgram)
 
     def fillFiltersSearch(self, filterText: str) -> None:

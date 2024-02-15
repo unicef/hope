@@ -731,6 +731,7 @@ input CreatePaymentPlanInput {
   dispersionStartDate: Date!
   dispersionEndDate: Date!
   currency: String!
+  name: String!
 }
 
 type CreatePaymentPlanMutation {
@@ -1228,6 +1229,7 @@ type FinancialServiceProviderNode implements Node {
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
+  isPaymentGateway: Boolean
 }
 
 type FinancialServiceProviderNodeConnection {
@@ -3122,6 +3124,7 @@ type PaymentPlanNode implements Node {
   isFollowUp: Boolean!
   exclusionReason: String!
   excludeHouseholdError: String!
+  name: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   deliveryMechanisms: [DeliveryMechanismNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -4387,6 +4390,7 @@ type TargetPopulationNode implements Node {
   totalFamilySize: Int
   householdList(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   totalHouseholdsCountWithValidPhoneNo: Int
+  hasEmptyCriteria: Boolean
 }
 
 type TargetPopulationNodeConnection {
@@ -4933,6 +4937,7 @@ input UpdatePaymentPlanInput {
   dispersionStartDate: Date
   dispersionEndDate: Date
   currency: String
+  name: String
 }
 
 type UpdatePaymentPlanMutation {

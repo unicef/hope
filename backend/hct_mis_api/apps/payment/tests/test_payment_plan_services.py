@@ -93,6 +93,15 @@ class TestPaymentPlanServices(APITestCase):
             GraphQLError, f"Dispersion End Date [{input_data['dispersion_end_date']}] cannot be a past date"
         ):
             PaymentPlanService.create(input_data=input_data, user=self.user)
+        input_data["dispersion_end_date"] = parse_date("2020-11-11")
+
+        with self.assertRaisesMessage(GraphQLError, "Start date cannot be earlier than start date in the program"):
+            PaymentPlanService.create(input_data=input_data, user=self.user)
+        targeting.program.start_date = timezone.datetime(2021, 10, 1, tzinfo=utc)
+        targeting.program.save()
+
+        with self.assertRaisesMessage(GraphQLError, "Payment plan name is required"):
+            PaymentPlanService.create(input_data=input_data, user=self.user)
 
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -127,14 +136,15 @@ class TestPaymentPlanServices(APITestCase):
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",
+            name="paymentPlanName",
         )
 
         with mock.patch(
-            "hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"
+            "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
         ) as mock_prepare_payment_plan_task:
             with self.assertNumQueries(6):
                 pp = PaymentPlanService.create(input_data=input_data, user=self.user)
-            self.assertEqual(mock_prepare_payment_plan_task.delay.call_args, mock.call(pp.id))
+            assert mock_prepare_payment_plan_task.on_commit.call_count == 1
 
         self.assertEqual(pp.status, PaymentPlan.Status.PREPARING)
         self.assertEqual(pp.target_population.status, TargetPopulation.STATUS_ASSIGNED)
@@ -148,6 +158,7 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp.total_households_count, 2)
         self.assertEqual(pp.total_individuals_count, 4)
         self.assertEqual(pp.payment_items.count(), 2)
+        self.assertEqual(pp.name, "paymentPlanName")
 
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
@@ -199,7 +210,7 @@ class TestPaymentPlanServices(APITestCase):
     @freeze_time("2020-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_update(self, get_exchange_rate_mock: Any) -> None:
-        pp = PaymentPlanFactory(total_households_count=1)
+        pp = PaymentPlanFactory(total_households_count=1, name="PaymentPlanName1")
         hoh1 = IndividualFactory(household=None)
         hh1 = HouseholdFactory(head_of_household=hoh1)
         PaymentFactory(parent=pp, household=hh1, currency="PLN")
@@ -227,7 +238,7 @@ class TestPaymentPlanServices(APITestCase):
             old_pp_updated_at = pp.updated_at
 
             updated_pp_1 = PaymentPlanService(payment_plan=pp).update(
-                input_data=dict(targeting_id=self.id_to_base64(new_targeting.id, "Targeting"))
+                input_data=dict(targeting_id=self.id_to_base64(new_targeting.id, "Targeting"), name="PaymentPlanName2")
             )
             updated_pp_1.refresh_from_db()
             self.assertNotEqual(old_pp_updated_at, updated_pp_1.updated_at)
@@ -237,6 +248,7 @@ class TestPaymentPlanServices(APITestCase):
             self.assertEqual(updated_pp_1.target_population, new_targeting)
             self.assertEqual(updated_pp_1.target_population.status, TargetPopulation.STATUS_ASSIGNED)
             self.assertEqual(updated_pp_1.program, updated_pp_1.target_population.program)
+            self.assertEqual(updated_pp_1.name, "PaymentPlanName2")
             self.assertEqual(old_pp_targeting.status, TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
 
             # test start_date update

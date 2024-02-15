@@ -252,7 +252,7 @@ class TestXlsxVerificationImport(APITestCase):
             [
                 "Payment Verifications",
                 f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2",
-                "If received_amount is 0, you should set received to NO",
+                "Amount Received' equals to 0, please set status as 'Not Received'",
             ],
         )
 
