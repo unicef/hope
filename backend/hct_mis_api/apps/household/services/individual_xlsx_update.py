@@ -61,7 +61,7 @@ class IndividualXlsxUpdate:
 
         individuals = []
         columns = [column.replace("individual__", "") for column in self.columns_names]
-        columns.append("row_id")
+        columns.append("detail_id")
         has_phone_number = "phone_no" in columns or "phone_no_alternative" in columns
         if has_phone_number:
             columns.append("phone_no_valid")
@@ -69,7 +69,7 @@ class IndividualXlsxUpdate:
         for individuals_unique_report in self.report_dict[IndividualXlsxUpdate.STATUS_UNIQUE]:
             row_num, individual = individuals_unique_report
             row = self.individuals_ws[row_num]
-            individual.row_id = row_num
+            individual.detail_id = row_num
             individual = self._update_single_individual(row, individual)
             if has_phone_number:
                 individual = calculate_phone_numbers_validity(individual)
