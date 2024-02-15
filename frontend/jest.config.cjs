@@ -6,10 +6,11 @@ module.exports = {
   testPathIgnorePatterns: ['/node_modules/', '/.history/', '/scripts/'],
   setupFilesAfterEnv: ['./jest/setupTests.ts'],
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': '<rootDir>/node_modules/babel-jest',
-    '^.+\\.css$': '<rootDir>/config/jest/cssTransform.js',
+    '^.+\\.(js|jsx)$': 'esbuild-jest',
+    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.css$': '<rootDir>/config/jest/cssTransform.cjs',
     '^(?!.*\\.(js|jsx|ts|tsx|css|json)$)':
-      '<rootDir>/config/jest/fileTransform.js',
+      '<rootDir>/config/jest/fileTransform.cjs',
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|ts|tsx)$',
@@ -21,4 +22,13 @@ module.exports = {
     '/src/serviceWorker.ts',
     '.*\\.d\\.ts',
   ],
+  moduleNameMapper: {
+    '^@components/(.*)$': '<rootDir>/src/components/$1',
+    '^@core/(.*)$': '<rootDir>/src/components/core/$1',
+    '^@containers/(.*)$': '<rootDir>/src/containers/$1',
+    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+    '^@utils/(.*)$': '<rootDir>/src/utils/$1',
+    '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
+    '^@generated/(.*)$': '<rootDir>/src/__generated__/$1',
+  },
 };

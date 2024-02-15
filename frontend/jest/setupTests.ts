@@ -1,4 +1,3 @@
-import replaceAllInserter from 'string.prototype.replaceall';
 import '@testing-library/jest-dom';
 import 'jest-canvas-mock';
 import setupInternalization from '../src/i18n';
@@ -7,6 +6,7 @@ import * as useBusinessAreaModule from '../src/hooks/useBusinessArea';
 import * as useGlobalProgramModule from '../src/hooks/useGlobalProgram';
 import { fakeProgram } from '../fixtures/programs/fakeProgram';
 import * as useProgramContextModule from '../src/programContext';
+const replaceAllInserter = require('string.prototype.replaceall');
 
 global.Date.now = () => new Date('1970-01-01T00:00:00.000Z').getTime();
 replaceAllInserter.shim();
