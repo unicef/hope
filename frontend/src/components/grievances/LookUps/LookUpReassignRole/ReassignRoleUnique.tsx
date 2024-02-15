@@ -8,8 +8,9 @@ import {
   GrievanceTicketDocument,
   useReassignRoleGrievanceMutation,
 } from '@generated/graphql';
+import { Button } from '@mui/material';
 
-const ReassignRoleButton = styled.button`
+const ReassignRoleButton = styled(Button)`
   padding: 25px;
   margin-top: 25px;
   width: 100%;
@@ -69,9 +70,9 @@ export function ReassignRoleUnique({
         <ReassignRoleButton
           type="submit"
           color="primary"
-          variant="contained"
           onClick={submitForm}
           data-cy="button-submit"
+          variant="contained"
         >
           {t('Reassign To Unique Individual')}
         </ReassignRoleButton>

@@ -2,7 +2,7 @@ import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import * as React from 'react';
 import { useState } from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { formatThousands } from '@utils/utils';
 import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
@@ -11,9 +11,9 @@ interface TicketsByLocationAndCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByLocationAndCategory'];
 }
 
-export function TicketsByLocationAndCategoryChart({
-  data,
-}: TicketsByLocationAndCategoryChartProps): React.ReactElement {
+export const TicketsByLocationAndCategoryChart: React.FC<
+  TicketsByLocationAndCategoryChartProps
+> = ({ data }) => {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
   const { t } = useTranslation();
@@ -47,12 +47,13 @@ export function TicketsByLocationAndCategoryChart({
     maxBarThickness: 15,
   }));
 
-  const chartData = {
+  const chartData: any = {
     labels: matchDataSize(data.labels),
     datasets: mappedDatasets,
   };
 
-  const options = {
+  const options: any = {
+    indexAxis: 'y',
     legend: {
       labels: {
         padding: 40,
@@ -84,11 +85,7 @@ export function TicketsByLocationAndCategoryChart({
 
   return (
     <Box flexDirection="column">
-      <HorizontalBar
-        data={chartData}
-        options={options}
-        plugins={[ChartDataLabels]}
-      />
+      <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />
       {data.labels.length > lessDataCount ? (
         <Box textAlign="center" mt={4} ml={2} mr={2} letterSpacing={1.75}>
           <Button
@@ -103,4 +100,4 @@ export function TicketsByLocationAndCategoryChart({
       ) : null}
     </Box>
   );
-}
+};

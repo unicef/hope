@@ -100,7 +100,7 @@ export function RevertForceFailedButton({
                   component={FormikDateField}
                   required
                   fullWidth
-                  decoratorEnd={<CalendarTodayRounded color="disabled" />}
+                  decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
                 />
               </Form>
             </DialogContent>

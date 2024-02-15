@@ -58,7 +58,7 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
     <ButtonTooltip
       variant="contained"
       color="primary"
-      startIcon={<ExitToAppRounded />}
+      startIcon={<ExitToAppRoundedIcon />}
       onClick={() => setOpen(true)}
       data-cy="button-import"
       title={t(
@@ -116,7 +116,9 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
               defaultValue=""
               variant="outlined"
               label=""
-              onChange={(e) => setImportType(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setImportType(e.target.value)
+              }
               fullWidth
               data-cy="import-type-select"
             >

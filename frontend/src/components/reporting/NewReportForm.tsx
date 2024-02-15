@@ -35,7 +35,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export function NewReportForm(): React.ReactElement {
+export const NewReportForm = (): React.ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -44,18 +44,17 @@ export function NewReportForm(): React.ReactElement {
     reportType: Yup.string().required(t('Report type is required')),
     dateFrom: Yup.date().required(t('Date From is required')),
     dateTo: Yup.date()
-      .when(
-        'dateFrom',
-        (dateFrom, schema) =>
-          dateFrom &&
-          schema.min(
-            dateFrom,
-            `${t('End date have to be greater than')}
-            ${moment(dateFrom).format('YYYY-MM-DD')}`,
-          ),
-        '',
-      )
-      .required(t('Date To is required')),
+      .required(t('Date To is required'))
+      .when('dateFrom', (dateFrom: any, schema: Yup.DateSchema) =>
+        dateFrom
+          ? schema.min(
+              new Date(dateFrom),
+              `${t('End date have to be greater than')} ${moment(
+                dateFrom,
+              ).format('YYYY-MM-DD')}`,
+            )
+          : schema,
+      ),
   });
 
   const { data: allProgramsData, loading: loadingPrograms } =
@@ -229,7 +228,7 @@ export function NewReportForm(): React.ReactElement {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         scroll="paper"
-        PaperComponent={React.forwardRef((props, ref) => (
+        PaperComponent={React.forwardRef<HTMLDivElement>((props, ref) => (
           <Paper
             {...{
               ...props,
@@ -249,7 +248,7 @@ export function NewReportForm(): React.ReactElement {
             <>
               {dialogOpen && <AutoSubmitFormOnEnter />}
               <DialogTitleWrapper>
-                <DialogTitle disableTypography>
+                <DialogTitle>
                   <Typography variant="h6">
                     {t('Generate New Report')}
                   </Typography>
@@ -283,7 +282,7 @@ export function NewReportForm(): React.ReactElement {
                             required
                             fullWidth
                             decoratorEnd={
-                              <CalendarTodayRounded color="disabled" />
+                              <CalendarTodayRoundedIcon color="disabled" />
                             }
                           />
                         </Grid>
@@ -297,7 +296,7 @@ export function NewReportForm(): React.ReactElement {
                             initialFocusedDate={values.dateFrom}
                             fullWidth
                             decoratorEnd={
-                              <CalendarTodayRounded color="disabled" />
+                              <CalendarTodayRoundedIcon color="disabled" />
                             }
                             minDate={values.dateFrom}
                           />
@@ -368,4 +367,4 @@ export function NewReportForm(): React.ReactElement {
       </Dialog>
     </>
   );
-}
+};

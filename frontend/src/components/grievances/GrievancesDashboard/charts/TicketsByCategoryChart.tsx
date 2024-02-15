@@ -1,17 +1,18 @@
 import * as React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import { formatThousands } from '@utils/utils';
 import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
 
 interface TicketsByCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
 }
+
 export function TicketsByCategoryChart({
   data,
 }: TicketsByCategoryChartProps): React.ReactElement {
   if (!data) return null;
 
-  const chartData = {
+  const chartData: any = {
     labels: data.labels,
     datasets: [
       {
@@ -24,7 +25,7 @@ export function TicketsByCategoryChart({
     ],
   };
 
-  const options = {
+  const options: any = {
     responsive: true,
     maintainAspectRatio: false,
     legend: {
@@ -54,7 +55,8 @@ export function TicketsByCategoryChart({
         },
       ],
     },
+    indexAxis: 'y',
   };
 
-  return <HorizontalBar data={chartData} options={options} />;
+  return <Bar data={chartData} options={options} />;
 }

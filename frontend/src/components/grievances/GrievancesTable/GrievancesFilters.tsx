@@ -2,7 +2,7 @@ import { Grid, MenuItem } from '@mui/material';
 import { AccountBalance } from '@mui/icons-material';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   GrievancesChoiceDataQuery,
   useGrievanceTicketAreaScopeQuery,
@@ -37,7 +37,7 @@ interface GrievancesFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export function GrievancesFilters({
+export const GrievancesFilters = ({
   filter,
   choicesData,
   selectedTab,
@@ -45,7 +45,7 @@ export function GrievancesFilters({
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: GrievancesFiltersProps): React.ReactElement {
+}: GrievancesFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
   const navigate = useNavigate();
@@ -412,4 +412,4 @@ export function GrievancesFilters({
       </Grid>
     </FiltersSection>
   );
-}
+};

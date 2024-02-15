@@ -236,9 +236,11 @@ export function EditVerificationPlan({
           values.verificationChannel === 'RAPIDPRO'
         ) {
           navigate(`/error/${businessArea}`, {
-            errorMessage: t(
-              'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
-            ),
+            state: {
+              errorMessage: t(
+                'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
+              ),
+            },
           });
         }
         return (

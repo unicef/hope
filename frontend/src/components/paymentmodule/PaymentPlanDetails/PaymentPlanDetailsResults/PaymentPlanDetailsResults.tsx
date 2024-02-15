@@ -50,9 +50,9 @@ interface PaymentPlanDetailsResultsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export function PaymentPlanDetailsResults({
+export const PaymentPlanDetailsResults = ({
   paymentPlan,
-}: PaymentPlanDetailsResultsProps): React.ReactElement {
+}: PaymentPlanDetailsResultsProps): React.ReactElement => {
   const { t } = useTranslation();
   const {
     femaleChildrenCount,
@@ -119,9 +119,13 @@ export function PaymentPlanDetailsResults({
                     width={100}
                     height={100}
                     options={{
-                      legend: {
-                        display: false,
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
                       },
+                      responsive: true,
+                      maintainAspectRatio: false,
                     }}
                     data={{
                       labels: [
@@ -174,4 +178,4 @@ export function PaymentPlanDetailsResults({
       </ContentWrapper>
     </PaperContainer>
   );
-}
+};
