@@ -94,6 +94,7 @@ export function CreateProgramPage(): ReactElement {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',

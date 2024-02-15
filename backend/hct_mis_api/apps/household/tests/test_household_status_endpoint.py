@@ -77,13 +77,13 @@ class TestDetails(TestCase):
         imported_household = ImportedHouseholdFactory(registration_data_import=rdi_datahub)
         imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
         imported_household.head_of_household = imported_individual
-        imported_household.kobo_asset_id = "HOPE-2022530111222"
+        imported_household.detail_id = "HOPE-2022530111222"
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
             individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
         )
 
-        registration_id = imported_household.kobo_asset_id
+        registration_id = imported_household.detail_id
 
         response_ok = self.api_client.get(
             f"/api/hh-status?registration_id={registration_id}&business_area_code={self.business_area.code}"
@@ -208,13 +208,13 @@ class TestDetails(TestCase):
         imported_household = ImportedHouseholdFactory()
         imported_individual = ImportedIndividualFactory(household=imported_household, relationship=HEAD)
         imported_household.head_of_household = imported_individual
-        imported_household.kobo_asset_id = "HOPE-2022530111222"
+        imported_household.detail_id = "HOPE-2022530111222"
         imported_household.save()
         ImportedIndividualRoleInHousehold.objects.create(
             individual=imported_individual, role=ROLE_NO_ROLE, household=imported_household
         )
 
-        registration_id = imported_household.kobo_asset_id
+        registration_id = imported_household.detail_id
 
         response = self.api_client.get(f"/api/hh-status?registration_id={registration_id}")
         self.assertEqual(response.status_code, 200)
