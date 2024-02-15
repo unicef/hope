@@ -139,6 +139,7 @@ class TestPaymentSignature(APITestCase):
             dispersion_start_date=parse_date("2020-09-10"),
             dispersion_end_date=parse_date("2020-11-10"),
             currency="USD",
+            name="paymentPlanName",
         )
 
         with mock.patch("hct_mis_api.apps.payment.services.payment_plan_services.prepare_payment_plan_task"):

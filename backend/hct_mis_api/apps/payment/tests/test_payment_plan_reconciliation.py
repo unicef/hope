@@ -391,21 +391,28 @@ class TestPaymentPlanReconciliation(APITestCase):
         status = finalize_tp_response["data"]["finalizeTargetPopulation"]["targetPopulation"]["status"]
         self.assertEqual(status, "READY_FOR_PAYMENT_MODULE")
 
-        create_payment_plan_response = self.graphql_request(
-            request_string=CREATE_PAYMENT_PLAN_MUTATION,
-            context={"user": self.user},
-            variables={
-                "input": {
-                    "businessAreaSlug": self.business_area.slug,
-                    "targetingId": target_population_id,
-                    "startDate": timezone.datetime(2022, 8, 25, tzinfo=utc),
-                    "endDate": timezone.datetime(2022, 8, 30, tzinfo=utc),
-                    "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
-                    "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
-                    "currency": "USD",
-                }
-            },
-        )
+        with patch(
+            "hct_mis_api.apps.payment.services.payment_plan_services.transaction"
+        ) as mock_prepare_payment_plan_task:
+            create_payment_plan_response = self.graphql_request(
+                request_string=CREATE_PAYMENT_PLAN_MUTATION,
+                context={"user": self.user},
+                variables={
+                    "input": {
+                        "businessAreaSlug": self.business_area.slug,
+                        "targetingId": target_population_id,
+                        "name": "paymentPlanName",
+                        "startDate": timezone.datetime(2022, 8, 25, tzinfo=utc),
+                        "endDate": timezone.datetime(2022, 8, 30, tzinfo=utc),
+                        "dispersionStartDate": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
+                        "dispersionEndDate": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
+                        "currency": "USD",
+                    }
+                },
+            )
+            assert mock_prepare_payment_plan_task.on_commit.call_count == 1
+            mock_prepare_payment_plan_task.on_commit.call_args[0][0]()  # call real func
+
         assert "errors" not in create_payment_plan_response, create_payment_plan_response
         encoded_payment_plan_id = create_payment_plan_response["data"]["createPaymentPlan"]["paymentPlan"]["id"]
         payment_plan_id = decode_id_string(encoded_payment_plan_id)

@@ -52,6 +52,7 @@ class TestUpdateProgram(APITestCase):
         )
 
         cls.partner = PartnerFactory(name="WFP")
+        cls.user = UserFactory.create(partner=cls.partner)
 
     def test_update_program_not_authenticated(self) -> None:
         self.snapshot_graphql_request(
@@ -82,12 +83,11 @@ class TestUpdateProgram(APITestCase):
     def test_update_program_authenticated(
         self, _: Any, permissions: List[Permissions], should_be_updated: bool
     ) -> None:
-        user = UserFactory.create(partner=self.partner)
-        self.create_user_role_with_permissions(user, permissions, self.business_area)
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
@@ -109,8 +109,7 @@ class TestUpdateProgram(APITestCase):
             assert updated_program.name == "initial name"
 
     def test_update_active_program_with_dct(self) -> None:
-        user = UserFactory.create(partner=self.partner)
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
         data_collecting_type.limit_to.add(self.business_area)
         Program.objects.filter(id=self.program.id).update(
@@ -123,7 +122,7 @@ class TestUpdateProgram(APITestCase):
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
@@ -136,15 +135,14 @@ class TestUpdateProgram(APITestCase):
         self.assertEqual(self.program.data_collecting_type.code, "full_collection")
 
     def test_update_draft_not_empty_program_with_dct(self) -> None:
-        user = UserFactory.create(partner=self.partner)
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
         data_collecting_type.limit_to.add(self.business_area)
         create_household(household_args={"program": self.program})
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
@@ -162,12 +160,11 @@ class TestUpdateProgram(APITestCase):
         )
         dct.limit_to.add(self.business_area)
 
-        user = UserFactory.create(partner=self.partner)
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
@@ -184,12 +181,11 @@ class TestUpdateProgram(APITestCase):
         )
         dct.limit_to.add(self.business_area)
 
-        user = UserFactory.create(partner=self.partner)
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
@@ -204,12 +200,11 @@ class TestUpdateProgram(APITestCase):
         DataCollectingType.objects.update_or_create(
             **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA"}
         )
-        user = UserFactory.create(partner=self.partner)
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_CREATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
@@ -221,12 +216,11 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_when_finished(self) -> None:
-        user = UserFactory.create(partner=self.partner)
-        self.create_user_role_with_permissions(user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
         self.snapshot_graphql_request(
             request_string=self.UPDATE_PROGRAM_MUTATION,
-            context={"user": user},
+            context={"user": self.user},
             variables={
                 "programData": {
                     "id": self.id_to_base64(self.program_finished.id, "ProgramNode"),
@@ -255,3 +249,71 @@ class TestUpdateProgram(APITestCase):
                 "version": self.program.version,
             },
         )
+
+    def test_update_program_with_programme_code(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        self.graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "name": "xyz",
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
+                    "programmeCode": "abc2",
+                },
+                "version": self.program.version,
+            },
+        )
+        program = Program.objects.get(id=self.program.id)
+        self.assertIsNotNone(program.programme_code)
+        self.assertEqual(program.programme_code, "ABC2")
+
+    def test_update_program_without_programme_code(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        self.program.programme_code = ""
+        self.program.save()
+
+        self.graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "name": "xyz",
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
+                    "programmeCode": "",
+                },
+                "version": self.program.version,
+            },
+        )
+        program = Program.objects.get(id=self.program.id)
+        self.assertIsNotNone(program.programme_code)
+        self.assertEqual(len(program.programme_code), 4)
+
+    def test_update_program_with_duplicated_programme_code_among_the_same_business_area(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
+
+        ProgramFactory(programme_code="ABC2", business_area=self.business_area)
+        self.program.programme_code = "ABC3"
+        self.program.save()
+
+        self.snapshot_graphql_request(
+            request_string=self.UPDATE_PROGRAM_MUTATION,
+            context={"user": self.user},
+            variables={
+                "programData": {
+                    "id": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "name": "xyz",
+                    "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
+                    "programmeCode": "abc2",
+                },
+                "version": self.program.version,
+            },
+        )
+        program = Program.objects.get(id=self.program.id)
+        self.assertIsNotNone(program.programme_code)
+        self.assertEqual(len(program.programme_code), 4)
+        self.assertEqual(program.programme_code, "ABC3")

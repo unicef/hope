@@ -75,6 +75,9 @@ export const PaymentPlanTableRow = ({
         )}
       </TableCell>
       <TableCell align='left'>
+        {(plan.name?.length > 10 ? `${plan.name.slice(0, 10)}...` : plan.name) || '-'}
+      </TableCell>
+      <TableCell align='left'>
         <StatusContainer>
           <StatusBox
             status={plan.status}

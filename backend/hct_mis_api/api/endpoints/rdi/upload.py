@@ -139,7 +139,6 @@ class IndividualSerializer(serializers.ModelSerializer):
             "deduplication_batch_status",
             "created_at",
             "updated_at",
-            "kobo_asset_id",
             "mis_unicef_id",
         ]
 

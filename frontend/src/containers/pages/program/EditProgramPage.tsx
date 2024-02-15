@@ -140,6 +140,7 @@ export const EditProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',
