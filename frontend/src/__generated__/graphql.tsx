@@ -1799,6 +1799,7 @@ export type FinancialServiceProviderNode = Node & {
   deliveryMechanismsPerPaymentPlan: DeliveryMechanismNodeConnection,
   paymentSet: PaymentNodeConnection,
   fullName?: Maybe<Scalars['String']>,
+  isPaymentGateway?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -7776,6 +7777,7 @@ export type TargetPopulationNode = Node & {
   totalFamilySize?: Maybe<Scalars['Int']>,
   householdList?: Maybe<HouseholdNodeConnection>,
   totalHouseholdsCountWithValidPhoneNo?: Maybe<Scalars['Int']>,
+  hasEmptyCriteria?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -12459,7 +12461,7 @@ export type PaymentPlanQuery = (
       & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order' | 'sentToPaymentGateway'>
       & { fsp: Maybe<(
         { __typename?: 'FinancialServiceProviderNode' }
-        & Pick<FinancialServiceProviderNode, 'id' | 'name' | 'communicationChannel'>
+        & Pick<FinancialServiceProviderNode, 'id' | 'name' | 'communicationChannel' | 'isPaymentGateway'>
       )> }
     )>>>, volumeByDeliveryMechanism: Maybe<Array<Maybe<(
       { __typename?: 'VolumeByDeliveryMechanismNode' }
@@ -23224,6 +23226,7 @@ export const PaymentPlanDocument = gql`
         id
         name
         communicationChannel
+        isPaymentGateway
       }
     }
     volumeByDeliveryMechanism {
@@ -30411,6 +30414,7 @@ export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType 
   deliveryMechanismsPerPaymentPlan?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodePaymentSetArgs>,
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isPaymentGateway?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type FinancialServiceProviderNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNodeConnection'] = ResolversParentTypes['FinancialServiceProviderNodeConnection']> = {
@@ -32662,6 +32666,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   householdList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeHouseholdListArgs>,
   totalHouseholdsCountWithValidPhoneNo?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  hasEmptyCriteria?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {

@@ -16,7 +16,6 @@ from smart_admin.mixins import LinkedObjectsMixin
 
 from hct_mis_api.apps.targeting.celery_tasks import target_population_apply_steficon
 from hct_mis_api.apps.targeting.forms import TargetPopulationForm
-from hct_mis_api.apps.targeting.mixins import TargetPopulationFromListMixin
 from hct_mis_api.apps.targeting.models import HouseholdSelection, TargetPopulation
 from hct_mis_api.apps.targeting.steficon import SteficonExecutorMixin
 from hct_mis_api.apps.utils.admin import (
@@ -30,7 +29,6 @@ from hct_mis_api.apps.utils.admin import (
 class TargetPopulationAdmin(
     SoftDeletableAdminMixin,
     SteficonExecutorMixin,
-    TargetPopulationFromListMixin,
     LinkedObjectsMixin,
     HOPEModelAdminBase,
 ):

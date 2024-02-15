@@ -46,3 +46,8 @@ class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST, headers=headers)
+
+    def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
+        queryset = self.model.objects.filter(business_area=self.selected_business_area)
+        serializer = self.serializer(queryset, many=True)
+        return Response(serializer.data)
