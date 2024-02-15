@@ -115,7 +115,7 @@ export const EditProgramPage = (): ReactElement => {
 
   const initialValues = {
     name,
-    programmeCode: '',
+    programmeCode,
     startDate,
     endDate,
     sector,
@@ -140,6 +140,7 @@ export const EditProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',

@@ -202,6 +202,26 @@ snapshots['TestUpdateProgram::test_update_program_with_deprecated_dct 1'] = {
     ]
 }
 
+snapshots['TestUpdateProgram::test_update_program_with_duplicated_programme_code_among_the_same_business_area 1'] = {
+    'data': {
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "Programme code is already used.",
+            'path': [
+                'updateProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestUpdateProgram::test_update_program_with_inactive_dct 1'] = {
     'data': {
         'updateProgram': None

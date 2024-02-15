@@ -13,11 +13,10 @@ from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetPopulation
 
 
-def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, separator: Any) -> Union[QuerySet, List]:
+def get_households_from_text(program: Program, text: Any, target_field: Any, separator: Any) -> Union[QuerySet, List]:
     """
     Given a text and a BA, find all the Households ID in the text and return the valid IDs in that business area
     """
-    list_of_households = None
     if separator in ["space", "tab"]:
         list_of_households = list(map(str.strip, text.split(" ")))
     elif separator == "new_line":
@@ -25,11 +24,11 @@ def get_households_from_text(ba: BusinessArea, text: Any, target_field: Any, sep
     else:
         list_of_households = list(map(str.strip, text.split(separator)))
     if target_field == "unicef_id":
-        return Household.objects.filter(business_area=ba, unicef_id__in=list_of_households)
+        return Household.objects.filter(unicef_id__in=list_of_households, program=program)
     elif target_field == "unique_id":
         return Household.objects.filter(
-            business_area=ba,
             id__in=list_of_households,
+            program=program,
         )
     return []
 
@@ -161,21 +160,17 @@ class CreateTargetPopulationTextForm(forms.Form):
             ("tab", _("Tab")),
         )
     )
-    business_area = forms.ModelChoiceField(
-        queryset=BusinessArea.objects.all(), help_text=_("Choose the correct business area")
-    )
     criteria = forms.CharField(
         widget=forms.Textarea, help_text=_("List of either UUID4 or UNICEF IDs separated the separator")
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.program = kwargs.pop("program")
+        assert self.program is not None
         read_only = kwargs.pop("read_only", False)
         super().__init__(*args, **kwargs)
-        if "initial" in kwargs:
-            self.fields["business_area"].queryset = BusinessArea.objects.all()
 
         if read_only:
-            self.fields["business_area"].widget = HiddenInput()
             self.fields["name"].widget = HiddenInput()
             self.fields["criteria"].widget = HiddenInput()
             self.fields["target_field"].widget = HiddenInput()
@@ -185,7 +180,7 @@ class CreateTargetPopulationTextForm(forms.Form):
     def clean_criteria(self) -> Optional[List]:
         try:
             return get_households_from_text(  # type: ignore
-                self.cleaned_data["business_area"],
+                self.program,
                 self.cleaned_data["criteria"],
                 self.cleaned_data["target_field"],
                 self.cleaned_data["separator"],

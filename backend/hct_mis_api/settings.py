@@ -820,6 +820,7 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
+        enable_tracing=env("SENTRY_ENABLE_TRACING", default=False),
         traces_sample_rate=1.0,
         send_default_pii=True,
         ignore_errors=[
