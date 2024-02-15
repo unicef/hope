@@ -127,10 +127,8 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
-        if parent.kobo_asset_id:
-            row = f" (Source id {parent.kobo_asset_id})"
-        if parent.row_id:
-            row = f" (XLS row {parent.row_id})"
+        if parent.detail_id:
+            row = f" (Detail id {parent.detail_id})"
         if parent.enumerator_rec_id:
             row = f" (Enumerator ID {parent.enumerator_rec_id})"
 
@@ -194,11 +192,8 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         row = ""
         resp = str(parent.mis_unicef_id) if parent.mis_unicef_id else str(parent.id)
 
-        if parent.kobo_asset_id:
-            row = f" (Kobo {parent.kobo_asset_id})"
-        if parent.row_id:
-            row = f" (XLS row {parent.row_id})"
-
+        if parent.detail_id:
+            row = f" (Detail ID {parent.detail_id})"
         return resp + row
 
     def resolve_phone_no_valid(parent, info: Any) -> Boolean:

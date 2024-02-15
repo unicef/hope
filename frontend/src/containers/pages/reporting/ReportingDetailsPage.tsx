@@ -69,13 +69,13 @@ export const ReportingDetailsPage = (): React.ReactElement => {
   } = useReportChoiceDataQuery();
 
   useEffect(() => {
-    if (data.report.status === REPORTING_STATES.PROCESSING) {
+    if (data?.report?.status === REPORTING_STATES.PROCESSING) {
       startPolling(30000);
     } else {
       stopPolling();
     }
     return stopPolling;
-  }, [data.report, startPolling, stopPolling]);
+  }, [data, startPolling, stopPolling]);
 
   if (loading || choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;

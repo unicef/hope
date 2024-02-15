@@ -260,7 +260,7 @@ if DEBUG:
     CSP_MANIFEST_SRC += (FRONTEND_HOST,)
 
 if DEBUG:
-    ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
+    ALLOWED_HOSTS.extend(["backend", "localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
@@ -819,6 +819,7 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
+        enable_tracing=env("SENTRY_ENABLE_TRACING", default=False),
         traces_sample_rate=1.0,
         send_default_pii=True,
         ignore_errors=[

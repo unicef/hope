@@ -1189,6 +1189,7 @@ export type CreatePaymentPlanInput = {
   dispersionStartDate: Scalars['Date'],
   dispersionEndDate: Scalars['Date'],
   currency: Scalars['String'],
+  name: Scalars['String'],
 };
 
 export type CreatePaymentPlanMutation = {
@@ -1798,6 +1799,7 @@ export type FinancialServiceProviderNode = Node & {
   deliveryMechanismsPerPaymentPlan: DeliveryMechanismNodeConnection,
   paymentSet: PaymentNodeConnection,
   fullName?: Maybe<Scalars['String']>,
+  isPaymentGateway?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -3088,8 +3090,8 @@ export type ImportedIndividualNode = Node & {
   disabilityCertificatePicture?: Maybe<Scalars['String']>,
   preferredLanguage?: Maybe<Scalars['String']>,
   misUnicefId?: Maybe<Scalars['String']>,
-  ageAtRegistration?: Maybe<Scalars['Int']>,
   programId?: Maybe<Scalars['UUID']>,
+  ageAtRegistration?: Maybe<Scalars['Int']>,
   importedhousehold?: Maybe<ImportedHouseholdNode>,
   documents: ImportedDocumentNodeConnection,
   identities: ImportedIndividualIdentityNodeConnection,
@@ -4839,6 +4841,7 @@ export type PaymentPlanNode = Node & {
   isFollowUp: Scalars['Boolean'],
   exclusionReason: Scalars['String'],
   excludeHouseholdError: Scalars['String'],
+  name?: Maybe<Scalars['String']>,
   followUps: PaymentPlanNodeConnection,
   deliveryMechanisms?: Maybe<Array<Maybe<DeliveryMechanismNode>>>,
   paymentItems: PaymentNodeConnection,
@@ -8339,6 +8342,7 @@ export type UpdatePaymentPlanInput = {
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>,
   currency?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
 };
 
 export type UpdatePaymentPlanMutation = {
@@ -11060,23 +11064,7 @@ export type CreateReportMutation = (
     { __typename?: 'CreateReport' }
     & { report: Maybe<(
       { __typename?: 'ReportNode' }
-      & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl'>
-      & { createdBy: (
-        { __typename?: 'UserNode' }
-        & Pick<UserNode, 'firstName' | 'lastName'>
-      ), adminArea: (
-        { __typename?: 'AreaNodeConnection' }
-        & { edges: Array<Maybe<(
-          { __typename?: 'AreaNodeEdge' }
-          & { node: Maybe<(
-            { __typename?: 'AreaNode' }
-            & Pick<AreaNode, 'name'>
-          )> }
-        )>> }
-      ), program: Maybe<(
-        { __typename?: 'ProgramNode' }
-        & Pick<ProgramNode, 'name'>
-      )> }
+      & Pick<ReportNode, 'id'>
     )> }
   )> }
 );
@@ -12296,7 +12284,7 @@ export type AllPaymentPlansForTableQuery = (
       & Pick<PaymentPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentPlanNode' }
-        & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'isFollowUp' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
+        & Pick<PaymentPlanNode, 'id' | 'unicefId' | 'name' | 'isFollowUp' | 'status' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity'>
         & { followUps: (
           { __typename?: 'PaymentPlanNodeConnection' }
           & Pick<PaymentPlanNodeConnection, 'totalCount'>
@@ -12400,7 +12388,7 @@ export type PaymentPlanQuery = (
   { __typename?: 'Query' }
   & { paymentPlan: Maybe<(
     { __typename?: 'PaymentPlanNode' }
-    & Pick<PaymentPlanNode, 'id' | 'version' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'excludeHouseholdError' | 'isFollowUp' | 'unsuccessfulPaymentsCount'>
+    & Pick<PaymentPlanNode, 'id' | 'name' | 'version' | 'unicefId' | 'status' | 'canCreateFollowUp' | 'backgroundActionStatus' | 'canCreatePaymentVerificationPlan' | 'availablePaymentRecordsCount' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'currency' | 'currencyName' | 'startDate' | 'endDate' | 'dispersionStartDate' | 'dispersionEndDate' | 'femaleChildrenCount' | 'femaleAdultsCount' | 'maleChildrenCount' | 'maleAdultsCount' | 'totalHouseholdsCount' | 'totalIndividualsCount' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'totalWithdrawnHouseholdsCount' | 'hasPaymentListExportFile' | 'hasFspDeliveryMechanismXlsxTemplate' | 'importedFileDate' | 'importedFileName' | 'totalEntitledQuantityUsd' | 'paymentsConflictsCount' | 'exclusionReason' | 'excludeHouseholdError' | 'isFollowUp' | 'unsuccessfulPaymentsCount'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -12473,7 +12461,7 @@ export type PaymentPlanQuery = (
       & Pick<DeliveryMechanismNode, 'id' | 'name' | 'order' | 'sentToPaymentGateway'>
       & { fsp: Maybe<(
         { __typename?: 'FinancialServiceProviderNode' }
-        & Pick<FinancialServiceProviderNode, 'id' | 'name' | 'communicationChannel'>
+        & Pick<FinancialServiceProviderNode, 'id' | 'name' | 'communicationChannel' | 'isPaymentGateway'>
       )> }
     )>>>, volumeByDeliveryMechanism: Maybe<Array<Maybe<(
       { __typename?: 'VolumeByDeliveryMechanismNode' }
@@ -19538,26 +19526,6 @@ export const CreateReportDocument = gql`
   createReport(reportData: $reportData) {
     report {
       id
-      status
-      reportType
-      createdAt
-      dateFrom
-      dateTo
-      fileUrl
-      createdBy {
-        firstName
-        lastName
-      }
-      adminArea {
-        edges {
-          node {
-            name
-          }
-        }
-      }
-      program {
-        name
-      }
     }
   }
 }
@@ -22823,6 +22791,7 @@ export const AllPaymentPlansForTableDocument = gql`
       node {
         id
         unicefId
+        name
         isFollowUp
         followUps {
           totalCount
@@ -23114,6 +23083,7 @@ export const PaymentPlanDocument = gql`
     query PaymentPlan($id: ID!) {
   paymentPlan(id: $id) {
     id
+    name
     version
     unicefId
     status
@@ -23256,6 +23226,7 @@ export const PaymentPlanDocument = gql`
         id
         name
         communicationChannel
+        isPaymentGateway
       }
     }
     volumeByDeliveryMechanism {
@@ -30443,6 +30414,7 @@ export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType 
   deliveryMechanismsPerPaymentPlan?: Resolver<ResolversTypes['DeliveryMechanismNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodeDeliveryMechanismsPerPaymentPlanArgs>,
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, FinancialServiceProviderNodePaymentSetArgs>,
   fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isPaymentGateway?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type FinancialServiceProviderNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNodeConnection'] = ResolversParentTypes['FinancialServiceProviderNodeConnection']> = {
@@ -31021,8 +30993,8 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   disabilityCertificatePicture?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   preferredLanguage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   misUnicefId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   programId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  ageAtRegistration?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<ResolversTypes['ImportedIndividualIdentityNodeConnection'], ParentType, ContextType, ImportedIndividualNodeIdentitiesArgs>,
@@ -31626,6 +31598,7 @@ export type PaymentPlanNodeResolvers<ContextType = any, ParentType extends Resol
   isFollowUp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   exclusionReason?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   excludeHouseholdError?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   followUps?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, PaymentPlanNodeFollowUpsArgs>,
   deliveryMechanisms?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeliveryMechanismNode']>>>, ParentType, ContextType>,
   paymentItems?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, PaymentPlanNodePaymentItemsArgs>,
