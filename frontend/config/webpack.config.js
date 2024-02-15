@@ -78,6 +78,7 @@ function generateNginxHeaderFile(
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
 module.exports = function(webpackEnv) {
+  webpackEnv = webpackEnv || process.env.NODE_ENV;
   const isEnvDevelopment = webpackEnv === 'development';
   const isEnvProduction = webpackEnv === 'production';
 
@@ -198,11 +199,15 @@ module.exports = function(webpackEnv) {
       pathinfo: isEnvDevelopment,
       // There will be one main bundle, and one file per asynchronous chunk.
       // In development, it does not produce real files.
-      filename: 'bundle.js',
+      filename: isEnvProduction
+        ? 'bundle.[contenthash:8].js'
+        : isEnvDevelopment && 'bundle.js',
       // TODO: remove this when upgrading to webpack 5
       futureEmitAssets: true,
       // There are also additional JS chunk files if you use code splitting.
-      chunkFilename: '[name].chunk.js',
+      chunkFilename: isEnvProduction
+        ? '[name].[contenthash:8].chunk.js'
+        : isEnvDevelopment && '[name].chunk.js',
       // We inferred the "public path" (such as / or /my-project) from homepage.
       // We use "/" in development.
       publicPath: '___STATIC_TAG___',
