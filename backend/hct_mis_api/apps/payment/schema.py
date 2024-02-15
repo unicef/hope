@@ -551,6 +551,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
     unsuccessful_payments_count = graphene.Int()
+    name = graphene.String()
 
     class Meta:
         model = PaymentPlan

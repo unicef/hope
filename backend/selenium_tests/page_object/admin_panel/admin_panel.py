@@ -13,10 +13,10 @@ class AdminPanel(BaseComponents):
     loggedOut = '//*[@id="content"]'
     errorNote = '//*[@class="errornote"]'
 
-    def getErrorLogin(self):
+    def getErrorLogin(self) -> WebElement:
         return self.wait_for(self.errorNote, By.XPATH)
 
-    def getLoggedOut(self):
+    def getLoggedOut(self) -> WebElement:
         return self.wait_for(self.loggedOut, By.XPATH)
 
     def getButtonLogout(self) -> WebElement:
@@ -31,9 +31,8 @@ class AdminPanel(BaseComponents):
     def getPermissionText(self) -> WebElement:
         return self.wait_for(self.permissionText, By.ID)
 
-    def getLoginButton(self):
+    def getLoginButton(self) -> WebElement:
         return self.wait_for(self.loginButton, By.XPATH)
 
-    def getLoggedName(self):
+    def getLoggedName(self) -> WebElement:
         return self.wait_for(self.loggedName, By.XPATH)
-        
