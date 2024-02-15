@@ -3,6 +3,7 @@ import CloseIcon from '@material-ui/icons/CloseRounded';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   ProgramQuery,
@@ -42,6 +43,7 @@ interface DeleteProgramProps {
 export const DeleteProgram = ({
   program,
 }: DeleteProgramProps): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -62,11 +64,8 @@ export const DeleteProgram = ({
           },
         ],
       });
-      showMessage(t('Programme removed'), {
-        pathname: `/${businessArea}/programs/all/list`,
-        historyMethod: 'push',
-        dataCy: 'snackbar-program-remove-success',
-      });
+      showMessage(t('Programme removed'));
+      history.push(`/${businessArea}/programs/all/list`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
