@@ -1,20 +1,16 @@
-//@ts-ignore
-//TODO: fix imports
-import {
-  ApolloLink,
-  ApolloClient,
-  NormalizedCacheObject,
-  InMemoryCache,
-} from '@apollo/client';
-import { onError } from '@apollo/link-error';
+import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { persistCache } from 'apollo-cache-persist';
+import ApolloClient from 'apollo-client';
+import { ApolloLink } from 'apollo-link';
+import { onError } from 'apollo-link-error';
+import { createUploadLink } from 'apollo-upload-client';
+import localForage from 'localforage';
 import { GRAPHQL_URL } from '../config';
-import { clearCache } from '@utils/utils';
+import { clearCache } from '../utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
-import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors) {
+  if (graphQLErrors)
     graphQLErrors.forEach(({ message }) => {
       if (message.toLowerCase().includes('user is not authenticated')) {
         window.location.replace(
@@ -25,12 +21,12 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         message.toLowerCase().includes('user does not have correct permission')
       ) {
         // eslint-disable-next-line no-console
-        console.error('Permission denied for mutation');
+        console.error(`Permission denied for mutation`);
       }
     });
-  }
 
   const maintenanceError =
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     networkError?.result?.message ===
     'Migrations are running, please try again later';
@@ -39,26 +35,26 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     window.location.href = '/maintenance';
   }
 
-  if (networkError) {
+  if (networkError)
     // eslint-disable-next-line no-console
     console.error(
-      `[Network error]: ${String(networkError)}`,
+      `[Network error]: ${networkError}`,
       networkError,
       graphQLErrors,
     );
-  }
 });
 
-const isDataNull = (data): boolean =>
-  Object.values(data).some((value) => value === null);
+const isDataNull = (data): boolean => {
+  return Object.values(data).some((value) => value === null);
+};
 
-const hasResponseErrors = (response): boolean =>
-  response && (response?.error || response?.errors?.length > 0);
+const hasResponseErrors = (response): boolean => {
+  return response && (response?.error || response?.errors?.length > 0);
+};
 
 const redirectLink = new ApolloLink((operation, forward) => {
   // Check if the app is not running on localhost, dev, or stg environment
-  const isNotLocalhostDevOrStg =
-    !window.location.hostname.includes('localhost') &&
+  const isNotLocalhostDevOrStg = !window.location.hostname.includes('localhost') &&
     !window.location.href.includes('dev') &&
     !window.location.href.includes('stg');
 
@@ -73,12 +69,10 @@ const redirectLink = new ApolloLink((operation, forward) => {
     );
 
     // Check if the error message is "Permission Denied"
-    const isPermissionDenied = response?.errors?.some(
-      (error) => error.message === 'Permission Denied',
-    );
+    const isPermissionDenied = response?.errors?.some((error) => error.message === 'Permission Denied');
 
     // If the error message is "Permission Denied" or data is null, redirect to the access denied page
-    if (isPermissionDenied || (isDataNull(response.data) && !isMutation)) {
+    if (isPermissionDenied || isDataNull(response.data) && !isMutation) {
       window.location.href = `/access-denied/${businessArea}`;
     }
     // Check if the response has any errors
@@ -125,8 +119,8 @@ function findValidationErrors(
   return errors;
 }
 
-const validationErrorMiddleware = new ApolloLink((operation, forward) =>
-  forward(operation).map((response) => {
+const validationErrorMiddleware = new ApolloLink((operation, forward) => {
+  return forward(operation).map((response) => {
     if (response.data) {
       const context = operation.getContext();
       const {
@@ -159,8 +153,8 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) =>
       response.errors = [error];
     }
     return response;
-  }),
-);
+  });
+});
 
 const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
   const businessAreaSlug = window.location.pathname.split('/')[1];
@@ -205,6 +199,7 @@ export async function getClient(): Promise<
   const cache = new InMemoryCache();
   await persistCache({
     cache,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     storage: localForage,
     maxSize: false,
