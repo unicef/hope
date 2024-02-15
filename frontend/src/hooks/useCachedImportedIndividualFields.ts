@@ -39,13 +39,13 @@ export function useCachedImportedIndividualFieldsQuery(
         programId: selectedProgramId
       },
     });
-  }, [businessArea, selectedProgramId, getAttributes]);
+  }, [businessArea, selectedProgramId]);
 
   useEffect(() => {
     if (results.data || results.error) {
       setLoading(results.loading);
     }
-  }, [results.loading, results.data, results.error]);
+  }, [results.loading]);
 
   useEffect(() => {
     if (businessArea === oldBusinessArea && selectedProgramId === oldSelectedProgramId) {

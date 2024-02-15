@@ -353,6 +353,7 @@ class Query(graphene.ObjectType):
         info: Any,
         flex_field: Optional[bool] = None,
         business_area_slug: Optional[str] = None,
+        program_id: Optional[str] = None,
     ) -> List[Any]:
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):
