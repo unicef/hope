@@ -7,14 +7,12 @@ from dateutil.relativedelta import relativedelta
 from helpers.date_time_format import FormatTime
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
-from selenium.webdriver import Keys
-
-from hct_mis_api.apps.account.models import Partner
+from selenium.webdriver import Chrome, Keys
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
-def screenshot(driver, node_id: str) -> None:
+def screenshot(driver: Chrome, node_id: str) -> None:
     if not os.path.exists("screenshot"):
         os.makedirs("screenshot")
     file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H:%M")}.png'.replace("/", "_").replace("::", "__")
@@ -60,7 +58,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme(
-            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -105,7 +103,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_optional_values(
-            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -156,7 +154,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_Frequency_of_Payment(
-            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -198,7 +196,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_Cash_Plus(
-            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -240,7 +238,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_check(
-            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -301,7 +299,7 @@ class TestProgrammeManagement:
         ],
     )
     def test_create_programme_delete_partners(
-            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -324,7 +322,7 @@ class TestProgrammeManagement:
             assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
     def test_create_programme_cancel_scenario(
-            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -337,7 +335,6 @@ class TestProgrammeManagement:
 # ToDo: Check Unicef partner! and delete classes
 @pytest.mark.usefixtures("login")
 class TestBusinessAreas:
-
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -354,8 +351,11 @@ class TestBusinessAreas:
         ],
     )
     def test_create_programme_add_partners_Business_Area(
-            self, change_super_user, pageProgrammeManagement: ProgrammeManagement,
-            pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        change_super_user: None,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -394,8 +394,11 @@ class TestAdminAreas:
         ],
     )
     def test_create_programme_add_partners_Admin_Area(
-            self, change_super_user, pageProgrammeManagement: ProgrammeManagement,
-            pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        change_super_user: None,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -436,8 +439,11 @@ class TestComeBackScenarios:
         ],
     )
     def test_create_programme_back_scenarios(
-            self, change_super_user, pageProgrammeManagement: ProgrammeManagement,
-            pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        change_super_user: None,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -490,7 +496,7 @@ class TestManualCalendar:
         ],
     )
     def test_create_programme_chose_dates_via_calendar(
-            self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()

@@ -36,14 +36,17 @@ class ProgrammeManagement(BaseComponents):
     labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span/span[1]'
     calendarIcon = 'button[data-cy="calendar-icon"]'
     calendar = 'div[data-cy="date-picker-container"]'
-    calendarMonthYear = ('//*[@class="MuiPickersSlideTransition-transitionContainer '
-                         'MuiPickersCalendarHeader-transitionContainer"]')
+    calendarMonthYear = (
+        '//*[@class="MuiPickersSlideTransition-transitionContainer ' 'MuiPickersCalendarHeader-transitionContainer"]'
+    )
     calendarChangeMonth = '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersCalendarHeader-iconButton"]'
-    calendarDays = ('//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
-                    'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
-                    'MuiPickersDay-daySelected" '
-                    'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
-                    'MuiPickersDay-dayDisabled"]')
+    calendarDays = (
+        '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
+        'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
+        'MuiPickersDay-daySelected" '
+        'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
+        'MuiPickersDay-dayDisabled"]'
+    )
     filtersSearch = '//*[@data-cy="filters-search"]/div/input'
     buttonApply = 'button[data-cy="button-filters-clear"]'
 
@@ -109,7 +112,7 @@ class ProgrammeManagement(BaseComponents):
         self.getCalendar()
         month = self.get(self.calendarMonthYear, By.XPATH).text
         self.get_elements(self.calendarChangeMonth, By.XPATH)[0].click()
-        for i in range(5):
+        for _ in range(5):
             next_month = self.get(self.calendarMonthYear, By.XPATH).text
             sleep(0.5)
             if month != next_month:

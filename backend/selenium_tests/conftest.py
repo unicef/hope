@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-from time import sleep
 
 from django.conf import settings
 from django.core.management import call_command
@@ -9,8 +8,6 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
-
-from hct_mis_api.apps.account.permissions import Permissions
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
@@ -22,6 +19,7 @@ from selenium.webdriver.chrome.options import Options
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.geo.models import Country
 
@@ -92,11 +90,10 @@ def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
 
 
 @pytest.fixture
-def change_super_user() -> User:
+def change_super_user() -> None:
     user = User.objects.filter(email="test@example.com").first()
     user.partner = Partner.objects.get(name="UNHCR")
     user.save()
-    return user
 
 
 @pytest.fixture(autouse=True)

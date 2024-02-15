@@ -1,11 +1,10 @@
 import pytest
 from page_object.admin_panel.admin_panel import AdminPanel
 from selenium.webdriver import Chrome
+from selenium.webdriver.common.by import By
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-
 from hct_mis_api.apps.account.models import User
-from selenium.webdriver.common.by import By
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -36,41 +35,37 @@ class TestAdminPanel:
         pageAdminPanel.getLoginButton().click()
         assert "You don't have permission to view or edit anything." in pageAdminPanel.getPermissionText().text
 
-    def test_login_with_valid_username_and_invalid_password(
-            self, browser: Chrome, pageAdminPanel: AdminPanel
-    ) -> None:
+    def test_login_with_valid_username_and_invalid_password(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
         browser.get(f"{browser.live_server.url}/api/unicorn/")
         pageAdminPanel.getLogin().send_keys("normal_user")
         pageAdminPanel.getPassword().send_keys("wrong")
         pageAdminPanel.getLoginButton().click()
         assert (
-                   "Please enter the correct username and password for a staff account. Note that both fields may be "
-                   "case-sensitive."
-               ) in pageAdminPanel.getErrorLogin().text
+            "Please enter the correct username and password for a staff account. Note that both fields may be "
+            "case-sensitive."
+        ) in pageAdminPanel.getErrorLogin().text
 
-    def test_login_with_invalid_username_and_valid_password(
-            self, browser: Chrome, pageAdminPanel: AdminPanel
-    ) -> None:
+    def test_login_with_invalid_username_and_valid_password(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
         browser.get(f"{browser.live_server.url}/api/unicorn/")
         pageAdminPanel.getLogin().send_keys("wrong")
         pageAdminPanel.getPassword().send_keys("normal_password")
         pageAdminPanel.getLoginButton().click()
         assert (
-                   "Please enter the correct username and password for a staff account. Note that both fields may be "
-                   "case-sensitive."
-               ) in pageAdminPanel.getErrorLogin().text
+            "Please enter the correct username and password for a staff account. Note that both fields may be "
+            "case-sensitive."
+        ) in pageAdminPanel.getErrorLogin().text
 
     def test_login_with_invalid_username_and_invalid_password(
-            self, browser: Chrome, pageAdminPanel: AdminPanel
+        self, browser: Chrome, pageAdminPanel: AdminPanel
     ) -> None:
         browser.get(f"{browser.live_server.url}/api/unicorn/")
         pageAdminPanel.getLogin().send_keys("wrong")
         pageAdminPanel.getPassword().send_keys("wrong123123312")
         pageAdminPanel.getLoginButton().click()
         assert (
-                   "Please enter the correct username and password for a staff account. Note that both fields may be "
-                   "case-sensitive."
-               ) in pageAdminPanel.getErrorLogin().text
+            "Please enter the correct username and password for a staff account. Note that both fields may be "
+            "case-sensitive."
+        ) in pageAdminPanel.getErrorLogin().text
 
     def test_not_logged_main_page(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
         browser.get(f"{browser.live_server.url}/")
