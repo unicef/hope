@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { render, RenderOptions } from '@testing-library/react';
-import { MockLink } from '@apollo/react-testing';
+import { MockLink } from '@apollo/client/testing';
 import { Formik } from 'formik';
 import noop from 'lodash/noop';
 import { TestProviders } from './testProviders';
@@ -51,7 +51,7 @@ export class ApolloLoadingLink extends MockLink {
     super([]);
   }
 
-  request(operation) {
+  request() {
     return null;
   }
 }

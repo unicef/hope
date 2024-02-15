@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "test": "jest --config jest.config.cjs",
     "preview": "vite preview",
     "download-dev-schema": "wget --no-check-certificate -O data/schema.graphql https://dev-hct.unitst.org/api/graphql/schema.graphql",
     "download-local-schema": "wget --no-check-certificate -O data/schema.graphql http://localhost:8080/api/graphql/schema.graphql",
@@ -41,7 +42,7 @@
     "eslint-import-resolver-alias": "^1.1.2",
     "formik": "^2.4.5",
     "graphql": "^16.8.1",
-    "graphql-tag": "^2.0.0",
+    "graphql-tag": "^2.12.6",
     "helmet": "^7.1.0",
     "i18next": "^23.8.2",
     "localforage": "^1.10.0",
@@ -83,6 +84,8 @@
     "@types/react-dom": "^18.2.17",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "esbuild": "0.8.50",
+    "esbuild-jest": "^0.5.0",
     "eslint": "^8.56.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.1.0",
@@ -92,9 +95,11 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "jest": "^29.7.0",
+    "jest-canvas-mock": "^2.5.2",
     "jest-environment-jsdom-fourteen": "^1.0.1",
     "jest-resolve": "^29.7.0",
     "jest-watch-typeahead": "^2.2.2",
+    "ts-jest": "^29.1.2",
     "typescript": "^5.3.3"
   }
 }
