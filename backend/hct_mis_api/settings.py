@@ -350,8 +350,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
-    "csp.contrib.rate_limiting.RateLimitedCSPMiddleware",
 ]
+if not DEBUG:
+    MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
 TEMPLATES: List[Dict[str, Any]] = [
     {

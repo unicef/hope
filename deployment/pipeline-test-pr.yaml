@@ -14,7 +14,6 @@ variables:
   Docker.registryConnection: "ICTD-HOPE-DEV-ACR"
   tag: '$(System.PullRequest.PullRequestId)'
   Docker.backend.repository: "hope-backend"
-  Docker.cypress.repository: "hope-cypress"
   Docker.url: "uniappsakshopedev.azurecr.io"
   DOCKER_BUILDKIT: 1
 
@@ -105,31 +104,6 @@ stages:
               -f ./docker/Dockerfile \
               ./
             displayName: Docker build dev
-
-  - stage: build_and_push_cypress
-    displayName: BUILD and PUSH cypress
-    jobs:
-      - job: build_and_push_cypress
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[Build_Cypress]"
-        steps:
-          - task: Docker@2
-            inputs:
-              containerRegistry: '$(Docker.registryConnection)'
-              command: 'login'
-          - script: |
-              docker buildx create --use
-              docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.cypress.repository)-cache:$(tag) \
-              --cache-from=$(Docker.url)/$(Docker.cypress.repository)-cache:latest \
-              --cache-to=$(Docker.url)/$(Docker.cypress.repository)-cache:$(tag) \
-              --cache-to=$(Docker.url)/$(Docker.cypress.repository)-cache:latest \
-              -t $(Docker.url)/$(Docker.cypress.repository):$(tag) \
-              -t $(Docker.url)/$(Docker.cypress.repository):latest \
-              --push \
-              ./cypress
-            displayName: Docker build
 
   - stage: lint_backend
     dependsOn: build_and_push_backend
@@ -284,46 +258,27 @@ stages:
             continueOnError: true
 
   - stage: e2e_tests
-    dependsOn: [build_and_push_backend, build_and_push_cypress]
+    dependsOn: [build_and_push_backend]
     displayName: E2E-Tests
     jobs:
-      - job: cypress_tests
+      - job: selenium_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "[CYPRESS TEST]"
+        displayName: "[SELENIUM TEST]"
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
-          - script: |
-              mkdir -p cypress-results cypress-reports
           - task: DockerCompose@0
             displayName: "Run tests"
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
-              dockerComposeFile: '**/docker-compose.cy.yml'
+              dockerComposeFile: '**/docker-compose.selenium.yml'
               action: 'Run a Docker Compose command'
-              dockerComposeCommand: 'run cypress ci-test'
+              dockerComposeCommand: '--verbose run selenium'
               dockerComposeFileArgs: |
-               BACKEND_IMAGE=$(Docker.url)/$(Docker.backend.repository):$(tag)
-               CYPRESS_IMAGE=$(Docker.url)/$(Docker.cypress.repository):$(tag)
-               BRANCH_NAME=$(System.PullRequest.SourceBranch)
-               BUILD_ID=$(Build.BuildId)
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Test Report Artifacts'
-            condition: always()
-            inputs:
-              PathtoPublish: './cypress-reports'
-          - task: PublishTestResults@2
-            displayName: "Publish Test Result"
-            condition: always()
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '*.xml'
-              searchFolder: './cypress-results/'
-              mergeTestResults: true
-              failTaskOnFailedTests: true
-              testRunTitle: 'TEST E2E Results'
+               dev_backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
+               dist_backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
