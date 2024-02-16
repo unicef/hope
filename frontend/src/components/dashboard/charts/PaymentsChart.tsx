@@ -17,7 +17,7 @@ export function PaymentsChart({
     datasets: [
       {
         backgroundColor: ['#3363A5', '#FFAA1D'],
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
       },
     ],
   };

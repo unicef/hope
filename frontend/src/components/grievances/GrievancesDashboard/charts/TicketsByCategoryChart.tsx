@@ -7,9 +7,9 @@ interface TicketsByCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
 }
 
-export function TicketsByCategoryChart({
+export const TicketsByCategoryChart = ({
   data,
-}: TicketsByCategoryChartProps): React.ReactElement {
+}: TicketsByCategoryChartProps): React.ReactElement => {
   if (!data) return null;
 
   const chartData: any = {
@@ -19,7 +19,7 @@ export function TicketsByCategoryChart({
         categoryPercentage: 0.5,
         maxBarThickness: 20,
         backgroundColor: '#00867B',
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
         stack: 2,
       },
     ],
@@ -59,4 +59,4 @@ export function TicketsByCategoryChart({
   };
 
   return <Bar data={chartData} options={options} />;
-}
+};

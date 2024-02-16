@@ -3,11 +3,6 @@ import { Bar } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { formatNumber, formatThousands, getPercentage } from '@utils/utils';
 import { AllChartsQuery } from '@generated/graphql';
-import {
-  CategoryScaleOptions,
-  ChartOptions,
-  LinearScaleOptions,
-} from 'chart.js';
 
 interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
   data: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];
@@ -24,12 +19,12 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
       {
         label: data.datasets[0]?.label,
         backgroundColor: '#FFAA1D',
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
       },
       {
         label: data.datasets[1]?.label,
         backgroundColor: '#C3D1D8',
-        data: [...data.datasets[1]?.data],
+        data: [...(data.datasets[1]?.data || [])],
       },
     ],
   };

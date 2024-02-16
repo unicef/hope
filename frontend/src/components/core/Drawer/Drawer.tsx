@@ -14,8 +14,24 @@ import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
 import { theme } from '../../../theme';
-
 import { styled } from '@mui/system';
+
+const matchColorToWindowOrigin = (): string => {
+  const url = window.location.href;
+  if (window.location.hostname === 'localhost') {
+    return '#FF6600';
+  }
+  if (url.includes('trn')) {
+    return '#BF360C';
+  }
+  if (url.includes('stg')) {
+    return '#673AB7';
+  }
+  if (url.includes('dev')) {
+    return '#00796B';
+  }
+  return '#00ADEF';
+};
 
 const ToolbarHeader = styled('div')(() => ({
   display: 'flex',
@@ -29,11 +45,6 @@ const ToolbarHeader = styled('div')(() => ({
     '0px 2px 4px 0px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
   ...theme.mixins.toolbar,
 }));
-
-const CollapseIcon = styled('div')({
-  color: '#fff',
-  opacity: 0.54,
-});
 
 const DrawerPaper = styled('div')(() => ({
   height: '100vh',
@@ -104,23 +115,6 @@ const CollapseIconButton = styled(IconButton)({
   color: '#fff',
   opacity: 0.54,
 });
-
-const matchColorToWindowOrigin = (): string => {
-  const url = window.location.href;
-  if (window.location.hostname === 'localhost') {
-    return '#FF6600';
-  }
-  if (url.includes('trn')) {
-    return '#BF360C';
-  }
-  if (url.includes('stg')) {
-    return '#673AB7';
-  }
-  if (url.includes('dev')) {
-    return '#00796B';
-  }
-  return '#00ADEF';
-};
 
 interface DrawerProps {
   open: boolean;

@@ -12,8 +12,17 @@ const Flex = styled.div`
     display: flex;
   }
 `;
+interface LookUpHouseholdIndividualSelectionDisplayProps {
+  onValueChange;
+  disableUnselectIndividual: boolean;
+  disableUnselectHousehold: boolean;
+  selectedHousehold;
+  setSelectedHousehold: (value) => void;
+  selectedIndividual;
+  setSelectedIndividual: (value) => void;
+}
 
-export function LookUpHouseholdIndividualSelectionDisplay({
+export const LookUpHouseholdIndividualSelectionDisplay = ({
   onValueChange,
   disableUnselectIndividual,
   disableUnselectHousehold,
@@ -21,15 +30,7 @@ export function LookUpHouseholdIndividualSelectionDisplay({
   setSelectedHousehold,
   selectedIndividual,
   setSelectedIndividual,
-}: {
-  onValueChange;
-  disableUnselectIndividual: boolean;
-  disableUnselectHousehold: boolean;
-  selectedHousehold;
-  setSelectedHousehold: Function;
-  selectedIndividual;
-  setSelectedIndividual: Function;
-}): React.ReactElement {
+}: LookUpHouseholdIndividualSelectionDisplayProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleRemove = (type): void => {
     if (type === Types.household) {
@@ -103,4 +104,4 @@ export function LookUpHouseholdIndividualSelectionDisplay({
       </Grid>
     </Grid>
   );
-}
+};

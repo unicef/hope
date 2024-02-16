@@ -12,7 +12,7 @@ import { styled } from '@mui/system';
 import * as React from 'react';
 import { MiśTheme, theme } from 'src/theme';
 
-const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+const StyledToolbar = styled(Toolbar)(() => ({
   display: 'flex',
   justifyContent: 'space-between',
 }));
@@ -31,34 +31,34 @@ interface StyledAppBarProps extends AppBarProps {
 }
 
 const StyledAppBar = styled(MuiAppBar)<StyledAppBarProps>(
-  ({ theme, open }) => ({
+  ({ theme: muiTheme, open }) => ({
     position: 'fixed',
     top: 0,
-    zIndex: theme.zIndex.drawer + 1,
-    backgroundColor: theme.palette.secondary.main,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
+    zIndex: muiTheme.zIndex.drawer + 1,
+    backgroundColor: muiTheme.palette.secondary.main,
+    transition: muiTheme.transitions.create(['width', 'margin'], {
+      easing: muiTheme.transitions.easing.sharp,
+      duration: muiTheme.transitions.duration.leavingScreen,
     }),
     ...(open && {
-      marginLeft: theme.drawer.width,
-      width: `calc(100% - ${theme.drawer.width}px)`,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
+      marginLeft: muiTheme.drawer.width,
+      width: `calc(100% - ${muiTheme.drawer.width}px)`,
+      transition: muiTheme.transitions.create(['width', 'margin'], {
+        easing: muiTheme.transitions.easing.sharp,
+        duration: muiTheme.transitions.duration.enteringScreen,
       }),
     }),
   }),
 );
 
-const StyledIconButton = styled(IconButton)<AppBarProps>(({ theme, open }) => ({
+const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
   marginRight: 36,
   ...(open && {
     display: 'none',
   }),
 }));
 
-export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
+export const AppBar = ({ open, handleDrawerOpen }): React.ReactElement => {
   const { data: meData, loading: meLoading } = useCachedMe();
   const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${
     window.location.pathname.split('/')[2]
@@ -104,4 +104,4 @@ export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
       </StyledToolbar>
     </StyledAppBar>
   );
-}
+};

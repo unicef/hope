@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useIdleTimer } from 'react-idle-timer';
 import { AUTO_LOGOUT_MILLIS } from '../../config';
 
@@ -19,9 +19,9 @@ export function AutoLogout(): React.ReactElement {
     debounce: 500,
   });
 
-  const handleOnAction = (): void => {
+  const handleOnAction = useCallback((): void => {
     reset();
-  };
+  }, [reset]);
 
   useEffect(() => {
     window.addEventListener('click', handleOnAction);

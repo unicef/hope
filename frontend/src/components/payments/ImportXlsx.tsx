@@ -30,10 +30,10 @@ export interface ImportXlsxProps {
   cashOrPaymentPlanId: string;
 }
 
-export function ImportXlsx({
+export const ImportXlsx = ({
   paymentVerificationPlanId,
   cashOrPaymentPlanId,
-}: ImportXlsxProps): ReactElement {
+}: ImportXlsxProps): ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
@@ -118,7 +118,9 @@ export function ImportXlsx({
               <Error>
                 <p>Errors</p>
                 {error
-                  ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
+                  ? error.graphQLErrors.map((x) => (
+                      <p key={x.message}>{x.message}</p>
+                    ))
                   : null}
                 <ImportErrors errors={xlsxErrors as XlsxErrorNode[]} />
               </Error>
@@ -149,4 +151,4 @@ export function ImportXlsx({
       </Dialog>
     </>
   );
-}
+};

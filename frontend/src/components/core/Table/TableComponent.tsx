@@ -107,6 +107,8 @@ interface TableComponentProps<T> {
   actions?: Array<React.ReactElement>;
   onSelectAllClick?: (event, rows) => void;
   numSelected?: number;
+  count?: number;
+  onPageChange?: (event, page) => void;
 }
 
 export function TableComponent<T>({
@@ -123,18 +125,18 @@ export function TableComponent<T>({
   handleRequestSort,
   order,
   orderBy,
+  onSelectAllClick,
+  count,
+  onPageChange,
   loading = false,
   allowSort = true,
   isOnPaper = true,
   actions = [],
-  onSelectAllClick,
   numSelected = 0,
 }: TableComponentProps<T>): React.ReactElement {
   const { t } = useTranslation();
 
-  function TablePaginationActions(props) {
-    const { count, page, rowsPerPage, onPageChange } = props;
-
+  const TablePaginationActions = () => {
     const handleBackButtonClick = (event) => {
       onPageChange(event, page - 1);
     };
@@ -161,7 +163,7 @@ export function TableComponent<T>({
         </IconButton>
       </MuiBox>
     );
-  }
+  };
 
   const emptyRows = itemsCount
     ? rowsPerPage - Math.min(rowsPerPage, itemsCount - page * rowsPerPage)

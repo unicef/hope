@@ -19,10 +19,10 @@ export interface EditIndividualDataChangeFieldRowProps {
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
-  onDelete: () => {};
+  onDelete: () => void;
   values;
 }
-export function EditIndividualDataChangeFieldRow({
+export const EditIndividualDataChangeFieldRow = ({
   fields,
   individual,
   index,
@@ -30,7 +30,7 @@ export function EditIndividualDataChangeFieldRow({
   notAvailableFields,
   onDelete,
   values,
-}: EditIndividualDataChangeFieldRowProps): React.ReactElement {
+}: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const field = fields.find((item) => item.name === itemValue.fieldName);
@@ -92,4 +92,4 @@ export function EditIndividualDataChangeFieldRow({
       )}
     </>
   );
-}
+};

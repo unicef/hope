@@ -220,6 +220,7 @@ export function AddIndividualDataChange({
                   const existingOrNewId = item.node?.id || item.id;
                   return (
                     <AgencyField
+                      key={existingOrNewId}
                       id={existingOrNewId}
                       onDelete={() =>
                         removeItemById(

@@ -6,7 +6,7 @@ import { opacityToHex } from '@utils/utils';
 interface Props {
   status: string;
   statusToColor: (theme: typeof themeObj, status: string) => string;
-  statusNameMapping?: Function;
+  statusNameMapping?: (status: string) => string;
   dataCy?: string;
 }
 const StatusContainer = styled.div`
@@ -35,12 +35,12 @@ const StatusBoxContainer = styled.div<StatusBoxContainerProps>`
   margin-right: 20px;
 `;
 
-export function StatusBox({
+export const StatusBox = ({
   status,
   statusToColor,
   statusNameMapping,
   dataCy,
-}: Props): React.ReactElement {
+}: Props): React.ReactElement => {
   const underscoreRemoveRegex = /_/g;
   if (!status) return <>-</>;
   return (
@@ -56,4 +56,4 @@ export function StatusBox({
       </StatusBoxContainer>
     </StatusContainer>
   );
-}
+};

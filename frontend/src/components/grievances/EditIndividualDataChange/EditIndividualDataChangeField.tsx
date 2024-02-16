@@ -12,14 +12,14 @@ import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
 
-export interface EditIndividualDataChangeField {
+export interface EditIndividualDataChangeFieldProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   name: string;
 }
-export function EditIndividualDataChangeField({
+export const EditIndividualDataChangeField = ({
   name,
   field,
-}: EditIndividualDataChangeField): React.ReactElement {
+}: EditIndividualDataChangeFieldProps): React.ReactElement => {
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -107,4 +107,4 @@ export function EditIndividualDataChangeField({
       />
     </Grid>
   );
-}
+};

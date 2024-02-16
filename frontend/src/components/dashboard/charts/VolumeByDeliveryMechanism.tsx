@@ -31,7 +31,7 @@ export function VolumeByDeliveryMechanism({
           '#FEa26D',
           '#FF723D',
         ],
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
       },
     ],
   };

@@ -1,20 +1,19 @@
-//TODO: fix imports
-//@ts-ignore
+import localForage from 'localforage';
+import { persistCache } from 'apollo3-cache-persist';
 import {
   ApolloLink,
   ApolloClient,
   NormalizedCacheObject,
   InMemoryCache,
+  HttpLink,
 } from '@apollo/client';
-import { onError } from '@apollo/link-error';
-import { persistCache } from 'apollo-cache-persist';
+import { onError } from '@apollo/client/link/error';
 import { GRAPHQL_URL } from '../config';
-import { clearCache } from '@utils/utils';
+import { clearCache } from '../utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
-import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors) {
+  if (graphQLErrors)
     graphQLErrors.forEach(({ message }) => {
       if (message.toLowerCase().includes('user is not authenticated')) {
         window.location.replace(
@@ -28,7 +27,6 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         console.error('Permission denied for mutation');
       }
     });
-  }
 
   const maintenanceError =
     // @ts-ignore
@@ -39,21 +37,22 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     window.location.href = '/maintenance';
   }
 
-  if (networkError) {
+  if (networkError)
     // eslint-disable-next-line no-console
     console.error(
       `[Network error]: ${String(networkError)}`,
       networkError,
       graphQLErrors,
     );
-  }
 });
 
-const isDataNull = (data): boolean =>
-  Object.values(data).some((value) => value === null);
+const isDataNull = (data): boolean => {
+  return Object.values(data).some((value) => value === null);
+};
 
-const hasResponseErrors = (response): boolean =>
-  response && (response?.error || response?.errors?.length > 0);
+const hasResponseErrors = (response): boolean => {
+  return response && (response?.error || response?.errors?.length > 0);
+};
 
 const redirectLink = new ApolloLink((operation, forward) => {
   // Check if the app is not running on localhost, dev, or stg environment
@@ -80,20 +79,17 @@ const redirectLink = new ApolloLink((operation, forward) => {
     // If the error message is "Permission Denied" or data is null, redirect to the access denied page
     if (isPermissionDenied || (isDataNull(response.data) && !isMutation)) {
       window.location.href = `/access-denied/${businessArea}`;
-    }
-    // Check if the response has any errors
-    else if (hasResponseErrors(response)) {
+    } else if (hasResponseErrors(response)) {
+      // Check if the response has any errors
       // If it's a mutation, log the error to the console
       if (isMutation) {
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
-      }
-      // If it's not a mutation and the app is not running on localhost, dev, or stg environment, redirect to an error page
-      else if (isNotLocalhostDevOrStg) {
+      } else if (isNotLocalhostDevOrStg) {
+        // If it's not a mutation and the app is not running on localhost, dev, or stg environment, redirect to an error page
         window.location.href = `/error/${businessArea}`;
-      }
-      // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
-      else {
+      } else {
+        // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
       }
@@ -125,8 +121,8 @@ function findValidationErrors(
   return errors;
 }
 
-const validationErrorMiddleware = new ApolloLink((operation, forward) =>
-  forward(operation).map((response) => {
+const validationErrorMiddleware = new ApolloLink((operation, forward) => {
+  return forward(operation).map((response) => {
     if (response.data) {
       const context = operation.getContext();
       const {
@@ -159,8 +155,8 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) =>
       response.errors = [error];
     }
     return response;
-  }),
-);
+  });
+});
 
 const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
   const businessAreaSlug = window.location.pathname.split('/')[1];
@@ -174,12 +170,14 @@ const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
   return forward(operation);
 });
 
+const httpLink = new HttpLink({ uri: GRAPHQL_URL });
+
 const link = ApolloLink.from([
   addBusinessAreaHeaderMiddleware,
   validationErrorMiddleware,
   errorLink,
   redirectLink,
-  createUploadLink({ uri: GRAPHQL_URL }),
+  httpLink,
 ]);
 let client;
 

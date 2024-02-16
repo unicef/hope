@@ -398,7 +398,9 @@ export function ExcludeSection({
                           <Box display="flex" flexDirection="column" mt={2}>
                             {formatErrorToArray(excludeHouseholdError).map(
                               (el) => (
-                                <FormHelperText error>{el}</FormHelperText>
+                                <FormHelperText key={el} error>
+                                  {el}
+                                </FormHelperText>
                               ),
                             )}
                           </Box>
@@ -410,14 +412,16 @@ export function ExcludeSection({
                 {renderInputAndApply()}
                 <Grid container item xs={6}>
                   {errors?.map((formError) => (
-                    <Grid item xs={12}>
-                      <FormHelperText error>{formError}</FormHelperText>
+                    <Grid key={formError} item xs={12}>
+                      <FormHelperText key={formError} error>
+                        {formError}
+                      </FormHelperText>
                     </Grid>
                   ))}
                 </Grid>
                 <Grid container direction="column" item xs={3}>
                   {excludedIds.map((id) => (
-                    <Grid item xs={12}>
+                    <Grid key={id} item xs={12}>
                       <ExcludedItem
                         key={id}
                         id={id}
