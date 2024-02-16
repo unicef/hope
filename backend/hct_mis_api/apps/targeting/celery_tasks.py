@@ -130,7 +130,7 @@ def create_tp_from_list(form_data: Dict[str, str], user_id: str, program_pk: str
     form = CreateTargetPopulationTextForm(form_data, program=program)
     if form.is_valid():
         population = form.cleaned_data["criteria"]
-        set_sentry_business_area_tag(ba.name)
+        set_sentry_business_area_tag(program.business_area.name)
         try:
             with atomic():
                 tp = TargetPopulation.objects.create(
