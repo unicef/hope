@@ -52,11 +52,11 @@ const TabsContainer = styled.div`
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(
-  cashOrPaymentPlanId = null,
   paymentVerificationPlanId,
   selectedTab,
   values,
   businessArea,
+  cashOrPaymentPlanId = null,
 ) {
   return {
     input: {
@@ -275,7 +275,7 @@ export function EditVerificationPlan({
                     <StyledTabs
                       value={selectedTab}
                       onChange={(
-                        event: React.ChangeEvent<{}>,
+                        _event: React.ChangeEvent<object>,
                         newValue: number,
                       ) => {
                         setValues(initialValues);

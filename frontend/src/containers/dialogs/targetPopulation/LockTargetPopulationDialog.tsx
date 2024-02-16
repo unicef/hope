@@ -11,16 +11,17 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export interface ApproveCandidateListPropTypes {
+export interface LockTargetPopulationDialogProps {
   open: boolean;
-  setOpen: Function;
+  setOpen: (open: boolean) => void;
+  targetPopulationId: string;
 }
 
-export function LockTargetPopulationDialog({
+export const LockTargetPopulationDialog = ({
   open,
   setOpen,
   targetPopulationId,
-}): React.ReactElement {
+}: LockTargetPopulationDialogProps): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
@@ -75,4 +76,4 @@ export function LockTargetPopulationDialog({
       </>
     </Dialog>
   );
-}
+};

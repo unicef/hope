@@ -34,7 +34,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
 
   const { payment } = data;
 
-  const { verificationPlans } = payment?.parent;
+  const { verificationPlans } = payment?.parent || {};
   const verificationPlansAmount = verificationPlans?.edges.length;
   const verification =
     verificationPlans.edges[verificationPlansAmount - 1].node;

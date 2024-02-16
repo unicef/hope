@@ -5,6 +5,7 @@ module.exports = {
   moduleDirectories: ['node_modules', 'src'],
   testPathIgnorePatterns: ['/node_modules/', '/.history/', '/scripts/'],
   setupFilesAfterEnv: ['./jest/setupTests.ts'],
+  testEnvironment: 'jsdom',
   transform: {
     '^.+\\.(js|jsx)$': 'esbuild-jest',
     '^.+\\.(ts|tsx)$': 'ts-jest',

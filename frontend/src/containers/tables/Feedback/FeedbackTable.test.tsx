@@ -5,6 +5,7 @@ import wait from 'waait';
 import { fakeApolloAllFeedbacks } from '../../../../fixtures/feedback/fakeApolloAllFeedbacks';
 import { ApolloLoadingLink, render } from '../../../testUtils/testUtils';
 import { FeedbackTable } from './FeedbackTable';
+import { ApolloLink } from '@apollo/client';
 
 describe('containers/tables//Feedback/FeedbackTable', () => {
   it('should render with data', async () => {
@@ -29,7 +30,7 @@ describe('containers/tables//Feedback/FeedbackTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
+        link={new ApolloLoadingLink() as ApolloLink}
         addTypename={false}
         mocks={fakeApolloAllFeedbacks}
       >

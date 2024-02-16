@@ -38,7 +38,7 @@ export function ErrorsKobo({
       </ErrorsContainer>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         {errors.map((item) => (
-          <Error>
+          <Error key={item.message}>
             <strong>
               Field:
               {item.header}

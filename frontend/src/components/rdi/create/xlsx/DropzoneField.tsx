@@ -26,25 +26,28 @@ const DropzoneContainer = styled.div<DropzoneContainerProps>`
 `;
 
 export function DropzoneField({ loading }): React.ReactElement {
-  const [_field, _meta, helpers] = useField('file');
+  const [, , helpers] = useField('file');
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const onDrop = useCallback((acceptedFiles) => {
-    if (acceptedFiles.length !== 1) {
-      return;
-    }
-    const file = acceptedFiles[0];
-    const fileSizeMB = file.size / (1024 * 1024);
-    if (fileSizeMB > 200) {
-      showMessage(
-        `${t('File size is to big. It should be under 200MB')}, ${t(
-          'File size is',
-        )} ${fileSizeMB}MB`,
-      );
-      return;
-    }
-    helpers.setValue(file);
-  }, []);
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      if (acceptedFiles.length !== 1) {
+        return;
+      }
+      const file = acceptedFiles[0];
+      const fileSizeMB = file.size / (1024 * 1024);
+      if (fileSizeMB > 200) {
+        showMessage(
+          `${t('File size is to big. It should be under 200MB')}, ${t(
+            'File size is',
+          )} ${fileSizeMB}MB`,
+        );
+        return;
+      }
+      helpers.setValue(file);
+    },
+    [helpers, showMessage, t],
+  );
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
     accept:

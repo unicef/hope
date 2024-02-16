@@ -121,7 +121,7 @@ export function LookUpHouseholdIndividualSelectionDetail({
         <Box id="scroll-dialog-title">
           <StyledTabs
             value={selectedTab}
-            onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
+            onChange={(_event: React.ChangeEvent<object>, newValue: number) => {
               setSelectedTab(newValue);
             }}
             indicatorColor="primary"

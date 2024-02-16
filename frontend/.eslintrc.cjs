@@ -21,6 +21,11 @@ module.exports = {
     },
   },
   plugins: ['@typescript-eslint', 'react', 'import', 'react-hooks'],
+  ignorePatterns: [
+    '**/*.test.tsx',
+    '**/*.test.ts',
+    'frontend/src/__generated__/graphql.tsx',
+  ],
   settings: {
     react: {
       version: 'detect',

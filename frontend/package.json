@@ -15,7 +15,7 @@
     "generate-types-local": "yarn download-local-schema && graphql-codegen --config codegen.yml --debug"
   },
   "dependencies": {
-    "@apollo/client": "^3.9.2",
+    "@apollo/client": "^3.9.5",
     "@apollo/link-error": "^2.0.0-beta.3",
     "@apollo/react-hooks": "^4.0.0",
     "@apollo/react-testing": "^4.0.0",
@@ -45,6 +45,7 @@
     "graphql-tag": "^2.12.6",
     "helmet": "^7.1.0",
     "i18next": "^23.8.2",
+    "jest-environment-jsdom": "^29.7.0",
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",

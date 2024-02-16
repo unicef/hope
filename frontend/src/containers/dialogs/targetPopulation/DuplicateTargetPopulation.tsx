@@ -15,26 +15,21 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export interface FinalizeTargetPopulationPropTypes {
-  open: boolean;
-  setOpen: Function;
-}
-
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
 });
 
-interface DuplicateTargetPopulationPropTypes {
+interface DuplicateTargetPopulationProps {
   open: boolean;
-  setOpen: Function;
+  setOpen: (open: boolean) => void;
   targetPopulationId: string;
 }
 
-export function DuplicateTargetPopulation({
+export const DuplicateTargetPopulation = ({
   open,
   setOpen,
   targetPopulationId,
-}: DuplicateTargetPopulationPropTypes): React.ReactElement {
+}: DuplicateTargetPopulationProps): React.ReactElement => {
   const { t } = useTranslation();
   const [mutate, { loading }] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
@@ -116,4 +111,4 @@ export function DuplicateTargetPopulation({
       </Formik>
     </Dialog>
   );
-}
+};

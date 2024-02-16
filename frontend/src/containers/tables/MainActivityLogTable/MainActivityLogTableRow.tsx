@@ -177,7 +177,7 @@ export function MainActivityLogTableRow({
 
       <CollapseContainer in={expanded}>
         {keys.map((key) => (
-          <Row key={logEntry + key}>
+          <Row key={logEntry.timestamp}>
             <Cell weight={headCells[0].weight} />
             <Cell weight={headCells[1].weight} />
             <Cell weight={headCells[2].weight} />
