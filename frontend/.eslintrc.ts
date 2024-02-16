@@ -2,6 +2,11 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
+  env: {
+    "browser": true,
+    "es2021": true,
+    "jest/globals": true
+  },
   extends: [
     'airbnb-typescript',
     'eslint:recommended',
@@ -10,17 +15,18 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
+    'plugin:jest/recommended',
   ],
   parserOptions: {
     sourceType: 'module',
     tsconfigRootDir: __dirname,
-    project: './tsconfig.eslint.json',
+    project: './tsconfig.json',
     ecmaFeatures: {
       node: true,
       es6: true,
     },
   },
-  plugins: ['@typescript-eslint', 'react', 'import', 'react-hooks'],
+  plugins: ['@typescript-eslint', 'react', 'import', 'react-hooks', 'jest'],
   ignorePatterns: ['**/*.test.tsx', '**/*.test.ts', '**/__generated__/*'],
   settings: {
     react: {

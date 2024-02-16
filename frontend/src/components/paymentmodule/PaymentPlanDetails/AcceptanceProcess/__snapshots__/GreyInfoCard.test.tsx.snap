@@ -3,35 +3,35 @@
 exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoCard should render 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-1"
+    class="MuiBox-root css-j7qwjs"
   >
     <div
-      class="MuiBox-root MuiBox-root-2"
+      class="MuiBox-root css-38zrbw"
     >
       <div
-        class="sc-htoDjs epmobj"
+        class="sc-fsYfdN jMIuUM"
       >
         Test top message
-         on 
+         on
         <time
-          datetime="1640995200000"
+          datetime="1640991600000"
         >
           1 Jan 2022
         </time>
       </div>
     </div>
     <div
-      class="MuiBox-root MuiBox-root-3 sc-iwsKbI jkUKDG"
+      class="sc-jsEeTM dTGmvg MuiBox-root css-e6xxd1"
     >
       <div
-        class="MuiBox-root MuiBox-root-4"
+        class="MuiBox-root css-fv3lde"
       >
         Approved by Root Rootkowski
         <div
-          class="MuiBox-root MuiBox-root-5"
+          class="MuiBox-root css-15fzge"
         >
           <div
-            class="sc-gzVnrw hhgPWL"
+            class="sc-iBdnpw bQxTxM"
           >
             on 
             <time
@@ -42,10 +42,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/GreyInfoC
           </div>
         </div>
         <div
-          class="MuiBox-root MuiBox-root-6"
+          class="MuiBox-root css-1el3gal"
         >
           <div
-            class="sc-dnqmqq fnJivi"
+            class="sc-qZrbh iHiqlR"
           />
         </div>
       </div>

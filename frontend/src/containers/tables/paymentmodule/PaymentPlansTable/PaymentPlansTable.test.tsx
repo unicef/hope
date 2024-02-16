@@ -35,7 +35,6 @@ describe('containers/tables/payments/PaymentPlansTable', () => {
   it('should render loading', async () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllPaymentPlansForTable}
       >

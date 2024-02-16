@@ -6,6 +6,7 @@ import { ProgrammesTable } from '.';
 import { render, ApolloLoadingLink } from '../../../testUtils/testUtils';
 import { fakeProgramChoices } from '../../../../fixtures/programs/fakeProgramChoices';
 import { fakeApolloAllPrograms } from '../../../../fixtures/programs/fakeApolloAllPrograms';
+import {ApolloLink} from "@apollo/client";
 
 describe('containers/tables/ProgrammesTable', () => {
   const initialFilter = {
@@ -39,7 +40,6 @@ describe('containers/tables/ProgrammesTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllPrograms}
       >

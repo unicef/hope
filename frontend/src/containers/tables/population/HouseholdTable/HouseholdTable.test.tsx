@@ -40,7 +40,6 @@ describe('containers/tables/population/HouseholdTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllHouseholdsForPopulationTable}
       >

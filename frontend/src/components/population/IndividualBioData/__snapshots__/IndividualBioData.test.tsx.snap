@@ -3,26 +3,26 @@
 exports[`components/population/IndividualBioData should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-cSHVUG gnjeDy MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-hABBmJ WYxXm css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-bxivhb jsIVNl"
+      class="sc-hLQSwg eVWFRE"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6"
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
       >
         Bio Data
       </h6>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Full Name
@@ -35,11 +35,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Given Name
@@ -52,11 +52,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Middle Name
@@ -69,11 +69,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Family Name
@@ -86,11 +86,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Gender
@@ -103,11 +103,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Age
@@ -120,11 +120,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Date of Birth
@@ -133,7 +133,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Date of Birth"
           >
             <time
-              datetime="-2176675200000"
+              datetime="-2176680240000"
             >
               10 Jan 1901
             </time>
@@ -141,11 +141,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Estimated Date of Birth
@@ -158,11 +158,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Marital Status
@@ -175,11 +175,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Work Status
@@ -192,11 +192,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Pregnant
@@ -209,11 +209,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Household ID
@@ -222,7 +222,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Household ID"
           >
             <a
-              class="sc-bdVaJa jtVjYx"
+              class="sc-beySPh hAGzde"
               href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/population/household/SG91c2Vob2xkTm9kZTowMTk1YTEzYi0wYThkLTRiYTEtYjM0OS00MDY4YWNmOTViNDE="
             >
               HH-20-0000.0002
@@ -231,11 +231,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Role
@@ -248,11 +248,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Relationship to HOH
@@ -265,11 +265,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Preferred language
@@ -282,11 +282,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Linked Households
@@ -299,18 +299,18 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-kAzzGY ZtRWH"
+          class="sc-fmKFGs jLgjYX"
         />
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Observed disabilities
@@ -323,11 +323,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Seeing disability severity
@@ -340,11 +340,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Hearing disability severity
@@ -357,11 +357,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Physical disability severity
@@ -374,11 +374,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Remembering or concentrating disability severity
@@ -391,11 +391,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Self-care disability severity
@@ -408,11 +408,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Communicating disability severity
@@ -425,11 +425,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Disability
@@ -442,24 +442,24 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-kAzzGY ZtRWH"
+          class="sc-fmKFGs jLgjYX"
         />
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div
-          class="MuiBox-root MuiBox-root-1"
+          class="MuiBox-root css-cgq59l"
         >
           <div
-            class="MuiBox-root MuiBox-root-2"
+            class="MuiBox-root css-1itv5e3"
           >
             <div>
               <span
-                class="sc-bwzfXH eoWrid"
+                class="sc-guDLey RwNuC"
                 color="textSecondary"
               >
                 National ID
@@ -473,7 +473,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
           </div>
           <div>
             <span
-              class="sc-bwzfXH eoWrid"
+              class="sc-guDLey RwNuC"
               color="textSecondary"
             >
               issued
@@ -487,18 +487,18 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-kAzzGY ZtRWH"
+          class="sc-fmKFGs jLgjYX"
         />
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Email
@@ -511,11 +511,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Phone Number
@@ -528,11 +528,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Alternative Phone Number
@@ -545,18 +545,18 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
       >
         <div
-          class="sc-kAzzGY ZtRWH"
+          class="sc-fmKFGs jLgjYX"
         />
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Date of last screening against sanctions list
@@ -565,7 +565,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Date of last screening against sanctions list"
           >
             <time
-              datetime="1644305739718"
+              datetime="1644302139718"
             >
               8 Feb 2022
             </time>
@@ -573,11 +573,11 @@ exports[`components/population/IndividualBioData should render 1`] = `
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bwzfXH eoWrid"
+            class="sc-guDLey RwNuC"
             color="textSecondary"
           >
             Linked Grievances
@@ -586,7 +586,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Linked Grievances"
           >
             <span
-              class="sc-htpNat gXZdAP"
+              class="sc-dmyCSP bGPBYf"
               color="textSecondary"
             >
               <span>

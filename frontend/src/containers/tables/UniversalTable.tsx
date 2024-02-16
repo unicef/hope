@@ -109,7 +109,7 @@ export function UniversalTable<T, K>({
       rowsPerPageOptions={rowsPerPageOptions}
       rowsPerPage={rowsPerPage}
       page={page}
-      itemsCount={data?.[queriedObjectName]?.totalCount}
+      itemsCount={data?.[queriedObjectName]?.totalCount ?? 0}
       handleChangePage={(_event, newPage) => {
         if (!edges.length) return;
         const variables = {

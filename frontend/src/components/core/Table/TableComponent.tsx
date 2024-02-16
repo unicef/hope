@@ -1,6 +1,5 @@
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
-import Skeleton from '@mui/lab/Skeleton';
 import {
   IconButton,
   Box as MuiBox,
@@ -11,6 +10,7 @@ import {
   TableContainer as MuiTableContainer,
   TableRow as MuiTableRow,
   TablePagination,
+  Skeleton,
 } from '@mui/material';
 import { styled } from '@mui/system';
 import * as React from 'react';

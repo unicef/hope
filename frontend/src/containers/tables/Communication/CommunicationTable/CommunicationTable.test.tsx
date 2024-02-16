@@ -36,7 +36,6 @@ describe('containers/tables//Communication/CommunicationTable', () => {
     const { programId } = useBaseUrl();
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllCommunicationMessages}
       >

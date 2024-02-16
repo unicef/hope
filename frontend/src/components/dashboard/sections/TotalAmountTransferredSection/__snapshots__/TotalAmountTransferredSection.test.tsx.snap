@@ -3,56 +3,58 @@
 exports[`components/dashboard/TotalAmountTransferredSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-gzVnrw hTZzfQ MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-jTQCzO kDebLm css-1ps6pg7-MuiPaper-root"
     color="#1E877D"
   >
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center MuiGrid-justify-content-xs-space-between"
+      class="MuiGrid-root MuiGrid-container css-9cyib4-MuiGrid-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item"
+        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
       >
         <div
-          class="sc-bdVaJa QtzJE"
+          class="sc-beySPh kIkzEK"
         >
           TOTAL AMOUNT TRANSFERRED
         </div>
         <div
-          class="sc-bwzfXH kSOshW"
+          class="sc-guDLey gyhxLl"
         >
           IN USD
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item"
+        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 MuiGrid-align-items-xs-center"
+          class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-73i7jt-MuiGrid-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-item"
+            class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
           >
             <div
-              class="sc-bxivhb inNIaq"
+              class="sc-hLQSwg ghfqgX"
             >
               USD 1,719.00
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-item"
+            class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
           >
             <div
-              class="sc-ifAKCX bVDPnH"
+              bg="#d9eceb"
+              class="sc-eDLKkx iqMerL"
               color="#03867b"
             >
               <svg
                 aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1vooibu-MuiSvgIcon-root"
+                data-testid="AccountBalanceWalletIcon"
                 focusable="false"
                 viewBox="0 0 24 24"
               >
                 <path
-                  d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
+                  d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2zm-9-2h10V8H12zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5"
                 />
               </svg>
             </div>

@@ -28,7 +28,6 @@ describe('containers/tables/ReportingTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllReports}
       >

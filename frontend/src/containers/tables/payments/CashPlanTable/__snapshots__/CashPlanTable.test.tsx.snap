@@ -3,50 +3,46 @@
 exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
 <div>
   <div
-    class="makeStyles-root-15"
+    class="css-1ago99h"
   >
     <div
-      class="MuiPaper-root makeStyles-paper-16 MuiPaper-elevation1 MuiPaper-rounded"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-hmspz7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root"
+        class="MuiTableContainer-root css-70zvr5-MuiTableContainer-root"
       >
         <div
-          class="MuiBox-root MuiBox-root-21"
+          class="MuiBox-root css-qa3kpn"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-regular makeStyles-root-22 MuiToolbar-gutters"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
           >
             <h6
-              class="MuiTypography-root makeStyles-title-24 MuiTypography-h6"
+              class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
               data-cy="table-title"
             >
               Payment Plans
             </h6>
           </div>
           <div
-            class="MuiBox-root MuiBox-root-25"
+            class="MuiBox-root css-1ggnmte"
           />
         </div>
         <table
-          aria-label="enhanced table"
-          aria-labelledby="tableTitle"
-          class="MuiTable-root makeStyles-table-17"
-          data-cy="table-title"
+          class="MuiTable-root css-101ivag-MuiTable-root"
         >
           <thead
-            class="MuiTableHead-root"
+            class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-head"
+              class="MuiTableRow-root MuiTableRow-head css-n2dwpd-MuiTableRow-root"
             >
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -54,7 +50,8 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                   Payment Plan ID
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -65,12 +62,11 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -78,7 +74,8 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                   Status
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -89,12 +86,11 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -102,7 +98,8 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                   Num. of Households
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -113,12 +110,11 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -126,7 +122,8 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                   Currency
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -137,12 +134,11 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -150,7 +146,8 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                   Total Entitled Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -161,12 +158,11 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -174,7 +170,8 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                   Total Delivered Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -185,12 +182,11 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -198,7 +194,8 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                   Total Undelivered Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -209,12 +206,11 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -222,7 +218,8 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
                   Dispersion Date
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -235,79 +232,74 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
             </tr>
           </thead>
           <tbody
-            class="MuiTableBody-root"
+            class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root"
+              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
               data-cy="table-row"
-              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1vojfri-MuiTableCell-root"
                 colspan="8"
               >
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                   style="width: 100%; height: 70px;"
                 />
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root"
+              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
               data-cy="table-row"
-              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1vojfri-MuiTableCell-root"
                 colspan="8"
               >
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                   style="width: 100%; height: 70px;"
                 />
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root"
+              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
               data-cy="table-row"
-              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1vojfri-MuiTableCell-root"
                 colspan="8"
               >
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                   style="width: 100%; height: 70px;"
                 />
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root"
+              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
               data-cy="table-row"
-              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1vojfri-MuiTableCell-root"
                 colspan="8"
               >
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                   style="width: 100%; height: 70px;"
                 />
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root"
+              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
               data-cy="table-row"
-              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1vojfri-MuiTableCell-root"
                 colspan="8"
               >
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
                   style="width: 100%; height: 70px;"
                 />
               </td>
@@ -316,43 +308,47 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
         </table>
       </div>
       <div
-        class="MuiTablePagination-root"
+        class="MuiTablePagination-root css-jtlhu6-MuiTablePagination-root"
         data-cy="table-pagination"
       >
         <div
-          class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
+          class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-wogcmv-MuiToolbar-root-MuiTablePagination-toolbar"
         >
           <div
-            class="MuiTablePagination-spacer"
+            class="MuiTablePagination-spacer css-1psng7p-MuiTablePagination-spacer"
           />
           <p
-            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
-            id="mui-5806"
+            class="MuiTablePagination-selectLabel css-pdct74-MuiTablePagination-selectLabel"
+            id=":r4:"
           >
             Rows per page:
           </p>
           <div
-            class="MuiInputBase-root MuiTablePagination-input MuiTablePagination-selectRoot"
+            class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-input css-16c50h-MuiInputBase-root-MuiTablePagination-select"
           >
             <div
+              aria-controls=":r5:"
+              aria-expanded="false"
               aria-haspopup="listbox"
-              aria-labelledby="mui-5806 mui-73230"
-              class="MuiSelect-root MuiSelect-select MuiTablePagination-select MuiSelect-selectMenu MuiInputBase-input"
-              id="mui-73230"
-              role="button"
+              aria-labelledby=":r4: :r3:"
+              class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-194a1fa-MuiSelect-select-MuiInputBase-input"
+              id=":r3:"
+              role="combobox"
               tabindex="0"
             >
               5
             </div>
             <input
               aria-hidden="true"
-              class="MuiSelect-nativeInput"
+              aria-invalid="false"
+              class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
               tabindex="-1"
               value="5"
             />
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSelect-icon MuiTablePagination-selectIcon"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon"
+              data-testid="ArrowDropDownIcon"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -362,58 +358,50 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
             </svg>
           </div>
           <p
-            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+            class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
           >
-            1-NaN of undefined
+            1–NaN of undefined
           </p>
           <div
-            class="MuiTablePagination-actions"
+            class="MuiBox-root css-nkn1dz"
           >
             <button
-              aria-label="Previous page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+              aria-label="previous page"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
               disabled=""
               tabindex="-1"
-              title="Previous page"
               type="button"
             >
-              <span
-                class="MuiIconButton-label"
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                data-testid="KeyboardArrowLeftIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
-                  />
-                </svg>
-              </span>
+                <path
+                  d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z"
+                />
+              </svg>
             </button>
             <button
-              aria-label="Next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+              aria-label="next page"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
               disabled=""
               tabindex="-1"
-              title="Next page"
               type="button"
             >
-              <span
-                class="MuiIconButton-label"
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                data-testid="KeyboardArrowRightIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
-                  />
-                </svg>
-              </span>
+                <path
+                  d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
+                />
+              </svg>
             </button>
           </div>
         </div>
@@ -426,50 +414,46 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
 exports[`containers/tables/payments/CashPlanTable should render with data 1`] = `
 <div>
   <div
-    class="makeStyles-root-1"
+    class="css-1ago99h"
   >
     <div
-      class="MuiPaper-root makeStyles-paper-2 MuiPaper-elevation1 MuiPaper-rounded"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-hmspz7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root"
+        class="MuiTableContainer-root css-70zvr5-MuiTableContainer-root"
       >
         <div
-          class="MuiBox-root MuiBox-root-7"
+          class="MuiBox-root css-qa3kpn"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-regular makeStyles-root-8 MuiToolbar-gutters"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
           >
             <h6
-              class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+              class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
               data-cy="table-title"
             >
               Payment Plans
             </h6>
           </div>
           <div
-            class="MuiBox-root MuiBox-root-11"
+            class="MuiBox-root css-1ggnmte"
           />
         </div>
         <table
-          aria-label="enhanced table"
-          aria-labelledby="tableTitle"
-          class="MuiTable-root makeStyles-table-3"
-          data-cy="table-title"
+          class="MuiTable-root css-101ivag-MuiTable-root"
         >
           <thead
-            class="MuiTableHead-root"
+            class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-head"
+              class="MuiTableRow-root MuiTableRow-head css-n2dwpd-MuiTableRow-root"
             >
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -477,7 +461,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   Payment Plan ID
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -488,12 +473,11 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -501,7 +485,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   Status
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -512,12 +497,11 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -525,7 +509,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   Num. of Households
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -536,12 +521,11 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -549,7 +533,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   Currency
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -560,12 +545,11 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -573,7 +557,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   Total Entitled Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -584,12 +569,11 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -597,7 +581,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   Total Delivered Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -608,12 +593,11 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -621,7 +605,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   Total Undelivered Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -632,12 +617,11 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  aria-disabled="false"
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -645,7 +629,8 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
                   Dispersion Date
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
+                    data-testid="ArrowDownwardIcon"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -658,84 +643,310 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
             </tr>
           </thead>
           <tbody
-            class="MuiTableBody-root"
+            class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root"
-              data-cy="table-row"
-              style="height: 350px; min-height: 70px;"
+              class="MuiTableRow-root MuiTableRow-hover sc-jsEeTM hBRTbZ css-n2dwpd-MuiTableRow-root"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body"
-                colspan="8"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
-                <div
-                  class="makeStyles-empty-4"
+                <a
+                  class="sc-iBdnpw dEpeJw"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOmQ4NDdkZDFlLTkwYmYtNDQzZC1iNWI1LWNiZTcwMDQ5YzYyMA=="
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root makeStyles-icon-6 MuiSvgIcon-fontSizeInherit"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M20 19.59V8l-6-6H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c.45 0 .85-.15 1.19-.4l-4.43-4.43c-.8.52-1.74.83-2.76.83-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 1.02-.31 1.96-.83 2.75L20 19.59zM9 13c0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3-3 1.34-3 3z"
-                    />
-                  </svg>
-                  <div
-                    class="MuiBox-root MuiBox-root-13"
-                  >
-                    No results
+                  <div>
+                    PP-0060-23-00000017
                   </div>
-                  <div
-                    class="MuiBox-root MuiBox-root-14 makeStyles-smallerText-5"
-                  >
-                    Try adjusting your search or your filters to find what you are looking for.
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                USD
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                2,200.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                1,000.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                1,200.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root MuiTableRow-hover sc-jsEeTM hBRTbZ css-n2dwpd-MuiTableRow-root"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                <a
+                  class="sc-iBdnpw dEpeJw"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjQ4YmU4NzVmLWUxYzMtNDM3OS1iMzc1LTgwMzlkYWU4ODQ5MQ=="
+                >
+                  <div>
+                    PP-0060-23-00000015
                   </div>
-                </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                ALL
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                2,800.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                2,800.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                0.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root MuiTableRow-hover sc-jsEeTM hBRTbZ css-n2dwpd-MuiTableRow-root"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                <a
+                  class="sc-iBdnpw dEpeJw"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjBkNDVlNjQzLTY1YWMtNDIzOS04ZmI5LWIyNzRhNjlmMmE2ZA=="
+                >
+                  <div>
+                    PP-0060-23-00000005
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                AUD
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                200.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                150.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                50.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root MuiTableRow-hover sc-jsEeTM hBRTbZ css-n2dwpd-MuiTableRow-root"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                <a
+                  class="sc-iBdnpw dEpeJw"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-module/payment-plans/UGF5bWVudFBsYW5Ob2RlOjc3MDQ1YmUwLTUzOTUtNDdlNy1hZWZiLTYwZjNjNDgxNzE5Zg=="
+                >
+                  <div>
+                    PP-0060-23-00000001
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              />
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                PLN
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                700.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                600.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                100.00
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root MuiTableRow-hover sc-jsEeTM hBRTbZ css-n2dwpd-MuiTableRow-root"
+              data-cy="cash-plan-table-row"
+              role="checkbox"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                <a
+                  class="sc-iBdnpw dEpeJw"
+                  href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/cashplans/Q2FzaFBsYW5Ob2RlOjk1NGY3OWE3LTdiZDYtNDU5ZS05ZGE4LTQzNjg3ZDY0NjYyNg=="
+                >
+                  <div>
+                    123-21-CSH-00003
+                  </div>
+                </a>
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                5
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                BHD
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                2,463,289.03
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                14,923,041.29
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
+              >
+                16,301,871.34
+              </td>
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+              >
+                -
               </td>
             </tr>
           </tbody>
         </table>
       </div>
       <div
-        class="MuiTablePagination-root"
+        class="MuiTablePagination-root css-jtlhu6-MuiTablePagination-root"
         data-cy="table-pagination"
       >
         <div
-          class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
+          class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-wogcmv-MuiToolbar-root-MuiTablePagination-toolbar"
         >
           <div
-            class="MuiTablePagination-spacer"
+            class="MuiTablePagination-spacer css-1psng7p-MuiTablePagination-spacer"
           />
           <p
-            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
-            id="mui-5806"
+            class="MuiTablePagination-selectLabel css-pdct74-MuiTablePagination-selectLabel"
+            id=":r1:"
           >
             Rows per page:
           </p>
           <div
-            class="MuiInputBase-root MuiTablePagination-input MuiTablePagination-selectRoot"
+            class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-input css-16c50h-MuiInputBase-root-MuiTablePagination-select"
           >
             <div
+              aria-controls=":r2:"
+              aria-expanded="false"
               aria-haspopup="listbox"
-              aria-labelledby="mui-5806 mui-73230"
-              class="MuiSelect-root MuiSelect-select MuiTablePagination-select MuiSelect-selectMenu MuiInputBase-input"
-              id="mui-73230"
-              role="button"
+              aria-labelledby=":r1: :r0:"
+              class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-194a1fa-MuiSelect-select-MuiInputBase-input"
+              id=":r0:"
+              role="combobox"
               tabindex="0"
             >
               5
             </div>
             <input
               aria-hidden="true"
-              class="MuiSelect-nativeInput"
+              aria-invalid="false"
+              class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
               tabindex="-1"
               value="5"
             />
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSelect-icon MuiTablePagination-selectIcon"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon"
+              data-testid="ArrowDropDownIcon"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -745,59 +956,51 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
             </svg>
           </div>
           <p
-            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+            class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
           >
-            1-NaN of undefined
+            1–5 of 7
           </p>
           <div
-            class="MuiTablePagination-actions"
+            class="MuiBox-root css-nkn1dz"
           >
             <button
-              aria-label="Previous page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+              aria-label="previous page"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
               disabled=""
               tabindex="-1"
-              title="Previous page"
               type="button"
             >
-              <span
-                class="MuiIconButton-label"
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                data-testid="KeyboardArrowLeftIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
-                  />
-                </svg>
-              </span>
+                <path
+                  d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z"
+                />
+              </svg>
             </button>
             <button
-              aria-label="Next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit"
+              aria-label="next page"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
               tabindex="0"
-              title="Next page"
               type="button"
             >
-              <span
-                class="MuiIconButton-label"
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                data-testid="KeyboardArrowRightIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
-                  />
-                </svg>
-              </span>
+                <path
+                  d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
+                />
+              </svg>
               <span
-                class="MuiTouchRipple-root"
+                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
               />
             </button>
           </div>

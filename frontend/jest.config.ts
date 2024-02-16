@@ -1,12 +1,14 @@
 /* eslint-disable */
 module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jest-environment-jsdom',
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
   moduleDirectories: ['node_modules', 'src'],
-  testPathIgnorePatterns: ['/node_modules/', '/.history/', '/scripts/'],
+  testPathIgnorePatterns: ['/node_modules/', '/.history/'],
   setupFilesAfterEnv: ['./jest/setupTests.ts'],
-  testEnvironment: 'jsdom',
   transform: {
+    '^.+\\.cjs$': 'babel-jest',
     '^.+\\.(js|jsx)$': 'esbuild-jest',
     '^.+\\.(ts|tsx)$': 'ts-jest',
     '^.+\\.css$': '<rootDir>/config/jest/cssTransform.cjs',
