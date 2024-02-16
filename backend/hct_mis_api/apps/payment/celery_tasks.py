@@ -617,12 +617,16 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_fsp(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
     try:
         from hct_mis_api.apps.payment.services.payment_gateway import (
             PaymentGatewayService,
         )
 
         PaymentGatewayService().sync_fsps()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -658,12 +662,16 @@ def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> No
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_records(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
     try:
         from hct_mis_api.apps.payment.services.payment_gateway import (
             PaymentGatewayService,
         )
 
         PaymentGatewayService().sync_records()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)

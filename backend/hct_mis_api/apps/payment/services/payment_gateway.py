@@ -169,6 +169,9 @@ class PaymentGatewayAPI:
     class PaymentGatewayAPIException(Exception):
         pass
 
+    class PaymentGatewayMissingAPICredentialsException(Exception):
+        pass
+
     class Endpoints:
         CREATE_PAYMENT_INSTRUCTION = "payment_instructions/"
         ABORT_PAYMENT_INSTRUCTION_STATUS = "payment_instructions/{remote_id}/abort/"
@@ -185,7 +188,7 @@ class PaymentGatewayAPI:
         self.api_url = api_url or os.getenv("PAYMENT_GATEWAY_API_URL")
 
         if not self.api_key or not self.api_url:
-            raise ValueError("Missing Payment Gateway API Key/URL")
+            raise self.PaymentGatewayMissingAPICredentialsException("Missing Payment Gateway API Key/URL")
 
         self._client = session()
         retries = Retry(total=3, backoff_factor=1, status_forcelist=[502, 503, 504], allowed_methods=None)
