@@ -37,7 +37,7 @@ export function ImportErrors({
       </ErrorsContainer>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         {errors.map((item) => (
-          <Error>
+          <Error key={item.coordinates}>
             <strong>
               {item.sheet} -{item.coordinates}
             </strong>{' '}

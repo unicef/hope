@@ -33,7 +33,7 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const { paymentRecord } = data;
   if (!paymentRecord || !choicesData || permissions === null) return null;
 
-  const { verificationPlans } = paymentRecord?.parent;
+  const { verificationPlans } = paymentRecord?.parent || {};
   const verificationPlansAmount = verificationPlans?.edges.length;
   const verification =
     verificationPlans.edges[verificationPlansAmount - 1].node;

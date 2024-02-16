@@ -129,7 +129,9 @@ export function ImportXlsxPaymentPlanPaymentList({
               <Error data-cy="error-list">
                 <p>Errors</p>
                 {error
-                  ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
+                  ? error.graphQLErrors.map((x) => (
+                      <p key={x.message}>{x.message}</p>
+                    ))
                   : null}
                 <ImportErrors errors={xlsxErrors} />
               </Error>

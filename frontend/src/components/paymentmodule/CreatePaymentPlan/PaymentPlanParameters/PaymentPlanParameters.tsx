@@ -1,16 +1,16 @@
-import { OverviewContainer } from "@core/OverviewContainer";
-import { Title } from "@core/Title";
-import { useTargetPopulationLazyQuery } from "@generated/graphql";
-import { Grid, Typography } from "@mui/material";
-import { FormikCurrencyAutocomplete } from "@shared/Formik/FormikCurrencyAutocomplete";
-import { FormikDateField } from "@shared/Formik/FormikDateField";
-import { tomorrow } from "@utils/utils";
-import { Field } from "formik";
-import * as React from "react";
-import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { PaperContainer } from "../../../targeting/PaperContainer";
-import { CalendarTodayRounded } from "@mui/icons-material";
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { useTargetPopulationLazyQuery } from '@generated/graphql';
+import { Grid, Typography } from '@mui/material';
+import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { tomorrow } from '@utils/utils';
+import { Field } from 'formik';
+import * as React from 'react';
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { PaperContainer } from '../../../targeting/PaperContainer';
+import { CalendarTodayRounded } from '@mui/icons-material';
 
 interface PaymentPlanParametersProps {
   values;
@@ -19,20 +19,20 @@ interface PaymentPlanParametersProps {
 
 export const PaymentPlanParameters = ({
   values,
-  paymentPlan
+  paymentPlan,
 }: PaymentPlanParametersProps): React.ReactElement => {
   const { t } = useTranslation();
   const [
     loadTargetPopulation,
-    { data, loading }
+    { data, loading },
   ] = useTargetPopulationLazyQuery();
 
   useEffect(() => {
     if (values.targetingId) {
       loadTargetPopulation({
         variables: {
-          id: values.targetingId
-        }
+          id: values.targetingId,
+        },
       });
     }
   }, [values.targetingId, loadTargetPopulation]);
@@ -40,14 +40,14 @@ export const PaymentPlanParameters = ({
   return (
     <PaperContainer>
       <Title>
-        <Typography variant="h6">{t("Parameters")}</Typography>
+        <Typography variant="h6">{t('Parameters')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid spacing={3} container>
           <Grid item xs={4}>
             <Field
               name="startDate"
-              label={t("Start Date")}
+              label={t('Start Date')}
               component={FormikDateField}
               required
               minDate={data?.targetPopulation?.program?.startDate}
@@ -59,14 +59,14 @@ export const PaymentPlanParameters = ({
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
               data-cy="input-start-date"
               tooltip={t(
-                "The first day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period."
+                'The first day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
               )}
             />
           </Grid>
           <Grid item xs={4}>
             <Field
               name="endDate"
-              label={t("End Date")}
+              label={t('End Date')}
               component={FormikDateField}
               required
               minDate={values.startDate}
@@ -77,7 +77,7 @@ export const PaymentPlanParameters = ({
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
               data-cy="input-end-date"
               tooltip={t(
-                "The last day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period."
+                'The last day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
               )}
             />
           </Grid>
@@ -92,7 +92,7 @@ export const PaymentPlanParameters = ({
           <Grid item xs={4}>
             <Field
               name="dispersionStartDate"
-              label={t("Dispersion Start Date")}
+              label={t('Dispersion Start Date')}
               component={FormikDateField}
               required
               disabled={!data || loading}
@@ -100,14 +100,14 @@ export const PaymentPlanParameters = ({
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
               data-cy="input-dispersion-start-date"
               tooltip={t(
-                "The first day from which payments could be delivered."
+                'The first day from which payments could be delivered.',
               )}
             />
           </Grid>
           <Grid item xs={4}>
             <Field
               name="dispersionEndDate"
-              label={t("Dispersion End Date")}
+              label={t('Dispersion End Date')}
               component={FormikDateField}
               required
               minDate={tomorrow}
@@ -116,7 +116,7 @@ export const PaymentPlanParameters = ({
               fullWidth
               decoratorEnd={<CalendarTodayRounded color="disabled" />}
               data-cy="input-dispersion-end-date"
-              tooltip={t("The last day on which payments could be delivered.")}
+              tooltip={t('The last day on which payments could be delivered.')}
             />
           </Grid>
         </Grid>

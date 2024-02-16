@@ -17,16 +17,17 @@ import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export interface DeleteTargetPopulation {
+export interface DeleteTargetPopulationProps {
   open: boolean;
-  setOpen: Function;
+  setOpen: (open: boolean) => void;
+  targetPopulationId: string;
 }
 
-export function DeleteTargetPopulation({
+export const DeleteTargetPopulation = ({
   open,
   setOpen,
   targetPopulationId,
-}): React.ReactElement {
+}: DeleteTargetPopulationProps): React.ReactElement => {
   const { t } = useTranslation();
   const [mutate, { loading }] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
@@ -86,4 +87,4 @@ export function DeleteTargetPopulation({
       </Formik>
     </Dialog>
   );
-}
+};

@@ -96,7 +96,6 @@ export function SanctionList(): React.ReactElement {
                     component="a"
                     href="/api/download-sanction-template"
                     onClick={(event) => {
-                      /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
                       // @ts-ignore
                       if (window.Cypress) {
                         event.preventDefault();

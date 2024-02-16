@@ -14,7 +14,6 @@ import { FiltersSection } from '@core/FiltersSection';
 import { NumberTextField } from '@core/NumberTextField';
 import { SearchTextField } from '@core/SearchTextField';
 import { SelectFilter } from '@core/SelectFilter';
-import { AssignmentIndRounded } from '@mui/icons-material';
 
 interface HouseholdFiltersProps {
   filter;
@@ -121,7 +120,7 @@ export function HouseholdFilters({
             label={t('Residence Status')}
             fullWidth
             value={filter.residenceStatus}
-            icon={<AssignmentIndRounded />}
+            icon={<AssignmentIndRoundedIcon />}
             data-cy="hh-filters-residence-status"
           >
             {choicesData.residenceStatusChoices?.map((status) => (

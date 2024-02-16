@@ -215,6 +215,17 @@ export const NewReportForm = (): React.ReactElement => {
     return label;
   };
 
+  const ForwardedPaper = React.forwardRef<HTMLDivElement>((props, ref) => (
+    <Paper
+      {...{
+        ...props,
+        ref,
+      }}
+      data-cy="dialog-setup-new-report"
+    />
+  ));
+  ForwardedPaper.displayName = 'ForwardedPaper';
+
   return (
     <>
       <Button
@@ -228,15 +239,7 @@ export const NewReportForm = (): React.ReactElement => {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         scroll="paper"
-        PaperComponent={React.forwardRef<HTMLDivElement>((props, ref) => (
-          <Paper
-            {...{
-              ...props,
-              ref,
-            }}
-            data-cy="dialog-setup-new-report"
-          />
-        ))}
+        PaperComponent={ForwardedPaper}
         aria-labelledby="form-dialog-title"
       >
         <Formik

@@ -8,11 +8,6 @@ import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png'
 import { TabPanel } from '@components/core/TabPanel';
 import { FlexFieldTab } from './FlexFieldTab';
 
-export interface FinalizeTargetPopulationPropTypes {
-  open: boolean;
-  setOpen: Function;
-}
-
 const DialogWrapper = styled(Dialog)`
   && {
     .MuiPaper-root {
@@ -53,10 +48,21 @@ const StyledTabPanel = styled(TabPanel)`
   }
 `;
 
-export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
+export interface TargetingInfoDialogProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+export const TargetingInfoDialog = ({
+  open,
+  setOpen,
+}: TargetingInfoDialogProps): React.ReactElement => {
   const { t } = useTranslation();
   const [selectedTab, setTab] = useState(0);
-  const changeTab = (event: React.ChangeEvent<{}>, newValue: number): void => {
+  const changeTab = (
+    _event: React.ChangeEvent<object>,
+    newValue: number,
+  ): void => {
     setTab(newValue);
   };
   const HeaderTabs = (
@@ -99,4 +105,4 @@ export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
       </StyledDialogContent>
     </DialogWrapper>
   );
-}
+};
