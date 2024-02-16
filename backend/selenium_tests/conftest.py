@@ -56,7 +56,6 @@ def driver() -> Chrome:
 @pytest.fixture(autouse=True, scope="class")
 def browser(driver: Chrome) -> Chrome:
     driver.live_server = LiveServer("localhost")
-    driver.get(f"{driver.live_server.url}")
     yield driver
     driver.close()
 
