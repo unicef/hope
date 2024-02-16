@@ -1063,7 +1063,7 @@ SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
 
 FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
-LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
+LOG_LEVEL = env("LOG_LEVEL", default="ERROR") if "test" not in sys.argv else "INFO"
 
 LOGGING: Dict[str, Any] = {
     "version": 1,
