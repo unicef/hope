@@ -195,7 +195,7 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_less_than_
     ]
 }
 
-snapshots['TestCreateProgram::test_create_program_with_programme_code_not_alphanumeric 1'] = {
+snapshots['TestCreateProgram::test_create_program_with_programme_code_not_within_allowed_characters 1'] = {
     'data': {
         'createProgram': None
     },
@@ -207,7 +207,7 @@ snapshots['TestCreateProgram::test_create_program_with_programme_code_not_alphan
                     'line': 3
                 }
             ],
-            'message': 'Programme code should be alphanumeric.',
+            'message': 'Programme code should be 4 alphanumeric characters.',
             'path': [
                 'createProgram'
             ]
