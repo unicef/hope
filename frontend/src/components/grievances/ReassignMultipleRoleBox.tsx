@@ -141,20 +141,18 @@ export function ReassignMultipleRoleBox({
   );
 
   return selectedIndividualsToReassign.length ? (
-    <>
-      <StyledBox>
-        <OrangeTitle>
-          <Typography variant='h6'>
-            <WarnIcon />
-            {t('Individual is the HOH or the collector for the household')}
-          </Typography>
-        </OrangeTitle>
-        <Typography variant='body2'>
-          {t(
-            'Upon changing you will need to select new individual(s) for this role.',
-          )}
+    <StyledBox>
+      <OrangeTitle>
+        <Typography variant="h6">
+          <WarnIcon />
+          {t('Individual is the HOH or the collector for the household')}
         </Typography>
       </OrangeTitle>
+      <Typography variant="body2">
+        {t(
+          'Upon changing you will need to select new individual(s) for this role.',
+        )}
+      </Typography>
       <Typography variant="body2">
         {t(
           'Upon removing you will need to select new individual(s) for this role.',
