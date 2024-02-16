@@ -24,7 +24,7 @@ export function PaymentIds({
 
   const mappedIds = verifications.map(
     (verification): React.ReactElement => (
-      <Box mb={1}>
+      <Box key={verification.id} mb={1}>
         <ContentLink
           href={`/${baseUrl}/verification-records/${verification.id}`}
         >

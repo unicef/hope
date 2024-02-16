@@ -13,17 +13,17 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface FinalizeTargetPopulationPaymentPlanProps {
   open: boolean;
-  setOpen: Function;
+  setOpen: (open: boolean) => void;
   totalHouseholds: number;
   targetPopulationId: string;
 }
 
-export function FinalizeTargetPopulationPaymentPlan({
+export const FinalizeTargetPopulationPaymentPlan = ({
   open,
   setOpen,
   totalHouseholds,
   targetPopulationId,
-}: FinalizeTargetPopulationPaymentPlanProps): React.ReactElement {
+}: FinalizeTargetPopulationPaymentPlanProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
@@ -77,4 +77,4 @@ export function FinalizeTargetPopulationPaymentPlan({
       </DialogFooter>
     </Dialog>
   );
-}
+};

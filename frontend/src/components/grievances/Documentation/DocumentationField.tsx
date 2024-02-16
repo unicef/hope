@@ -8,7 +8,7 @@ import { FormikTextField } from '@shared/Formik/FormikTextField';
 export interface DocumentationFieldProps {
   index: number;
   baseName: string;
-  onDelete: () => {};
+  onDelete: () => void;
   isEdited?: boolean;
   setFieldValue;
 }

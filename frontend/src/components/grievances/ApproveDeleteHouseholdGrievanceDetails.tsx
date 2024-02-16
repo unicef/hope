@@ -29,19 +29,18 @@ import {
   useApproveDeleteHouseholdDataChangeMutation,
 } from '@generated/graphql';
 
-export interface ApproveDeleteHouseholdGrievanceDetails {
+const EditIcon = styled(Edit)`
+  color: ${({ theme }) => theme.hctPalette.darkerBlue};
+`;
+export interface ApproveDeleteHouseholdGrievanceDetailsProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   type: 'edit' | 'button';
 }
 
-const EditIcon = styled(Edit)`
-  color: ${({ theme }) => theme.hctPalette.darkerBlue};
-`;
-
-export function ApproveDeleteHouseholdGrievanceDetails({
+export const ApproveDeleteHouseholdGrievanceDetails = ({
   ticket,
   type,
-}: ApproveDeleteHouseholdGrievanceDetails): React.ReactElement {
+}: ApproveDeleteHouseholdGrievanceDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [mutate] = useApproveDeleteHouseholdDataChangeMutation();
@@ -232,4 +231,4 @@ export function ApproveDeleteHouseholdGrievanceDetails({
       )}
     </Formik>
   );
-}
+};

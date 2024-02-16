@@ -7,17 +7,19 @@ import { useTranslation } from 'react-i18next';
 import { BlueText, StyledBox, LightGrey, DarkGrey } from '../LookUpStyles';
 import { LinkedTicketIdDisplay } from './LinkedTicketIdDisplay';
 
-export function LookUpLinkedTicketsDisplay({
+interface LookUpLinkedTicketsDisplayProps {
+  values;
+  setLookUpDialogOpen: (open: boolean) => void;
+  onValueChange;
+  disabled?: boolean;
+}
+
+export const LookUpLinkedTicketsDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
-  disabled,
-}: {
-  values;
-  setLookUpDialogOpen;
-  onValueChange;
-  disabled?;
-}): React.ReactElement {
+  disabled = false,
+}: LookUpLinkedTicketsDisplayProps): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -28,7 +30,7 @@ export function LookUpLinkedTicketsDisplay({
   const renderLinkedTickets = (): React.ReactElement => {
     if (values.selectedLinkedTickets.length) {
       return values.selectedLinkedTickets.map((id) => (
-        <LinkedTicketIdDisplay ticketId={id} />
+        <LinkedTicketIdDisplay key={id} ticketId={id} />
       ));
     }
     return <BlueText>-</BlueText>;
@@ -72,4 +74,4 @@ export function LookUpLinkedTicketsDisplay({
       </Grid>
     </StyledBox>
   );
-}
+};

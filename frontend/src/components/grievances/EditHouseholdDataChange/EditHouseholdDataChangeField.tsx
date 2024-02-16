@@ -18,14 +18,14 @@ import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
 import { FormikAsyncAutocomplete } from '@shared/Formik/FormikAsyncAutocomplete';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export interface EditHouseholdDataChangeField {
+export interface EditHouseholdDataChangeFieldProps {
   field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   name: string;
 }
-export function EditHouseholdDataChangeField({
+export const EditHouseholdDataChangeField = ({
   name,
   field,
-}: EditHouseholdDataChangeField): React.ReactElement {
+}: EditHouseholdDataChangeFieldProps): React.ReactElement => {
   const { businessArea } = useBaseUrl();
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
@@ -125,4 +125,4 @@ export function EditHouseholdDataChangeField({
       />
     </Grid>
   );
-}
+};

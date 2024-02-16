@@ -20,7 +20,7 @@ export const ProgrammesBySector = ({
         maxBarThickness: 20,
         label: data.datasets[0]?.label,
         backgroundColor: '#00A9FB',
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
         stack: 2,
       },
       {
@@ -28,7 +28,7 @@ export const ProgrammesBySector = ({
         maxBarThickness: 20,
         label: data.datasets[1]?.label,
         backgroundColor: '#023F90',
-        data: [...data.datasets[1]?.data],
+        data: [...(data.datasets[1]?.data || [])],
         stack: 2,
       },
     ],

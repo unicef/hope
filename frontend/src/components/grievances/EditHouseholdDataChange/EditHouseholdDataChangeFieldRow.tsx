@@ -20,10 +20,10 @@ export interface EditHouseholdDataChangeFieldRowProps {
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
-  onDelete: () => {};
+  onDelete: () => void;
   values;
 }
-export function EditHouseholdDataChangeFieldRow({
+export const EditHouseholdDataChangeFieldRow = ({
   fields,
   household,
   index,
@@ -31,7 +31,7 @@ export function EditHouseholdDataChangeFieldRow({
   notAvailableFields,
   onDelete,
   values,
-}: EditHouseholdDataChangeFieldRowProps): React.ReactElement {
+}: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -94,4 +94,4 @@ export function EditHouseholdDataChangeFieldRow({
       )}
     </>
   );
-}
+};

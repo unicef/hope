@@ -27,7 +27,7 @@ export function IndividualsReachedByAgeAndGenderGroupsChart({
           '#B1E3E0',
           '#D2E0E0',
         ],
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
       },
     ],
   };

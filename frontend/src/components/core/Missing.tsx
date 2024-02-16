@@ -3,9 +3,6 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { useInterval } from '@hooks/useInterval';
 
-const red = '#f00';
-const black = '#253b46';
-
 interface ValueProps {
   missing?: boolean;
 }

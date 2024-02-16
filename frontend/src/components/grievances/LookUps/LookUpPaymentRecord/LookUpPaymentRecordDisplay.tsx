@@ -5,17 +5,19 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BlueText, DarkGrey, LightGrey, StyledBox } from '../LookUpStyles';
 
-export function LookUpPaymentRecordDisplay({
+interface LookUpPaymentRecordDisplayProps {
+  values;
+  setLookUpDialogOpen: (open: boolean) => void;
+  onValueChange;
+  disabled?: boolean;
+}
+
+export const LookUpPaymentRecordDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
-  disabled,
-}: {
-  values;
-  setLookUpDialogOpen;
-  onValueChange;
-  disabled?;
-}): React.ReactElement {
+  disabled = false,
+}: LookUpPaymentRecordDisplayProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleRemove = (): void => {
     onValueChange('selectedPaymentRecords', []);
@@ -23,7 +25,7 @@ export function LookUpPaymentRecordDisplay({
   const renderPaymentRecords = (): React.ReactElement => {
     if (values.selectedPaymentRecords.length) {
       return values.selectedPaymentRecords.map((record) => (
-        <BlueText>{record.caId}</BlueText>
+        <BlueText key={record.caId}>{record.caId}</BlueText>
       ));
     }
     return <BlueText>-</BlueText>;
@@ -65,4 +67,4 @@ export function LookUpPaymentRecordDisplay({
       </Grid>
     </StyledBox>
   );
-}
+};

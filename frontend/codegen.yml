@@ -9,7 +9,7 @@ generates:
     config:
       withHooks: true
       addTypename: true
-      gqlImport: @apollo/client#gql
+      gqlImport: '@apollo/client#gql'
     plugins:
       - typescript
       - typescript-operations

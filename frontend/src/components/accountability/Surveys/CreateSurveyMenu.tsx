@@ -9,7 +9,7 @@ import { SurveyCategory } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useProgramContext } from '../../../programContext';
 
-const StyledMenu = styled(Menu)(({ theme }) => ({
+const StyledMenu = styled(Menu)(() => ({
   '.MuiPaper-root': {
     border: '1px solid #d3d4d5',
   },
