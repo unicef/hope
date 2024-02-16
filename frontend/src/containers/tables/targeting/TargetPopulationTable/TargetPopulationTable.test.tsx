@@ -30,7 +30,6 @@ describe('containers/tables/targeting/TargetPopulation/TargetPopulationTable', (
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllTargetPopulation}
       >

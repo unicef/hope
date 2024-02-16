@@ -29,7 +29,6 @@ describe('containers/tables/payments/VerificationRecordsTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllPaymentVerifications}
       >

@@ -30,7 +30,6 @@ describe('containers/tables//Feedback/FeedbackTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink() as ApolloLink}
         addTypename={false}
         mocks={fakeApolloAllFeedbacks}
       >

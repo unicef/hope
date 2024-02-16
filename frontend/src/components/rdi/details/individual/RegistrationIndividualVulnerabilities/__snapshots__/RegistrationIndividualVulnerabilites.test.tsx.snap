@@ -3,26 +3,26 @@
 exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-htoDjs beQuXv MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN gzXAga css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-htpNat hUqbZq"
+      class="sc-dmyCSP eINMDi"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6"
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
       >
         Vulnerabilities
       </h6>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6"
+      class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-6 css-zow5z4-MuiGrid-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bdVaJa kwsjSG"
+            class="sc-beySPh gbuZtJ"
             color="textSecondary"
           >
             muac
@@ -31,7 +31,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities
             data-cy="label-muac"
           >
             <span
-              class="sc-bwzfXH kOktSP"
+              class="sc-guDLey cyWTlF"
               color="textSecondary"
             >
               12
@@ -40,11 +40,11 @@ exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bdVaJa kwsjSG"
+            class="sc-beySPh gbuZtJ"
             color="textSecondary"
           >
             school enrolled
@@ -53,7 +53,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities
             data-cy="label-school enrolled"
           >
             <span
-              class="sc-bwzfXH kOktSP"
+              class="sc-guDLey cyWTlF"
               color="textSecondary"
             >
               No
@@ -62,11 +62,11 @@ exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
       >
         <div>
           <span
-            class="sc-bdVaJa kwsjSG"
+            class="sc-beySPh gbuZtJ"
             color="textSecondary"
           >
             school enrolled before
@@ -75,7 +75,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualVulnerabilities
             data-cy="label-school enrolled before"
           >
             <span
-              class="sc-bwzfXH kOktSP"
+              class="sc-guDLey cyWTlF"
               color="textSecondary"
             >
               Yes

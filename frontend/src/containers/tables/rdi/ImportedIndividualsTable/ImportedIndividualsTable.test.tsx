@@ -26,7 +26,6 @@ describe('containers/tables/rdi/ImportedIndividualsTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         mocks={fakeApolloAllImportedIndividuals}
       >
         <ImportedIndividualsTable

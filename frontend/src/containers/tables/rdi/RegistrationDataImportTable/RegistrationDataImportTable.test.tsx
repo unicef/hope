@@ -31,7 +31,6 @@ describe('containers/tables/rdi/RegistrationDataImportTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         mocks={fakeApolloAllRegistrationDataImports}
       >
         <RegistrationDataImportTable filter={initialFilter} canViewDetails />

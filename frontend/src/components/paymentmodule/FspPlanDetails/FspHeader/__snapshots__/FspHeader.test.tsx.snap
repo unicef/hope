@@ -3,38 +3,39 @@
 exports[`components/paymentmodule/FspPlanDetails/FspHeader should render 1`] = `
 <div>
   <div
-    class="sc-ifAKCX hPNxSD"
+    class="sc-eDLKkx lfCuNM"
     data-cy="page-header-container"
   >
     <div
-      class="sc-EHOje xCQCx"
+      class="sc-jTQCzO WuAEu"
     >
       <div
-        class="sc-htoDjs ehUDZT"
+        class="sc-fsYfdN iNbZZl"
       >
         <svg
           aria-hidden="true"
-          class="MuiSvgIcon-root MuiSvgIcon-fontSizeLarge"
+          class="MuiSvgIcon-root MuiSvgIcon-fontSizeLarge css-tzssek-MuiSvgIcon-root"
+          data-testid="ArrowBackRoundedIcon"
           focusable="false"
           viewBox="0 0 24 24"
         >
           <path
-            d="M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42a.9959.9959 0 00-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1z"
+            d="M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42a.9959.9959 0 0 0-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1"
           />
         </svg>
       </div>
       <div
-        class="sc-bZQynM hoGuXF"
+        class="sc-gLLuof djFRuj"
       >
         <div>
           <div
-            class="sc-bxivhb jcdCai"
+            class="sc-hLQSwg SXgid"
           >
             <span
-              class="sc-htpNat iTScjb"
+              class="sc-dmyCSP bnnKST"
             >
               <a
-                class="sc-bdVaJa eFfWno"
+                class="sc-beySPh iKhNAo"
                 href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/"
               >
                 Payment Module
@@ -42,60 +43,55 @@ exports[`components/paymentmodule/FspPlanDetails/FspHeader should render 1`] = `
             </span>
           </div>
           <div
-            class="MuiBox-root MuiBox-root-1"
+            class="MuiBox-root css-70qvj9"
           >
             <div
-              class="sc-gZMcBi jDLnjQ"
+              class="sc-kFCroH fxDWDh"
             >
               <h5
-                class="MuiTypography-root MuiTypography-h5"
+                class="MuiTypography-root MuiTypography-h5 css-ag7rrr-MuiTypography-root"
                 data-cy="page-header-title"
               >
                 Set up FSP
               </h5>
             </div>
             <div
-              class="MuiBox-root MuiBox-root-2"
+              class="MuiBox-root css-15aqakd"
             />
           </div>
         </div>
         <div
-          class="sc-gzVnrw cHjfCB"
+          class="sc-iBdnpw bvluil"
         >
           <div
-            class="MuiBox-root MuiBox-root-3"
+            class="MuiBox-root css-1jzjbfr"
           >
             <div
-              class="MuiBox-root MuiBox-root-4"
+              class="MuiBox-root css-5hicrt"
             >
               <a
-                aria-disabled="false"
-                class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary"
+                class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium css-11rak30-MuiButtonBase-root-MuiButton-root"
                 href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/fsp/"
-                role="button"
                 tabindex="0"
               >
                 <span
-                  class="MuiButton-label"
+                  class="MuiButton-startIcon MuiButton-iconSizeMedium css-1d6wzja-MuiButton-startIcon"
                 >
-                  <span
-                    class="MuiButton-startIcon MuiButton-iconSizeMedium"
+                  <svg
+                    aria-hidden="true"
+                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                    data-testid="EditRoundedIcon"
+                    focusable="false"
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      aria-hidden="true"
-                      class="MuiSvgIcon-root"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M3 17.46v3.04c0 .28.22.5.5.5h3.04c.13 0 .26-.05.35-.15L17.81 9.94l-3.75-3.75L3.15 17.1c-.1.1-.15.22-.15.36zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
-                      />
-                    </svg>
-                  </span>
-                  Edit
+                    <path
+                      d="M3 17.46v3.04c0 .28.22.5.5.5h3.04c.13 0 .26-.05.35-.15L17.81 9.94l-3.75-3.75L3.15 17.1c-.1.1-.15.22-.15.36M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75z"
+                    />
+                  </svg>
                 </span>
+                Edit
                 <span
-                  class="MuiTouchRipple-root"
+                  class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
                 />
               </a>
             </div>
@@ -104,7 +100,7 @@ exports[`components/paymentmodule/FspPlanDetails/FspHeader should render 1`] = `
       </div>
     </div>
     <div
-      class="sc-dnqmqq bUccVO"
+      class="sc-qZrbh hQWlbe"
     />
   </div>
 </div>

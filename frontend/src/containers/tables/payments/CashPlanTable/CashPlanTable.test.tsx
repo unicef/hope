@@ -25,7 +25,6 @@ describe('containers/tables/payments/CashPlanTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllCashPlansAndPaymentPlans}
       >

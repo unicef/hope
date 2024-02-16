@@ -236,32 +236,27 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
 exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Set Up FSP 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-1"
+    class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh iMSXGq css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiBox-root MuiBox-root-2"
+        class="MuiBox-root css-tdpf08"
       >
         <h6
-          class="MuiTypography-root MuiTypography-h6"
+          class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
         >
           FSPs
         </h6>
         <a
           aria-disabled="true"
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
           data-cy="button-set-up-fsp"
           href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/undefined/setup-fsp/create"
-          role="button"
           tabindex="-1"
         >
-          <span
-            class="MuiButton-label"
-          >
-            Set up FSP
-          </span>
+          Set up FSP
         </a>
       </div>
     </div>
