@@ -53,11 +53,18 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   setFieldValue,
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const selectedAdminAreasLength = values.partners[index]?.adminAreas?.length;
-  const initialExpanded = selectedAdminAreasLength > 0;
+  const adminAreas = allAreasTreeData.map(obj => obj.id);
+  const selectedAreasLength = values.partners[index]?.adminAreas?.length;
+  const initialExpanded = selectedAreasLength > 0;
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(
     initialExpanded,
   );
+
+  let adminAreasOccurrenceLength = 0
+  if (selectedAreasLength) {
+    adminAreasOccurrenceLength = values.partners[index]?.adminAreas.filter(item => adminAreas.includes(item)).length;
+  }
+
   const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
     AreaTreeNode.buildTree(
       allAreasTreeData,
@@ -124,7 +131,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           </SmallText>
           <Box mt={2} mb={2}>
             <SmallText>
-              Selected Admin Areas: {selectedAdminAreasLength || 0}
+              Selected Admin Areas: {(selectedAreasLength - adminAreasOccurrenceLength) || 0}
             </SmallText>
           </Box>
         </Box>
