@@ -37,7 +37,7 @@ from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from admin_sync.mixin import GetManyFromRemoteMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminFiltersMixin
+from adminfilters.mixin import AdminAutoCompleteSearchMixin, AdminFiltersMixin
 from constance import config
 from jsoneditor.forms import JSONEditor
 from xlrd import XLRDError
@@ -196,7 +196,9 @@ class AcceptanceProcessThresholdInline(TabularInline):
 
 
 @admin.register(BusinessArea)
-class BusinessAreaAdmin(GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
+class BusinessAreaAdmin(
+    GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEModelAdminBase, AdminAutoCompleteSearchMixin
+):
     inlines = [
         AcceptanceProcessThresholdInline,
     ]

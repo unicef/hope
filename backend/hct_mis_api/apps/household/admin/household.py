@@ -16,10 +16,9 @@ from django.utils.safestring import mark_safe
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
-from adminfilters.value import ValueFilter
 from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
@@ -87,8 +86,9 @@ class HouseholdAdmin(
     )
     list_filter = (
         DepotManager,
-        ("business_area", AutoCompleteFilter),
-        ("registration_data_import__id", ValueFilter),
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
         QueryStringFilter,
         "withdrawn",
     )
