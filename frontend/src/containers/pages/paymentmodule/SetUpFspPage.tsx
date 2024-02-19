@@ -27,7 +27,6 @@ export function SetUpFspPage(): React.ReactElement {
     <>
       <CreateSetUpFspHeader baseUrl={baseUrl} permissions={permissions} />
       <SetUpFspCore
-        baseUrl={baseUrl}
         permissions={permissions}
         initialValues={initialValues}
       />

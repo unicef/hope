@@ -7,7 +7,6 @@ import { EditSetUpFspHeader } from '@components/paymentmodule/EditSetUpFsp/EditS
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { usePaymentPlanQuery } from '@generated/graphql';
-import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export function EditSetUpFspPage(): React.ReactElement {
   const { id } = useParams();
@@ -20,7 +19,6 @@ export function EditSetUpFspPage(): React.ReactElement {
       fetchPolicy: 'cache-and-network',
     });
 
-  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
 
   if (permissions === null) return null;
@@ -41,9 +39,8 @@ export function EditSetUpFspPage(): React.ReactElement {
 
   return (
     <>
-      <EditSetUpFspHeader baseUrl={baseUrl} permissions={permissions} />
+      <EditSetUpFspHeader permissions={permissions} />
       <SetUpFspCore
-        baseUrl={baseUrl}
         permissions={permissions}
         initialValues={initialValues}
       />

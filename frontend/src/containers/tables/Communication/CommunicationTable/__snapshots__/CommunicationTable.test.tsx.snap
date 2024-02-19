@@ -361,7 +361,7 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
             <p
               class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
             >
-              1–NaN of undefined
+              0–0 of 0
             </p>
             <div
               class="MuiBox-root css-nkn1dz"

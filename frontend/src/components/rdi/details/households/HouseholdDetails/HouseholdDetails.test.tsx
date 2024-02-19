@@ -8,7 +8,6 @@ describe('components/rdi/details/households/HouseholdDetails', () => {
   it('should render', () => {
     const { container } = render(
       <HouseholdDetails
-        businessArea="afghanistan"
         household={fakeImportedHouseholdDetailedFragment}
         choicesData={fakeHouseholdChoices}
       />,

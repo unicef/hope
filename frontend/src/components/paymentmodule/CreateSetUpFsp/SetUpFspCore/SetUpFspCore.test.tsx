@@ -16,7 +16,6 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspCore', () => {
         mocks={fakeChooseDeliveryMechForPaymentPlanMutation}
       >
         <SetUpFspCore
-          businessArea="afghanistan"
           permissions={[PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]}
           initialValues={{
             deliveryMechanisms: [
@@ -26,12 +25,6 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspCore', () => {
               },
             ],
           }}
-          setDeliveryMechanismsForQuery={(_deliveryMechanisms) => {
-            console.log(_deliveryMechanisms);
-          }}
-          deliveryMechanismsForQuery={fakeDeliveryMechanisms.allDeliveryMechanisms.map(
-            (dm) => dm.name,
-          )}
         />
       </MockedProvider>,
     );

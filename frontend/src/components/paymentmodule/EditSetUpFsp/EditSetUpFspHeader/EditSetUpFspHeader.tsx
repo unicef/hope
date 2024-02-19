@@ -4,16 +4,16 @@ import { useParams, useLocation } from 'react-router-dom';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { BreadCrumbsItem } from '@core/BreadCrumbs';
 import { PageHeader } from '@core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface EditFspHeaderProps {
-  baseUrl: string;
   permissions: string[];
 }
 
 export function EditSetUpFspHeader({
-  baseUrl,
   permissions,
 }: EditFspHeaderProps): React.ReactElement {
+  const { baseUrl } = useBaseUrl();
   const location = useLocation();
   const { t } = useTranslation();
   const { id } = useParams();

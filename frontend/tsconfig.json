@@ -38,7 +38,7 @@
     "jest",
     "vite.config.ts",
     "tsconfig.json",
-    ".eslintrc",
+    ".eslintrc.cjs",
     "jest.config"
   ],
   "exclude": ["node_modules", "**/*.test.tsx", "frontend/jest"],

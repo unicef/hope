@@ -12,6 +12,7 @@ import {
 } from '@generated/graphql';
 import { Title } from '@core/Title';
 import { useProgramContext } from '../../../../../programContext';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled.div`
   display: flex;
@@ -22,13 +23,12 @@ const Overview = styled.div`
 interface HouseholdDetailsProps {
   household: ImportedHouseholdDetailedFragment;
   choicesData: HouseholdChoiceDataQuery;
-  baseUrl: string;
 }
 export function HouseholdDetails({
   household,
   choicesData,
-  baseUrl,
 }: HouseholdDetailsProps): React.ReactElement {
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { selectedProgram } = useProgramContext();
   const residenceChoicesDict = choicesToDict(
