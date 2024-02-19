@@ -182,7 +182,7 @@ const link = ApolloLink.from([
 let client;
 
 export async function getClient(): Promise<
-  ApolloClient<NormalizedCacheObject>
+ApolloClient<NormalizedCacheObject>
 > {
   if (client) {
     return client;

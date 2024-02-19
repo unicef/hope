@@ -148,11 +148,11 @@ export function ImportXlsxPaymentPlanPaymentListPerFsp({
                 {error
                   ? error.graphQLErrors.map((x) => (
                       <p key={x.message}>{x.message}</p>
-                    ))
+                  ))
                   : null}
                 <ImportErrors errors={xlsxErrors} />
               </Error>
-            ) : null}
+              ) : null}
           </>
           <DialogActions>
             <Button

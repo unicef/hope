@@ -66,13 +66,13 @@ export function DedupeResults({
     score,
     proximityToScore,
   ): {
-    hitId: number;
-    fullName: string;
-    age: number;
-    location: string;
-    score: number;
-    proximityToScore: number;
-  } {
+      hitId: number;
+      fullName: string;
+      age: number;
+      location: string;
+      score: number;
+      proximityToScore: number;
+    } {
     return {
       hitId,
       fullName,

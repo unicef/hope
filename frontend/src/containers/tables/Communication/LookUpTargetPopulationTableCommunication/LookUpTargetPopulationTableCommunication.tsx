@@ -74,8 +74,8 @@ export const LookUpTargetPopulationTableCommunication = ({
   const renderTable = (): React.ReactElement => (
     <TableWrapper>
       <UniversalTable<
-        TargetPopulationNode,
-        AllActiveTargetPopulationsQueryVariables
+      TargetPopulationNode,
+      AllActiveTargetPopulationsQueryVariables
       >
         title={noTitle ? null : t('Target Populations')}
         headCells={enableRadioButton ? headCells : headCells.slice(1)}

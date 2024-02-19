@@ -229,7 +229,7 @@ export function RegistrationIndividualBioData({
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
-        )}
+          )}
         {mappedIndividualDocuments}
         {mappedIdentities}
         <Grid item xs={12}>

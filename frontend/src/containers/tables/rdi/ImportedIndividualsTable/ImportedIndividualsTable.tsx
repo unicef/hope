@@ -68,8 +68,8 @@ export function ImportedIndividualsTable({
       )}
       {isMerged ? (
         <UniversalTable<
-          MergedIndividualMinimalFragment,
-          AllMergedIndividualsQueryVariables
+        MergedIndividualMinimalFragment,
+        AllMergedIndividualsQueryVariables
         >
           title={title}
           headCells={mergedIndividualHeadCells}
@@ -89,8 +89,8 @@ export function ImportedIndividualsTable({
         />
       ) : (
         <UniversalTable<
-          ImportedIndividualMinimalFragment,
-          AllImportedIndividualsQueryVariables
+        ImportedIndividualMinimalFragment,
+        AllImportedIndividualsQueryVariables
         >
           title={title}
           headCells={importedIndividualHeadCells}

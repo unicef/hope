@@ -217,13 +217,13 @@ export function EditFeedbackPage(): React.ReactElement {
                               >
                                 {feedback.householdLookup?.unicefId}
                               </BlackLink>
-                            ) : (
+                              ) : (
                               <div>
                                 {feedback.householdLookup?.id
                                   ? feedback.householdLookup?.unicefId
                                   : '-'}
                               </div>
-                            )}
+                              )}
                           </LabelizedField>
                         </Grid>
                         <Grid item xs={6}>
@@ -236,13 +236,13 @@ export function EditFeedbackPage(): React.ReactElement {
                               >
                                 {feedback.individualLookup?.unicefId}
                               </BlackLink>
-                            ) : (
+                              ) : (
                               <div>
                                 {feedback.individualLookup?.id
                                   ? feedback.individualLookup?.unicefId
                                   : '-'}
                               </div>
-                            )}
+                              )}
                           </LabelizedField>
                         </Grid>
                       </Grid>

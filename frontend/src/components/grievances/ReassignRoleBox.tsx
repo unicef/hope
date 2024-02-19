@@ -121,7 +121,7 @@ export const ReassignRoleBox = ({
             household={el.household}
             individual={uniqueIndividual}
           />
-        ) : null}
+          ) : null}
       </Box>
     ));
 

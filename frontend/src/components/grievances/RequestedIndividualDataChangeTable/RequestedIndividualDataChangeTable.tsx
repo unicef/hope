@@ -115,7 +115,7 @@ export function RequestedIndividualDataChangeTable({
               index={index}
               document={document}
             />
-          ))
+        ))
         : null}
       {identities?.length ? (
         <IdentitiesTable
@@ -142,7 +142,7 @@ export function RequestedIndividualDataChangeTable({
               index={index}
               identity={identity}
             />
-          ))
+        ))
         : null}
       {paymentChannels?.length ? (
         <PaymentChannelsTable
@@ -164,7 +164,7 @@ export function RequestedIndividualDataChangeTable({
               index={index}
               paymentChannel={paymentChannel}
             />
-          ))
+        ))
         : null}
       {documentsToRemove?.length ? (
         <DocumentsToRemoveTable

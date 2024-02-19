@@ -408,7 +408,7 @@ export const GrievancesFilters = ({
                 <MenuItem value="all">{t('All Tickets')}</MenuItem>
               </SelectFilter>
             </Grid>
-          )}
+        )}
       </Grid>
     </FiltersSection>
   );

@@ -28,8 +28,8 @@ export function RecipientsTable({
   return (
     <TableWrapper>
       <UniversalTable<
-        CommunicationMessageRecipientMapNode,
-        AllAccountabilityCommunicationMessageRecipientsQueryVariables
+      CommunicationMessageRecipientMapNode,
+      AllAccountabilityCommunicationMessageRecipientsQueryVariables
       >
         title={t('Recipients')}
         headCells={headCells}

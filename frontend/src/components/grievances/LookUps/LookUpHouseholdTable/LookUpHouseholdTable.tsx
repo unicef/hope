@@ -79,8 +79,8 @@ export function LookUpHouseholdTable({
 
   const handleCheckboxClick = (
     _event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     name: string,
   ): void => {
     const selectedIndex = selected.indexOf(name);
@@ -141,8 +141,8 @@ export function LookUpHouseholdTable({
 
   const renderTable = (): React.ReactElement => (
     <UniversalTable<
-      AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
-      AllHouseholdsForPopulationTableQueryVariables
+    AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'],
+    AllHouseholdsForPopulationTableQueryVariables
     >
       headCells={
         householdMultiSelect ? preparedHeadcells.slice(1) : preparedHeadcells

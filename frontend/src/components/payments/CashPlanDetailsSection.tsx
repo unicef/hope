@@ -100,15 +100,17 @@ export function CashPlanDetailsSection({
             <Grid item xs={9}>
               <ChartContainer>
                 <Doughnut
-                  options={{
-                    maintainAspectRatio: false,
-                    cutout: '80%',
-                    plugins: {
-                      legend: {
-                        display: false,
+                  options={
+                    {
+                      maintainAspectRatio: false,
+                      cutout: '80%',
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
                       },
-                    },
-                  }}
+                    } as any
+                  }
                   data={{
                     labels: [t('SUCCESSFUL'), t('ERRONEOUS')],
                     datasets: [

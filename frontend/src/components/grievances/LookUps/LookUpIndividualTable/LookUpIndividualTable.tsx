@@ -103,8 +103,8 @@ export function LookUpIndividualTable({
 
   const renderTable = (): React.ReactElement => (
     <UniversalTable<
-      AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
-      AllIndividualsForPopulationTableQueryVariables
+    AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
+    AllIndividualsForPopulationTableQueryVariables
     >
       headCells={preparedHeadcells}
       allowSort={false}

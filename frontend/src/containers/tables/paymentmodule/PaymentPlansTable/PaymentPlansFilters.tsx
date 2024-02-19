@@ -15,14 +15,14 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 
 export type FilterProps = Pick<
-  AllPaymentPlansForTableQueryVariables,
-  | 'search'
-  | 'status'
-  | 'totalEntitledQuantityFrom'
-  | 'totalEntitledQuantityTo'
-  | 'dispersionStartDate'
-  | 'dispersionEndDate'
-  | 'isFollowUp'
+AllPaymentPlansForTableQueryVariables,
+| 'search'
+| 'status'
+| 'totalEntitledQuantityFrom'
+| 'totalEntitledQuantityTo'
+| 'dispersionStartDate'
+| 'dispersionEndDate'
+| 'isFollowUp'
 >;
 
 interface PaymentPlansFiltersProps {

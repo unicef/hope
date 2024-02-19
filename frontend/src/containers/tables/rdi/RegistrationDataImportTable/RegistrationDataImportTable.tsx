@@ -63,16 +63,16 @@ export function RegistrationDataImportTable({
   const renderTable = (): React.ReactElement => (
     <TableWrapper>
       <UniversalTable<
-        RegistrationDataImportNode,
-        AllRegistrationDataImportsQueryVariables
+      RegistrationDataImportNode,
+      AllRegistrationDataImportsQueryVariables
       >
         title={noTitle ? null : t('List of Imports')}
         getTitle={(data) =>
           noTitle
             ? null
             : `${t('List of Imports')} (${
-                data?.allRegistrationDataImports?.totalCount || 0
-              })`
+              data?.allRegistrationDataImports?.totalCount || 0
+            })`
         }
         headCells={enableRadioButton ? headCells : headCells.slice(1)}
         defaultOrderBy="importDate"

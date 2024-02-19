@@ -37,8 +37,8 @@ export const individualDataRow = (
   const individualValue = field.isFlexField
     ? ticket.individualDataUpdateTicketDetails?.individual?.flexFields[row[0]]
     : ticket.individualDataUpdateTicketDetails?.individual[
-        camelCase(fieldName)
-      ];
+      camelCase(fieldName)
+    ];
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? valueDetails.previousValue

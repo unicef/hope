@@ -217,8 +217,8 @@ export function GrievanceDetailsToolbar({
   const closingWarningText =
     ticket?.businessArea.postponeDeduplication === true
       ? t(
-          'This ticket will be closed without running the deduplication process.',
-        )
+        'This ticket will be closed without running the deduplication process.',
+      )
       : null;
 
   const changeState = async (status): Promise<void> => {

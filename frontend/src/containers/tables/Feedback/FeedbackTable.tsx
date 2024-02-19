@@ -30,9 +30,9 @@ export function FeedbackTable({
     createdAtRange:
       filter.createdAtRangeMin || filter.createdAtRangeMax
         ? JSON.stringify({
-            min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
-            max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
-          })
+          min: dateToIsoString(filter.createdAtRangeMin, 'startOfDay'),
+          max: dateToIsoString(filter.createdAtRangeMax, 'endOfDay'),
+        })
         : '',
     program: isAllPrograms ? filter.program : programId,
     isActiveProgram: filter.programState === 'active' ? 'true' : '',

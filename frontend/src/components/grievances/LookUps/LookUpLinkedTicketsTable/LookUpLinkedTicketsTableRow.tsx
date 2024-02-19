@@ -14,8 +14,8 @@ interface LookUpLinkedTicketsTableRowProps {
   selected: Array<string>;
   checkboxClickHandler: (
     event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     number,
   ) => void;
   statusChoices: { [id: number]: string };

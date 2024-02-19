@@ -647,9 +647,9 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
   if (!inputStr) return null;
   return shouldAnonymize
     ? inputStr
-        .split(' ')
-        .map((el) => el.substring(0, 2) + '*'.repeat(3))
-        .join(' ')
+      .split(' ')
+      .map((el) => el.substring(0, 2) + '*'.repeat(3))
+      .join(' ')
     : inputStr;
 };
 

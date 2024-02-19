@@ -89,7 +89,7 @@ export function GrievancesSidebar({
                   ) || []
                 }
               />
-            ) : null}
+              ) : null}
           </Box>
           <Box mt={3}>
             <OtherRelatedTickets ticket={ticket} />

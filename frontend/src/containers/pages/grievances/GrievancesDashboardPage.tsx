@@ -80,9 +80,9 @@ export function GrievancesDashboardPage(): React.ReactElement {
                 topNumber={`${
                   numberOfClosedTickets > 0
                     ? (
-                        (userWeightedTime + systemWeightedTime) /
+                      (userWeightedTime + systemWeightedTime) /
                         numberOfClosedTickets
-                      ).toFixed(2)
+                    ).toFixed(2)
                     : 0
                 } days`}
                 systemGenerated={`${systemGeneratedAvgResolution} days`}

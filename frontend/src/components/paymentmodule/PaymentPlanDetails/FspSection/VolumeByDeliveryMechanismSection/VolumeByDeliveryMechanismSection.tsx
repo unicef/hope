@@ -51,7 +51,7 @@ export const getDeliveryMechanismColor = (
 };
 
 export const VolumeByDeliveryMechanismSection: React.FC<
-  VolumeByDeliveryMechanismSectionProps
+VolumeByDeliveryMechanismSectionProps
 > = ({ paymentPlan }) => {
   const { t } = useTranslation();
   const { volumeByDeliveryMechanism } = paymentPlan;

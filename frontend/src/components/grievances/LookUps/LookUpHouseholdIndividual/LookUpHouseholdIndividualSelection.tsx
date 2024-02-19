@@ -73,7 +73,7 @@ export function LookUpHouseholdIndividualSelection({
         {isInvalid('selectedHousehold', errors, touched) &&
           !selectedHousehold && (
             <FormHelperText error>{errors?.selectedHousehold}</FormHelperText>
-          )}
+        )}
       </Box>
     </>
   );

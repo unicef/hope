@@ -36,8 +36,8 @@ export function PaymentVerificationTable({
   };
   return (
     <UniversalTable<
-      CashPlanAndPaymentPlanNode,
-      AllCashPlansAndPaymentPlansQueryVariables
+    CashPlanAndPaymentPlanNode,
+    AllCashPlansAndPaymentPlansQueryVariables
     >
       title={t('List of Payment Plans')}
       headCells={headCells}

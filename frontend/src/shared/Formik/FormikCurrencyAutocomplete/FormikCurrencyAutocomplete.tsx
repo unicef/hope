@@ -13,12 +13,12 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function FormikCurrencyAutocomplete({
+export const FormikCurrencyAutocomplete = ({
   field,
   form,
   disabled,
   ...otherProps
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
 
   const { data } = useCurrencyChoicesQuery();
@@ -60,4 +60,4 @@ export function FormikCurrencyAutocomplete({
       />
     </Box>
   );
-}
+};

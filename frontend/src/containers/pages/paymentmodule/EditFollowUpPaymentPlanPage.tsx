@@ -75,11 +75,11 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
       .when('startDate', (startDate: any, schema: Yup.DateSchema) =>
         startDate
           ? schema.min(
+            startDate,
+            `${t('End date has to be greater than')} ${moment(
               startDate,
-              `${t('End date has to be greater than')} ${moment(
-                startDate,
-              ).format('YYYY-MM-DD')}`,
-            )
+            ).format('YYYY-MM-DD')}`,
+          )
           : schema,
       ),
     dispersionStartDate: Yup.date().required(
@@ -93,11 +93,11 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
         (dispersionStartDate: any, schema: Yup.DateSchema) =>
           dispersionStartDate
             ? schema.min(
+              dispersionStartDate,
+              `${t('Dispersion End Date has to be greater than')} ${moment(
                 dispersionStartDate,
-                `${t('Dispersion End Date has to be greater than')} ${moment(
-                  dispersionStartDate,
-                ).format('YYYY-MM-DD')}`,
-              )
+              ).format('YYYY-MM-DD')}`,
+            )
             : schema,
       ),
   });

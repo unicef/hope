@@ -64,9 +64,9 @@ export function GrievancesTableRow({
   );
   const issueType = ticket.issueType
     ? issueTypeChoicesData
-        .find((el) => el.category === ticket.category.toString())
-        .subCategories.find((el) => el.value === ticket.issueType.toString())
-        .name
+      .find((el) => el.category === ticket.category.toString())
+      .subCategories.find((el) => el.value === ticket.issueType.toString())
+      .name
     : '-';
 
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();

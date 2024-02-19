@@ -51,10 +51,10 @@ export function UserProfileMenu({
 
   const handleClose = (
     event:
-      | React.MouseEvent<HTMLAnchorElement, MouseEvent>
-      | React.TouchEvent<HTMLAnchorElement>
-      | MouseEvent
-      | TouchEvent,
+    | React.MouseEvent<HTMLAnchorElement, MouseEvent>
+    | React.TouchEvent<HTMLAnchorElement>
+    | MouseEvent
+    | TouchEvent,
   ): void => {
     if (
       anchorRef.current &&
@@ -68,10 +68,10 @@ export function UserProfileMenu({
 
   const handleLogout = (
     event:
-      | React.MouseEvent<HTMLAnchorElement, MouseEvent>
-      | React.TouchEvent<HTMLAnchorElement>
-      | MouseEvent
-      | TouchEvent,
+    | React.MouseEvent<HTMLAnchorElement, MouseEvent>
+    | React.TouchEvent<HTMLAnchorElement>
+    | MouseEvent
+    | TouchEvent,
   ): void => {
     window.location.assign('/api/logout');
     localStorage.removeItem('AUTHENTICATED');

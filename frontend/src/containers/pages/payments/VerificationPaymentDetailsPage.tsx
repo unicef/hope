@@ -42,22 +42,22 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
       ? [
-          {
-            title: t('Payment Verification'),
-            to: `/${baseUrl}/payment-verification`,
-          },
-        ]
+        {
+          title: t('Payment Verification'),
+          to: `/${baseUrl}/payment-verification`,
+        },
+      ]
       : []),
     ...(hasPermissions(
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
       permissions,
     )
       ? [
-          {
-            title: `${t('Payment Plan')} ${payment.parent.unicefId}`,
-            to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent.id}`,
-          },
-        ]
+        {
+          title: `${t('Payment Plan')} ${payment.parent.unicefId}`,
+          to: `/${baseUrl}/payment-verification/payment-plan/${payment.parent.id}`,
+        },
+      ]
       : []),
   ];
 
@@ -73,7 +73,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
           paymentVerificationId={payment.verification?.id}
           enabled={payment.verification.isManuallyEditable}
         />
-      ) : null}
+        ) : null}
     </PageHeader>
   );
   return (

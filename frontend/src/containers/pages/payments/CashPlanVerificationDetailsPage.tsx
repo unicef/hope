@@ -177,7 +177,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
               verificationPlan={edge.node}
               planNode={cashPlan}
             />
-          ))
+        ))
         : null}
       {canSeeVerificationRecords() ? (
         <>
@@ -220,7 +220,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
           <UniversalActivityLogTablePaymentVerification
             objectId={cashPlan.id}
           />
-        )}
+      )}
     </>
   );
 }

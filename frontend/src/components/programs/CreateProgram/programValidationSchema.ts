@@ -22,11 +22,11 @@ export const programValidationSchema = (
       .when('startDate', (startDate, schema) =>
         startDate
           ? schema.min(
+            startDate,
+            `${t('End date have to be greater than')} ${moment(
               startDate,
-              `${t('End date have to be greater than')} ${moment(
-                startDate,
-              ).format('YYYY-MM-DD')}`,
-            )
+            ).format('YYYY-MM-DD')}`,
+          )
           : schema,
       ),
     sector: Yup.string().required(t('Sector is required')),

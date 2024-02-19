@@ -40,8 +40,8 @@ export function ProgrammesTable({
   return (
     <TableWrapper>
       <UniversalTable<
-        AllProgramsQuery['allPrograms']['edges'][number]['node'],
-        AllProgramsQueryVariables
+      AllProgramsQuery['allPrograms']['edges'][number]['node'],
+      AllProgramsQueryVariables
       >
         title={t('Programmes')}
         headCells={headCells}

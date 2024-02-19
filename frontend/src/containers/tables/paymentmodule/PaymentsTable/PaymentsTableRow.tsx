@@ -159,12 +159,12 @@ export function PaymentsTableRow({
       <TableCell align="left">
         {payment.entitlementQuantity != null && payment.entitlementQuantity >= 0
           ? `${formatCurrencyWithSymbol(
-              payment.entitlementQuantity,
-              payment.currency,
-            )} (${formatCurrencyWithSymbol(
-              payment.entitlementQuantityUsd,
-              'USD',
-            )})`
+            payment.entitlementQuantity,
+            payment.currency,
+          )} (${formatCurrencyWithSymbol(
+            payment.entitlementQuantityUsd,
+            'USD',
+          )})`
           : '-'}
       </TableCell>
       <TableCell data-cy="delivered-quantity-cell" align="left">

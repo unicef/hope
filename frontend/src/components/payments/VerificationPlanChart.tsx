@@ -20,15 +20,17 @@ export function VerificationPlanDetailsChart({
   return (
     <ChartContainer>
       <Doughnut
-        options={{
-          maintainAspectRatio: false,
-          cutout: 80,
-          plugins: {
-            legend: {
-              display: false,
+        options={
+          {
+            maintainAspectRatio: false,
+            cutout: '%',
+            plugins: {
+              legend: {
+                display: false,
+              },
             },
-          },
-        }}
+          } as any
+        }
         data={{
           labels: [
             t('RECEIVED'),

@@ -44,9 +44,9 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-        .required(t('Payment Plan Name is required'))
-        .min(5, t('Too short'))
-        .max(25, t('Too long')),
+      .required(t('Payment Plan Name is required'))
+      .min(5, t('Too short'))
+      .max(25, t('Too long')),
     targetingId: Yup.string().required(t('Target Population is required')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
@@ -54,11 +54,11 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       .when('startDate', (startDate: any, schema: Yup.DateSchema) =>
         startDate
           ? schema.min(
-              new Date(startDate),
-              `${t('End date has to be greater than')} ${moment(
-                startDate,
-              ).format('YYYY-MM-DD')}`,
-            )
+            new Date(startDate),
+            `${t('End date has to be greater than')} ${moment(
+              startDate,
+            ).format('YYYY-MM-DD')}`,
+          )
           : schema,
       ),
     currency: Yup.string().nullable().required(t('Currency is required')),
@@ -73,11 +73,11 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
         (dispersionStartDate: any, schema: Yup.DateSchema) =>
           dispersionStartDate
             ? schema.min(
-                new Date(dispersionStartDate),
-                `${t('Dispersion End Date has to be greater than')} ${moment(
-                  dispersionStartDate,
-                ).format('YYYY-MM-DD')}`,
-              )
+              new Date(dispersionStartDate),
+              `${t('Dispersion End Date has to be greater than')} ${moment(
+                dispersionStartDate,
+              ).format('YYYY-MM-DD')}`,
+            )
             : schema,
       ),
   });

@@ -2,30 +2,20 @@ import * as React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import * as Sentry from '@sentry/react';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-import Chart from 'chart.js/auto'; // Import Chart.js correctly
+import { Chart as ChartJS } from 'chart.js';
 import packageJson from '../package.json';
 import setupInternalization from './i18n';
 import * as serviceWorker from './serviceWorker';
 import { FONT } from './theme';
 import { App } from './App';
 
-Chart.register(ChartDataLabels); // Register the plugin
-
-Chart.defaults.font.family = FONT;
-Chart.defaults.plugins.tooltip.padding = 12;
-Chart.defaults.plugins.tooltip.cornerRadius = 2;
-Chart.defaults.plugins.tooltip.mode = 'point';
-Chart.defaults.plugins.legend.position = 'bottom';
-Chart.defaults.plugins.legend.labels.usePointStyle = true;
-Chart.defaults.plugins.legend.labels.boxWidth = 8;
-
-Chart.defaults.plugins.datalabels.font = {
-  family: FONT,
-};
-Chart.defaults.plugins.datalabels.font = () => ({
-  weight: 'bold',
-});
+ChartJS.defaults.font.family = FONT;
+ChartJS.defaults.plugins.tooltip.padding = 12;
+ChartJS.defaults.plugins.tooltip.cornerRadius = 2;
+ChartJS.defaults.plugins.tooltip.mode = 'point';
+ChartJS.defaults.plugins.legend.position = 'bottom';
+ChartJS.defaults.plugins.legend.labels.usePointStyle = true;
+ChartJS.defaults.plugins.legend.labels.boxWidth = 8;
 
 setupInternalization();
 if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {

@@ -57,8 +57,8 @@ export function CashPlanDetails({
   };
 
   const renderTargetPopulations = ():
-    | React.ReactElement
-    | Array<React.ReactElement> =>
+  | React.ReactElement
+  | Array<React.ReactElement> =>
     filteredTps().length ? (
       filteredTps().map((el) => (
         <span key={el.id}>

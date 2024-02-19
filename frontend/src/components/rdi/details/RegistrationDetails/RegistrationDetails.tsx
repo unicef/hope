@@ -134,7 +134,7 @@ export function RegistrationDetails({
                     value={registration?.refuseReason}
                   />
                 </Grid>
-              ) : null}
+                ) : null}
             </Grid>
           </Grid>
           <Grid item xs={4}>
