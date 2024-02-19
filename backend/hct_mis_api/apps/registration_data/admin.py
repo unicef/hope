@@ -21,7 +21,7 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.documents import get_individual_doc
-from hct_mis_api.apps.household.forms import MassEnrolForm
+from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.utils import enroll_household_to_program
@@ -280,7 +280,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
         context = self.get_common_context(request, title="Mass enroll households to another program")
         business_area_id = qs.first().business_area_id
         if "apply" in request.POST or "acknowledge" in request.POST:
-            form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+            form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
             if form.is_valid():
                 enrolled_hh_count = 0
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
@@ -293,7 +293,7 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
                     level=messages.SUCCESS,
                 )
                 return HttpResponseRedirect(url)
-        form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+        form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
         context["form"] = form
         context["action"] = "mass_enroll_to_another_program"
         return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)

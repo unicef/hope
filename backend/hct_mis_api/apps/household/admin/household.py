@@ -28,7 +28,7 @@ from hct_mis_api.apps.household.admin.mixins import (
     CustomTargetPopulationMixin,
     HouseholdWithDrawnMixin,
 )
-from hct_mis_api.apps.household.forms import MassEnrolForm
+from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -296,7 +296,7 @@ class HouseholdAdmin(
         context = self.get_common_context(request, title="Mass enroll households to another program")
         business_area_id = qs.first().business_area_id
         if "apply" in request.POST or "acknowledge" in request.POST:
-            form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+            form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
             if form.is_valid():
                 enrolled_hh_count = 0
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
@@ -318,7 +318,7 @@ class HouseholdAdmin(
                     level=messages.ERROR,
                 )
                 return None
-        form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+        form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
         context["form"] = form
         context["action"] = "mass_enroll_to_another_program"
         return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
