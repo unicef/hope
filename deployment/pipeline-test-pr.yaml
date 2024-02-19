@@ -263,7 +263,7 @@ stages:
             continueOnError: true
 
   - stage: e2e_tests
-    dependsOn: [build_and_push_backend]
+    dependsOn: [build_and_push_backend, test_frontend]
     displayName: E2E-Tests
     jobs:
       - job: selenium_tests
