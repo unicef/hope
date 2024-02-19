@@ -25,8 +25,19 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan, PaymentPlanSplit
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismPerPaymentPlanFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+)
+from hct_mis_api.apps.payment.models import (
+    FinancialServiceProvider,
+    GenericPayment,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+)
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
@@ -518,15 +529,8 @@ class TestPaymentPlanServices(APITestCase):
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_split(self, get_exchange_rate_mock: Any) -> None:
         pp = PaymentPlanFactory(
-            total_households_count=1,
             start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
             end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
-        )
-
-        new_targeting = TargetPopulationFactory(status=TargetPopulation.STATUS_READY_FOR_PAYMENT_MODULE)
-        new_targeting.program = ProgramFactory(
-            start_date=timezone.datetime(2021, 5, 10, tzinfo=utc).date(),
-            end_date=timezone.datetime(2021, 8, 10, tzinfo=utc).date(),
         )
 
         with self.assertRaisesMessage(GraphQLError, "No payments to split"):
@@ -628,3 +632,47 @@ class TestPaymentPlanServices(APITestCase):
         self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
         self.assertEqual(pp_splits[0].payments.count(), 4)
         self.assertEqual(pp_splits[1].payments.count(), 8)
+
+    @freeze_time("2023-10-10")
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
+        pp = PaymentPlanFactory(
+            start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
+            end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        pp.background_action_status_send_to_payment_gateway()
+        pp.save()
+        with self.assertRaisesMessage(GraphQLError, "Sending in progress"):
+            PaymentPlanService(pp).send_to_payment_gateway()
+
+        pp.background_action_status_none()
+        pp.save()
+
+        pg_fsp = FinancialServiceProviderFactory(
+            name="Western Union",
+            delivery_mechanisms=[
+                GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+            ],
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
+        )
+        dm = DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=pp,
+            financial_service_provider=pg_fsp,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+            sent_to_payment_gateway=True,
+        )
+
+        with self.assertRaisesMessage(GraphQLError, "Already sent to Payment Gateway"):
+            PaymentPlanService(pp).send_to_payment_gateway()
+
+        dm.sent_to_payment_gateway = False
+        dm.save()
+        with mock.patch(
+            "hct_mis_api.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay"
+        ) as mock_send_to_payment_gateway_task:
+            pps = PaymentPlanService(pp)
+            pps.user = mock.MagicMock(pk="123")
+            pps.send_to_payment_gateway()
+            assert mock_send_to_payment_gateway_task.call_count == 1
