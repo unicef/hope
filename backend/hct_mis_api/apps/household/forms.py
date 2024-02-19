@@ -190,21 +190,21 @@ class CreateTargetPopulationTextForm(forms.Form):
 
 
 class MassEnrolForm(forms.Form):
-    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+    _selected_action = forms.CharField(widget=forms.MultipleHiddenInput, required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.business_area_id = kwargs.pop("business_area_id")
         self.households = kwargs.pop("households")
         super().__init__(*args, **kwargs)
-        self.fields["program_for_enrol"] = forms.ModelChoiceField(
+        self.fields["program_for_enroll"] = forms.ModelChoiceField(
             queryset=Program.objects.filter(business_area_id=self.business_area_id, status=Program.ACTIVE),
-            label="Select a program to enrol households to",
+            label="Select a program to enroll households to",
         )
 
     def clean(self) -> Optional[Dict[str, Any]]:
         cleaned_data = super().clean()
         if "apply" in self.data:
-            program_for_enrol = cleaned_data.get("program_for_enrol")
+            program_for_enroll = cleaned_data.get("program_for_enroll")
             warning_message = None  # Initialize the warning message
 
             # Check each household in the queryset
@@ -212,8 +212,8 @@ class MassEnrolForm(forms.Form):
                 if not (
                     household.program
                     and household.program.data_collecting_type
-                    and program_for_enrol.data_collecting_type
-                    and program_for_enrol.data_collecting_type
+                    and program_for_enroll.data_collecting_type
+                    and program_for_enroll.data_collecting_type
                     in household.program.data_collecting_type.compatible_types.all()
                 ):
                     # Set the warning message

@@ -9,6 +9,7 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
@@ -20,8 +21,10 @@ from adminfilters.filters import ChoicesFieldComboFilter
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.documents import get_individual_doc
+from hct_mis_api.apps.household.forms import MassEnrolForm
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.program.utils import enroll_household_to_program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub import models as datahub_models
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -266,3 +269,31 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
     def households(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?&registration_data_import__exact={pk}")
+
+    @button(permission="program.enroll_beneficiaries")
+    def enroll_to_program(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        url = reverse("admin:registration_data_registrationdataimport_change", args=[pk])
+        qs = RegistrationDataImport.objects.filter(pk=pk).first().households.all()
+        if not qs.exists():
+            self.message_user(request, "No households found in this RDI", level=messages.ERROR)
+            return None
+        context = self.get_common_context(request, title="Mass enroll households to another program")
+        business_area_id = qs.first().business_area_id
+        if "apply" in request.POST or "acknowledge" in request.POST:
+            form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+            if form.is_valid():
+                enrolled_hh_count = 0
+                program_for_enroll = form.cleaned_data["program_for_enroll"]
+                for household in qs:
+                    _, created = enroll_household_to_program(household, program_for_enroll)
+                    enrolled_hh_count += created
+                self.message_user(
+                    request,
+                    f"Successfully enrolled {enrolled_hh_count} households to {program_for_enroll}",
+                    level=messages.SUCCESS,
+                )
+                return HttpResponseRedirect(url)
+        form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+        context["form"] = form
+        context["action"] = "mass_enroll_to_another_program"
+        return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
