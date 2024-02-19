@@ -3,42 +3,37 @@
 exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Edit FSP 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-3"
+    class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root sc-bdVaJa fUBeDk MuiPaper-elevation1 MuiPaper-rounded"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh iMSXGq css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiBox-root MuiBox-root-4"
+        class="MuiBox-root css-tdpf08"
       >
         <h6
-          class="MuiTypography-root MuiTypography-h6"
+          class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
         >
           FSPs
         </h6>
         <a
           aria-disabled="true"
-          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
+          class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
           href="/afghanistan/programs/UHJvZ3JhbU5vZGU6NmI1OTE1OTktYmNhNy00NDVhLWJmZjItYWU5MTUyMjMxZGFm/payment-module/payment-plans/undefined/setup-fsp/edit"
-          role="button"
           tabindex="-1"
         >
-          <span
-            class="MuiButton-label"
-          >
-            Edit FSP
-          </span>
+          Edit FSP
         </a>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
+        class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-acctgf-MuiGrid-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-bxivhb faHsOD"
+              class="sc-hLQSwg hqLXmS"
               color="textSecondary"
             >
               Cash
@@ -47,7 +42,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-Cash"
             >
               <span
-                class="sc-ifAKCX eVOAmK"
+                class="sc-eDLKkx gpSOvu"
                 color="textSecondary"
               >
                 Miranda Ltd
@@ -56,11 +51,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-bxivhb faHsOD"
+              class="sc-hLQSwg hqLXmS"
               color="textSecondary"
             >
               In Kind
@@ -69,7 +64,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-In Kind"
             >
               <span
-                class="sc-ifAKCX eVOAmK"
+                class="sc-eDLKkx gpSOvu"
                 color="textSecondary"
               >
                 Frazier-Watson
@@ -78,11 +73,11 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
         >
           <div>
             <span
-              class="sc-bxivhb faHsOD"
+              class="sc-hLQSwg hqLXmS"
               color="textSecondary"
             >
               Transfer
@@ -91,7 +86,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               data-cy="label-Transfer"
             >
               <span
-                class="sc-ifAKCX eVOAmK"
+                class="sc-eDLKkx gpSOvu"
                 color="textSecondary"
               >
                 Bray Group
@@ -101,41 +96,41 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
         </div>
       </div>
       <div
-        class="sc-bwzfXH gUDLEP"
+        class="sc-guDLey cGgsPx"
       >
         <div
-          class="sc-htpNat hMtgFq"
+          class="sc-dmyCSP hqweMa"
         />
       </div>
       <div
-        class="MuiBox-root MuiBox-root-5"
+        class="MuiBox-root css-j7qwjs"
       >
         <div
-          class="sc-bZQynM hiBBpC"
+          class="sc-gLLuof hORgxB"
         >
           <h6
-            class="MuiTypography-root MuiTypography-h6"
+            class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
           >
             Volume by Delivery Mechanism
           </h6>
            
         </div>
         <div
-          class="sc-gzVnrw tDqEr"
+          class="sc-iBdnpw hGeBlH"
         >
           <div
-            class="MuiGrid-root MuiGrid-container"
+            class="MuiGrid-root MuiGrid-container css-1bzpx2o-MuiGrid-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-EHOje QrCDa"
+                class="sc-jTQCzO eRiSbA"
                 color="#D8E1EE"
               >
                 <div>
                   <span
-                    class="sc-bxivhb faHsOD"
+                    class="sc-hLQSwg hqLXmS"
                     color="textSecondary"
                   >
                     Cash (Miranda Ltd)
@@ -144,7 +139,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-Cash (Miranda Ltd)"
                   >
                     <span
-                      class="sc-ifAKCX eVOAmK"
+                      class="sc-eDLKkx gpSOvu"
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -154,15 +149,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-EHOje eQfrqz"
+                class="sc-jTQCzO gORZfM"
                 color=" #d8d8d8"
               >
                 <div>
                   <span
-                    class="sc-bxivhb faHsOD"
+                    class="sc-hLQSwg hqLXmS"
                     color="textSecondary"
                   >
                     In Kind (Frazier-Watson)
@@ -171,7 +166,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-In Kind (Frazier-Watson)"
                   >
                     <span
-                      class="sc-ifAKCX eVOAmK"
+                      class="sc-eDLKkx gpSOvu"
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -181,15 +176,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-EHOje eRZRCM"
+                class="sc-jTQCzO cwvOqO"
                 color="#003C8F"
               >
                 <div>
                   <span
-                    class="sc-bxivhb faHsOD"
+                    class="sc-hLQSwg hqLXmS"
                     color="textSecondary"
                   >
                     Transfer (Bray Group)
@@ -198,7 +193,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
                     data-cy="label-Transfer (Bray Group)"
                   >
                     <span
-                      class="sc-ifAKCX eVOAmK"
+                      class="sc-eDLKkx gpSOvu"
                       color="textSecondary"
                     >
                       0 PLN (0 USD)
@@ -209,13 +204,13 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
             </div>
           </div>
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center"
+            class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div
-                class="sc-htoDjs iquLtL"
+                class="sc-fsYfdN kEIWSo"
               >
                 <canvas
                   class="chartjs-render-monitor"

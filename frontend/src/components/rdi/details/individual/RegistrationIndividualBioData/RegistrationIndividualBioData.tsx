@@ -18,6 +18,7 @@ import { LabelizedField } from '@core/LabelizedField';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModal';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -30,15 +31,14 @@ const BorderBox = styled.div`
 
 interface RegistrationIndividualBioDataProps {
   individual: ImportedIndividualDetailedFragment;
-  baseUrl: string;
   choicesData: HouseholdChoiceDataQuery;
 }
 
 export function RegistrationIndividualBioData({
   individual,
   choicesData,
-  baseUrl,
 }: RegistrationIndividualBioDataProps): React.ReactElement {
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,

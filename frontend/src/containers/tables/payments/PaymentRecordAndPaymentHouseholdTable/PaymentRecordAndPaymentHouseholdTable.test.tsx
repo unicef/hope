@@ -4,7 +4,7 @@ import * as React from 'react';
 import wait from 'waait';
 import { fakeApolloAllPaymentRecordsHousehold } from '../../../../../fixtures/payments/fakeApolloAllPaymentRecordsHousehold';
 import { fakeHousehold } from '../../../../../fixtures/population/fakeHousehold';
-import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { render } from '../../../../testUtils/testUtils';
 import { PaymentRecordHouseholdTable } from '.';
 
 describe('containers/tables/payments/PaymentRecordHouseholdTable', () => {

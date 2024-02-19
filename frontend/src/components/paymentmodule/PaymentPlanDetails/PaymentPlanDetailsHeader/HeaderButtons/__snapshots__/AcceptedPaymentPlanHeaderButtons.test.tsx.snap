@@ -3,54 +3,47 @@
 exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons should render disabled buttons 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-1"
+    class="MuiBox-root css-70qvj9"
   >
     <div
-      class="MuiBox-root MuiBox-root-2"
+      class="MuiBox-root css-hpgf8j"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
         data-cy="button-export-xlsx"
         disabled=""
         tabindex="-1"
         type="button"
       >
         <span
-          class="MuiButton-label"
+          class="MuiButton-startIcon MuiButton-iconSizeMedium css-1d6wzja-MuiButton-startIcon"
         >
-          <span
-            class="MuiButton-startIcon MuiButton-iconSizeMedium"
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+            data-testid="GetAppIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
           >
-            <svg
-              aria-hidden="true"
-              class="MuiSvgIcon-root"
-              focusable="false"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
-              />
-            </svg>
-          </span>
-          Export Xlsx
+            <path
+              d="M19 9h-4V3H9v6H5l7 7zM5 18v2h14v-2z"
+            />
+          </svg>
         </span>
+        Export Xlsx
       </button>
     </div>
     <div
-      class="MuiBox-root MuiBox-root-3"
+      class="MuiBox-root css-1ynyhby"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
         data-cy="button-send-to-payment-gateway"
         disabled=""
         tabindex="-1"
         type="button"
       >
-        <span
-          class="MuiButton-label"
-        >
-          Send to FSP
-        </span>
+        Send to FSP
       </button>
     </div>
   </div>
@@ -60,54 +53,47 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/He
 exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/HeaderButtons/AcceptedPaymentPlanHeaderButtons should render not disabled buttons 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-4"
+    class="MuiBox-root css-70qvj9"
   >
     <div
-      class="MuiBox-root MuiBox-root-5"
+      class="MuiBox-root css-hpgf8j"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
         data-cy="button-export-xlsx"
         disabled=""
         tabindex="-1"
         type="button"
       >
         <span
-          class="MuiButton-label"
+          class="MuiButton-startIcon MuiButton-iconSizeMedium css-1d6wzja-MuiButton-startIcon"
         >
-          <span
-            class="MuiButton-startIcon MuiButton-iconSizeMedium"
+          <svg
+            aria-hidden="true"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+            data-testid="GetAppIcon"
+            focusable="false"
+            viewBox="0 0 24 24"
           >
-            <svg
-              aria-hidden="true"
-              class="MuiSvgIcon-root"
-              focusable="false"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
-              />
-            </svg>
-          </span>
-          Export Xlsx
+            <path
+              d="M19 9h-4V3H9v6H5l7 7zM5 18v2h14v-2z"
+            />
+          </svg>
         </span>
+        Export Xlsx
       </button>
     </div>
     <div
-      class="MuiBox-root MuiBox-root-6"
+      class="MuiBox-root css-1ynyhby"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary Mui-disabled Mui-disabled"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium Mui-disabled MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
         data-cy="button-send-to-payment-gateway"
         disabled=""
         tabindex="-1"
         type="button"
       >
-        <span
-          class="MuiButton-label"
-        >
-          Send to FSP
-        </span>
+        Send to FSP
       </button>
     </div>
   </div>

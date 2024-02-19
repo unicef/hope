@@ -16,13 +16,13 @@ import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentsTableHeadCells';
 import { PaymentsTableRow } from './PaymentsTableRow';
 import { WarningTooltipTable } from './WarningTooltipTable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const StyledBox = styled(Box)`
   background-color: #fff;
 `;
 interface PaymentsTableProps {
   businessArea: string;
-  baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
   permissions: string[];
   canViewDetails?: boolean;
@@ -30,11 +30,11 @@ interface PaymentsTableProps {
 
 export function PaymentsTable({
   businessArea,
-  baseUrl,
   paymentPlan,
   permissions,
   canViewDetails = false,
 }: PaymentsTableProps): React.ReactElement {
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const [dialogPayment, setDialogPayment] = useState<
     AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null

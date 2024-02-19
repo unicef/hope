@@ -6,7 +6,8 @@ interface StyledLinkProps {
   fullWidth?: boolean;
 }
 
-export const StyledLink = styled(Link)<StyledLinkProps>`  color: #000;
+export const StyledLink = styled(Link)<StyledLinkProps>`
+  color: #000;
   max-width: ${(props) => (props.fullWidth ? '100%' : '200px')}
   overflow-wrap: break-word;
 `;

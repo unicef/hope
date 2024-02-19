@@ -4,7 +4,7 @@ import * as React from 'react';
 import wait from 'waait';
 import { fakeApolloAllPaymentsForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentsForTable';
 import { fakeApolloAllPaymentPlansForTable } from '../../../../../fixtures/payments/fakeApolloAllPaymentPlansForTable';
-import { ApolloLoadingLink, render } from '../../../../testUtils/testUtils';
+import { render } from '../../../../testUtils/testUtils';
 import { PaymentPlanQuery } from '@generated/graphql';
 import { PERMISSIONS } from '../../../../config/permissions';
 import { PaymentsTable } from './PaymentsTable';
