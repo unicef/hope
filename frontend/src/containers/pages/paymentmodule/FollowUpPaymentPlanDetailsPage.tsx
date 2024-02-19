@@ -78,7 +78,6 @@ export function FollowUpPaymentPlanDetailsPage(): React.ReactElement {
       <ExcludeSection paymentPlan={paymentPlan} />
       <PaymentPlanDetailsResults paymentPlan={paymentPlan} />
       <PaymentsTable
-        baseUrl={baseUrl}
         businessArea={businessArea}
         paymentPlan={paymentPlan}
         permissions={permissions}

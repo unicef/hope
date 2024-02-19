@@ -8,7 +8,6 @@ describe('components/rdi/details/individual/RegistrationIndividualBioData', () =
   it('should render', () => {
     const { container } = render(
       <RegistrationIndividualBioData
-        businessArea="afghanistan"
         individual={fakeImportedIndividualDetailedFragment}
         choicesData={fakeHouseholdChoices}
       />,

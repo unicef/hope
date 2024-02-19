@@ -90,7 +90,6 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
       </PageHeader>
       <Container>
         <RegistrationIndividualBioData
-          baseUrl={baseUrl}
           individual={importedIndividual}
           choicesData={choicesData}
         />
