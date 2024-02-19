@@ -44,6 +44,7 @@ stages:
 
   - stage: build_and_push_backend
     displayName: BE build & push
+    dependsOn: []
     jobs:
       - job: build_push_backend
         pool:
