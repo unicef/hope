@@ -40,7 +40,7 @@ class ProgramCycleAdminInline(admin.TabularInline):
 
 
 @admin.register(Program)
-class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase, AdminAutoCompleteSearchMixin):
+class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "start_date", "end_date", "business_area", "data_collecting_type")
     date_hierarchy = "start_date"
     list_filter = (

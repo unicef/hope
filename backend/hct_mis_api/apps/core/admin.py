@@ -197,7 +197,7 @@ class AcceptanceProcessThresholdInline(TabularInline):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(
-    GetManyFromRemoteMixin, LastSyncDateResetMixin, HOPEModelAdminBase, AdminAutoCompleteSearchMixin
+    GetManyFromRemoteMixin, LastSyncDateResetMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase
 ):
     inlines = [
         AcceptanceProcessThresholdInline,
