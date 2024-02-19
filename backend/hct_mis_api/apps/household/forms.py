@@ -189,7 +189,7 @@ class CreateTargetPopulationTextForm(forms.Form):
             raise ValidationError(str(e))
 
 
-class MassEnrolForm(forms.Form):
+class MassEnrollForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput, required=False)
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
