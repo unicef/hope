@@ -17,6 +17,7 @@ from hct_mis_api.api.endpoints.rdi.mixin import HouseholdUploadMixin
 from hct_mis_api.api.endpoints.rdi.upload import HouseholdSerializer
 from hct_mis_api.api.models import Grant
 from hct_mis_api.api.utils import humanize_errors
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
@@ -28,6 +29,10 @@ if TYPE_CHECKING:
 
 
 class RDISerializer(serializers.ModelSerializer):
+    program = serializers.SlugRelatedField(
+        slug_field="id", required=True, queryset=Program.objects.all(), write_only=True
+    )
+
     class Meta:
         model = RegistrationDataImportDatahub
         exclude = ("business_area_slug", "import_data", "hct_id")
@@ -51,6 +56,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
     @atomic()
     @atomic(using="registration_datahub")
     def perform_create(self, serializer: serializers.BaseSerializer) -> Optional[RegistrationDataImport]:  # type: ignore # FIXME: perform_create from CreateModelMixin returns None
+        program = serializer.validated_data.pop("program")
         obj = serializer.save(
             business_area_slug=self.selected_business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
         )
@@ -62,6 +68,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
             number_of_households=0,
             datahub_id=str(obj.pk),
             business_area=self.selected_business_area,
+            program=program,
         )
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:

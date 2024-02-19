@@ -113,7 +113,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         household = self._create_object_and_validate(household_data, ImportedHousehold)
         household.set_admin_areas()
 
-        household.kobo_asset_id = record.source_id
+        household.detail_id = record.source_id
         household.save(
             update_fields=(
                 "admin_area",
@@ -122,7 +122,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 "admin2_title",
                 "admin3_title",
                 "admin4_title",
-                "kobo_asset_id",
+                "detail_id",
             )
         )
 
@@ -135,7 +135,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 individual: ImportedIndividual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
-                individual.kobo_asset_id = record.source_id
+                individual.detail_id = record.source_id
                 individual.save()
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)

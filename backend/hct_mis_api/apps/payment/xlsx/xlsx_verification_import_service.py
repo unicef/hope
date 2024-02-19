@@ -199,7 +199,7 @@ class XlsxVerificationImportService(XlsxImportBaseService):
                 XlsxError(
                     "Payment Verifications",
                     received_cell.coordinate,
-                    "If received_amount is 0, you should set received to NO",
+                    "Amount Received' equals to 0, please set status as 'Not Received'",
                 )
             )
         elif received_amount is not None and received_amount != 0 and received != "YES":

@@ -273,6 +273,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return Truncator(self.get_criteria_string()).chars(390, "...")
 
     @property
+    def has_empty_criteria(self) -> bool:
+        return self.targeting_criteria is None or self.targeting_criteria.rules.count() == 0
+
+    @property
     def allowed_steficon_rule(self) -> Union[Rule, None]:
         if not self.program:
             return None

@@ -96,6 +96,7 @@ export const CreateProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',
@@ -129,7 +130,11 @@ export const CreateProgramPage = (): ReactElement => {
       onSubmit={(values) => {
         handleSubmit(values);
       }}
+      initialTouched={{
+        programmeCode: true,
+      }}
       validationSchema={programValidationSchema(t)}
+      validateOnMount
     >
       {({ submitForm, values, validateForm, setFieldTouched }) => {
         const mappedPartnerChoices = userPartnerChoices

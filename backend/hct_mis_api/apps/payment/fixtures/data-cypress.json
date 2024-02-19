@@ -44,7 +44,8 @@
       "source_payment_plan": "a953712b-1e71-4e50-93a0-78a8e653c79a",
       "is_follow_up": true,
       "exclusion_reason": "",
-      "exclude_household_error": ""
+      "exclude_household_error": "",
+      "name": "pp1"
     }
   },
   {
@@ -92,7 +93,8 @@
       "source_payment_plan": null,
       "is_follow_up": false,
       "exclusion_reason": "",
-      "exclude_household_error": ""
+      "exclude_household_error": "",
+      "name": "pp2"
     }
   },
   {

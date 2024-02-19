@@ -102,8 +102,7 @@ class RdiMergeTask:
         "returnee",
         "fchild_hoh",
         "child_hoh",
-        "kobo_asset_id",
-        "row_id",
+        "detail_id",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -138,8 +137,7 @@ class RdiMergeTask:
         "who_answers_alt_phone",
         "pregnant",
         "work_status",
-        "kobo_asset_id",
-        "row_id",
+        "detail_id",
         "disability_certificate_picture",
         "preferred_language",
         "age_at_registration",
@@ -224,6 +222,7 @@ class RdiMergeTask:
                 photo=imported_document.photo,
                 expiry_date=imported_document.expiry_date,
                 issuance_date=imported_document.issuance_date,
+                program=individual.program,
             )
             documents_to_create.append(document)
         identities_to_create = []
@@ -368,7 +367,7 @@ class RdiMergeTask:
                     kobo_submissions = []
                     for imported_household in imported_households:
                         kobo_submission_uuid = imported_household.kobo_submission_uuid
-                        kobo_asset_id = imported_household.kobo_asset_id
+                        kobo_asset_id = imported_household.detail_id
                         kobo_submission_time = imported_household.kobo_submission_time
                         if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
                             submission = KoboImportedSubmission(
