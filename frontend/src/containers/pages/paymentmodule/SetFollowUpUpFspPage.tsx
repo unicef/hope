@@ -6,7 +6,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export function SetFollowUpUpFspPage(): React.ReactElement {
+export const SetFollowUpUpFspPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
 
@@ -26,11 +26,7 @@ export function SetFollowUpUpFspPage(): React.ReactElement {
   return (
     <>
       <CreateSetUpFspHeader baseUrl={baseUrl} permissions={permissions} />
-      <SetUpFspCore
-        baseUrl={baseUrl}
-        permissions={permissions}
-        initialValues={initialValues}
-      />
+      <SetUpFspCore permissions={permissions} initialValues={initialValues} />
     </>
   );
-}
+};
