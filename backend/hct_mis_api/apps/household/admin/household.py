@@ -19,6 +19,7 @@ from admin_extra_buttons.mixins import confirm_action
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
+from adminfilters.value import ValueFilter
 from power_query.mixin import PowerQueryMixin
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from smart_admin.mixins import LinkedObjectsMixin
@@ -87,6 +88,7 @@ class HouseholdAdmin(
     list_filter = (
         DepotManager,
         ("business_area", AutoCompleteFilter),
+        ("registration_data_import__id", ValueFilter),
         QueryStringFilter,
         "withdrawn",
     )
