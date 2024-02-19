@@ -33,7 +33,7 @@ const WarnIcon = styled(WarningIcon)`
   margin-right: 10px;
 `;
 
-export function ReassignRoleBox({
+export const ReassignRoleBox = ({
   ticket,
   shouldDisplayButton,
   shouldDisableButton,
@@ -41,7 +41,7 @@ export function ReassignRoleBox({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   shouldDisplayButton?: boolean;
   shouldDisableButton?: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   let { individual } = ticket;
@@ -127,26 +127,28 @@ export function ReassignRoleBox({
 
   const showMessage = () => {
     if (
-        (
-            ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
-            (ticket.individual?.role === "PRIMARY" || ticket.individual?.relationship === "HEAD")
-        ) || (
-            ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
-            ticket.individualDataUpdateTicketDetails?.individualData?.role?.previous_value === "PRIMARY" &&
-            (
-                ticket.individualDataUpdateTicketDetails?.individualData?.role?.value === "ALTERNATE" ||
-                ticket.individualDataUpdateTicketDetails?.individualData?.role?.value === "NO_ROLE"
-            )
-        )
+      (ticket.issueType.toString() ===
+        GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+        (ticket.individual?.role === 'PRIMARY' ||
+          ticket.individual?.relationship === 'HEAD')) ||
+      (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
+        ticket.individualDataUpdateTicketDetails?.individualData?.role
+          ?.previous_value === 'PRIMARY' &&
+        (ticket.individualDataUpdateTicketDetails?.individualData?.role
+          ?.value === 'ALTERNATE' ||
+          ticket.individualDataUpdateTicketDetails?.individualData?.role
+            ?.value === 'NO_ROLE'))
     ) {
       return (
-        <Typography variant='body2'>
-          {t('Upon removing you will need to select new individual(s) for this role.')}
+        <Typography variant="body2">
+          {t(
+            'Upon removing you will need to select new individual(s) for this role.',
+          )}
         </Typography>
-      )
+      );
     }
-    return null
-  }
+    return null;
+  };
 
   return (
     <StyledBox>
@@ -157,7 +159,7 @@ export function ReassignRoleBox({
         </Typography>
       </OrangeTitle>
       {showMessage()}
-      <Box mt={3} display='flex' flexDirection='column'>
+      <Box mt={3} display="flex" flexDirection="column">
         {shouldShowReassignHoH && (
           <Box mb={2} mt={2}>
             <Box mb={2}>
@@ -187,4 +189,4 @@ export function ReassignRoleBox({
       </Box>
     </StyledBox>
   );
-}
+};
