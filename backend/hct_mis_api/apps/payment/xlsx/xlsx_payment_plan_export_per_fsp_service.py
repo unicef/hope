@@ -176,7 +176,7 @@ class XlsxPaymentPlanExportPerFspService(XlsxExportBaseService):
         )
         fsp: FinancialServiceProvider = delivery_mechanism_per_payment_plan.financial_service_provider
         delivery_mechanism: str = delivery_mechanism_per_payment_plan.delivery_mechanism
-        for i, split in enumerate(self.payment_plan.splits.all()):
+        for i, split in enumerate(self.payment_plan.splits.all().order_by("order")):
             wb, ws_fsp = self.open_workbook(f"{fsp.name}-chunk{i + 1}")
             fsp_xlsx_template = self.get_template(fsp, delivery_mechanism)
             payment_ids = list(split.payments.all().order_by("unicef_id").values_list("id", flat=True))

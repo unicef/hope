@@ -408,6 +408,7 @@ class PaymentPlanSplit(TimeStampedUUIDModel):
         related_name="+",
     )
     sent_to_payment_gateway = models.BooleanField(default=False)
+    order = models.IntegerField(default=0)
 
     @property
     def financial_service_provider(self) -> "FinancialServiceProvider":

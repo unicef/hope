@@ -268,7 +268,7 @@ class PaymentGatewayService:
             assert status == PaymentInstructionStatus.OPEN.value, status
 
         if payment_plan.splits.exists():
-            for split in payment_plan.splits.all():
+            for split in payment_plan.splits.all().order_by("order"):
                 if split.financial_service_provider.is_payment_gateway:
                     _create_payment_instruction(PaymentInstructionFromSplitSerializer, split)
 
@@ -306,7 +306,7 @@ class PaymentGatewayService:
             obj.save(update_fields=["sent_to_payment_gateway"])
 
         if payment_plan.splits.exists():
-            for split in payment_plan.splits.all():
+            for split in payment_plan.splits.all().order_by("order"):
                 if split.financial_service_provider.is_payment_gateway:
                     payments = split.payments.order_by("unicef_id")
                     response = self.api.add_records_to_payment_instruction(payments, split.id)

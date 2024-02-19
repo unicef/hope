@@ -593,16 +593,38 @@ class TestPaymentPlanServices(APITestCase):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
         unique_collectors_count = pp.eligible_payments.values_list("collector", flat=True).distinct().count()
         self.assertEqual(unique_collectors_count, 10)
-        self.assertEqual(pp.splits.count(), unique_collectors_count)
+        pp_splits = pp.splits.all().order_by("order")
+
+        self.assertEqual(pp_splits.count(), unique_collectors_count)
+        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_COLLECTOR)
+        self.assertEqual(pp_splits[0].payments.count(), 3)
+        self.assertEqual(pp_splits[1].payments.count(), 1)
+        self.assertEqual(pp_splits[2].payments.count(), 1)
+        self.assertEqual(pp_splits[3].payments.count(), 1)
+        self.assertEqual(pp_splits[4].payments.count(), 1)
+        self.assertEqual(pp_splits[5].payments.count(), 1)
+        self.assertEqual(pp_splits[6].payments.count(), 1)
+        self.assertEqual(pp_splits[7].payments.count(), 1)
+        self.assertEqual(pp_splits[8].payments.count(), 1)
+        self.assertEqual(pp_splits[9].payments.count(), 1)
 
         # split by records
-        with self.assertNumQueries(22):
-            PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=2)
-        self.assertEqual(pp.splits.count(), 6)
+        with self.assertNumQueries(16):
+            PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=5)
+        pp_splits = pp.splits.all().order_by("order")
+        self.assertEqual(pp_splits.count(), 3)
+        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_RECORDS)
+        self.assertEqual(pp_splits[0].payments.count(), 5)
+        self.assertEqual(pp_splits[1].payments.count(), 5)
+        self.assertEqual(pp_splits[2].payments.count(), 2)
 
         # split by admin2
         with self.assertNumQueries(14):
             PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
         unique_admin2_count = pp.eligible_payments.values_list("household__admin2", flat=True).distinct().count()
         self.assertEqual(unique_admin2_count, 2)
+        pp_splits = pp.splits.all().order_by("order")
         self.assertEqual(pp.splits.count(), unique_admin2_count)
+        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
+        self.assertEqual(pp_splits[0].payments.count(), 4)
+        self.assertEqual(pp_splits[1].payments.count(), 8)

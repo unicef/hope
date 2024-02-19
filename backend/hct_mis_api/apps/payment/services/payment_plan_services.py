@@ -701,14 +701,14 @@ class PaymentPlanService:
 
         elif split_type == PaymentPlanSplit.SplitType.BY_ADMIN_AREA2:
             grouped_payments = list(
-                payments.order_by("household__admin2", "unicef_id").select_related("household__admin2")
+                payments.order_by("household__admin2__p_code", "unicef_id").select_related("household__admin2")
             )
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: x.household.admin2):  # type: ignore
                 payments_chunks.append([payment.id for payment in payments])
 
         elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
-            grouped_payments = list(payments.order_by("collector", "unicef_id").select_related("collector"))
+            grouped_payments = list(payments.order_by("collector__unicef_id", "unicef_id").select_related("collector"))
             payments_chunks = []
             for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
                 payments_chunks.append([payment.id for payment in payments])
@@ -726,12 +726,13 @@ class PaymentPlanService:
                 self.payment_plan.remove_export_file_per_fsp()
 
             payment_plan_splits_to_create = []
-            for _ in payments_chunks:
+            for i, _ in enumerate(payments_chunks):
                 payment_plan_splits_to_create.append(
                     PaymentPlanSplit(
                         payment_plan=self.payment_plan,
                         split_type=split_type,
                         chunks_no=chunks_no,
+                        order=i,
                     )
                 )
             PaymentPlanSplit.objects.bulk_create(payment_plan_splits_to_create)
