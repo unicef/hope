@@ -13,8 +13,8 @@ import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
 
 interface LookUpReassignRoleProps {
   household?:
-    | GrievanceTicketQuery['grievanceTicket']['household']
-    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
+  | GrievanceTicketQuery['grievanceTicket']['household']
+  | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
   individual: GrievanceTicketQuery['grievanceTicket']['individual'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };

@@ -59,8 +59,8 @@ export function LookUpProgrammesTableSurveys({
     <NoTableStyling>
       <TableWrapper>
         <UniversalTable<
-          AllProgramsQuery['allPrograms']['edges'][number]['node'],
-          AllActiveProgramsQueryVariables
+        AllProgramsQuery['allPrograms']['edges'][number]['node'],
+        AllActiveProgramsQueryVariables
         >
           headCells={headCells}
           query={useAllActiveProgramsQuery}

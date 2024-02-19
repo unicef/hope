@@ -11,7 +11,7 @@ export function GreyBox({
   children,
   ...props
 }: React.PropsWithChildren<
-  React.ComponentProps<typeof Box>
+React.ComponentProps<typeof Box>
 >): React.ReactElement {
   return <StyledGreyBox {...props}>{children}</StyledGreyBox>;
 }

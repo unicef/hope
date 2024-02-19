@@ -105,7 +105,7 @@ export function IndividualBioData({
               <Box key={item.id}>
                 {item.household.unicefId} -{roleChoicesDict[item.role]}
               </Box>
-            ))
+          ))
           : '-'}
       </LabelizedField>
     </Grid>
@@ -288,7 +288,7 @@ export function IndividualBioData({
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
-        )}
+          )}
         {mappedIndividualDocuments}
         {mappedIdentities}
         <Grid item xs={12}>

@@ -111,12 +111,12 @@ export function LinkedGrievancesModal({
   const renderGrievances = (): Array<React.ReactElement> =>
     allGrievances.length
       ? allGrievances.map((el) => {
-          const grievanceDetailsPath = getGrievanceDetailsPath(
-            el.node.id,
-            el.node.category,
-            baseUrl,
-          );
-          return (
+        const grievanceDetailsPath = getGrievanceDetailsPath(
+          el.node.id,
+          el.node.category,
+          baseUrl,
+        );
+        return (
             <span key={el.node.id}>
               <ContentLink href={grievanceDetailsPath}>
                 {`${el.node.unicefId} - ${
@@ -125,8 +125,8 @@ export function LinkedGrievancesModal({
               </ContentLink>{' '}
               <br />
             </span>
-          );
-        })
+        );
+      })
       : [<span key="empty">-</span>];
 
   const renderLink = (): React.ReactElement => {

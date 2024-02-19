@@ -53,10 +53,10 @@ export function GrievancesDetails({
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
-        .filter((el) => el.category === ticket.category.toString())[0]
-        .subCategories.filter(
-          (el) => el.value === ticket.issueType.toString(),
-        )[0].name
+      .filter((el) => el.category === ticket.category.toString())[0]
+      .subCategories.filter(
+        (el) => el.value === ticket.issueType.toString(),
+      )[0].name
     : '-';
 
   const showIssueType =
@@ -73,22 +73,22 @@ export function GrievancesDetails({
     <Box display="flex" flexDirection="column">
       {ticket.documentation?.length
         ? ticket.documentation.map((doc) => {
-            if (doc.contentType.includes('image')) {
-              return (
+          if (doc.contentType.includes('image')) {
+            return (
                 <PhotoModal
                   key={doc.id}
                   src={doc.filePath}
                   variant="link"
                   linkText={doc.name}
                 />
-              );
-            }
-            return (
+            );
+          }
+          return (
               <ContentLink key={doc.id} download href={doc.filePath}>
                 {doc.name}
               </ContentLink>
-            );
-          })
+          );
+        })
         : '-'}
     </Box>
   );
@@ -258,11 +258,11 @@ export function GrievancesDetails({
                       >
                         {ticket.household.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>
                         {ticket.household?.id ? ticket.household.unicefId : '-'}
                       </div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -279,13 +279,13 @@ export function GrievancesDetails({
                       >
                         {ticket.individual.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>
                         {ticket.individual?.id
                           ? ticket.individual.unicefId
                           : '-'}
                       </div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,

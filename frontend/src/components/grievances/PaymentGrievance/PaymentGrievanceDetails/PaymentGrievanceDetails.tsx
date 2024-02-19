@@ -109,7 +109,7 @@ export function PaymentGrievanceDetails({
             >
               {approveStatus ? t('Disapprove') : t('Approve')}
             </Button>
-          ) : null}
+            ) : null}
         </Box>
       </Title>
       <StyledTable>

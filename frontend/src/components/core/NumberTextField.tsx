@@ -35,10 +35,10 @@ export function NumberTextField({
         InputProps={
           icon
             ? {
-                startAdornment: (
+              startAdornment: (
                   <InputAdornment position="start">{icon}</InputAdornment>
-                ),
-              }
+              ),
+            }
             : null
         }
       />

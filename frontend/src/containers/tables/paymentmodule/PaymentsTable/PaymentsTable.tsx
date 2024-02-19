@@ -37,7 +37,7 @@ export function PaymentsTable({
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const [dialogPayment, setDialogPayment] = useState<
-    AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
+  AllPaymentsForTableQuery['allPayments']['edges'][number]['node'] | null
   >();
   const initialVariables: AllPaymentsForTableQueryVariables = {
     businessArea,
@@ -61,8 +61,8 @@ export function PaymentsTable({
             )}
           </StyledBox>
           <UniversalTable<
-            AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
-            AllPaymentsForTableQueryVariables
+          AllPaymentsForTableQuery['allPayments']['edges'][number]['node'],
+          AllPaymentsForTableQueryVariables
           >
             isOnPaper={false}
             headCells={headCells}

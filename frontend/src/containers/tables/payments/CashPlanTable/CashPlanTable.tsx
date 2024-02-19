@@ -26,8 +26,8 @@ export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
 
   return (
     <UniversalTable<
-      CashPlanAndPaymentPlanNode,
-      AllCashPlansAndPaymentPlansQueryVariables
+    CashPlanAndPaymentPlanNode,
+    AllCashPlansAndPaymentPlansQueryVariables
     >
       title={t('Payment Plans')}
       headCells={headCells}

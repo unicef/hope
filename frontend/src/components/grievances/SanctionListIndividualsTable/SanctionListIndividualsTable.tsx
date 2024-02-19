@@ -15,8 +15,8 @@ export function SanctionListIndividualsTable({ filter }): React.ReactElement {
   };
   return (
     <UniversalTable<
-      AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'],
-      AllSanctionListIndividualsQueryVariables
+    AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'],
+    AllSanctionListIndividualsQueryVariables
     >
       headCells={headCells}
       query={useAllSanctionListIndividualsQuery}

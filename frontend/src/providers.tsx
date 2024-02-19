@@ -17,7 +17,7 @@ interface ProvidersProps {
 
 export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
-    ApolloClient<NormalizedCacheObject> | undefined
+  ApolloClient<NormalizedCacheObject> | undefined
   >();
 
   useEffect(() => {

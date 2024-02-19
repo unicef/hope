@@ -184,7 +184,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
               verificationPlan={edge.node}
               planNode={paymentPlan}
             />
-          ))
+        ))
         : null}
       {canSeeVerificationRecords() ? (
         <>
@@ -226,7 +226,7 @@ export function PaymentPlanVerificationDetailsPage(): React.ReactElement {
             objectId={paymentPlan.id}
             objectType="PaymentPlan"
           />
-        )}
+      )}
     </>
   );
 }

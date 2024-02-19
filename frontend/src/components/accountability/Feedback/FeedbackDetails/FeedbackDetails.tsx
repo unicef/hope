@@ -62,13 +62,13 @@ export function FeedbackDetails({
                       >
                         {feedback.householdLookup?.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>
                         {feedback.householdLookup?.id
                           ? feedback.householdLookup?.unicefId
                           : '-'}
                       </div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -85,13 +85,13 @@ export function FeedbackDetails({
                       >
                         {feedback.individualLookup?.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>
                         {feedback.individualLookup?.id
                           ? feedback.individualLookup?.unicefId
                           : '-'}
                       </div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,

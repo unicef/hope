@@ -2,7 +2,7 @@ import { HeadCell } from '@core/Table/EnhancedTableHead';
 import { AllGrievanceTicketQuery } from '@generated/graphql';
 
 export const headCells: HeadCell<
-  AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']
+AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,

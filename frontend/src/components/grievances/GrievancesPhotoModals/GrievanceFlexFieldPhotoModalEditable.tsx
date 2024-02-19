@@ -37,9 +37,9 @@ export function GrievanceFlexFieldPhotoModalEditable({
 
   const flexFields = isIndividual
     ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-        ?.flex_fields
+      ?.flex_fields
     : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-        ?.flex_fields;
+      ?.flex_fields;
 
   const picUrl: string = isCurrent
     ? flexFields[flexField.name]?.previous_value

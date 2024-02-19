@@ -32,8 +32,8 @@ export function VerificationRecordsTable({
 
   return (
     <UniversalTable<
-      PaymentVerificationNode,
-      AllPaymentVerificationsQueryVariables
+    PaymentVerificationNode,
+    AllPaymentVerificationsQueryVariables
     >
       title={t('Verification Records')}
       headCells={headCells}

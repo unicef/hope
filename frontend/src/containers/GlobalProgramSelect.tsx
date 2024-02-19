@@ -74,8 +74,8 @@ export function GlobalProgramSelect(): React.ReactElement {
   );
 
   const getCurrentProgram = useCallback(():
-    | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
-    | null => {
+  | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
+  | null => {
     const obj = data?.allPrograms.edges.find((el) => el.node.id === programId);
     return obj ? obj.node : null;
   }, [data, programId]);

@@ -24,10 +24,10 @@ export function FeedbackTableRow({
   const householdDetailsPath = `/${baseUrl}/population/household/${feedback.householdLookup?.id}`;
   const grievanceDetailsPath = feedback.linkedGrievance
     ? getGrievanceDetailsPath(
-        feedback.linkedGrievance?.id,
-        feedback.linkedGrievance?.category,
-        baseUrl,
-      )
+      feedback.linkedGrievance?.id,
+      feedback.linkedGrievance?.category,
+      baseUrl,
+    )
     : null;
   const handleClick = (): void => {
     navigate(feedbackDetailsPath);

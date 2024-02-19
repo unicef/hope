@@ -124,9 +124,9 @@ export function Description({
                       >
                         {values.selectedHousehold.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>{values.selectedHousehold?.unicefId || '-'}</div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -143,9 +143,9 @@ export function Description({
                       >
                         {values.selectedIndividual.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>{values.selectedIndividual?.unicefId || '-'}</div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,

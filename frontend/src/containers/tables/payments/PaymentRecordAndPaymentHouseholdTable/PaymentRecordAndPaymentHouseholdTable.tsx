@@ -29,8 +29,8 @@ export function PaymentRecordHouseholdTable({
   };
   return (
     <UniversalTable<
-      PaymentRecordAndPaymentNode,
-      AllPaymentRecordsAndPaymentsQueryVariables
+    PaymentRecordAndPaymentNode,
+    AllPaymentRecordsAndPaymentsQueryVariables
     >
       title={t('Payment Records')}
       headCells={headCells}

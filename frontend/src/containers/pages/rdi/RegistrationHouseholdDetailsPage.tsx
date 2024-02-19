@@ -49,11 +49,11 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
       ? [
-          {
-            title: t('Registration Data import'),
-            to: `/${baseUrl}/registration-data-import/`,
-          },
-        ]
+        {
+          title: t('Registration Data import'),
+          to: `/${baseUrl}/registration-data-import/`,
+        },
+      ]
       : []),
     {
       title: importedHousehold.registrationDataImport.name,

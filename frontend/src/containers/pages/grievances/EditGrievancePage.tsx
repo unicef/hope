@@ -374,13 +374,13 @@ export function EditGrievancePage(): React.ReactElement {
                                 >
                                   {ticket.household.unicefId}
                                 </BlackLink>
-                              ) : (
+                                ) : (
                                 <div>
                                   {ticket.household?.id
                                     ? ticket.household.unicefId
                                     : '-'}
                                 </div>
-                              )}
+                                )}
                             </span>
                           </LabelizedField>
                         </Grid>
@@ -395,13 +395,13 @@ export function EditGrievancePage(): React.ReactElement {
                                 >
                                   {ticket.individual.unicefId}
                                 </BlackLink>
-                              ) : (
+                                ) : (
                                 <div>
                                   {ticket.individual?.id
                                     ? ticket.individual.unicefId
                                     : '-'}
                                 </div>
-                              )}
+                                )}
                             </span>
                           </LabelizedField>
                         </Grid>

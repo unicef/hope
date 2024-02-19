@@ -103,7 +103,7 @@ export function TotalAmountTransferredByCountryChart({
         },
       },
     },
-  };
+  } as any;
 
   return (
     <Box flexDirection="column">

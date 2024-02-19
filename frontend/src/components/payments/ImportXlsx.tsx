@@ -120,11 +120,11 @@ export const ImportXlsx = ({
                 {error
                   ? error.graphQLErrors.map((x) => (
                       <p key={x.message}>{x.message}</p>
-                    ))
+                  ))
                   : null}
                 <ImportErrors errors={xlsxErrors as XlsxErrorNode[]} />
               </Error>
-            ) : null}
+              ) : null}
           </>
           <DialogActions>
             <Button

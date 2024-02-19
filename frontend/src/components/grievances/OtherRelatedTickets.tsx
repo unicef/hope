@@ -30,48 +30,48 @@ export function OtherRelatedTickets({
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => {
-          const grievanceDetailsPath = getGrievanceDetailsPath(
-            edge.id,
-            edge.category,
-            baseUrl,
-          );
+        const grievanceDetailsPath = getGrievanceDetailsPath(
+          edge.id,
+          edge.category,
+          baseUrl,
+        );
 
-          return (
+        return (
             <Box key={edge.id} mb={1}>
               <ContentLink href={grievanceDetailsPath}>
                 {edge.unicefId}
               </ContentLink>
             </Box>
-          );
-        })
+        );
+      })
       : '-';
 
   const openExistingTickets =
     ticket.household?.id && existingTickets.length
       ? existingTickets.filter(
-          (edge) =>
-            edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
-        )
+        (edge) =>
+          edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
+      )
       : [];
   const closedExistingTickets =
     ticket.household?.id && existingTickets.length
       ? existingTickets.filter(
-          (edge) =>
-            edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
-        )
+        (edge) =>
+          edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
+      )
       : [];
 
   const openLinkedTickets = linkedTickets.length
     ? linkedTickets.filter(
-        (edge) =>
-          edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
-      )
+      (edge) =>
+        edge.status !== GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
+    )
     : [];
   const closedLinkedTickets = linkedTickets.length
     ? linkedTickets.filter(
-        (edge) =>
-          edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
-      )
+      (edge) =>
+        edge.status === GRIEVANCE_TICKET_STATES.CLOSED && edge.id !== id,
+    )
     : [];
 
   return linkedTickets.length > 0 || existingTickets.length > 0 ? (
@@ -96,7 +96,7 @@ export function OtherRelatedTickets({
               {closedLinkedTickets.length + closedExistingTickets.length})
             </BlueBold>
           </Box>
-        ) : null}
+          ) : null}
         {show && (
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
@@ -118,7 +118,7 @@ export function OtherRelatedTickets({
             {t('HIDE CLOSED TICKETS')} (
             {closedLinkedTickets.length + closedExistingTickets.length})
           </BlueBold>
-        ) : null}
+          ) : null}
       </Box>
     </ApproveBox>
   ) : null;

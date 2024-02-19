@@ -211,13 +211,13 @@ export function HouseholdDetails({
                           >
                             {item.currency === 'USD'
                               ? formatCurrencyWithSymbol(
-                                  item.totalDeliveredQuantity,
-                                  item.currency,
-                                )
+                                item.totalDeliveredQuantity,
+                                item.currency,
+                              )
                               : `(${formatCurrencyWithSymbol(
-                                  item.totalDeliveredQuantity,
-                                  item.currency,
-                                )})`}
+                                item.totalDeliveredQuantity,
+                                item.currency,
+                              )})`}
                           </Box>
                         ))}
                       </Box>

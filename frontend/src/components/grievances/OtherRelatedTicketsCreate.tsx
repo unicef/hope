@@ -38,30 +38,30 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => {
-          const grievanceDetailsPath = getGrievanceDetailsPath(
-            edge.node.id,
-            edge.node.category,
-            baseUrl,
-          );
-          return (
+        const grievanceDetailsPath = getGrievanceDetailsPath(
+          edge.node.id,
+          edge.node.category,
+          baseUrl,
+        );
+        return (
             <Box key={edge.node.id} mb={1}>
               <ContentLink href={grievanceDetailsPath}>
                 {edge.node.unicefId}
               </ContentLink>
             </Box>
-          );
-        })
+        );
+      })
       : '-';
 
   const openExistingTickets = existingTickets.length
     ? existingTickets.filter(
-        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
-      )
+      (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+    )
     : [];
   const closedExistingTickets = existingTickets.length
     ? existingTickets.filter(
-        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
-      )
+      (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+    )
     : [];
 
   return existingTickets.length ? (

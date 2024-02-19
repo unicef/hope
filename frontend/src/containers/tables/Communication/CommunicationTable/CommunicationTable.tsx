@@ -36,8 +36,8 @@ export function CommunicationTable({
   return (
     <TableWrapper>
       <UniversalTable<
-        CommunicationMessageNode,
-        AllAccountabilityCommunicationMessagesQueryVariables
+      CommunicationMessageNode,
+      AllAccountabilityCommunicationMessagesQueryVariables
       >
         title={t('Messages List')}
         headCells={headCells}

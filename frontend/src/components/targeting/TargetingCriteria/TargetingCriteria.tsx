@@ -218,7 +218,7 @@ export function TargetingCriteria({
                         <Divider>
                           <DividerLabel>Or</DividerLabel>
                         </Divider>
-                      )}
+                        )}
                     </Fragment>
                   ))
                 ) : (

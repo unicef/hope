@@ -12,7 +12,7 @@ interface TicketsByLocationAndCategoryChartProps {
 }
 
 export const TicketsByLocationAndCategoryChart: React.FC<
-  TicketsByLocationAndCategoryChartProps
+TicketsByLocationAndCategoryChartProps
 > = ({ data }) => {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);

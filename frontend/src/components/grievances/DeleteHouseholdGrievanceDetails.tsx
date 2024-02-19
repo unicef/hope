@@ -80,7 +80,7 @@ export function DeleteHouseholdGrievanceDetails({
                   />
                 )}
               </Box>
-            )}
+          )}
           {canApproveDataChange && (
             <ApproveDeleteHouseholdGrievanceDetails
               type="button"

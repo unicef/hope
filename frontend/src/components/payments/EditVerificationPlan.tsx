@@ -70,32 +70,32 @@ function prepareVariables(
       fullListArguments:
         selectedTab === 0
           ? {
-              excludedAdminAreas: values.excludedAdminAreasFull || [],
-            }
+            excludedAdminAreas: values.excludedAdminAreasFull || [],
+          }
           : null,
       verificationChannel: values.verificationChannel,
       rapidProArguments:
         values.verificationChannel === 'RAPIDPRO'
           ? {
-              flowId: values.rapidProFlow,
-            }
+            flowId: values.rapidProFlow,
+          }
           : null,
       randomSamplingArguments:
         selectedTab === 1
           ? {
-              confidenceInterval: values.confidenceInterval * 0.01,
-              marginOfError: values.marginOfError * 0.01,
-              excludedAdminAreas: values.adminCheckbox
-                ? values.excludedAdminAreasRandom
-                : [],
-              age: values.ageCheckbox
-                ? {
-                    min: values.filterAgeMin || null,
-                    max: values.filterAgeMax || null,
-                  }
-                : null,
-              sex: values.sexCheckbox ? values.filterSex : null,
-            }
+            confidenceInterval: values.confidenceInterval * 0.01,
+            marginOfError: values.marginOfError * 0.01,
+            excludedAdminAreas: values.adminCheckbox
+              ? values.excludedAdminAreasRandom
+              : [],
+            age: values.ageCheckbox
+              ? {
+                min: values.filterAgeMin || null,
+                max: values.filterAgeMax || null,
+              }
+              : null,
+            sex: values.sexCheckbox ? values.filterSex : null,
+          }
           : null,
       businessAreaSlug: businessArea,
     },
@@ -208,9 +208,9 @@ export function EditVerificationPlan({
 
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
     ? data.allAdminAreas.edges.map((el) => ({
-        value: el.node.id,
-        name: el.node.name,
-      }))
+      value: el.node.id,
+      name: el.node.name,
+    }))
     : [];
 
   const handleFormChange = (values): void => {
@@ -335,9 +335,9 @@ export function EditVerificationPlan({
                           choices={
                             rapidProFlows
                               ? rapidProFlows.allRapidProFlows.map((flow) => ({
-                                  value: flow.id,
-                                  name: flow.name,
-                                }))
+                                value: flow.id,
+                                name: flow.name,
+                              }))
                               : []
                           }
                           component={FormikSelectField}

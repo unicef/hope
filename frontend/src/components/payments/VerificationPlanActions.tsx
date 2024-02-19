@@ -196,7 +196,7 @@ export function VerificationPlanActions({
                     <DiscardVerificationPlan
                       paymentVerificationPlanId={verificationPlan.id}
                     />
-                  )}
+                )}
                 {canMarkInvalid && (
                   <Box p={2}>
                     <LoadingButton

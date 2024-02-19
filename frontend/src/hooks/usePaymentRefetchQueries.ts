@@ -9,12 +9,12 @@ import { useBaseUrl } from './useBaseUrl';
 export const usePaymentRefetchQueries = (
   paymentPlanId: string,
 ): (() => [
-  {
-    query: DocumentNode;
-    variables: { paymentPlanId: string; businessArea: string };
-  },
-  { query: DocumentNode; variables: { id: string } },
-]) => {
+    {
+      query: DocumentNode;
+      variables: { paymentPlanId: string; businessArea: string };
+    },
+    { query: DocumentNode; variables: { id: string } },
+  ]) => {
   const { businessArea } = useBaseUrl();
   const planType = atob(paymentPlanId).split(':')[0];
 

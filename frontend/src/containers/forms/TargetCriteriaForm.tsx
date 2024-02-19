@@ -322,7 +322,7 @@ export function TargetCriteriaForm({
                       In your programme, individual rules can only be applied to
                       head of households.
                     </DialogDescription>
-                  ) : null}
+                    ) : null}
                   <FieldArray
                     name="individualsFiltersBlocks"
                     render={(arrayHelpers) => (
