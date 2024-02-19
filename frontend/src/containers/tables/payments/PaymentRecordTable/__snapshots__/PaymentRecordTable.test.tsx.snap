@@ -3,16 +3,16 @@
 exports[`containers/tables/payments/PaymentRecordTable should render loading 1`] = `
 <div>
   <div
-    class="css-1ago99h"
+    class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-hmspz7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN jHXnCk css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-ktwOfi css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="MuiBox-root css-qa3kpn"
+          class="sc-hABBmJ IOzft MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`containers/tables/payments/PaymentRecordTable should render loading 1`]
             </h6>
           </div>
           <div
-            class="MuiBox-root css-1ggnmte"
+            class="sc-hABBmJ IOzft MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root css-101ivag-MuiTable-root"
+          class="MuiTable-root sc-qZrbh sc-fmKFGs haQfFY cYYCMt css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -259,11 +259,11 @@ exports[`containers/tables/payments/PaymentRecordTable should render loading 1`]
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsvh css-1ex1afd-MuiTableCell-root"
                 colspan="9"
               >
                 <span
@@ -273,11 +273,11 @@ exports[`containers/tables/payments/PaymentRecordTable should render loading 1`]
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsvh css-1ex1afd-MuiTableCell-root"
                 colspan="9"
               >
                 <span
@@ -287,11 +287,11 @@ exports[`containers/tables/payments/PaymentRecordTable should render loading 1`]
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsvh css-1ex1afd-MuiTableCell-root"
                 colspan="9"
               >
                 <span
@@ -301,11 +301,11 @@ exports[`containers/tables/payments/PaymentRecordTable should render loading 1`]
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsvh css-1ex1afd-MuiTableCell-root"
                 colspan="9"
               >
                 <span
@@ -315,11 +315,11 @@ exports[`containers/tables/payments/PaymentRecordTable should render loading 1`]
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsvh css-1ex1afd-MuiTableCell-root"
                 colspan="9"
               >
                 <span
@@ -438,16 +438,16 @@ exports[`containers/tables/payments/PaymentRecordTable should render loading 1`]
 exports[`containers/tables/payments/PaymentRecordTable should render with data 1`] = `
 <div>
   <div
-    class="css-1ago99h"
+    class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-hmspz7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN jHXnCk css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-ktwOfi css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="MuiBox-root css-qa3kpn"
+          class="sc-hABBmJ IOzft MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
@@ -460,11 +460,11 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
             </h6>
           </div>
           <div
-            class="MuiBox-root css-1ggnmte"
+            class="sc-hABBmJ IOzft MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root css-101ivag-MuiTable-root"
+          class="MuiTable-root sc-qZrbh sc-fmKFGs haQfFY cYYCMt css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -694,14 +694,14 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-jsEeTM hBRTbZ css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql iZJhhY css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-iBdnpw hUWFm"
+                  class="sc-fHejqy itrONR"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/payment-records/UGF5bWVudFJlY29yZE5vZGU6NWEyZmE4NWYtNTM4YS00M2VjLWEwZTItMzM4ZTBmZDNlODQ1"
                 >
                   123-21-PR-00006
@@ -711,10 +711,10 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-fsYfdN kvUOTU"
+                  class="sc-blmEgr eRMyHT"
                 >
                   <div
-                    class="sc-qZrbh iOJnvt"
+                    class="sc-ifyrAs cLAoOc"
                     data-cy="status-container"
                     status="DISTRIBUTION_SUCCESSFUL"
                   >

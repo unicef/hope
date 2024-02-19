@@ -3,16 +3,16 @@
 exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render loading 1`] = `
 <div>
   <div
-    class="css-1ago99h"
+    class="sc-hLQSwg gYvGVw"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-hmspz7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx fymXAN css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="MuiBox-root css-qa3kpn"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             </h6>
           </div>
           <div
-            class="MuiBox-root css-1ggnmte"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root css-101ivag-MuiTable-root"
+          class="MuiTable-root sc-jTQCzO sc-eTNRI gwVygm bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -131,14 +131,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-eDLKkx ievSms css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-hLQSwg fgzAqi"
+                  class="sc-brSamD dPuKUD"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
@@ -178,14 +178,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-eDLKkx ievSms css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-hLQSwg fgzAqi"
+                  class="sc-brSamD dPuKUD"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
@@ -225,14 +225,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-eDLKkx ievSms css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-hLQSwg fgzAqi"
+                  class="sc-brSamD dPuKUD"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>
@@ -343,16 +343,16 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
 exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render with data 1`] = `
 <div>
   <div
-    class="css-1ago99h"
+    class="sc-hLQSwg gYvGVw"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-hmspz7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx fymXAN css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root css-70zvr5-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="MuiBox-root css-qa3kpn"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
@@ -365,11 +365,11 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             </h6>
           </div>
           <div
-            class="MuiBox-root css-1ggnmte"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root css-101ivag-MuiTable-root"
+          class="MuiTable-root sc-jTQCzO sc-eTNRI gwVygm bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -471,14 +471,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-eDLKkx ievSms css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-hLQSwg fgzAqi"
+                  class="sc-brSamD dPuKUD"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTo0YmY3NmE4ZC05MmFjLTQwZjAtOTE2YS04ZDcwMDIwNzFiYmI="
                 />
               </td>
@@ -523,14 +523,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-eDLKkx ievSms css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-hLQSwg fgzAqi"
+                  class="sc-brSamD dPuKUD"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTpjMjZiNmQ2MS1mMTdjLTQ0NmYtYjQ1MC0wMWI0NmMyYmE4Yjk="
                 />
               </td>
@@ -575,14 +575,14 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-eDLKkx ievSms css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-hLQSwg fgzAqi"
+                  class="sc-brSamD dPuKUD"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/registration-data-import/individual/SW1wb3J0ZWRJbmRpdmlkdWFsTm9kZTozZTE0OGVkYy0wMTY3LTQ0ZTYtOTliYi02ZDA3MmM4ZjA2NWI="
                 />
               </td>

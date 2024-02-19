@@ -6,16 +6,16 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
     class="sc-beySPh jDojEa"
   >
     <div
-      class="css-1ago99h"
+      class="sc-fsYfdN iJWUfq"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-hmspz7-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh idHjRT css-1ps6pg7-MuiPaper-root"
       >
         <div
-          class="MuiTableContainer-root css-70zvr5-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-hABBmJ css-rorn0c-MuiTableContainer-root"
         >
           <div
-            class="MuiBox-root css-qa3kpn"
+            class="sc-fmKFGs eUWQFp MuiBox-root css-0"
           >
             <div
               class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
@@ -28,11 +28,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
               </h6>
             </div>
             <div
-              class="MuiBox-root css-1ggnmte"
+              class="sc-fmKFGs eUWQFp MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root css-101ivag-MuiTable-root"
+            class="MuiTable-root sc-jsEeTM sc-fHejqy euROHP HbNSW css-b1kpk9-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -152,11 +152,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
               class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -166,11 +166,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -180,11 +180,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -194,11 +194,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -208,11 +208,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -222,11 +222,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -236,11 +236,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -250,11 +250,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -264,11 +264,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -278,11 +278,11 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root css-o00bwt-MuiTableRow-root"
+                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium css-1yysqv4-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lnigrq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span

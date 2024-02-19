@@ -1,7 +1,6 @@
 import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Bar } from 'react-chartjs-2';
-import { ChartData, ChartOptions } from 'chart.js';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -30,7 +29,7 @@ export function TotalAmountTransferredByCountryChart({
   ): string[] | number[] =>
     showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount);
 
-  const chartData: ChartData<'bar'> = {
+  const chartData = {
     labels: matchDataSize(data.labels) as string[],
     datasets: [
       {
@@ -52,7 +51,7 @@ export function TotalAmountTransferredByCountryChart({
     ],
   };
 
-  const options: ChartOptions<'bar'> = {
+  const options = {
     scales: {
       x: {
         title: {

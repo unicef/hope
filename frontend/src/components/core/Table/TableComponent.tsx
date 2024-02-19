@@ -12,12 +12,12 @@ import {
   TablePagination,
   Skeleton,
 } from '@mui/material';
-import { styled } from '@mui/system';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
+import styled from 'styled-components';
 
 export type Order = 'asc' | 'desc';
 
