@@ -7,11 +7,8 @@ interface LinkProps {
   theme: MiśTheme;
 }
 
-const Link = styled.a<LinkProps>`  font-family: ${({
-  theme,
-}: {
-  theme: MiśTheme;
-}) => theme.hctTypography.fontFamily};
+const Link = styled('a')<LinkProps>`
+  font-family: ${({ theme }: { theme: MiśTheme; }) => theme.hctTypography.fontFamily};
   color: #000;
   font-size: 14px;
   line-height: 19px;

@@ -70,7 +70,6 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         breadCrumbs={breadCrumbsItems}
       />
       <HouseholdDetails
-        baseUrl={baseUrl}
         choicesData={choicesData}
         household={importedHousehold}
       />

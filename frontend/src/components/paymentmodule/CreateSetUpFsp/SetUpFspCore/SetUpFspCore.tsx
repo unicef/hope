@@ -21,6 +21,7 @@ import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { DeliveryMechanismRow } from '../DeliveryMechanismRow';
 import { SetUpFspButtonActions } from '../SetUpFspButtonActions/SetUpFspButtonActions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface FormValues {
   deliveryMechanisms: {
@@ -30,16 +31,15 @@ export interface FormValues {
 }
 
 interface SetUpFspCoreProps {
-  baseUrl: string;
   permissions: string[];
   initialValues: FormValues;
 }
 
 export function SetUpFspCore({
-  baseUrl,
   permissions,
   initialValues,
 }: SetUpFspCoreProps): React.ReactElement {
+  const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();

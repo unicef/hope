@@ -3,41 +3,41 @@
 exports[`components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader should render 1`] = `
 <div>
   <div
-    class="sc-ifAKCX hPNxSD"
+    class="sc-eDLKkx lfCuNM"
     data-cy="page-header-container"
   >
     <div
-      class="sc-EHOje xCQCx"
+      class="sc-jTQCzO WuAEu"
     >
       <div
-        class="sc-bZQynM hoGuXF"
+        class="sc-gLLuof djFRuj"
       >
         <div>
           <div
-            class="MuiBox-root MuiBox-root-1"
+            class="MuiBox-root css-70qvj9"
           >
             <div
-              class="sc-gZMcBi jDLnjQ"
+              class="sc-kFCroH fxDWDh"
             >
               <h5
-                class="MuiTypography-root MuiTypography-h5"
+                class="MuiTypography-root MuiTypography-h5 css-ag7rrr-MuiTypography-root"
                 data-cy="page-header-title"
               >
                 Edit Set up FSP
               </h5>
             </div>
             <div
-              class="MuiBox-root MuiBox-root-2"
+              class="MuiBox-root css-15aqakd"
             />
           </div>
         </div>
         <div
-          class="sc-gzVnrw cHjfCB"
+          class="sc-iBdnpw bvluil"
         />
       </div>
     </div>
     <div
-      class="sc-dnqmqq bUccVO"
+      class="sc-qZrbh hQWlbe"
     />
   </div>
 </div>
