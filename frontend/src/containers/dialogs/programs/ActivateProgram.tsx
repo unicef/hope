@@ -1,6 +1,7 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import {
   AllProgramsQuery,
   ProgramQuery,
@@ -17,7 +18,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 interface ActivateProgramProps {
   program: ProgramQuery['program'];
@@ -26,6 +27,7 @@ interface ActivateProgramProps {
 export function ActivateProgram({
   program,
 }: ActivateProgramProps): React.ReactElement {
+  const history = useHistory();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -64,21 +66,18 @@ export function ActivateProgram({
       },
     });
     if (!response.errors && response.data.updateProgram) {
-
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Active
-      })
-
-      showMessage(t('Programme activated.'), {
-        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
-        dataCy: 'snackbar-program-activate-success',
+        status: ProgramStatus.Active,
       });
+
+      showMessage(t('Programme activated.'));
+      history.push(
+        `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
+      );
       setOpen(false);
     } else {
-      showMessage(t('Programme activate action failed.'), {
-        dataCy: 'snackbar-program-activate-failure',
-      });
+      showMessage(t('Programme activate action failed.'));
     }
   };
   return (

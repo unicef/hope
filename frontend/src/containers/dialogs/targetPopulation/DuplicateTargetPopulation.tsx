@@ -3,6 +3,7 @@ import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { useHistory } from 'react-router-dom';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
@@ -35,6 +36,7 @@ export const DuplicateTargetPopulation = ({
   setOpen,
   targetPopulationId,
 }: DuplicateTargetPopulationPropTypes): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const [mutate, { loading }] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
@@ -60,10 +62,10 @@ export const DuplicateTargetPopulation = ({
               variables: { input: { targetPopulationData: { ...values } } },
             });
             setOpen(false);
-            showMessage(t('Target Population Duplicated'), {
-              pathname: `/${baseUrl}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
-              historyMethod: 'push',
-            });
+            showMessage(t('Target Population Duplicated'));
+            history.push(
+              `/${baseUrl}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
+            );
           } catch (e) {
             e.graphQLErrors.map((x) => showMessage(x.message));
           }

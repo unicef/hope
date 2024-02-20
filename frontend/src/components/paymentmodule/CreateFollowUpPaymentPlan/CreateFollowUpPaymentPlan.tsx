@@ -14,6 +14,7 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { useHistory } from 'react-router-dom';
 import {
   PaymentPlanQuery,
   useCreateFollowUpPpMutation,
@@ -32,7 +33,7 @@ import { FieldBorder } from '../../core/FieldBorder';
 import { GreyText } from '../../core/GreyText';
 import { LabelizedField } from '../../core/LabelizedField';
 import { LoadingButton } from '../../core/LoadingButton';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 export interface CreateFollowUpPaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -41,6 +42,7 @@ export interface CreateFollowUpPaymentPlanProps {
 export const CreateFollowUpPaymentPlan = ({
   paymentPlan,
 }: CreateFollowUpPaymentPlanProps): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
@@ -93,10 +95,10 @@ export const CreateFollowUpPaymentPlan = ({
         },
       });
       setDialogOpen(false);
-      showMessage(t('Payment Plan Created'), {
-        pathname: `/${baseUrl}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
-        historyMethod: 'push',
-      });
+      showMessage(t('Payment Plan Created'));
+      history.push(
+        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -117,7 +119,7 @@ export const CreateFollowUpPaymentPlan = ({
               variant='outlined'
               color='primary'
               onClick={() => setDialogOpen(true)}
-               disabled={
+              disabled={
                 !hasPermissions(PERMISSIONS.PM_CREATE, permissions) ||
                 !isActiveProgram
               }
