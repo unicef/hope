@@ -153,7 +153,8 @@ export function GlobalProgramSelect(): React.ReactElement {
         All Programmes
       </MenuItem>
       {data.allPrograms.edges
-        .sort((objA, objB) => objA.node.name.localeCompare(objB.node.name))
+        // TODO fix sorting
+        // .sort((objA, objB) => objA.node.name.localeCompare(objB.node.name))
         .map((each) => (
           <MenuItem key={each.node.id} value={each.node.id}>
             {each.node.name}

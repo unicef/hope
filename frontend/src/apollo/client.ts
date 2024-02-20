@@ -1,16 +1,11 @@
-import localForage from 'localforage';
-import { persistCache } from 'apollo3-cache-persist';
-import {
-  ApolloLink,
-  ApolloClient,
-  NormalizedCacheObject,
-  InMemoryCache,
-  HttpLink,
-} from '@apollo/client';
+import { persistCache } from 'apollo-cache-persist';
 import { onError } from '@apollo/client/link/error';
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
+import localForage from 'localforage';
 import { GRAPHQL_URL } from '../config';
-import { clearCache } from '../utils/utils';
+import { clearCache } from '@utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
+import { ApolloLink, ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -40,7 +35,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError)
     // eslint-disable-next-line no-console
     console.error(
-      `[Network error]: ${String(networkError)}`,
+      `[Network error]: ${networkError}`,
       networkError,
       graphQLErrors,
     );
@@ -56,8 +51,7 @@ const hasResponseErrors = (response): boolean => {
 
 const redirectLink = new ApolloLink((operation, forward) => {
   // Check if the app is not running on localhost, dev, or stg environment
-  const isNotLocalhostDevOrStg =
-    !window.location.hostname.includes('localhost') &&
+  const isNotLocalhostDevOrStg = !window.location.hostname.includes('localhost') &&
     !window.location.href.includes('dev') &&
     !window.location.href.includes('stg');
 
@@ -72,24 +66,25 @@ const redirectLink = new ApolloLink((operation, forward) => {
     );
 
     // Check if the error message is "Permission Denied"
-    const isPermissionDenied = response?.errors?.some(
-      (error) => error.message === 'Permission Denied',
-    );
+    const isPermissionDenied = response?.errors?.some((error) => error.message === 'Permission Denied');
 
     // If the error message is "Permission Denied" or data is null, redirect to the access denied page
-    if (isPermissionDenied || (isDataNull(response.data) && !isMutation)) {
+    if (isPermissionDenied || isDataNull(response.data) && !isMutation) {
       window.location.href = `/access-denied/${businessArea}`;
-    } else if (hasResponseErrors(response)) {
-      // Check if the response has any errors
+    }
+    // Check if the response has any errors
+    else if (hasResponseErrors(response)) {
       // If it's a mutation, log the error to the console
       if (isMutation) {
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
-      } else if (isNotLocalhostDevOrStg) {
-        // If it's not a mutation and the app is not running on localhost, dev, or stg environment, redirect to an error page
+      }
+      // If it's not a mutation and the app is not running on localhost, dev, or stg environment, redirect to an error page
+      else if (isNotLocalhostDevOrStg) {
         window.location.href = `/error/${businessArea}`;
-      } else {
-        // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
+      }
+      // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
+      else {
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
       }
@@ -138,9 +133,10 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
           localStorage.setItem('backend-version', backendVersion);
         }
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        client.writeData({
-          data: { backendVersion },
-        });
+        // TODO check if needed
+        // client.writeData({
+        //   data: { backendVersion },
+        // });
       }
     }
     if (response.errors) {
@@ -170,19 +166,17 @@ const addBusinessAreaHeaderMiddleware = new ApolloLink((operation, forward) => {
   return forward(operation);
 });
 
-const httpLink = new HttpLink({ uri: GRAPHQL_URL });
-
 const link = ApolloLink.from([
   addBusinessAreaHeaderMiddleware,
   validationErrorMiddleware,
   errorLink,
   redirectLink,
-  httpLink,
+  createUploadLink({ uri: GRAPHQL_URL }),
 ]);
 let client;
 
 export async function getClient(): Promise<
-ApolloClient<NormalizedCacheObject>
+  ApolloClient<NormalizedCacheObject>
 > {
   if (client) {
     return client;
