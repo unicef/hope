@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from "apollo-boost";
 
 export const PAYMENT_PLAN_QUERY = gql`
   query PaymentPlan($id: ID!) {
@@ -149,6 +149,12 @@ export const PAYMENT_PLAN_QUERY = gql`
           communicationChannel
           isPaymentGateway
         }
+      }
+      canSendToPaymentGateway
+      canSplit
+      splitChoices {
+        name
+        value
       }
       volumeByDeliveryMechanism {
         deliveryMechanism {

@@ -14,6 +14,7 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory, CountryFactory
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
@@ -24,8 +25,19 @@ from hct_mis_api.apps.payment.celery_tasks import (
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
 )
-from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
-from hct_mis_api.apps.payment.models import Payment, PaymentPlan
+from hct_mis_api.apps.payment.fixtures import (
+    DeliveryMechanismPerPaymentPlanFactory,
+    FinancialServiceProviderFactory,
+    PaymentFactory,
+    PaymentPlanFactory,
+)
+from hct_mis_api.apps.payment.models import (
+    FinancialServiceProvider,
+    GenericPayment,
+    Payment,
+    PaymentPlan,
+    PaymentPlanSplit,
+)
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
@@ -512,3 +524,155 @@ class TestPaymentPlanServices(APITestCase):
             {follow_up_payment.source_payment.id},
             set(follow_up_pp_2.payment_items.values_list("source_payment_id", flat=True)),
         )
+
+    @freeze_time("2023-10-10")
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_split(self, get_exchange_rate_mock: Any) -> None:
+        pp = PaymentPlanFactory(
+            start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
+            end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+        )
+
+        with self.assertRaisesMessage(GraphQLError, "No payments to split"):
+            PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
+
+        payments = []
+        # 2 payments with the same collector
+        # 2 payments with the same admin area 2
+        # 2 other payments
+        collector = IndividualFactory(household=None)
+        for _ in range(3):
+            hoh = IndividualFactory(household=None)
+            hh = HouseholdFactory(head_of_household=hoh)
+            IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
+            IndividualFactory.create_batch(2, household=hh)
+            payment = PaymentFactory(
+                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN", collector=collector
+            )
+            payments.append(payment)
+
+        country = CountryFactory()
+        admin_type_1 = AreaTypeFactory(country=country, area_level=1)
+        admin_type_2 = AreaTypeFactory(country=country, area_level=2, parent=admin_type_1)
+        area2 = AreaFactory(parent=None, p_code="AF01", area_type=admin_type_2)
+        for _ in range(4):
+            collector = IndividualFactory(household=None)
+            hoh = IndividualFactory(household=None)
+            hh = HouseholdFactory(head_of_household=hoh, admin2=area2)
+            IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
+            IndividualFactory.create_batch(2, household=hh)
+            payment = PaymentFactory(
+                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN", collector=collector
+            )
+            payments.append(payment)
+
+        for _ in range(5):
+            collector = IndividualFactory(household=None)
+            hoh = IndividualFactory(household=None)
+            hh = HouseholdFactory(head_of_household=hoh)
+            IndividualRoleInHouseholdFactory(household=hh, individual=hoh, role=ROLE_PRIMARY)
+            IndividualFactory.create_batch(2, household=hh)
+            payment = PaymentFactory(
+                parent=pp, household=hh, status=Payment.STATUS_DISTRIBUTION_SUCCESS, currency="PLN", collector=collector
+            )
+            payments.append(payment)
+
+        with self.assertRaisesMessage(GraphQLError, "Payments Number is required for split by records"):
+            PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=None)
+
+        with self.assertRaisesMessage(
+            GraphQLError, "Payment Parts number should be between 2 and total number of payments"
+        ):
+            PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=669)
+
+        with mock.patch(
+            "hct_mis_api.apps.payment.services.payment_plan_services.PaymentPlanSplit.MAX_CHUNKS"
+        ) as max_chunks_patch:
+            max_chunks_patch.__get__ = mock.Mock(return_value=2)
+            with self.assertRaisesMessage(GraphQLError, "Too many Payment Parts to split: 6, maximum is 2"):
+                PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=2)
+
+        # split by collector
+        with self.assertNumQueries(26):
+            PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
+        unique_collectors_count = pp.eligible_payments.values_list("collector", flat=True).distinct().count()
+        self.assertEqual(unique_collectors_count, 10)
+        pp_splits = pp.splits.all().order_by("order")
+
+        self.assertEqual(pp_splits.count(), unique_collectors_count)
+        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_COLLECTOR)
+        self.assertEqual(pp_splits[0].payments.count(), 3)
+        self.assertEqual(pp_splits[1].payments.count(), 1)
+        self.assertEqual(pp_splits[2].payments.count(), 1)
+        self.assertEqual(pp_splits[3].payments.count(), 1)
+        self.assertEqual(pp_splits[4].payments.count(), 1)
+        self.assertEqual(pp_splits[5].payments.count(), 1)
+        self.assertEqual(pp_splits[6].payments.count(), 1)
+        self.assertEqual(pp_splits[7].payments.count(), 1)
+        self.assertEqual(pp_splits[8].payments.count(), 1)
+        self.assertEqual(pp_splits[9].payments.count(), 1)
+
+        # split by records
+        with self.assertNumQueries(16):
+            PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_RECORDS, chunks_no=5)
+        pp_splits = pp.splits.all().order_by("order")
+        self.assertEqual(pp_splits.count(), 3)
+        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_RECORDS)
+        self.assertEqual(pp_splits[0].payments.count(), 5)
+        self.assertEqual(pp_splits[1].payments.count(), 5)
+        self.assertEqual(pp_splits[2].payments.count(), 2)
+
+        # split by admin2
+        with self.assertNumQueries(14):
+            PaymentPlanService(pp).split(PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
+        unique_admin2_count = pp.eligible_payments.values_list("household__admin2", flat=True).distinct().count()
+        self.assertEqual(unique_admin2_count, 2)
+        pp_splits = pp.splits.all().order_by("order")
+        self.assertEqual(pp.splits.count(), unique_admin2_count)
+        self.assertEqual(pp_splits[0].split_type, PaymentPlanSplit.SplitType.BY_ADMIN_AREA2)
+        self.assertEqual(pp_splits[0].payments.count(), 4)
+        self.assertEqual(pp_splits[1].payments.count(), 8)
+
+    @freeze_time("2023-10-10")
+    @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_send_to_payment_gateway(self, get_exchange_rate_mock: Any) -> None:
+        pp = PaymentPlanFactory(
+            start_date=timezone.datetime(2021, 6, 10, tzinfo=utc),
+            end_date=timezone.datetime(2021, 7, 10, tzinfo=utc),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+        pp.background_action_status_send_to_payment_gateway()
+        pp.save()
+        with self.assertRaisesMessage(GraphQLError, "Sending in progress"):
+            PaymentPlanService(pp).send_to_payment_gateway()
+
+        pp.background_action_status_none()
+        pp.save()
+
+        pg_fsp = FinancialServiceProviderFactory(
+            name="Western Union",
+            delivery_mechanisms=[
+                GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+            ],
+            communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            payment_gateway_id="123",
+        )
+        dm = DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=pp,
+            financial_service_provider=pg_fsp,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+            sent_to_payment_gateway=True,
+        )
+
+        with self.assertRaisesMessage(GraphQLError, "Already sent to Payment Gateway"):
+            PaymentPlanService(pp).send_to_payment_gateway()
+
+        dm.sent_to_payment_gateway = False
+        dm.save()
+        with mock.patch(
+            "hct_mis_api.apps.payment.services.payment_plan_services.send_to_payment_gateway.delay"
+        ) as mock_send_to_payment_gateway_task:
+            pps = PaymentPlanService(pp)
+            pps.user = mock.MagicMock(pk="123")
+            pps.send_to_payment_gateway()
+            assert mock_send_to_payment_gateway_task.call_count == 1
