@@ -226,7 +226,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 "delivered_quantity_usd",
                 "status",
                 "delivery_date",
-                "reference_id",
+                "transaction_reference_id",
                 "reason_for_unsuccessful_payment",
                 "additional_collector_name",
                 "additional_document_type",
@@ -280,6 +280,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         else:
             delivery_date = None
 
+        if "reference_id" in self.xlsx_headers:
+            reference_id = row[self.xlsx_headers.index("reference_id")].value
+        else:
+            reference_id = None
+
         if "reason_for_unsuccessful_payment" in self.xlsx_headers:
             reason_for_unsuccessful_payment = row[self.xlsx_headers.index("reason_for_unsuccessful_payment")].value
         else:
@@ -299,11 +304,6 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             additional_document_number = row[self.xlsx_headers.index("additional_document_number")].value
         else:
             additional_document_number = None
-
-        if "reference_id" in self.xlsx_headers:
-            reference_id = row[self.xlsx_headers.index("reference_id")].value
-        else:
-            reference_id = None
 
         if isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
@@ -347,6 +347,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 payment.additional_collector_name = additional_collector_name
                 payment.additional_document_type = additional_document_type
                 payment.additional_document_number = additional_document_number
+                payment.transaction_reference_id = reference_id
 
                 self.payments_to_save.append(payment)
                 # update PaymentVerification status
