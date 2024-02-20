@@ -13,6 +13,7 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { useHistory } from 'react-router-dom';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { DialogFooter } from '../../containers/dialogs/DialogFooter';
@@ -35,6 +36,7 @@ import { LoadingComponent } from '../core/LoadingComponent';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 
 export const NewReportForm = (): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -141,10 +143,10 @@ export const NewReportForm = (): React.ReactElement => {
       },
     });
     if (!response.errors && response.data.createReport) {
-      showMessage('Report created.', {
-        pathname: `/${baseUrl}/reporting/${response.data.createReport.report.id}`,
-        historyMethod: 'push',
-      });
+      showMessage('Report created.');
+      history.push(
+        `/${baseUrl}/reporting/${response.data.createReport.report.id}`,
+      );
     } else {
       showMessage('Report create action failed.');
     }

@@ -11,7 +11,8 @@ import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { getClient } from './apollo/client';
 import { ConfirmationDialogProvider } from './components/core/ConfirmationDialog';
 import { theme } from './theme';
-import { ProgramProvider } from "./programContext";
+import { ProgramProvider } from './programContext';
+import { SnackbarProvider } from './hooks/useSnackBar';
 
 export const Providers: React.FC = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
@@ -33,7 +34,7 @@ export const Providers: React.FC = ({ children }) => {
             <ConfirmationDialogProvider>
               <CssBaseline />
               <ProgramProvider>
-                {children}
+                <SnackbarProvider>{children}</SnackbarProvider>
               </ProgramProvider>
             </ConfirmationDialogProvider>
           </MuiPickersUtilsProvider>

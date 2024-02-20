@@ -1,6 +1,7 @@
 import { Button, DialogContent, DialogTitle } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useLockTpMutation } from '../../../__generated__/graphql';
@@ -21,6 +22,7 @@ export function LockTargetPopulationDialog({
   setOpen,
   targetPopulationId,
 }): React.ReactElement {
+  const history = useHistory();
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
@@ -61,9 +63,10 @@ export function LockTargetPopulationDialog({
                   variables: { id: targetPopulationId },
                 }).then(() => {
                   setOpen(false);
-                  showMessage(t('Target Population Locked'), {
-                    pathname: `/${baseUrl}/target-population/${targetPopulationId}`,
-                  });
+                  showMessage(t('Target Population Locked'));
+                  history.push(
+                    `/${baseUrl}/target-population/${targetPopulationId}`,
+                  );
                 });
               }}
               data-cy='button-target-population-modal-lock'

@@ -238,30 +238,27 @@ export const CreateGrievancePage = (): React.ReactElement => {
       onSubmit={async (values) => {
         if (activeStep === GrievanceSteps.Description) {
           try {
-            const response = await mutate(
+            const { data } = await mutate(
               prepareVariables(businessArea, values),
             );
-            if (values.selectedPaymentRecords.length > 1) {
-              showMessage(
-                `${values.selectedPaymentRecords.length} ${t(
-                  'Grievance Tickets created',
-                )}.`,
-                {
-                  pathname: `/${baseUrl}/grievance/tickets/user-generated`,
-                  historyMethod: 'push',
-                },
-              );
+            const grievanceTicket =
+              data.createGrievanceTicket.grievanceTickets[0];
+            let msg: string;
+            let url: string;
+            const paymentsNumber = values.selectedPaymentRecords.length;
+            if (paymentsNumber > 1) {
+              msg = `${paymentsNumber} ${t('Grievance Tickets created')}.`;
+              url = `/${baseUrl}/grievance/tickets/user-generated`;
             } else {
-              showMessage(t('Grievance Ticket created.'), {
-                pathname: getGrievanceDetailsPath(
-                  response.data.createGrievanceTicket.grievanceTickets[0].id,
-                  response.data.createGrievanceTicket.grievanceTickets[0]
-                    .category,
-                  baseUrl,
-                ),
-                historyMethod: 'push',
-              });
+              msg = t('Grievance Ticket created.');
+              url = getGrievanceDetailsPath(
+                grievanceTicket.id,
+                grievanceTicket.category,
+                baseUrl,
+              );
             }
+            showMessage(msg);
+            history.push(url);
           } catch (e) {
             e.graphQLErrors.map((x) => showMessage(x.message));
           }
