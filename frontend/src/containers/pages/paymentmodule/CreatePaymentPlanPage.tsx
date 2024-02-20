@@ -3,6 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import * as Yup from 'yup';
+import { useHistory } from 'react-router-dom';
 import { LoadingComponent } from '../../../components/core/LoadingComponent';
 import { PermissionDenied } from '../../../components/core/PermissionDenied';
 import { CreatePaymentPlanHeader } from '../../../components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader/CreatePaymentPlanHeader';
@@ -20,6 +21,7 @@ import { today } from '../../../utils/utils';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
 export const CreatePaymentPlanPage = (): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
@@ -46,9 +48,9 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
-        .required(t('Payment Plan Name is required'))
-        .min(5, t('Too short'))
-        .max(25, t('Too long')),
+      .required(t('Payment Plan Name is required'))
+      .min(5, t('Too short'))
+      .max(25, t('Too long')),
     targetingId: Yup.string().required(t('Target Population is required')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
@@ -108,10 +110,10 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
           },
         },
       });
-      showMessage(t('Payment Plan Created'), {
-        pathname: `/${baseUrl}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
-        historyMethod: 'push',
-      });
+      showMessage(t('Payment Plan Created'));
+      history.push(
+        `/${baseUrl}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

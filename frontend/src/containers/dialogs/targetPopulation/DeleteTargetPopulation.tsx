@@ -8,6 +8,7 @@ import {
 import { Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
@@ -27,6 +28,7 @@ export const DeleteTargetPopulation = ({
   setOpen,
   targetPopulationId,
 }): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const [mutate, { loading }] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
@@ -49,10 +51,8 @@ export const DeleteTargetPopulation = ({
             variables: { input: { targetId: targetPopulationId } },
           });
           setOpen(false);
-          showMessage('Target Population Deleted', {
-            pathname: `/${baseUrl}/target-population/`,
-            historyMethod: 'push',
-          });
+          showMessage('Target Population Deleted');
+          history.push(`/${baseUrl}/target-population/`);
         }}
       >
         {({ submitForm }) => (
