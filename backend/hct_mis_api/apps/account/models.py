@@ -16,6 +16,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import JSONField, Q, QuerySet
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import UUIDModel
@@ -333,7 +334,9 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             Role.objects.filter(
                 user_roles__user=self,
                 user_roles__business_area__slug=business_area_slug,
-            ).values_list("permissions", flat=True)
+            )
+            .exclude(user_roles__expiry_date__lt=timezone.now())
+            .values_list("permissions", flat=True)
         )
         return (
             list(
@@ -364,11 +367,15 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def cached_has_user_roles_for_business_area_and_permission(
         self, business_area: BusinessArea, permission: str
     ) -> bool:
-        return Role.objects.filter(
-            permissions__contains=[permission],
-            user_roles__user=self,
-            user_roles__business_area=business_area,
-        ).exists()
+        return (
+            Role.objects.filter(
+                permissions__contains=[permission],
+                user_roles__user=self,
+                user_roles__business_area=business_area,
+            )
+            .exclude(user_roles__expiry_date__lt=timezone.now())
+            .exists()
+        )
 
     def has_permission(
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
@@ -457,6 +464,9 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+    expiry_date = models.DateField(
+        blank=True, null=True, help_text="After expiry date this User Role will be inactive."
+    )
 
     class Meta:
         unique_together = ("business_area", "user", "role")
