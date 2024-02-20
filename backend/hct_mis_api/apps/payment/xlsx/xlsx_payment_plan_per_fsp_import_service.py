@@ -167,6 +167,17 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 )
             )
 
+    def _validate_reference_id(self, row: Row) -> None:
+        payment_id = row[self.xlsx_headers.index("reference_id")].value
+        payment = self.payments_dict.get(payment_id)
+        if payment is None:
+            return
+
+        if "reference_id" in self.xlsx_headers:
+            reference_id = row[self.xlsx_headers.index("reference_id")].value
+            if reference_id != payment.transaction_reference_id:
+                self.is_updated = True
+
     def _validate_rows(self) -> None:
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any([cell.value for cell in row]):
@@ -176,6 +187,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             self._validate_delivered_quantity(row)
             self._validate_delivery_date(row)
             self._validate_reason_for_unsuccessful_payment(row)
+            self._validate_reference_id(row)
 
     def _validate_imported_file(self) -> None:
         if not self.is_updated:
@@ -214,6 +226,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 "delivered_quantity_usd",
                 "status",
                 "delivery_date",
+                "reference_id",
                 "reason_for_unsuccessful_payment",
                 "additional_collector_name",
                 "additional_document_type",
@@ -287,6 +300,11 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         else:
             additional_document_number = None
 
+        if "reference_id" in self.xlsx_headers:
+            reference_id = row[self.xlsx_headers.index("reference_id")].value
+        else:
+            reference_id = None
+
         if isinstance(delivery_date, str):
             delivery_date = parse(delivery_date)
 
@@ -309,6 +327,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
                 or (additional_collector_name != payment.additional_collector_name)
                 or (additional_document_type != payment.additional_document_type)
                 or (additional_document_number != payment.additional_document_number)
+                or (reference_id != payment.transaction_reference_id)
             ):
                 payment.delivered_quantity = delivered_quantity
                 payment.delivered_quantity_usd = get_quantity_in_usd(
