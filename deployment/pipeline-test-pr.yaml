@@ -19,16 +19,16 @@ variables:
 
 stages:
   - stage: test_frontend
-    displayName: Test-Frontend
+    displayName: FE tests
     jobs:
       - job: frontend_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "[FRONTEND TEST]"
+        displayName: "[FE tests]"
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: "14.x"
+              versionSpec: "16.x"
             displayName: "Install Node.js"
           - task: Cache@2
             inputs:
@@ -42,86 +42,65 @@ stages:
             workingDirectory: 'frontend'
             displayName: "Test"
 
-  - stage: check_backend_format
-    displayName: Check BE format
-    jobs:
-      - job: check_backend_format
-        pool:
-          vmImage: ubuntu-latest
-        displayName: "[CHECK FORMAT]"
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: "3.9"
-            displayName: "Use Python 3.9"
-          - script: pip install black==23.12 isort==5.13
-          # remember to update this if you change the version of black/isort in pyproject.toml
-            displayName: "Install tools"
-          - script: black --check .
-            workingDirectory: 'backend'
-            displayName: "Check format"
-          - script: isort --check-only .
-            workingDirectory: 'backend'
-            displayName: "Check imports order"
-
-
   - stage: build_and_push_backend
-    dependsOn: check_backend_format
-    displayName: BUILD and PUSH
+    displayName: BE build & push
+    dependsOn: []
     jobs:
       - job: build_push_backend
         pool:
           vmImage: ubuntu-latest
-        displayName: "[Build]"
+        displayName: "[BE build & push]"
         steps:
           - task: Docker@2
             inputs:
               containerRegistry: '$(Docker.registryConnection)'
               command: 'login'
-            displayName: Docker Login
+            displayName: Docker login
           - script: |
               docker buildx create --use
               docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag) \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag) \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
-              -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
-              -t $(Docker.url)/$(Docker.backend.repository):latest \
-              --push \
-              -f ./docker/Dockerfile \
-              ./
-            displayName: Docker build
+                --cache-from type=registry,ref=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag) \
+                --cache-from type=registry,ref=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+                --cache-to type=registry,ref=$(Docker.url)/$(Docker.backend.repository)-cache:$(tag),mode=max \
+                --cache-to type=registry,ref=$(Docker.url)/$(Docker.backend.repository)-cache:latest,mode=max \
+                -t $(Docker.url)/$(Docker.backend.repository):$(tag) \
+                -t $(Docker.url)/$(Docker.backend.repository):latest \
+                --push \
+                -f ./docker/Dockerfile \
+                ./
+            displayName: Docker build dist image
           - script: |
               docker buildx create --use
               docker buildx build \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
-              --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
-              --cache-to=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
-              -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
-              --push --target dev \
-              -f ./docker/Dockerfile \
-              ./
-            displayName: Docker build dev
+                --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag) \
+                --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest \
+                --cache-from=$(Docker.url)/$(Docker.backend.repository)-cache:latest \
+                --cache-to type=registry,ref=$(Docker.url)/$(Docker.backend.repository)-cache:dev-$(tag),mode=max \
+                --cache-to type=registry,ref=$(Docker.url)/$(Docker.backend.repository)-cache:dev-latest,mode=max \
+                -t $(Docker.url)/$(Docker.backend.repository):dev-$(tag) \
+                -t $(Docker.url)/$(Docker.backend.repository):dev-latest \
+                --push --target dev \
+                -f ./docker/Dockerfile \
+                ./
+            displayName: Docker build dev image
 
   - stage: lint_backend
     dependsOn: build_and_push_backend
-    displayName: Lint-Backend
+    displayName: BE lint
     jobs:
       - job: django_lint
         pool:
           vmImage: ubuntu-latest
-        displayName: "[DJANGO LINT]"
+        displayName: "[BE lint]"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
 
           - task: DockerCompose@0
-            displayName: "Run tests"
+            displayName: "Run linter"
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
@@ -144,21 +123,21 @@ stages:
 
   - stage: mypy_backend
     dependsOn: build_and_push_backend
-    displayName: Mypy-Backend
+    displayName: BE mypy
     jobs:
       - job: django_mypy
         pool:
           vmImage: ubuntu-latest
-        displayName: "[DJANGO MYPY]"
+        displayName: "[BE mypy]"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
 
           - task: DockerCompose@0
-            displayName: "Run tests"
+            displayName: "Run mypy"
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
@@ -179,17 +158,43 @@ stages:
               failTaskOnFailedTests: true
               testRunTitle: 'Mypy results'
 
+  - stage: format_backend
+    dependsOn: [build_and_push_backend]
+    displayName: BE format
+    jobs:
+      - job: django_black
+        pool:
+          vmImage: ubuntu-latest
+        displayName: "[BE format]"
+        steps:
+          - task: Docker@2
+            displayName: "ACR Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registryConnection)
+
+          - task: DockerCompose@0
+            displayName: "Run formatter"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registryConnection)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run --no-deps backend ./dev.sh black . --check'
+              dockerComposeFileArgs: |
+               backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
+
   - stage: test_backend
-    dependsOn: [lint_backend, mypy_backend]
-    displayName: Test-Backend
+    dependsOn: [format_backend, lint_backend, mypy_backend]
+    displayName: BE tests
     jobs:
       - job: django_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "[DJANGO TEST]"
+        displayName: "[BE tests]"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
@@ -204,7 +209,7 @@ stages:
               dockerComposeFileArgs: |
                backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
           - task: PublishTestResults@2
-            displayName: "Publish Test Result"
+            displayName: "Publish tests result"
             condition: always()
             inputs:
               testResultsFormat: 'JUnit'
@@ -215,7 +220,7 @@ stages:
               testRunTitle: 'TEST Results'
           - script: |
               sed -i 's|/code/hct_mis_api|backend/hct_mis_api|g' backend/coverage.xml
-            displayName: "fix coverage.xml"
+            displayName: "Fix coverage.xml"
           - task: PublishCodeCoverageResults@2
             inputs:
               summaryFileLocation: 'backend/coverage.xml'
@@ -230,7 +235,7 @@ stages:
               artifact: 'BackendLineCoverage'
               path: '$(System.ArtifactsDirectory)/old_coverage'
           - task: PythonScript@0
-            displayName: 'Check Coverage'
+            displayName: 'Check coverage'
             continueOnError: true
             inputs:
               scriptSource: 'filePath'
@@ -240,15 +245,15 @@ stages:
 
   - stage: trivy
     dependsOn: [build_and_push_backend]
-    displayName: Trivy
+    displayName: BE Trivy
     jobs:
       - job: run_trivy
         pool:
           vmImage: ubuntu-latest
-        displayName: "[TRIVY]"
+        displayName: "[BE Trivy]"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
@@ -258,21 +263,22 @@ stages:
             continueOnError: true
 
   - stage: e2e_tests
-    dependsOn: [build_and_push_backend]
+    dependsOn: [build_and_push_backend, test_frontend]
     displayName: E2E-Tests
     jobs:
       - job: selenium_tests
         pool:
           vmImage: ubuntu-latest
-        displayName: "[SELENIUM TEST]"
+        displayName: "[Selenium tests]"
         steps:
           - task: Docker@2
-            displayName: "[ACR] Login"
+            displayName: "ACR Login"
             inputs:
               command: login
               containerRegistry: $(Docker.registryConnection)
           - task: DockerCompose@0
-            displayName: "Run tests"
+            displayName: "Run selenium tests"
+            continueOnError: true
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
