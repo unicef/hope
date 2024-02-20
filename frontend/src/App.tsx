@@ -12,6 +12,7 @@ import { SanctionList } from '@containers/pages/core/SanctionList';
 import { PageNotFound } from '@containers/pages/404/PageNotFound';
 import { AccessDenied } from '@containers/pages/accessDenied/AccessDenied';
 import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
+import React from 'react';
 
 const Root: React.FC = () => (
       <Routes>

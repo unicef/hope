@@ -5,7 +5,6 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   useAllBusinessAreasQuery,
-  useAllProgramsForChoicesQuery,
 } from '@generated/graphql';
 import { AppBar } from '@components/core/AppBar';
 import { Drawer } from '@components/core/Drawer/Drawer';
@@ -48,17 +47,9 @@ export const BaseHomeRouter: React.FC = () => {
       fetchPolicy: 'cache-first',
     });
 
-  const { data: programsData, loading: programsLoading } =
-    useAllProgramsForChoicesQuery({
-      variables: { businessArea, first: 100 },
-      fetchPolicy: 'cache-first',
-    });
-
   if (
     !businessAreaData ||
-    businessAreaLoading ||
-    !programsData ||
-    programsLoading
+    businessAreaLoading
   ) {
     return <LoadingComponent />;
   }

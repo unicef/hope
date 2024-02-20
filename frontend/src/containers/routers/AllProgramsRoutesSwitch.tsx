@@ -14,38 +14,31 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
 
   const allProgramsRoutes = [
     {
-      path: `${path}/country-dashboard`,
-      element: (
-        <Route
-          path={`${path}/country-dashboard`}
-          element={<DashboardPage />}
-        />
-      ),
+      path: '/country-dashboard',
+      element: <DashboardPage />,
     },
+    // {
+    //   path: `${path}/reporting/:id`,
+    //   element: (
+    //     <Route
+    //       path={`${path}/reporting/:id`}
+    //       element={<ReportingDetailsPage />}
+    //     />
+    //   ),
+    // },
     {
-      path: `${path}/reporting/:id`,
-      element: (
-        <Route
-          path={`${path}/reporting/:id`}
-          element={<ReportingDetailsPage />}
-        />
-      ),
+      path: 'reporting',
+      element: <ReportingPage />,
     },
-    {
-      path: `${path}/reporting`,
-      element: (
-        <Route path={`${path}/reporting`} element={<ReportingPage />} />
-      ),
-    },
-    {
-      path: `${path}/activity-log`,
-      element: (
-        <Route
-          path={`${path}/activity-log`}
-          element={<ActivityLogPage />}
-        />
-      ),
-    },
+    // {
+    //   path: `${path}/activity-log`,
+    //   element: (
+    //     <Route
+    //       path={`${path}/activity-log`}
+    //       element={<ActivityLogPage />}
+    //     />
+    //   ),
+    // },
   ];
 
   const routes = useRoutes(allProgramsRoutes);
@@ -53,8 +46,8 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
   return (
     <>
       {routes}
-      <GrievanceRoutes />
-      <ProgramRoutes />
+      {/*<GrievanceRoutes />*/}
+      {/*<ProgramRoutes />*/}
     </>
   );
 };
