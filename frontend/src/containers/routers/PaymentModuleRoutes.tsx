@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, useLocation, useRoutes } from 'react-router-dom';
+import { useLocation, useRoutes } from 'react-router-dom';
 import { CreatePaymentPlanPage } from '../pages/paymentmodule/CreatePaymentPlanPage';
 import { EditFollowUpPaymentPlanPage } from '../pages/paymentmodule/EditFollowUpPaymentPlanPage';
 import { EditFollowUpSetUpFspPage } from '../pages/paymentmodule/EditFollowUpSetUpFspPage';
@@ -18,93 +18,43 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
   const paymentModuleRoutes = [
     {
       path: `${path}/payment-module/new-plan`,
-      element: (
-        <Route
-          path={`${path}/payment-module/new-plan`}
-          element={<CreatePaymentPlanPage />}
-        />
-      ),
+      element: <CreatePaymentPlanPage />,
     },
     {
       path: `${path}/payment-module`,
-      element: (
-        <Route
-          path={`${path}/payment-module`}
-          element={<PaymentModulePage />}
-        />
-      ),
+      element: <PaymentModulePage />,
     },
     {
       path: `${path}/payment-module/followup-payment-plans/:id/edit`,
-      element: (
-        <Route
-          path={`${path}/payment-module/followup-payment-plans/:id/edit`}
-          element={<EditFollowUpPaymentPlanPage />}
-        />
-      ),
+      element: <EditFollowUpPaymentPlanPage />,
     },
     {
       path: `${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`,
-      element: (
-        <Route
-          path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`}
-          element={<EditFollowUpSetUpFspPage />}
-        />
-      ),
+      element: <EditFollowUpSetUpFspPage />,
     },
     {
       path: `${path}/payment-module/payment-plans/:id/setup-fsp/create`,
-      element: (
-        <Route
-          path={`${path}/payment-module/payment-plans/:id/setup-fsp/create`}
-          element={<SetUpFspPage />}
-        />
-      ),
+      element: <SetUpFspPage />,
     },
     {
       path: `${path}/payment-module/payment-plans/:id/setup-fsp/edit`,
-      element: (
-        <Route
-          path={`${path}/payment-module/payment-plans/:id/setup-fsp/edit`}
-          element={<EditSetUpFspPage />}
-        />
-      ),
+      element: <EditSetUpFspPage />,
     },
     {
       path: `${path}/payment-module/payment-plans/:id/edit`,
-      element: (
-        <Route
-          path={`${path}/payment-module/payment-plans/:id/edit`}
-          element={<EditPaymentPlanPage />}
-        />
-      ),
+      element: <EditPaymentPlanPage />,
     },
     {
       path: `${path}/payment-module/payments/:id`,
-      element: (
-        <Route
-          path={`${path}/payment-module/payments/:id`}
-          element={<PaymentDetailsPage />}
-        />
-      ),
+      element: <PaymentDetailsPage />,
     },
     {
       path: `${path}/payment-module/payment-plans/:id`,
-      element: (
-        <Route
-          path={`${path}/payment-module/payment-plans/:id`}
-          element={<PaymentPlanDetailsPage />}
-        />
-      ),
+      element: <PaymentPlanDetailsPage />,
     },
     {
       path: `${path}/payment-module/followup-payment-plans/:id`,
-      element: (
-        <Route
-          path={`${path}/payment-module/followup-payment-plans/:id`}
-          element={<FollowUpPaymentPlanDetailsPage />}
-        />
-      ),
+      element: <FollowUpPaymentPlanDetailsPage />,
     },
   ];
 

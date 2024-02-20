@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation, Route } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
+import { useRoutes, useLocation } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
@@ -17,28 +16,18 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
       path: '/country-dashboard',
       element: <DashboardPage />,
     },
-    // {
-    //   path: `${path}/reporting/:id`,
-    //   element: (
-    //     <Route
-    //       path={`${path}/reporting/:id`}
-    //       element={<ReportingDetailsPage />}
-    //     />
-    //   ),
-    // },
     {
-      path: 'reporting',
+      path: `${path}/reporting/:id`,
+      element: <ReportingDetailsPage />,
+    },
+    {
+      path: `${path}/reporting`,
       element: <ReportingPage />,
     },
-    // {
-    //   path: `${path}/activity-log`,
-    //   element: (
-    //     <Route
-    //       path={`${path}/activity-log`}
-    //       element={<ActivityLogPage />}
-    //     />
-    //   ),
-    // },
+    {
+      path: `${path}/activity-log`,
+      element: <ActivityLogPage />,
+    },
   ];
 
   const routes = useRoutes(allProgramsRoutes);
@@ -46,8 +35,8 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
   return (
     <>
       {routes}
-      {/*<GrievanceRoutes />*/}
-      {/*<ProgramRoutes />*/}
+      <GrievanceRoutes />
+      <ProgramRoutes />
     </>
   );
 };

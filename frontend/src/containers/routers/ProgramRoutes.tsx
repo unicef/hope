@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, useLocation, useRoutes } from 'react-router-dom';
+import { useLocation, useRoutes } from 'react-router-dom';
 import { ProgramDetailsPage } from '../pages/program/ProgramDetailsPage';
 import { ProgramsPage } from '../pages/program/ProgramsPage';
 import { CreateProgramPage } from '../pages/program/CreateProgramPage';
@@ -13,37 +13,23 @@ export const ProgramRoutes = (): React.ReactElement => {
   const programRoutes = [
     {
       path: `${path}/list`,
-      element: <Route path={`${path}/list`} element={<ProgramsPage />} />,
+      element: <ProgramsPage />,
     },
     {
       path: `${path}/create`,
-      element: (
-        <Route path={`${path}/create`} element={<CreateProgramPage />} />
-      ),
+      element: <CreateProgramPage />,
     },
     {
       path: `${path}/edit/:id`,
-      element: (
-        <Route path={`${path}/edit/:id`} element={<EditProgramPage />} />
-      ),
+      element: <EditProgramPage />,
     },
     {
       path: `${path}/duplicate/:id`,
-      element: (
-        <Route
-          path={`${path}/duplicate/:id`}
-          element={<DuplicateProgramPage />}
-        />
-      ),
+      element: <DuplicateProgramPage />,
     },
     {
       path: `${path}/details/:id`,
-      element: (
-        <Route
-          path={`${path}/details/:id`}
-          element={<ProgramDetailsPage />}
-        />
-      ),
+      element: <ProgramDetailsPage />,
     },
   ];
 

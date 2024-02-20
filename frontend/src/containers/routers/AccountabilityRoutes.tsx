@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, useLocation, useRoutes } from 'react-router-dom';
+import { useLocation, useRoutes } from 'react-router-dom';
 import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
 import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
 import { CreateCommunicationPage } from '../pages/accountability/communication/CreateCommunicationPage';
@@ -14,57 +14,27 @@ export const AccountabilityRoutes = (): React.ReactElement => {
   const accountabilityRoutes = [
     {
       path: `${path}/accountability/surveys/create`,
-      element: (
-        <Route
-          path={`${path}/accountability/surveys/create`}
-          element={<CreateSurveyPage />}
-        />
-      ),
+      element: <CreateSurveyPage />,
     },
     {
       path: `${path}/accountability/surveys/:id`,
-      element: (
-        <Route
-          path={`${path}/accountability/surveys/:id`}
-          element={<SurveyDetailsPage />}
-        />
-      ),
+      element: <SurveyDetailsPage />,
     },
     {
       path: `${path}/accountability/surveys`,
-      element: (
-        <Route
-          path={`${path}/accountability/surveys`}
-          element={<SurveysPage />}
-        />
-      ),
+      element: <SurveysPage />,
     },
     {
       path: `${path}/accountability/communication/create`,
-      element: (
-        <Route
-          path={`${path}/accountability/communication/create`}
-          element={<CreateCommunicationPage />}
-        />
-      ),
+      element: <CreateCommunicationPage />,
     },
     {
       path: `${path}/accountability/communication/:id`,
-      element: (
-        <Route
-          path={`${path}/accountability/communication/:id`}
-          element={<CommunicationDetailsPage />}
-        />
-      ),
+      element: <CommunicationDetailsPage />,
     },
     {
       path: `${path}/accountability/communication`,
-      element: (
-        <Route
-          path={`${path}/accountability/communication`}
-          element={<CommunicationPage />}
-        />
-      ),
+      element: <CommunicationPage />,
     },
   ];
 

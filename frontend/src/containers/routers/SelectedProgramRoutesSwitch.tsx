@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, useRoutes } from 'react-router-dom';
+import { useRoutes } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { UsersPage } from '../pages/core/UsersPage';
@@ -20,42 +20,27 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
   const routes = useRoutes([
     {
       path: 'country-dashboard',
-      element: (
-        <Route
-          // label="/ - Dashboard"
-          path="country-dashboard"
-          element={<DashboardPage />}
-        />
-      ),
+      element: <DashboardPage />,
     },
     {
       path: 'payment-records/:id',
-      element: (
-        <Route
-          path="payment-records/:id"
-          element={<PaymentRecordDetailsPage />}
-        />
-      ),
+      element: <PaymentRecordDetailsPage />,
     },
     {
       path: 'reporting/:id',
-      element: (
-        <Route path="reporting/:id" element={<ReportingDetailsPage />} />
-      ),
+      element: <ReportingDetailsPage />,
     },
     {
       path: 'reporting',
-      element: <Route path="reporting" element={<ReportingPage />} />,
+      element: <ReportingPage />,
     },
     {
       path: 'users-list',
-      element: <Route path="users-list" element={<UsersPage />} />,
+      element: <UsersPage />,
     },
     {
       path: 'activity-log',
-      element: (
-        <Route path="activity-log" element={<ActivityLogPage />} />
-      ),
+      element: <ActivityLogPage />,
     },
   ]);
 

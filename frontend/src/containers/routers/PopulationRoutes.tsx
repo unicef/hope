@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, useLocation, useRoutes } from 'react-router-dom';
+import { useLocation, useRoutes } from 'react-router-dom';
 import { PopulationHouseholdDetailsPage } from '../pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from '../pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from '../pages/population/PopulationIndividualsDetailsPage';
@@ -12,39 +12,19 @@ export const PopulationRoutes = (): React.ReactElement => {
   const populationRoutes = [
     {
       path: `${path}/population/household/:id`,
-      element: (
-        <Route
-          path={`${path}/population/household/:id`}
-          element={<PopulationHouseholdDetailsPage />}
-        />
-      ),
+      element: <PopulationHouseholdDetailsPage />,
     },
     {
       path: `${path}/population/individuals/:id`,
-      element: (
-        <Route
-          path={`${path}/population/individuals/:id`}
-          element={<PopulationIndividualsDetailsPage />}
-        />
-      ),
+      element: <PopulationIndividualsDetailsPage />,
     },
     {
       path: `${path}/population/household`,
-      element: (
-        <Route
-          path={`${path}/population/household`}
-          element={<PopulationHouseholdPage />}
-        />
-      ),
+      element: <PopulationHouseholdPage />,
     },
     {
       path: `${path}/population/individuals`,
-      element: (
-        <Route
-          path={`${path}/population/individuals`}
-          element={<PopulationIndividualsPage />}
-        />
-      ),
+      element: <PopulationIndividualsPage />,
     },
   ];
 

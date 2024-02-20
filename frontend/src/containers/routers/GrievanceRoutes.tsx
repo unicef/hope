@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, useLocation, useRoutes } from 'react-router-dom';
+import { useLocation, useRoutes } from 'react-router-dom';
 import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
 import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
@@ -17,129 +17,59 @@ export const GrievanceRoutes = (): React.ReactElement => {
   const grievanceRoutes = [
     {
       path: `${path}/grievance/new-ticket`,
-      element: (
-        <Route
-          path={`${path}/grievance/new-ticket`}
-          element={<CreateGrievancePage />}
-        />
-      ),
+      element: <CreateGrievancePage />,
     },
     {
       path: `${path}/grievance/edit-ticket/user-generated/:id`,
-      element: (
-        <Route
-          path={`${path}/grievance/edit-ticket/user-generated/:id`}
-          element={<EditGrievancePage />}
-        />
-      ),
+      element: <EditGrievancePage />,
     },
     {
       path: `${path}/grievance/edit-ticket/system-generated/:id`,
-      element: (
-        <Route
-          path={`${path}/grievance/edit-ticket/system-generated/:id`}
-          element={<EditGrievancePage />}
-        />
-      ),
+      element: <EditGrievancePage />,
     },
     {
       path: `${path}/grievance/tickets/user-generated/:id`,
-      element: (
-        <Route
-          path={`${path}/grievance/tickets/user-generated/:id`}
-          element={<GrievancesDetailsPage />}
-        />
-      ),
+      element: <GrievancesDetailsPage />,
     },
     {
       path: `${path}/grievance/tickets/system-generated/:id`,
-      element: (
-        <Route
-          path={`${path}/grievance/tickets/system-generated/:id`}
-          element={<GrievancesDetailsPage />}
-        />
-      ),
+      element: <GrievancesDetailsPage />,
     },
     {
       path: `${path}/grievance/rdi/:id`,
-      element: (
-        <Route
-          path={`${path}/grievance/rdi/:id`}
-          element={<GrievancesTablePage />}
-        />
-      ),
+      element: <GrievancesTablePage />,
     },
     {
       path: `${path}/grievance/payment-verification/:cashPlanId`,
-      element: (
-        <Route
-          path={`${path}/grievance/payment-verification/:cashPlanId`}
-          element={<GrievancesTablePage />}
-        />
-      ),
+      element: <GrievancesTablePage />,
     },
     {
       path: `${path}/grievance/tickets/user-generated`,
-      element: (
-        <Route
-          path={`${path}/grievance/tickets/user-generated`}
-          element={<GrievancesTablePage />}
-        />
-      ),
+      element: <GrievancesTablePage />,
     },
     {
       path: `${path}/grievance/tickets/system-generated`,
-      element: (
-        <Route
-          path={`${path}/grievance/tickets/system-generated`}
-          element={<GrievancesTablePage />}
-        />
-      ),
+      element: <GrievancesTablePage />,
     },
     {
       path: `${path}/grievance/dashboard`,
-      element: (
-        <Route
-          path={`${path}/grievance/dashboard`}
-          element={<GrievancesDashboardPage />}
-        />
-      ),
+      element: <GrievancesDashboardPage />,
     },
     {
       path: `${path}/grievance/feedback/create`,
-      element: (
-        <Route
-          path={`${path}/grievance/feedback/create`}
-          element={<CreateFeedbackPage />}
-        />
-      ),
+      element: <CreateFeedbackPage />,
     },
     {
       path: `${path}/grievance/feedback/edit-ticket/:id`,
-      element: (
-        <Route
-          path={`${path}/grievance/feedback/edit-ticket/:id`}
-          element={<EditFeedbackPage />}
-        />
-      ),
+      element: <EditFeedbackPage />,
     },
     {
       path: `${path}/grievance/feedback/:id`,
-      element: (
-        <Route
-          path={`${path}/grievance/feedback/:id`}
-          element={<FeedbackDetailsPage />}
-        />
-      ),
+      element: <FeedbackDetailsPage />,
     },
     {
       path: `${path}/grievance/feedback`,
-      element: (
-        <Route
-          path={`${path}/grievance/feedback`}
-          element={<FeedbackPage />}
-        />
-      ),
+      element: <FeedbackPage />,
     },
   ];
 

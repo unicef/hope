@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, useLocation, useRoutes } from 'react-router-dom';
+import { useLocation, useRoutes } from 'react-router-dom';
 import { RegistrationDataImportDetailsPage } from '../pages/rdi/RegistrationDataImportDetailsPage';
 import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportPage';
 import { RegistrationHouseholdDetailsPage } from '../pages/rdi/RegistrationHouseholdDetailsPage';
@@ -12,39 +12,19 @@ export const RegistrationRoutes = (): React.ReactElement => {
   const registrationRoutes = [
     {
       path: `${path}/registration-data-import/household/:id`,
-      element: (
-        <Route
-          path={`${path}/registration-data-import/household/:id`}
-          element={<RegistrationHouseholdDetailsPage />}
-        />
-      ),
+      element: <RegistrationHouseholdDetailsPage />,
     },
     {
       path: `${path}/registration-data-import/individual/:id`,
-      element: (
-        <Route
-          path={`${path}/registration-data-import/individual/:id`}
-          element={<RegistrationIndividualDetailsPage />}
-        />
-      ),
+      element: <RegistrationIndividualDetailsPage />,
     },
     {
       path: `${path}/registration-data-import/:id`,
-      element: (
-        <Route
-          path={`${path}/registration-data-import/:id`}
-          element={<RegistrationDataImportDetailsPage />}
-        />
-      ),
+      element: <RegistrationDataImportDetailsPage />,
     },
     {
       path: `${path}/registration-data-import`,
-      element: (
-        <Route
-          path={`${path}/registration-data-import`}
-          element={<RegistrationDataImportPage />}
-        />
-      ),
+      element: <RegistrationDataImportPage />,
     },
   ];
 
