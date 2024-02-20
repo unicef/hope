@@ -30,8 +30,10 @@ from hct_mis_api.apps.payment.models import (
     GenericPayment,
     Payment,
     PaymentPlan,
+    PaymentPlanSplit,
     ServiceProvider,
 )
+from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
 from hct_mis_api.apps.payment.utils import to_decimal
 from hct_mis_api.apps.payment.xlsx.xlsx_error import XlsxError
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_export_per_fsp_service import (
@@ -234,3 +236,61 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
                     f"{fsp_xlsx_template_per_delivery_mechanism.financial_service_provider.name}_{fsp_xlsx_template_per_delivery_mechanism.delivery_mechanism}",
                     file_list_fsp,
                 )
+
+    def test_export_payment_plan_payment_list_per_split(self) -> None:
+        financial_service_provider1 = FinancialServiceProviderFactory(
+            delivery_mechanisms=[GenericPayment.DELIVERY_TYPE_CASH]
+        )
+        FspXlsxTemplatePerDeliveryMechanismFactory(
+            financial_service_provider=financial_service_provider1, delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH
+        )
+        DeliveryMechanismPerPaymentPlanFactory(
+            payment_plan=self.payment_plan,
+            delivery_mechanism=GenericPayment.DELIVERY_TYPE_CASH,
+            financial_service_provider=financial_service_provider1,
+            delivery_mechanism_order=2,
+        )
+
+        self.payment_plan.status = PaymentPlan.Status.ACCEPTED
+        self.payment_plan.save()
+
+        payments = self.payment_plan.eligible_payments.all()
+        self.assertEqual(payments.count(), 3)
+
+        pp_service = PaymentPlanService(self.payment_plan)
+        pp_service.split(PaymentPlanSplit.SplitType.BY_RECORDS, 2)
+
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        export_service.export_per_fsp(self.user)
+
+        self.assertTrue(self.payment_plan.has_export_file)
+        self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
+        self.assertTrue(
+            self.payment_plan.export_file_per_fsp.file.name.startswith(
+                f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
+            )
+        )
+        splits_count = self.payment_plan.splits.count()
+        self.assertEqual(splits_count, 2)
+        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:
+            file_list = zip_file.namelist()
+            self.assertEqual(splits_count, len(file_list))
+
+        # reexport
+        pp_service.split(PaymentPlanSplit.SplitType.BY_COLLECTOR)
+
+        export_service = XlsxPaymentPlanExportPerFspService(self.payment_plan)
+        export_service.export_per_fsp(self.user)
+        self.payment_plan.refresh_from_db()
+        self.assertTrue(self.payment_plan.has_export_file)
+        self.assertIsNotNone(self.payment_plan.payment_list_export_file_link)
+        self.assertTrue(
+            self.payment_plan.export_file_per_fsp.file.name.startswith(
+                f"payment_plan_payment_list_{self.payment_plan.unicef_id}"
+            )
+        )
+        splits_count = self.payment_plan.splits.count()
+        self.assertEqual(splits_count, 3)
+        with zipfile.ZipFile(self.payment_plan.export_file_per_fsp.file, mode="r") as zip_file:
+            file_list = zip_file.namelist()
+            self.assertEqual(splits_count, len(file_list))

@@ -229,7 +229,7 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
                 service.import_payment_list()
                 payment_plan.imported_file_date = timezone.now()
                 payment_plan.background_action_status_none()
-                payment_plan.remove_export_file()
+                payment_plan.remove_export_files()
                 payment_plan.save()
                 payment_plan.update_money_fields()
         except Exception as e:
@@ -261,7 +261,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
             service.open_workbook()
             with transaction.atomic():
                 service.import_payment_list()
-                payment_plan.remove_export_file()
+                payment_plan.remove_export_files()
                 payment_plan.background_action_status_none()
                 payment_plan.update_money_fields()
 
@@ -387,7 +387,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
             payment_plan.steficon_applied_date = timezone.now()
             payment_plan.background_action_status_none()
             with disable_concurrency(payment_plan):
-                payment_plan.remove_export_file()
+                payment_plan.remove_export_files()
                 payment_plan.remove_imported_file()
                 payment_plan.save()
                 payment_plan.update_money_fields()
@@ -617,12 +617,16 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_fsp(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
     try:
         from hct_mis_api.apps.payment.services.payment_gateway import (
             PaymentGatewayService,
         )
 
         PaymentGatewayService().sync_fsps()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -658,12 +662,16 @@ def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> No
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_records(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
     try:
         from hct_mis_api.apps.payment.services.payment_gateway import (
             PaymentGatewayService,
         )
 
         PaymentGatewayService().sync_records()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
