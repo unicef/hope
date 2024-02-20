@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
+import { Route, useLocation, useRoutes } from 'react-router-dom';
 import { RegistrationDataImportDetailsPage } from '../pages/rdi/RegistrationDataImportDetailsPage';
 import { RegistrationDataImportPage } from '../pages/rdi/RegistrationDataImportPage';
 import { RegistrationHouseholdDetailsPage } from '../pages/rdi/RegistrationHouseholdDetailsPage';
@@ -14,7 +13,7 @@ export const RegistrationRoutes = (): React.ReactElement => {
     {
       path: `${path}/registration-data-import/household/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/registration-data-import/household/:id`}
           element={<RegistrationHouseholdDetailsPage />}
         />
@@ -23,7 +22,7 @@ export const RegistrationRoutes = (): React.ReactElement => {
     {
       path: `${path}/registration-data-import/individual/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/registration-data-import/individual/:id`}
           element={<RegistrationIndividualDetailsPage />}
         />
@@ -32,7 +31,7 @@ export const RegistrationRoutes = (): React.ReactElement => {
     {
       path: `${path}/registration-data-import/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/registration-data-import/:id`}
           element={<RegistrationDataImportDetailsPage />}
         />
@@ -41,7 +40,7 @@ export const RegistrationRoutes = (): React.ReactElement => {
     {
       path: `${path}/registration-data-import`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/registration-data-import`}
           element={<RegistrationDataImportPage />}
         />
@@ -49,7 +48,5 @@ export const RegistrationRoutes = (): React.ReactElement => {
     },
   ];
 
-  const routes = useRoutes(registrationRoutes);
-
-  return routes;
+  return useRoutes(registrationRoutes);
 };

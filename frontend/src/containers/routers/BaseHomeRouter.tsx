@@ -1,7 +1,7 @@
 import { Snackbar, SnackbarContent } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import * as React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   useAllBusinessAreasQuery,
@@ -28,11 +28,7 @@ const AppBarSpacer = MuiStyled('div')(() => ({
   ...theme.mixins.toolbar,
 }));
 
-interface BaseHomeRouterProps {
-  children: React.ReactNode;
-}
-
-export const BaseHomeRouter: React.FC<BaseHomeRouterProps> = ({ children }) => {
+export const BaseHomeRouter: React.FC = () => {
   const [open, setOpen] = React.useState(true);
   const { businessArea } = useBaseUrl();
   const location = useLocation();
@@ -89,7 +85,7 @@ export const BaseHomeRouter: React.FC<BaseHomeRouterProps> = ({ children }) => {
       />
       <MainContent data-cy="main-content">
         <AppBarSpacer />
-        {children}
+        <Outlet />
       </MainContent>
       {snackBar.show && (
         <Snackbar

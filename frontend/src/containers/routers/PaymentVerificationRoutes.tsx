@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
+import { Route, useLocation, useRoutes } from 'react-router-dom';
 import { CashPlanDetailsPage } from '../pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationDetailsPage } from '../pages/payments/CashPlanVerificationDetailsPage';
 import { CashPlanVerificationRedirectPage } from '../pages/payments/CashplanVerificationRedirectPage';
@@ -17,7 +16,7 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
     {
       path: `${path}/cashplans/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/cashplans/:id`}
           element={<CashPlanDetailsPage />}
         />
@@ -26,7 +25,7 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
     {
       path: `${path}/verification/payment-record/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/verification/payment-record/:id`}
           element={<VerificationPaymentRecordDetailsPage />}
         />
@@ -35,7 +34,7 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
     {
       path: `${path}/verification/payment/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/verification/payment/:id`}
           element={<VerificationPaymentDetailsPage />}
         />
@@ -44,7 +43,7 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-verification`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-verification`}
           element={<PaymentVerificationPage />}
         />
@@ -53,7 +52,7 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-verification/cash-plan/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-verification/cash-plan/:id`}
           element={<CashPlanVerificationDetailsPage />}
         />
@@ -62,7 +61,7 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-verification/payment-plan/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-verification/payment-plan/:id`}
           element={<PaymentPlanVerificationDetailsPage />}
         />
@@ -71,7 +70,7 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
     {
       path: `${path}/csh-payment-verification/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/csh-payment-verification/:id`}
           element={<CashPlanVerificationRedirectPage />}
         />
@@ -79,7 +78,5 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
     },
   ];
 
-  const routes = useRoutes(paymentVerificationRoutes);
-
-  return routes;
+  return useRoutes(paymentVerificationRoutes);
 };

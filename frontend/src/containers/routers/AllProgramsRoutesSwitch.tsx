@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
+import { useRoutes, useLocation, Route } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
@@ -16,7 +16,7 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
     {
       path: `${path}/country-dashboard`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/country-dashboard`}
           element={<DashboardPage />}
         />
@@ -25,7 +25,7 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
     {
       path: `${path}/reporting/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/reporting/:id`}
           element={<ReportingDetailsPage />}
         />
@@ -34,13 +34,13 @@ export const AllProgramsRoutesSwitch = (): React.ReactElement => {
     {
       path: `${path}/reporting`,
       element: (
-        <SentryRoute path={`${path}/reporting`} element={<ReportingPage />} />
+        <Route path={`${path}/reporting`} element={<ReportingPage />} />
       ),
     },
     {
       path: `${path}/activity-log`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/activity-log`}
           element={<ActivityLogPage />}
         />
