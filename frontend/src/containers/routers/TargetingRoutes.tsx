@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
+import { Route, useLocation, useRoutes } from 'react-router-dom';
 import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopulationPage';
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
@@ -14,7 +13,7 @@ export const TargetingRoutes = (): React.ReactElement => {
     {
       path: `${path}/target-population`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/target-population`}
           element={<TargetPopulationsPage />}
         />
@@ -23,7 +22,7 @@ export const TargetingRoutes = (): React.ReactElement => {
     {
       path: `${path}/target-population/create`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/target-population/create`}
           element={<CreateTargetPopulationPage />}
         />
@@ -32,7 +31,7 @@ export const TargetingRoutes = (): React.ReactElement => {
     {
       path: `${path}/target-population/edit-tp/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/target-population/edit-tp/:id`}
           element={<EditTargetPopulationPage />}
         />
@@ -41,7 +40,7 @@ export const TargetingRoutes = (): React.ReactElement => {
     {
       path: `${path}/target-population/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/target-population/:id`}
           element={<TargetPopulationDetailsPage />}
         />
@@ -49,7 +48,5 @@ export const TargetingRoutes = (): React.ReactElement => {
     },
   ];
 
-  const routes = useRoutes(targetingRoutes);
-
-  return routes;
+  return useRoutes(targetingRoutes);
 };

@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
+import { Route, useLocation, useRoutes } from 'react-router-dom';
 import { CreatePaymentPlanPage } from '../pages/paymentmodule/CreatePaymentPlanPage';
 import { EditFollowUpPaymentPlanPage } from '../pages/paymentmodule/EditFollowUpPaymentPlanPage';
 import { EditFollowUpSetUpFspPage } from '../pages/paymentmodule/EditFollowUpSetUpFspPage';
@@ -20,7 +19,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/new-plan`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module/new-plan`}
           element={<CreatePaymentPlanPage />}
         />
@@ -29,7 +28,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module`}
           element={<PaymentModulePage />}
         />
@@ -38,7 +37,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/followup-payment-plans/:id/edit`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module/followup-payment-plans/:id/edit`}
           element={<EditFollowUpPaymentPlanPage />}
         />
@@ -47,7 +46,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`}
           element={<EditFollowUpSetUpFspPage />}
         />
@@ -56,7 +55,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/payment-plans/:id/setup-fsp/create`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module/payment-plans/:id/setup-fsp/create`}
           element={<SetUpFspPage />}
         />
@@ -65,7 +64,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/payment-plans/:id/setup-fsp/edit`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module/payment-plans/:id/setup-fsp/edit`}
           element={<EditSetUpFspPage />}
         />
@@ -74,7 +73,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/payment-plans/:id/edit`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module/payment-plans/:id/edit`}
           element={<EditPaymentPlanPage />}
         />
@@ -83,7 +82,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/payments/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module/payments/:id`}
           element={<PaymentDetailsPage />}
         />
@@ -92,7 +91,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/payment-plans/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module/payment-plans/:id`}
           element={<PaymentPlanDetailsPage />}
         />
@@ -101,7 +100,7 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: `${path}/payment-module/followup-payment-plans/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/payment-module/followup-payment-plans/:id`}
           element={<FollowUpPaymentPlanDetailsPage />}
         />
@@ -109,7 +108,5 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     },
   ];
 
-  const routes = useRoutes(paymentModuleRoutes);
-
-  return routes;
+  return useRoutes(paymentModuleRoutes);
 };

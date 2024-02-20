@@ -1,5 +1,5 @@
 import * as React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import * as Sentry from '@sentry/react';
 import { Chart as ChartJS } from 'chart.js';
@@ -27,7 +27,7 @@ if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {
   });
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />

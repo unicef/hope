@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
+import { Route, useLocation, useRoutes } from 'react-router-dom';
 import { ProgramDetailsPage } from '../pages/program/ProgramDetailsPage';
 import { ProgramsPage } from '../pages/program/ProgramsPage';
 import { CreateProgramPage } from '../pages/program/CreateProgramPage';
@@ -14,24 +13,24 @@ export const ProgramRoutes = (): React.ReactElement => {
   const programRoutes = [
     {
       path: `${path}/list`,
-      element: <SentryRoute path={`${path}/list`} element={<ProgramsPage />} />,
+      element: <Route path={`${path}/list`} element={<ProgramsPage />} />,
     },
     {
       path: `${path}/create`,
       element: (
-        <SentryRoute path={`${path}/create`} element={<CreateProgramPage />} />
+        <Route path={`${path}/create`} element={<CreateProgramPage />} />
       ),
     },
     {
       path: `${path}/edit/:id`,
       element: (
-        <SentryRoute path={`${path}/edit/:id`} element={<EditProgramPage />} />
+        <Route path={`${path}/edit/:id`} element={<EditProgramPage />} />
       ),
     },
     {
       path: `${path}/duplicate/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/duplicate/:id`}
           element={<DuplicateProgramPage />}
         />
@@ -40,7 +39,7 @@ export const ProgramRoutes = (): React.ReactElement => {
     {
       path: `${path}/details/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/details/:id`}
           element={<ProgramDetailsPage />}
         />
@@ -48,7 +47,5 @@ export const ProgramRoutes = (): React.ReactElement => {
     },
   ];
 
-  const routes = useRoutes(programRoutes);
-
-  return routes;
+  return useRoutes(programRoutes);
 };

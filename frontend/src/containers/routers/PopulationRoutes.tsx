@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
+import { Route, useLocation, useRoutes } from 'react-router-dom';
 import { PopulationHouseholdDetailsPage } from '../pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from '../pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from '../pages/population/PopulationIndividualsDetailsPage';
@@ -14,7 +13,7 @@ export const PopulationRoutes = (): React.ReactElement => {
     {
       path: `${path}/population/household/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/population/household/:id`}
           element={<PopulationHouseholdDetailsPage />}
         />
@@ -23,7 +22,7 @@ export const PopulationRoutes = (): React.ReactElement => {
     {
       path: `${path}/population/individuals/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/population/individuals/:id`}
           element={<PopulationIndividualsDetailsPage />}
         />
@@ -32,7 +31,7 @@ export const PopulationRoutes = (): React.ReactElement => {
     {
       path: `${path}/population/household`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/population/household`}
           element={<PopulationHouseholdPage />}
         />
@@ -41,7 +40,7 @@ export const PopulationRoutes = (): React.ReactElement => {
     {
       path: `${path}/population/individuals`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/population/individuals`}
           element={<PopulationIndividualsPage />}
         />
@@ -49,7 +48,5 @@ export const PopulationRoutes = (): React.ReactElement => {
     },
   ];
 
-  const routes = useRoutes(populationRoutes);
-
-  return routes;
+  return useRoutes(populationRoutes);
 };

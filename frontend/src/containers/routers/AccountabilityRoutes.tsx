@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
+import { Route, useLocation, useRoutes } from 'react-router-dom';
 import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
 import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
 import { CreateCommunicationPage } from '../pages/accountability/communication/CreateCommunicationPage';
@@ -16,7 +15,7 @@ export const AccountabilityRoutes = (): React.ReactElement => {
     {
       path: `${path}/accountability/surveys/create`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/accountability/surveys/create`}
           element={<CreateSurveyPage />}
         />
@@ -25,7 +24,7 @@ export const AccountabilityRoutes = (): React.ReactElement => {
     {
       path: `${path}/accountability/surveys/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/accountability/surveys/:id`}
           element={<SurveyDetailsPage />}
         />
@@ -34,7 +33,7 @@ export const AccountabilityRoutes = (): React.ReactElement => {
     {
       path: `${path}/accountability/surveys`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/accountability/surveys`}
           element={<SurveysPage />}
         />
@@ -43,7 +42,7 @@ export const AccountabilityRoutes = (): React.ReactElement => {
     {
       path: `${path}/accountability/communication/create`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/accountability/communication/create`}
           element={<CreateCommunicationPage />}
         />
@@ -52,7 +51,7 @@ export const AccountabilityRoutes = (): React.ReactElement => {
     {
       path: `${path}/accountability/communication/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/accountability/communication/:id`}
           element={<CommunicationDetailsPage />}
         />
@@ -61,7 +60,7 @@ export const AccountabilityRoutes = (): React.ReactElement => {
     {
       path: `${path}/accountability/communication`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/accountability/communication`}
           element={<CommunicationPage />}
         />
@@ -69,7 +68,5 @@ export const AccountabilityRoutes = (): React.ReactElement => {
     },
   ];
 
-  const routes = useRoutes(accountabilityRoutes);
-
-  return routes;
+  return useRoutes(accountabilityRoutes);
 };

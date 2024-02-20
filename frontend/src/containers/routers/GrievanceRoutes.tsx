@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { useRoutes, useLocation } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
+import { Route, useLocation, useRoutes } from 'react-router-dom';
 import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
 import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
@@ -19,7 +18,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/new-ticket`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/new-ticket`}
           element={<CreateGrievancePage />}
         />
@@ -28,7 +27,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/edit-ticket/user-generated/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/edit-ticket/user-generated/:id`}
           element={<EditGrievancePage />}
         />
@@ -37,7 +36,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/edit-ticket/system-generated/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/edit-ticket/system-generated/:id`}
           element={<EditGrievancePage />}
         />
@@ -46,7 +45,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/tickets/user-generated/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/tickets/user-generated/:id`}
           element={<GrievancesDetailsPage />}
         />
@@ -55,7 +54,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/tickets/system-generated/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/tickets/system-generated/:id`}
           element={<GrievancesDetailsPage />}
         />
@@ -64,7 +63,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/rdi/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/rdi/:id`}
           element={<GrievancesTablePage />}
         />
@@ -73,7 +72,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/payment-verification/:cashPlanId`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/payment-verification/:cashPlanId`}
           element={<GrievancesTablePage />}
         />
@@ -82,7 +81,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/tickets/user-generated`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/tickets/user-generated`}
           element={<GrievancesTablePage />}
         />
@@ -91,7 +90,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/tickets/system-generated`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/tickets/system-generated`}
           element={<GrievancesTablePage />}
         />
@@ -100,7 +99,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/dashboard`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/dashboard`}
           element={<GrievancesDashboardPage />}
         />
@@ -109,7 +108,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/feedback/create`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/feedback/create`}
           element={<CreateFeedbackPage />}
         />
@@ -118,7 +117,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/feedback/edit-ticket/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/feedback/edit-ticket/:id`}
           element={<EditFeedbackPage />}
         />
@@ -127,7 +126,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/feedback/:id`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/feedback/:id`}
           element={<FeedbackDetailsPage />}
         />
@@ -136,7 +135,7 @@ export const GrievanceRoutes = (): React.ReactElement => {
     {
       path: `${path}/grievance/feedback`,
       element: (
-        <SentryRoute
+        <Route
           path={`${path}/grievance/feedback`}
           element={<FeedbackPage />}
         />
@@ -144,7 +143,5 @@ export const GrievanceRoutes = (): React.ReactElement => {
     },
   ];
 
-  const routes = useRoutes(grievanceRoutes);
-
-  return routes;
+  return useRoutes(grievanceRoutes);
 };

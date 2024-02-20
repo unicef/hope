@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRoutes } from 'react-router-dom';
+import { Route, useRoutes } from 'react-router-dom';
 import { SentryRoute } from '@components/core/SentryRoute';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { UsersPage } from '../pages/core/UsersPage';
@@ -21,8 +21,8 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
     {
       path: 'country-dashboard',
       element: (
-        <SentryRoute
-          label="/ - Dashboard"
+        <Route
+          // label="/ - Dashboard"
           path="country-dashboard"
           element={<DashboardPage />}
         />
@@ -31,7 +31,7 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
     {
       path: 'payment-records/:id',
       element: (
-        <SentryRoute
+        <Route
           path="payment-records/:id"
           element={<PaymentRecordDetailsPage />}
         />
@@ -40,21 +40,21 @@ export const SelectedProgramRoutesSwitch = (): React.ReactElement => {
     {
       path: 'reporting/:id',
       element: (
-        <SentryRoute path="reporting/:id" element={<ReportingDetailsPage />} />
+        <Route path="reporting/:id" element={<ReportingDetailsPage />} />
       ),
     },
     {
       path: 'reporting',
-      element: <SentryRoute path="reporting" element={<ReportingPage />} />,
+      element: <Route path="reporting" element={<ReportingPage />} />,
     },
     {
       path: 'users-list',
-      element: <SentryRoute path="users-list" element={<UsersPage />} />,
+      element: <Route path="users-list" element={<UsersPage />} />,
     },
     {
       path: 'activity-log',
       element: (
-        <SentryRoute path="activity-log" element={<ActivityLogPage />} />
+        <Route path="activity-log" element={<ActivityLogPage />} />
       ),
     },
   ]);
