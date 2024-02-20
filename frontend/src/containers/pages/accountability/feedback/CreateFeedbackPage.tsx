@@ -11,7 +11,7 @@ import {
 import { Field, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
@@ -150,6 +150,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 // }
 
 export const CreateFeedbackPage = (): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -242,10 +243,10 @@ export const CreateFeedbackPage = (): React.ReactElement => {
             const response = await mutate({
               variables: { input: prepareVariables(values) },
             });
-            showMessage(t('Feedback created'), {
-              pathname: `/${baseUrl}/grievance/feedback/${response.data.createFeedback.feedback.id}`,
-              historyMethod: 'push',
-            });
+            showMessage(t('Feedback created'));
+            history.push(
+              `/${baseUrl}/grievance/feedback/${response.data.createFeedback.feedback.id}`,
+            );
           } catch (e) {
             e.graphQLErrors.map((x) => showMessage(x.message));
           }

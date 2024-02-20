@@ -10,6 +10,7 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Delete } from '@material-ui/icons';
+import { useHistory } from 'react-router-dom';
 import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
 import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
@@ -29,6 +30,7 @@ export interface DeletePaymentPlanProps {
 export const DeletePaymentPlan = ({
   paymentPlan,
 }: DeletePaymentPlanProps): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
@@ -44,11 +46,8 @@ export const DeletePaymentPlan = ({
           paymentPlanId: id,
         },
       });
-      showMessage(t('Payment Plan Deleted'), {
-        pathname: `/${baseUrl}/payment-module`,
-        historyMethod: 'push',
-        dataCy: 'snackbar-payment-plan-remove-success',
-      });
+      showMessage(t('Payment Plan Deleted'));
+      history.push(`/${baseUrl}/payment-module`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

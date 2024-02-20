@@ -6,6 +6,7 @@ import {
 } from '@material-ui/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import { LoadingButton } from '../../../components/core/LoadingButton';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useFinalizeTpMutation } from '../../../__generated__/graphql';
@@ -29,6 +30,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
   totalHouseholds,
   targetPopulationId,
 }: FinalizeTargetPopulationPaymentPlanProps): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
@@ -40,9 +42,8 @@ export const FinalizeTargetPopulationPaymentPlan = ({
       },
     }).then(() => {
       setOpen(false);
-      showMessage(t('Target Population Finalized'), {
-        pathname: `/${baseUrl}/target-population/${id}`,
-      });
+      showMessage(t('Target Population Finalized'));
+      history.push(`/${baseUrl}/target-population/${id}`);
     });
   };
   return (
