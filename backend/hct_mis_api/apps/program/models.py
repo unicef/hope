@@ -191,6 +191,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
                 name="unique_for_program_if_not_removed",
             )
         ]
+        permissions = [("enroll_beneficiaries", "Can enroll beneficiaries")]
         verbose_name = "Programme"
 
     def __str__(self) -> str:
