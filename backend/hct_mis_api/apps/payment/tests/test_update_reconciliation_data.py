@@ -9,13 +9,13 @@ from django.conf import settings
 import pytz
 from pytz import utc
 
-from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
@@ -179,7 +179,11 @@ class TestDeliveryDate(APITestCase):
 
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     def test_upload_reference_id(self, mock_exchange_rate: Any) -> None:
-        pp = PaymentPlanFactory(status=PaymentPlan.Status.ACCEPTED)
+        pp = PaymentPlanFactory(
+            dispersion_start_date=datetime(2024, 2, 10).date(),
+            dispersion_end_date=datetime(2024, 12, 10).date(),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
 
         payment_1 = PaymentFactory(parent=pp)
         payment_1.unicef_id = "RCPT-0060-24-0.000.665"
@@ -199,9 +203,5 @@ class TestDeliveryDate(APITestCase):
         payment_1.refresh_from_db()
         payment_2.refresh_from_db()
 
-        print(payment_1.unicef_id)
-        print(payment_2.unicef_id)
-
         self.assertEqual(payment_1.transaction_reference_id, "ref1")
         self.assertEqual(payment_2.transaction_reference_id, "ref2")
-

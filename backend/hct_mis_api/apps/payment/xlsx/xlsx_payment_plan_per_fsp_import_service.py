@@ -168,7 +168,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
             )
 
     def _validate_reference_id(self, row: Row) -> None:
-        payment_id = row[self.xlsx_headers.index("reference_id")].value
+        payment_id = row[self.xlsx_headers.index("payment_id")].value
         payment = self.payments_dict.get(payment_id)
         if payment is None:
             return
