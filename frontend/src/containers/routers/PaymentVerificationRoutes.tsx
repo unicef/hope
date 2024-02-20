@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, useLocation, useRoutes } from 'react-router-dom';
+import { useLocation, useRoutes } from 'react-router-dom';
 import { CashPlanDetailsPage } from '../pages/payments/CashPlanDetailsPage';
 import { CashPlanVerificationDetailsPage } from '../pages/payments/CashPlanVerificationDetailsPage';
 import { CashPlanVerificationRedirectPage } from '../pages/payments/CashplanVerificationRedirectPage';
@@ -15,66 +15,31 @@ export const PaymentVerificationRoutes = (): React.ReactElement => {
   const paymentVerificationRoutes = [
     {
       path: `${path}/cashplans/:id`,
-      element: (
-        <Route
-          path={`${path}/cashplans/:id`}
-          element={<CashPlanDetailsPage />}
-        />
-      ),
+      element: <CashPlanDetailsPage />,
     },
     {
       path: `${path}/verification/payment-record/:id`,
-      element: (
-        <Route
-          path={`${path}/verification/payment-record/:id`}
-          element={<VerificationPaymentRecordDetailsPage />}
-        />
-      ),
+      element: <VerificationPaymentRecordDetailsPage />,
     },
     {
       path: `${path}/verification/payment/:id`,
-      element: (
-        <Route
-          path={`${path}/verification/payment/:id`}
-          element={<VerificationPaymentDetailsPage />}
-        />
-      ),
+      element: <VerificationPaymentDetailsPage />,
     },
     {
       path: `${path}/payment-verification`,
-      element: (
-        <Route
-          path={`${path}/payment-verification`}
-          element={<PaymentVerificationPage />}
-        />
-      ),
+      element: <PaymentVerificationPage />,
     },
     {
       path: `${path}/payment-verification/cash-plan/:id`,
-      element: (
-        <Route
-          path={`${path}/payment-verification/cash-plan/:id`}
-          element={<CashPlanVerificationDetailsPage />}
-        />
-      ),
+      element: <CashPlanVerificationDetailsPage />,
     },
     {
       path: `${path}/payment-verification/payment-plan/:id`,
-      element: (
-        <Route
-          path={`${path}/payment-verification/payment-plan/:id`}
-          element={<PaymentPlanVerificationDetailsPage />}
-        />
-      ),
+      element: <PaymentPlanVerificationDetailsPage />,
     },
     {
       path: `${path}/csh-payment-verification/:id`,
-      element: (
-        <Route
-          path={`${path}/csh-payment-verification/:id`}
-          element={<CashPlanVerificationRedirectPage />}
-        />
-      ),
+      element: <CashPlanVerificationRedirectPage />,
     },
   ];
 

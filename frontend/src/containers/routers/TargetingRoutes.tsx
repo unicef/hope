@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, useLocation, useRoutes } from 'react-router-dom';
+import { useLocation, useRoutes } from 'react-router-dom';
 import { CreateTargetPopulationPage } from '../pages/targeting/CreateTargetPopulationPage';
 import { EditTargetPopulationPage } from '../pages/targeting/EditTargetPopulationPage';
 import { TargetPopulationDetailsPage } from '../pages/targeting/TargetPopulationDetailsPage';
@@ -12,39 +12,19 @@ export const TargetingRoutes = (): React.ReactElement => {
   const targetingRoutes = [
     {
       path: `${path}/target-population`,
-      element: (
-        <Route
-          path={`${path}/target-population`}
-          element={<TargetPopulationsPage />}
-        />
-      ),
+      element: <TargetPopulationsPage />,
     },
     {
       path: `${path}/target-population/create`,
-      element: (
-        <Route
-          path={`${path}/target-population/create`}
-          element={<CreateTargetPopulationPage />}
-        />
-      ),
+      element: <CreateTargetPopulationPage />,
     },
     {
       path: `${path}/target-population/edit-tp/:id`,
-      element: (
-        <Route
-          path={`${path}/target-population/edit-tp/:id`}
-          element={<EditTargetPopulationPage />}
-        />
-      ),
+      element: <EditTargetPopulationPage />,
     },
     {
       path: `${path}/target-population/:id`,
-      element: (
-        <Route
-          path={`${path}/target-population/:id`}
-          element={<TargetPopulationDetailsPage />}
-        />
-      ),
+      element: <TargetPopulationDetailsPage />,
     },
   ];
 
