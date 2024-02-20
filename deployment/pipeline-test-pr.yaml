@@ -1,7 +1,7 @@
 trigger: none
 pr:
   - master
-  - develop
+  # - develop # TEMP
   - global-program-filter
   - feature/*
 resources:
