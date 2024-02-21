@@ -90,8 +90,7 @@ class IndividualAdmin(
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
-        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
-        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
+        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="business_area")),
         "updated_at",
         "last_sync_at",
     )

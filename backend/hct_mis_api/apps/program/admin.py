@@ -9,7 +9,6 @@ from django.utils.safestring import mark_safe
 from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
-from adminfilters.mixin import AdminAutoCompleteSearchMixin
 
 from hct_mis_api.apps.household.forms import CreateTargetPopulationTextForm
 from hct_mis_api.apps.program.models import Program, ProgramCycle
@@ -40,7 +39,7 @@ class ProgramCycleAdminInline(admin.TabularInline):
 
 
 @admin.register(Program)
-class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
+class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "start_date", "end_date", "business_area", "data_collecting_type")
     date_hierarchy = "start_date"
     list_filter = (
@@ -49,7 +48,6 @@ class ProgramAdmin(SoftDeletableAdminMixin, LastSyncDateResetMixin, AdminAutoCom
         ("scope", ChoicesFieldComboFilter),
         "is_visible",
     )
-    search_fields = ("name",)
     raw_id_fields = ("business_area",)
     filter_horizontal = ("admin_areas",)
 
