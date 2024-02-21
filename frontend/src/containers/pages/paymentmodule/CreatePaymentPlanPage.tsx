@@ -3,7 +3,6 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import * as Yup from 'yup';
-import { useHistory } from 'react-router-dom';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
 import { CreatePaymentPlanHeader } from '@components/paymentmodule/CreatePaymentPlan/CreatePaymentPlanHeader/CreatePaymentPlanHeader';
@@ -19,9 +18,10 @@ import {
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { today } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
 export const CreatePaymentPlanPage = (): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [mutate, { loading: loadingCreate }] = useCreatePpMutation();
   const { showMessage } = useSnackbar();
@@ -108,7 +108,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
         },
       });
       showMessage(t('Payment Plan Created'));
-      history.push(
+      navigate(
         `/${baseUrl}/payment-module/payment-plans/${res.data.createPaymentPlan.paymentPlan.id}`,
       );
     } catch (e) {

@@ -306,7 +306,7 @@ export function CreateCommunicationPage(): React.ReactElement {
                 variables: prepareMutationVariables(values),
               });
               showMessage(t('Communication Ticket created.'));
-              history.push(
+              navigate(
                 `/${baseUrl}/accountability/communication/${response.data.createAccountabilityCommunicationMessage.message.id}`,
               );
             } catch (e) {

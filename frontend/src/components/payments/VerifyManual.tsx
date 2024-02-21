@@ -13,7 +13,7 @@ import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   PaymentVerificationStatus,
-  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation
+  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 

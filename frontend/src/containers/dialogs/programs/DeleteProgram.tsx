@@ -4,7 +4,6 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   ProgramQuery,
@@ -16,6 +15,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
+import { useNavigate } from 'react-router-dom';
 
 const RemoveButton = styled(Button)`
   && {
@@ -44,7 +44,7 @@ interface DeleteProgramProps {
 export function DeleteProgram({
   program,
 }: DeleteProgramProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -66,7 +66,7 @@ export function DeleteProgram({
         ],
       });
       showMessage(t('Programme removed'));
-      history.push(`/${businessArea}/programs/all/list`);
+      navigate(`/${businessArea}/programs/all/list`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

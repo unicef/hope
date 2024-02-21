@@ -44,7 +44,7 @@ import { decodeIdString, thingForSpecificGrievanceType } from '@utils/utils';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   PERMISSIONS,
@@ -79,6 +79,7 @@ export const dataChangeComponentDict = {
 };
 
 export const CreateGrievancePage = (): React.ReactElement => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
@@ -247,7 +248,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
               );
             }
             showMessage(msg);
-            history.push(url);
+            navigate(url);
           } catch (e) {
             e.graphQLErrors.map((x) => showMessage(x.message));
           }

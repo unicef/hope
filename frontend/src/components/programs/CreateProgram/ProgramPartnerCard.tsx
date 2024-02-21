@@ -57,7 +57,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] =
     useState(initialExpanded);
 
-  let adminAreasOccurrenceLength = 0
+  let adminAreasOccurrenceLength = 0;
   if (selectedAreasLength) {
     adminAreasOccurrenceLength = values.partners[index]?.adminAreas.filter(item => adminAreas.includes(item)).length;
   }

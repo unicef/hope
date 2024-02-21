@@ -5139,6 +5139,7 @@ type UserRoleNode {
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
   role: RoleNode!
+  expiryDate: Date
 }
 
 enum UserStatus {

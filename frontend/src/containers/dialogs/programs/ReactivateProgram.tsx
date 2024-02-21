@@ -8,7 +8,6 @@ import {
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import {
   AllProgramsQuery,
   ProgramQuery,
@@ -25,6 +24,7 @@ import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useProgramContext } from '../../../programContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ReactivateProgramProps {
   program: ProgramQuery['program'];
@@ -33,7 +33,7 @@ interface ReactivateProgramProps {
 export function ReactivateProgram({
   program,
 }: ReactivateProgramProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -78,7 +78,7 @@ export function ReactivateProgram({
       });
 
       showMessage(t('Programme reactivated.'));
-      history.push(
+      navigate(
         `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       );
       setOpen(false);

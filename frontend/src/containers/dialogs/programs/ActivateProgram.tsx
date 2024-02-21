@@ -2,7 +2,6 @@ import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import {
   AllProgramsQuery,
   ProgramQuery,
@@ -20,6 +19,7 @@ import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useProgramContext } from '../../../programContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ActivateProgramProps {
   program: ProgramQuery['program'];
@@ -28,7 +28,7 @@ interface ActivateProgramProps {
 export function ActivateProgram({
   program,
 }: ActivateProgramProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -73,7 +73,7 @@ export function ActivateProgram({
       });
 
       showMessage(t('Programme activated.'));
-      history.push(
+      navigate(
         `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       );
       setOpen(false);

@@ -8,7 +8,6 @@ import {
 import { Formik } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -17,6 +16,7 @@ import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
 export interface DeleteTargetPopulationProps {
   open: boolean;
@@ -29,7 +29,7 @@ export const DeleteTargetPopulation = ({
   setOpen,
   targetPopulationId,
 }: DeleteTargetPopulationProps): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [mutate, { loading }] = useDeleteTargetPopulationMutation();
   const { showMessage } = useSnackbar();
@@ -53,7 +53,7 @@ export const DeleteTargetPopulation = ({
           });
           setOpen(false);
           showMessage('Target Population Deleted');
-          history.push(`/${baseUrl}/target-population/`);
+          navigate(`/${baseUrl}/target-population/`);
         }}
       >
         {({ submitForm }) => (

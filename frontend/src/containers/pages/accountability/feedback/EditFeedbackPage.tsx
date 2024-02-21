@@ -2,7 +2,7 @@ import { Box, Button, Divider, Grid } from '@mui/material';
 import { Field, Formik } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import {
   UpdateFeedbackInput,
@@ -43,7 +43,7 @@ export const validationSchema = Yup.object().shape({
 });
 
 export const EditFeedbackPage = (): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
@@ -145,7 +145,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
             variables: { input: prepareVariables(values) },
           });
           showMessage(t('Feedback updated'));
-          history.push(
+          navigate(
             `/${baseUrl}/grievance/feedback/${response.data.updateFeedback.feedback.id}`,
           );
         } catch (e) {

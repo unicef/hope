@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useRoutes } from 'react-router-dom';
-import { SentryRoute } from '@components/core/SentryRoute';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { UsersPage } from '../pages/core/UsersPage';
 import { PaymentRecordDetailsPage } from '../pages/payments/PaymentRecordDetailsPage';

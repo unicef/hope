@@ -4,7 +4,7 @@ import React, {
   ReactElement,
   useContext,
 } from 'react';
-import { Snackbar, SnackbarContent as Content } from '@material-ui/core';
+import { Snackbar, SnackbarContent as Content } from '@mui/material';
 
 type SnackbarContent = {
   message: string;

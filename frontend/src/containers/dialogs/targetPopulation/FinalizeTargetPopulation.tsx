@@ -1,7 +1,6 @@
 import { Button, DialogContent, DialogTitle } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useFinalizeTpMutation } from '@generated/graphql';
@@ -11,6 +10,7 @@ import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -25,7 +25,7 @@ export const FinalizeTargetPopulation = ({
   totalHouseholds,
   targetPopulationId,
 }: FinalizeTargetPopulationPropTypes): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
@@ -38,7 +38,7 @@ export const FinalizeTargetPopulation = ({
     }).then(() => {
       setOpen(false);
       showMessage(t('Target Population Finalized'));
-      history.push(`/${baseUrl}/target-population/${id}`);
+      navigate(`/${baseUrl}/target-population/${id}`);
     });
   };
   return (
