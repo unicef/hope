@@ -1,13 +1,17 @@
-import * as React from 'react';
-import { createRoot } from 'react-dom/client';
-import './index.css';
 import * as Sentry from '@sentry/react';
-import { ArcElement, LinearScale, CategoryScale, BarElement, Chart as ChartJS } from 'chart.js';
+import {
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  LinearScale,
+} from 'chart.js';
+import { createRoot } from 'react-dom/client';
 import packageJson from '../package.json';
-import setupInternalization from './i18n';
-import * as serviceWorker from './serviceWorker';
-import { FONT } from './theme';
 import { App } from './App';
+import setupInternalization from './i18n';
+import './index.css';
+import * as serviceWorker from './serviceWorker';
 
 ChartJS.register(ArcElement, LinearScale, CategoryScale, BarElement);
 // TODO fix chart config
@@ -26,13 +30,14 @@ if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {
     release: packageJson.version,
     environment: process.env.SENTRY_ENVIRONMENT,
     ignoreErrors: ['Permission Denied'],
+    integrations: [Sentry.replayIntegration()],
   });
 }
 
 const root = createRoot(document.getElementById('root'));
 root.render(
   // <React.StrictMode>
-    <App />,
+  <App />,
   // </React.StrictMode>,
 );
 
