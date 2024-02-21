@@ -84,7 +84,7 @@ ENTRYPOINT ["entrypoint.sh"]
 
 
 # Frontend builder
-FROM node:16.20.0-buster-slim as frontend-builder
+FROM node:18.19.0-buster-slim as frontend-builder
 
 WORKDIR /fe-build
 RUN mkdir -p /backend/hct_mis_api/apps/web/templates/web
