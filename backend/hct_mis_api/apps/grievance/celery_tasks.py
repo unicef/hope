@@ -62,14 +62,16 @@ def periodic_grievances_notifications() -> None:
     )
     for ticket in sensitive_tickets_to_notify:
         set_sentry_business_area_tag(ticket.business_area.name)
-        notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
-        notification.send_email_notification()
-        ticket.last_notification_sent = timezone.now()
-        ticket.save()
+        if ticket.business_area.enable_email_notification:
+            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+            notification.send_email_notification()
+            ticket.last_notification_sent = timezone.now()
+            ticket.save()
 
     for ticket in other_tickets_to_notify:
         set_sentry_business_area_tag(ticket.business_area.name)
-        notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
-        notification.send_email_notification()
-        ticket.last_notification_sent = timezone.now()
-        ticket.save()
+        if ticket.business_area.enable_email_notification:
+            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
+            notification.send_email_notification()
+            ticket.last_notification_sent = timezone.now()
+            ticket.save()

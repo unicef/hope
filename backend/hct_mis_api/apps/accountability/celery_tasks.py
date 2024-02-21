@@ -30,13 +30,14 @@ def export_survey_sample_task(survey_id: str, user_id: str) -> None:
         service = ExportSurveySampleService(survey, user)
         service.export_sample()
 
-        context = service.get_email_context()
-        user.email_user(
-            context["title"],
-            render_to_string(service.text_template, context=context),
-            settings.EMAIL_HOST_USER,
-            html_message=render_to_string(service.html_template, context=context),
-        )
+        if survey.business_area.enable_email_notification:
+            context = service.get_email_context()
+            user.email_user(
+                context["title"],
+                render_to_string(service.text_template, context=context),
+                settings.EMAIL_HOST_USER,
+                html_message=render_to_string(service.html_template, context=context),
+            )
     except Exception as e:
         logger.exception(e)
         raise

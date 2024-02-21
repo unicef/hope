@@ -105,6 +105,7 @@ class BusinessArea(NaturalKeyModel, TimeStampedUUIDModel):
     is_payment_plan_applicable = models.BooleanField(default=False)
     is_accountability_applicable = models.BooleanField(default=False)
     active = models.BooleanField(default=False)
+    enable_email_notification = models.BooleanField(default=True, verbose_name="Automatic Email notifications enabled")
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         unique_slugify(self, self.name, slug_field_name="slug")
