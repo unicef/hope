@@ -71,6 +71,7 @@ export const VerificationPaymentRecordDetailsPage = (): React.ReactElement => {
       verification?.status !== PaymentVerificationPlanStatus.Finished ? (
         <VerifyManual
           paymentVerificationId={paymentRecord.verification.id}
+          status={paymentRecord.verification?.status}
           enabled={paymentRecord.verification.isManuallyEditable}
         />
       ) : null}
