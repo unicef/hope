@@ -1,6 +1,6 @@
 import { Form, Formik } from 'formik';
 import * as React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import * as Yup from 'yup';
@@ -21,7 +21,8 @@ import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export function EditPaymentPlanPage(): React.ReactElement {
+export const EditPaymentPlanPage = (): React.ReactElement => {
+  const history = useHistory();
   const { id } = useParams();
   const { t } = useTranslation();
   const { data: paymentPlanData, loading: loadingPaymentPlan } =
@@ -123,10 +124,10 @@ export function EditPaymentPlanPage(): React.ReactElement {
           },
         },
       });
-      showMessage(t('Payment Plan Edited'), {
-        pathname: `/${baseUrl}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
-        historyMethod: 'push',
-      });
+      showMessage(t('Payment Plan Edited'));
+      history.push(
+        `/${baseUrl}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -157,4 +158,4 @@ export function EditPaymentPlanPage(): React.ReactElement {
       )}
     </Formik>
   );
-}
+};

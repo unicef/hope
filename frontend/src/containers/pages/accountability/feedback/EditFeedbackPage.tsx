@@ -2,7 +2,7 @@ import { Box, Button, Divider, Grid } from '@mui/material';
 import { Field, Formik } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import * as Yup from 'yup';
 import {
   UpdateFeedbackInput,
@@ -42,7 +42,8 @@ export const validationSchema = Yup.object().shape({
   comments: Yup.string().nullable(),
 });
 
-export function EditFeedbackPage(): React.ReactElement {
+export const EditFeedbackPage = (): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
@@ -143,10 +144,10 @@ export function EditFeedbackPage(): React.ReactElement {
           const response = await mutate({
             variables: { input: prepareVariables(values) },
           });
-          showMessage(t('Feedback updated'), {
-            pathname: `/${baseUrl}/grievance/feedback/${response.data.updateFeedback.feedback.id}`,
-            historyMethod: 'push',
-          });
+          showMessage(t('Feedback updated'));
+          history.push(
+            `/${baseUrl}/grievance/feedback/${response.data.updateFeedback.feedback.id}`,
+          );
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
@@ -322,4 +323,4 @@ export function EditFeedbackPage(): React.ReactElement {
       )}
     </Formik>
   );
-}
+};

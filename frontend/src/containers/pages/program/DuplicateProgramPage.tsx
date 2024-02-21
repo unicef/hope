@@ -2,7 +2,7 @@ import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
@@ -21,7 +21,8 @@ import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 
-export function DuplicateProgramPage(): ReactElement {
+export const DuplicateProgramPage = (): ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -57,10 +58,10 @@ export function DuplicateProgramPage(): ReactElement {
           },
         ],
       });
-      showMessage('Programme created.', {
-        pathname: `/${baseUrl}/details/${response.data.copyProgram.program.id}`,
-        historyMethod: 'push',
-      });
+      showMessage('Programme created.');
+      history.push(
+        `/${baseUrl}/details/${response.data.copyProgram.program.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -212,4 +213,4 @@ export function DuplicateProgramPage(): ReactElement {
       }}
     </Formik>
   );
-}
+};

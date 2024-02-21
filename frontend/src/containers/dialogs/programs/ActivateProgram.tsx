@@ -2,6 +2,7 @@ import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import {
   AllProgramsQuery,
   ProgramQuery,
@@ -27,6 +28,7 @@ interface ActivateProgramProps {
 export function ActivateProgram({
   program,
 }: ActivateProgramProps): React.ReactElement {
+  const history = useHistory();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -70,15 +72,13 @@ export function ActivateProgram({
         status: ProgramStatus.Active,
       });
 
-      showMessage(t('Programme activated.'), {
-        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
-        dataCy: 'snackbar-program-activate-success',
-      });
+      showMessage(t('Programme activated.'));
+      history.push(
+        `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
+      );
       setOpen(false);
     } else {
-      showMessage(t('Programme activate action failed.'), {
-        dataCy: 'snackbar-program-activate-failure',
-      });
+      showMessage(t('Programme activate action failed.'));
     }
   };
   return (

@@ -15,6 +15,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
+import { useHistory } from 'react-router-dom';
 import {
   PaymentPlanQuery,
   useCreateFollowUpPpMutation,
@@ -42,6 +43,7 @@ export interface CreateFollowUpPaymentPlanProps {
 export function CreateFollowUpPaymentPlan({
   paymentPlan,
 }: CreateFollowUpPaymentPlanProps): React.ReactElement {
+  const history = useHistory();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
@@ -92,10 +94,10 @@ export function CreateFollowUpPaymentPlan({
         },
       });
       setDialogOpen(false);
-      showMessage(t('Payment Plan Created'), {
-        pathname: `/${baseUrl}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
-        historyMethod: 'push',
-      });
+      showMessage(t('Payment Plan Created'));
+      history.push(
+        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.createFollowUpPaymentPlan.paymentPlan.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

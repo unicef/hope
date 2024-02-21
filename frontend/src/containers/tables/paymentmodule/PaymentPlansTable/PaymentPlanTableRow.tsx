@@ -86,6 +86,7 @@ export const PaymentPlanTableRow = ({
           />
         </StatusContainer>
       </TableCell>
+      <TableCell align='left'>{plan.targetPopulation.name}</TableCell>
       <TableCell align="left">{plan.totalHouseholdsCount || '-'}</TableCell>
       <TableCell align="left">{plan.currencyName}</TableCell>
       <TableCell align="right">

@@ -10,6 +10,7 @@ import { getClient } from './apollo/client';
 import { ConfirmationDialogProvider } from './components/core/ConfirmationDialog';
 import { theme } from './theme';
 import { ProgramProvider } from './programContext';
+import { SnackbarProvider } from './hooks/useSnackBar';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -36,7 +37,9 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
         <StyledThemeProvider theme={theme}>
           <ConfirmationDialogProvider>
             <CssBaseline />
-            <ProgramProvider>{children}</ProgramProvider>
+            <ProgramProvider>
+              <SnackbarProvider>{children}</SnackbarProvider>
+            </ProgramProvider>
           </ConfirmationDialogProvider>
         </StyledThemeProvider>
       </ThemeProvider>

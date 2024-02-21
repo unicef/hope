@@ -86,6 +86,7 @@ class Permissions(Enum):
     PM_VIEW_DETAILS = auto()
     PM_IMPORT_XLSX_WITH_ENTITLEMENTS = auto()
     PM_APPLY_RULE_ENGINE_FORMULA_WITH_ENTITLEMENTS = auto()
+    PM_SPLIT = auto()
 
     PM_LOCK_AND_UNLOCK = auto()
     PM_LOCK_AND_UNLOCK_FSP = auto()

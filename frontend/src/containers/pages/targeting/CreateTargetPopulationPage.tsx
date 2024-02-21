@@ -24,6 +24,7 @@ import { usePermissions } from '@hooks/usePermissions';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '@utils/targetingUtils';
 import { getFullNodeFromEdgesById } from '@utils/utils';
+import { useHistory } from 'react-router-dom';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -45,6 +46,7 @@ export function CreateTargetPopulationPage(): React.ReactElement {
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
+  const history = useHistory();
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -96,10 +98,10 @@ export function CreateTargetPopulationPage(): React.ReactElement {
           },
         },
       });
-      showMessage(t('Target Population Created'), {
-        pathname: `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
-        historyMethod: 'push',
-      });
+      showMessage(t('Target Population Created'));
+      history.push(
+        `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

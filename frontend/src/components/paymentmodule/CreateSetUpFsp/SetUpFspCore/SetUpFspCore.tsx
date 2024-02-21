@@ -1,3 +1,4 @@
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
@@ -6,7 +7,6 @@ import { FieldArray, Form, Formik } from 'formik';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
 import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AvailableFspsForDeliveryMechanismsDocument,
@@ -35,11 +35,12 @@ interface SetUpFspCoreProps {
   initialValues: FormValues;
 }
 
-export function SetUpFspCore({
+export const SetUpFspCore = ({
   permissions,
   initialValues,
-}: SetUpFspCoreProps): React.ReactElement {
+}: SetUpFspCoreProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
+  const history = useHistory();
   const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
@@ -150,12 +151,12 @@ export function SetUpFspCore({
           },
         },
       });
-      showMessage(t('FSPs have been assigned to the delivery mechanisms'), {
-        pathname: `/${baseUrl}/payment-module/${
+      showMessage(t('FSPs have been assigned to the delivery mechanisms'));
+      history.push(
+        `/${baseUrl}/payment-module/${
           isFollowUp ? 'followup-payment-plans' : 'payment-plans'
         }/${id}`,
-        historyMethod: 'push',
-      });
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -264,4 +265,4 @@ export function SetUpFspCore({
       )}
     </Formik>
   );
-}
+};

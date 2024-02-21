@@ -214,15 +214,15 @@ class TestCreateProgram(APITestCase):
 
     def test_programme_code_can_be_reuse_in_different_business_area(self) -> None:
         business_area = BusinessAreaFactory()
-        ProgramFactory(programme_code="ABC2", business_area=business_area)
+        ProgramFactory(programme_code="AB.2", business_area=business_area)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
-        self.program_data["programData"]["programmeCode"] = "ABC2"
+        self.program_data["programData"]["programmeCode"] = "AB.2"
 
         self.graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
         )
 
-        program_count = Program.objects.filter(programme_code="ABC2").count()
+        program_count = Program.objects.filter(programme_code="AB.2").count()
         self.assertEqual(program_count, 2)
 
     def test_create_program_without_programme_code(self) -> None:
@@ -250,7 +250,7 @@ class TestCreateProgram(APITestCase):
 
     def test_create_program_with_programme_code_lowercase(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
-        self.program_data["programData"]["programmeCode"] = "abc2"
+        self.program_data["programData"]["programmeCode"] = "ab2-"
 
         self.graphql_request(
             request_string=self.CREATE_PROGRAM_MUTATION, context={"user": self.user}, variables=self.program_data
@@ -259,9 +259,9 @@ class TestCreateProgram(APITestCase):
         program = Program.objects.get(name="Test")
         self.assertIsNotNone(program.programme_code)
         self.assertEqual(len(program.programme_code), 4)
-        self.assertEqual(program.programme_code, "ABC2")
+        self.assertEqual(program.programme_code, "AB2-")
 
-    def test_create_program_with_programme_code_not_alphanumeric(self) -> None:
+    def test_create_program_with_programme_code_not_within_allowed_characters(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
         self.program_data["programData"]["programmeCode"] = "A@C2"
 
