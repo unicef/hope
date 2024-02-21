@@ -353,10 +353,10 @@ export const CreateSurveyPage = (): React.ReactElement => {
               const response = await mutate({
                 variables: prepareMutationVariables(values),
               });
-              showMessage(t('Survey created.'), {
-                pathname: `/${baseUrl}/accountability/surveys/${response.data.createSurvey.survey.id}`,
-                historyMethod: 'push',
-              });
+              showMessage(t('Survey created.'));
+              history.push(
+                `/${baseUrl}/accountability/surveys/${response.data.createSurvey.survey.id}`,
+              );
             } catch (e) {
               e.graphQLErrors.map((x) => showMessage(x.message));
             }

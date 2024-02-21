@@ -1591,6 +1591,7 @@ type HouseholdNode implements Node {
   userFields: JSONString!
   koboAssetId: String!
   rowId: Int
+  detailId: String
   registrationId: Int
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
@@ -2040,9 +2041,10 @@ type ImportedHouseholdNode implements Node {
   currency: ImportedHouseholdCurrency!
   unhcrId: String!
   koboSubmissionUuid: UUID
-  koboAssetId: String!
   koboSubmissionTime: DateTime
+  koboAssetId: String!
   rowId: Int
+  detailId: String
   enumeratorRecId: Int
   misUnicefId: String
   programId: UUID
@@ -2178,6 +2180,7 @@ type ImportedIndividualNode implements Node {
   whoAnswersAltPhone: String!
   koboAssetId: String!
   rowId: Int
+  detailId: String
   disabilityCertificatePicture: String
   preferredLanguage: String
   misUnicefId: String
@@ -2354,6 +2357,7 @@ type IndividualNode implements Node {
   childHoh: Boolean!
   koboAssetId: String!
   rowId: Int
+  detailId: String
   registrationId: Int
   disabilityCertificatePicture: String
   preferredLanguage: String
@@ -2688,6 +2692,7 @@ type Mutations {
   deletePaymentPlan(paymentPlanId: ID!): DeletePaymentPlanMutation
   chooseDeliveryMechanismsForPaymentPlan(input: ChooseDeliveryMechanismsForPaymentPlanInput!): ChooseDeliveryMechanismsForPaymentPlanMutation
   assignFspToDeliveryMechanism(input: AssignFspToDeliveryMechanismInput!): AssignFspToDeliveryMechanismMutation
+  splitPaymentPlan(paymentPlanId: ID!, paymentsNo: Int, splitType: String!): SplitPaymentPlanMutation
   exportXlsxPaymentPlanPaymentList(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListMutation
   exportXlsxPaymentPlanPaymentListPerFsp(paymentPlanId: ID!): ExportXLSXPaymentPlanPaymentListPerFSPMutation
   importXlsxPaymentPlanPaymentList(file: Upload!, paymentPlanId: ID!): ImportXLSXPaymentPlanPaymentListMutation
@@ -3135,6 +3140,7 @@ type PaymentPlanNode implements Node {
   importedFileName: String
   paymentsConflictsCount: Int
   volumeByDeliveryMechanism: [VolumeByDeliveryMechanismNode]
+  splitChoices: [ChoiceObject]
   verificationPlans(offset: Int, before: String, after: String, first: Int, last: Int, programId: String): PaymentVerificationPlanNodeConnection
   paymentVerificationSummary: PaymentVerificationSummaryNode
   bankReconciliationSuccess: Int
@@ -3146,6 +3152,8 @@ type PaymentPlanNode implements Node {
   canCreateFollowUp: Boolean
   totalWithdrawnHouseholdsCount: Int
   unsuccessfulPaymentsCount: Int
+  canSendToPaymentGateway: Boolean
+  canSplit: Boolean
 }
 
 type PaymentPlanNodeConnection {
@@ -3627,7 +3635,7 @@ type Query {
   allCashPlansAndPaymentPlans(businessArea: String!, program: String, search: String, serviceProvider: String, deliveryType: [String], verificationStatus: [String], startDateGte: String, endDateLte: String, orderBy: String, first: Int, last: Int, before: String, after: String, isPaymentVerificationPage: Boolean): PaginatedCashPlanAndPaymentPlanNode
   businessArea(businessAreaSlug: String!): BusinessAreaNode
   allBusinessAreas(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID, slug: String): BusinessAreaNodeConnection
-  allFieldsAttributes(flexField: Boolean, businessAreaSlug: String): [FieldAttributeNode]
+  allFieldsAttributes(flexField: Boolean, businessAreaSlug: String, programId: String): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
@@ -4255,6 +4263,10 @@ type SetSteficonRuleOnTargetPopulationMutationPayload {
 
 type SimpleApproveMutation {
   grievanceTicket: GrievanceTicketNode
+}
+
+type SplitPaymentPlanMutation {
+  paymentPlan: PaymentPlanNode
 }
 
 type SteficonRuleNode implements Node {

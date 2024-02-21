@@ -36,14 +36,6 @@ services:
     command: |
       bash -c "
         waitforit -host=db -port=5432 -timeout=30
-        ls -la /code/hct_mis_api/apps/web/
-        find /code/hct_mis_api/apps/web/
-        if [ ! -f /code/hct_mis_api/apps/web/templates/web/index.html ]; then
-          echo 'index.html does not exist'
-          exit 1
-        else
-          echo 'index.html exists'
-        fi
         pytest -svvv selenium_tests
       "
     depends_on:

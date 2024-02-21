@@ -1,6 +1,7 @@
 import { Button, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import {
   AllProgramsQuery,
   ProgramQuery,
@@ -17,7 +18,7 @@ import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 interface FinishProgramProps {
   program: ProgramQuery['program'];
@@ -26,6 +27,7 @@ interface FinishProgramProps {
 export function FinishProgram({
   program,
 }: FinishProgramProps): React.ReactElement {
+  const history = useHistory();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -64,21 +66,18 @@ export function FinishProgram({
       },
     });
     if (!response.errors && response.data.updateProgram) {
-
       setSelectedProgram({
         ...selectedProgram,
-        status: ProgramStatus.Finished
-      })
-
-      showMessage(t('Programme finished.'), {
-        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
-        dataCy: 'snackbar-program-finish-success',
+        status: ProgramStatus.Finished,
       });
+
+      showMessage(t('Programme finished.'));
+      history.push(
+        `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
+      );
       setOpen(false);
     } else {
-      showMessage(t('Programme finish action failed.'), {
-        dataCy: 'snackbar-program-finish-failure',
-      });
+      showMessage(t('Programme finish action failed.'));
     }
   };
   return (
