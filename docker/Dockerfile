@@ -1,37 +1,43 @@
+FROM alpine:3.19.1 as curl
+RUN apk add curl && mkdir /data
+
+FROM curl as waitforit
+RUN curl -o /data/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/v2.4.1/waitforit-linux_amd64 \
+    && chmod +x /data/waitforit
+
+FROM curl as certs
+RUN curl -o /data/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
+
 # Base image
 FROM python:3.11.7-slim-bookworm as base
 
 ARG UID=82
 
-RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
-RUN --mount=type=cache,target=/root/.cache,sharing=private \
-  --mount=type=cache,target=/var/lib/apt,sharing=private \
-  apt-get update &&\
-  apt-get install -y --no-install-recommends \
-  chromium-driver \
-  chromium \
-  build-essential \
-  libjpeg-dev \
-  zlib1g-dev \
-  postgresql-client \
-  libpq-dev \
-  python3-psycopg2 \
-  python3-gdal \
-  gdal-bin \
-  libcairo2 \
-  libcairo2-dev \
-  libffi-dev \
-  libgdk-pixbuf2.0-0 \
-  libpango-1.0-0 \
-  libpangocairo-1.0-0 \
-  shared-mime-info \
-  wkhtmltopdf \
-  curl &&\
-  addgroup --system --gid "${UID}" hope &&\
-  adduser --system --uid "${UID}" --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope &&\
-  mkdir -p /code /tmp /data &&\
-  mkdir -p -m 0700 /run/user/"${UID}" &&\
-  chown -R hope:hope /code /tmp /data /run/user/"${UID}"
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    build-essential \
+    libjpeg-dev \
+    zlib1g-dev \
+    postgresql-client \
+    libpq-dev \
+    python3-psycopg2 \
+    python3-gdal \
+    gdal-bin \
+    libcairo2 \
+    libcairo2-dev \
+    libffi-dev \
+    libgdk-pixbuf2.0-0 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    shared-mime-info \
+    wkhtmltopdf \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && addgroup --system --gid "${UID}" hope \
+  && adduser --system --uid "${UID}" --disabled-password --home /home/hope --shell /sbin.nologin --group hope --gecos hope \
+  && mkdir -p /code /tmp /data \
+  && mkdir -p -m 0700 /run/user/"${UID}" \
+  && chown -R hope:hope /code /tmp /data /run/user/"${UID}"
 
 ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
     VIRTUAL_ENV=/opt/venv \
@@ -41,12 +47,7 @@ ENV PYTHONPYCACHEPREFIX=/tmp/pycache \
 
 WORKDIR /code
 
-RUN curl -o /usr/local/bin/waitforit -sSL https://github.com/maxcnunes/waitforit/releases/download/v2.4.1/waitforit-linux_amd64 &&\
-  chmod +x /usr/local/bin/waitforit
-
-FROM alpine:3.19.1 as certs
-RUN apk add curl && mkdir /data
-RUN curl -o /data/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
+COPY --from=waitforit /data/waitforit /usr/local/bin/waitforit
 
 # Dist builder image
 FROM base as builder
@@ -63,6 +64,13 @@ RUN poetry install --without dev
 
 # Dev image
 FROM builder AS dev
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    chromium-driver \
+    chromium \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN poetry install
 COPY ./backend ./
