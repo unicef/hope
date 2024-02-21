@@ -32,9 +32,9 @@ exports[`components/dashboard/PaymentVerificationSection should render 1`] = `
       class="MuiBox-root css-2y8fku"
     >
       <canvas
-        class="chartjs-render-monitor"
         height="0"
-        style="display: block;"
+        role="img"
+        style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
         width="0"
       />
     </div>

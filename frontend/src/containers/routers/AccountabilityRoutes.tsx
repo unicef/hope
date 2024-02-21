@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useLocation, useRoutes } from 'react-router-dom';
+import { useRoutes } from 'react-router-dom';
 import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
 import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
 import { CreateCommunicationPage } from '../pages/accountability/communication/CreateCommunicationPage';
@@ -8,32 +8,29 @@ import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetails
 import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
 
 export const AccountabilityRoutes = (): React.ReactElement => {
-  const location = useLocation();
-  const path = location.pathname;
-
   const accountabilityRoutes = [
     {
-      path: `${path}/accountability/surveys/create`,
+      path: 'accountability/surveys/create',
       element: <CreateSurveyPage />,
     },
     {
-      path: `${path}/accountability/surveys/:id`,
+      path: 'accountability/surveys/:id',
       element: <SurveyDetailsPage />,
     },
     {
-      path: `${path}/accountability/surveys`,
+      path: 'accountability/surveys',
       element: <SurveysPage />,
     },
     {
-      path: `${path}/accountability/communication/create`,
+      path: 'accountability/communication/create',
       element: <CreateCommunicationPage />,
     },
     {
-      path: `${path}/accountability/communication/:id`,
+      path: 'accountability/communication/:id',
       element: <CommunicationDetailsPage />,
     },
     {
-      path: `${path}/accountability/communication`,
+      path: 'accountability/communication',
       element: <CommunicationPage />,
     },
   ];
