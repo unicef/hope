@@ -20,11 +20,11 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.utils import enrol_household_to_program
+from hct_mis_api.apps.program.utils import enroll_household_to_program
 
 
 class TestEnrolHouseholdToProgram(TestCase):
-    """Test enrol household to program."""
+    """Test enroll household to program."""
 
     def setUp(self) -> None:
         create_afghanistan()
@@ -41,6 +41,7 @@ class TestEnrolHouseholdToProgram(TestCase):
             program=self.program2,
             head_of_household=self.individual_already_enrolled,
             copied_from=self.household_original_already_enrolled,
+            unicef_id=self.household_original_already_enrolled.unicef_id,
         )
         self.individual_already_enrolled.household = self.household_already_enrolled
         self.individual_already_enrolled.save()
@@ -111,27 +112,27 @@ class TestEnrolHouseholdToProgram(TestCase):
             role=ROLE_PRIMARY,
         )
 
-    def test_enrol_household_to_program_already_enrolled(self) -> None:
+    def test_enroll_household_to_program_already_enrolled(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
-        hh, value = enrol_household_to_program(self.household_already_enrolled, self.program2)
+        hh, value = enroll_household_to_program(self.household_already_enrolled, self.program2)
         self.assertEqual(hh, self.household_already_enrolled)
         self.assertEqual(value, 0)
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
-    def test_enrol_original_household_to_program_representation_already_enrolled(self) -> None:
+    def test_enroll_original_household_to_program_representation_already_enrolled(self) -> None:
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
-        hh, value = enrol_household_to_program(self.household_original_already_enrolled, self.program2)
+        hh, value = enroll_household_to_program(self.household_original_already_enrolled, self.program2)
         self.assertEqual(hh, self.household_already_enrolled)
         self.assertEqual(value, 0)
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
-    def test_enrol_household_to_program(self) -> None:
+    def test_enroll_household_to_program(self) -> None:
         hh_count = Household.original_and_repr_objects.count()
         ind_count = Individual.original_and_repr_objects.count()
         document_count = Document.objects.count()
@@ -139,7 +140,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         bank_account_info_count = BankAccountInfo.objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()
 
-        hh, value = enrol_household_to_program(self.household, self.program2)
+        hh, value = enroll_household_to_program(self.household, self.program2)
         self.assertEqual(value, 1)
 
         self.individual_2_already_enrolled.refresh_from_db()
@@ -157,6 +158,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         enrolled_household = original_household.copied_to.first()
         self.assertEqual(original_household.copied_to.count(), 1)
         self.assertEqual(enrolled_household.program, self.program2)
+        self.assertEqual(enrolled_household.unicef_id, original_household.unicef_id)
         self.assertEqual(
             enrolled_household.head_of_household,
             self.individual_hoh.copied_to.filter(program=self.program2).first(),
@@ -186,12 +188,12 @@ class TestEnrolHouseholdToProgram(TestCase):
             ).first()
         )
 
-    def test_enrol_household_with_external_collector(self) -> None:
+    def test_enroll_household_with_external_collector(self) -> None:
         hh_count = Household.original_and_repr_objects.count()
         ind_count = Individual.original_and_repr_objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()
 
-        hh, value = enrol_household_to_program(self.household_external, self.program2)
+        hh, value = enroll_household_to_program(self.household_external, self.program2)
         self.assertEqual(value, 1)
         self.assertEqual(hh_count + 1, Household.original_and_repr_objects.count())
         # 2 new individuals enrolled - individual_external and individual_hoh
