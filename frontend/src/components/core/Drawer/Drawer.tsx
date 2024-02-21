@@ -1,10 +1,9 @@
 import { Box, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import MUIDrawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
-import DrawerMaterial from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBackendVersion } from '@hooks/useBackendVersion';
@@ -13,9 +12,7 @@ import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
-import { theme } from '../../../theme';
-import { styled } from '@mui/system';
-
+import styled from 'styled-components';
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
   if (window.location.hostname === 'localhost') {
@@ -33,88 +30,82 @@ const matchColorToWindowOrigin = (): string => {
   return '#00ADEF';
 };
 
-const ToolbarHeader = styled('div')(() => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  paddingLeft: '51px',
-  backgroundColor: matchColorToWindowOrigin(),
-  color: 'white',
-  borderRight: '2px solid #02367D',
-  boxShadow:
-    '0px 2px 4px 0px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
-  ...theme.mixins.toolbar,
-}));
+const ToolbarHeader = styled('div')`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 51px;
+  background-color: ${matchColorToWindowOrigin()};
+  color: white;
+  box-shadow:
+    0px 2px 4px 0px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  min-height: 64px;
+`;
 
-const DrawerPaper = styled('div')(() => ({
-  height: '100vh',
-  position: 'relative',
-  whiteSpace: 'nowrap',
-  width: theme.drawer.width,
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  borderWidth: 0,
-}));
+interface DrawerComponentProps {
+  open: boolean;
+}
 
-const DrawerPaperClose = styled(DrawerPaper)(() => ({
-  overflowX: 'hidden',
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  width: theme.spacing(16),
-  [theme.breakpoints.up('sm')]: {
-    width: theme.spacing(14),
-  },
-}));
+const DrawerComponent = styled(MUIDrawer)<DrawerComponentProps>`
+  .MuiDrawer-paper {
+    background-color: white;
+    height: 100vh;
+    position: relative;
+    white-space: nowrap;
+    width: ${(props) => (props.open ? '240px' : '64px')};
+    transition:
+      width 225ms cubic-bezier(0, 0, 0.2, 1) 0ms,
+      width 195ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+    border-width: 0;
+    overflow-x: hidden;
+  }
+`;
 
-const Version = styled('div')({
-  color: '#aaa',
-  padding: 4,
-  textAlign: 'center',
-});
+const CollapseIconButton = styled(IconButton)`
+  color: #fff;
+  opacity: 0.54;
+`;
 
-const StyledLink = styled('a')({
-  color: '#233944',
-  fontSize: '14px',
-  fontWeight: 500,
-  lineHeight: '16px',
-  textDecoration: 'none',
-});
+export const StyledLink = styled.a`
+  color: #233944;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  text-decoration: none;
+`;
 
-const Text = styled(ListItemText)({
-  '.MuiTypography-body1': {
-    color: '#233944',
-    fontSize: '14px',
-    fontWeight: 500,
-    lineHeight: '16px',
-  },
-});
+const ResourcesText = styled('p')`
+  text-align: left;
+  font-size: 14px;
+  color: #aaa;
+  margin-left: 16px;
+`;
 
-const ResourcesText = styled('p')({
-  textAlign: 'left',
-  fontSize: '14px',
-  color: '#aaa',
-  marginLeft: '16px',
-});
+const ToolbarScrollBox = styled(Box)`
+  overflow-y: auto;
+  height: 100%;
+`;
 
-const ToolbarScrollBox = styled(Box)({
-  overflowY: 'auto',
-  height: '100%',
-  borderRight: '2px solid #e1e1e1',
-});
+const Icon = styled(ListItemIcon)`
+  padding-right: 32px;
+`;
 
-const Icon = styled(ListItemIcon)(() => ({
-  minWidth: 0,
-  paddingRight: theme.spacing(4),
-}));
+const Version = styled('div')`
+  color: #aaa;
+  padding: 4px;
+  text-align: center;
+`;
 
-const CollapseIconButton = styled(IconButton)({
-  color: '#fff',
-  opacity: 0.54,
-});
+const Text = styled(ListItemText)`
+  .MuiTypography-body1 {
+    color: #233944;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+  }
+`;
 
 interface DrawerProps {
   open: boolean;
@@ -143,12 +134,12 @@ export const Drawer = ({
       setShowMismatchedDialog(true);
     }
   }, [backendVersion, frontendVersion, showMismatchedDialog]);
+
   return (
-    <DrawerMaterial
+    <DrawerComponent
       variant="permanent"
-      className={clsx(DrawerPaper, !open && DrawerPaperClose)}
-      style={{ height: '100vh' }}
       open={open}
+      style={{ height: '100vh' }}
       data-cy={dataCy}
     >
       <ToolbarHeader>
@@ -174,7 +165,7 @@ export const Drawer = ({
           </Box>
         )}
         {resourcesItems.map((item) => (
-          <ListItem button key={item.name + item.href}>
+          <ListItem key={item.name + item.href}>
             <StyledLink
               data-cy={`nav-resources-${item.name}`}
               target="_blank"
@@ -204,6 +195,6 @@ export const Drawer = ({
         show={showMismatchedDialog}
         message={t('Version mismatch, please refresh page')}
       />
-    </DrawerMaterial>
+    </DrawerComponent>
   );
 };

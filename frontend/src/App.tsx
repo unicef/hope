@@ -1,18 +1,24 @@
-import { createBrowserRouter, Route, RouterProvider, Routes } from 'react-router-dom';
-import { AutoLogout } from '@core/AutoLogout';
 import { DefaultRoute } from '@containers/DefaultRoute';
+import { PageNotFound } from '@containers/pages/404/PageNotFound';
+import { AccessDenied } from '@containers/pages/accessDenied/AccessDenied';
 import { LoginPage } from '@containers/pages/core/LoginPage';
 import { ProfilePage } from '@containers/pages/core/ProfilePage';
+import { SanctionList } from '@containers/pages/core/SanctionList';
 import { MaintenancePage } from '@containers/pages/maintenance/MaintenancePage';
+import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
 import { AllProgramsRoutesSwitch } from '@containers/routers/AllProgramsRoutesSwitch';
 import { BaseHomeRouter } from '@containers/routers/BaseHomeRouter';
 import { SelectedProgramRoutesSwitch } from '@containers/routers/SelectedProgramRoutesSwitch';
-import { Providers } from './providers';
-import { SanctionList } from '@containers/pages/core/SanctionList';
-import { PageNotFound } from '@containers/pages/404/PageNotFound';
-import { AccessDenied } from '@containers/pages/accessDenied/AccessDenied';
-import { SomethingWentWrong } from '@containers/pages/somethingWentWrong/SomethingWentWrong';
+import { AutoLogout } from '@core/AutoLogout';
+
 import React from 'react';
+import {
+  createBrowserRouter,
+  Route,
+  RouterProvider,
+  Routes,
+} from 'react-router-dom';
+import { Providers } from './providers';
 
 const Root: React.FC = () => (
   <Routes>
@@ -39,24 +45,18 @@ const Root: React.FC = () => (
     <Route element={<BaseHomeRouter />}>
       <Route
         path="/:businessArea/programs/all/*"
-        element={
-          <AllProgramsRoutesSwitch />
-        }
+        element={<AllProgramsRoutesSwitch />}
       />
       <Route
         path="/:businessArea/programs/:programId/*"
-        element={
-          <SelectedProgramRoutesSwitch />
-        }
+        element={<SelectedProgramRoutesSwitch />}
       />
     </Route>
     <Route path="/" element={<DefaultRoute />} />
   </Routes>
 );
 
-const router = createBrowserRouter([
-  { path: '*', Component: Root },
-]);
+const router = createBrowserRouter([{ path: '*', Component: Root }]);
 
 export const App: React.FC = () => (
   <Providers>

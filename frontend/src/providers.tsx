@@ -3,7 +3,8 @@ import {
   ApolloClient,
   NormalizedCacheObject,
 } from '@apollo/client';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { CssBaseline } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 import { ReactNode, useEffect, useState } from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { getClient } from './apollo/client';
@@ -13,12 +14,12 @@ import { ProgramProvider } from './programContext';
 import { SnackbarProvider } from './hooks/useSnackBar';
 
 interface ProvidersProps {
-  children: ReactNode;
+  children: ReactNode[];
 }
 
 export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
-  ApolloClient<NormalizedCacheObject> | undefined
+    ApolloClient<NormalizedCacheObject> | undefined
   >();
 
   useEffect(() => {
