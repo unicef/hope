@@ -2,7 +2,7 @@ import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useHistory } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
@@ -22,7 +22,7 @@ import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 
 export const DuplicateProgramPage = (): ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -59,7 +59,7 @@ export const DuplicateProgramPage = (): ReactElement => {
         ],
       });
       showMessage('Programme created.');
-      history.push(
+      navigate(
         `/${baseUrl}/details/${response.data.copyProgram.program.id}`,
       );
     } catch (e) {

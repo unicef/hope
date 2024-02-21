@@ -11,7 +11,6 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Delete } from '@mui/icons-material';
-import { useHistory } from 'react-router-dom';
 import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
@@ -20,6 +19,7 @@ import { LoadingButton } from '@core/LoadingButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../../../programContext';
+import { useNavigate } from 'react-router-dom';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -28,7 +28,7 @@ export interface DeletePaymentPlanProps {
 export function DeletePaymentPlan({
   paymentPlan,
 }: DeletePaymentPlanProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
@@ -45,7 +45,7 @@ export function DeletePaymentPlan({
         },
       });
       showMessage(t('Payment Plan Deleted'));
-      history.push(`/${baseUrl}/payment-module`);
+      navigate(`/${baseUrl}/payment-module`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

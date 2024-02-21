@@ -1,4 +1,3 @@
-import { useHistory } from 'react-router-dom';
 import { Typography } from '@mui/material';
 import { FieldArray, Form, Formik } from 'formik';
 import * as React from 'react';
@@ -22,6 +21,7 @@ import { Exclusions } from '../CreateTargetPopulation/Exclusions';
 import { PaperContainer } from '../PaperContainer';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { EditTargetPopulationHeader } from './EditTargetPopulationHeader';
+import { useNavigate } from 'react-router-dom';
 
 const Label = styled.p`
   color: #b1b1b5;
@@ -36,7 +36,7 @@ export function EditTargetPopulation({
   targetPopulation,
   screenBeneficiary,
 }: EditTargetPopulationProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const initialValues = {
     id: targetPopulation.id,
@@ -119,7 +119,7 @@ export function EditTargetPopulation({
         },
       });
       showMessage(t('Target Population Updated'));
-      history.push(`/${baseUrl}/target-population/${values.id}`);
+      navigate(`/${baseUrl}/target-population/${values.id}`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

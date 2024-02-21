@@ -2,7 +2,7 @@ import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
 import { Field, Formik } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   GrievanceTicketDocument,
@@ -86,7 +86,7 @@ const BoxWithBottomBorders = styled.div`
 `;
 
 export const EditGrievancePage = (): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
@@ -270,7 +270,7 @@ export const EditGrievancePage = (): React.ReactElement => {
             ],
           });
           showMessage(t('Grievance Ticket edited.'));
-          history.push(grievanceDetailsPath);
+          navigate(grievanceDetailsPath);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }

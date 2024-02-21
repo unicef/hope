@@ -2,7 +2,7 @@ import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useHistory } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   useAllAreasTreeQuery,
   useProgramQuery,
@@ -24,7 +24,7 @@ import { hasPermissionInModule } from '../../../config/permissions';
 import { usePermissions } from '@hooks/usePermissions';
 
 export const EditProgramPage = (): ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -105,7 +105,7 @@ export const EditProgramPage = (): ReactElement => {
         },
       });
       showMessage(t('Programme edited.'));
-      history.push(
+      navigate(
         `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       );
     } catch (e) {

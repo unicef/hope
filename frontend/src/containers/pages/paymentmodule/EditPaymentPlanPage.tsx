@@ -1,6 +1,6 @@
 import { Form, Formik } from 'formik';
 import * as React from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import moment from 'moment';
 import * as Yup from 'yup';
@@ -22,7 +22,7 @@ import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export const EditPaymentPlanPage = (): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id } = useParams();
   const { t } = useTranslation();
   const { data: paymentPlanData, loading: loadingPaymentPlan } =
@@ -125,7 +125,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
         },
       });
       showMessage(t('Payment Plan Edited'));
-      history.push(
+      navigate(
         `/${baseUrl}/payment-module/payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
       );
     } catch (e) {

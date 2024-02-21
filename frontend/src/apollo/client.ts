@@ -1,6 +1,6 @@
 import { persistCache } from 'apollo-cache-persist';
 import { onError } from '@apollo/client/link/error';
-import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
+import createUploadLink from 'apollo-upload-client/createUploadLink';
 import localForage from 'localforage';
 import { GRAPHQL_URL } from '../config';
 import { clearCache } from '@utils/utils';
@@ -35,7 +35,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError)
     // eslint-disable-next-line no-console
     console.error(
-      `[Network error]: ${networkError}`,
+      `[Network error]: ${networkError.name}`,
       networkError,
       graphQLErrors,
     );
@@ -69,25 +69,21 @@ const redirectLink = new ApolloLink((operation, forward) => {
     const isPermissionDenied = response?.errors?.some((error) => error.message === 'Permission Denied');
 
     // If the error message is "Permission Denied" or data is null, redirect to the access denied page
-    if (isPermissionDenied || isDataNull(response.data) && !isMutation) {
+    if (isPermissionDenied || isDataNull(response.data) && !isMutation)
       window.location.href = `/access-denied/${businessArea}`;
-    }
     // Check if the response has any errors
     else if (hasResponseErrors(response)) {
       // If it's a mutation, log the error to the console
-      if (isMutation) {
+      if (isMutation)
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
-      }
       // If it's not a mutation and the app is not running on localhost, dev, or stg environment, redirect to an error page
-      else if (isNotLocalhostDevOrStg) {
+      else if (isNotLocalhostDevOrStg)
         window.location.href = `/error/${businessArea}`;
-      }
       // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
-      else {
+      else
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
-      }
     }
 
     return response;

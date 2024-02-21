@@ -3,7 +3,6 @@ import { Field, Formik } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { useHistory } from 'react-router-dom';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
 import { LoadingButton } from '@components/core/LoadingButton';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -15,6 +14,7 @@ import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
@@ -31,7 +31,7 @@ export const DuplicateTargetPopulation = ({
   setOpen,
   targetPopulationId,
 }: DuplicateTargetPopulationProps): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [mutate, { loading }] = useCopyTargetPopulationMutation();
   const { showMessage } = useSnackbar();
@@ -58,7 +58,7 @@ export const DuplicateTargetPopulation = ({
             });
             setOpen(false);
             showMessage(t('Target Population Duplicated'));
-            history.push(
+            navigate(
               `/${baseUrl}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
             );
           } catch (e) {

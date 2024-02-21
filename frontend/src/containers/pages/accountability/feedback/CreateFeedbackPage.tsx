@@ -12,7 +12,7 @@ import { Field, Formik } from 'formik';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
@@ -147,7 +147,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 // }
 
 export function CreateFeedbackPage(): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -237,7 +237,7 @@ export function CreateFeedbackPage(): React.ReactElement {
               variables: { input: prepareVariables(values) },
             });
             showMessage(t('Feedback created'));
-            history.push(
+            navigate(
               `/${baseUrl}/grievance/feedback/${response.data.createFeedback.feedback.id}`,
             );
           } catch (e) {

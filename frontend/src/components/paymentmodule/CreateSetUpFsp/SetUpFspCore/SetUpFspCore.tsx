@@ -1,4 +1,4 @@
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
@@ -40,7 +40,7 @@ export const SetUpFspCore = ({
   initialValues,
 }: SetUpFspCoreProps): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
@@ -152,7 +152,7 @@ export const SetUpFspCore = ({
         },
       });
       showMessage(t('FSPs have been assigned to the delivery mechanisms'));
-      history.push(
+      navigate(
         `/${baseUrl}/payment-module/${
           isFollowUp ? 'followup-payment-plans' : 'payment-plans'
         }/${id}`,

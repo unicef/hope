@@ -347,7 +347,7 @@ export function CreateSurveyPage(): React.ReactElement {
                 variables: prepareMutationVariables(values),
               });
               showMessage(t('Survey created.'));
-              history.push(
+              navigate(
                 `/${baseUrl}/accountability/surveys/${response.data.createSurvey.survey.id}`,
               );
             } catch (e) {

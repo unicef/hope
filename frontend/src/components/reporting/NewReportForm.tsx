@@ -14,7 +14,6 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { useHistory } from 'react-router-dom';
 import { Dialog } from '@containers/dialogs/Dialog';
 import { DialogActions } from '@containers/dialogs/DialogActions';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
@@ -35,9 +34,10 @@ import { FieldLabel } from '@core/FieldLabel';
 import { LoadingButton } from '@core/LoadingButton';
 import { LoadingComponent } from '@core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
 export const NewReportForm = (): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -140,7 +140,7 @@ export const NewReportForm = (): React.ReactElement => {
     });
     if (!response.errors && response.data.createReport) {
       showMessage('Report created.');
-      history.push(
+      navigate(
         `/${baseUrl}/reporting/${response.data.createReport.report.id}`,
       );
     } else {
