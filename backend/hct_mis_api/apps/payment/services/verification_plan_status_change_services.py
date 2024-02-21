@@ -160,9 +160,10 @@ class VerificationPlanStatusChangeServices:
 
         ticket_payment_verification_details_list = []
         for verification, grievance_ticket in zip(verifications, grievance_ticket_objs):
-            GrievanceNotification.send_all_notifications(
-                GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
-            )
+            if grievance_ticket.business_area.enable_email_notification:
+                GrievanceNotification.send_all_notifications(
+                    GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+                )
 
             ticket_payment_verification_details = TicketPaymentVerificationDetails(
                 ticket=grievance_ticket,

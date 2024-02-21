@@ -470,7 +470,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
 
-        GrievanceNotification.send_all_notifications(messages)
+        if grievance_ticket.business_area.enable_email_notification:
+            GrievanceNotification.send_all_notifications(messages)
         return grievance_ticket
 
 
@@ -626,7 +627,8 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             grievance_ticket,
         )
 
-        GrievanceNotification.send_all_notifications(notifications)
+        if grievance_ticket.business_area.enable_email_notification:
+            GrievanceNotification.send_all_notifications(notifications)
         return cls(grievance_ticket=grievance_ticket)
 
 
@@ -777,13 +779,14 @@ class CreateTicketNoteMutation(PermissionMutation):
 
         description = note_input["description"]
         ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=user)
-        notification = GrievanceNotification(
-            grievance_ticket,
-            GrievanceNotification.ACTION_NOTES_ADDED,
-            created_by=user,
-            ticket_note=ticket_note,
-        )
-        notification.send_email_notification()
+        if grievance_ticket.business_area.enable_email_notification:
+            notification = GrievanceNotification(
+                grievance_ticket,
+                GrievanceNotification.ACTION_NOTES_ADDED,
+                created_by=user,
+                ticket_note=ticket_note,
+            )
+            notification.send_email_notification()
         return cls(grievance_ticket_note=ticket_note)
 
 

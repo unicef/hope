@@ -87,13 +87,14 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
         payment_verification_plan.xlsx_file_exporting = False
         payment_verification_plan.save()
 
-        context = service.get_email_context(user)
-        user.email_user(
-            context["title"],
-            render_to_string(service.text_template, context=context),
-            settings.EMAIL_HOST_USER,
-            html_message=render_to_string(service.html_template, context=context),
-        )
+        if payment_verification_plan.business_area.enable_email_notification:
+            context = service.get_email_context(user)
+            user.email_user(
+                context["title"],
+                render_to_string(service.text_template, context=context),
+                settings.EMAIL_HOST_USER,
+                html_message=render_to_string(service.html_template, context=context),
+            )
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -141,15 +142,16 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
-                context = service.get_email_context(user)
-                transaction.on_commit(
-                    lambda: user.email_user(
-                        context["title"],
-                        render_to_string(service.text_template, context=context),
-                        settings.EMAIL_HOST_USER,
-                        html_message=render_to_string(service.html_template, context=context),
+                if payment_plan.business_area.enable_email_notification:
+                    context = service.get_email_context(user)
+                    transaction.on_commit(
+                        lambda: user.email_user(
+                            context["title"],
+                            render_to_string(service.text_template, context=context),
+                            settings.EMAIL_HOST_USER,
+                            html_message=render_to_string(service.html_template, context=context),
+                        )
                     )
-                )
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -183,15 +185,16 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
-                context = service.get_email_context(user)
-                transaction.on_commit(
-                    lambda: user.email_user(
-                        context["title"],
-                        render_to_string(service.text_template, context=context),
-                        settings.EMAIL_HOST_USER,
-                        html_message=render_to_string(service.html_template, context=context),
+                if payment_plan.business_area.enable_email_notification:
+                    context = service.get_email_context(user)
+                    transaction.on_commit(
+                        lambda: user.email_user(
+                            context["title"],
+                            render_to_string(service.text_template, context=context),
+                            settings.EMAIL_HOST_USER,
+                            html_message=render_to_string(service.html_template, context=context),
+                        )
                     )
-                )
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -331,15 +334,16 @@ def create_cash_plan_reconciliation_xlsx(
         except Exception as e:
             error_msg = f"Error parse xlsx: {e} \nFile name: {reconciliation_xlsx_obj.file_name}"
 
-        context = service.get_email_context(
-            reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg
-        )
-        reconciliation_xlsx_obj.created_by.email_user(
-            context["title"],
-            render_to_string(service.text_template, context=context),
-            settings.EMAIL_HOST_USER,
-            html_message=render_to_string(service.html_template, context=context),
-        )
+        if reconciliation_xlsx_obj.business_area.enable_email_notification:
+            context = service.get_email_context(
+                reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg
+            )
+            reconciliation_xlsx_obj.created_by.email_user(
+                context["title"],
+                render_to_string(service.text_template, context=context),
+                settings.EMAIL_HOST_USER,
+                html_message=render_to_string(service.html_template, context=context),
+            )
 
         # remove file every time
         reconciliation_xlsx_obj.file.delete()
@@ -594,19 +598,18 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
             file_pdf_obj.file.save(filename, ContentFile(pdf))
 
             payment_plan.export_pdf_file_summary = file_pdf_obj
-            # TODO: maybe will add background status
-            # payment_plan.background_action_status_none()
             payment_plan.save()
 
-            context = service.get_email_context(user)
-            transaction.on_commit(
-                lambda: user.email_user(
-                    context["title"],
-                    render_to_string(service.text_template, context=context),
-                    settings.EMAIL_HOST_USER,
-                    html_message=render_to_string(service.html_template, context=context),
+            if payment_plan.business_area.enable_email_notification:
+                context = service.get_email_context(user)
+                transaction.on_commit(
+                    lambda: user.email_user(
+                        context["title"],
+                        render_to_string(service.text_template, context=context),
+                        settings.EMAIL_HOST_USER,
+                        html_message=render_to_string(service.html_template, context=context),
+                    )
                 )
-            )
 
     except Exception as e:
         logger.exception("Export PDF Payment Plan Summary Error")
