@@ -29,7 +29,7 @@
     "@mui/lab": "^5.0.0-alpha.163",
     "@mui/material": "^5.15.7",
     "@mui/styled-engine-sc": "^6.0.0-alpha.14",
-    "@sentry/react": "^7.99.0",
+    "@sentry/react": "^7.102.0",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.16",
     "@vitejs/plugin-react": "^4.2.1",
