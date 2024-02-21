@@ -17,6 +17,7 @@ from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -43,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImport)
-class RegistrationDataImportAdmin(HOPEModelAdminBase):
+class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "import_date", "data_source", "business_area")
     search_fields = ("name",)
     list_filter = (
