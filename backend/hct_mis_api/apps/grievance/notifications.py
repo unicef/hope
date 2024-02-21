@@ -39,6 +39,7 @@ class GrievanceNotification:
         self.user_recipients = self._prepare_user_recipients()
         self.emails = self._prepare_emails()
         self.enable_email_notification = grievance_ticket.business_area.enable_email_notification
+        # TODO: need adjast logic based on this flag 'enable_email_notification'
 
     def _prepare_default_context(self, user_recipient: "User") -> Dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
