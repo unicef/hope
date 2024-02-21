@@ -1,6 +1,6 @@
 import { persistCache } from 'apollo-cache-persist';
 import { onError } from '@apollo/client/link/error';
-import createUploadLink from 'apollo-upload-client/createUploadLink';
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import localForage from 'localforage';
 import { GRAPHQL_URL } from '../config';
 import { clearCache } from '@utils/utils';
