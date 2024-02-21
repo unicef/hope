@@ -2,6 +2,7 @@ import { Button, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import {
   AllProgramsQuery,
   ProgramQuery,
@@ -27,6 +28,7 @@ interface FinishProgramProps {
 export function FinishProgram({
   program,
 }: FinishProgramProps): React.ReactElement {
+  const history = useHistory();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -70,15 +72,13 @@ export function FinishProgram({
         status: ProgramStatus.Finished,
       });
 
-      showMessage(t('Programme finished.'), {
-        pathname: `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
-        dataCy: 'snackbar-program-finish-success',
-      });
+      showMessage(t('Programme finished.'));
+      history.push(
+        `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
+      );
       setOpen(false);
     } else {
-      showMessage(t('Programme finish action failed.'), {
-        dataCy: 'snackbar-program-finish-failure',
-      });
+      showMessage(t('Programme finish action failed.'));
     }
   };
   return (

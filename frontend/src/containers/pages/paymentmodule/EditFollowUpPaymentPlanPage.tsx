@@ -2,7 +2,7 @@ import { Form, Formik } from 'formik';
 import moment from 'moment';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import * as Yup from 'yup';
 import {
   useAllTargetPopulationsQuery,
@@ -22,6 +22,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { today } from '@utils/utils';
 
 export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
+  const history = useHistory();
   const { id } = useParams();
   const { t } = useTranslation();
   const { data: paymentPlanData, loading: loadingPaymentPlan } =
@@ -119,10 +120,10 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
           },
         },
       });
-      showMessage(t('Follow-up Payment Plan Edited'), {
-        pathname: `/${baseUrl}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
-        historyMethod: 'push',
-      });
+      showMessage(t('Follow-up Payment Plan Edited'));
+      history.push(
+        `/${baseUrl}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

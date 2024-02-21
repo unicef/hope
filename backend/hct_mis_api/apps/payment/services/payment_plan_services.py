@@ -2,6 +2,7 @@ import datetime
 import logging
 from decimal import Decimal
 from functools import partial
+from itertools import groupby
 from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -31,6 +32,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
+    PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -160,7 +162,7 @@ class PaymentPlanService:
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
-        self.payment_plan.remove_export_file()
+        self.payment_plan.remove_export_files()
 
         self.payment_plan.save()
 
@@ -676,3 +678,65 @@ class PaymentPlanService:
             for payment in payments:
                 payment.update_signature_hash()
             Payment.objects.bulk_update(payments, ("signature_hash",))
+
+    def split(self, split_type: str, chunks_no: Optional[int] = None) -> PaymentPlan:
+        def chunks(lst: List, n: int) -> List:
+            """Yield successive n-sized chunks from lst."""
+            for i in range(0, len(lst), n):
+                yield lst[i : i + n]
+
+        payments_chunks = []
+        payments = self.payment_plan.eligible_payments.all()
+        payments_count = payments.count()
+        if not payments_count:
+            raise GraphQLError("No payments to split")
+
+        if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
+            if not chunks_no:
+                raise GraphQLError("Payments Number is required for split by records")
+
+            if chunks_no > payments_count or chunks_no < 2:
+                raise GraphQLError("Payment Parts number should be between 2 and total number of payments")
+            payments_chunks = list(chunks(list(payments.order_by("unicef_id").values_list("id", flat=True)), chunks_no))
+
+        elif split_type == PaymentPlanSplit.SplitType.BY_ADMIN_AREA2:
+            grouped_payments = list(
+                payments.order_by("household__admin2__p_code", "unicef_id").select_related("household__admin2")
+            )
+            payments_chunks = []
+            for _, payments in groupby(grouped_payments, key=lambda x: x.household.admin2):  # type: ignore
+                payments_chunks.append([payment.id for payment in payments])
+
+        elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
+            grouped_payments = list(payments.order_by("collector__unicef_id", "unicef_id").select_related("collector"))
+            payments_chunks = []
+            for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
+                payments_chunks.append([payment.id for payment in payments])
+
+        payments_chunks_count = len(payments_chunks)
+        if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
+            raise GraphQLError(
+                f"Too many Payment Parts to split: {payments_chunks_count}, maximum is {PaymentPlanSplit.MAX_CHUNKS}"
+            )
+
+        with transaction.atomic():
+            if self.payment_plan.splits.exists():
+                self.payment_plan.splits.all().delete()
+            if self.payment_plan.export_file_per_fsp:
+                self.payment_plan.remove_export_file_per_fsp()
+
+            payment_plan_splits_to_create = []
+            for i, _ in enumerate(payments_chunks):
+                payment_plan_splits_to_create.append(
+                    PaymentPlanSplit(
+                        payment_plan=self.payment_plan,
+                        split_type=split_type,
+                        chunks_no=chunks_no,
+                        order=i,
+                    )
+                )
+            PaymentPlanSplit.objects.bulk_create(payment_plan_splits_to_create)
+            for i, chunk in enumerate(payments_chunks):
+                payment_plan_splits_to_create[i].payments.add(*chunk)
+
+        return self.payment_plan

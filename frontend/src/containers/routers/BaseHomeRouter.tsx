@@ -1,4 +1,3 @@
-import { Snackbar, SnackbarContent } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 import * as React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -10,7 +9,6 @@ import { AppBar } from '@components/core/AppBar';
 import { Drawer } from '@components/core/Drawer/Drawer';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { useSnackbar } from '@hooks/useSnackBar';
 import { styled as MuiStyled } from '@mui/system';
 import { theme } from 'src/theme';
 
@@ -32,7 +30,6 @@ export const BaseHomeRouter: React.FC = () => {
   const { businessArea } = useBaseUrl();
   const location = useLocation();
   const navigate = useNavigate();
-  const snackBar = useSnackbar();
   const handleDrawerOpen = (): void => {
     setOpen(true);
   };
@@ -78,18 +75,6 @@ export const BaseHomeRouter: React.FC = () => {
         <AppBarSpacer />
         <Outlet />
       </MainContent>
-      {snackBar.show && (
-        <Snackbar
-          open={snackBar.show}
-          autoHideDuration={5000}
-          onClose={() => snackBar.setShow(false)}
-        >
-          <SnackbarContent
-            message={snackBar.message}
-            data-cy={snackBar.dataCy}
-          />
-        </Snackbar>
-      )}
     </Root>
   );
 };

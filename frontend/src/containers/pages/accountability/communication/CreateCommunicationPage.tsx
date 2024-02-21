@@ -305,10 +305,10 @@ export function CreateCommunicationPage(): React.ReactElement {
               const response = await mutate({
                 variables: prepareMutationVariables(values),
               });
-              showMessage(t('Communication Ticket created.'), {
-                pathname: `/${baseUrl}/accountability/communication/${response.data.createAccountabilityCommunicationMessage.message.id}`,
-                historyMethod: 'push',
-              });
+              showMessage(t('Communication Ticket created.'));
+              history.push(
+                `/${baseUrl}/accountability/communication/${response.data.createAccountabilityCommunicationMessage.message.id}`,
+              );
             } catch (e) {
               e.graphQLErrors.map((x) => showMessage(x.message));
             }

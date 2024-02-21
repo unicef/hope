@@ -30,6 +30,7 @@ import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
+import {useProgramContext} from "../../programContext";
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -125,8 +126,8 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const { data, loading } =
-    useCachedImportedIndividualFieldsQuery(businessArea);
+  const { selectedProgram: { id } } = useProgramContext();
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(businessArea, id);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);

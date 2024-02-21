@@ -150,6 +150,12 @@ export const PAYMENT_PLAN_QUERY = gql`
           isPaymentGateway
         }
       }
+      canSendToPaymentGateway
+      canSplit
+      splitChoices {
+        name
+        value
+      }
       volumeByDeliveryMechanism {
         deliveryMechanism {
           id

@@ -261,14 +261,14 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "xyz",
                     "partners": [{"id": str(self.partner.id), "areaAccess": "BUSINESS_AREA"}],
-                    "programmeCode": "abc2",
+                    "programmeCode": "ab/2",
                 },
                 "version": self.program.version,
             },
         )
         program = Program.objects.get(id=self.program.id)
         self.assertIsNotNone(program.programme_code)
-        self.assertEqual(program.programme_code, "ABC2")
+        self.assertEqual(program.programme_code, "AB/2")
 
     def test_update_program_without_programme_code(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
