@@ -9,7 +9,7 @@ FROM curl as certs
 RUN curl -o /data/psql-cert.crt -L https://dl.cacerts.digicert.com/DigiCertGlobalRootCA.crt.pem
 
 # Base image
-FROM python:3.11.7-slim-bullseye as base
+FROM python:3.11.7-slim-bookworm as base
 
 ARG UID=82
 
