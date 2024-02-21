@@ -29,7 +29,6 @@ interface AppBarProps {
 interface StyledAppBarProps extends AppBarProps {
   theme: MiśTheme;
 }
-
 const StyledAppBar = styled(MuiAppBar)<StyledAppBarProps>(
   ({ theme: muiTheme, open }) => ({
     position: 'fixed',
@@ -41,11 +40,19 @@ const StyledAppBar = styled(MuiAppBar)<StyledAppBarProps>(
       duration: muiTheme.transitions.duration.leavingScreen,
     }),
     ...(open && {
-      marginLeft: muiTheme.drawer.width,
-      width: `calc(100% - ${muiTheme.drawer.width}px)`,
+      marginLeft: '240px',
+      width: 'calc(100% - 240px)',
       transition: muiTheme.transitions.create(['width', 'margin'], {
         easing: muiTheme.transitions.easing.sharp,
         duration: muiTheme.transitions.duration.enteringScreen,
+      }),
+    }),
+    ...(!open && {
+      marginLeft: '0',
+      width: '100%',
+      transition: muiTheme.transitions.create(['width', 'margin'], {
+        easing: muiTheme.transitions.easing.sharp,
+        duration: muiTheme.transitions.duration.leavingScreen,
       }),
     }),
   }),

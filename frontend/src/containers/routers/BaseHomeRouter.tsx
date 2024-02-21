@@ -2,9 +2,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import * as React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  useAllBusinessAreasQuery,
-} from '@generated/graphql';
+import { useAllBusinessAreasQuery } from '@generated/graphql';
 import { AppBar } from '@components/core/AppBar';
 import { Drawer } from '@components/core/Drawer/Drawer';
 import { LoadingComponent } from '@components/core/LoadingComponent';
@@ -14,8 +12,13 @@ import { theme } from 'src/theme';
 
 const Root = styled.div`
   display: flex;
+  width: 100%;
 `;
+
 const MainContent = styled.div`
+  padding: 0px 1px;
+  transition: margin-left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+  width: 100%;
   flex-grow: 1;
   height: 100vh;
   overflow: auto;
@@ -44,10 +47,7 @@ export const BaseHomeRouter: React.FC = () => {
       fetchPolicy: 'cache-first',
     });
 
-  if (
-    !businessAreaData ||
-    businessAreaLoading
-  ) {
+  if (!businessAreaData || businessAreaLoading) {
     return <LoadingComponent />;
   }
 

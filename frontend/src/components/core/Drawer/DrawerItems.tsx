@@ -6,7 +6,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { Box, ListItemButton, Theme } from '@mui/material';
+import { Box, ListItemButton } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -29,22 +29,18 @@ const Text = styled(ListItemText)`
   }
 `;
 
-const Icon = styled(ListItemIcon)`
-  && {
-    min-width: 0;
-    padding-right: ${({ theme }) => theme.spacing(4)}px;
-  }
-`;
+const Icon = styled(ListItemIcon)(() => ({
+  minWidth: 0,
+  paddingRight: '32px',
+}));
 
 interface SubListProps {
-  theme: Theme;
   open: boolean;
   component: ElementType;
 }
 
 const SubList = styled(List)<SubListProps>`
-  padding-left: ${({ theme, open }) =>
-    open ? `${theme.spacing(10)}px !important` : 0};
+  padding-left: ${({ open }) => (open ? '32px !important' : 0)};
 `;
 
 export const StyledLink = styled.a`

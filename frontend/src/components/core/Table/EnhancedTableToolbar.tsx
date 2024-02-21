@@ -11,7 +11,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   paddingLeft: theme.spacing(6),
   paddingRight: theme.spacing(1),
   color: theme.palette.text.primary,
-  backgroundColor: theme.palette.secondary.dark,
+  backgroundColor: 'white',
 }));
 
 const StyledTypography = styled(Typography)({
