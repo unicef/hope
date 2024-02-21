@@ -11,9 +11,9 @@ exports[`components/grievances/GrievancesDashboard/TicketsByCategorySection shou
       Tickets by Category
     </div>
     <canvas
-      class="chartjs-render-monitor"
       height="0"
-      style="display: block; width: 0px; height: 0px;"
+      role="img"
+      style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
       width="0"
     />
   </div>

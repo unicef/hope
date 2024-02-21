@@ -12,6 +12,7 @@ import { App } from './App';
 import setupInternalization from './i18n';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
+import React from 'react';
 
 ChartJS.register(ArcElement, LinearScale, CategoryScale, BarElement);
 // TODO fix chart config
@@ -36,9 +37,9 @@ if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {
 
 const root = createRoot(document.getElementById('root'));
 root.render(
-  // <React.StrictMode>
-  <App />,
-  // </React.StrictMode>,
+  <React.StrictMode>
+    <App />,
+  </React.StrictMode>,
 );
 
 // If you want your app to work offline and load faster, you can change

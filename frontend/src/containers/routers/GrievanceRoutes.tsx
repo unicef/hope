@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useLocation, useRoutes } from 'react-router-dom';
+import { useRoutes } from 'react-router-dom';
 import { CreateFeedbackPage } from '../pages/accountability/feedback/CreateFeedbackPage';
 import { EditFeedbackPage } from '../pages/accountability/feedback/EditFeedbackPage';
 import { FeedbackDetailsPage } from '../pages/accountability/feedback/FeedbackDetailsPage';
@@ -11,64 +11,61 @@ import { GrievancesDetailsPage } from '../pages/grievances/GrievancesDetailsPage
 import { GrievancesTablePage } from '../pages/grievances/GrievancesTablePage';
 
 export const GrievanceRoutes = (): React.ReactElement => {
-  const location = useLocation();
-  const path = location.pathname;
-
   const grievanceRoutes = [
     {
-      path: `${path}/grievance/new-ticket`,
+      path: 'grievance/new-ticket',
       element: <CreateGrievancePage />,
     },
     {
-      path: `${path}/grievance/edit-ticket/user-generated/:id`,
+      path: 'grievance/edit-ticket/user-generated/:id',
       element: <EditGrievancePage />,
     },
     {
-      path: `${path}/grievance/edit-ticket/system-generated/:id`,
+      path: 'grievance/edit-ticket/system-generated/:id',
       element: <EditGrievancePage />,
     },
     {
-      path: `${path}/grievance/tickets/user-generated/:id`,
+      path: 'grievance/tickets/user-generated/:id',
       element: <GrievancesDetailsPage />,
     },
     {
-      path: `${path}/grievance/tickets/system-generated/:id`,
+      path: 'grievance/tickets/system-generated/:id',
       element: <GrievancesDetailsPage />,
     },
     {
-      path: `${path}/grievance/rdi/:id`,
+      path: 'grievance/rdi/:id',
       element: <GrievancesTablePage />,
     },
     {
-      path: `${path}/grievance/payment-verification/:cashPlanId`,
+      path: 'grievance/payment-verification/:cashPlanId',
       element: <GrievancesTablePage />,
     },
     {
-      path: `${path}/grievance/tickets/user-generated`,
+      path: 'grievance/tickets/user-generated',
       element: <GrievancesTablePage />,
     },
     {
-      path: `${path}/grievance/tickets/system-generated`,
+      path: 'grievance/tickets/system-generated',
       element: <GrievancesTablePage />,
     },
     {
-      path: `${path}/grievance/dashboard`,
+      path: 'grievance/dashboard',
       element: <GrievancesDashboardPage />,
     },
     {
-      path: `${path}/grievance/feedback/create`,
+      path: 'grievance/feedback/create',
       element: <CreateFeedbackPage />,
     },
     {
-      path: `${path}/grievance/feedback/edit-ticket/:id`,
+      path: 'grievance/feedback/edit-ticket/:id',
       element: <EditFeedbackPage />,
     },
     {
-      path: `${path}/grievance/feedback/:id`,
+      path: 'grievance/feedback/:id',
       element: <FeedbackDetailsPage />,
     },
     {
-      path: `${path}/grievance/feedback`,
+      path: 'grievance/feedback',
       element: <FeedbackPage />,
     },
   ];

@@ -14,9 +14,9 @@ exports[`components/grievances/GrievancesDashboard/TicketsByLocationAndCategoryS
       class="MuiBox-root css-cgq59l"
     >
       <canvas
-        class="chartjs-render-monitor"
         height="0"
-        style="display: block;"
+        role="img"
+        style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
         width="0"
       />
     </div>
