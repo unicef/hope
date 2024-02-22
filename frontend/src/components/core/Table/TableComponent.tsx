@@ -27,7 +27,7 @@ const Root = styled('div')`
 
 const Paper = styled(MuiPaper)`
   width: 100%;
-  margin-bottom: ${({ theme }) => theme.spacing(2)}px;
+  margin-bottom: 8px;
 `;
 
 const Table = styled(MuiTable)`

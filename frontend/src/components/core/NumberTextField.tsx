@@ -27,6 +27,7 @@ export function NumberTextField({
       <TextContainer
         {...otherProps}
         value={value}
+        size="medium"
         placeholder={placeholder}
         onChange={onChange}
         variant="outlined"
@@ -35,10 +36,10 @@ export function NumberTextField({
         InputProps={
           icon
             ? {
-              startAdornment: (
+                startAdornment: (
                   <InputAdornment position="start">{icon}</InputAdornment>
-              ),
-            }
+                ),
+              }
             : null
         }
       />

@@ -14,8 +14,7 @@ interface FiltersSectionProps {
 const FiltersPaper = styled(Paper)`
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(2)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: 8px 44px;
 `;
 
 export const FiltersSection: React.FC<FiltersSectionProps> = ({

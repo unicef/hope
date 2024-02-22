@@ -31,6 +31,7 @@ const muiTheme = createTheme({
 export const FONT = 'Roboto';
 export const theme = {
   ...muiTheme,
+  spacing: muiTheme.spacing,
   drawer: {
     width: 270,
   },

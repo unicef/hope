@@ -80,7 +80,7 @@ export function FormikSelectField({
           showX && (
             <EndInputAdornment position="end">
               <IconButton
-                size="small"
+                size="medium"
                 onClick={() => {
                   form.setFieldValue(field.name, multiple ? [] : '');
                 }}

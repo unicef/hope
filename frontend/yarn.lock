@@ -2465,10 +2465,10 @@
     "@mui/utils" "^5.15.9"
     prop-types "^15.8.1"
 
-"@mui/styled-engine-sc@^6.0.0-alpha.14":
-  version "6.0.0-alpha.16"
-  resolved "https://registry.yarnpkg.com/@mui/styled-engine-sc/-/styled-engine-sc-6.0.0-alpha.16.tgz#2e4cb8bb12ad981641721d52dd3a4ae707158bb5"
-  integrity sha512-hZT4xPk/zvFtNvUS/VumrtSe+sV2eZB2Z048z0RGgxMDLTGgWAIs4kJ+YAS16ugmE2nwrlaZhpfr/1lD7gd7xg==
+"@mui/styled-engine-sc@^6.0.0-alpha.17":
+  version "6.0.0-alpha.17"
+  resolved "https://registry.yarnpkg.com/@mui/styled-engine-sc/-/styled-engine-sc-6.0.0-alpha.17.tgz#8f97d86998b534f57a04b5fa853151cde1689f64"
+  integrity sha512-pHxm8kvt7kf0Gei7+ZLr/AY2+t7FZs/JKLMCJhiBcMAWVgZXYjWfysQPeZ9sjC25eE9eiL7af/f+F8B1EqR9eA==
   dependencies:
     "@babel/runtime" "^7.23.9"
     csstype "^3.1.3"
@@ -4639,6 +4639,11 @@ dataloader@^2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/dataloader/-/dataloader-2.2.2.tgz#216dc509b5abe39d43a9b9d97e6e5e473dfbe3e0"
   integrity sha512-8YnDaaf7N3k/q5HnTJVuzSyLETjoZjVmHc4AeKAzOvKHEFQKcn64OKBfzHYtE9zGjctNM7V9I0MfnUVLpi7M5g==
+
+date-fns@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-3.3.1.tgz#7581daca0892d139736697717a168afbb908cfed"
+  integrity sha512-y8e109LYGgoQDveiEBD3DYXKba1jWf5BA8YU1FL5Tvm0BTdEfy54WLCwnuYWZNnzzvALy/QQ4Hov+Q9RVRv+Zw==
 
 debounce@^1.2.0:
   version "1.2.1"
