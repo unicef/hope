@@ -15,6 +15,7 @@ from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
 from hct_mis_api.apps.payment.fixtures import PaymentFactory, PaymentPlanFactory
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
@@ -38,6 +39,12 @@ def file_with_existing_delivery_dates() -> BytesIO:
 
 def file_one_record() -> BytesIO:
     content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/import_file_one_record.xlsx").read_bytes()
+    file = BytesIO(content)
+    return file
+
+
+def file_reference_id() -> BytesIO:
+    content = Path(f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/import_file_reference_id.xlsx").read_bytes()
     file = BytesIO(content)
     return file
 
@@ -169,3 +176,32 @@ class TestDeliveryDate(APITestCase):
         self.assertEqual(self.payment_1.delivery_date, datetime(2023, 5, 5).replace(tzinfo=utc))  # only this changed
         self.assertEqual(self.payment_2.delivery_date, datetime(2023, 12, 24).replace(tzinfo=utc))
         self.assertEqual(self.payment_3.delivery_date, datetime(2023, 12, 24).replace(tzinfo=utc))
+
+    @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    def test_upload_reference_id(self, mock_exchange_rate: Any) -> None:
+        pp = PaymentPlanFactory(
+            dispersion_start_date=datetime(2024, 2, 10).date(),
+            dispersion_end_date=datetime(2024, 12, 10).date(),
+            status=PaymentPlan.Status.ACCEPTED,
+        )
+
+        payment_1 = PaymentFactory(parent=pp)
+        payment_1.unicef_id = "RCPT-0060-24-0.000.665"
+        payment_1.save()
+
+        payment_2 = PaymentFactory(parent=pp)
+        payment_2.unicef_id = "RCPT-0060-24-0.000.666"
+        payment_2.save()
+
+        file_with_reference_id = file_reference_id()
+
+        import_service = XlsxPaymentPlanImportPerFspService(pp, file_with_reference_id)
+        import_service.open_workbook()
+        import_service.validate()
+        import_service.import_payment_list()
+
+        payment_1.refresh_from_db()
+        payment_2.refresh_from_db()
+
+        self.assertEqual(payment_1.transaction_reference_id, "ref1")
+        self.assertEqual(payment_2.transaction_reference_id, "ref2")

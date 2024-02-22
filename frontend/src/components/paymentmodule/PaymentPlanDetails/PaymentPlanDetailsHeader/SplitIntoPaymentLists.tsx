@@ -51,8 +51,11 @@ export const SplitIntoPaymentLists = ({
     splitType: Yup.string().required("Split Type is required"),
     paymentsNo: Yup.number().when("splitType", {
       is: "BY_RECORDS",
-      then: (schema) => schema.required("Payments Number is required")
-    }).min(10, "Payments Number must be greater than 10").max(paymentPlan.paymentItems.totalCount, `Payments Number must be less than ${paymentPlan.paymentItems.totalCount}`)
+      then: (schema) => schema
+        .required("Payments Number is required")
+        .min(10, "Payments Number must be greater than 10")
+        .max(paymentPlan.paymentItems.totalCount, `Payments Number must be less than ${paymentPlan.paymentItems.totalCount}`),
+    }),
   });
 
   const handleSplit = async (values): Promise<void> => {
