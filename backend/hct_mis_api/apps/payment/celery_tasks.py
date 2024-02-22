@@ -23,7 +23,7 @@ from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
 )
-from hct_mis_api.apps.payment.utils import get_quantity_in_usd
+from hct_mis_api.apps.payment.utils import get_quantity_in_usd, send_email_notification
 from hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service import (
     XlsxPaymentPlanImportPerFspService,
 )
@@ -142,16 +142,7 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
-                if payment_plan.business_area.enable_email_notification:
-                    context = service.get_email_context(user)
-                    transaction.on_commit(
-                        lambda: user.email_user(
-                            context["title"],
-                            render_to_string(service.text_template, context=context),
-                            settings.EMAIL_HOST_USER,
-                            html_message=render_to_string(service.html_template, context=context),
-                        )
-                    )
+                send_email_notification(user, service, payment_plan.business_area.enable_email_notification)
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -185,16 +176,7 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
-                if payment_plan.business_area.enable_email_notification:
-                    context = service.get_email_context(user)
-                    transaction.on_commit(
-                        lambda: user.email_user(
-                            context["title"],
-                            render_to_string(service.text_template, context=context),
-                            settings.EMAIL_HOST_USER,
-                            html_message=render_to_string(service.html_template, context=context),
-                        )
-                    )
+                send_email_notification(user, service, payment_plan.business_area.enable_email_notification)
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -600,16 +582,7 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
             payment_plan.export_pdf_file_summary = file_pdf_obj
             payment_plan.save()
 
-            if payment_plan.business_area.enable_email_notification:
-                context = service.get_email_context(user)
-                transaction.on_commit(
-                    lambda: user.email_user(
-                        context["title"],
-                        render_to_string(service.text_template, context=context),
-                        settings.EMAIL_HOST_USER,
-                        html_message=render_to_string(service.html_template, context=context),
-                    )
-                )
+            send_email_notification(user, service, payment_plan.business_area.enable_email_notification)
 
     except Exception as e:
         logger.exception("Export PDF Payment Plan Summary Error")
