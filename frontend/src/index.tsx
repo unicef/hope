@@ -23,13 +23,19 @@ Chart.defaults.global.plugins.datalabels.font.family = FONT;
 Chart.defaults.global.plugins.datalabels.font.weight = 'bold';
 
 setupInternalization();
-if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN)
+if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     release: packageJson.version,
     environment: process.env.SENTRY_ENVIRONMENT,
     ignoreErrors: ['Permission Denied'],
-  });
+    integrations: [
+      Sentry.replayIntegration(),
+    ],
+     // Session Replay
+     replaysSessionSampleRate:  0.1, // 10% in production
+     replaysOnErrorSampleRate: 1.0, // 100% when sampling sessions where errors occur
+  })};
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
