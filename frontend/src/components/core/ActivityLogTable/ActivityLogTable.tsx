@@ -1,4 +1,4 @@
-import { Paper } from '@mui/material';
+import { Paper, styled } from '@mui/material';
 import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import TablePagination from '@mui/material/TablePagination';
@@ -7,21 +7,21 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded';
 import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { LogEntryNode } from '@generated/graphql';
 import { headCells } from './headCells';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
 
-const Table = styled.div`
+const Table = styled('div')`
   display: flex;
   flex-direction: column;
 `;
+
 interface HeadingCellProps {
   weight?: number;
 }
 
-const HeadingCell = styled.div<HeadingCellProps>`
+const HeadingCell = styled('div')<HeadingCellProps>`
   display: flex;
   flex: ${({ weight }) => weight || 1};
   padding: 16px;
@@ -33,17 +33,18 @@ const HeadingCell = styled.div<HeadingCellProps>`
   letter-spacing: 0.01071em;
   vertical-align: inherit;
 `;
-const PaperContainer = styled(Paper)`
-  width: 100%;
-  padding: ${({ theme }) => theme.spacing(5)}px 0;
-  margin-bottom: ${({ theme }) => theme.spacing(5)}px;
-`;
-const Toolbar = styled.div`
-  margin: 0 ${({ theme }) => theme.spacing(6)}px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`;
+const PaperContainer = styled(Paper)(() => ({
+  width: '100%',
+  padding: '20px 0',
+  marginBottom: '20px',
+}));
+
+const Toolbar = styled('div')(() => ({
+  margin: '0 24px',
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+}));
 
 interface ActivityLogTableProps {
   logEntries: LogEntryNode[];

@@ -102,7 +102,7 @@ export function GrievancesTable({
 
   const [selectedTicketsPerPage, setSelectedTicketsPerPage] = useState<{
     [
-    key: number
+      key: number
     ]: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'][];
   }>({ 0: [] });
 
@@ -250,7 +250,7 @@ export function GrievancesTable({
             display="flex"
             flexDirection="row"
             marginX={6}
-            gap={16}
+            gap={4}
             component="div"
           >
             {' '}
@@ -289,11 +289,11 @@ export function GrievancesTable({
                 >
                   {t('NEW TICKET')}
                 </ButtonTooltip>
-            )}
+              )}
           </Box>
           <UniversalTable<
-          AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-          AllGrievanceTicketQueryVariables
+            AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+            AllGrievanceTicketQueryVariables
           >
             isOnPaper={false}
             headCells={isAllPrograms ? headCellsWithProgramColumn : headCells}

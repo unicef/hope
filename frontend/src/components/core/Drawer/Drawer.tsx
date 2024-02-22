@@ -13,6 +13,7 @@ import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
 import styled from 'styled-components';
+
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
   if (window.location.hostname === 'localhost') {
@@ -89,7 +90,7 @@ const ToolbarScrollBox = styled(Box)`
 `;
 
 const Icon = styled(ListItemIcon)`
-  padding-right: 32px;
+  padding-right: 20px;
 `;
 
 const Version = styled('div')`

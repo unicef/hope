@@ -81,7 +81,8 @@ export const SelectFilter = ({
             }}
             renderValue={(selected) => {
               const selectedOption = React.Children.toArray(children).find(
-                (child) => child.props.value === selected,
+                (child): child is React.ReactElement<any> =>
+                  React.isValidElement(child) && child.props.value === selected,
               );
 
               return (
