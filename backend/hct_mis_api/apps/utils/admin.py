@@ -178,7 +178,11 @@ def is_exporting_xlsx_file(btn: Button) -> bool:
 
 
 class PaymentCeleryTasksMixin:
-    @button(visible=lambda btn: is_preparing_payment_plan(btn), enabled=lambda btn: is_enabled(btn))
+
+    @button(
+        visible=lambda btn: is_preparing_payment_plan(btn),
+        enabled=lambda btn: is_enabled(btn)
+    )
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         if request.method == "POST":
             pass
@@ -188,11 +192,14 @@ class PaymentCeleryTasksMixin:
                 request=request,
                 action=self.restart_preparing_payment_plan,
                 message="Do you confirm to restart payment plan task?",
-                success_message="Successfully executed",
+                success_message="Successfully executed"
             )
         return None
 
-    @button(visible=lambda btn: is_importing_entitlements_xlsx_file(btn), enabled=lambda btn: is_enabled(btn))
+    @button(
+        visible=lambda btn: is_importing_entitlements_xlsx_file(btn),
+        enabled=lambda btn: is_enabled(btn)
+    )
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         if request.method == "POST":
             pass
@@ -201,12 +208,15 @@ class PaymentCeleryTasksMixin:
                 modeladmin=self,
                 request=request,
                 action=self.restart_importing_entitlements_xlsx_file,
-                message="Do you confirm to restart importing entitlements xlsx file task?",
-                success_message="Successfully executed",
+                message="Do you confirm to restart importing entitlements xlsx file task?"
             )
         return None
 
-    @button(visible=lambda btn: is_exporting_xlsx_file(btn), enabled=lambda btn: is_enabled(btn))
+
+    @button(
+        visible=lambda btn: is_exporting_xlsx_file(btn),
+        enabled=lambda btn: is_enabled(btn)
+    )
     def restart_exporting_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         if request.method == "POST":
             pass
@@ -216,6 +226,6 @@ class PaymentCeleryTasksMixin:
                 request=request,
                 action=self.restart_exporting_xlsx_file,
                 message="Do you confirm to restart exporting xlsx file task?",
-                success_message="Successfully executed",
+                success_message="Successfully executed"
             )
         return None
