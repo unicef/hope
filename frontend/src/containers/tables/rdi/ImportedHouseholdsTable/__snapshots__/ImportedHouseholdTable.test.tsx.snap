@@ -617,7 +617,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
               class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
             >
               <time
-                datetime="1610319600000"
+                datetime="1610323200000"
               >
                 11 Jan 2021
               </time>

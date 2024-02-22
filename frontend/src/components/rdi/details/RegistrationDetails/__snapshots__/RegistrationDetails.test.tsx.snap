@@ -97,7 +97,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                     color="textSecondary"
                   >
                     <time
-                      datetime="1644230752336"
+                      datetime="1644234352336"
                     >
                       7 Feb 2022 11:45 AM
                     </time>
