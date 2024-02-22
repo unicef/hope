@@ -7,6 +7,7 @@ from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.db.models import JSONField, QuerySet
 from django.http import HttpRequest, HttpResponse
 
+from admin_extra_buttons.buttons import Button
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin, confirm_action
 from adminactions.helpers import AdminActionPermMixin
@@ -16,6 +17,7 @@ from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.utils.security import is_root
 
 
@@ -138,3 +140,82 @@ class BusinessAreaForHouseholdCollectionListFilter(BusinessAreaForCollectionsLis
 
 class BusinessAreaForIndividualCollectionListFilter(BusinessAreaForCollectionsListFilter):
     model_filter_field = "individuals__business_area__id"
+
+
+def is_enabled(btn: Button) -> bool:
+    return btn.request.user.is_superuser
+
+
+def get_payment_plan_from_button_context(btn: Button) -> Optional[PaymentPlan]:
+    if btn:
+        payment_plan_id = btn.request.resolver_match.kwargs.get("object_id")
+        return PaymentPlan.objects.get(id=payment_plan_id)
+    return None
+
+
+def is_payment_plan_in_status(btn: Button, status: str) -> bool:
+    if payment_plan := get_payment_plan_from_button_context(btn):
+        return payment_plan.status == status
+    return False
+
+
+def is_background_action_in_status(btn: Button, background_status: str) -> bool:
+    if payment_plan := get_payment_plan_from_button_context(btn):
+        return payment_plan.background_action_status == background_status
+    return False
+
+
+def is_preparing_payment_plan(btn: Button) -> bool:
+    return is_payment_plan_in_status(btn, PaymentPlan.Status.PREPARING)
+
+
+def is_importing_entitlements_xlsx_file(btn: Button) -> bool:
+    return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS)
+
+
+def is_exporting_xlsx_file(btn: Button) -> bool:
+    return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING)
+
+
+class PaymentCeleryTasksMixin:
+    @button(visible=lambda btn: is_preparing_payment_plan(btn), enabled=lambda btn: is_enabled(btn))
+    def restart_preparing_payment_plan(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        if request.method == "POST":
+            pass
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.restart_preparing_payment_plan,
+                message="Do you confirm to restart payment plan task?",
+                success_message="Successfully executed",
+            )
+        return None
+
+    @button(visible=lambda btn: is_importing_entitlements_xlsx_file(btn), enabled=lambda btn: is_enabled(btn))
+    def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        if request.method == "POST":
+            pass
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.restart_importing_entitlements_xlsx_file,
+                message="Do you confirm to restart importing entitlements xlsx file task?",
+                success_message="Successfully executed",
+            )
+        return None
+
+    @button(visible=lambda btn: is_exporting_xlsx_file(btn), enabled=lambda btn: is_enabled(btn))
+    def restart_exporting_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        if request.method == "POST":
+            pass
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.restart_exporting_xlsx_file,
+                message="Do you confirm to restart exporting xlsx file task?",
+                success_message="Successfully executed",
+            )
+        return None
