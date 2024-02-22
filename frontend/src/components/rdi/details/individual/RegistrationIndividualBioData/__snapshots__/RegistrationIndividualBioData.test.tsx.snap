@@ -133,7 +133,7 @@ exports[`components/rdi/details/individual/RegistrationIndividualBioData should 
             data-cy="label-Date of Birth"
           >
             <time
-              datetime="-894679200000"
+              datetime="-894672000000"
             >
               26 Aug 1941
             </time>

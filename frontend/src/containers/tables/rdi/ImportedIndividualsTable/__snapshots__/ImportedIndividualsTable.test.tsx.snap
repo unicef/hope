@@ -721,7 +721,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <time
-                  datetime="670374000000"
+                  datetime="670377600000"
                 >
                   31 Mar 1991
                 </time>

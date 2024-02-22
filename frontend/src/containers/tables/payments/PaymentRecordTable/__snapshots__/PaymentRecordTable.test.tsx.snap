@@ -15,7 +15,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render loading 1`]
           class="sc-hABBmJ IOzft MuiBox-root css-0"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
           >
             <h6
               class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
@@ -450,7 +450,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
           class="sc-hABBmJ IOzft MuiBox-root css-0"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
           >
             <h6
               class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
@@ -751,7 +751,7 @@ exports[`containers/tables/payments/PaymentRecordTable should render with data 1
                 class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignRight MuiTableCell-sizeMedium css-177gid-MuiTableCell-root"
               >
                 <time
-                  datetime="1610381153000"
+                  datetime="1610384753000"
                 >
                   11 Jan 2021
                 </time>

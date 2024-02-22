@@ -18,7 +18,7 @@ exports[`containers/tables//Communication/CommunicationTable should render loadi
             class="sc-fmKFGs eUWQFp MuiBox-root css-0"
           >
             <div
-              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
+              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
             >
               <h6
                 class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
@@ -431,7 +431,7 @@ exports[`containers/tables//Communication/CommunicationTable should render with 
             class="sc-fmKFGs eUWQFp MuiBox-root css-0"
           >
             <div
-              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1f0itq8-MuiToolbar-root"
+              class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
             >
               <h6
                 class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"

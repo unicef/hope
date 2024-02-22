@@ -133,7 +133,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Date of Birth"
           >
             <time
-              datetime="-2176680240000"
+              datetime="-2176675200000"
             >
               10 Jan 1901
             </time>
@@ -565,7 +565,7 @@ exports[`components/population/IndividualBioData should render 1`] = `
             data-cy="label-Date of last screening against sanctions list"
           >
             <time
-              datetime="1644302139718"
+              datetime="1644305739718"
             >
               8 Feb 2022
             </time>
