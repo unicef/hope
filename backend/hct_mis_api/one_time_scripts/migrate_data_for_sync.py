@@ -696,7 +696,7 @@ def handle_non_program_objects(
 
 def create_program_with_matching_collecting_type(
     business_area: BusinessArea,
-    collecting_type: DataCollectingType,
+    collecting_type: DataCollectingType.Type,
     unknown_unassigned_program: Optional[Program] = None,
 ) -> Program:
     if collecting_type == COLLECT_TYPE_FULL:
