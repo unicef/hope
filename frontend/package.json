@@ -29,6 +29,7 @@
     "@mui/lab": "^5.0.0-alpha.163",
     "@mui/material": "^5.15.10",
     "@mui/styled-engine-sc": "^6.0.0-alpha.14",
+    "@mui/x-date-pickers": "^6.19.4",
     "@sentry/react": "^7.102.0",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.16",
