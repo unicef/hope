@@ -88,7 +88,8 @@ class HouseholdAdmin(
     list_filter = (
         DepotManager,
         ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
-        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
         QueryStringFilter,
         "withdrawn",
     )
