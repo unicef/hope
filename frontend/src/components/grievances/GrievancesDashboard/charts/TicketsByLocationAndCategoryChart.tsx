@@ -12,7 +12,7 @@ interface TicketsByLocationAndCategoryChartProps {
 }
 
 export const TicketsByLocationAndCategoryChart: React.FC<
-TicketsByLocationAndCategoryChartProps
+  TicketsByLocationAndCategoryChartProps
 > = ({ data }) => {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
@@ -85,7 +85,9 @@ TicketsByLocationAndCategoryChartProps
 
   return (
     <Box flexDirection="column">
-      <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />
+      <div style={{ height: '400px' }}>
+        <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />
+      </div>
       {data.labels.length > lessDataCount ? (
         <Box textAlign="center" mt={4} ml={2} mr={2} letterSpacing={1.75}>
           <Button

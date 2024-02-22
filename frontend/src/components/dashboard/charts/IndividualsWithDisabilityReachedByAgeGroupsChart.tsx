@@ -88,5 +88,9 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
       },
     },
   } as any;
-  return <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />;
+  return (
+    <div style={{ height: '400px' }}>
+      <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />
+    </div>
+  );
 };

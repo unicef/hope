@@ -37,7 +37,7 @@ export const ProgrammesBySector = ({
   const options: any = {
     indexAxis: 'y',
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: true,
     plugins: {
       legend: {
         position: 'bottom',
@@ -68,5 +68,9 @@ export const ProgrammesBySector = ({
     },
   };
 
-  return <Bar data={chartData} options={options} />;
+  return (
+    <div style={{ height: '400px' }}>
+      <Bar data={chartData} options={options} />
+    </div>
+  );
 };

@@ -36,7 +36,7 @@ const TableWrapper = styled.div`
 `;
 
 const NoCashPlansContainer = styled.div`
-  margin-top: ${({ theme }) => theme.spacing(30)}px;
+  margin-top: 120px;
 `;
 const NoCashPlansTitle = styled.div`
   color: rgba(0, 0, 0, 0.38);
