@@ -47,6 +47,8 @@ if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {
       }),
       Sentry.replayIntegration(),
     ],
+    replaysSessionSampleRate: 0.1, // 10% in production
+    replaysOnErrorSampleRate: 1.0, // 100% when sampling sessions where errors occur
   });
 }
 
