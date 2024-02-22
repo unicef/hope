@@ -159,7 +159,9 @@ def create_grievance_ticket_with_details(
     ticket_details.populate_cross_area_flag()
 
     if ticket.business_area.enable_email_notification:
-        GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
+        GrievanceNotification.send_all_notifications(
+            GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
+        )
 
     return ticket, ticket_details
 
