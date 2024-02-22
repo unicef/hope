@@ -13,6 +13,12 @@ import setupInternalization from './i18n';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
 import React from 'react';
+import {
+  createRoutesFromChildren,
+  matchRoutes,
+  useLocation,
+  useNavigationType,
+} from 'react-router-dom';
 
 ChartJS.register(ArcElement, LinearScale, CategoryScale, BarElement);
 // TODO fix chart config
@@ -31,7 +37,16 @@ if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {
     release: packageJson.version,
     environment: process.env.SENTRY_ENVIRONMENT,
     ignoreErrors: ['Permission Denied'],
-    integrations: [Sentry.replayIntegration()],
+    integrations: [
+      Sentry.reactRouterV6BrowserTracingIntegration({
+        useEffect: React.useEffect,
+        useLocation,
+        useNavigationType,
+        createRoutesFromChildren,
+        matchRoutes,
+      }),
+      Sentry.replayIntegration(),
+    ],
   });
 }
 
