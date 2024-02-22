@@ -93,5 +93,9 @@ export function TotalTransferredByMonth({
     },
   };
 
-  return <Bar data={chartdata} options={options} />;
+  return (
+    <div style={{ height: '400px' }}>
+      <Bar data={chartdata} options={options} />
+    </div>
+  );
 }

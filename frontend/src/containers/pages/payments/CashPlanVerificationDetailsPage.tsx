@@ -36,8 +36,7 @@ const Container = styled.div`
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: 32px 44px;
   flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
@@ -177,7 +176,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
               verificationPlan={edge.node}
               planNode={cashPlan}
             />
-        ))
+          ))
         : null}
       {canSeeVerificationRecords() ? (
         <>
@@ -220,7 +219,7 @@ export function CashPlanVerificationDetailsPage(): React.ReactElement {
           <UniversalActivityLogTablePaymentVerification
             objectId={cashPlan.id}
           />
-      )}
+        )}
     </>
   );
 }

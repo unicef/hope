@@ -58,5 +58,9 @@ export const TicketsByCategoryChart = ({
     indexAxis: 'y',
   };
 
-  return <Bar data={chartData} options={options} />;
+  return (
+    <div style={{ height: '400px' }}>
+      <Bar data={chartData} options={options} />
+    </div>
+  );
 };
