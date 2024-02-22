@@ -19,6 +19,7 @@ import {
   Routes,
 } from 'react-router-dom';
 import { Providers } from './providers';
+import * as Sentry from '@sentry/react';
 
 const Root: React.FC = () => (
   <Routes>
@@ -56,7 +57,9 @@ const Root: React.FC = () => (
   </Routes>
 );
 
-const router = createBrowserRouter([{ path: '*', Component: Root }]);
+const sentryCreateBrowserRouter =
+  Sentry.wrapCreateBrowserRouter(createBrowserRouter);
+const router = sentryCreateBrowserRouter([{ path: '*', Component: Root }]);
 
 export const App: React.FC = () => (
   <Providers>
