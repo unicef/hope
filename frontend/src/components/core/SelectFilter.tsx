@@ -36,7 +36,7 @@ const StyledSelect = styled(Select)`
   white-space: nowrap;
 `;
 
-export function SelectFilter({
+export const SelectFilter = ({
   label,
   children,
   onChange,
@@ -45,7 +45,7 @@ export function SelectFilter({
   fullWidth = true,
   disableClearable = false,
   ...otherProps
-}): React.ReactElement {
+}): React.ReactElement => {
   const checkValue = (value): boolean => {
     if (Array.isArray(value)) {
       return value.length > 0;
@@ -61,11 +61,11 @@ export function SelectFilter({
         theme={{ borderRadius }}
         fullWidth={fullWidth}
         variant="outlined"
-        margin="dense"
       >
-        <Box display="grid">
+        <Box display="flex" alignItems="center">
           <InputLabel>{label}</InputLabel>
           <StyledSelect
+            size="medium"
             onChange={onChange}
             variant="outlined"
             label={label}
@@ -79,30 +79,42 @@ export function SelectFilter({
                 horizontal: 'left',
               },
             }}
-            renderValue={(selected) => (
-              <div>
-                {icon && (
-                  <StartInputAdornment position="start">
-                    {icon}
-                  </StartInputAdornment>
-                )}
-                {String(selected)}
-                {isValue && !disableClearable && (
-                  <EndInputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        onChange({
-                          target: { value: otherProps.multiple ? [] : '' },
-                        });
-                      }}
-                    >
-                      <XIcon fontSize="small" />
-                    </IconButton>
-                  </EndInputAdornment>
-                )}
-              </div>
-            )}
+            renderValue={(selected) => {
+              const selectedOption = React.Children.toArray(children).find(
+                (child) => child.props.value === selected,
+              );
+
+              return (
+                <Box display="flex" alignItems="center">
+                  {icon && (
+                    <StartInputAdornment position="start">
+                      {icon}
+                    </StartInputAdornment>
+                  )}
+                  {selectedOption
+                    ? selectedOption.props.children
+                    : String(selected)}
+                </Box>
+              );
+            }}
+            endAdornment={
+              isValue &&
+              !disableClearable && (
+                <EndInputAdornment position="end">
+                  <IconButton
+                    size="small"
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      onChange({
+                        target: { value: otherProps.multiple ? [] : '' },
+                      });
+                    }}
+                  >
+                    <XIcon fontSize="small" />
+                  </IconButton>
+                </EndInputAdornment>
+              )
+            }
             {...otherProps}
           >
             {children}
@@ -111,4 +123,4 @@ export function SelectFilter({
       </StyledFormControl>
     </SelectWrapper>
   );
-}
+};

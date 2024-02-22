@@ -65,7 +65,7 @@ export function HouseholdFilters({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container item xs={6} spacing={0}>
+        <Grid container alignItems="center" item xs={6} spacing={0}>
           <Grid item xs={8}>
             <SearchTextField
               label={t('Search')}

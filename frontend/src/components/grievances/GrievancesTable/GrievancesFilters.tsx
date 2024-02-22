@@ -120,7 +120,7 @@ export const GrievancesFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container item xs={6} spacing={0}>
+        <Grid container item xs={6} alignItems="center" spacing={0}>
           <Grid item xs={8}>
             <SearchTextField
               value={filter.search}
@@ -408,7 +408,7 @@ export const GrievancesFilters = ({
                 <MenuItem value="all">{t('All Tickets')}</MenuItem>
               </SelectFilter>
             </Grid>
-        )}
+          )}
       </Grid>
     </FiltersSection>
   );

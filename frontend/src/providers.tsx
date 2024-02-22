@@ -12,8 +12,8 @@ import { ConfirmationDialogProvider } from '@core/ConfirmationDialog';
 import { theme } from './theme';
 import { ProgramProvider } from './programContext';
 import { SnackbarProvider } from '@hooks/useSnackBar';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 
 interface ProvidersProps {
   children: ReactNode[];
@@ -39,7 +39,7 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
       <ThemeProvider theme={theme}>
         <StyledThemeProvider theme={theme}>
           <ConfirmationDialogProvider>
-            <LocalizationProvider dateAdapter={AdapterMoment}>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
               <CssBaseline />
               <ProgramProvider>
                 <SnackbarProvider>{children}</SnackbarProvider>

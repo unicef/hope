@@ -106,6 +106,7 @@ export function BaseAutocomplete({
           label={label}
           variant="outlined"
           margin="dense"
+          size="medium"
           data-cy={`${label}-input`}
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}

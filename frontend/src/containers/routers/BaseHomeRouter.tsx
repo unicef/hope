@@ -12,7 +12,7 @@ import { theme } from 'src/theme';
 
 const Root = styled.div`
   display: flex;
-  width: 100%;
+  width: 100vw;
 `;
 
 const MainContent = styled.div`
