@@ -14,10 +14,10 @@ import { Title } from '@core/Title';
 import { IndividualFlexFieldPhotoModal } from '../IndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  margin-top: ${({ theme }) => theme.spacing(6)}px;
-  margin-bottom: ${({ theme }) => theme.spacing(6)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
+  margin-top: ${({ theme }) => theme.spacing(6)};
+  margin-bottom: ${({ theme }) => theme.spacing(6)};
 `;
 interface IndividualVulnerabilitesProps {
   individual: IndividualNode;

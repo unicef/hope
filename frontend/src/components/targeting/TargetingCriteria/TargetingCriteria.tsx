@@ -28,13 +28,12 @@ import {
 import { TargetingCriteriaDisabled } from './TargetingCriteriaDisabled';
 
 const PaperContainer = styled(Paper)`
-  margin: ${({ theme }) => theme.spacing(5)}px;
+  margin: ${({ theme }) => theme.spacing(5)};
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
 const Title = styled.div`
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -42,7 +41,7 @@ const Title = styled.div`
 
 const Divider = styled.div`
   border-left: 1px solid #b1b1b5;
-  margin: 0 ${({ theme }) => theme.spacing(10)}px;
+  margin: 0 ${({ theme }) => theme.spacing(10)};
   position: relative;
   transform: scale(0.9);
 `;
@@ -75,12 +74,12 @@ const AddCriteria = styled.div`
   border: 2px solid #033f91;
   border-radius: 3px;
   font-size: 16px;
-  padding: ${({ theme }) => theme.spacing(6)}px
-    ${({ theme }) => theme.spacing(28)}px;
+  padding: ${({ theme }) => theme.spacing(6)}
+    ${({ theme }) => theme.spacing(28)};
   cursor: pointer;
   p {
     font-weight: 500;
-    margin: 0 0 0 ${({ theme }) => theme.spacing(2)}px;
+    margin: 0 0 0 ${({ theme }) => theme.spacing(2)};
   }
 `;
 
@@ -218,7 +217,7 @@ export function TargetingCriteria({
                         <Divider>
                           <DividerLabel>Or</DividerLabel>
                         </Divider>
-                        )}
+                      )}
                     </Fragment>
                   ))
                 ) : (

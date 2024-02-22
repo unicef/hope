@@ -22,7 +22,7 @@ const HeaderWrapper = styled.div`
   align-items: center;
   justify-content: center;
   div {
-    margin: 0 0 0 ${({ theme }) => theme.spacing(3)}px;
+    margin: 0 0 0 ${({ theme }) => theme.spacing(3)};
   }
 `;
 const StatusWrapper = styled.div`

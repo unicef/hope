@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { GreyBox } from '@components/core/GreyBox';
 
 const FormLabelContainer = styled.div`
-  margin-bottom: ${({ theme }) => theme.spacing(3)}px;
+  margin-bottom: ${({ theme }) => theme.spacing(3)};
   .MuiFormLabel-root {
     color: ${({ theme }) => theme.palette.text.primary};
   }

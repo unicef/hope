@@ -120,7 +120,7 @@ export const GrievancesFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container item xs={6} alignItems="center" spacing={0}>
+        <Grid container alignItems="flex-end" item xs={6} spacing={0}>
           <Grid item xs={8}>
             <SearchTextField
               value={filter.search}
@@ -131,23 +131,27 @@ export const GrievancesFilters = ({
             />
           </Grid>
           <Grid container item xs={4}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label="Search Type"
-              value={filter.searchType}
-              borderRadius="0px 4px 4px 0px"
-              data-cy="filters-search-type"
-              fullWidth
-              disableClearable
-            >
-              {choicesData?.grievanceTicketSearchTypesChoices?.map(
-                ({ name, value }) => (
-                  <MenuItem key={value} value={value}>
-                    {name}
-                  </MenuItem>
-                ),
-              )}
-            </SelectFilter>
+            <div style={{ paddingBottom: '4px', width: '100%' }}>
+              <SelectFilter
+                onChange={(e) =>
+                  handleFilterChange('searchType', e.target.value)
+                }
+                label="Search Type"
+                value={filter.searchType}
+                borderRadius="0px 4px 4px 0px"
+                data-cy="filters-search-type"
+                fullWidth
+                disableClearable
+              >
+                {choicesData?.grievanceTicketSearchTypesChoices?.map(
+                  ({ name, value }) => (
+                    <MenuItem key={value} value={value}>
+                      {name}
+                    </MenuItem>
+                  ),
+                )}
+              </SelectFilter>
+            </div>
           </Grid>
         </Grid>
         {isAllPrograms && (

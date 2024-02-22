@@ -61,8 +61,9 @@ export function Verification({
       <Consent />
       <Field
         name="consent"
-        label={t('Received Consent*')}
+        label={t('Received Consent')}
         color="primary"
+        required
         fullWidth
         container={false}
         component={FormikCheckboxField}

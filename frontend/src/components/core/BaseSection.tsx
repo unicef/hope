@@ -6,8 +6,7 @@ import { GreyText } from './GreyText';
 
 const PaperContainer = styled(Box)`
   display: flex;
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
   flex-direction: column;
   background-color: #fff;
   border-bottom: 1px solid rgba(224, 224, 224, 1);
@@ -16,8 +15,7 @@ const PaperContainer = styled(Box)`
 
 const BoxContainer = styled(Box)`
   display: flex;
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
   flex-direction: column;
   width: 100%;
 `;

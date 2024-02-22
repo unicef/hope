@@ -17,7 +17,7 @@ const colors = {
 };
 
 const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(2)}px;
+  padding-bottom: ${({ theme }) => theme.spacing(2)};
 `;
 
 const ContentWrapper = styled.div`
@@ -25,7 +25,7 @@ const ContentWrapper = styled.div`
 `;
 
 const SummaryBorder = styled.div`
-  padding: ${({ theme }) => theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(4)};
   border-color: #b1b1b5;
   border-left-width: 1px;
   border-left-style: solid;
@@ -37,7 +37,7 @@ const SummaryValue = styled.div`
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
-  margin-top: ${({ theme }) => theme.spacing(2)}px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
 const ChartContainer = styled.div`

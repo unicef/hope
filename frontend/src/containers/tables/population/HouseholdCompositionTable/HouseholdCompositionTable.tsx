@@ -18,7 +18,7 @@ const GreyTableCell = styled(TableCell)`
 `;
 const OverviewPaper = styled(Paper)`
   margin: 20px 20px 0 20px;
-  padding: 20px ${({ theme }) => theme.spacing(11)}px;
+  padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
 export interface HouseholdCompositionTableProps {
   household: HouseholdNode;

@@ -22,8 +22,8 @@ const DropzoneContainer = styled.div<DropzoneContainerProps>`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: ${({ theme }) => theme.spacing(5)}px;
-  padding: ${({ theme }) => theme.spacing(5)}px;
+  margin-top: ${({ theme }) => theme.spacing(5)};
+  padding: ${({ theme }) => theme.spacing(5)};
   cursor: pointer;
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;

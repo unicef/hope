@@ -73,7 +73,6 @@ export function AdminAreaFixedAutocomplete({
   };
 
   return (
-    // @ts-ignore
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       open={open}
       filterOptions={(options1) => options1}

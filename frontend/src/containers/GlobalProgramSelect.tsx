@@ -14,7 +14,7 @@ import { isProgramNodeUuidFormat } from '@utils/utils';
 
 const CountrySelect = styled(Select)`
   && {
-    width: ${({ theme }) => theme.spacing(58)}px;
+    width: ${({ theme }) => theme.spacing(58)};
     background-color: rgba(104, 119, 127, 0.5);
     color: #e3e6e7;
     border-bottom-width: 0;
@@ -74,8 +74,8 @@ export function GlobalProgramSelect(): React.ReactElement {
   );
 
   const getCurrentProgram = useCallback(():
-  | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
-  | null => {
+    | AllProgramsForChoicesQuery['allPrograms']['edges'][number]['node']
+    | null => {
     const obj = data?.allPrograms.edges.find((el) => el.node.id === programId);
     return obj ? obj.node : null;
   }, [data, programId]);
