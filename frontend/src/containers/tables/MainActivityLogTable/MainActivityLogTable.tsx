@@ -35,8 +35,8 @@ const HeadingCell = styled.div<HeadingCellProps>`
 
 const PaperContainer = styled(Paper)`
   width: 100%;
-  padding: ${({ theme }) => theme.spacing(5)}px 0;
-  margin-bottom: ${({ theme }) => theme.spacing(5)}px;
+  padding: ${({ theme }) => theme.spacing(5)} 0;
+  margin-bottom: ${({ theme }) => theme.spacing(5)};
 `;
 
 interface MainActivityLogTableProps {

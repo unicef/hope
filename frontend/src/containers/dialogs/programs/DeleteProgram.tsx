@@ -33,7 +33,7 @@ const RemoveModalButton = styled(Button)`
 `;
 const MidDialog = styled(Dialog)`
   .MuiDialog-paperWidthSm {
-    min-width: ${({ theme }) => theme.spacing(120)}px;
+    min-width: ${({ theme }) => theme.spacing(120)};
   }
 `;
 

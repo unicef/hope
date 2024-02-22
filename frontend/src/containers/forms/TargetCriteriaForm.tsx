@@ -53,7 +53,7 @@ const AndDividerLabel = styled.div`
 `;
 const AndDivider = styled.div`
   border-top: 1px solid #b1b1b5;
-  margin: ${({ theme }) => theme.spacing(10)}px 0;
+  margin: ${({ theme }) => theme.spacing(10)} 0;
   position: relative;
 `;
 
@@ -126,8 +126,13 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const { selectedProgram: { id } } = useProgramContext();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(businessArea, id);
+  const {
+    selectedProgram: { id },
+  } = useProgramContext();
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(
+    businessArea,
+    id,
+  );
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -323,7 +328,7 @@ export function TargetCriteriaForm({
                       In your programme, individual rules can only be applied to
                       head of households.
                     </DialogDescription>
-                    ) : null}
+                  ) : null}
                   <FieldArray
                     name="individualsFiltersBlocks"
                     render={(arrayHelpers) => (

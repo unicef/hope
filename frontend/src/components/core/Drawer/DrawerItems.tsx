@@ -28,12 +28,11 @@ const Text = styled(ListItemText)`
     line-height: 16px;
   }
 `;
-
-const Icon = styled(ListItemIcon)(() => ({
-  minWidth: 0,
-  paddingRight: '32px',
-}));
-
+const Icon = styled(ListItemIcon)`
+  && {
+    min-width: 40px;
+  }
+`;
 interface SubListProps {
   open: boolean;
   component: ElementType;

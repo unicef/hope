@@ -103,7 +103,7 @@ export const SelectFilter = ({
               !disableClearable && (
                 <EndInputAdornment position="end">
                   <IconButton
-                    size="small"
+                    size="medium"
                     onMouseDown={(event) => {
                       event.preventDefault();
                       onChange({

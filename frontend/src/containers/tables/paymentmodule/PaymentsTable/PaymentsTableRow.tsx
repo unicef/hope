@@ -33,7 +33,7 @@ const RoutedBox = styled.div`
   font-weight: 500;
   letter-spacing: 1.2px;
   line-height: 16px;
-  padding: ${({ theme }) => theme.spacing(1)}px;
+  padding: ${({ theme }) => theme.spacing(1)};
   text-align: center;
   margin-right: 20px;
 `;
@@ -159,12 +159,12 @@ export function PaymentsTableRow({
       <TableCell align="left">
         {payment.entitlementQuantity != null && payment.entitlementQuantity >= 0
           ? `${formatCurrencyWithSymbol(
-            payment.entitlementQuantity,
-            payment.currency,
-          )} (${formatCurrencyWithSymbol(
-            payment.entitlementQuantityUsd,
-            'USD',
-          )})`
+              payment.entitlementQuantity,
+              payment.currency,
+            )} (${formatCurrencyWithSymbol(
+              payment.entitlementQuantityUsd,
+              'USD',
+            )})`
           : '-'}
       </TableCell>
       <TableCell data-cy="delivered-quantity-cell" align="left">

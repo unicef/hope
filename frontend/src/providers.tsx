@@ -4,7 +4,7 @@ import {
   NormalizedCacheObject,
 } from '@apollo/client';
 import { CssBaseline } from '@mui/material';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { ReactNode, useEffect, useState } from 'react';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { getClient } from './apollo/client';
@@ -36,7 +36,7 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
 
   return (
     <ApolloProvider client={apolloClient}>
-      <ThemeProvider theme={theme}>
+      <MuiThemeProvider theme={theme}>
         <StyledThemeProvider theme={theme}>
           <ConfirmationDialogProvider>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -47,7 +47,7 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
             </LocalizationProvider>
           </ConfirmationDialogProvider>
         </StyledThemeProvider>
-      </ThemeProvider>
+      </MuiThemeProvider>
     </ApolloProvider>
   );
 };

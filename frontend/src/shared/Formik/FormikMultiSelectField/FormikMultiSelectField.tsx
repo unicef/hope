@@ -9,7 +9,7 @@ import Chip from '@mui/material/Chip';
 import styled from 'styled-components';
 
 const StyledFormControl = styled(FormControl)`
-  margin: ${(props) => props.theme.spacing(1)}px;
+  margin: ${(props) => props.theme.spacing(1)};
   min-width: 300px;
   max-width: 500px;
 `;
@@ -23,7 +23,7 @@ const StyledChip = styled(Chip)`
   margin: 2px;
 `;
 const StyledNoLabel = styled.div`
-  margin-top: ${(props) => props.theme.spacing(3)}px;
+  margin-top: ${(props) => props.theme.spacing(3)};
 `;
 
 const ITEM_HEIGHT = 48;

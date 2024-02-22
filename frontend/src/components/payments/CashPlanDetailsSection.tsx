@@ -17,7 +17,7 @@ const ChartContainer = styled.div`
 `;
 
 const BorderLeftBox = styled.div`
-  padding-left: ${({ theme }) => theme.spacing(6)}px;
+  padding-left: ${({ theme }) => theme.spacing(6)};
   border-left: 1px solid #e0e0e0;
   height: 100%;
 `;

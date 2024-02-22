@@ -14,7 +14,7 @@ import { Title } from '../Title';
 import { UniversalMoment } from '../UniversalMoment';
 
 const NumberOfHouseHolds = styled.div`
-  padding: ${({ theme }) => theme.spacing(8)}px;
+  padding: ${({ theme }) => theme.spacing(8)};
   border-color: #b1b1b5;
   border-left-width: 1px;
   border-left-style: solid;
@@ -25,7 +25,7 @@ const NumberOfHouseHoldsValue = styled.div`
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
-  margin-top: ${({ theme }) => theme.spacing(2)}px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 interface CashPlanProps {
   cashPlan: CashPlanNode;
@@ -57,8 +57,8 @@ export function CashPlanDetails({
   };
 
   const renderTargetPopulations = ():
-  | React.ReactElement
-  | Array<React.ReactElement> =>
+    | React.ReactElement
+    | Array<React.ReactElement> =>
     filteredTps().length ? (
       filteredTps().map((el) => (
         <span key={el.id}>

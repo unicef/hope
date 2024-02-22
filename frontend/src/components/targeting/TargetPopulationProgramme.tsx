@@ -11,7 +11,7 @@ import { FormikSelectFieldConfirmProgram } from './FormikSelectFieldConfirmProgr
 import { PaperContainer } from './PaperContainer';
 
 const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(3)}px;
+  padding-bottom: ${({ theme }) => theme.spacing(3)};
 `;
 const GreyText = styled.p`
   color: #9e9e9e;

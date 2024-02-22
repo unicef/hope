@@ -54,7 +54,7 @@ export function MessageDialog({
   const [MessageDialogOpen, setMessageDialogOpen] = useState(false);
   return (
     <>
-      <IconButton size="small" onClick={() => setMessageDialogOpen(true)}>
+      <IconButton size="medium" onClick={() => setMessageDialogOpen(true)}>
         <MessageIconContainer>
           <MessageIcon fontSize="inherit" />
         </MessageIconContainer>

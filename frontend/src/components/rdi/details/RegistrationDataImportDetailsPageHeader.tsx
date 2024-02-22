@@ -28,7 +28,7 @@ export interface RegistrationDataImportDetailsPageHeaderPropTypes {
 }
 
 const MergeButtonContainer = styled.span`
-  margin-left: ${({ theme }) => theme.spacing(4)}px;
+  margin-left: ${({ theme }) => theme.spacing(4)};
 `;
 
 export function RegistrationDataImportDetailsPageHeader({

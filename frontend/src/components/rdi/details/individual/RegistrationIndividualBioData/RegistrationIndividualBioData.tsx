@@ -21,8 +21,8 @@ import { DocumentRegistrationPhotoModal } from '../DocumentRegistrationPhotoModa
 import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
 `;
 
 const BorderBox = styled.div`
@@ -229,7 +229,7 @@ export function RegistrationIndividualBioData({
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
-          )}
+        )}
         {mappedIndividualDocuments}
         {mappedIdentities}
         <Grid item xs={12}>

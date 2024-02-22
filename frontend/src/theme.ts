@@ -5,7 +5,7 @@ import { DARK_GRAY, NAVY_BLUE } from './config/colors';
 
 // A custom theme for this app
 const muiTheme = createTheme({
-  spacing: 4,
+  spacing: (factor) => factor * 4,
   palette: {
     primary: {
       main: NAVY_BLUE,

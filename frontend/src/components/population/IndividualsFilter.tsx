@@ -78,7 +78,7 @@ export function IndividualsFilter({
       isOnPaper={isOnPaper}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container item xs={6} spacing={0}>
+        <Grid container alignItems="flex-end" item xs={6} spacing={0}>
           <Grid item xs={8}>
             <SearchTextField
               label={t('Search')}
@@ -88,23 +88,27 @@ export function IndividualsFilter({
             />
           </Grid>
           <Grid item xs={4}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('searchType', e.target.value)}
-              label={t('Search Type')}
-              value={filter.searchType}
-              borderRadius="0px 4px 4px 0px"
-              data-cy="filter-search-type"
-              fullWidth
-              disableClearable
-            >
-              {choicesData?.individualSearchTypesChoices.map(
-                ({ name, value }) => (
-                  <MenuItem key={value} value={value}>
-                    {name}
-                  </MenuItem>
-                ),
-              )}
-            </SelectFilter>
+            <div style={{ paddingBottom: '4px', width: '100%' }}>
+              <SelectFilter
+                onChange={(e) =>
+                  handleFilterChange('searchType', e.target.value)
+                }
+                label={t('Search Type')}
+                value={filter.searchType}
+                borderRadius="0px 4px 4px 0px"
+                data-cy="filter-search-type"
+                fullWidth
+                disableClearable
+              >
+                {choicesData?.individualSearchTypesChoices.map(
+                  ({ name, value }) => (
+                    <MenuItem key={value} value={value}>
+                      {name}
+                    </MenuItem>
+                  ),
+                )}
+              </SelectFilter>
+            </div>
           </Grid>
         </Grid>
         {isAllPrograms && (

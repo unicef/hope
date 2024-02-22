@@ -10,7 +10,7 @@ import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
 
 const Divider = styled.div`
   border-top: 1px solid #e2e2e2;
-  margin: ${({ theme }) => theme.spacing(5)}px 0;
+  margin: ${({ theme }) => theme.spacing(5)} 0;
   position: relative;
 `;
 const DividerLabel = styled.div`
@@ -35,7 +35,7 @@ const DividerLabel = styled.div`
 `;
 const AndDivider = styled.div`
   border-top: 1px solid #b1b1b5;
-  margin: ${({ theme }) => theme.spacing(10)}px 0;
+  margin: ${({ theme }) => theme.spacing(10)} 0;
   position: relative;
 `;
 
@@ -65,8 +65,7 @@ const GrayFiltersBlock = styled.div`
 `;
 
 const FilterWrapper = styled.div`
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(5)}px;
+  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(5)};
 `;
 export function TargetCriteriaFilterBlocks({
   blockIndex,

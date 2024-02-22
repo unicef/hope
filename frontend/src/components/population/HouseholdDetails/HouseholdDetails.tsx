@@ -23,8 +23,8 @@ const Container = styled.div`
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
   flex-direction: column;
   align-items: center;
   border-color: #b1b1b5;
@@ -43,7 +43,7 @@ const Overview = styled.div`
 `;
 const OverviewPaper = styled(Paper)`
   margin: 20px 20px 0 20px;
-  padding: 20px ${({ theme }) => theme.spacing(11)}px;
+  padding: 20px ${({ theme }) => theme.spacing(11)};
 `;
 
 interface HouseholdDetailsProps {
@@ -211,13 +211,13 @@ export function HouseholdDetails({
                           >
                             {item.currency === 'USD'
                               ? formatCurrencyWithSymbol(
-                                item.totalDeliveredQuantity,
-                                item.currency,
-                              )
+                                  item.totalDeliveredQuantity,
+                                  item.currency,
+                                )
                               : `(${formatCurrencyWithSymbol(
-                                item.totalDeliveredQuantity,
-                                item.currency,
-                              )})`}
+                                  item.totalDeliveredQuantity,
+                                  item.currency,
+                                )})`}
                           </Box>
                         ))}
                       </Box>

@@ -9,8 +9,8 @@ import { useRegistrationDataImportQuery } from '@generated/graphql';
 import { Title } from '@core/Title';
 
 const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
   margin-top: 20px;
   &:first-child {
     margin-top: 0px;

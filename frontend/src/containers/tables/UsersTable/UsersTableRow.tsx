@@ -33,7 +33,7 @@ export function UsersTableRow({
         <TableCell>
           <IconButton
             aria-label="expand row"
-            size="small"
+            size="medium"
             onClick={() => setOpen(!open)}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}

@@ -23,8 +23,8 @@ import { DocumentPopulationPhotoModal } from '../DocumentPopulationPhotoModal';
 import { LinkedGrievancesModal } from '../LinkedGrievancesModal/LinkedGrievancesModal';
 
 const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
 `;
 
 const BorderBox = styled.div`
@@ -105,7 +105,7 @@ export function IndividualBioData({
               <Box key={item.id}>
                 {item.household.unicefId} -{roleChoicesDict[item.role]}
               </Box>
-          ))
+            ))
           : '-'}
       </LabelizedField>
     </Grid>
@@ -288,7 +288,7 @@ export function IndividualBioData({
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
-          )}
+        )}
         {mappedIndividualDocuments}
         {mappedIdentities}
         <Grid item xs={12}>

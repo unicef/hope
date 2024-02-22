@@ -7,7 +7,7 @@ import { SubField } from '@components/targeting/SubField';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;
-  margin: ${({ theme }) => theme.spacing(10)}px 0;
+  margin: ${({ theme }) => theme.spacing(10)} 0;
   position: relative;
 `;
 const DividerLabel = styled.div`

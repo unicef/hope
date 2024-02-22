@@ -17,7 +17,7 @@ import { DedupeBox } from '../DedupeBox';
 import { Title } from '@core/Title';
 
 export const BigValueContainer = styled.div`
-  padding: ${({ theme }) => theme.spacing(6)}px;
+  padding: ${({ theme }) => theme.spacing(6)};
   border-color: #b1b1b5;
   border-left-width: 1px;
   border-left-style: solid;
@@ -29,7 +29,7 @@ export const BigValue = styled.div`
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
-  margin-top: ${({ theme }) => theme.spacing(2)}px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
 const Error = styled.p`
@@ -134,7 +134,7 @@ export function RegistrationDetails({
                     value={registration?.refuseReason}
                   />
                 </Grid>
-                ) : null}
+              ) : null}
             </Grid>
           </Grid>
           <Grid item xs={4}>

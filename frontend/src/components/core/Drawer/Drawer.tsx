@@ -55,7 +55,7 @@ const DrawerComponent = styled(MUIDrawer)<DrawerComponentProps>`
     height: 100vh;
     position: relative;
     white-space: nowrap;
-    width: ${(props) => (props.open ? '240px' : '64px')};
+    width: ${(props) => (props.open ? '240px' : '55px')};
     transition:
       width 225ms cubic-bezier(0, 0, 0.2, 1) 0ms,
       width 195ms cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -89,10 +89,6 @@ const ToolbarScrollBox = styled(Box)`
   height: 100%;
 `;
 
-const Icon = styled(ListItemIcon)`
-  padding-right: 20px;
-`;
-
 const Version = styled('div')`
   color: #aaa;
   padding: 4px;
@@ -105,6 +101,12 @@ const Text = styled(ListItemText)`
     font-size: 14px;
     font-weight: 500;
     line-height: 16px;
+  }
+`;
+
+const Icon = styled(ListItemIcon)`
+  && {
+    min-width: 40px;
   }
 `;
 
