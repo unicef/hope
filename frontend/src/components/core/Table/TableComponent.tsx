@@ -34,26 +34,6 @@ const Table = styled(MuiTable)`
   min-width: 750px;
 `;
 
-const Empty = styled('div')`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  color: rgba(0, 0, 0, 0.38);
-  font-size: 24px;
-  line-height: 28px;
-  text-align: center;
-  padding: 70px;
-`;
-
-const SmallerText = styled(MuiBox)`
-  font-size: 16px;
-`;
-
-const Icon = styled(FindInPageIcon)`
-  font-size: 50px;
-`;
-
 const StyledTableRow = styled(MuiTableRow)`
   height: 70px;
   min-height: 70px;
@@ -61,13 +41,6 @@ const StyledTableRow = styled(MuiTableRow)`
 
 const StyledTableCell = styled(MuiTableCell)`
   col-span: ${(props) => props.colSpan};
-`;
-
-const EmptyMessage = styled('div')`
-  ${Empty}
-  ${Icon} {
-    font-size: inherit;
-  }
 `;
 
 const StyledTableContainer = styled(MuiTableContainer)``;
@@ -82,6 +55,33 @@ const StyledTable = styled(Table)`
   size: 'medium';
   aria-label: 'enhanced table';
   data-cy: 'table-title';
+`;
+
+const EmptyMessage = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #a9a9a9;
+  font-size: 24px;
+  line-height: 28px;
+  text-align: center;
+  padding: 70px;
+`;
+
+const SmallerText = styled(MuiBox)`
+  font-size: 16px;
+  color: #a9a9a9;
+`;
+
+const IconContainer = styled(MuiBox)`
+  font-size: 50px;
+`;
+
+const Icon = styled(FindInPageIcon)`
+  & svg {
+    color: #9e9e9e;
+  }
 `;
 
 interface TableComponentProps<T> {
@@ -184,7 +184,9 @@ export function TableComponent<T>({
       <StyledTableRow data-cy="table-row" style={{ height: 70 * emptyRows }}>
         <StyledTableCell colSpan={headCells.length}>
           <EmptyMessage>
-            <Icon fontSize="inherit" />
+            <IconContainer>
+              <Icon fontSize="inherit" />
+            </IconContainer>
             <MuiBox mt={2}>No results</MuiBox>
             <SmallerText mt={2}>
               {t(
