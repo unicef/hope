@@ -1,6 +1,5 @@
 import { Button, Grid } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
-import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
 import * as React from 'react';
@@ -56,7 +55,7 @@ export const NewIdentityFieldArray = ({
                 color="primary"
                 onClick={() => {
                   arrayHelpers.push({
-                    id: uuidv4(),
+                    id: crypto.randomUUID(),
                     country: null,
                     partner: null,
                     number: '',

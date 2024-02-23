@@ -1,20 +1,19 @@
 import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
 import {
-  IconButton,
   Box as MuiBox,
+  IconButton,
   Paper as MuiPaper,
+  Skeleton,
   Table as MuiTable,
   TableBody as MuiTableBody,
   TableCell as MuiTableCell,
   TableContainer as MuiTableContainer,
-  TableRow as MuiTableRow,
   TablePagination,
-  Skeleton,
+  TableRow as MuiTableRow,
 } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { v4 as uuidv4 } from 'uuid';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import styled from 'styled-components';
@@ -173,7 +172,7 @@ export function TableComponent<T>({
 
   if (loading) {
     body = Array.from({ length: rowsPerPage }).map(() => (
-      <StyledTableRow key={uuidv4()} data-cy="table-row">
+      <StyledTableRow key={crypto.randomUUID()} data-cy="table-row">
         <StyledTableCell colSpan={headCells.length}>
           <Skeleton variant="rectangular" width="100%" height={70} />
         </StyledTableCell>

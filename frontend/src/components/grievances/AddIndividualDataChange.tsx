@@ -1,7 +1,6 @@
 import { Button, Grid, Typography } from '@mui/material';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field, FieldArray } from 'formik';
 import camelCase from 'lodash/camelCase';
@@ -197,7 +196,7 @@ export function AddIndividualDataChange({
                     disabled={isEditTicket}
                     onClick={() => {
                       arrayHelpers.push({
-                        id: uuidv4(),
+                        id: crypto.randomUUID(),
                         country: null,
                         key: null,
                         number: '',
@@ -244,7 +243,7 @@ export function AddIndividualDataChange({
                     startIcon={<AddCircleOutline />}
                     onClick={() => {
                       arrayHelpers.push({
-                        id: uuidv4(),
+                        id: crypto.randomUUID(),
                         country: null,
                         partner: null,
                         number: '',

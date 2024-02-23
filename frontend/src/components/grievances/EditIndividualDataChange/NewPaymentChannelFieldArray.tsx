@@ -1,5 +1,4 @@
 import { Button, Grid } from '@mui/material';
-import { v4 as uuidv4 } from 'uuid';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { FieldArray } from 'formik';
@@ -48,7 +47,7 @@ export function NewPaymentChannelFieldArray({
                 color="primary"
                 onClick={() => {
                   arrayHelpers.push({
-                    id: uuidv4(),
+                    id: crypto.randomUUID(),
                     bankName: null,
                     bankAccountNumber: null,
                     type: 'BANK_TRANSFER',
