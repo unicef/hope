@@ -82,20 +82,22 @@ export function RegistrationFilters({
           />
         </Grid>
         <Grid item xs={4}>
-          <SelectFilter
-            value={filter.status}
-            label={t('Status')}
-            onChange={(e) => handleFilterChange('status', e.target.value)}
-            data-cy="filter-status"
-          >
-            {registrationChoicesData.registrationDataStatusChoices.map(
-              (item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ),
-            )}
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SelectFilter
+              value={filter.status}
+              label={t('Status')}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              data-cy="filter-status"
+            >
+              {registrationChoicesData.registrationDataStatusChoices.map(
+                (item) => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ),
+              )}
+            </SelectFilter>
+          </div>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField

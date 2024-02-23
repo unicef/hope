@@ -55,12 +55,14 @@ export function ProgrammesFilters({
     >
       <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
-          <SearchTextField
-            label="Search"
-            value={filter.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy="filters-search"
-          />
+          <div style={{ position: 'relative', top: '3px' }}>
+            <SearchTextField
+              label="Search"
+              value={filter.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              data-cy="filters-search"
+            />
+          </div>
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
@@ -103,19 +105,21 @@ export function ProgrammesFilters({
           />
         </Grid>
         <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('sector', e.target.value)}
-            label="Sector"
-            data-cy="filters-sector"
-            value={filter.sector}
-            multiple
-          >
-            {choicesData.programSectorChoices.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('sector', e.target.value)}
+              label="Sector"
+              data-cy="filters-sector"
+              value={filter.sector}
+              multiple
+            >
+              {choicesData.programSectorChoices.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </div>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
@@ -158,20 +162,22 @@ export function ProgrammesFilters({
           />
         </Grid>
         <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('dataCollectingType', e.target.value)
-            }
-            label="Data Collecting Type"
-            value={filter.dataCollectingType}
-            data-cy="filters-data-collecting-type"
-          >
-            {choicesData.dataCollectingTypeChoices.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('dataCollectingType', e.target.value)
+              }
+              label="Data Collecting Type"
+              value={filter.dataCollectingType}
+              data-cy="filters-data-collecting-type"
+            >
+              {choicesData.dataCollectingTypeChoices.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </div>
         </Grid>
       </Grid>
     </FiltersSection>

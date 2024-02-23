@@ -27,8 +27,8 @@ interface EditValuesTypes {
   selectedHousehold?;
   selectedIndividual?;
   selectedPaymentRecords: Pick<
-  PaymentRecordAndPaymentNode,
-  'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
+    PaymentRecordAndPaymentNode,
+    'id' | 'caId' | 'deliveredQuantity' | 'entitlementQuantity' | 'objType'
   >[];
   paymentRecord?: string;
   selectedLinkedTickets: string[];
@@ -202,7 +202,7 @@ export function prepareInitialValues(
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || '',
     language: ticket.language || '',
-    admin: ticket.admin2 ? { node: ticket.admin2 } : null,
+    admin: ticket.admin2 ? ticket.admin2?.id : null,
     area: ticket.area || '',
     selectedHousehold: ticket.household || null,
     selectedIndividual: ticket.individual || null,

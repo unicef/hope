@@ -1,20 +1,20 @@
+import { Box, TextField, CircularProgress } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { CircularProgress, TextField } from '@mui/material';
-import { useDebounce } from '@hooks/useDebounce';
-import { AllAdminAreasQuery, useAllAdminAreasQuery } from '@generated/graphql';
+import { useAllAdminAreasQuery } from '@generated/graphql';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDebounce } from '@hooks/useDebounce';
 
 const StyledAutocomplete = styled(Autocomplete)`
-  .MuiFormControl-marginDense {
-    //margin-top: 4px;
+  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
+    .MuiFormControl-marginDense {
+    margin-top: 4px;
   }
 `;
 
-export function AdminAreaFixedAutocomplete({
+export const AdminAreaFixedAutocomplete = ({
   value,
   onChange,
   disabled,
@@ -23,24 +23,13 @@ export function AdminAreaFixedAutocomplete({
   onClear,
   additionalOnChange,
   dataCy,
-}: {
-  value: string | AllAdminAreasQuery['allAdminAreas']['edges'][number]['node'];
-  onChange;
-  disabled?;
-  level?;
-  parentId?;
-  onClear?: () => void;
-  additionalOnChange?: () => void;
-  dataCy?: string;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
-  const [open, setOpen] = React.useState(false);
-  const [inputValue, onInputTextChange] = React.useState('');
-
+  const [inputValue, setInputValue] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
-  const [newValue, setNewValue] = useState(null);
+  const [, setNewValue] = useState(null);
   const { businessArea } = useBaseUrl();
-  const { data, loading } = useAllAdminAreasQuery({
+  const { data, loading, error } = useAllAdminAreasQuery({
     variables: {
       name: debouncedInputText,
       businessArea,
@@ -61,9 +50,9 @@ export function AdminAreaFixedAutocomplete({
     }
   }, [data, value]);
 
-  const onChangeMiddleware = (e, selectedValue, reason): void => {
-    onInputTextChange(selectedValue?.node?.name);
-    onChange(e, selectedValue, reason);
+  const handleOnChange = (event, selectedValue, reason): void => {
+    setInputValue(selectedValue?.node?.name);
+    onChange(event, selectedValue, reason);
     if (additionalOnChange) {
       additionalOnChange();
     }
@@ -72,58 +61,58 @@ export function AdminAreaFixedAutocomplete({
     }
   };
 
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
-    <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
-      open={open}
-      filterOptions={(options1) => options1}
-      onChange={onChangeMiddleware}
-      value={newValue}
-      data-cy={dataCy || 'admin-area-autocomplete'}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={(e, reason) => {
-        setOpen(false);
-        if (value || reason === 'select-option') return;
-        onInputTextChange(null);
-      }}
-      isOptionEqualToValue={(option, selectedValue) =>
-        selectedValue?.node?.id === option.node.id
-      }
-      getOptionLabel={(option) => {
-        if (!option.node) {
-          return '';
+    <Box mt={1}>
+      <StyledAutocomplete
+        options={data?.allAdminAreas.edges || []}
+        defaultValue={
+          data && typeof value === 'string'
+            ? data.allAdminAreas.edges.find((item) => item.node.id === value)
+            : value
         }
-        return `${option.node.name}`;
-      }}
-      disabled={disabled}
-      options={get(data, 'allAdminAreas.edges', [])}
-      loading={loading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={
-            level === 1
-              ? t('Administrative Level 1')
-              : t('Administrative Level 2')
-          }
-          variant="outlined"
-          margin="dense"
-          value={inputValue}
-          onChange={(e) => onInputTextChange(e.target.value)}
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <>
-                {loading ? (
-                  <CircularProgress color="inherit" size={20} />
-                ) : null}
-                {params.InputProps.endAdornment}
-              </>
-            ),
-          }}
-        />
-      )}
-    />
+        getOptionLabel={(option: any) =>
+          option.node ? `${option.node.name}` : ''
+        }
+        // eslint-disable-next-line
+        isOptionEqualToValue={(option: any, value: any) =>
+          typeof value === 'string'
+            ? option?.node?.id === value
+            : option?.node?.id === value?.node?.id
+        }
+        onChange={handleOnChange}
+        disabled={disabled}
+        fullWidth
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={
+              level === 1
+                ? t('Administrative Level 1')
+                : t('Administrative Level 2')
+            }
+            variant="outlined"
+            margin="dense"
+            value={inputValue}
+            onChange={(event) => setInputValue(event.target.value)}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+          />
+        )}
+        data-cy={dataCy || 'admin-area-autocomplete'}
+      />
+    </Box>
   );
-}
+};

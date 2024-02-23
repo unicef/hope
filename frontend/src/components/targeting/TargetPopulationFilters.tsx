@@ -71,20 +71,22 @@ export const TargetPopulationFilters = ({
           />
         </Grid>
         <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('status', e.target.value)}
-            value={filter.status}
-            label={t('Status')}
-            icon={<Person />}
-            fullWidth
-            data-cy="filters-status"
-          >
-            {preparedStatusChoices.sort().map((key) => (
-              <MenuItem key={key} value={key}>
-                {targetPopulationStatusMapping(key)}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              value={filter.status}
+              label={t('Status')}
+              icon={<Person />}
+              fullWidth
+              data-cy="filters-status"
+            >
+              {preparedStatusChoices.sort().map((key) => (
+                <MenuItem key={key} value={key}>
+                  {targetPopulationStatusMapping(key)}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </div>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField

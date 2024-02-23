@@ -144,17 +144,19 @@ export function IndividualsFilter({
           </Grid>
         )}
         <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('sex', e.target.value)}
-            value={filter.sex}
-            label={t('Gender')}
-            icon={<WcIcon />}
-            data-cy="ind-filters-gender"
-            fullWidth
-          >
-            <MenuItem value="FEMALE">{t('Female')}</MenuItem>
-            <MenuItem value="MALE">{t('Male')}</MenuItem>
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('sex', e.target.value)}
+              value={filter.sex}
+              label={t('Gender')}
+              icon={<WcIcon />}
+              data-cy="ind-filters-gender"
+              fullWidth
+            >
+              <MenuItem value="FEMALE">{t('Female')}</MenuItem>
+              <MenuItem value="MALE">{t('Male')}</MenuItem>
+            </SelectFilter>
+          </div>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
@@ -184,24 +186,26 @@ export function IndividualsFilter({
           />
         </Grid>
         <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('flags', e.target.value)}
-            label={t('Flags')}
-            multiple
-            fullWidth
-            value={filter.flags}
-            data-cy="ind-filters-flags"
-          >
-            {choicesData?.flagChoices.map((each, index) => (
-              <MenuItem
-                key={each.value}
-                value={each.value}
-                data-cy={`select-option-${index}`}
-              >
-                {each.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('flags', e.target.value)}
+              label={t('Flags')}
+              multiple
+              fullWidth
+              value={filter.flags}
+              data-cy="ind-filters-flags"
+            >
+              {choicesData?.flagChoices.map((each, index) => (
+                <MenuItem
+                  key={each.value}
+                  value={each.value}
+                  data-cy={`select-option-${index}`}
+                >
+                  {each.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </div>
         </Grid>
         <Grid item xs={3}>
           <SelectFilter

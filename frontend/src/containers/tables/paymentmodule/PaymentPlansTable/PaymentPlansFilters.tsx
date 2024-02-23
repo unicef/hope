@@ -15,14 +15,14 @@ import { SelectFilter } from '@components/core/SelectFilter';
 import { createHandleApplyFilterChange } from '@utils/utils';
 
 export type FilterProps = Pick<
-AllPaymentPlansForTableQueryVariables,
-| 'search'
-| 'status'
-| 'totalEntitledQuantityFrom'
-| 'totalEntitledQuantityTo'
-| 'dispersionStartDate'
-| 'dispersionEndDate'
-| 'isFollowUp'
+  AllPaymentPlansForTableQueryVariables,
+  | 'search'
+  | 'status'
+  | 'totalEntitledQuantityFrom'
+  | 'totalEntitledQuantityTo'
+  | 'dispersionStartDate'
+  | 'dispersionEndDate'
+  | 'isFollowUp'
 >;
 
 interface PaymentPlansFiltersProps {
@@ -82,20 +82,22 @@ export function PaymentPlansFilters({
           />
         </Grid>
         <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('status', e.target.value)}
-            variant="outlined"
-            label={t('Status')}
-            multiple
-            value={filter.status}
-            fullWidth
-          >
-            {statusChoicesData.paymentPlanStatusChoices.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              variant="outlined"
+              label={t('Status')}
+              multiple
+              value={filter.status}
+              fullWidth
+            >
+              {statusChoicesData.paymentPlanStatusChoices.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </div>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField

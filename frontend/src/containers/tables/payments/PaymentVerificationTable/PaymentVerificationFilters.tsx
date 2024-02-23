@@ -55,7 +55,7 @@ export function PaymentVerificationFilters({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid container spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             value={filter.search}
@@ -66,22 +66,26 @@ export function PaymentVerificationFilters({
           />
         </Grid>
         <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) =>
-              handleFilterChange('verificationStatus', e.target.value)
-            }
-            label="Status"
-            multiple
-            fullWidth
-            data-cy="filter-status"
-            value={filter.verificationStatus}
-          >
-            {statusChoicesData.cashPlanVerificationStatusChoices.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('verificationStatus', e.target.value)
+              }
+              label="Status"
+              multiple
+              fullWidth
+              data-cy="filter-status"
+              value={filter.verificationStatus}
+            >
+              {statusChoicesData.cashPlanVerificationStatusChoices.map(
+                (item) => (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ),
+              )}
+            </SelectFilter>
+          </div>
         </Grid>
         <Grid item xs={3}>
           <SearchTextField
@@ -95,21 +99,27 @@ export function PaymentVerificationFilters({
           />
         </Grid>
         <Grid item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('deliveryType', e.target.value)}
-            label="Delivery Mechanism"
-            data-cy="filter-Modality"
-            multiple
-            value={filter.deliveryType}
-            fullWidth
-            icon={<MonetizationOnIcon />}
-          >
-            {statusChoicesData.paymentRecordDeliveryTypeChoices.map((item) => (
-              <MenuItem key={item.name} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SelectFilter
+              onChange={(e) =>
+                handleFilterChange('deliveryType', e.target.value)
+              }
+              label="Delivery Mechanism"
+              data-cy="filter-Modality"
+              multiple
+              value={filter.deliveryType}
+              fullWidth
+              icon={<MonetizationOnIcon />}
+            >
+              {statusChoicesData.paymentRecordDeliveryTypeChoices.map(
+                (item) => (
+                  <MenuItem key={item.name} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ),
+              )}
+            </SelectFilter>
+          </div>
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter

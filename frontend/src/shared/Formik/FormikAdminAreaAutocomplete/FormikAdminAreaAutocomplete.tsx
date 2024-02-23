@@ -7,14 +7,20 @@ export function FormikAdminAreaAutocomplete({
   field,
   form,
   disabled,
+  level,
+  parentId,
+  onClear,
+  additionalOnChange,
+  dataCy,
   ...props
 }): React.ReactElement {
   const { label } = props;
   const handleChange = (_, option): void => {
+    console.log('option', option);
     if (!option) {
       form.setFieldValue(field.name, null);
     } else {
-      form.setFieldValue(field.name, option);
+      form.setFieldValue(field.name, option.node.id);
     }
   };
   return (
@@ -24,6 +30,11 @@ export function FormikAdminAreaAutocomplete({
         disabled={disabled}
         value={field.value}
         onChange={handleChange}
+        level={level}
+        parentId={parentId}
+        onClear={onClear}
+        additionalOnChange={additionalOnChange}
+        dataCy={dataCy}
         {...props}
       />
     </Box>

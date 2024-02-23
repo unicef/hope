@@ -168,29 +168,33 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         <Grid container item xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('status', e.target.value)}
-            label={t('Status')}
-            value={filter.status}
-            fullWidth
-            data-cy="filters-status"
-          >
-            {choicesData.grievanceTicketStatusChoices.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+          <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              label={t('Status')}
+              value={filter.status}
+              fullWidth
+              data-cy="filters-status"
+            >
+              {choicesData.grievanceTicketStatusChoices.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </div>
         </Grid>
         <Grid item xs={3}>
-          <SearchTextField
-            value={filter.fsp}
-            label="FSP"
-            icon={<AccountBalance style={{ color: '#5f6368' }} />}
-            fullWidth
-            onChange={(e) => handleFilterChange('fsp', e.target.value)}
-            data-cy="filters-fsp"
-          />
+          <div style={{ position: 'relative', top: '3px', width: '100%' }}>
+            <SearchTextField
+              value={filter.fsp}
+              label="FSP"
+              icon={<AccountBalance style={{ color: '#5f6368' }} />}
+              fullWidth
+              onChange={(e) => handleFilterChange('fsp', e.target.value)}
+              data-cy="filters-fsp"
+            />
+          </div>
         </Grid>
         <Grid item xs={3}>
           <DatePickerFilter
@@ -243,16 +247,18 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         <Grid item xs={3}>
-          <AdminAreaAutocomplete
-            filter={filter}
-            name="admin2"
-            value={filter.admin2}
-            setFilter={setFilter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            dataCy="filters-admin-level"
-          />
+          <div style={{ position: 'relative', top: '3px', width: '100%' }}>
+            <AdminAreaAutocomplete
+              filter={filter}
+              name="admin2"
+              value={filter.admin2}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+              dataCy="filters-admin-level"
+            />
+          </div>
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
@@ -305,27 +311,31 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         <Grid item xs={3}>
-          <RdiAutocomplete
-            filter={filter}
-            name="registrationDataImport"
-            value={filter.registrationDataImport}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            setFilter={setFilter}
-          />
+          <div style={{ position: 'relative', top: '3px', width: '100%' }}>
+            <RdiAutocomplete
+              filter={filter}
+              name="registrationDataImport"
+              value={filter.registrationDataImport}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+              setFilter={setFilter}
+            />
+          </div>
         </Grid>
         <Grid item xs={3}>
-          <LanguageAutocomplete
-            filter={filter}
-            name="preferredLanguage"
-            value={filter.preferredLanguage}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            setFilter={setFilter}
-            dataCy="filters-preferred-language"
-          />
+          <div style={{ position: 'relative', top: '3px', width: '100%' }}>
+            <LanguageAutocomplete
+              filter={filter}
+              name="preferredLanguage"
+              value={filter.preferredLanguage}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+              setFilter={setFilter}
+              dataCy="filters-preferred-language"
+            />
+          </div>
         </Grid>
         <Grid item container xs={3}>
           <SelectFilter
