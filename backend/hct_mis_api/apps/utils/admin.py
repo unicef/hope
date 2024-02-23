@@ -169,8 +169,20 @@ def is_preparing_payment_plan(btn: Button) -> bool:
     return is_payment_plan_in_status(btn, PaymentPlan.Status.PREPARING)
 
 
+def is_locked_payment_plan(btn: Button) -> bool:
+    return is_payment_plan_in_status(btn, PaymentPlan.Status.LOCKED)
+
+
+def is_accepted_payment_plan(btn: Button) -> bool:
+    return is_payment_plan_in_status(btn, PaymentPlan.Status.ACCEPTED)
+
+
 def is_importing_entitlements_xlsx_file(btn: Button) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_ENTITLEMENTS)
+
+
+def is_importing_reconciliation_xlsx_file(btn: Button) -> bool:
+    return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_IMPORTING_RECONCILIATION)
 
 
 def is_exporting_xlsx_file(btn: Button) -> bool:
@@ -178,12 +190,10 @@ def is_exporting_xlsx_file(btn: Button) -> bool:
 
 
 class PaymentCeleryTasksMixin:
-
-    @button(
-        visible=lambda btn: is_preparing_payment_plan(btn),
-        enabled=lambda btn: is_enabled(btn)
-    )
+    @button(visible=lambda btn: is_preparing_payment_plan(btn), enabled=lambda btn: is_enabled(btn))
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        """preparing Payment Plan"""
+
         if request.method == "POST":
             pass
         else:
@@ -192,15 +202,14 @@ class PaymentCeleryTasksMixin:
                 request=request,
                 action=self.restart_preparing_payment_plan,
                 message="Do you confirm to restart payment plan task?",
-                success_message="Successfully executed"
+                success_message="Successfully executed",
             )
         return None
 
-    @button(
-        visible=lambda btn: is_importing_entitlements_xlsx_file(btn),
-        enabled=lambda btn: is_enabled(btn)
-    )
+    @button(visible=lambda btn: is_importing_entitlements_xlsx_file(btn), enabled=lambda btn: is_enabled(btn))
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        """importing entitlement file"""
+
         if request.method == "POST":
             pass
         else:
@@ -208,24 +217,59 @@ class PaymentCeleryTasksMixin:
                 modeladmin=self,
                 request=request,
                 action=self.restart_importing_entitlements_xlsx_file,
-                message="Do you confirm to restart importing entitlements xlsx file task?"
+                message="Do you confirm to restart importing entitlements xlsx file task?",
             )
         return None
 
+    @button(visible=lambda btn: is_importing_reconciliation_xlsx_file(btn), enabled=lambda btn: is_enabled(btn))
+    def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        """importing payment plan list (from xlsx)"""
 
-    @button(
-        visible=lambda btn: is_exporting_xlsx_file(btn),
-        enabled=lambda btn: is_enabled(btn)
-    )
-    def restart_exporting_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         if request.method == "POST":
             pass
         else:
             return confirm_action(
                 modeladmin=self,
                 request=request,
-                action=self.restart_exporting_xlsx_file,
+                action=self.restart_importing_reconciliation_xlsx_file,
+                message="Do you confirm to restart importing entitlements xlsx file task?",
+            )
+        return None
+
+    @button(
+        visible=lambda btn: is_exporting_xlsx_file(btn) and is_locked_payment_plan(btn),
+        enabled=lambda btn: is_enabled(btn),
+    )
+    def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        """exporting template for entitlement"""
+
+        if request.method == "POST":
+            pass
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.restart_exporting_template_for_entitlement,
                 message="Do you confirm to restart exporting xlsx file task?",
-                success_message="Successfully executed"
+                success_message="Successfully executed",
+            )
+        return None
+
+    @button(
+        visible=lambda btn: is_exporting_xlsx_file(btn) and is_accepted_payment_plan(btn),
+        enabled=lambda btn: is_enabled(btn),
+    )
+    def restart_exporting_exporting_payment_plan_list(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        """exporting payment plan list"""
+
+        if request.method == "POST":
+            pass
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.restart_exporting_exporting_payment_plan_list,
+                message="Do you confirm to restart exporting xlsx file task?",
+                success_message="Successfully executed",
             )
         return None
