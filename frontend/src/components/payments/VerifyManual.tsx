@@ -65,7 +65,7 @@ export function VerifyManual({
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ values }) => (
-        <Form>
+        <Form placeholder="Form">
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
             <Button
@@ -75,7 +75,9 @@ export function VerifyManual({
               data-cy="button-ed-plan"
               disabled={!enabled}
             >
-              {status === PaymentVerificationStatus.Pending ? t('Verify') : t('Edit')}
+              {status === PaymentVerificationStatus.Pending
+                ? t('Verify')
+                : t('Edit')}
             </Button>
           </Box>
           <Dialog

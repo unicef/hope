@@ -2,16 +2,8 @@ import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import get from 'lodash/get';
 import { useCurrencyChoicesQuery } from '@generated/graphql';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
-    .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-`;
 
 export const FormikCurrencyAutocomplete = ({
   field,
@@ -38,7 +30,7 @@ export const FormikCurrencyAutocomplete = ({
   if (!data) return null;
   return (
     <Box mt={1}>
-      <StyledAutocomplete
+      <Autocomplete
         options={data?.currencyChoices || []}
         defaultValue={field.value}
         getOptionLabel={(option: any) => option.name}

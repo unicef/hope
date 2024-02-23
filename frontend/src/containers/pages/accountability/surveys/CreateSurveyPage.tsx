@@ -69,22 +69,22 @@ function prepareVariables(
       fullListArguments:
         selectedSampleSizeType === 0
           ? {
-            excludedAdminAreas: values.excludedAdminAreasFull || [],
-          }
+              excludedAdminAreas: values.excludedAdminAreasFull || [],
+            }
           : null,
       randomSamplingArguments:
         selectedSampleSizeType === 1
           ? {
-            confidenceInterval: values.confidenceInterval * 0.01,
-            marginOfError: values.marginOfError * 0.01,
-            excludedAdminAreas: values.adminCheckbox
-              ? values.excludedAdminAreasRandom
-              : [],
-            age: values.ageCheckbox
-              ? { min: values.filterAgeMin, max: values.filterAgeMax }
-              : null,
-            sex: values.sexCheckbox ? values.filterSex : null,
-          }
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              excludedAdminAreas: values.adminCheckbox
+                ? values.excludedAdminAreasRandom
+                : [],
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
           : null,
     },
   };
@@ -231,15 +231,15 @@ export function CreateSurveyPage(): React.ReactElement {
 
   const mappedAdminAreas = adminAreasData?.allAdminAreas?.edges?.length
     ? adminAreasData.allAdminAreas.edges.map((el) => ({
-      value: el.node.id,
-      name: el.node.name,
-    }))
+        value: el.node.id,
+        name: el.node.name,
+      }))
     : [];
   const mappedFlows = flowsData?.surveyAvailableFlows?.length
     ? flowsData.surveyAvailableFlows.map((el) => ({
-      value: el.id,
-      name: el.name,
-    }))
+        value: el.id,
+        name: el.name,
+      }))
     : [];
 
   const getSampleSizePercentage = (): string =>
@@ -285,20 +285,20 @@ export function CreateSurveyPage(): React.ReactElement {
       fullListArguments:
         selectedSampleSizeType === 0
           ? {
-            excludedAdminAreas: values.excludedAdminAreasFull,
-          }
+              excludedAdminAreas: values.excludedAdminAreasFull,
+            }
           : null,
       randomSamplingArguments:
         selectedSampleSizeType === 1
           ? {
-            excludedAdminAreas: values.excludedAdminAreasRandom,
-            confidenceInterval: values.confidenceInterval * 0.01,
-            marginOfError: values.marginOfError * 0.01,
-            age: values.ageCheckbox
-              ? { min: values.filterAgeMin, max: values.filterAgeMax }
-              : null,
-            sex: values.sexCheckbox ? values.filterSex : null,
-          }
+              excludedAdminAreas: values.excludedAdminAreasRandom,
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
           : null,
       flow: values.title,
     },
@@ -389,7 +389,7 @@ export function CreateSurveyPage(): React.ReactElement {
                 })}
               </Stepper>
             </Grid>
-            <Form>
+            <Form placeholder="Form">
               <FormikEffect
                 values={values}
                 onChange={() => setFormValues(values)}
