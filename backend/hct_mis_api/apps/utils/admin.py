@@ -189,7 +189,7 @@ def is_exporting_xlsx_file(btn: Button) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING)
 
 
-class PaymentCeleryTasksMixin:
+class PaymentPlanCeleryTasksMixin:
     @button(visible=lambda btn: is_preparing_payment_plan(btn), enabled=lambda btn: is_enabled(btn))
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         """preparing Payment Plan"""
@@ -206,7 +206,10 @@ class PaymentCeleryTasksMixin:
             )
         return None
 
-    @button(visible=lambda btn: is_importing_entitlements_xlsx_file(btn), enabled=lambda btn: is_enabled(btn))
+    @button(
+        visible=lambda btn: is_importing_entitlements_xlsx_file(btn) and is_locked_payment_plan(btn),
+        enabled=lambda btn: is_enabled(btn),
+    )
     def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         """importing entitlement file"""
 
@@ -221,7 +224,10 @@ class PaymentCeleryTasksMixin:
             )
         return None
 
-    @button(visible=lambda btn: is_importing_reconciliation_xlsx_file(btn), enabled=lambda btn: is_enabled(btn))
+    @button(
+        visible=lambda btn: is_importing_reconciliation_xlsx_file(btn) and is_accepted_payment_plan(btn),
+        enabled=lambda btn: is_enabled(btn),
+    )
     def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
         """importing payment plan list (from xlsx)"""
 

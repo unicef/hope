@@ -40,7 +40,7 @@ from hct_mis_api.apps.payment.services.create_cash_plan_from_reconciliation impo
 from hct_mis_api.apps.payment.services.verification_plan_status_change_services import (
     VerificationPlanStatusChangeServices,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentCeleryTasksMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, PaymentPlanCeleryTasksMixin
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -256,7 +256,7 @@ class CashPlanAdmin(HOPEModelAdminBase):
 
 
 @admin.register(PaymentPlan)
-class PaymentPlanAdmin(HOPEModelAdminBase, PaymentCeleryTasksMixin):
+class PaymentPlanAdmin(HOPEModelAdminBase, PaymentPlanCeleryTasksMixin):
     list_display = ("unicef_id", "program", "status", "target_population")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
