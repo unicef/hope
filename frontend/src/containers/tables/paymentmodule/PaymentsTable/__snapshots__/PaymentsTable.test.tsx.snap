@@ -22,17 +22,17 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
         class="sc-ktwOfi cRuYAu"
       >
         <div
-          class="MuiTableContainer-root sc-khjJXk css-rorn0c-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-ifyrAs css-rorn0c-MuiTableContainer-root"
         >
           <div
-            class="sc-fLseNd fszeRd MuiBox-root css-0"
+            class="sc-dJGMql gfEzAy MuiBox-root css-0"
           >
             <div
-              class="sc-fLseNd fszeRd MuiBox-root css-1ruxp1v"
+              class="sc-dJGMql gfEzAy MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-fmKFGs sc-bBkKde dThPWF kdAuBC css-b1kpk9-MuiTable-root"
+            class="MuiTable-root sc-fmKFGs sc-hIPBNq dThPWF jhWCiv css-b1kpk9-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -285,6 +285,132 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
               class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
             >
               <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
                 class="MuiTableRow-root MuiTableRow-hover sc-cyZbeP dzjaCW css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
@@ -385,11 +511,11 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render loading 1`]
                 />
               </tr>
               <tr
-                class="MuiTableRow-root sc-dJGMql faKavp css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
                 style="height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-hIPBNq gmCPTN css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
                   colspan="10"
                 />
               </tr>
@@ -525,17 +651,17 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
         class="sc-ktwOfi cRuYAu"
       >
         <div
-          class="MuiTableContainer-root sc-khjJXk css-rorn0c-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-ifyrAs css-rorn0c-MuiTableContainer-root"
         >
           <div
-            class="sc-fLseNd fszeRd MuiBox-root css-0"
+            class="sc-dJGMql gfEzAy MuiBox-root css-0"
           >
             <div
-              class="sc-fLseNd fszeRd MuiBox-root css-1ruxp1v"
+              class="sc-dJGMql gfEzAy MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-fmKFGs sc-bBkKde dThPWF kdAuBC css-b1kpk9-MuiTable-root"
+            class="MuiTable-root sc-fmKFGs sc-hIPBNq dThPWF jhWCiv css-b1kpk9-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -788,6 +914,132 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
               class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
             >
               <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
+                  colspan="10"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
                 class="MuiTableRow-root MuiTableRow-hover sc-cyZbeP dzjaCW css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
@@ -888,11 +1140,11 @@ exports[`containers/tables/paymentmodule/PaymentsTable should render with data 1
                 />
               </tr>
               <tr
-                class="MuiTableRow-root sc-dJGMql faKavp css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-fHejqy jUpFiZ css-n2dwpd-MuiTableRow-root"
                 style="height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-hIPBNq gmCPTN css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-blmEgr fyHlfW css-1ex1afd-MuiTableCell-root"
                   colspan="10"
                 />
               </tr>

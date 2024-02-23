@@ -6,10 +6,10 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
     class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-13i4rnv-MuiGrid-root"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh iMSXGq css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh fvkwGO css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="sc-irLvIq hLLJrH"
+        class="sc-irLvIq cDFsGT"
       >
         <h6
           class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -40,7 +40,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                   class="sc-jsEeTM hhwOY"
                 >
                   <div
-                    class="sc-kFCroH cEBJQx"
+                    class="sc-kFCroH iNLqSI"
                     data-cy="status-container"
                     status="In Progress"
                   >
@@ -67,7 +67,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                   class="sc-jsEeTM hhwOY"
                 >
                   <div
-                    class="sc-kFCroH hfSyJZ"
+                    class="sc-kFCroH jBgGcQ"
                     data-cy="status-container"
                     status="High"
                   >
@@ -94,7 +94,7 @@ exports[`components/grievances/GrievancesDetails should render 1`] = `
                   class="sc-jsEeTM hhwOY"
                 >
                   <div
-                    class="sc-kFCroH hfSyJZ"
+                    class="sc-kFCroH jBgGcQ"
                     data-cy="status-container"
                     status="Very urgent"
                   >

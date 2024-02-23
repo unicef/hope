@@ -3,10 +3,10 @@
 exports[`components/rdi/details/RegistrationDetails should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh iMSXGq css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh fvkwGO css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-kFCroH blRxzd"
+      class="sc-kFCroH jTbWmF"
     >
       <h6
         class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -46,7 +46,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                       class="sc-eDLKkx eTMLwF"
                     >
                       <div
-                        class="sc-jTQCzO boKGWT"
+                        class="sc-jTQCzO cQZnmW"
                         data-cy="status-container"
                         status="MERGED"
                       >
@@ -139,7 +139,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-irLvIq erbnEb"
+                class="sc-irLvIq igDrRv"
               >
                 <div
                   data-cy="labelized-field-container-households"
@@ -154,7 +154,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                     data-cy="label-Total Number of Households"
                   >
                     <div
-                      class="sc-csKJxZ kNZczP"
+                      class="sc-csKJxZ hPFNA-D"
                     >
                       2
                     </div>
@@ -166,7 +166,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-irLvIq erbnEb"
+                class="sc-irLvIq igDrRv"
               >
                 <div
                   data-cy="labelized-field-container-individuals"
@@ -181,7 +181,7 @@ exports[`components/rdi/details/RegistrationDetails should render 1`] = `
                     data-cy="label-Total Number of Individuals"
                   >
                     <div
-                      class="sc-csKJxZ kNZczP"
+                      class="sc-csKJxZ hPFNA-D"
                     >
                       6
                     </div>

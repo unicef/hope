@@ -6,13 +6,13 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
     class="sc-hLQSwg gYvGVw"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx fymXAN css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx edwVeM css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-fsYfdN css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-0"
+          class="sc-qZrbh fDJnQI MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             </h6>
           </div>
           <div
-            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+            class="sc-qZrbh fDJnQI MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-jTQCzO sc-eTNRI gwVygm bGeKmT css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-jTQCzO sc-jsEeTM gwVygm iETolD css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -346,13 +346,13 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
     class="sc-hLQSwg gYvGVw"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx fymXAN css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-eDLKkx edwVeM css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-fsYfdN css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-0"
+          class="sc-qZrbh fDJnQI MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -365,11 +365,11 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             </h6>
           </div>
           <div
-            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+            class="sc-qZrbh fDJnQI MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-jTQCzO sc-eTNRI gwVygm bGeKmT css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-jTQCzO sc-jsEeTM gwVygm iETolD css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"

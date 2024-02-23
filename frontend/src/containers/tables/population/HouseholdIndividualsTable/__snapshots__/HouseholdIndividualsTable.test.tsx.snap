@@ -6,13 +6,13 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
     class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN jHXnCk css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-ktwOfi css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-hABBmJ IOzft MuiBox-root css-0"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
             </h6>
           </div>
           <div
-            class="sc-hABBmJ IOzft MuiBox-root css-1ruxp1v"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-fmKFGs haQfFY cYYCMt css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -145,7 +145,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                   class="sc-guDLey eueYPa"
                 >
                   <div
-                    class="sc-dmyCSP bNYWXW"
+                    class="sc-dmyCSP ljkNfL"
                     data-cy="status-container"
                     status="ACTIVE"
                   >

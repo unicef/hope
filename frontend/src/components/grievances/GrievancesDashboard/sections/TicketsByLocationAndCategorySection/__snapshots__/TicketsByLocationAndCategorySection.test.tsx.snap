@@ -13,12 +13,16 @@ exports[`components/grievances/GrievancesDashboard/TicketsByLocationAndCategoryS
     <div
       class="MuiBox-root css-cgq59l"
     >
-      <canvas
-        height="0"
-        role="img"
-        style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
-        width="0"
-      />
+      <div
+        style="height: 400px;"
+      >
+        <canvas
+          height="0"
+          role="img"
+          style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
+          width="0"
+        />
+      </div>
     </div>
   </div>
 </div>

@@ -6,13 +6,13 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
     class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN jHXnCk css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-ktwOfi css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-hABBmJ IOzft MuiBox-root css-0"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
             </h6>
           </div>
           <div
-            class="sc-hABBmJ IOzft MuiBox-root css-1ruxp1v"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-fmKFGs haQfFY cYYCMt css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -187,11 +187,11 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqGK css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -201,11 +201,11 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqGK css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -215,11 +215,11 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqGK css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -229,11 +229,11 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqGK css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -243,11 +243,11 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqGK css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -369,13 +369,13 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
     class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN jHXnCk css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-ktwOfi css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-hABBmJ IOzft MuiBox-root css-0"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -388,11 +388,11 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
             </h6>
           </div>
           <div
-            class="sc-hABBmJ IOzft MuiBox-root css-1ruxp1v"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-fmKFGs haQfFY cYYCMt css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -550,35 +550,39 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
               style="height: 350px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqGK css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <div
-                  class="sc-brSamD fUYPxQ"
+                  class="sc-brSamD gafQqG"
                 >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit sc-irLvIq hXqhOz css-1vooibu-MuiSvgIcon-root"
-                    data-testid="FindInPageIcon"
-                    focusable="false"
-                    viewBox="0 0 24 24"
+                  <div
+                    class="sc-hABBmJ jIjMDA MuiBox-root css-0"
                   >
-                    <path
-                      d="M20 19.59V8l-6-6H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c.45 0 .85-.15 1.19-.4l-4.43-4.43c-.8.52-1.74.83-2.76.83-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 1.02-.31 1.96-.83 2.75zM9 13c0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3-3 1.34-3 3"
-                    />
-                  </svg>
+                    <svg
+                      aria-hidden="true"
+                      class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit sc-fmKFGs jEKuKe css-1vooibu-MuiSvgIcon-root"
+                      data-testid="FindInPageIcon"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M20 19.59V8l-6-6H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c.45 0 .85-.15 1.19-.4l-4.43-4.43c-.8.52-1.74.83-2.76.83-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5c0 1.02-.31 1.96-.83 2.75zM9 13c0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3-3 1.34-3 3"
+                      />
+                    </svg>
+                  </div>
                   <div
                     class="MuiBox-root css-164r41r"
                   >
                     No results
                   </div>
                   <div
-                    class="sc-kFCroH kIxPhT MuiBox-root css-164r41r"
+                    class="sc-ktwOfi bEKCSh MuiBox-root css-164r41r"
                   >
                     Try adjusting your search or your filters to find what you are looking for.
                   </div>
