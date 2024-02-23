@@ -3,14 +3,14 @@
 exports[`components/paymentmodule/EditFspHeader should render 1`] = `
 <div>
   <div
-    class="sc-eDLKkx lfCuNM"
+    class="css-14yyz2y"
     data-cy="page-header-container"
   >
     <div
-      class="sc-jTQCzO WuAEu"
+      class="css-1dm7nei"
     >
       <div
-        class="sc-fsYfdN iNbZZl"
+        class="css-4g6ai3"
       >
         <svg
           aria-hidden="true"
@@ -25,7 +25,7 @@ exports[`components/paymentmodule/EditFspHeader should render 1`] = `
         </svg>
       </div>
       <div
-        class="sc-gLLuof djFRuj"
+        class="css-175cn9v"
       >
         <div>
           <div
@@ -46,7 +46,7 @@ exports[`components/paymentmodule/EditFspHeader should render 1`] = `
             class="MuiBox-root css-70qvj9"
           >
             <div
-              class="sc-kFCroH fxDWDh"
+              class="css-1ukvkn"
             >
               <h5
                 class="MuiTypography-root MuiTypography-h5 css-ag7rrr-MuiTypography-root"
@@ -61,7 +61,7 @@ exports[`components/paymentmodule/EditFspHeader should render 1`] = `
           </div>
         </div>
         <div
-          class="sc-iBdnpw bvluil"
+          class="css-70qvj9"
         >
           <div
             class="MuiBox-root css-1jzjbfr"
@@ -95,7 +95,7 @@ exports[`components/paymentmodule/EditFspHeader should render 1`] = `
       </div>
     </div>
     <div
-      class="sc-qZrbh hQWlbe"
+      class="css-l30346"
     />
   </div>
 </div>

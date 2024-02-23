@@ -3,7 +3,7 @@
 exports[`components/core/CashPlanDetails should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh hvrGci css-1ps6pg7-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh ehchJK css-1ps6pg7-MuiPaper-root"
   >
     <div
       class="MuiBox-root css-qfdd9t"
@@ -13,7 +13,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
         class="MuiBox-root css-j7qwjs"
       >
         <div
-          class="sc-iBdnpw dpuutE"
+          class="sc-iBdnpw fIJfic"
         >
           <h6
             class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -44,7 +44,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                     class="sc-jTQCzO gpwful"
                   >
                     <div
-                      class="sc-gLLuof ieFHrl"
+                      class="sc-gLLuof bfnybE"
                       data-cy="status-container"
                       status="DISTRIBUTION_COMPLETED"
                     >
@@ -305,7 +305,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
             </div>
           </div>
           <div
-            class="sc-fsYfdN MhWoz"
+            class="sc-fsYfdN eoQjuz"
           >
             <div>
               <span
@@ -318,7 +318,7 @@ exports[`components/core/CashPlanDetails should render 1`] = `
                 data-cy="label-Total Number of Households"
               >
                 <div
-                  class="sc-qZrbh crYvYL"
+                  class="sc-qZrbh hnKrjX"
                 >
                   5
                 </div>

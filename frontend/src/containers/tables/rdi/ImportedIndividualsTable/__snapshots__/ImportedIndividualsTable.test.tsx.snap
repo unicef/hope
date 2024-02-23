@@ -9,17 +9,17 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
       class="sc-iBdnpw dcYiFg"
     >
       <div
-        class="MuiTableContainer-root sc-ktwOfi css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-hABBmJ IOzft MuiBox-root css-0"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
-            class="sc-hABBmJ IOzft MuiBox-root css-1ruxp1v"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-fmKFGs haQfFY cYYCMt css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -225,11 +225,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -239,11 +239,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -253,11 +253,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -267,11 +267,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -281,11 +281,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -295,11 +295,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -309,11 +309,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -323,11 +323,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -337,11 +337,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -351,11 +351,11 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagsQc css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -480,17 +480,17 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
       class="sc-iBdnpw dcYiFg"
     >
       <div
-        class="MuiTableContainer-root sc-ktwOfi css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-hABBmJ IOzft MuiBox-root css-0"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
-            class="sc-hABBmJ IOzft MuiBox-root css-1ruxp1v"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-fmKFGs haQfFY cYYCMt css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -695,6 +695,132 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
           <tbody
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                colspan="8"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                colspan="8"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                colspan="8"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                colspan="8"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                colspan="8"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                colspan="8"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                colspan="8"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                colspan="8"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                colspan="8"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
             <tr
               class="MuiTableRow-root MuiTableRow-hover sc-blmEgr UdMJi css-n2dwpd-MuiTableRow-root"
               role="checkbox"

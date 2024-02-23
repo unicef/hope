@@ -6,7 +6,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh iMSXGq css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh fvkwGO css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="MuiBox-root css-tdpf08"
@@ -106,7 +106,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
         class="MuiBox-root css-j7qwjs"
       >
         <div
-          class="sc-gLLuof hORgxB"
+          class="sc-gLLuof lmCLpt"
         >
           <h6
             class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
@@ -125,7 +125,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-jTQCzO eRiSbA"
+                class="sc-jTQCzO ezbXzI"
                 color="#D8E1EE"
               >
                 <div>
@@ -152,7 +152,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-jTQCzO gORZfM"
+                class="sc-jTQCzO dtylZg"
                 color=" #d8d8d8"
               >
                 <div>
@@ -179,7 +179,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Ed
               class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-jTQCzO cwvOqO"
+                class="sc-jTQCzO fCimZe"
                 color="#003C8F"
               >
                 <div>
@@ -234,7 +234,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/FspSection should render Se
     class="MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh iMSXGq css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-beySPh fvkwGO css-1ps6pg7-MuiPaper-root"
     >
       <div
         class="MuiBox-root css-tdpf08"

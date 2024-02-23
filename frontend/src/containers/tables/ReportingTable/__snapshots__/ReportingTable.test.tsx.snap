@@ -9,20 +9,20 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
       class="sc-fsYfdN iJWUfq"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh idHjRT css-1ps6pg7-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh lhqvQi css-1ps6pg7-MuiPaper-root"
       >
         <div
-          class="MuiTableContainer-root sc-hABBmJ css-rorn0c-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-csKJxZ css-rorn0c-MuiTableContainer-root"
         >
           <div
-            class="sc-fmKFGs eUWQFp MuiBox-root css-0"
+            class="sc-eTNRI gzFCin MuiBox-root css-0"
           >
             <div
-              class="sc-fmKFGs eUWQFp MuiBox-root css-1ruxp1v"
+              class="sc-eTNRI gzFCin MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-jsEeTM sc-fHejqy euROHP HbNSW css-b1kpk9-MuiTable-root"
+            class="MuiTable-root sc-jsEeTM sc-brSamD euROHP ejYVTE css-b1kpk9-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -203,11 +203,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
               class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
             >
               <tr
-                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lniiAI css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -217,11 +217,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lniiAI css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -231,11 +231,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lniiAI css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -245,11 +245,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lniiAI css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -259,11 +259,11 @@ exports[`containers/tables/ReportingTable should render loading 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lniiAI css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
                   colspan="7"
                 >
                   <span
@@ -389,20 +389,20 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
       class="sc-fsYfdN iJWUfq"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh idHjRT css-1ps6pg7-MuiPaper-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-qZrbh lhqvQi css-1ps6pg7-MuiPaper-root"
       >
         <div
-          class="MuiTableContainer-root sc-hABBmJ css-rorn0c-MuiTableContainer-root"
+          class="MuiTableContainer-root sc-csKJxZ css-rorn0c-MuiTableContainer-root"
         >
           <div
-            class="sc-fmKFGs eUWQFp MuiBox-root css-0"
+            class="sc-eTNRI gzFCin MuiBox-root css-0"
           >
             <div
-              class="sc-fmKFGs eUWQFp MuiBox-root css-1ruxp1v"
+              class="sc-eTNRI gzFCin MuiBox-root css-1ruxp1v"
             />
           </div>
           <table
-            class="MuiTable-root sc-jsEeTM sc-fHejqy euROHP HbNSW css-b1kpk9-MuiTable-root"
+            class="MuiTable-root sc-jsEeTM sc-brSamD euROHP ejYVTE css-b1kpk9-MuiTable-root"
           >
             <thead
               class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -583,6 +583,62 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
               class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
             >
               <tr
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
+                  colspan="7"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
+                  colspan="7"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
+                  colspan="7"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
+                data-cy="table-row"
+              >
+                <td
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
+                  colspan="7"
+                >
+                  <span
+                    class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                    style="width: 100%; height: 70px;"
+                  />
+                </td>
+              </tr>
+              <tr
                 class="MuiTableRow-root MuiTableRow-hover css-n2dwpd-MuiTableRow-root"
                 role="checkbox"
               >
@@ -618,7 +674,7 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                     class="sc-ifyrAs hRFFSe"
                   >
                     <div
-                      class="sc-dJGMql jqjrlH"
+                      class="sc-dJGMql iKMXMO"
                       data-cy="status-container"
                       status="Processing"
                     >
@@ -648,11 +704,11 @@ exports[`containers/tables/ReportingTable should render with data 1`] = `
                 />
               </tr>
               <tr
-                class="MuiTableRow-root sc-eTNRI kbMZtI css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root sc-kFCroH eTsYhL css-n2dwpd-MuiTableRow-root"
                 style="height: 70px;"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-brSamD lniiAI css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjRS css-1ex1afd-MuiTableCell-root"
                   colspan="7"
                 />
               </tr>

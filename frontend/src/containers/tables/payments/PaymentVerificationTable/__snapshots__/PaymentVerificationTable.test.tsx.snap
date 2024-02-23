@@ -6,13 +6,13 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
     class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN jHXnCk css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-ktwOfi css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-hABBmJ IOzft MuiBox-root css-0"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -25,11 +25,11 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
             </h6>
           </div>
           <div
-            class="sc-hABBmJ IOzft MuiBox-root css-1ruxp1v"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-fmKFGs haQfFY cYYCMt css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -168,11 +168,11 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqZl css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -182,11 +182,11 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqZl css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -196,11 +196,11 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqZl css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -210,11 +210,11 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqZl css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -224,11 +224,11 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqZl css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -350,13 +350,13 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
     class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN jHXnCk css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root sc-ktwOfi css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="sc-hABBmJ IOzft MuiBox-root css-0"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
             class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
@@ -369,11 +369,11 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
             </h6>
           </div>
           <div
-            class="sc-hABBmJ IOzft MuiBox-root css-1ruxp1v"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-fmKFGs haQfFY cYYCMt css-b1kpk9-MuiTable-root"
+          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
             class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
@@ -512,11 +512,67 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-csKJxZ fqLiNT css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                colspan="5"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                colspan="5"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                colspan="5"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              data-cy="table-row"
+            >
+              <td
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                colspan="5"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
+            </tr>
+            <tr
+              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
               style="height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-eTNRI iagqZl css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               />
             </tr>
