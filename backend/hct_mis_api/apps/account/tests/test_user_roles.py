@@ -96,7 +96,7 @@ class UserRolesTest(TestCase):
             role=role_2, business_area=self.business_area_afg, user=user_not_unicef_partner, expiry_date="2024-02-16"
         )
         # user_role_active_but_sharing_same_role_with_user_role_inactive
-        user_role_3 = UserRole.objects.create(
+        UserRole.objects.create(
             role=role_2,
             business_area=self.business_area_ukr,
             user=user_not_unicef_partner,
