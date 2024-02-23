@@ -1,5 +1,4 @@
 import { Button, Grid } from '@mui/material';
-import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from 'react-router-dom';
 import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray } from 'formik';
@@ -60,7 +59,7 @@ export function NewDocumentFieldArray({
                 disabled={isEditTicket}
                 onClick={() => {
                   arrayHelpers.push({
-                    id: uuidv4(),
+                    id: crypto.randomUUID(),
                     country: null,
                     key: null,
                     number: '',
