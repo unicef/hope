@@ -50,13 +50,15 @@ export function SurveysFilters({
     >
       <Grid container alignItems="center" spacing={3}>
         <Grid xs={3} item>
-          <SearchTextField
-            value={filter.search}
-            label="Search"
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy="filters-search"
-            fullWidth
-          />
+          <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
+            <SearchTextField
+              value={filter.search}
+              label="Search"
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              data-cy="filters-search"
+              fullWidth
+            />
+          </div>
         </Grid>
         <Grid xs={4} item>
           <TargetPopulationAutocomplete
@@ -71,17 +73,19 @@ export function SurveysFilters({
         </Grid>
         <Grid container item xs={12} spacing={3} alignItems="flex-end">
           <Grid item xs={4}>
-            <CreatedByAutocomplete
-              name="createdBy"
-              label={t('Created by')}
-              value={filter.createdBy}
-              filter={filter}
-              setFilter={setFilter}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-              additionalVariables={{ isSurveyCreator: true }}
-            />
+            <div style={{ position: 'relative', top: '3px', width: '100%' }}>
+              <CreatedByAutocomplete
+                name="createdBy"
+                label={t('Created by')}
+                value={filter.createdBy}
+                filter={filter}
+                setFilter={setFilter}
+                initialFilter={initialFilter}
+                appliedFilter={appliedFilter}
+                setAppliedFilter={setAppliedFilter}
+                additionalVariables={{ isSurveyCreator: true }}
+              />
+            </div>
           </Grid>
           <Grid item xs={4}>
             <DatePickerFilter

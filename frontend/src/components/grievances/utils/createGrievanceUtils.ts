@@ -9,10 +9,10 @@ export const selectedIssueType = (
 ): string =>
   formValues.issueType
     ? grievanceTicketIssueTypeChoices
-      .filter((el) => el.category === formValues.category.toString())[0]
-      .subCategories.filter(
-        (el) => el.value === formValues.issueType.toString(),
-      )[0].name
+        .filter((el) => el.category === formValues.category.toString())[0]
+        .subCategories.filter(
+          (el) => el.value === formValues.issueType.toString(),
+        )[0].name
     : '-';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -346,7 +346,7 @@ export function prepareVariables(businessArea, values) {
     category: parseInt(values.category, 10),
     consent: values.consent,
     language: values.language,
-    admin: values?.admin?.node?.id,
+    admin: values.admin,
     area: values.area,
     priority:
       values.priority === 'Not set' || values.priority === null
