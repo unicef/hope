@@ -69,11 +69,11 @@ export function CreateFollowUpPaymentPlan({
         (dispersionStartDate: any, schema: Yup.DateSchema) =>
           dispersionStartDate
             ? schema.min(
-              new Date(dispersionStartDate),
-              `${t('Dispersion End Date has to be greater than')} ${moment(
-                dispersionStartDate,
-              ).format('YYYY-MM-DD')}`,
-            )
+                new Date(dispersionStartDate),
+                `${t('Dispersion End Date has to be greater than')} ${moment(
+                  dispersionStartDate,
+                ).format('YYYY-MM-DD')}`,
+              )
             : schema,
       ),
   });
@@ -112,7 +112,7 @@ export function CreateFollowUpPaymentPlan({
       validateOnBlur
     >
       {({ submitForm, values }) => (
-        <Form>
+        <Form placeholder="Form">
           <Box p={2}>
             <Button
               variant="outlined"

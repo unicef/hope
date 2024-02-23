@@ -53,7 +53,7 @@ function RefuseRdiForm({
       }}
     >
       {({ submitForm }) => (
-        <Form>
+        <Form placeholder="Form">
           <Dialog open={open} onClose={onClose} style={{ minWidth: '750px' }}>
             <DialogTitle>Refuse RDI</DialogTitle>
             <DialogContent>

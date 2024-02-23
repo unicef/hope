@@ -84,7 +84,7 @@ export function RevertForceFailedButton({
               <DialogTitle>{t('Revert mark as failed')}</DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
-              <Form>
+              <Form placeholder="Form">
                 <Field
                   name="deliveredQuantity"
                   label={t('Delivered Quantity')}

@@ -114,7 +114,7 @@ export function CreateTargetPopulationPage(): React.ReactElement {
       onSubmit={handleSubmit}
     >
       {({ submitForm, values }) => (
-        <Form>
+        <Form placeholder="Form">
           <AutoSubmitFormOnEnter />
           <CreateTargetPopulationHeader
             handleSubmit={submitForm}

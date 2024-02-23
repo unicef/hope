@@ -89,22 +89,22 @@ function prepareVariables(
       fullListArguments:
         selectedSampleSizeType === 0
           ? {
-            excludedAdminAreas: values.excludedAdminAreasFull || [],
-          }
+              excludedAdminAreas: values.excludedAdminAreasFull || [],
+            }
           : null,
       randomSamplingArguments:
         selectedSampleSizeType === 1
           ? {
-            confidenceInterval: values.confidenceInterval * 0.01,
-            marginOfError: values.marginOfError * 0.01,
-            excludedAdminAreas: values.adminCheckbox
-              ? values.excludedAdminAreasRandom
-              : [],
-            age: values.ageCheckbox
-              ? { min: values.filterAgeMin, max: values.filterAgeMax }
-              : null,
-            sex: values.sexCheckbox ? values.filterSex : null,
-          }
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              excludedAdminAreas: values.adminCheckbox
+                ? values.excludedAdminAreasRandom
+                : [],
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
           : null,
     },
   };
@@ -205,9 +205,9 @@ export function CreateCommunicationPage(): React.ReactElement {
 
   const mappedAdminAreas = data?.allAdminAreas?.edges?.length
     ? data.allAdminAreas.edges.map((el) => ({
-      value: el.node.id,
-      name: el.node.name,
-    }))
+        value: el.node.id,
+        name: el.node.name,
+      }))
     : [];
 
   if (permissions === null) return null;
@@ -261,20 +261,20 @@ export function CreateCommunicationPage(): React.ReactElement {
       fullListArguments:
         selectedSampleSizeType === 0
           ? {
-            excludedAdminAreas: values.excludedAdminAreasFull,
-          }
+              excludedAdminAreas: values.excludedAdminAreasFull,
+            }
           : null,
       randomSamplingArguments:
         selectedSampleSizeType === 1
           ? {
-            excludedAdminAreas: values.excludedAdminAreasRandom,
-            confidenceInterval: values.confidenceInterval * 0.01,
-            marginOfError: values.marginOfError * 0.01,
-            age: values.ageCheckbox
-              ? { min: values.filterAgeMin, max: values.filterAgeMax }
-              : null,
-            sex: values.sexCheckbox ? values.filterSex : null,
-          }
+              excludedAdminAreas: values.excludedAdminAreasRandom,
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
           : null,
       title: values.title,
       body: values.body,
@@ -347,7 +347,7 @@ export function CreateCommunicationPage(): React.ReactElement {
                 })}
               </Stepper>
             </Grid>
-            <Form>
+            <Form placeholder="Form">
               <FormikEffect
                 values={values}
                 onChange={() => setFormValues(values)}

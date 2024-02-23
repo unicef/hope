@@ -1,7 +1,7 @@
 import { Form, Formik } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import moment from 'moment';
+import { format, parseISO } from 'date-fns';
 import * as Yup from 'yup';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
@@ -16,7 +16,6 @@ import {
   useCreatePpMutation,
 } from '@generated/graphql';
 import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
-import { today } from '@utils/utils';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { useNavigate } from 'react-router-dom';
 
@@ -45,48 +44,39 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .required(t('Payment Plan Name is required'))
-      .min(5, t('Too short'))
-      .max(25, t('Too long')),
+    currency: Yup.string(),
     targetingId: Yup.string().required(t('Target Population is required')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
       .required(t('End Date is required'))
       .when('startDate', (startDate: any, schema: Yup.DateSchema) =>
-        startDate
+        startDate && typeof startDate === 'string'
           ? schema.min(
-            new Date(startDate),
-            `${t('End date has to be greater than')} ${moment(
-              startDate,
-            ).format('YYYY-MM-DD')}`,
-          )
+              parseISO(startDate),
+              `${t('End date has to be greater than')} ${format(parseISO(startDate), 'yyyy-MM-dd')}`,
+            )
           : schema,
       ),
-    currency: Yup.string().nullable().required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
     dispersionEndDate: Yup.date()
       .required(t('Dispersion End Date is required'))
-      .min(today, t('Dispersion End Date cannot be in the past'))
+      .min(new Date(), t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
         (dispersionStartDate: any, schema: Yup.DateSchema) =>
-          dispersionStartDate
+          dispersionStartDate && typeof dispersionStartDate === 'string'
             ? schema.min(
-              new Date(dispersionStartDate),
-              `${t('Dispersion End Date has to be greater than')} ${moment(
-                dispersionStartDate,
-              ).format('YYYY-MM-DD')}`,
-            )
+                parseISO(dispersionStartDate),
+                `${t('Dispersion End Date has to be greater than')} ${format(parseISO(dispersionStartDate), 'yyyy-MM-dd')}`,
+              )
             : schema,
       ),
   });
 
   type FormValues = Yup.InferType<typeof validationSchema>;
   const initialValues: FormValues = {
-    name: '',
     targetingId: '',
     startDate: null,
     endDate: null,
@@ -97,13 +87,31 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
 
   const handleSubmit = async (values: FormValues): Promise<void> => {
     try {
+      const startDate = values.startDate
+        ? format(new Date(values.startDate), 'yyyy-MM-dd')
+        : null;
+      const endDate = values.endDate
+        ? format(new Date(values.endDate), 'yyyy-MM-dd')
+        : null;
+      const dispersionStartDate = values.dispersionStartDate
+        ? format(new Date(values.dispersionStartDate), 'yyyy-MM-dd')
+        : null;
+      const dispersionEndDate = values.dispersionEndDate
+        ? format(new Date(values.dispersionEndDate), 'yyyy-MM-dd')
+        : null;
+
       const res = await mutate({
         variables: {
           //@ts-ignore
-          //Currency will not be null here because it is required in thevalidation schema
           input: {
             businessAreaSlug: businessArea,
             ...values,
+            startDate,
+            endDate,
+            dispersionStartDate,
+            dispersionEndDate,
+            //TODO: remove this when the backend is updated
+            name: 'Payment Plan',
           },
         },
       });
@@ -125,7 +133,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       validateOnBlur
     >
       {({ submitForm, values }) => (
-        <Form>
+        <Form placeholder="Form">
           <AutoSubmitFormOnEnter />
           <CreatePaymentPlanHeader
             handleSubmit={submitForm}

@@ -50,11 +50,11 @@ export const NewReportForm = (): React.ReactElement => {
       .when('dateFrom', (dateFrom: any, schema: Yup.DateSchema) =>
         dateFrom
           ? schema.min(
-            new Date(dateFrom),
-            `${t('End date have to be greater than')} ${moment(
-              dateFrom,
-            ).format('YYYY-MM-DD')}`,
-          )
+              new Date(dateFrom),
+              `${t('End date have to be greater than')} ${moment(
+                dateFrom,
+              ).format('YYYY-MM-DD')}`,
+            )
           : schema,
       ),
   });
@@ -140,9 +140,7 @@ export const NewReportForm = (): React.ReactElement => {
     });
     if (!response.errors && response.data.createReport) {
       showMessage('Report created.');
-      navigate(
-        `/${baseUrl}/reporting/${response.data.createReport.report.id}`,
-      );
+      navigate(`/${baseUrl}/reporting/${response.data.createReport.report.id}`);
     } else {
       showMessage('Report create action failed.');
     }
@@ -260,7 +258,7 @@ export const NewReportForm = (): React.ReactElement => {
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
-                <Form>
+                <Form placeholder="Form">
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
                       <Field

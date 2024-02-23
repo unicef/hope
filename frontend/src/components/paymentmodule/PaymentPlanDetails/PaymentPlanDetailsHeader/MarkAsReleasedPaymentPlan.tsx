@@ -109,7 +109,7 @@ export function MarkAsReleasedPaymentPlan({
                     </GreyText>
                   </Box>
                 )}
-                <Form>
+                <Form placeholder="Form">
                   <Field
                     name="comment"
                     multiline

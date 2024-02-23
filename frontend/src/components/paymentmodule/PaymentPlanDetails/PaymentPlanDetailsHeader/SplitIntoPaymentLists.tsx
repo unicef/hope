@@ -7,13 +7,17 @@ import { DialogContainer } from '@containers/dialogs/DialogContainer';
 import { DialogFooter } from '@containers/dialogs/DialogFooter';
 import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
 import { useSnackbar } from '@hooks/useSnackBar';
-import {
-  PaymentPlanQuery,
-  useSplitPpMutation,
-} from '@generated/graphql';
+import { PaymentPlanQuery, useSplitPpMutation } from '@generated/graphql';
 import { LoadingButton } from '@core/LoadingButton';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+} from '@mui/material';
 import ReorderIcon from '@mui/icons-material/Reorder';
 
 interface FormValues {
@@ -44,10 +48,14 @@ export const SplitIntoPaymentLists = ({
     splitType: Yup.string().required('Split Type is required'),
     paymentsNo: Yup.number().when('splitType', {
       is: 'BY_RECORDS',
-      then: (schema) => schema
-        .required('Payments Number is required')
-        .min(10, 'Payments Number must be greater than 10')
-        .max(paymentPlan.paymentItems.totalCount, `Payments Number must be less than ${paymentPlan.paymentItems.totalCount}`),
+      then: (schema) =>
+        schema
+          .required('Payments Number is required')
+          .min(10, 'Payments Number must be greater than 10')
+          .max(
+            paymentPlan.paymentItems.totalCount,
+            `Payments Number must be less than ${paymentPlan.paymentItems.totalCount}`,
+          ),
     }),
   });
 
@@ -78,10 +86,10 @@ export const SplitIntoPaymentLists = ({
       }}
     >
       {({ values, submitForm }) => (
-        <Form>
+        <Form placeholder="Form">
           <Button
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             onClick={() => setDialogOpen(true)}
             endIcon={<ReorderIcon />}
             disabled={!canSplit}
@@ -91,9 +99,9 @@ export const SplitIntoPaymentLists = ({
           <Dialog
             open={dialogOpen}
             onClose={() => setDialogOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-            maxWidth='md'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
+            maxWidth="md"
           >
             <DialogTitleWrapper>
               <DialogTitle>{t('Split into Payment Lists')}</DialogTitle>
@@ -103,8 +111,8 @@ export const SplitIntoPaymentLists = ({
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <Field
-                      name='splitType'
-                      label='Split Type'
+                      name="splitType"
+                      label="Split Type"
                       choices={paymentPlan.splitChoices}
                       component={FormikSelectField}
                     />
@@ -112,11 +120,11 @@ export const SplitIntoPaymentLists = ({
                   <Grid item xs={12}>
                     {values.splitType === 'BY_RECORDS' && (
                       <Field
-                        name='paymentsNo'
-                        label='Payments Number'
+                        name="paymentsNo"
+                        label="Payments Number"
                         component={FormikTextField}
-                        type='number'
-                        variant='outlined'
+                        type="number"
+                        variant="outlined"
                       />
                     )}
                   </Grid>
@@ -130,10 +138,10 @@ export const SplitIntoPaymentLists = ({
                 </Button>
                 <LoadingButton
                   loading={loading}
-                  color='primary'
-                  variant='contained'
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-split'
+                  data-cy="button-split"
                 >
                   {t('Split')}
                 </LoadingButton>

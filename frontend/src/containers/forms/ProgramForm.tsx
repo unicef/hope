@@ -33,7 +33,7 @@ export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
     );
 
   return (
-    <Form>
+    <Form placeholder="Form">
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <Field
@@ -49,13 +49,13 @@ export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
         </Grid>
         <Grid item xs={6}>
           <Field
-            name='programmeCode'
+            name="programmeCode"
             label={t('Programme Code')}
-            type='text'
+            type="text"
             fullWidth
-            variant='outlined'
+            variant="outlined"
             component={FormikTextField}
-            data-cy='input-programme-code'
+            data-cy="input-programme-code"
           />
         </Grid>
         <Grid item xs={6}>

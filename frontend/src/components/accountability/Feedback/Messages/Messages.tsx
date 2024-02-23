@@ -141,7 +141,7 @@ export function Messages({
                       </Grid>
                       <Grid item xs={12}>
                         <DescMargin>
-                          <Form>
+                          <Form placeholder="Form">
                             <Field
                               name="newNote"
                               multiline

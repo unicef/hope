@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PaperContainer } from '../../../targeting/PaperContainer';
 import { CalendarTodayRounded } from '@mui/icons-material';
+import { relative } from 'path';
 
 interface PaymentPlanParametersProps {
   values;
@@ -22,10 +23,8 @@ export const PaymentPlanParameters = ({
   paymentPlan,
 }: PaymentPlanParametersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [
-    loadTargetPopulation,
-    { data, loading },
-  ] = useTargetPopulationLazyQuery();
+  const [loadTargetPopulation, { data, loading }] =
+    useTargetPopulationLazyQuery();
 
   useEffect(() => {
     if (values.targetingId) {
@@ -82,12 +81,16 @@ export const PaymentPlanParameters = ({
             />
           </Grid>
           <Grid item xs={4}>
-            <Field
-              name="currency"
-              component={FormikCurrencyAutocomplete}
-              required
-              disabled={Boolean(paymentPlan?.isFollowUp)}
-            />
+            <div
+              style={{ position: 'relative', bottom: '12px', width: '100%' }}
+            >
+              <Field
+                name="currency"
+                component={FormikCurrencyAutocomplete}
+                required
+                disabled={Boolean(paymentPlan?.isFollowUp)}
+              />
+            </div>
           </Grid>
           <Grid item xs={4}>
             <Field
