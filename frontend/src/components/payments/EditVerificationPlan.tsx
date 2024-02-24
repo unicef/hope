@@ -244,7 +244,7 @@ export function EditVerificationPlan({
           });
         }
         return (
-          <Form placeholder="Form">
+          <Form>
             <AutoSubmitFormOnEnter />
             <FormikEffect
               values={values}

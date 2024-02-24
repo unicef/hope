@@ -112,7 +112,7 @@ export function CreateFollowUpPaymentPlan({
       validateOnBlur
     >
       {({ submitForm, values }) => (
-        <Form placeholder="Form">
+        <Form>
           <Box p={2}>
             <Button
               variant="outlined"

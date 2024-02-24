@@ -389,7 +389,7 @@ export function CreateSurveyPage(): React.ReactElement {
                 })}
               </Stepper>
             </Grid>
-            <Form placeholder="Form">
+            <Form>
               <FormikEffect
                 values={values}
                 onChange={() => setFormValues(values)}

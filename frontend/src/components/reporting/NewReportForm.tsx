@@ -258,7 +258,7 @@ export const NewReportForm = (): React.ReactElement => {
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
-                <Form placeholder="Form">
+                <Form>
                   <Grid container spacing={3}>
                     <Grid item xs={12}>
                       <Field

@@ -107,7 +107,7 @@ export function AuthorizePaymentPlan({
                     </GreyText>
                   </Box>
                 )}
-                <Form placeholder="Form">
+                <Form>
                   <Field
                     name="comment"
                     multiline

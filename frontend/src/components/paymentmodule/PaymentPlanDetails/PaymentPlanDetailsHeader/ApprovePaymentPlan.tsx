@@ -108,7 +108,7 @@ export function ApprovePaymentPlan({
                     </GreyText>
                   </Box>
                 )}
-                <Form placeholder="Form">
+                <Form>
                   <Field
                     name="comment"
                     multiline

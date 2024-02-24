@@ -33,7 +33,7 @@ export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
     );
 
   return (
-    <Form placeholder="Form">
+    <Form>
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <Field

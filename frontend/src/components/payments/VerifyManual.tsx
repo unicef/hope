@@ -65,7 +65,7 @@ export function VerifyManual({
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ values }) => (
-        <Form placeholder="Form">
+        <Form>
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
             <Button

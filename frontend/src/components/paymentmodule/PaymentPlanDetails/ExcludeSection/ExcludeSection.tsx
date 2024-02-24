@@ -358,7 +358,7 @@ export function ExcludeSection({
       enableReinitialize
     >
       {({ submitForm, values, resetForm }) => (
-        <Form placeholder="Form">
+        <Form>
           <PaperContainer>
             <Box display="flex" justifyContent="space-between">
               <Typography variant="h6">{t('Exclude')}</Typography>

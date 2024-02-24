@@ -86,7 +86,7 @@ export const SplitIntoPaymentLists = ({
       }}
     >
       {({ values, submitForm }) => (
-        <Form placeholder="Form">
+        <Form>
           <Button
             variant="contained"
             color="primary"
