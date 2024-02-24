@@ -133,7 +133,7 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
       validateOnBlur
     >
       {({ submitForm, values }) => (
-        <Form placeholder="Form">
+        <Form>
           <AutoSubmitFormOnEnter />
           <CreatePaymentPlanHeader
             handleSubmit={submitForm}

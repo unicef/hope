@@ -178,7 +178,7 @@ export const SetUpFspCore = ({
       enableReinitialize
     >
       {({ values, submitForm }) => (
-        <Form placeholder="Form">
+        <Form>
           <AutoSubmitFormOnEnter />
           <Box m={5}>
             <ContainerColumnWithBorder>

@@ -139,7 +139,7 @@ export function EditTargetPopulation({
       onSubmit={handleSubmit}
     >
       {({ values, submitForm }) => (
-        <Form placeholder="Form">
+        <Form>
           <AutoSubmitFormOnEnter />
           <EditTargetPopulationHeader
             handleSubmit={submitForm}

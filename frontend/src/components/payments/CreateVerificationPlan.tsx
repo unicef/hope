@@ -239,7 +239,7 @@ export function CreateVerificationPlan({
         }
 
         return (
-          <Form placeholder="Form">
+          <Form>
             <AutoSubmitFormOnEnter />
             <FormikEffect
               values={values}

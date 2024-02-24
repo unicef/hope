@@ -136,7 +136,7 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
       onSubmit={handleSubmit}
     >
       {({ submitForm, values }) => (
-        <Form placeholder="Form">
+        <Form>
           <AutoSubmitFormOnEnter />
           <EditPaymentPlanHeader
             paymentPlan={paymentPlan}
