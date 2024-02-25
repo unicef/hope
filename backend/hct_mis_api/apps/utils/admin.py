@@ -1,3 +1,4 @@
+import uuid
 from typing import Any, Dict, Optional, Sequence, Tuple, Union
 from uuid import UUID
 
@@ -18,6 +19,7 @@ from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 from hct_mis_api.apps.administration.widgets import JsonWidget
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.utils.celery_utils import get_task_in_queue_or_running
 from hct_mis_api.apps.utils.security import is_root
 
 
@@ -190,12 +192,25 @@ def is_exporting_xlsx_file(btn: Button) -> bool:
 
 
 class PaymentPlanCeleryTasksMixin:
+
+    prefix = "hct_mis_api.apps.payment.celery_tasks"
+    prepare_payment_plan_task = f"{prefix}.prepare_payment_plan_task"
+    import_payment_plan_payment_list_from_xlsx = f"{prefix}.import_payment_plan_payment_list_from_xlsx"
+    import_payment_plan_payment_list_per_fsp_from_xlsx = f"{prefix}.import_payment_plan_payment_list_per_fsp_from_xlsx"
+    create_payment_plan_payment_list_xlsx = f"{prefix}.create_payment_plan_payment_list_xlsx"
+    create_payment_plan_payment_list_xlsx_per_fsp = f"{prefix}.create_payment_plan_payment_list_xlsx_per_fsp"
+
     @button(visible=lambda btn: is_preparing_payment_plan(btn), enabled=lambda btn: is_enabled(btn))
-    def restart_preparing_payment_plan(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
-        """preparing Payment Plan"""
+    def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+        """Preparing Payment Plan"""
+
+        from hct_mis_api.apps.payment.celery_tasks import prepare_payment_plan_task
 
         if request.method == "POST":
-            pass
+            task_name = self.prepare_payment_plan_task
+            args = [uuid.UUID(pk)]
+            task_data = get_task_in_queue_or_running(name=task_name, args=args)
+            prepare_payment_plan_task.apply_async(task_id=task_data["id"], args=args)
         else:
             return confirm_action(
                 modeladmin=self,
@@ -210,11 +225,17 @@ class PaymentPlanCeleryTasksMixin:
         visible=lambda btn: is_importing_entitlements_xlsx_file(btn) and is_locked_payment_plan(btn),
         enabled=lambda btn: is_enabled(btn),
     )
-    def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
-        """importing entitlement file"""
+    def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+        """Importing entitlement file"""
+
+        from hct_mis_api.apps.payment.celery_tasks import import_payment_plan_payment_list_from_xlsx
 
         if request.method == "POST":
-            pass
+            task_name = self.prepare_payment_plan_task
+            args = [uuid.UUID(pk)]
+            task_data = get_task_in_queue_or_running(name=task_name, args=args)
+            import_payment_plan_payment_list_from_xlsx.apply_async(task_id=task_data["id"], args=args)
+
         else:
             return confirm_action(
                 modeladmin=self,
@@ -228,8 +249,8 @@ class PaymentPlanCeleryTasksMixin:
         visible=lambda btn: is_importing_reconciliation_xlsx_file(btn) and is_accepted_payment_plan(btn),
         enabled=lambda btn: is_enabled(btn),
     )
-    def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
-        """importing payment plan list (from xlsx)"""
+    def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+        """Importing payment plan list (from xlsx)"""
 
         if request.method == "POST":
             pass
@@ -246,11 +267,26 @@ class PaymentPlanCeleryTasksMixin:
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_locked_payment_plan(btn),
         enabled=lambda btn: is_enabled(btn),
     )
-    def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
-        """exporting template for entitlement"""
+    def restart_exporting_template_for_entitlement(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+        """Exporting template for entitlement"""
+
+        from hct_mis_api.apps.payment.celery_tasks import create_payment_plan_payment_list_xlsx
 
         if request.method == "POST":
-            pass
+            task_name = self.create_payment_plan_payment_list_xlsx
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            kwargs = {
+                "payment_plan_id": uuid.UUID(pk),
+                "user_id": uuid.UUID(str(payment_plan.created_by.id))
+            }
+            task_data = get_task_in_queue_or_running(name=task_name, kwargs=kwargs)
+            if task_data:
+                create_payment_plan_payment_list_xlsx.apply_async(
+                    task_id=task_data["id"], kwargs={
+                        "payment_plan_id": uuid.UUID(pk),
+                        "user_id": uuid.UUID(request.user.id)
+                    })
+
         else:
             return confirm_action(
                 modeladmin=self,
@@ -266,7 +302,7 @@ class PaymentPlanCeleryTasksMixin:
         enabled=lambda btn: is_enabled(btn),
     )
     def restart_exporting_exporting_payment_plan_list(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
-        """exporting payment plan list"""
+        """Exporting payment plan list"""
 
         if request.method == "POST":
             pass
