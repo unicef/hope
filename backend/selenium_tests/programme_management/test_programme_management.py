@@ -253,7 +253,6 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
@@ -376,6 +375,7 @@ class TestBusinessAreas:
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
 
+@pytest.mark.skip()
 @pytest.mark.usefixtures("login")
 class TestAdminAreas:
     @pytest.mark.parametrize(

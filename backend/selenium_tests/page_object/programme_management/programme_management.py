@@ -114,7 +114,7 @@ class ProgrammeManagement(BaseComponents):
         self.get_elements(self.calendarChangeMonth, By.XPATH)[0].click()
         for _ in range(5):
             next_month = self.get(self.calendarMonthYear, By.XPATH).text
-            sleep(0.5)
+            sleep(1)
             if month != next_month:
                 break
         self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
