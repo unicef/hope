@@ -5,11 +5,8 @@ from decimal import Decimal
 from math import ceil
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
-from django.conf import settings
-from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.template.loader import render_to_string
 
 from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
@@ -26,7 +23,6 @@ from hct_mis_api.apps.payment.models import (
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from hct_mis_api.apps.account.models import User
     from hct_mis_api.apps.core.exchange_rates.api import ExchangeRateClient
 
 
@@ -168,17 +164,3 @@ def get_payment_plan_object(cash_or_payment_plan_id: str) -> Union["PaymentPlan"
         payment_plan_object = get_object_or_404(PaymentPlan, pk=obj_id)
 
     return payment_plan_object
-
-
-def send_email_notification(user: "User", service: typing.Any, enable_email_notification: bool = True) -> None:
-    # BusinessArea.enable_email_notification
-    if enable_email_notification:
-        context = service.get_email_context(user)
-        transaction.on_commit(
-            lambda: user.email_user(
-                context["title"],
-                render_to_string(service.text_template, context=context),
-                settings.EMAIL_HOST_USER,
-                html_message=render_to_string(service.html_template, context=context),
-            )
-        )

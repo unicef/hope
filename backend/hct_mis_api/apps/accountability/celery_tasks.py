@@ -1,9 +1,7 @@
 import logging
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.template.loader import render_to_string
 
 from hct_mis_api.apps.accountability.models import Survey
 from hct_mis_api.apps.accountability.services.export_survey_sample_service import (
@@ -12,6 +10,7 @@ from hct_mis_api.apps.accountability.services.export_survey_sample_service impor
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.services.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.core.utils import send_email_notification
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
@@ -30,14 +29,8 @@ def export_survey_sample_task(survey_id: str, user_id: str) -> None:
         service = ExportSurveySampleService(survey, user)
         service.export_sample()
 
-        if survey.business_area.enable_email_notification:
-            context = service.get_email_context()
-            user.email_user(
-                context["title"],
-                render_to_string(service.text_template, context=context),
-                settings.EMAIL_HOST_USER,
-                html_message=render_to_string(service.html_template, context=context),
-            )
+        send_email_notification(service, user, survey.business_area.enable_email_notification)
+
     except Exception as e:
         logger.exception(e)
         raise
