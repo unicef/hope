@@ -47,7 +47,7 @@ export function EditIdentityRow({
     values?.individualDataUpdateIdentitiesToRemove || [];
   const removed = identitiesToRemove.includes(identity.node.id);
   return isEdited ? (
-    <>
+    <Grid container alignItems="center" spacing={3}>
       <AgencyField
         id={id}
         key={`${id}-${identity?.node?.number}-${identity?.node?.partner}`}
@@ -78,9 +78,9 @@ export function EditIdentityRow({
           <Close />
         </IconButton>
       </Box>
-    </>
+    </Grid>
   ) : (
-    <React.Fragment key={identity.node.id}>
+    <Grid container alignItems="center" spacing={3} key={identity.node.id}>
       <Grid item xs={4}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
@@ -134,6 +134,6 @@ export function EditIdentityRow({
           </Box>
         )}
       </Grid>
-    </React.Fragment>
+    </Grid>
   );
 }

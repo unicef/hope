@@ -59,7 +59,7 @@ export const TicketsByCategoryChart = ({
   };
 
   return (
-    <div style={{ height: '400px' }}>
+    <div style={{ height: '400px', width: '100%' }}>
       <Bar data={chartData} options={options} />
     </div>
   );

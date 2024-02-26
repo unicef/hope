@@ -23,7 +23,7 @@ export function DocumentationField({
   const { t } = useTranslation();
 
   return (
-    <>
+    <Grid container spacing={3} alignItems="center">
       <Grid item xs={3}>
         <Field
           name={`${baseName}[${index}].name`}
@@ -56,6 +56,6 @@ export function DocumentationField({
           </IconButton>
         </Grid>
       ) : null}
-    </>
+    </Grid>
   );
 }

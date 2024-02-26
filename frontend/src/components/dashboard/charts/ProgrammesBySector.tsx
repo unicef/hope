@@ -36,8 +36,8 @@ export const ProgrammesBySector = ({
 
   const options: any = {
     indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: true,
+    responsive: false,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'bottom',
