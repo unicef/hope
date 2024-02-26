@@ -4,8 +4,6 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  Tab,
-  Tabs,
   Typography,
 } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
@@ -41,6 +39,7 @@ import { ButtonTooltip } from '@core/ButtonTooltip';
 import { FormikEffect } from '@core/FormikEffect';
 import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
+import { Tabs, Tab } from '@core/Tabs';
 
 const StyledTabs = styled(Tabs)`
   && {

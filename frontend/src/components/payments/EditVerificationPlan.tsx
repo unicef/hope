@@ -4,8 +4,6 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  Tab,
-  Tabs,
   Typography,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/EditRounded';
@@ -37,6 +35,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { FormikSliderField } from '@shared/Formik/FormikSliderField';
 import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { Tabs, Tab } from '@core/Tabs';
 import { FormikEffect } from '@core/FormikEffect';
 import { LoadingButton } from '@core/LoadingButton';
 import { TabPanel } from '@core/TabPanel';
