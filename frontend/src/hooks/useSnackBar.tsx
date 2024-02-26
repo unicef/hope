@@ -1,10 +1,10 @@
 import React, {
-  useState,
   createContext,
   ReactElement,
   useContext,
+  useState,
 } from 'react';
-import { Snackbar, SnackbarContent as Content } from '@mui/material';
+import Snackbar from '@mui/material/Snackbar';
 
 type SnackbarContent = {
   message: string;
@@ -40,12 +40,13 @@ export const SnackbarProvider = ({ children }): ReactElement => {
     <SnackbarContext.Provider value={{ showMessage, message }}>
       <>
         {children}
-        <Snackbar open={show} autoHideDuration={5000} onClose={hideMessage}>
-          <Content
-            message={message}
-            // data-cy={snackBar.dataCy}
-          />
-        </Snackbar>
+        <Snackbar
+          open={show}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          autoHideDuration={5000}
+          onClose={hideMessage}
+          message={message}
+        />
       </>
     </SnackbarContext.Provider>
   );
