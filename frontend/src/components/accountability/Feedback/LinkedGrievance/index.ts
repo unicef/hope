@@ -1,1 +1,1 @@
-import { LinkedGrievance } from './LinkedGrievance';
+export { LinkedGrievance } from './LinkedGrievance';

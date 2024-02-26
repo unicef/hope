@@ -1,26 +1,21 @@
-import {
-  Box,
-  Button,
-  DialogContent,
-  DialogTitle,
-  Grid,
-} from '@material-ui/core';
+import { Box, Button, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   PaymentVerificationStatus,
-  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation
-} from '../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
+  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation,
+} from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
 
 export interface Props {
   paymentVerificationId: string;
@@ -36,10 +31,8 @@ export function VerifyManual({
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [
-    mutate,
-    { error },
-  ] = useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
+  const [mutate, { error }] =
+    useUpdatePaymentVerificationReceivedAndReceivedAmountMutation();
 
   const submit = async (values): Promise<void> => {
     try {
@@ -76,21 +69,23 @@ export function VerifyManual({
           {verifyManualDialogOpen && <AutoSubmitFormOnEnter />}
           <Box p={2}>
             <Button
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               onClick={() => setVerifyManualDialogOpen(true)}
-              data-cy='button-ed-plan'
+              data-cy="button-ed-plan"
               disabled={!enabled}
             >
-              {status === PaymentVerificationStatus.Pending ? t('Verify') : t('Edit')}
+              {status === PaymentVerificationStatus.Pending
+                ? t('Verify')
+                : t('Edit')}
             </Button>
           </Box>
           <Dialog
             open={verifyManualDialogOpen}
             onClose={() => setVerifyManualDialogOpen(false)}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
-            maxWidth='md'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
+            maxWidth="md"
           >
             <DialogTitleWrapper>
               <DialogTitle>{t('Verify Payment')}</DialogTitle>
@@ -100,8 +95,8 @@ export function VerifyManual({
                 <Grid container>
                   <Grid item xs={12}>
                     <Field
-                      name='status'
-                      label='Status'
+                      name="status"
+                      label="Status"
                       style={{ flexDirection: 'row' }}
                       choices={[
                         { value: 'RECEIVED', name: t('Received') },
@@ -113,10 +108,10 @@ export function VerifyManual({
                   <Grid item xs={6}>
                     {values.status === 'RECEIVED' && (
                       <Field
-                        name='receivedAmount'
-                        type='number'
+                        name="receivedAmount"
+                        type="number"
                         label={t('Amount Received')}
-                        color='primary'
+                        color="primary"
                         component={FormikTextField}
                       />
                     )}
@@ -130,11 +125,11 @@ export function VerifyManual({
                   {t('CANCEL')}
                 </Button>
                 <Button
-                  type='submit'
-                  color='primary'
-                  variant='contained'
+                  type="submit"
+                  color="primary"
+                  variant="contained"
                   onClick={() => submit(values)}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {t('Verify')}
                 </Button>

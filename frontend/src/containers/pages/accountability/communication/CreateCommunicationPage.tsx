@@ -10,11 +10,11 @@ import {
   StepLabel,
   Stepper,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
@@ -25,30 +25,27 @@ import {
   useAllAdminAreasQuery,
   useCreateAccountabilityCommunicationMessageMutation,
   useSurveyAvailableFlowsLazyQuery,
-} from '../../../../__generated__/graphql';
-import { LookUpSelectionCommunication } from '../../../../components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { useConfirmation } from '../../../../components/core/ConfirmationDialog';
-import { FormikEffect } from '../../../../components/core/FormikEffect';
-import { LoadingButton } from '../../../../components/core/LoadingButton';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { TabPanel } from '../../../../components/core/TabPanel';
-import { PaperContainer } from '../../../../components/targeting/PaperContainer';
+} from '@generated/graphql';
+import { LookUpSelectionCommunication } from '@components/accountability/Communication/LookUpsCommunication/LookUpSelectionCommunication';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useConfirmation } from '@components/core/ConfirmationDialog';
+import { FormikEffect } from '@components/core/FormikEffect';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TabPanel } from '@components/core/TabPanel';
+import { PaperContainer } from '@components/targeting/PaperContainer';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '../../../../shared/Formik/FormikMultiSelectField';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { FormikSliderField } from '../../../../shared/Formik/FormikSliderField';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import {
-  CommunicationSteps,
-  CommunicationTabsValues,
-} from '../../../../utils/constants';
-import { getPercentage } from '../../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { CommunicationSteps, CommunicationTabsValues } from '@utils/constants';
+import { getPercentage } from '@utils/utils';
 
 const steps = ['Recipients Look up', 'Sample Size', 'Details'];
 const SampleSizeTabs = ['Full List', 'Random Sampling'];
@@ -113,14 +110,12 @@ function prepareVariables(
   };
 }
 
-export const CreateCommunicationPage = (): React.ReactElement => {
+export function CreateCommunicationPage(): React.ReactElement {
   const { t } = useTranslation();
-  const [
-    mutate,
-    { loading },
-  ] = useCreateAccountabilityCommunicationMessageMutation();
+  const [mutate, { loading }] =
+    useCreateAccountabilityCommunicationMessageMutation();
   const { showMessage } = useSnackbar();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
   const confirm = useConfirmation();
@@ -140,13 +135,11 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     },
   });
 
-  const [
-    loadSampleSize,
-    { data: sampleSizesData },
-  ] = useAccountabilityCommunicationMessageSampleSizeLazyQuery({
-    variables: prepareVariables(selectedSampleSizeType, formValues),
-    fetchPolicy: 'network-only',
-  });
+  const [loadSampleSize, { data: sampleSizesData }] =
+    useAccountabilityCommunicationMessageSampleSizeLazyQuery({
+      variables: prepareVariables(selectedSampleSizeType, formValues),
+      fetchPolicy: 'network-only',
+    });
 
   useEffect(() => {
     if (activeStep === CommunicationSteps.SampleSize) {
@@ -154,27 +147,27 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     }
   }, [activeStep, formValues, loadSampleSize]);
 
-  const [
-    loadAvailableFlows,
-    { data: flowsData },
-  ] = useSurveyAvailableFlowsLazyQuery({
-    fetchPolicy: 'network-only',
-  });
+  const [loadAvailableFlows, { data: flowsData }] =
+    useSurveyAvailableFlowsLazyQuery({
+      fetchPolicy: 'network-only',
+    });
 
   useEffect(() => {
     loadAvailableFlows();
   }, [loadAvailableFlows]);
 
   useEffect(() => {
-    //Redirect to error page if RapidPro unavailable available
+    // Redirect to error page if RapidPro unavailable available
     if (!flowsData?.surveyAvailableFlows?.length) {
-      history.push(`/error/${businessArea}`, {
-        errorMessage: t(
-          'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
-        ),
+      navigate(`/error/${businessArea}`, {
+        state: {
+          errorMessage: t(
+            'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
+          ),
+        },
       });
     }
-  }, [flowsData, businessArea, history, t]);
+  }, [flowsData, businessArea, navigate, t]);
 
   const validationSchema = useCallback(() => {
     const datum = {
@@ -226,13 +219,12 @@ export const CreateCommunicationPage = (): React.ReactElement => {
   )
     return <PermissionDenied />;
 
-  const getSampleSizePercentage = (): string => {
-    return `(${getPercentage(
+  const getSampleSizePercentage = (): string =>
+    `(${getPercentage(
       sampleSizesData?.accountabilityCommunicationMessageSampleSize?.sampleSize,
       sampleSizesData?.accountabilityCommunicationMessageSampleSize
         ?.numberOfRecipients,
     )})`;
-  };
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -257,39 +249,37 @@ export const CreateCommunicationPage = (): React.ReactElement => {
 
   const prepareMutationVariables = (
     values,
-  ): CreateAccountabilityCommunicationMessageMutationVariables => {
-    return {
-      input: {
-        households: values.households,
-        targetPopulation: values.targetPopulation,
-        registrationDataImport: values.registrationDataImport,
-        samplingType:
-          selectedSampleSizeType === 0
-            ? SamplingChoices.FullList
-            : SamplingChoices.Random,
-        fullListArguments:
-          selectedSampleSizeType === 0
-            ? {
-                excludedAdminAreas: values.excludedAdminAreasFull,
-              }
-            : null,
-        randomSamplingArguments:
-          selectedSampleSizeType === 1
-            ? {
-                excludedAdminAreas: values.excludedAdminAreasRandom,
-                confidenceInterval: values.confidenceInterval * 0.01,
-                marginOfError: values.marginOfError * 0.01,
-                age: values.ageCheckbox
-                  ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                  : null,
-                sex: values.sexCheckbox ? values.filterSex : null,
-              }
-            : null,
-        title: values.title,
-        body: values.body,
-      },
-    };
-  };
+  ): CreateAccountabilityCommunicationMessageMutationVariables => ({
+    input: {
+      households: values.households,
+      targetPopulation: values.targetPopulation,
+      registrationDataImport: values.registrationDataImport,
+      samplingType:
+        selectedSampleSizeType === 0
+          ? SamplingChoices.FullList
+          : SamplingChoices.Random,
+      fullListArguments:
+        selectedSampleSizeType === 0
+          ? {
+              excludedAdminAreas: values.excludedAdminAreasFull,
+            }
+          : null,
+      randomSamplingArguments:
+        selectedSampleSizeType === 1
+          ? {
+              excludedAdminAreas: values.excludedAdminAreasRandom,
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
+          : null,
+      title: values.title,
+      body: values.body,
+    },
+  });
 
   const dataChangeErrors = (errors): ReactElement[] =>
     ['error'].map((fieldname) => (
@@ -316,7 +306,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 variables: prepareMutationVariables(values),
               });
               showMessage(t('Communication Ticket created.'));
-              history.push(
+              navigate(
                 `/${baseUrl}/accountability/communication/${response.data.createAccountabilityCommunicationMessage.message.id}`,
               );
             } catch (e) {
@@ -331,7 +321,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
       {({ submitForm, setValues, values, setFieldValue, errors }) => (
         <>
           <PageHeader
-            title='New Message'
+            title="New Message"
             breadCrumbs={
               hasPermissions(
                 PERMISSIONS.ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_CREATE,
@@ -363,7 +353,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 onChange={() => setFormValues(values)}
               />
               {activeStep === CommunicationSteps.LookUp && (
-                <Box display='flex' flexDirection='column'>
+                <Box display="flex" flexDirection="column">
                   <LookUpSelectionCommunication
                     businessArea={businessArea}
                     values={values}
@@ -378,7 +368,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 (values.households.length ? (
                   <Box px={8}>
                     <Box pt={3}>
-                      <Box fontSize={12} color='#797979'>
+                      <Box fontSize={12} color="#797979">
                         {t(
                           'You have selected households as the recipients group',
                         )}
@@ -387,7 +377,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                         pb={3}
                         pt={3}
                         fontSize={16}
-                        fontWeight='fontWeightBold'
+                        fontWeight="fontWeightBold"
                       >
                         {t('Message will be sent to all households selected')}:
                         ({values.households.length})
@@ -396,15 +386,15 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                   </Box>
                 ) : (
                   <Box px={8}>
-                    <Box display='flex' alignItems='center'>
-                      <Box pr={5} fontWeight='500' fontSize='medium'>
+                    <Box display="flex" alignItems="center">
+                      <Box pr={5} fontWeight="500" fontSize="medium">
                         {t('Sample Size')}:
                       </Box>
                       <RadioGroup
-                        aria-labelledby='selection-radio-buttons-group'
+                        aria-labelledby="selection-radio-buttons-group"
                         value={selectedSampleSizeType}
                         row
-                        name='radio-buttons-group'
+                        name="radio-buttons-group"
                       >
                         {SampleSizeTabs.map((tab, index) => (
                           <FormControlLabel
@@ -414,7 +404,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                               setSelectedSampleSizeType(index);
                             }}
                             key={tab}
-                            control={<Radio color='primary' />}
+                            control={<Radio color="primary" />}
                             label={tab}
                           />
                         ))}
@@ -423,9 +413,9 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                     <TabPanel value={selectedSampleSizeType} index={0}>
                       {mappedAdminAreas && (
                         <Field
-                          name='excludedAdminAreasFull'
+                          name="excludedAdminAreasFull"
                           choices={mappedAdminAreas}
-                          variant='outlined'
+                          variant="outlined"
                           label={t('Filter Out Administrative Level Areas')}
                           component={FormikMultiSelectField}
                         />
@@ -435,7 +425,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                           pb={3}
                           pt={3}
                           fontSize={16}
-                          fontWeight='fontWeightBold'
+                          fontWeight="fontWeightBold"
                         >
                           Sample size:{' '}
                           {
@@ -456,47 +446,47 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                     <TabPanel value={selectedSampleSizeType} index={1}>
                       <Box pt={3}>
                         <Field
-                          name='confidenceInterval'
+                          name="confidenceInterval"
                           label={t('Confidence Interval')}
                           min={90}
                           max={99}
                           component={FormikSliderField}
-                          suffix='%'
+                          suffix="%"
                         />
                         <Field
-                          name='marginOfError'
+                          name="marginOfError"
                           label={t('Margin of Error')}
                           min={0}
                           max={9}
                           component={FormikSliderField}
-                          suffix='%'
+                          suffix="%"
                         />
-                        <Typography variant='caption'>
+                        <Typography variant="caption">
                           {t('Cluster Filters')}
                         </Typography>
-                        <Box flexDirection='column' display='flex'>
-                          <Box display='flex'>
+                        <Box flexDirection="column" display="flex">
+                          <Box display="flex">
                             <Field
-                              name='adminCheckbox'
+                              name="adminCheckbox"
                               label={t('Administrative Level')}
                               component={FormikCheckboxField}
                             />
                             <Field
-                              name='ageCheckbox'
+                              name="ageCheckbox"
                               label={t('Age of HoH')}
                               component={FormikCheckboxField}
                             />
                             <Field
-                              name='sexCheckbox'
+                              name="sexCheckbox"
                               label={t('Gender of HoH')}
                               component={FormikCheckboxField}
                             />
                           </Box>
                           {values.adminCheckbox && (
                             <Field
-                              name='excludedAdminAreasRandom'
+                              name="excludedAdminAreasRandom"
                               choices={mappedAdminAreas}
-                              variant='outlined'
+                              variant="outlined"
                               label={t('Filter Out Administrative Level Areas')}
                               component={FormikMultiSelectField}
                             />
@@ -508,19 +498,19 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                                 <Grid container>
                                   <Grid item xs={4}>
                                     <Field
-                                      name='filterAgeMin'
+                                      name="filterAgeMin"
                                       label={t('Minimum Age')}
-                                      type='number'
-                                      color='primary'
+                                      type="number"
+                                      color="primary"
                                       component={FormikTextField}
                                     />
                                   </Grid>
                                   <Grid item xs={4}>
                                     <Field
-                                      name='filterAgeMax'
+                                      name="filterAgeMax"
                                       label={t('Maximum Age')}
-                                      type='number'
-                                      color='primary'
+                                      type="number"
+                                      color="primary"
                                       component={FormikTextField}
                                     />
                                   </Grid>
@@ -530,9 +520,9 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                             {values.sexCheckbox && (
                               <Grid item xs={5}>
                                 <Field
-                                  name='filterSex'
+                                  name="filterSex"
                                   label={t('Gender')}
-                                  color='primary'
+                                  color="primary"
                                   choices={[
                                     { value: 'FEMALE', name: t('Female') },
                                     { value: 'MALE', name: t('Male') },
@@ -547,7 +537,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                           pb={3}
                           pt={3}
                           fontSize={16}
-                          fontWeight='fontWeightBold'
+                          fontWeight="fontWeightBold"
                         >
                           Sample size:{' '}
                           {
@@ -573,56 +563,56 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                   <Box my={3}>
                     <Grid item xs={12}>
                       <Field
-                        name='title'
+                        name="title"
                         required
                         fullWidth
-                        variant='outlined'
+                        variant="outlined"
                         label={t('Title')}
                         component={FormikTextField}
-                        data-cy='input-title'
+                        data-cy="input-title"
                       />
                     </Grid>
                   </Box>
                   <Grid item xs={12}>
                     <Field
-                      name='body'
+                      name="body"
                       required
                       multiline
                       fullWidth
-                      variant='outlined'
+                      variant="outlined"
                       label={t('Message')}
                       component={FormikTextField}
-                      data-cy='input-body'
+                      data-cy="input-body"
                     />
                   </Grid>
                 </>
               )}
               {dataChangeErrors(errors)}
             </Form>
-            <Box pt={3} display='flex' flexDirection='row'>
+            <Box pt={3} display="flex" flexDirection="row">
               <Box mr={3}>
                 <Button
                   component={Link}
                   to={`/${baseUrl}/accountability/communication`}
-                  data-cy='button-cancel'
+                  data-cy="button-cancel"
                 >
                   {t('Cancel')}
                 </Button>
               </Box>
-              <Box display='flex' ml='auto'>
+              <Box display="flex" ml="auto">
                 <Button
                   disabled={activeStep === CommunicationSteps.LookUp}
                   onClick={() => handleBack(values)}
-                  data-cy='button-back'
+                  data-cy="button-back"
                 >
                   {t('Back')}
                 </Button>
                 <LoadingButton
                   loading={loading}
-                  color='primary'
-                  variant='contained'
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {activeStep === steps.length - 1 ? t('Save') : t('Next')}
                 </LoadingButton>
@@ -633,4 +623,4 @@ export const CreateCommunicationPage = (): React.ReactElement => {
       )}
     </Formik>
   );
-};
+}

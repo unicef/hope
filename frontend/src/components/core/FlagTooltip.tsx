@@ -1,9 +1,13 @@
-import React from 'react';
-import FlagIcon from '@material-ui/icons/Flag';
-import { Tooltip } from '@material-ui/core';
+import * as React from 'react';
+import FlagIcon from '@mui/icons-material/Flag';
+import { Tooltip } from '@mui/material';
 import styled from 'styled-components';
 
-const StyledFlag = styled(FlagIcon)`
+interface StyledFlagProps {
+  confirmed?: boolean;
+}
+
+const StyledFlag = styled(FlagIcon)<StyledFlagProps>`
   color: ${({ theme, confirmed }) =>
     confirmed ? 'deeppink' : theme.hctPalette.orange};
 `;
@@ -12,14 +16,14 @@ interface FlagTooltipProps {
   message?: string;
   handleClick?: () => void;
 }
-export const FlagTooltip = ({
+export function FlagTooltip({
   confirmed,
   message = '',
   handleClick,
-}: FlagTooltipProps): React.ReactElement => {
+}: FlagTooltipProps): React.ReactElement {
   return (
     <Tooltip onClick={handleClick} title={message}>
-      <StyledFlag confirmed={confirmed ? 1 : 0} />
+      <StyledFlag confirmed={confirmed} />
     </Tooltip>
   );
-};
+}

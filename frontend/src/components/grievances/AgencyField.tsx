@@ -1,12 +1,12 @@
-import { Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Grid, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { getIndexForId } from './utils/helpers';
 
 export interface AgencyFieldProps {
@@ -44,7 +44,7 @@ export function AgencyField({
         <Field
           name={`${agencyFieldName}.partner`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Partner')}
           component={FormikSelectField}
           choices={identityTypeChoices}
@@ -56,7 +56,7 @@ export function AgencyField({
         <Field
           name={`${agencyFieldName}.country`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Country')}
           component={FormikSelectField}
           choices={countryChoices}
@@ -68,7 +68,7 @@ export function AgencyField({
         <Field
           name={`${agencyFieldName}.number`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Identity Number')}
           component={FormikTextField}
           required

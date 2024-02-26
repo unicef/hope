@@ -1,13 +1,13 @@
-import { TextField } from '@material-ui/core';
-import React from 'react';
+import { TextField } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import CommentIcon from '@material-ui/icons/Comment';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import CommentIcon from '@mui/icons-material/Comment';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceAddNoteMutation,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
@@ -24,11 +24,11 @@ interface BulkAddNoteModalProps {
   setSelected;
 }
 
-export const BulkAddNoteModal = ({
+export function BulkAddNoteModal({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkAddNoteModalProps): React.ReactElement => {
+}: BulkAddNoteModalProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] = React.useState<string>('');
@@ -52,24 +52,22 @@ export const BulkAddNoteModal = ({
   };
 
   return (
-    <>
-      <BulkBaseModal
-        selectedTickets={selectedTickets}
-        title={t('Add Note')}
-        buttonTitle={t('add note')}
-        onSave={onSave}
-        icon={<CommentIcon />}
-        disabledSave={!value}
-      >
-        <TextField
-          variant='outlined'
-          label={t('Note')}
-          fullWidth
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          margin='dense'
-        />
-      </BulkBaseModal>
-    </>
+    <BulkBaseModal
+      selectedTickets={selectedTickets}
+      title={t('Add Note')}
+      buttonTitle={t('add note')}
+      onSave={onSave}
+      icon={<CommentIcon />}
+      disabledSave={!value}
+    >
+      <TextField
+        variant="outlined"
+        label={t('Note')}
+        fullWidth
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        margin="dense"
+      />
+    </BulkBaseModal>
   );
-};
+}

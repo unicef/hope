@@ -7,40 +7,40 @@ import {
   Tab,
   Tabs,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Form, Formik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   PaymentVerificationPlanVerificationChannel,
   useAllAdminAreasQuery,
   useAllRapidProFlowsLazyQuery,
   useCreatePaymentVerificationPlanMutation,
   useSampleSizeLazyQuery,
-} from '../../__generated__/graphql';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
-import { useSnackbar } from '../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../programContext';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { getPercentage } from '../../utils/utils';
-import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
-import { ButtonTooltip } from '../core/ButtonTooltip';
-import { FormikEffect } from '../core/FormikEffect';
-import { LoadingButton } from '../core/LoadingButton';
-import { TabPanel } from '../core/TabPanel';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikMultiSelectField } from '@shared/Formik/FormikMultiSelectField';
+import { FormikRadioGroup } from '@shared/Formik/FormikRadioGroup';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikSliderField } from '@shared/Formik/FormikSliderField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { getPercentage } from '@utils/utils';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { ButtonTooltip } from '@core/ButtonTooltip';
+import { FormikEffect } from '@core/FormikEffect';
+import { LoadingButton } from '@core/LoadingButton';
+import { TabPanel } from '@core/TabPanel';
 
 const StyledTabs = styled(Tabs)`
   && {
@@ -122,7 +122,7 @@ export function CreateVerificationPlan({
 }: Props): React.ReactElement {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const { showMessage } = useSnackbar();
@@ -131,14 +131,12 @@ export function CreateVerificationPlan({
   const { isActiveProgram } = useProgramContext();
   const [formValues, setFormValues] = useState(initialValues);
 
-  const [
-    loadRapidProFlows,
-    { data: rapidProFlows },
-  ] = useAllRapidProFlowsLazyQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-    },
-  });
+  const [loadRapidProFlows, { data: rapidProFlows }] =
+    useAllRapidProFlowsLazyQuery({
+      variables: {
+        businessAreaSlug: businessArea,
+      },
+    });
   const { data } = useAllAdminAreasQuery({
     variables: {
       first: 100,
@@ -205,12 +203,11 @@ export function CreateVerificationPlan({
     setFormValues(values);
   };
 
-  const getSampleSizePercentage = (): string => {
-    return `(${getPercentage(
+  const getSampleSizePercentage = (): string =>
+    `(${getPercentage(
       sampleSizesData?.sampleSize?.sampleSize,
       sampleSizesData?.sampleSize?.paymentRecordCount,
     )})`;
-  };
 
   const getTooltipTitle = (): string => {
     if (!canCreatePaymentVerificationPlan) {
@@ -227,15 +224,17 @@ export function CreateVerificationPlan({
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => {
-        //Redirect to error page if no flows available
+        // Redirect to error page if no flows available
         if (
           !rapidProFlows?.allRapidProFlows?.length &&
           values.verificationChannel === 'RAPIDPRO'
         ) {
-          history.push(`/error/${businessArea}`, {
-            errorMessage: t(
-              'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
-            ),
+          navigate(`/error/${businessArea}`, {
+            state: {
+              errorMessage: t(
+                'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
+              ),
+            },
           });
         }
 
@@ -250,10 +249,10 @@ export function CreateVerificationPlan({
               <ButtonTooltip
                 title={getTooltipTitle()}
                 disabled={!isActiveProgram || !canCreatePaymentVerificationPlan}
-                color='primary'
-                variant='contained'
+                color="primary"
+                variant="contained"
                 onClick={() => setOpen(true)}
-                data-cy='button-new-plan'
+                data-cy="button-new-plan"
               >
                 {t('CREATE VERIFICATION PLAN')}
               </ButtonTooltip>
@@ -261,12 +260,12 @@ export function CreateVerificationPlan({
             <Dialog
               open={open}
               onClose={() => setOpen(false)}
-              scroll='paper'
-              aria-labelledby='form-dialog-title'
-              maxWidth='md'
+              scroll="paper"
+              aria-labelledby="form-dialog-title"
+              maxWidth="md"
             >
               <DialogTitleWrapper>
-                <DialogTitle data-cy='dialog-title'>
+                <DialogTitle data-cy="dialog-title">
                   {t('Create Verification Plan')}
                 </DialogTitle>
               </DialogTitleWrapper>
@@ -274,20 +273,20 @@ export function CreateVerificationPlan({
                 <DialogContainer>
                   <TabsContainer>
                     <StyledTabs
-                      data-cy='tabs'
+                      data-cy="tabs"
                       value={selectedTab}
                       onChange={(
-                        event: React.ChangeEvent<{}>,
+                        event: React.ChangeEvent<unknown>,
                         newValue: number,
                       ) => {
                         setValues(initialValues);
                         setFormValues(initialValues);
                         setSelectedTab(newValue);
                       }}
-                      indicatorColor='primary'
-                      textColor='primary'
-                      variant='fullWidth'
-                      aria-label='full width tabs example'
+                      indicatorColor="primary"
+                      textColor="primary"
+                      variant="fullWidth"
+                      aria-label="full width tabs example"
                     >
                       <Tab label={t('FULL LIST')} />
                       <Tab label={t('RANDOM SAMPLING')} />
@@ -296,9 +295,9 @@ export function CreateVerificationPlan({
                   <TabPanel value={selectedTab} index={0}>
                     {mappedAdminAreas && (
                       <Field
-                        name='excludedAdminAreasFull'
+                        name="excludedAdminAreasFull"
                         choices={mappedAdminAreas}
-                        variant='outlined'
+                        variant="outlined"
                         label={t('Filter Out Administrative Level Areas')}
                         component={FormikMultiSelectField}
                       />
@@ -308,17 +307,17 @@ export function CreateVerificationPlan({
                         pb={3}
                         pt={3}
                         fontSize={16}
-                        fontWeight='fontWeightBold'
+                        fontWeight="fontWeightBold"
                       >
                         Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
                         out of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
                         {getSampleSizePercentage()}
                       </Box>
-                      <Box fontSize={12} color='#797979'>
+                      <Box fontSize={12} color="#797979">
                         {t('This option is recommended for RapidPro')}
                       </Box>
                       <Field
-                        name='verificationChannel'
+                        name="verificationChannel"
                         label={t('Verification Channel')}
                         style={{ flexDirection: 'row' }}
                         choices={[
@@ -327,11 +326,11 @@ export function CreateVerificationPlan({
                           { value: 'MANUAL', name: 'MANUAL' },
                         ]}
                         component={FormikRadioGroup}
-                        alignItems='center'
+                        alignItems="center"
                       />
                       {values.verificationChannel === 'RAPIDPRO' && (
                         <Field
-                          name='rapidProFlow'
+                          name="rapidProFlow"
                           label={t('RapidPro Flow')}
                           style={{ width: '90%' }}
                           choices={
@@ -348,49 +347,49 @@ export function CreateVerificationPlan({
                   <TabPanel value={selectedTab} index={1}>
                     <Box pt={3}>
                       <Field
-                        name='confidenceInterval'
+                        name="confidenceInterval"
                         label={t('Confidence Interval')}
                         min={90}
                         max={99}
                         component={FormikSliderField}
-                        suffix='%'
-                        dataCy='slider-confidence-interval'
+                        suffix="%"
+                        dataCy="slider-confidence-interval"
                       />
                       <Field
-                        name='marginOfError'
+                        name="marginOfError"
                         label={t('Margin of Error')}
                         min={0}
                         max={9}
                         component={FormikSliderField}
-                        suffix='%'
-                        dataCy='slider-margin-of-error'
+                        suffix="%"
+                        dataCy="slider-margin-of-error"
                       />
-                      <Typography variant='caption'>
+                      <Typography variant="caption">
                         {t('Cluster Filters')}
                       </Typography>
-                      <Box flexDirection='column' display='flex'>
-                        <Box display='flex'>
+                      <Box flexDirection="column" display="flex">
+                        <Box display="flex">
                           <Field
-                            name='adminCheckbox'
+                            name="adminCheckbox"
                             label={t('Administrative Level')}
                             component={FormikCheckboxField}
                           />
                           <Field
-                            name='ageCheckbox'
+                            name="ageCheckbox"
                             label={t('Age of HoH')}
                             component={FormikCheckboxField}
                           />
                           <Field
-                            name='sexCheckbox'
+                            name="sexCheckbox"
                             label={t('Gender of HoH')}
                             component={FormikCheckboxField}
                           />
                         </Box>
                         {values.adminCheckbox && (
                           <Field
-                            name='excludedAdminAreasRandom'
+                            name="excludedAdminAreasRandom"
                             choices={mappedAdminAreas}
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Filter Out Administrative Level Areas')}
                             component={FormikMultiSelectField}
                           />
@@ -402,19 +401,19 @@ export function CreateVerificationPlan({
                               <Grid container>
                                 <Grid item xs={4}>
                                   <Field
-                                    name='filterAgeMin'
+                                    name="filterAgeMin"
                                     label={t('Minimum Age')}
-                                    type='number'
-                                    color='primary'
+                                    type="number"
+                                    color="primary"
                                     component={FormikTextField}
                                   />
                                 </Grid>
                                 <Grid item xs={4}>
                                   <Field
-                                    name='filterAgeMax'
+                                    name="filterAgeMax"
                                     label={t('Maximum Age')}
-                                    type='number'
-                                    color='primary'
+                                    type="number"
+                                    color="primary"
                                     component={FormikTextField}
                                   />
                                 </Grid>
@@ -424,9 +423,9 @@ export function CreateVerificationPlan({
                           {values.sexCheckbox && (
                             <Grid item xs={5}>
                               <Field
-                                name='filterSex'
+                                name="filterSex"
                                 label={t('Gender')}
-                                color='primary'
+                                color="primary"
                                 choices={[
                                   { value: 'FEMALE', name: t('Female') },
                                   { value: 'MALE', name: t('Male') },
@@ -442,14 +441,14 @@ export function CreateVerificationPlan({
                         pb={3}
                         pt={3}
                         fontSize={16}
-                        fontWeight='fontWeightBold'
+                        fontWeight="fontWeightBold"
                       >
                         Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
                         out of {sampleSizesData?.sampleSize?.paymentRecordCount}
                         {getSampleSizePercentage()}
                       </Box>
                       <Field
-                        name='verificationChannel'
+                        name="verificationChannel"
                         label={t('Verification Channel')}
                         style={{ flexDirection: 'row' }}
                         choices={[
@@ -461,8 +460,8 @@ export function CreateVerificationPlan({
                       />
                       {values.verificationChannel === 'RAPIDPRO' && (
                         <Field
-                          name='rapidProFlow'
-                          label='RapidPro Flow'
+                          name="rapidProFlow"
+                          label="RapidPro Flow"
                           style={{ width: '90%' }}
                           choices={
                             rapidProFlows
@@ -484,11 +483,11 @@ export function CreateVerificationPlan({
                   <Button onClick={() => setOpen(false)}>CANCEL</Button>
                   <LoadingButton
                     loading={loading}
-                    type='submit'
-                    color='primary'
-                    variant='contained'
+                    type="submit"
+                    color="primary"
+                    variant="contained"
                     onClick={submitForm}
-                    data-cy='button-submit'
+                    data-cy="button-submit"
                   >
                     SAVE
                   </LoadingButton>

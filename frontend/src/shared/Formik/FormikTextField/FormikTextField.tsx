@@ -1,5 +1,5 @@
-import React from 'react';
-import { InputAdornment, TextField } from '@material-ui/core';
+import * as React from 'react';
+import { InputAdornment, TextField } from '@mui/material';
 import styled from 'styled-components';
 import get from 'lodash/get';
 
@@ -16,7 +16,7 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
-export const FormikTextField = ({
+export function FormikTextField({
   field,
   form,
   decoratorStart,
@@ -26,7 +26,7 @@ export const FormikTextField = ({
   integer,
   maxLength,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const isInvalid =
     get(form.errors, field.name) &&
     (get(form.touched, field.name) || form.submitCount > 0);
@@ -55,37 +55,35 @@ export const FormikTextField = ({
   };
 
   return (
-    <>
-      <StyledTextField
-        {...field}
-        {...otherProps}
-        name={field.name}
-        id={`textField-${field.name}`}
-        margin='dense'
-        value={field.value}
-        onChange={handleChange}
-        onBlur={onBlur}
-        error={isInvalid}
-        autoComplete='off'
-        type={type}
-        helperText={isInvalid && get(form.errors, field.name)}
-        InputProps={{
-          onKeyPress: handleKeyPress,
-          startAdornment: decoratorStart && (
-            <InputAdornment position='start'>{decoratorStart}</InputAdornment>
-          ),
+    <StyledTextField
+      {...field}
+      {...otherProps}
+      name={field.name}
+      id={`textField-${field.name}`}
+      margin="dense"
+      value={field.value}
+      onChange={handleChange}
+      onBlur={onBlur}
+      error={isInvalid}
+      autoComplete="off"
+      type={type}
+      helperText={isInvalid && get(form.errors, field.name)}
+      InputProps={{
+        onKeyPress: handleKeyPress,
+        startAdornment: decoratorStart && (
+          <InputAdornment position="start">{decoratorStart}</InputAdornment>
+        ),
 
-          endAdornment: decoratorEnd && (
-            <InputAdornment position='end'>{decoratorEnd}</InputAdornment>
-          ),
-        }}
-        // https://github.com/mui-org/material-ui/issues/12805
-        // eslint-disable-next-line react/jsx-no-duplicate-props
-        inputProps={{
-          'data-cy': `input-${field.name}`,
-          maxLength: maxLength || undefined,
-        }}
-      />
-    </>
+        endAdornment: decoratorEnd && (
+          <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+        ),
+      }}
+      // https://github.com/mui-org/material-ui/issues/12805
+      // eslint-disable-next-line react/jsx-no-duplicate-props
+      inputProps={{
+        'data-cy': `input-${field.name}`,
+        maxLength: maxLength || undefined,
+      }}
+    />
   );
-};
+}

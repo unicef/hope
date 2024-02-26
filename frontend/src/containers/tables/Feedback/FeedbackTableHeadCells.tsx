@@ -1,5 +1,5 @@
-import { HeadCell } from '../../../components/core/Table/EnhancedTableHead';
-import { FeedbackNode } from '../../../__generated__/graphql';
+import { HeadCell } from '@components/core/Table/EnhancedTableHead';
+import { FeedbackNode } from '@generated/graphql';
 
 export const headCells: HeadCell<FeedbackNode>[] = [
   {

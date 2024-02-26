@@ -1,21 +1,22 @@
-import { InputAdornment } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
+import { InputAdornment } from '@mui/material';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
 import get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useAllProgramsForChoicesLazyQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAllProgramsForChoicesLazyQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDebounce } from '@hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
   getAutocompleteOptionLabel,
   handleAutocompleteChange,
   handleOptionSelected,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const ProgramAutocomplete = ({
+export function ProgramAutocomplete({
   disabled,
   name,
   filter,
@@ -34,11 +35,11 @@ export const ProgramAutocomplete = ({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { businessArea } = useBaseUrl();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
@@ -51,9 +52,19 @@ export const ProgramAutocomplete = ({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (businessArea) {
-      loadData({ variables: { businessArea, search: debouncedInputText } });
-    }
+    const asyncLoadData = async () => {
+      if (isMounted.current && businessArea) {
+        try {
+          await loadData({
+            variables: { businessArea, search: debouncedInputText },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    void asyncLoadData();
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {
@@ -67,7 +78,7 @@ export const ProgramAutocomplete = ({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
@@ -82,7 +93,7 @@ export const ProgramAutocomplete = ({
       value={value}
       disabled={disabled}
       label={t('Programme')}
-      dataCy='filters-program'
+      dataCy="filters-program"
       loadData={loadData}
       loading={loading}
       allEdges={allEdges}
@@ -114,10 +125,10 @@ export const ProgramAutocomplete = ({
       onInputTextChange={onInputTextChange}
       debouncedInputText={debouncedInputText}
       startAdornment={
-        <InputAdornment position='start'>
+        <InputAdornment position="start">
           <FlashOnIcon />
         </InputAdornment>
       }
     />
   );
-};
+}

@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import localForage from 'localforage';
-import { ApolloError } from 'apollo-client';
 import {
   ImportedIndividualFieldsQuery,
   useImportedIndividualFieldsLazyQuery,
-} from '../__generated__/graphql';
+} from '@generated/graphql';
+import { ApolloError } from '@apollo/client';
 
 export function useCachedImportedIndividualFieldsQuery(
-  businessArea, selectedProgramId
+  businessArea, selectedProgramId,
 ): {
   loading: boolean;
   data: ImportedIndividualFieldsQuery;
@@ -36,7 +36,7 @@ export function useCachedImportedIndividualFieldsQuery(
     getAttributes({
       variables: {
         businessAreaSlug: businessArea,
-        programId: selectedProgramId
+        programId: selectedProgramId,
       },
     });
   }, [businessArea, selectedProgramId]);

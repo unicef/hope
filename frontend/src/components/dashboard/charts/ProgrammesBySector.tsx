@@ -1,17 +1,18 @@
-import React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
-import { formatThousands } from '../../../utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import * as React from 'react';
+import { Bar } from 'react-chartjs-2';
+import { formatThousands } from '@utils/utils';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface ProgrammesBySectorProps {
   data: AllChartsQuery['chartProgrammesBySector'];
 }
+
 export const ProgrammesBySector = ({
   data,
 }: ProgrammesBySectorProps): React.ReactElement => {
   if (!data) return null;
 
-  const chartData = {
+  const chartData: any = {
     labels: data.labels,
     datasets: [
       {
@@ -19,7 +20,7 @@ export const ProgrammesBySector = ({
         maxBarThickness: 20,
         label: data.datasets[0]?.label,
         backgroundColor: '#00A9FB',
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
         stack: 2,
       },
       {
@@ -27,46 +28,49 @@ export const ProgrammesBySector = ({
         maxBarThickness: 20,
         label: data.datasets[1]?.label,
         backgroundColor: '#023F90',
-        data: [...data.datasets[1]?.data],
+        data: [...(data.datasets[1]?.data || [])],
         stack: 2,
       },
     ],
   };
 
-  const options = {
+  const options: any = {
+    indexAxis: 'y',
     responsive: true,
-    maintainAspectRatio: false,
-    legend: {
-      position: 'bottom',
-      labels: {
-        padding: 40,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 40,
+        },
+      },
+      tooltip: {
+        mode: 'point',
       },
     },
-    tooltips: {
-      mode: 'point',
-    },
     scales: {
-      xAxes: [
-        {
-          position: 'top',
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1,
-            callback: formatThousands,
-            suggestedMax: Math.max(...data.datasets[2].data) + 1,
-          },
+      x: {
+        position: 'top',
+        ticks: {
+          beginAtZero: true,
+          stepSize: 1,
+          callback: formatThousands,
+          suggestedMax: Math.max(...data.datasets[2].data) + 1,
         },
-      ],
-      yAxes: [
-        {
-          position: 'left',
-          gridLines: {
-            display: false,
-          },
+      },
+      y: {
+        position: 'left',
+        grid: {
+          display: false,
         },
-      ],
+      },
     },
   };
 
-  return <HorizontalBar data={chartData} options={options} />;
+  return (
+    <div style={{ height: '400px' }}>
+      <Bar data={chartData} options={options} />
+    </div>
+  );
 };

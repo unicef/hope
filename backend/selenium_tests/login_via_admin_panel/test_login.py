@@ -3,67 +3,75 @@ from page_object.admin_panel.admin_panel import AdminPanel
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import User
 
-@pytest.mark.skip
+pytestmark = pytest.mark.django_db(transaction=True)
+
+
+def create_normal_user() -> User:
+    return UserFactory.create(
+        is_superuser=False,
+        is_staff=True,
+        username="normal_user",
+        password="normal_password",
+        email="normal@user.com",
+    )
+
+
 class TestAdminPanel:
-    def test_login_superuser(self, browser: Chrome, logout: Chrome, PageAdminPanel: AdminPanel) -> None:
-        browser.get("http://localhost:8082/api/unicorn/")
-        # ToDo: Use super user from fixtures:
-        PageAdminPanel.getLogin().send_keys("")
-        PageAdminPanel.getPassword().send_keys("")
-        PageAdminPanel.getLoginButton().click()
-        assert "Permissions" in PageAdminPanel.getPermissionText().text
+    def test_login_superuser(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
+        browser.get(f"{browser.live_server.url}/api/unicorn/")
+        pageAdminPanel.getLogin().send_keys("superuser")
+        pageAdminPanel.getPassword().send_keys("testtest2")
+        pageAdminPanel.getLoginButton().click()
+        assert "Permissions" in pageAdminPanel.getPermissionText().text
 
-    # ToDo: Change cypress-username user to normal user
-    @pytest.mark.skip(reason="Change cypress-username user to normal user")
-    def test_login_normal_user(self, browser: Chrome, logout: Chrome, PageAdminPanel: AdminPanel) -> None:
-        browser.get("http://localhost:8082/api/unicorn/")
-        PageAdminPanel.getLogin().send_keys("cypress-username")
-        PageAdminPanel.getPassword().send_keys("cypress-password")
-        PageAdminPanel.getLoginButton().click()
-        assert "You don't have permission to view or edit anything." in PageAdminPanel.getPermissionText().text
+    def test_login_normal_user(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
+        create_normal_user()
+        browser.get(f"{browser.live_server.url}/api/unicorn/")
+        pageAdminPanel.getLogin().send_keys("normal_user")
+        pageAdminPanel.getPassword().send_keys("normal_password")
+        pageAdminPanel.getLoginButton().click()
+        assert "You don't have permission to view or edit anything." in pageAdminPanel.getPermissionText().text
 
-    def test_login_with_valid_username_and_invalid_password(
-        self, browser: Chrome, logout: Chrome, PageAdminPanel: AdminPanel
-    ) -> None:
-        browser.get("http://localhost:8082/api/unicorn/")
-        PageAdminPanel.getLogin().send_keys("cypress-username")
-        PageAdminPanel.getPassword().send_keys("wrong")
-        PageAdminPanel.getLoginButton().click()
+    def test_login_with_valid_username_and_invalid_password(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
+        browser.get(f"{browser.live_server.url}/api/unicorn/")
+        pageAdminPanel.getLogin().send_keys("normal_user")
+        pageAdminPanel.getPassword().send_keys("wrong")
+        pageAdminPanel.getLoginButton().click()
         assert (
             "Please enter the correct username and password for a staff account. Note that both fields may be "
             "case-sensitive."
-        ) in PageAdminPanel.getErrorLogin().text
+        ) in pageAdminPanel.getErrorLogin().text
 
-    def test_login_with_invalid_username_and_valid_password(
-        self, browser: Chrome, logout: Chrome, PageAdminPanel: AdminPanel
-    ) -> None:
-        browser.get("http://localhost:8082/api/unicorn/")
-        PageAdminPanel.getLogin().send_keys("wrong")
-        PageAdminPanel.getPassword().send_keys("cypress-password")
-        PageAdminPanel.getLoginButton().click()
+    def test_login_with_invalid_username_and_valid_password(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
+        browser.get(f"{browser.live_server.url}/api/unicorn/")
+        pageAdminPanel.getLogin().send_keys("wrong")
+        pageAdminPanel.getPassword().send_keys("normal_password")
+        pageAdminPanel.getLoginButton().click()
         assert (
             "Please enter the correct username and password for a staff account. Note that both fields may be "
             "case-sensitive."
-        ) in PageAdminPanel.getErrorLogin().text
+        ) in pageAdminPanel.getErrorLogin().text
 
     def test_login_with_invalid_username_and_invalid_password(
-        self, browser: Chrome, logout: Chrome, PageAdminPanel: AdminPanel
+        self, browser: Chrome, pageAdminPanel: AdminPanel
     ) -> None:
-        browser.get("http://localhost:8082/api/unicorn/")
-        PageAdminPanel.getLogin().send_keys("wrong")
-        PageAdminPanel.getPassword().send_keys("wrong123123312")
-        PageAdminPanel.getLoginButton().click()
+        browser.get(f"{browser.live_server.url}/api/unicorn/")
+        pageAdminPanel.getLogin().send_keys("wrong")
+        pageAdminPanel.getPassword().send_keys("wrong123123312")
+        pageAdminPanel.getLoginButton().click()
         assert (
             "Please enter the correct username and password for a staff account. Note that both fields may be "
             "case-sensitive."
-        ) in PageAdminPanel.getErrorLogin().text
+        ) in pageAdminPanel.getErrorLogin().text
 
-    def test_not_logged_main_page(self, browser: Chrome, logout: Chrome, PageAdminPanel: AdminPanel) -> None:
-        browser.get("http://localhost:8082")
-        assert "Login via Active Directory" in PageAdminPanel.wait_for('//*[@id="root"]/div/div', By.XPATH).text
+    def test_not_logged_main_page(self, browser: Chrome, pageAdminPanel: AdminPanel) -> None:
+        browser.get(f"{browser.live_server.url}/")
+        assert "Login via Active Directory" in pageAdminPanel.wait_for('//*[@id="root"]/div/div', By.XPATH).text
 
-    def test_log_out_via_admin_panel(self, browser: Chrome, PageAdminPanel: AdminPanel) -> None:
-        browser.get("http://localhost:8082/api/unicorn")
-        PageAdminPanel.getButtonLogout().click()
-        assert "Logged out" in PageAdminPanel.getLoggedOut().text
+    def test_log_out_via_admin_panel(self, login: Chrome, pageAdminPanel: AdminPanel) -> None:
+        login.get(f"{login.live_server.url}/api/unicorn/")
+        pageAdminPanel.getButtonLogout().click()
+        assert "Logged out" in pageAdminPanel.getLoggedOut().text

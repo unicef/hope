@@ -7,17 +7,17 @@ import {
   InputLabel,
   MenuItem,
   Select,
-} from '@material-ui/core';
-import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import React, { useEffect, useState } from 'react';
+} from '@mui/material';
+import ExitToAppRoundedIcon from '@mui/icons-material/ExitToAppRounded';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../containers/dialogs/DialogActions';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { usePassFunctionFromChild } from '../../../hooks/usePassFunctionFromChild';
-import { ButtonTooltip } from '../../core/ButtonTooltip';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { usePassFunctionFromChild } from '@hooks/usePassFunctionFromChild';
+import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
 import { CreateImportFromKoboForm } from './kobo/CreateImportFromKoboForm';
 import { CreateImportFromXlsxForm } from './xlsx/CreateImportFromXlsxForm';
@@ -40,7 +40,7 @@ const StyledDialogFooter = styled(DialogFooter)`
   }
 `;
 
-export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
+export function RegistrationDataImportCreateDialog(): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState('');
@@ -56,11 +56,11 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
   }, [open]);
   const openModalButton = (
     <ButtonTooltip
-      variant='contained'
-      color='primary'
+      variant="contained"
+      color="primary"
       startIcon={<ExitToAppRoundedIcon />}
       onClick={() => setOpen(true)}
-      data-cy='button-import'
+      data-cy="button-import"
       title={t(
         'Program has to be active to create a new RegistrationDataImport',
       )}
@@ -102,51 +102,53 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Select File to Import')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <FormControl variant='outlined' margin='dense'>
+          <FormControl variant="outlined" margin="dense">
             <StyledInputLabel>{t('Import From')}</StyledInputLabel>
             <ComboBox
               value={importType}
-              defaultValue=''
-              variant='outlined'
-              label=''
-              onChange={(e) => setImportType(e.target.value)}
+              defaultValue=""
+              variant="outlined"
+              label=""
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setImportType(e.target.value)
+              }
               fullWidth
-              data-cy='import-type-select'
+              data-cy="import-type-select"
             >
-              <MenuItem data-cy='excel-menu-item' key='excel' value='excel'>
+              <MenuItem data-cy="excel-menu-item" key="excel" value="excel">
                 Excel
               </MenuItem>
-              <MenuItem data-cy='kobo-menu-item' key='kobo' value='kobo'>
+              <MenuItem data-cy="kobo-menu-item" key="kobo" value="kobo">
                 Kobo
               </MenuItem>
             </ComboBox>
           </FormControl>
           {importTypeForm}
         </DialogContent>
-        <StyledDialogFooter data-cy='dialog-actions-container'>
+        <StyledDialogFooter data-cy="dialog-actions-container">
           <Button
-            variant='text'
-            color='primary'
-            component='a'
-            href='/api/download-template'
-            data-cy='a-download-template'
+            variant="text"
+            color="primary"
+            component="a"
+            href="/api/download-template"
+            data-cy="a-download-template"
           >
             {t('DOWNLOAD TEMPLATE')}
           </Button>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <Button
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               disabled={submitDisabled}
-              data-cy='button-import-rdi'
+              data-cy="button-import-rdi"
               onClick={submitForm}
             >
               {t('IMPORT')}
@@ -156,4 +158,4 @@ export const RegistrationDataImportCreateDialog = (): React.ReactElement => {
       </Dialog>
     </span>
   );
-};
+}

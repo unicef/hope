@@ -1,18 +1,15 @@
-import { Box, Paper, Typography } from '@material-ui/core';
-import WarningIcon from '@material-ui/icons/Warning';
+import { Box, Paper, Typography } from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../utils/constants';
-import { ContentLink } from '../core/ContentLink';
-import { LabelizedField } from '../core/LabelizedField';
+import { GrievanceTicketQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
 import { LookUpReassignRole } from './LookUps/LookUpReassignRole/LookUpReassignRole';
 import { ReassignRoleUnique } from './LookUps/LookUpReassignRole/ReassignRoleUnique';
 
@@ -124,43 +121,45 @@ export const ReassignRoleBox = ({
             household={el.household}
             individual={uniqueIndividual}
           />
-        ) : null}
+          ) : null}
       </Box>
     ));
 
   const showMessage = () => {
     if (
-        (
-            ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
-            (ticket.individual?.role === "PRIMARY" || ticket.individual?.relationship === "HEAD")
-        ) || (
-            ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
-            ticket.individualDataUpdateTicketDetails?.individualData?.role?.previous_value === "PRIMARY" &&
-            (
-                ticket.individualDataUpdateTicketDetails?.individualData?.role?.value === "ALTERNATE" ||
-                ticket.individualDataUpdateTicketDetails?.individualData?.role?.value === "NO_ROLE"
-            )
-        )
+      (ticket.issueType.toString() ===
+        GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+        (ticket.individual?.role === 'PRIMARY' ||
+          ticket.individual?.relationship === 'HEAD')) ||
+      (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
+        ticket.individualDataUpdateTicketDetails?.individualData?.role
+          ?.previous_value === 'PRIMARY' &&
+        (ticket.individualDataUpdateTicketDetails?.individualData?.role
+          ?.value === 'ALTERNATE' ||
+          ticket.individualDataUpdateTicketDetails?.individualData?.role
+            ?.value === 'NO_ROLE'))
     ) {
       return (
-        <Typography variant='body2'>
-          {t('Upon removing you will need to select new individual(s) for this role.')}
+        <Typography variant="body2">
+          {t(
+            'Upon removing you will need to select new individual(s) for this role.',
+          )}
         </Typography>
-      )
+      );
     }
-    return null
-  }
+    return null;
+  };
 
   return (
     <StyledBox>
       <OrangeTitle>
-        <Typography variant='h6'>
+        <Typography variant="h6">
           <WarnIcon />
           {t('Individual is the HOH or the collector for the household')}
         </Typography>
       </OrangeTitle>
       {showMessage()}
-      <Box mt={3} display='flex' flexDirection='column'>
+      <Box mt={3} display="flex" flexDirection="column">
         {shouldShowReassignHoH && (
           <Box mb={2} mt={2}>
             <Box mb={2}>

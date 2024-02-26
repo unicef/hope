@@ -1,14 +1,14 @@
-import { MenuItem, Select } from '@material-ui/core';
-import React from 'react';
+import { MenuItem, Select } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import PriorityHighIcon from '@material-ui/icons/PriorityHigh';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
   useBulkUpdateGrievanceUrgencyMutation,
   useGrievancesChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
@@ -25,11 +25,11 @@ interface BulkSetUrgencyModalProps {
   setSelected;
 }
 
-export const BulkSetUrgencyModal = ({
+export function BulkSetUrgencyModal({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkSetUrgencyModalProps): React.ReactElement => {
+}: BulkSetUrgencyModalProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] = React.useState<number>(0);
@@ -55,29 +55,27 @@ export const BulkSetUrgencyModal = ({
   };
 
   return (
-    <>
-      <BulkBaseModal
-        selectedTickets={selectedTickets}
-        title={t('Set Urgency')}
-        buttonTitle={t('Set Urgency')}
-        onSave={onSave}
-        icon={<PriorityHighIcon />}
+    <BulkBaseModal
+      selectedTickets={selectedTickets}
+      title={t('Set Urgency')}
+      buttonTitle={t('Set Urgency')}
+      onSave={onSave}
+      icon={<PriorityHighIcon />}
+    >
+      <Select
+        value={value}
+        onChange={(e) => setValue(e.target.value as number)}
+        style={{ width: '100%' }}
+        variant="outlined"
+        margin="dense"
+        label={t('Urgency')}
       >
-        <Select
-          value={value}
-          onChange={(e) => setValue(e.target.value as number)}
-          style={{ width: '100%' }}
-          variant='outlined'
-          margin='dense'
-          label={t('Urgency')}
-        >
-          {urgencyChoices.map((choice) => (
-            <MenuItem key={choice.value} value={choice.value}>
-              {choice.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </BulkBaseModal>
-    </>
+        {urgencyChoices.map((choice) => (
+          <MenuItem key={choice.value} value={choice.value}>
+            {choice.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </BulkBaseModal>
   );
-};
+}

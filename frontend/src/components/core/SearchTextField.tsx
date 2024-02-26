@@ -1,10 +1,17 @@
-import { InputAdornment } from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
+import {
+  InputAdornment,
+  TextField,
+  OutlinedTextFieldProps,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import styled from 'styled-components';
-import React from 'react';
-import TextField from '../../shared/TextField';
+import * as React from 'react';
 
-const StyledTextField = styled(TextField)`
+interface StyledTextFieldProps extends OutlinedTextFieldProps {
+  borderRadius?: string;
+}
+
+const StyledTextField = styled(TextField)<StyledTextFieldProps>`
   flex: 1;
   && {
     min-width: 150px;
@@ -13,29 +20,32 @@ const StyledTextField = styled(TextField)`
     border-radius: ${(props) => props.borderRadius};
   }
 `;
-export const SearchTextField = ({
+
+export function SearchTextField({
   icon = null,
   borderRadius = '4px',
   fullWidth = true,
   ...props
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <StyledTextField
       {...props}
+      size="medium"
       fullWidth={fullWidth}
-      theme={{ borderRadius }}
-      variant='outlined'
-      margin='dense'
+      borderRadius={borderRadius}
+      variant="outlined"
+      margin="dense"
+      placeholder="Search"
       inputProps={{ maxLength: 200 }}
       // https://github.com/mui-org/material-ui/issues/12805
       // eslint-disable-next-line react/jsx-no-duplicate-props
       InputProps={{
         startAdornment: (
-          <InputAdornment position='start'>
+          <InputAdornment position="start">
             {(icon as JSX.Element) || <SearchIcon />}
           </InputAdornment>
         ),
       }}
     />
   );
-};
+}

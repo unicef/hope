@@ -1,17 +1,17 @@
-import { Grid, Typography } from '@material-ui/core';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { useTargetPopulationLazyQuery } from '@generated/graphql';
+import { Grid, Typography } from '@mui/material';
+import { FormikCurrencyAutocomplete } from '@shared/Formik/FormikCurrencyAutocomplete';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { tomorrow } from '@utils/utils';
 import { Field } from 'formik';
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import PaymentIcon from '@material-ui/icons/Payment';
-import { FormikDateField } from '../../../../shared/Formik/FormikDateField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
 import { PaperContainer } from '../../../targeting/PaperContainer';
-import { Title } from '../../../core/Title';
-import { FormikCurrencyAutocomplete } from '../../../../shared/Formik/FormikCurrencyAutocomplete';
-import { useTargetPopulationLazyQuery } from '../../../../__generated__/graphql';
-import { tomorrow } from '../../../../utils/utils';
-import { FormikTextField } from "../../../../shared/Formik/FormikTextField";
+import { CalendarTodayRounded } from '@mui/icons-material';
+import { relative } from 'path';
 
 interface PaymentPlanParametersProps {
   values;
@@ -23,10 +23,8 @@ export const PaymentPlanParameters = ({
   paymentPlan,
 }: PaymentPlanParametersProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [
-    loadTargetPopulation,
-    { data, loading },
-  ] = useTargetPopulationLazyQuery();
+  const [loadTargetPopulation, { data, loading }] =
+    useTargetPopulationLazyQuery();
 
   useEffect(() => {
     if (values.targetingId) {
@@ -41,26 +39,13 @@ export const PaymentPlanParameters = ({
   return (
     <PaperContainer>
       <Title>
-        <Typography variant='h6'>{t('Parameters')}</Typography>
+        <Typography variant="h6">{t('Parameters')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid spacing={3} container>
           <Grid item xs={4}>
             <Field
-              name='name'
-              label={t('Name')}
-              type='text'
-              fullWidth
-              required
-              variant='outlined'
-              component={FormikTextField}
-              decoratorEnd={<PaymentIcon color='disabled' />}
-              data-cy='input-payment-plan-name'
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <Field
-              name='startDate'
+              name="startDate"
               label={t('Start Date')}
               component={FormikDateField}
               required
@@ -70,8 +55,8 @@ export const PaymentPlanParameters = ({
               }
               disabled={!data || loading || Boolean(paymentPlan?.isFollowUp)}
               fullWidth
-              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              data-cy='input-start-date'
+              decoratorEnd={<CalendarTodayRounded color="disabled" />}
+              data-cy="input-start-date"
               tooltip={t(
                 'The first day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
               )}
@@ -79,7 +64,7 @@ export const PaymentPlanParameters = ({
           </Grid>
           <Grid item xs={4}>
             <Field
-              name='endDate'
+              name="endDate"
               label={t('End Date')}
               component={FormikDateField}
               required
@@ -88,31 +73,35 @@ export const PaymentPlanParameters = ({
               disabled={!values.startDate || Boolean(paymentPlan?.isFollowUp)}
               initialFocusedDate={values.startDate}
               fullWidth
-              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              data-cy='input-end-date'
+              decoratorEnd={<CalendarTodayRounded color="disabled" />}
+              data-cy="input-end-date"
               tooltip={t(
                 'The last day of the period intended to be covered by the payment plan. Note that individuals/households cannot be paid twice from the same programme within this period.',
               )}
             />
           </Grid>
           <Grid item xs={4}>
-            <Field
-              name='currency'
-              component={FormikCurrencyAutocomplete}
-              required
-              disabled={Boolean(paymentPlan?.isFollowUp)}
-            />
+            <div
+              style={{ position: 'relative', bottom: '12px', width: '100%' }}
+            >
+              <Field
+                name="currency"
+                component={FormikCurrencyAutocomplete}
+                required
+                disabled={Boolean(paymentPlan?.isFollowUp)}
+              />
+            </div>
           </Grid>
           <Grid item xs={4}>
             <Field
-              name='dispersionStartDate'
+              name="dispersionStartDate"
               label={t('Dispersion Start Date')}
               component={FormikDateField}
               required
               disabled={!data || loading}
               fullWidth
-              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              data-cy='input-dispersion-start-date'
+              decoratorEnd={<CalendarTodayRounded color="disabled" />}
+              data-cy="input-dispersion-start-date"
               tooltip={t(
                 'The first day from which payments could be delivered.',
               )}
@@ -120,7 +109,7 @@ export const PaymentPlanParameters = ({
           </Grid>
           <Grid item xs={4}>
             <Field
-              name='dispersionEndDate'
+              name="dispersionEndDate"
               label={t('Dispersion End Date')}
               component={FormikDateField}
               required
@@ -128,8 +117,8 @@ export const PaymentPlanParameters = ({
               disabled={!values.dispersionStartDate}
               initialFocusedDate={values.dispersionStartDate}
               fullWidth
-              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              data-cy='input-dispersion-end-date'
+              decoratorEnd={<CalendarTodayRounded color="disabled" />}
+              data-cy="input-dispersion-end-date"
               tooltip={t('The last day on which payments could be delivered.')}
             />
           </Grid>

@@ -33,9 +33,7 @@ export const chooseFieldType = (value, arrayHelpers, index): void => {
     type: value.type,
   });
 };
-export const clearField = (arrayHelpers, index): void => {
-  return arrayHelpers.replace(index, {});
-};
+export const clearField = (arrayHelpers, index): void => arrayHelpers.replace(index, {});
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mapFiltersToInitialValues(filters): any[] {
   const mappedFilters = [];
@@ -77,10 +75,9 @@ export function mapFiltersToInitialValues(filters): any[] {
           if (each?.fieldAttribute?.type === 'SELECT_MANY') {
             value = each.arguments;
           } else {
-            value =
-              typeof each.arguments === 'string'
-                ? each.arguments
-                : each.arguments[0];
+            value = typeof each.arguments === 'string'
+              ? each.arguments
+              : each.arguments[0];
           }
           return mappedFilters.push({
             ...each,
@@ -175,11 +172,11 @@ export function formatCriteriaIndividualsFiltersBlocks(
 function mapFilterToVariable(
   filter,
 ): {
-  comparisonMethod: string;
-  arguments;
-  fieldName: string;
-  isFlexField: boolean;
-} {
+    comparisonMethod: string;
+    arguments;
+    fieldName: string;
+    isFlexField: boolean;
+  } {
   return {
     comparisonMethod: filter.comparisonMethod,
     arguments: filter.arguments,
@@ -196,18 +193,16 @@ export function getTargetingCriteriaVariables(values) {
       flagExcludeIfActiveAdjudicationTicket:
         values.flagExcludeIfActiveAdjudicationTicket,
       flagExcludeIfOnSanctionList: values.flagExcludeIfOnSanctionList,
-      rules: values.criterias.map((rule) => {
-        return {
-          filters: rule.filters.map(mapFilterToVariable),
-          individualsFiltersBlocks: rule.individualsFiltersBlocks.map(
-            (block) => ({
-              individualBlockFilters: block.individualBlockFilters.map(
-                mapFilterToVariable,
-              ),
-            }),
-          ),
-        };
-      }),
+      rules: values.criterias.map((rule) => ({
+        filters: rule.filters.map(mapFilterToVariable),
+        individualsFiltersBlocks: rule.individualsFiltersBlocks.map(
+          (block) => ({
+            individualBlockFilters: block.individualBlockFilters.map(
+              mapFilterToVariable,
+            ),
+          }),
+        ),
+      })),
     },
   };
 }

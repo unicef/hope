@@ -1,22 +1,12 @@
-import {
-  Dialog,
-  DialogContent,
-  IconButton,
-  Tab,
-  Tabs,
-} from '@material-ui/core';
-import { Close } from '@material-ui/icons';
-import React, { useState } from 'react';
+import { Dialog, DialogContent, IconButton, Tab, Tabs } from '@mui/material';
+import { Close } from '@mui/icons-material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';
-import { TabPanel } from '../../../../components/core/TabPanel';
+import { TabPanel } from '@components/core/TabPanel';
 import { FlexFieldTab } from './FlexFieldTab';
-
-export interface FinalizeTargetPopulationPropTypes {
-  open: boolean;
-  setOpen: Function;
-}
 
 const DialogWrapper = styled(Dialog)`
   && {
@@ -58,38 +48,49 @@ const StyledTabPanel = styled(TabPanel)`
   }
 `;
 
-export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
+export interface TargetingInfoDialogProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
+export const TargetingInfoDialog = ({
+  open,
+  setOpen,
+}: TargetingInfoDialogProps): React.ReactElement => {
   const { t } = useTranslation();
   const [selectedTab, setTab] = useState(0);
-  const changeTab = (event: React.ChangeEvent<{}>, newValue: number): void => {
+  const changeTab = (
+    _event: React.ChangeEvent<object>,
+    newValue: number,
+  ): void => {
     setTab(newValue);
   };
   const HeaderTabs = (
     <Tabs
       value={selectedTab}
       onChange={changeTab}
-      aria-label='tabs'
-      indicatorColor='primary'
-      textColor='primary'
+      aria-label="tabs"
+      indicatorColor="primary"
+      textColor="primary"
     >
-      <Tab data-cy='tab-field-list' label={t('Field List')} />
-      <Tab data-cy='tab-targeting-diagram' label={t('Targeting Diagram')} />
+      <Tab data-cy="tab-field-list" label={t('Field List')} />
+      <Tab data-cy="tab-targeting-diagram" label={t('Targeting Diagram')} />
     </Tabs>
   );
   return (
     <DialogWrapper
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <DialogTitleWrapper>
         {HeaderTabs}
         <IconButton
           onClick={() => setOpen(false)}
-          color='primary'
-          aria-label='Close Information Modal'
-          data-cy='button-close'
+          color="primary"
+          aria-label="Close Information Modal"
+          data-cy="button-close"
         >
           <Close />
         </IconButton>
@@ -99,9 +100,9 @@ export function TargetingInfoDialog({ open, setOpen }): React.ReactElement {
           <FlexFieldTab />
         </StyledTabPanel>
         <TabPanel value={selectedTab} index={1}>
-          <TargetingDiagram src={TargetingDiagramImage} alt='diagram' />
+          <TargetingDiagram src={TargetingDiagramImage} alt="diagram" />
         </TabPanel>
       </StyledDialogContent>
     </DialogWrapper>
   );
-}
+};

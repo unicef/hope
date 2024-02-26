@@ -1,23 +1,19 @@
 import camelCase from 'lodash/camelCase';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../utils/constants';
-import { thingForSpecificGrievanceType } from '../../../utils/utils';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { thingForSpecificGrievanceType } from '@utils/utils';
 import { removeIdPropertyFromObjects } from './helpers';
 
 export const selectedIssueType = (
   formValues,
   grievanceTicketIssueTypeChoices,
-): string => {
-  return formValues.issueType
+): string =>
+  formValues.issueType
     ? grievanceTicketIssueTypeChoices
         .filter((el) => el.category === formValues.category.toString())[0]
         .subCategories.filter(
           (el) => el.value === formValues.issueType.toString(),
         )[0].name
     : '-';
-};
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function preparePositiveFeedbackVariables(requiredVariables, values) {
@@ -322,7 +318,8 @@ export const prepareVariablesDict = {
   [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: prepareNegativeFeedbackVariables,
   [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: preparePositiveFeedbackVariables,
   [GRIEVANCE_CATEGORIES.REFERRAL]: prepareReferralVariables,
-  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: prepareGrievanceComplaintVariables,
+  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]:
+    prepareGrievanceComplaintVariables,
   [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: prepareSensitiveVariables,
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
     [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: prepareAddIndividualVariables,
@@ -349,7 +346,7 @@ export function prepareVariables(businessArea, values) {
     category: parseInt(values.category, 10),
     consent: values.consent,
     language: values.language,
-    admin: values?.admin?.node?.id,
+    admin: values.admin,
     area: values.area,
     priority:
       values.priority === 'Not set' || values.priority === null

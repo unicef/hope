@@ -1,19 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
   ImportDataStatus,
   useCreateRegistrationKoboImportMutation,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { KoboImportDataRepresentation } from './KoboImportDataRepresentation';
 import { KoboProjectSelect } from './KoboProjectSelect';
@@ -45,7 +45,7 @@ export function CreateImportFromKoboForm({
   } = useSaveKoboImportDataAndCheckStatus();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl, businessArea } = useBaseUrl();
   const [createImport] = useCreateRegistrationKoboImportMutation();
 
@@ -61,7 +61,7 @@ export function CreateImportFromKoboForm({
           },
         },
       });
-      history.push(
+      navigate(
         `/${baseUrl}/registration-data-import/${data.data.registrationKoboImport.registrationDataImport.id}`,
       );
     } catch (e) {
@@ -107,24 +107,24 @@ export function CreateImportFromKoboForm({
     <div>
       <FormikProvider value={formik}>
         <Field
-          name='onlyActiveSubmissions'
+          name="onlyActiveSubmissions"
           label={t('Only approved submissions')}
-          color='primary'
+          color="primary"
           component={FormikCheckboxField}
         />
         <Field
-          name='pullPictures'
+          name="pullPictures"
           label={t('Pull pictures')}
-          color='primary'
+          color="primary"
           component={FormikCheckboxField}
         />
         <KoboProjectSelect />
         <Field
-          name='name'
+          name="name"
           fullWidth
           label={t('Title')}
           required
-          variant='outlined'
+          variant="outlined"
           component={FormikTextField}
         />
         <ScreenBeneficiaryField />

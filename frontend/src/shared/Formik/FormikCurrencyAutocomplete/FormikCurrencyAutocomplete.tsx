@@ -1,18 +1,9 @@
-import { Box } from '@material-ui/core';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import React from 'react';
+import { Box, TextField } from '@mui/material';
+import Autocomplete from '@mui/lab/Autocomplete';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import get from 'lodash/get';
-import { useCurrencyChoicesQuery } from '../../../__generated__/graphql';
-import TextField from '../../TextField';
-
-const StyledAutocomplete = styled(Autocomplete)`
-  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
-    .MuiFormControl-marginDense {
-    margin-top: 4px;
-  }
-`;
+import { useCurrencyChoicesQuery } from '@generated/graphql';
 
 export const FormikCurrencyAutocomplete = ({
   field,
@@ -39,10 +30,10 @@ export const FormikCurrencyAutocomplete = ({
   if (!data) return null;
   return (
     <Box mt={1}>
-      <StyledAutocomplete
+      <Autocomplete
         options={data?.currencyChoices || []}
         defaultValue={field.value}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option: any) => option.name}
         onChange={handleChange}
         disabled={disabled}
         fullWidth
@@ -50,14 +41,14 @@ export const FormikCurrencyAutocomplete = ({
           <TextField
             {...params}
             label={t('Currency')}
-            variant='outlined'
-            margin='dense'
+            variant="outlined"
+            margin="dense"
             error={isInvalid}
             helperText={`${isInvalid ? get(form.errors, field.name) : ''}`}
             {...otherProps}
           />
         )}
-        data-cy='input-currency'
+        data-cy="input-currency"
       />
     </Box>
   );

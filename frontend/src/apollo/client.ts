@@ -1,13 +1,11 @@
-import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { persistCache } from 'apollo-cache-persist';
-import ApolloClient from 'apollo-client';
-import { ApolloLink } from 'apollo-link';
-import { onError } from 'apollo-link-error';
-import { createUploadLink } from 'apollo-upload-client';
+import { onError } from '@apollo/client/link/error';
+import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import localForage from 'localforage';
 import { GRAPHQL_URL } from '../config';
-import { clearCache } from '../utils/utils';
+import { clearCache } from '@utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
+import { ApolloLink, ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -21,12 +19,11 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         message.toLowerCase().includes('user does not have correct permission')
       ) {
         // eslint-disable-next-line no-console
-        console.error(`Permission denied for mutation`);
+        console.error('Permission denied for mutation');
       }
     });
 
   const maintenanceError =
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     networkError?.result?.message ===
     'Migrations are running, please try again later';
@@ -38,7 +35,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError)
     // eslint-disable-next-line no-console
     console.error(
-      `[Network error]: ${networkError}`,
+      `[Network error]: ${networkError.name}`,
       networkError,
       graphQLErrors,
     );
@@ -72,25 +69,21 @@ const redirectLink = new ApolloLink((operation, forward) => {
     const isPermissionDenied = response?.errors?.some((error) => error.message === 'Permission Denied');
 
     // If the error message is "Permission Denied" or data is null, redirect to the access denied page
-    if (isPermissionDenied || isDataNull(response.data) && !isMutation) {
+    if (isPermissionDenied || isDataNull(response.data) && !isMutation)
       window.location.href = `/access-denied/${businessArea}`;
-    }
     // Check if the response has any errors
     else if (hasResponseErrors(response)) {
       // If it's a mutation, log the error to the console
-      if (isMutation) {
+      if (isMutation)
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
-      }
       // If it's not a mutation and the app is not running on localhost, dev, or stg environment, redirect to an error page
-      else if (isNotLocalhostDevOrStg) {
+      else if (isNotLocalhostDevOrStg)
         window.location.href = `/error/${businessArea}`;
-      }
       // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
-      else {
+      else
         // eslint-disable-next-line no-console
         console.error(response.data?.error || response.data?.errors);
-      }
     }
 
     return response;
@@ -136,9 +129,10 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
           localStorage.setItem('backend-version', backendVersion);
         }
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
-        client.writeData({
-          data: { backendVersion },
-        });
+        // TODO check if needed
+        // client.writeData({
+        //   data: { backendVersion },
+        // });
       }
     }
     if (response.errors) {
@@ -199,7 +193,6 @@ export async function getClient(): Promise<
   const cache = new InMemoryCache();
   await persistCache({
     cache,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     storage: localForage,
     maxSize: false,

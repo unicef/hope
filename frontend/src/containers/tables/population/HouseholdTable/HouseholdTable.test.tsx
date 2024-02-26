@@ -1,5 +1,5 @@
 import { MockedProvider } from '@apollo/react-testing';
-import React from 'react';
+import * as React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { render, ApolloLoadingLink } from '../../../../testUtils/testUtils';
@@ -25,7 +25,7 @@ describe('containers/tables/population/HouseholdTable', () => {
         mocks={fakeApolloAllHouseholdsForPopulationTable}
       >
         <HouseholdTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
           canViewDetails
           choicesData={fakeHouseholdChoices}
@@ -40,12 +40,11 @@ describe('containers/tables/population/HouseholdTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllHouseholdsForPopulationTable}
       >
         <HouseholdTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={initialFilter}
           canViewDetails
           choicesData={fakeHouseholdChoices}

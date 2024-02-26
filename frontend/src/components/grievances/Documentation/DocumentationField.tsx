@@ -1,25 +1,25 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Box, Grid, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 
 export interface DocumentationFieldProps {
   index: number;
   baseName: string;
-  onDelete: () => {};
+  onDelete: () => void;
   isEdited?: boolean;
   setFieldValue;
 }
 
-export const DocumentationField = ({
+export function DocumentationField({
   index,
   baseName,
   onDelete,
   isEdited,
   setFieldValue,
-}: DocumentationFieldProps): React.ReactElement => {
+}: DocumentationFieldProps): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -28,7 +28,7 @@ export const DocumentationField = ({
         <Field
           name={`${baseName}[${index}].name`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Document Name')}
           component={FormikTextField}
           required
@@ -36,10 +36,10 @@ export const DocumentationField = ({
         />
       </Grid>
       <Grid item xs={3}>
-        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+        <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <input
-            type='file'
-            accept='.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,image/*'
+            type="file"
+            accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,image/*"
             onChange={(event) => {
               setFieldValue(
                 `${baseName}[${index}].file`,
@@ -58,4 +58,4 @@ export const DocumentationField = ({
       ) : null}
     </>
   );
-};
+}

@@ -1,18 +1,19 @@
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import React, { useState } from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
+import * as React from 'react';
+import { useState } from 'react';
+import { Bar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
-import { formatThousands } from '../../../../utils/utils';
-import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
+import { formatThousands } from '@utils/utils';
+import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
 
 interface TicketsByLocationAndCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByLocationAndCategory'];
 }
 
-export const TicketsByLocationAndCategoryChart = ({
-  data,
-}: TicketsByLocationAndCategoryChartProps): React.ReactElement => {
+export const TicketsByLocationAndCategoryChart: React.FC<
+  TicketsByLocationAndCategoryChartProps
+> = ({ data }) => {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
   const { t } = useTranslation();
@@ -21,9 +22,8 @@ export const TicketsByLocationAndCategoryChart = ({
 
   const matchDataSize = (
     dataToSlice: number[] | string[],
-  ): number[] | string[] => {
-    return showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount);
-  };
+  ): number[] | string[] =>
+    showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount);
 
   const categoriesAndColors = [
     { category: 'Data Change', color: '#FFAA20' },
@@ -41,19 +41,19 @@ export const TicketsByLocationAndCategoryChart = ({
     categoryPercentage: 0.5,
     label: el.label,
     backgroundColor: categoriesAndColors[index].color,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     data: matchDataSize(data.datasets[index].data).map((item) => item || ''),
     stack: 2,
     maxBarThickness: 15,
   }));
 
-  const chartData = {
+  const chartData: any = {
     labels: matchDataSize(data.labels),
     datasets: mappedDatasets,
   };
 
-  const options = {
+  const options: any = {
+    indexAxis: 'y',
     legend: {
       labels: {
         padding: 40,
@@ -84,17 +84,15 @@ export const TicketsByLocationAndCategoryChart = ({
   };
 
   return (
-    <Box flexDirection='column'>
-      <HorizontalBar
-        data={chartData}
-        options={options}
-        plugins={[ChartDataLabels]}
-      />
+    <Box flexDirection="column">
+      <div style={{ height: '400px' }}>
+        <Bar data={chartData} options={options} plugins={[ChartDataLabels]} />
+      </div>
       {data.labels.length > lessDataCount ? (
-        <Box textAlign='center' mt={4} ml={2} mr={2} letterSpacing={1.75}>
+        <Box textAlign="center" mt={4} ml={2} mr={2} letterSpacing={1.75}>
           <Button
-            variant='outlined'
-            color='primary'
+            variant="outlined"
+            color="primary"
             onClick={() => setShowAll(!showAll)}
             fullWidth
           >

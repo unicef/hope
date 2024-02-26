@@ -1,11 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import {
   RecipientNode,
   RecipientsQueryVariables,
   useRecipientsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
@@ -15,10 +15,10 @@ interface RecipientsTableProps {
   canViewDetails: boolean;
 }
 
-export const RecipientsTable = ({
+export function RecipientsTable({
   id,
   canViewDetails,
-}: RecipientsTableProps): React.ReactElement => {
+}: RecipientsTableProps): React.ReactElement {
   const { t } = useTranslation();
   const initialVariables: RecipientsQueryVariables = {
     survey: id,
@@ -31,7 +31,7 @@ export const RecipientsTable = ({
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useRecipientsQuery}
-        queriedObjectName='recipients'
+        queriedObjectName="recipients"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <RecipientsTableRow
@@ -44,4 +44,4 @@ export const RecipientsTable = ({
       />
     </TableWrapper>
   );
-};
+}

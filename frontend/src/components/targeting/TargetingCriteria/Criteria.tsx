@@ -1,13 +1,16 @@
-import { IconButton } from '@material-ui/core';
-import { Delete, Edit } from '@material-ui/icons';
-import React from 'react';
+import { IconButton } from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
-import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
+import { TargetingCriteriaRuleObjectType } from '@generated/graphql';
 
-const CriteriaElement = styled.div`
+interface CriteriaElementProps {
+  alternative?: boolean;
+}
+const CriteriaElement = styled.div<CriteriaElementProps>`
   width: auto;
   max-width: 380px;
   position: relative;
@@ -16,13 +19,13 @@ const CriteriaElement = styled.div`
   font-size: 16px;
   background-color: ${(props) =>
     props.alternative ? 'transparent' : '#f7faff'};
-  padding: ${({ theme }) => theme.spacing(1)}px
+  padding: ${({ theme }) => theme.spacing(1)}
     ${({ theme, alternative }) =>
-      alternative ? theme.spacing(1) : theme.spacing(17)}px
-    ${({ theme }) => theme.spacing(1)}px ${({ theme }) => theme.spacing(4)}px;
-  margin: ${({ theme }) => theme.spacing(2)}px 0;
+      alternative ? theme.spacing(1) : theme.spacing(17)}
+    ${({ theme }) => theme.spacing(1)} ${({ theme }) => theme.spacing(4)};
+  margin: ${({ theme }) => theme.spacing(2)} 0;
   p {
-    margin: ${({ theme }) => theme.spacing(2)}px 0;
+    margin: ${({ theme }) => theme.spacing(2)} 0;
     span {
       color: ${(props) => (props.alternative ? '#000' : '#003c8f')};
       font-weight: bold;
@@ -53,8 +56,8 @@ const MathSign = styled.img`
 const CriteriaSetBox = styled.div`
   border: 1px solid #607cab;
   border-radius: 3px;
-  padding: 0 ${({ theme }) => theme.spacing(2)}px;
-  margin: ${({ theme }) => theme.spacing(2)}px 0;
+  padding: 0 ${({ theme }) => theme.spacing(2)};
+  margin: ${({ theme }) => theme.spacing(2)} 0;
 `;
 
 const CriteriaField = ({ field }): React.ReactElement => {
@@ -74,7 +77,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
           <span>
-            {field.arguments[0]} - {field.arguments[1]}
+            {field.arguments[0]} -{field.arguments[1]}
           </span>
         </p>
       );
@@ -101,7 +104,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <MathSign src={LessThanEqual} alt='less_than' />
+          <MathSign src={LessThanEqual} alt="less_than" />
           <span>{field.arguments[0]}</span>
         </p>
       );
@@ -110,7 +113,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <MathSign src={GreaterThanEqual} alt='greater_than' />
+          <MathSign src={GreaterThanEqual} alt="greater_than" />
           <span>{field.arguments[0]}</span>
         </p>
       );
@@ -120,20 +123,18 @@ const CriteriaField = ({ field }): React.ReactElement => {
         field.arguments.length > 1 ? (
           <p>
             {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-            {field.arguments.map((argument, index) => {
-              return (
-                <>
-                  <span>
-                    {field.fieldAttribute.choices?.length
-                      ? field.fieldAttribute.choices.find(
-                          (each) => each.value === argument,
-                        )?.labelEn
-                      : field.arguments[0]}
-                  </span>
-                  {index !== field.arguments.length - 1 && ', '}
-                </>
-              );
-            })}
+            {field.arguments.map((argument, index) => (
+              <>
+                <span>
+                  {field.fieldAttribute.choices?.length
+                    ? field.fieldAttribute.choices.find(
+                        (each) => each.value === argument,
+                      )?.labelEn
+                    : field.arguments[0]}
+                </span>
+                {index !== field.arguments.length - 1 && ', '}
+              </>
+            ))}
           </p>
         ) : (
           <p>
@@ -151,7 +152,7 @@ const CriteriaField = ({ field }): React.ReactElement => {
     default:
       fieldElement = (
         <p>
-          {field.fieldAttribute.labelEn}: <span>{field.arguments[0]}</span>
+          {field.fieldAttribute.labelEn}:<span>{field.arguments[0]}</span>
         </p>
       );
       break;
@@ -179,27 +180,27 @@ export function Criteria({
   individualsFiltersBlocks,
 }: CriteriaProps): React.ReactElement {
   return (
-    <CriteriaElement alternative={alternative} data-cy='criteria-container'>
-      {rules.map((each, index) => {
-        //eslint-disable-next-line
-        return <CriteriaField key={index} field={each} />;
-      })}
-      {individualsFiltersBlocks.map((item) => {
-        return (
-          <CriteriaSetBox>
-            {item.individualBlockFilters.map((filter) => {
-              return <CriteriaField field={filter} />;
-            })}
-          </CriteriaSetBox>
-        );
-      })}
+    <CriteriaElement alternative={alternative} data-cy="criteria-container">
+      {rules.map((each, index) => (
+        // eslint-disable-next-line
+        <CriteriaField key={index} field={each} />
+      ))}
+      {individualsFiltersBlocks.map((item) => (
+        // eslint-disable-next-line
+        <CriteriaSetBox>
+          {item.individualBlockFilters.map((filter) => (
+            // eslint-disable-next-line
+            <CriteriaField field={filter} />
+          ))}
+        </CriteriaSetBox>
+      ))}
       {isEdit && (
         <ButtonsContainer>
-          <IconButton data-cy='button-edit' onClick={editFunction}>
+          <IconButton data-cy="button-edit" onClick={editFunction}>
             <Edit />
           </IconButton>
           {canRemove && (
-            <IconButton data-cy='button-edit' onClick={removeFunction}>
+            <IconButton data-cy="button-edit" onClick={removeFunction}>
               <Delete />
             </IconButton>
           )}

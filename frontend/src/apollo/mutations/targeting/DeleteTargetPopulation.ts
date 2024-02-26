@@ -1,7 +1,9 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const DeleteTargetPopulation = gql`
-  mutation DeleteTargetPopulation($input: DeleteTargetPopulationMutationInput!) {
+  mutation DeleteTargetPopulation(
+    $input: DeleteTargetPopulationMutationInput!
+  ) {
     deleteTargetPopulation(input: $input) {
       clientMutationId
     }

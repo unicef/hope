@@ -1,18 +1,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
   ImportDataStatus,
   useCreateRegistrationXlsxImportMutation,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { ScreenBeneficiaryField } from '../ScreenBeneficiaryField';
 import { DropzoneField } from './DropzoneField';
 import { XlsxImportDataRepresentation } from './XlsxImportDataRepresentation';
@@ -45,7 +45,7 @@ export function CreateImportFromXlsxForm({
   const { baseUrl, businessArea } = useBaseUrl();
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [createImport] = useCreateRegistrationXlsxImportMutation();
 
   const onSubmit = async (values): Promise<void> => {
@@ -61,7 +61,7 @@ export function CreateImportFromXlsxForm({
           },
         },
       });
-      history.push(
+      navigate(
         `/${baseUrl}/registration-data-import/${data.data.registrationXlsxImport.registrationDataImport.id}`,
       );
     } catch (e) {
@@ -109,11 +109,11 @@ export function CreateImportFromXlsxForm({
       <FormikProvider value={formik}>
         <DropzoneField loading={saveXlsxLoading} />
         <Field
-          name='name'
+          name="name"
           fullWidth
           label={t('Title')}
           required
-          variant='outlined'
+          variant="outlined"
           component={FormikTextField}
         />
         <ScreenBeneficiaryField />

@@ -20,7 +20,7 @@ const result: IntrospectionResultData = {
             name: 'PaymentRecordNode',
           },
           {
-            name: 'HouseholdNode'
+            name: 'HouseholdNode',
           },
           {
             name: 'CashPlanNode',

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { fakeHouseholdChoices } from '../../../../../../fixtures/population/fakeHouseholdChoices';
 import { fakeImportedHouseholdDetailedFragment } from '../../../../../../fixtures/registration/fakeImportedHouseholdDetailedFragment';
 import { render } from '../../../../../testUtils/testUtils';
@@ -8,7 +8,6 @@ describe('components/rdi/details/households/HouseholdDetails', () => {
   it('should render', () => {
     const { container } = render(
       <HouseholdDetails
-        businessArea='afghanistan'
         household={fakeImportedHouseholdDetailedFragment}
         choicesData={fakeHouseholdChoices}
       />,

@@ -1,14 +1,14 @@
-import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
-import React from 'react';
-import { Radio } from '@material-ui/core';
-import { RegistrationDataImportNode } from '../../../../__generated__/graphql';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { StatusBox } from '../../../../components/core/StatusBox';
-import { registrationDataImportStatusToColor } from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import TableCell from '@mui/material/TableCell';
+import { useNavigate } from 'react-router-dom';
+import * as React from 'react';
+import { Radio } from '@mui/material';
+import { RegistrationDataImportNode } from '@generated/graphql';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { StatusBox } from '@components/core/StatusBox';
+import { registrationDataImportStatusToColor } from '@utils/utils';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentRecordTableRowProps {
   registrationDataImport: RegistrationDataImportNode;
@@ -23,14 +23,14 @@ export function RegistrationDataImportTableRow({
   selectedRDI,
   radioChangeHandler,
 }: PaymentRecordTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const importDetailsPath = `/${baseUrl}/registration-data-import/${registrationDataImport.id}`;
   const handleClick = (): void => {
     if (radioChangeHandler !== undefined) {
       radioChangeHandler(registrationDataImport.id);
     } else {
-      history.push(importDetailsPath);
+      navigate(importDetailsPath);
     }
   };
   const renderImportedBy = (): string => {
@@ -46,24 +46,24 @@ export function RegistrationDataImportTableRow({
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={registrationDataImport.id}
     >
       {radioChangeHandler && (
-        <TableCell padding='checkbox'>
+        <TableCell padding="checkbox">
           <Radio
-            color='primary'
+            color="primary"
             checked={selectedRDI === registrationDataImport.id}
             onChange={() => {
               radioChangeHandler(registrationDataImport.id);
             }}
             value={registrationDataImport.id}
-            name='radio-button-household'
+            name="radio-button-household"
             inputProps={{ 'aria-label': registrationDataImport.id }}
           />
         </TableCell>
       )}
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={importDetailsPath}>
             {registrationDataImport.name}
@@ -72,25 +72,25 @@ export function RegistrationDataImportTableRow({
           registrationDataImport.name
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={registrationDataImport.status}
           statusToColor={registrationDataImportStatusToColor}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment withTime>
           {registrationDataImport.importDate}
         </UniversalMoment>
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {registrationDataImport.numberOfIndividuals}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {registrationDataImport.numberOfHouseholds}
       </TableCell>
-      <TableCell align='left'>{renderImportedBy()}</TableCell>
-      <TableCell align='left'>{registrationDataImport.dataSource}</TableCell>
+      <TableCell align="left">{renderImportedBy()}</TableCell>
+      <TableCell align="left">{registrationDataImport.dataSource}</TableCell>
     </ClickableTableRow>
   );
 }

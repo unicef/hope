@@ -1,30 +1,31 @@
-import React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
-import { formatThousands } from '../../../../utils/utils';
-import { AllGrievanceDashboardChartsQuery } from '../../../../__generated__/graphql';
+import * as React from 'react';
+import { Bar } from 'react-chartjs-2';
+import { formatThousands } from '@utils/utils';
+import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
 
 interface TicketsByCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByCategory'];
 }
+
 export const TicketsByCategoryChart = ({
   data,
 }: TicketsByCategoryChartProps): React.ReactElement => {
   if (!data) return null;
 
-  const chartData = {
+  const chartData: any = {
     labels: data.labels,
     datasets: [
       {
         categoryPercentage: 0.5,
         maxBarThickness: 20,
         backgroundColor: '#00867B',
-        data: [...data.datasets[0]?.data],
+        data: [...(data.datasets[0]?.data || [])],
         stack: 2,
       },
     ],
   };
 
-  const options = {
+  const options: any = {
     responsive: true,
     maintainAspectRatio: false,
     legend: {
@@ -54,7 +55,12 @@ export const TicketsByCategoryChart = ({
         },
       ],
     },
+    indexAxis: 'y',
   };
 
-  return <HorizontalBar data={chartData} options={options} />;
+  return (
+    <div style={{ height: '400px' }}>
+      <Bar data={chartData} options={options} />
+    </div>
+  );
 };

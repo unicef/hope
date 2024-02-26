@@ -1,6 +1,6 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationHouseholdHeadCells';
 import { TargetPopulationHouseholdTableRow } from './TargetPopulationHouseholdRow';
@@ -13,13 +13,13 @@ interface TargetPopulationHouseholdProps {
   canViewDetails?: boolean;
 }
 
-export const TargetPopulationHouseholdTable = ({
+export function TargetPopulationHouseholdTable({
   id,
   query,
   queryObjectName,
   variables,
   canViewDetails,
-}: TargetPopulationHouseholdProps): ReactElement => {
+}: TargetPopulationHouseholdProps): ReactElement {
   const { t } = useTranslation();
   const initialVariables = {
     ...(id && { targetPopulation: id }),
@@ -44,4 +44,4 @@ export const TargetPopulationHouseholdTable = ({
       />
     </TableWrapper>
   );
-};
+}

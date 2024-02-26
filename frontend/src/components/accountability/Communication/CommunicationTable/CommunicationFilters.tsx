@@ -1,12 +1,12 @@
-import { Grid } from '@material-ui/core';
-import React from 'react';
+import { Grid } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { TargetPopulationAutocomplete } from '../../../../shared/autocompletes/TargetPopulationAutocomplete';
-import { createHandleApplyFilterChange } from '../../../../utils/utils';
-import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { FiltersSection } from '../../../core/FiltersSection';
-import { CreatedByAutocomplete } from '../../../../shared/autocompletes/CreatedByAutocomplete';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { CreatedByAutocomplete } from '@shared/autocompletes/CreatedByAutocomplete';
+import { TargetPopulationAutocomplete } from '@shared/autocompletes/TargetPopulationAutocomplete';
+import { DatePickerFilter } from '@components/core/DatePickerFilter';
+import { FiltersSection } from '@components/core/FiltersSection';
+import { createHandleApplyFilterChange } from '@utils/utils';
 
 interface CommunicationFiltersProps {
   filter;
@@ -15,29 +15,27 @@ interface CommunicationFiltersProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const CommunicationFilters = ({
+export function CommunicationFilters({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: CommunicationFiltersProps): React.ReactElement => {
+}: CommunicationFiltersProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
+
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
 
   const handleApplyFilter = (): void => {
     applyFilterChanges();
@@ -52,10 +50,10 @@ export const CommunicationFilters = ({
       applyHandler={handleApplyFilter}
       clearHandler={handleClearFilter}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid xs={4} item>
           <TargetPopulationAutocomplete
-            name='targetPopulation'
+            name="targetPopulation"
             value={filter.targetPopulation}
             filter={filter}
             setFilter={setFilter}
@@ -68,7 +66,7 @@ export const CommunicationFilters = ({
           <CreatedByAutocomplete
             label={t('Created by')}
             filter={filter}
-            name='createdBy'
+            name="createdBy"
             value={filter.createdBy}
             setFilter={setFilter}
             initialFilter={initialFilter}
@@ -77,14 +75,14 @@ export const CommunicationFilters = ({
             additionalVariables={{ isMessageCreator: true }}
           />
         </Grid>
-        <Grid container item xs={6} spacing={3} alignItems='flex-end'>
+        <Grid container item xs={6} spacing={3} alignItems="flex-end">
           <Grid item xs={6}>
             <DatePickerFilter
               topLabel={t('Creation Date')}
-              label='From'
+              label="From"
               onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
               value={filter.createdAtRangeMin}
-              data-cy='filters-creation-date-from'
+              data-cy="filters-creation-date-from"
             />
           </Grid>
           <Grid item xs={6}>
@@ -92,11 +90,11 @@ export const CommunicationFilters = ({
               label={t('To')}
               onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
               value={filter.createdAtRangeMax}
-              data-cy='filters-creation-date-to'
+              data-cy="filters-creation-date-to"
             />
           </Grid>
         </Grid>
       </Grid>
     </FiltersSection>
   );
-};
+}

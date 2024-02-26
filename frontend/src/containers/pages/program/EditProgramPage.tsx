@@ -1,30 +1,30 @@
-import { Box, Step, StepButton, Stepper } from '@material-ui/core';
+import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useHistory } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   useAllAreasTreeQuery,
   useProgramQuery,
   useUpdateProgramMutation,
   useUserPartnerChoicesQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/core/AllLogEntries';
 import { PROGRAM_QUERY } from '../../../apollo/queries/program/Program';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
-import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { decodeIdString } from '../../../utils/utils';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
+import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { decodeIdString } from '@utils/utils';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 
 export const EditProgramPage = (): ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
@@ -39,10 +39,8 @@ export const EditProgramPage = (): ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: userPartnerChoicesData,
-    loading: userPartnerChoicesLoading,
-  } = useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
+    useUserPartnerChoicesQuery();
 
   const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
@@ -107,7 +105,7 @@ export const EditProgramPage = (): ReactElement => {
         },
       });
       showMessage(t('Programme edited.'));
-      history.push(
+      navigate(
         `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
       );
     } catch (e) {
@@ -212,7 +210,7 @@ export const EditProgramPage = (): ReactElement => {
               <Stepper activeStep={step}>
                 <Step>
                   <StepButton
-                    data-cy='step-button-details'
+                    data-cy="step-button-details"
                     onClick={() => setStep(0)}
                   >
                     {t('Details')}
@@ -220,7 +218,7 @@ export const EditProgramPage = (): ReactElement => {
                 </Step>
                 <Step>
                   <StepButton
-                    data-cy='step-button-partners'
+                    data-cy="step-button-partners"
                     onClick={() => setStep(1)}
                   >
                     {t('Programme Partners')}

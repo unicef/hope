@@ -1,24 +1,24 @@
-import { Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { renderUserName } from '../../../../utils/utils';
-import { BlackLink } from '../../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { renderUserName } from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface FollowUpPaymentPlanDetailsProps {
   baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const FollowUpPaymentPlanDetails = ({
+export function FollowUpPaymentPlanDetails({
   baseUrl,
   paymentPlan,
-}: FollowUpPaymentPlanDetailsProps): React.ReactElement => {
+}: FollowUpPaymentPlanDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const {
     createdBy,
@@ -39,7 +39,7 @@ export const FollowUpPaymentPlanDetails = ({
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>
@@ -101,4 +101,4 @@ export const FollowUpPaymentPlanDetails = ({
       </ContainerColumnWithBorder>
     </Grid>
   );
-};
+}

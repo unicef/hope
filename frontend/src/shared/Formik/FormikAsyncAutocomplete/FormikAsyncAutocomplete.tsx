@@ -1,15 +1,15 @@
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import React, { useEffect, useState } from 'react';
-import { TextField } from '@material-ui/core';
+import Autocomplete from '@mui/lab/Autocomplete';
+import { useEffect, useState } from 'react';
+import { TextField } from '@mui/material';
 
-export const FormikAsyncAutocomplete = ({
+export function FormikAsyncAutocomplete({
   field,
   form,
   label,
   query,
   fetchData,
   variables,
-}): React.ReactElement => {
+}): React.ReactElement {
   const [value, setValue] = useState(null);
   const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState([]);
@@ -31,7 +31,7 @@ export const FormikAsyncAutocomplete = ({
     }
   }, [data, fetchData]);
 
-  const handleChange = (event, newValue): void => {
+  const handleChange = (_, newValue): void => {
     setValue(newValue);
     if (!newValue) {
       form.setFieldValue(field.name, null);
@@ -40,26 +40,26 @@ export const FormikAsyncAutocomplete = ({
     }
   };
 
-  const handleInputChange = (event, newInputValue): void => {
+  const handleInputChange = (_, newInputValue): void => {
     setInputValue(newInputValue);
   };
 
   return (
     <Autocomplete
       renderInput={(params) => (
-        <TextField {...params} label={label} variant='outlined' />
+        <TextField {...params} label={label} variant="outlined" />
       )}
       filterOptions={(option) => option}
       autoComplete
-      noOptionsText='No results'
+      noOptionsText="No results"
       options={options}
-      getOptionSelected={(option, selectedValue) => {
-        return option.value === selectedValue.value;
-      }}
+      isOptionEqualToValue={(option, selectedValue) =>
+        option.value === selectedValue.value
+      }
       getOptionLabel={(choice) => choice.labelEn}
       value={value}
       onChange={handleChange}
       onInputChange={handleInputChange}
     />
   );
-};
+}
