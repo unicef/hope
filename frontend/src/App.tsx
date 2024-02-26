@@ -23,11 +23,11 @@ import * as Sentry from '@sentry/react';
 
 const Root: React.FC = () => (
   <Routes>
-    <Route path="/login" element={<LoginPage />} />
-    <Route path="/maintenance" element={<MaintenancePage />} />
-    <Route path="/404" element={<PageNotFound />} />
-    <Route path="/error" element={<SomethingWentWrong />} />
-    <Route path="/access-denied" element={<AccessDenied />} />
+    <Route path="/login/*" element={<LoginPage />} />
+    <Route path="/maintenance/*" element={<MaintenancePage />} />
+    <Route path="/404/*" element={<PageNotFound />} />
+    <Route path="/error/*" element={<SomethingWentWrong />} />
+    <Route path="/access-denied/*" element={<AccessDenied />} />
     <Route
       path="/sentry-check"
       element={

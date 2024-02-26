@@ -14,6 +14,7 @@ import { App } from './App';
 import setupInternalization from './i18n';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
+import './global.css';
 import React from 'react';
 import {
   createRoutesFromChildren,
