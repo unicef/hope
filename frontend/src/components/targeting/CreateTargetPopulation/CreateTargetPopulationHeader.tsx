@@ -1,12 +1,12 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { BreadCrumbsItem } from '../../core/BreadCrumbs';
-import { LoadingButton } from '../../core/LoadingButton';
-import { PageHeader } from '../../core/PageHeader';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { LoadingButton } from '@core/LoadingButton';
+import { PageHeader } from '@core/PageHeader';
 
 interface CreateTargetPopulationHeaderProps {
   handleSubmit: () => Promise<void>;
@@ -36,13 +36,13 @@ export function CreateTargetPopulationHeader({
     <PageHeader
       title={
         <Field
-          name='name'
+          name="name"
           label={t('Enter Target Population Name')}
-          type='text'
+          type="text"
           fullWidth
           required
           component={FormikTextField}
-          data-cy='input-name'
+          data-cy="input-name"
         />
       }
       breadCrumbs={
@@ -55,12 +55,12 @@ export function CreateTargetPopulationHeader({
       <>
         <Box m={2}>
           <LoadingButton
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             onClick={handleSubmit}
             disabled={values.criterias?.length === 0 || !values.name || loading}
             loading={loading}
-            data-cy='button-target-population-create'
+            data-cy="button-target-population-create"
           >
             {t('Save')}
           </LoadingButton>

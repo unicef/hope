@@ -1,17 +1,14 @@
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import Collapse from '@material-ui/core/Collapse';
-import { Paper } from '@material-ui/core';
-import TablePagination from '@material-ui/core/TablePagination';
-import {
-  AllLogEntriesQuery,
-  LogEntryNode,
-} from '../../../__generated__/graphql';
+import Collapse from '@mui/material/Collapse';
+import { Paper } from '@mui/material';
+import TablePagination from '@mui/material/TablePagination';
+import { AllLogEntriesQuery, LogEntryNode } from '@generated/graphql';
 import {
   ButtonPlaceHolder,
   Row,
-} from '../../../components/core/ActivityLogTable/TableStyledComponents';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
+} from '@components/core/ActivityLogTable/TableStyledComponents';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
 
@@ -19,7 +16,11 @@ const Table = styled.div`
   display: flex;
   flex-direction: column;
 `;
-const HeadingCell = styled.div`
+interface HeadingCellProps {
+  weight?: number;
+}
+
+const HeadingCell = styled.div<HeadingCellProps>`
   display: flex;
   flex: ${({ weight }) => weight || 1};
   padding: 16px;
@@ -31,10 +32,11 @@ const HeadingCell = styled.div`
   letter-spacing: 0.01071em;
   vertical-align: inherit;
 `;
+
 const PaperContainer = styled(Paper)`
   width: 100%;
-  padding: ${({ theme }) => theme.spacing(5)}px 0;
-  margin-bottom: ${({ theme }) => theme.spacing(5)}px;
+  padding: ${({ theme }) => theme.spacing(5)} 0;
+  margin-bottom: ${({ theme }) => theme.spacing(5)};
 `;
 
 interface MainActivityLogTableProps {
@@ -47,7 +49,7 @@ interface MainActivityLogTableProps {
   actionChoices: AllLogEntriesQuery['logEntryActionChoices'];
   loading: boolean;
 }
-export const MainActivityLogTable = ({
+export function MainActivityLogTable({
   logEntries,
   totalCount,
   rowsPerPage,
@@ -56,7 +58,7 @@ export const MainActivityLogTable = ({
   onChangeRowsPerPage,
   actionChoices,
   loading = false,
-}: MainActivityLogTableProps): ReactElement => {
+}: MainActivityLogTableProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [expanded, setExpanded] = useState(true);
   const choicesDict = useArrayToDict(actionChoices, 'value', 'name');
@@ -65,13 +67,11 @@ export const MainActivityLogTable = ({
       <Collapse in={expanded}>
         <Table>
           <Row>
-            {headCells.map((item) => {
-              return (
-                <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
-                  {item.label}
-                </HeadingCell>
-              );
-            })}
+            {headCells.map((item) => (
+              <HeadingCell key={item.id} style={{ flex: item.weight || 1 }}>
+                {item.label}
+              </HeadingCell>
+            ))}
             <ButtonPlaceHolder />
           </Row>
           {logEntries.map((value) => (
@@ -86,7 +86,7 @@ export const MainActivityLogTable = ({
         </Table>
         <TablePagination
           rowsPerPageOptions={[5, 10, 15, 20]}
-          component='div'
+          component="div"
           count={totalCount}
           rowsPerPage={rowsPerPage}
           page={page}
@@ -98,4 +98,4 @@ export const MainActivityLogTable = ({
       </Collapse>
     </PaperContainer>
   );
-};
+}

@@ -1,3 +1,3 @@
 import { FormikRadioGroup } from './FormikRadioGroup';
 
-export { FormikRadioGroup }
+export { FormikRadioGroup };

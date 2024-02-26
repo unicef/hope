@@ -1,6 +1,6 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
-import React from 'react';
+import * as React from 'react';
 import wait from 'waait';
 import { PaymentRecordTable } from '.';
 import { fakeApolloAllPaymentRecords } from '../../../../../fixtures/payments/fakeApolloAllPaymentRecords';
@@ -22,7 +22,6 @@ describe('containers/tables/payments/PaymentRecordTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         addTypename={false}
         mocks={fakeApolloAllPaymentRecords}
       >

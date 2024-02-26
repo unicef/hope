@@ -1,13 +1,13 @@
-import { Box, Button } from '@material-ui/core';
-import { EditRounded } from '@material-ui/icons';
-import React from 'react';
+import { Box, Button } from '@mui/material';
+import { EditRounded } from '@mui/icons-material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 import { DeletePaymentPlan } from '../DeletePaymentPlan';
 import { LockPaymentPlan } from '../LockPaymentPlan';
-import { useBaseUrl } from '../../../../../hooks/useBaseUrl';
-import {useProgramContext} from "../../../../../programContext";
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from '../../../../../programContext';
 
 export interface OpenPaymentPlanHeaderButtonsProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
@@ -16,25 +16,25 @@ export interface OpenPaymentPlanHeaderButtonsProps {
   canLock: boolean;
 }
 
-export const OpenPaymentPlanHeaderButtons = ({
+export function OpenPaymentPlanHeaderButtons({
   paymentPlan,
   canRemove,
   canEdit,
   canLock,
-}: OpenPaymentPlanHeaderButtonsProps): React.ReactElement => {
+}: OpenPaymentPlanHeaderButtonsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const { isActiveProgram } = useProgramContext();
   const { id, isFollowUp } = paymentPlan;
 
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canRemove && <DeletePaymentPlan paymentPlan={paymentPlan} />}
       {canEdit && (
         <Box m={2}>
           <Button
-            variant='outlined'
-            color='primary'
+            variant="outlined"
+            color="primary"
             startIcon={<EditRounded />}
             component={Link}
             to={`/${baseUrl}/payment-module/${
@@ -53,4 +53,4 @@ export const OpenPaymentPlanHeaderButtons = ({
       )}
     </Box>
   );
-};
+}

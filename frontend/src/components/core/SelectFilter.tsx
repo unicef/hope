@@ -1,10 +1,14 @@
-import { Box, IconButton, InputAdornment } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { Close } from '@material-ui/icons';
-import React from 'react';
+import {
+  Box,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  Select,
+} from '@mui/material';
+import { Close } from '@mui/icons-material';
+import * as React from 'react';
 import styled from 'styled-components';
-import InputLabel from '../../shared/InputLabel';
-import Select from '../../shared/Select';
+
 import { StyledFormControl } from '../StyledFormControl';
 
 const StartInputAdornment = styled(InputAdornment)`
@@ -18,20 +22,19 @@ const XIcon = styled(Close)`
   color: #707070;
 `;
 
-const useStyles = makeStyles(() => ({
-  selectWrapper: {
-    flex: 1,
-    display: 'flex',
-    maxWidth: '100%',
-  },
-  select: {
-    flex: 1,
-    maxWidth: '100%',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-}));
+const SelectWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  max-width: 100%;
+`;
+
+const StyledSelect = styled(Select)`
+  flex: 1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 export const SelectFilter = ({
   label,
@@ -43,8 +46,6 @@ export const SelectFilter = ({
   disableClearable = false,
   ...otherProps
 }): React.ReactElement => {
-  const classes = useStyles();
-
   const checkValue = (value): boolean => {
     if (Array.isArray(value)) {
       return value.length > 0;
@@ -55,53 +56,72 @@ export const SelectFilter = ({
   const isValue = checkValue(otherProps.value);
 
   return (
-    <div className={classes.selectWrapper}>
+    <SelectWrapper>
       <StyledFormControl
         theme={{ borderRadius }}
         fullWidth={fullWidth}
-        variant='outlined'
-        margin='dense'
+        variant="outlined"
       >
-        <Box display='grid'>
+        <Box display="flex" alignItems="center">
           <InputLabel>{label}</InputLabel>
-          <Select
-            /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-            // @ts-ignore
-            className={classes.select}
+          <StyledSelect
+            size="medium"
             onChange={onChange}
-            variant='outlined'
+            variant="outlined"
             label={label}
             MenuProps={{
-              getContentAnchorEl: null,
+              anchorOrigin: {
+                vertical: 'bottom',
+                horizontal: 'left',
+              },
+              transformOrigin: {
+                vertical: 'top',
+                horizontal: 'left',
+              },
             }}
-            InputProps={{
-              startAdornment: icon ? (
-                <StartInputAdornment position='start'>
-                  {icon}
-                </StartInputAdornment>
-              ) : null,
-              endAdornment:
-                isValue && !disableClearable ? (
-                  <EndInputAdornment position='end'>
-                    <IconButton
-                      size='small'
-                      onClick={() => {
-                        onChange({
-                          target: { value: otherProps.multiple ? [] : '' },
-                        });
-                      }}
-                    >
-                      <XIcon fontSize='small' />
-                    </IconButton>
-                  </EndInputAdornment>
-                ) : null,
+            renderValue={(selected) => {
+              const selectedOption = React.Children.toArray(children).find(
+                (child): child is React.ReactElement<any> =>
+                  React.isValidElement(child) && child.props.value === selected,
+              );
+
+              return (
+                <Box display="flex" alignItems="center">
+                  {icon && (
+                    <StartInputAdornment position="start">
+                      {icon}
+                    </StartInputAdornment>
+                  )}
+                  {selectedOption
+                    ? selectedOption.props.children
+                    : String(selected)}
+                </Box>
+              );
             }}
+            endAdornment={
+              isValue &&
+              !disableClearable && (
+                <EndInputAdornment position="end">
+                  <IconButton
+                    size="medium"
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      onChange({
+                        target: { value: otherProps.multiple ? [] : '' },
+                      });
+                    }}
+                  >
+                    <XIcon fontSize="small" />
+                  </IconButton>
+                </EndInputAdornment>
+              )
+            }
             {...otherProps}
           >
             {children}
-          </Select>
+          </StyledSelect>
         </Box>
       </StyledFormControl>
-    </div>
+    </SelectWrapper>
   );
 };

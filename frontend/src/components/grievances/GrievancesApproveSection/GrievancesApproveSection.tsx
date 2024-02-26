@@ -1,10 +1,7 @@
-import { Box, Grid } from '@material-ui/core';
-import React from 'react';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../utils/constants';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { Box, Grid } from '@mui/material';
+import * as React from 'react';
+import { GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { GrievanceTicketQuery } from '@generated/graphql';
 import { AddIndividualGrievanceDetails } from '../AddIndividualGrievanceDetails';
 import { DeleteHouseholdGrievanceDetails } from '../DeleteHouseholdGrievanceDetails';
 import { DeleteIndividualGrievanceDetails } from '../DeleteIndividualGrievanceDetails';

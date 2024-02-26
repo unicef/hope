@@ -1,7 +1,7 @@
-import { IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { CriteriaAutocomplete } from './TargetingCriteria/CriteriaAutocomplete';

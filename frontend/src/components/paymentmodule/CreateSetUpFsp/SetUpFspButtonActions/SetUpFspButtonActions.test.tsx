@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react';
-import React from 'react';
+import * as React from 'react';
 import wait from 'waait';
 import { render } from '../../../../testUtils/testUtils';
 import { SetUpFspButtonActions } from './SetUpFspButtonActions';
@@ -16,7 +16,7 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspButtonActions', () => 
         step={step}
         submitForm={submitForm}
         baseUrl={fakeBaseUrl}
-        paymentPlanId='asdjkfhsakdjfsd76asdf0sdf=='
+        paymentPlanId="asdjkfhsakdjfsd76asdf0sdf=="
         handleBackStep={setStep}
       />,
     );

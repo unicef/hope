@@ -1,14 +1,14 @@
-import { MenuItem, Select } from '@material-ui/core';
-import React from 'react';
+import { MenuItem, Select } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import AlarmAddIcon from '@material-ui/icons/AlarmAdd';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import AlarmAddIcon from '@mui/icons-material/AlarmAdd';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
   useBulkUpdateGrievancePriorityMutation,
   useGrievancesChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { BulkBaseModal } from './BulkBaseModal';
 
 export const StyledLink = styled.div`
@@ -25,11 +25,11 @@ interface BulkSetPriorityModalProps {
   setSelected;
 }
 
-export const BulkSetPriorityModal = ({
+export function BulkSetPriorityModal({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkSetPriorityModalProps): React.ReactElement => {
+}: BulkSetPriorityModalProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] = React.useState<number>(0);
@@ -55,29 +55,27 @@ export const BulkSetPriorityModal = ({
   };
 
   return (
-    <>
-      <BulkBaseModal
-        selectedTickets={selectedTickets}
-        title={t('Set priority')}
-        buttonTitle={t('Set priority')}
-        onSave={onSave}
-        icon={<AlarmAddIcon />}
+    <BulkBaseModal
+      selectedTickets={selectedTickets}
+      title={t('Set priority')}
+      buttonTitle={t('Set priority')}
+      onSave={onSave}
+      icon={<AlarmAddIcon />}
+    >
+      <Select
+        value={value}
+        onChange={(e) => setValue(e.target.value as number)}
+        style={{ width: '100%' }}
+        variant="outlined"
+        margin="dense"
+        label={t('Priority')}
       >
-        <Select
-          value={value}
-          onChange={(e) => setValue(e.target.value as number)}
-          style={{ width: '100%' }}
-          variant='outlined'
-          margin='dense'
-          label={t('Priority')}
-        >
-          {priorityChoices.map((choice) => (
-            <MenuItem key={choice.value} value={choice.value}>
-              {choice.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </BulkBaseModal>
-    </>
+        {priorityChoices.map((choice) => (
+          <MenuItem key={choice.value} value={choice.value}>
+            {choice.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </BulkBaseModal>
   );
-};
+}

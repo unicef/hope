@@ -1,29 +1,29 @@
-import { Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AccountabilityCommunicationMessageQuery } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { renderUserName } from '../../../utils/utils';
-import { BlackLink } from '../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../core/LabelizedField';
-import { OverviewContainer } from '../../core/OverviewContainer';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
+import { AccountabilityCommunicationMessageQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { renderUserName } from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface CommunicationDetailsProps {
   message: AccountabilityCommunicationMessageQuery['accountabilityCommunicationMessage'];
 }
 
-export const CommunicationDetails = ({
+export function CommunicationDetails({
   message,
-}: CommunicationDetailsProps): React.ReactElement => {
+}: CommunicationDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   return (
-    <ContainerColumnWithBorder data-cy='communication-details-container'>
+    <ContainerColumnWithBorder data-cy="communication-details-container">
       <Title>
-        <Typography variant='h6'>{t('Details')}</Typography>
+        <Typography variant="h6">{t('Details')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
@@ -64,4 +64,4 @@ export const CommunicationDetails = ({
       </OverviewContainer>
     </ContainerColumnWithBorder>
   );
-};
+}

@@ -1,30 +1,24 @@
-import {
-  Box,
-  FormHelperText,
-  Grid,
-  GridSize,
-  Typography,
-} from '@material-ui/core';
+import { Box, FormHelperText, Grid, GridSize, Typography } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllProgramsForChoicesQuery,
   GrievancesChoiceDataQuery,
   usePartnerForGrievanceChoicesQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { PERMISSIONS, hasPermissions } from '../../../../config/permissions';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
-import { choicesToDict } from '../../../../utils/utils';
-import { BlackLink } from '../../../core/BlackLink';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { choicesToDict } from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
 import { NewDocumentationFieldArray } from '../../Documentation/NewDocumentationFieldArray';
 import { LookUpLinkedTickets } from '../../LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
 import { LookUpPaymentRecord } from '../../LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
@@ -56,7 +50,7 @@ export interface DescriptionProps {
   permissions: string[];
 }
 
-export const Description = ({
+export function Description({
   values,
   showIssueType,
   selectedIssueType,
@@ -66,7 +60,7 @@ export const Description = ({
   setFieldValue,
   errors,
   permissions,
-}: DescriptionProps): React.ReactElement => {
+}: DescriptionProps): React.ReactElement {
   const { t } = useTranslation();
   const { isAllPrograms } = useBaseUrl();
   const { data: partnerChoicesData } = usePartnerForGrievanceChoicesQuery({
@@ -171,9 +165,9 @@ export const Description = ({
           {values.issueType === GRIEVANCE_ISSUE_TYPES.PARTNER_COMPLAINT && (
             <Grid item xs={3}>
               <Field
-                name='partner'
+                name="partner"
                 fullWidth
-                variant='outlined'
+                variant="outlined"
                 label={t('Partner*')}
                 choices={partnerChoicesData?.partnerForGrievanceChoices || []}
                 component={FormikSelectField}
@@ -182,10 +176,10 @@ export const Description = ({
           )}
           <Grid item xs={12}>
             <Field
-              name='description'
+              name="description"
               multiline
               fullWidth
-              variant='outlined'
+              variant="outlined"
               label={
                 values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_HOUSEHOLD ||
                 values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
@@ -197,47 +191,47 @@ export const Description = ({
           </Grid>
           <Grid item xs={12}>
             <Field
-              name='comments'
+              name="comments"
               multiline
               fullWidth
-              variant='outlined'
+              variant="outlined"
               label={t('Comments')}
               component={FormikTextField}
             />
           </Grid>
           <Grid item xs={6}>
             <Field
-              name='admin'
-              variant='outlined'
+              name="admin"
+              variant="outlined"
               component={FormikAdminAreaAutocomplete}
               disabled={Boolean(values.selectedHousehold?.admin2)}
             />
           </Grid>
           <Grid item xs={6}>
             <Field
-              name='area'
+              name="area"
               fullWidth
-              variant='outlined'
+              variant="outlined"
               label={t('Area / Village / Pay point')}
               component={FormikTextField}
             />
           </Grid>
           <Grid item xs={6}>
             <Field
-              name='language'
+              name="language"
               multiline
               fullWidth
-              variant='outlined'
+              variant="outlined"
               label={t('Languages Spoken')}
               component={FormikTextField}
             />
           </Grid>
           <Grid item xs={3}>
             <Field
-              name='priority'
+              name="priority"
               multiline
               fullWidth
-              variant='outlined'
+              variant="outlined"
               label={t('Priority')}
               choices={priorityChoicesData}
               component={FormikSelectField}
@@ -245,10 +239,10 @@ export const Description = ({
           </Grid>
           <Grid item xs={3}>
             <Field
-              name='urgency'
+              name="urgency"
               multiline
               fullWidth
-              variant='outlined'
+              variant="outlined"
               label={t('Urgency')}
               choices={urgencyChoicesData}
               component={FormikSelectField}
@@ -256,10 +250,10 @@ export const Description = ({
           </Grid>
           <Grid item xs={3}>
             <Field
-              name='program'
+              name="program"
               label={t('Programme Name')}
               fullWidth
-              variant='outlined'
+              variant="outlined"
               choices={mappedProgramChoices}
               component={FormikSelectField}
               disabled={!isAllPrograms || !isAnonymousTicket}
@@ -286,7 +280,7 @@ export const Description = ({
                       onValueChange={setFieldValue}
                     />
                   </Box>
-                  <FormHelperText key='selectedPaymentRecords' error>
+                  <FormHelperText key="selectedPaymentRecords" error>
                     {errors.selectedPaymentRecords}
                   </FormHelperText>
                 </Grid>
@@ -299,7 +293,7 @@ export const Description = ({
         <Box mt={3}>
           <BoxWithBorderBottom>
             <Title>
-              <Typography variant='h6'>{t('Documentation')}</Typography>
+              <Typography variant="h6">{t('Documentation')}</Typography>
             </Title>
             <NewDocumentationFieldArray
               values={values}
@@ -311,4 +305,4 @@ export const Description = ({
       )}
     </>
   );
-};
+}

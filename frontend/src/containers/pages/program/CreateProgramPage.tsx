@@ -1,28 +1,28 @@
-import { Box, Step, StepButton, Stepper } from '@material-ui/core';
+import { Box, Step, StepButton, Stepper } from '@mui/material';
 import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
   useCreateProgramMutation,
   useUserPartnerChoicesQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/program/AllPrograms';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { DetailsStep } from '../../../components/programs/CreateProgram/DetailsStep';
-import { PartnersStep } from '../../../components/programs/CreateProgram/PartnersStep';
-import { programValidationSchema } from '../../../components/programs/CreateProgram/programValidationSchema';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { DetailsStep } from '@components/programs/CreateProgram/DetailsStep';
+import { PartnersStep } from '@components/programs/CreateProgram/PartnersStep';
+import { programValidationSchema } from '@components/programs/CreateProgram/programValidationSchema';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
+import { usePermissions } from '@hooks/usePermissions';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { useNavigate } from 'react-router-dom';
 
 export const CreateProgramPage = (): ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const permissions = usePermissions();
   const [step, setStep] = useState(0);
@@ -32,10 +32,8 @@ export const CreateProgramPage = (): ReactElement => {
   const { data: treeData, loading: treeLoading } = useAllAreasTreeQuery({
     variables: { businessArea },
   });
-  const {
-    data: userPartnerChoicesData,
-    loading: userPartnerChoicesLoading,
-  } = useUserPartnerChoicesQuery();
+  const { data: userPartnerChoicesData, loading: userPartnerChoicesLoading } =
+    useUserPartnerChoicesQuery();
 
   const [mutate] = useCreateProgramMutation({
     refetchQueries: () => [
@@ -71,7 +69,7 @@ export const CreateProgramPage = (): ReactElement => {
         ],
       });
       showMessage('Programme created.');
-      history.push(
+      navigate(
         `/${baseUrl}/details/${response.data.createProgram.program.id}`,
       );
     } catch (e) {
@@ -175,7 +173,7 @@ export const CreateProgramPage = (): ReactElement => {
               <Stepper activeStep={step}>
                 <Step>
                   <StepButton
-                    data-cy='step-button-details'
+                    data-cy="step-button-details"
                     onClick={() => setStep(0)}
                   >
                     {t('Details')}
@@ -183,7 +181,7 @@ export const CreateProgramPage = (): ReactElement => {
                 </Step>
                 <Step>
                   <StepButton
-                    data-cy='step-button-partners'
+                    data-cy="step-button-partners"
                     onClick={() => setStep(1)}
                   >
                     {t('Programme Partners')}

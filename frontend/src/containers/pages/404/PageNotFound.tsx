@@ -1,11 +1,11 @@
-import { Box, Button } from '@material-ui/core';
-import { Refresh } from '@material-ui/icons';
-import DashboardIcon from '@material-ui/icons/Dashboard';
-import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Box, Button } from '@mui/material';
+import { Refresh } from '@mui/icons-material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import * as React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { getClient } from '../../../apollo/client';
-import { clearCache } from '../../../utils/utils';
+import { clearCache } from '@utils/utils';
 import PageNotFoundGraphic from './404_graphic.png';
 import HopeLogo from './404_hope_logo.png';
 
@@ -50,26 +50,28 @@ const Paragraph = styled.p`
 `;
 
 export const PageNotFound: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const pathSegments = location.pathname.split('/');
+  const businessArea = pathSegments[2];
+
   const goBackAndClearCache = async (): Promise<void> => {
     const client = await getClient();
     await clearCache(client);
-    window.history.back();
+    navigate(-1);
   };
-  const history = useHistory();
-  const pathSegments = history.location.pathname.split('/');
-  const businessArea = pathSegments[2];
 
   return (
     <Container>
       <LogoContainer>
-        <img src={HopeLogo} alt='Hope Logo' width='186' height='101' />
+        <img src={HopeLogo} alt="Hope Logo" width="186" height="101" />
       </LogoContainer>
       <SquareLogo>
         <img
           src={PageNotFoundGraphic}
-          alt='Brush with paint 404'
-          width='354'
-          height='293'
+          alt="Brush with paint 404"
+          width="354"
+          height="293"
         />
       </SquareLogo>
       <TextContainer>
@@ -80,24 +82,26 @@ export const PageNotFound: React.FC = () => {
           exciting content.
         </Paragraph>
       </TextContainer>
-      <Box display='flex' justifyContent='center' alignItems='center'>
+      <Box display="flex" justifyContent="center" alignItems="center">
         <Box mr={4}>
           <Button
             endIcon={<Refresh />}
-            variant='outlined'
-            color='primary'
-            onClick={goBackAndClearCache}
-            data-cy='button-refresh-page'
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              goBackAndClearCache();
+            }}
+            data-cy="button-refresh-page"
           >
             REFRESH PAGE
           </Button>
         </Box>
         <Button
           endIcon={<DashboardIcon />}
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           component={Link}
-          data-cy='go-to-programme-management'
+          data-cy="go-to-programme-management"
           to={`/${businessArea}/programs/all/list`}
         >
           GO TO PROGRAMME MANAGEMENT

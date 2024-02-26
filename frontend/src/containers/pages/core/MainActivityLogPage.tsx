@@ -1,22 +1,19 @@
-import { Paper } from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
+import { Paper } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  LogEntryNode,
-  useAllLogEntriesQuery,
-} from '../../../__generated__/graphql';
-import { ActivityLogPageFilters } from '../../../components/core/ActivityLogPageFilters';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { EmptyTable } from '../../../components/core/Table/EmptyTable';
+import { LogEntryNode, useAllLogEntriesQuery } from '@generated/graphql';
+import { ActivityLogPageFilters } from '@components/core/ActivityLogPageFilters';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { EmptyTable } from '@components/core/Table/EmptyTable';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { MainActivityLogTable } from '../../tables/MainActivityLogTable/MainActivityLogTable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export const StyledPaper = styled(Paper)`
   margin: 20px;
@@ -48,7 +45,7 @@ function filtersToVariables(filters) {
   return variables;
 }
 
-export const ActivityLogPage = (): React.ReactElement => {
+export function ActivityLogPage(): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const [page, setPage] = useState(0);
@@ -162,4 +159,4 @@ export const ActivityLogPage = (): React.ReactElement => {
       </StyledPaper>
     </>
   );
-};
+}

@@ -1,4 +1,4 @@
-import {useState} from "react";
+import { useState } from 'react';
 
 export function usePassFunctionFromChild(): [() => void, (action) => void] {
   const [childFunction, setChildFunction] = useState() as [

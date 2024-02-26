@@ -1,4 +1,4 @@
-import { AllAreasTreeQuery } from '../../../__generated__/graphql';
+import { AllAreasTreeQuery } from '@generated/graphql';
 
 export class AreaTreeNode {
   id: string;

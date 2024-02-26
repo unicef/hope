@@ -1,6 +1,5 @@
-import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { SentryRoute } from '../../components/core/SentryRoute';
+import * as React from 'react';
+import { useRoutes } from 'react-router-dom';
 import { ActivityLogPage } from '../pages/core/MainActivityLogPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { ReportingDetailsPage } from '../pages/reporting/ReportingDetailsPage';
@@ -9,23 +8,30 @@ import { GrievanceRoutes } from './GrievanceRoutes';
 import { ProgramRoutes } from './ProgramRoutes';
 
 export const AllProgramsRoutesSwitch = (): React.ReactElement => {
-  const { path } = useRouteMatch();
+  const allProgramsRoutes = [
+    {
+      path: 'country-dashboard',
+      element: <DashboardPage />,
+    },
+    {
+      path: 'reporting/:id',
+      element: <ReportingDetailsPage />,
+    },
+    {
+      path: 'reporting',
+      element: <ReportingPage />,
+    },
+    {
+      path: 'activity-log',
+      element: <ActivityLogPage />,
+    },
+  ];
+
+  const routes = useRoutes(allProgramsRoutes);
+
   return (
     <>
-      <Switch>
-        <SentryRoute label='/ - Dashboard' path={`${path}/country-dashboard`}>
-          <DashboardPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/reporting/:id`}>
-          <ReportingDetailsPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/reporting`}>
-          <ReportingPage />
-        </SentryRoute>
-        <SentryRoute path={`${path}/activity-log`}>
-          <ActivityLogPage />
-        </SentryRoute>
-      </Switch>
+      {routes}
       <GrievanceRoutes />
       <ProgramRoutes />
     </>

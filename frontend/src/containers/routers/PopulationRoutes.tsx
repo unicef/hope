@@ -1,40 +1,29 @@
-import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { SentryRoute } from '../../components/core/SentryRoute';
+import * as React from 'react';
+import { useRoutes } from 'react-router-dom';
 import { PopulationHouseholdDetailsPage } from '../pages/population/PopulationHouseholdDetailsPage';
 import { PopulationHouseholdPage } from '../pages/population/PopulationHouseholdPage';
 import { PopulationIndividualsDetailsPage } from '../pages/population/PopulationIndividualsDetailsPage';
 import { PopulationIndividualsPage } from '../pages/population/PopulationIndividualsPage';
 
 export const PopulationRoutes = (): React.ReactElement => {
-  const { path } = useRouteMatch();
-
   const populationRoutes = [
     {
-      path: `${path}/population/household/:id`,
-      component: <PopulationHouseholdDetailsPage />,
+      path: 'population/household/:id',
+      element: <PopulationHouseholdDetailsPage />,
     },
     {
-      path: `${path}/population/individuals/:id`,
-      component: <PopulationIndividualsDetailsPage />,
+      path: 'population/individuals/:id',
+      element: <PopulationIndividualsDetailsPage />,
     },
     {
-      path: `${path}/population/household`,
-      component: <PopulationHouseholdPage />,
+      path: 'population/household',
+      element: <PopulationHouseholdPage />,
     },
     {
-      path: `${path}/population/individuals`,
-      component: <PopulationIndividualsPage />,
+      path: 'population/individuals',
+      element: <PopulationIndividualsPage />,
     },
   ];
 
-  return (
-    <Switch>
-      {populationRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
+  return useRoutes(populationRoutes);
 };

@@ -1,24 +1,23 @@
-import { Box } from '@material-ui/core';
-import Collapse from '@material-ui/core/Collapse';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import React, { useEffect } from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   useBusinessAreaDataQuery,
   useCashAssistUrlPrefixQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import { Box, ListItemButton } from '@mui/material';
+import Collapse from '@mui/material/Collapse';
+import List from '@mui/material/List';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import { ElementType, useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
 import { MenuItem, menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
@@ -29,17 +28,18 @@ const Text = styled(ListItemText)`
     line-height: 16px;
   }
 `;
-
 const Icon = styled(ListItemIcon)`
   && {
-    min-width: 0;
-    padding-right: ${({ theme }) => theme.spacing(4)}px;
+    min-width: 40px;
   }
 `;
+interface SubListProps {
+  open: boolean;
+  component: ElementType;
+}
 
-const SubList = styled(List)`
-  padding-left: ${({ theme, open }) =>
-    open ? `${theme.spacing(10)}px !important` : 0};
+const SubList = styled(List)<SubListProps>`
+  padding-left: ${({ open }) => (open ? '32px !important' : 0)};
 `;
 
 export const StyledLink = styled.a`
@@ -54,10 +54,10 @@ interface DrawerItemsProps {
   currentLocation: string;
   open: boolean;
 }
-export const DrawerItems = ({
+export function DrawerItems({
   currentLocation,
   open,
-}: DrawerItemsProps): React.ReactElement => {
+}: DrawerItemsProps): React.ReactElement {
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
@@ -68,22 +68,22 @@ export const DrawerItems = ({
     fetchPolicy: 'cache-first',
   });
   const clearLocation = currentLocation.replace(`/${baseUrl}`, '');
-  const history = useHistory();
+  const navigate = useNavigate();
   const initialIndex = menuItems.findIndex((item) => {
     if (!item.secondaryActions) {
       return false;
     }
     return (
-      item.secondaryActions.findIndex((secondaryItem) => {
-        return Boolean(secondaryItem.selectedRegexp.exec(clearLocation));
-      }) !== -1
+      item.secondaryActions.findIndex((secondaryItem) =>
+        Boolean(secondaryItem.selectedRegexp.exec(clearLocation)),
+      ) !== -1
     );
   });
-  const [expandedItem, setExpandedItem] = React.useState(
+  const [expandedItem, setExpandedItem] = useState(
     initialIndex !== -1 ? initialIndex : null,
   );
 
-  //close nav when changing business area or program
+  // close nav when changing business area or program
   useEffect(() => {
     setExpandedItem(null);
   }, [baseUrl]);
@@ -92,9 +92,8 @@ export const DrawerItems = ({
 
   const prepareMenuItems = (items: MenuItem[]): MenuItem[] => {
     const updatedMenuItems = [...items];
-    const getIndexByName = (name: string): number => {
-      return updatedMenuItems.findIndex((item) => item?.name === name);
-    };
+    const getIndexByName = (name: string): number =>
+      updatedMenuItems.findIndex((item) => item?.name === name);
     const cashAssistIndex = getIndexByName('Cash Assist');
     const programDetailsIndex = getIndexByName('Programme Details');
     const reportingIndex = getIndexByName('Reporting');
@@ -104,15 +103,15 @@ export const DrawerItems = ({
       updatedMenuItems.splice(reportingIndex, 1);
     }
 
-    //Set CashAssist URL
+    // Set CashAssist URL
     updatedMenuItems[cashAssistIndex].href =
       cashAssistUrlData?.cashAssistUrlPrefix;
 
-    //When GlobalProgramFilter applied
+    // When GlobalProgramFilter applied
     if (!isAllPrograms) {
       updatedMenuItems[programDetailsIndex].href = `/details/${programId}`;
     }
-    //When GlobalProgramFilter not applied show some pages only
+    // When GlobalProgramFilter not applied show some pages only
     if (isAllPrograms) {
       const pagesAvailableForAllPrograms = [
         'Country Dashboard',
@@ -130,10 +129,8 @@ export const DrawerItems = ({
 
   const preparedMenuItems = prepareMenuItems(menuItems);
 
-  const {
-    isPaymentPlanApplicable,
-    isAccountabilityApplicable,
-  } = businessAreaData.businessArea;
+  const { isPaymentPlanApplicable, isAccountabilityApplicable } =
+    businessAreaData.businessArea;
   const flags = {
     isPaymentPlanApplicable,
     isAccountabilityApplicable,
@@ -176,9 +173,10 @@ export const DrawerItems = ({
 
           return (
             <div key={item?.name + hrefForCollapsibleItem}>
-              <ListItem
-                button
+              <ListItemButton
+                component={NavLink}
                 data-cy={`nav-${item?.name}`}
+                to={`/${baseUrl}${hrefForCollapsibleItem}`}
                 onClick={() => {
                   if (index === expandedItem) {
                     setExpandedItem(null);
@@ -186,7 +184,7 @@ export const DrawerItems = ({
                     setExpandedItem(index);
                   }
                   if (hrefForCollapsibleItem) {
-                    history.push(`/${baseUrl}${hrefForCollapsibleItem}`);
+                    navigate(`/${baseUrl}${hrefForCollapsibleItem}`);
                   }
                 }}
               >
@@ -197,9 +195,9 @@ export const DrawerItems = ({
                 ) : (
                   <ExpandMore />
                 )}
-              </ListItem>
+              </ListItemButton>
               <Collapse in={expandedItem !== null && expandedItem === index}>
-                <SubList open={open} component='div'>
+                <SubList open={open} component="div">
                   {item.secondaryActions &&
                     item.secondaryActions.map(
                       (secondary) =>
@@ -208,9 +206,8 @@ export const DrawerItems = ({
                           secondary.permissionModule,
                           permissions,
                         ) && (
-                          <ListItem
-                            button
-                            component={Link}
+                          <ListItemButton
+                            component={NavLink}
                             data-cy={`nav-${secondary.name}`}
                             key={secondary.name}
                             to={`/${baseUrl}${secondary.href}`}
@@ -220,7 +217,7 @@ export const DrawerItems = ({
                           >
                             <Icon>{secondary.icon}</Icon>
                             <Text primary={secondary.name} />
-                          </ListItem>
+                          </ListItemButton>
                         ),
                     )}
                 </SubList>
@@ -229,23 +226,23 @@ export const DrawerItems = ({
           );
         }
         return item.external ? (
-          <ListItem
+          <ListItemButton
             data-cy={`nav-${item?.name}`}
-            button
+            component={NavLink}
             key={item?.name + item.href}
+            to={item.href}
           >
-            <StyledLink target='_blank' href={item.href}>
-              <Box display='flex'>
+            <StyledLink target="_blank" href={item.href}>
+              <Box display="flex">
                 <Icon>{item.icon}</Icon>
                 <Text primary={item?.name} />
               </Box>
             </StyledLink>
-          </ListItem>
+          </ListItemButton>
         ) : (
-          <ListItem
-            button
+          <ListItemButton
             data-cy={`nav-${item?.name}`}
-            component={Link}
+            component={NavLink}
             key={item?.name + item.href}
             to={`/${baseUrl}${item.href}`}
             onClick={() => {
@@ -255,9 +252,9 @@ export const DrawerItems = ({
           >
             <Icon>{item.icon}</Icon>
             <Text primary={item?.name} />
-          </ListItem>
+          </ListItemButton>
         );
       })}
     </div>
   );
-};
+}

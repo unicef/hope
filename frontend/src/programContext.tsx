@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  ReactElement,
-  useContext,
-  useState,
-} from 'react';
+import { createContext, ReactElement, useContext, useState } from 'react';
 import { ProgramStatus } from './__generated__/graphql';
 
 export interface ProgramInterface {
@@ -25,13 +20,12 @@ export type ProgramContextType = ProgramInterface | null;
 
 export const ProgramContext = createContext(null);
 
-export const ProgramProvider = ({ children }): ReactElement => {
-  const [selectedProgram, setSelectedProgram] = useState<ProgramContextType>(
-    null,
-  );
+export function ProgramProvider({ children }): ReactElement {
+  const [selectedProgram, setSelectedProgram] =
+    useState<ProgramContextType>(null);
   let isActiveProgram = selectedProgram?.status === ProgramStatus.Active;
 
-  //Set isActiveProgram to true if All Programs is selected
+  // Set isActiveProgram to true if All Programs is selected
   if (selectedProgram === null) {
     isActiveProgram = true;
   }
@@ -42,7 +36,7 @@ export const ProgramProvider = ({ children }): ReactElement => {
       {children}
     </ProgramContext.Provider>
   );
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useProgramContext = () => useContext(ProgramContext);

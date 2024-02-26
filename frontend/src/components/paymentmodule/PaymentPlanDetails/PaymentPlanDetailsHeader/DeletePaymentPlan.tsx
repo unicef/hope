@@ -6,31 +6,29 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-} from '@material-ui/core';
-import React, { useState } from 'react';
+} from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Delete } from '@material-ui/icons';
-import { useHistory } from 'react-router-dom';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import {
-  PaymentPlanQuery,
-  useDeletePpMutation,
-} from '../../../../__generated__/graphql';
-import { LoadingButton } from '../../../core/LoadingButton';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { Delete } from '@mui/icons-material';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { PaymentPlanQuery, useDeletePpMutation } from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { useProgramContext } from '../../../../programContext';
+import { useNavigate } from 'react-router-dom';
 
 export interface DeletePaymentPlanProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const DeletePaymentPlan = ({
+export function DeletePaymentPlan({
   paymentPlan,
-}: DeletePaymentPlanProps): React.ReactElement => {
-  const history = useHistory();
+}: DeletePaymentPlanProps): React.ReactElement {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
@@ -47,7 +45,7 @@ export const DeletePaymentPlan = ({
         },
       });
       showMessage(t('Payment Plan Deleted'));
-      history.push(`/${baseUrl}/payment-module`);
+      navigate(`/${baseUrl}/payment-module`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -65,9 +63,9 @@ export const DeletePaymentPlan = ({
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Delete Payment Plan')}</DialogTitle>
@@ -84,11 +82,11 @@ export const DeletePaymentPlan = ({
             <Button onClick={() => setDeleteDialogOpen(false)}>CANCEL</Button>
             <LoadingButton
               loading={loadingDelete}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => handleDelete()}
-              data-cy='button-submit'
+              data-cy="button-submit"
             >
               {t('Delete')}
             </LoadingButton>
@@ -97,4 +95,4 @@ export const DeletePaymentPlan = ({
       </Dialog>
     </>
   );
-};
+}

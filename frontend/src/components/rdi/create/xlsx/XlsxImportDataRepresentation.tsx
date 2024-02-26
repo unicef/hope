@@ -1,8 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 import {
   XlsxImportDataQueryResult,
   XlsxRowErrorNode,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { ImportCounters } from '../ImportCounters';
 import { XlsxErrors } from './XlsxErrors';
 

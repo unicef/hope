@@ -1,5 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import React, { useCallback, useEffect } from 'react';
+import { Box, Button, Grid } from '@mui/material';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ClearApplyButtonsProps {
@@ -7,10 +7,10 @@ interface ClearApplyButtonsProps {
   applyHandler: () => void;
 }
 
-export const ClearApplyButtons = ({
+export function ClearApplyButtons({
   clearHandler,
   applyHandler,
-}: ClearApplyButtonsProps): React.ReactElement => {
+}: ClearApplyButtonsProps): React.ReactElement {
   const { t } = useTranslation();
 
   const handleKeyPress = useCallback(
@@ -34,19 +34,19 @@ export const ClearApplyButtons = ({
   }, [handleKeyPress]);
 
   return (
-    <Grid container justifyContent='flex-end' spacing={3}>
+    <Grid container justifyContent="flex-end" spacing={3}>
       <Box mt={4}>
         <Button
-          color='primary'
-          data-cy='button-filters-clear'
+          color="primary"
+          data-cy="button-filters-clear"
           onClick={clearHandler}
         >
           {t('Clear')}
         </Button>
         <Button
-          color='primary'
-          variant='outlined'
-          data-cy='button-filters-apply'
+          color="primary"
+          variant="outlined"
+          data-cy="button-filters-apply"
           onClick={applyHandler}
         >
           {t('Apply')}
@@ -54,4 +54,4 @@ export const ClearApplyButtons = ({
       </Box>
     </Grid>
   );
-};
+}
