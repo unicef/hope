@@ -14,7 +14,8 @@ module.exports = defineConfig({
       on("task", verifyDownloadTasks);
     },
     projectId: "cypress",
-    baseUrl: "http://localhost:8082",
+    baseUrl: "http://localhost:8080",
+    chromeWebSecurity: false,
     specPattern: [
       "cypress/e2e/00-Login/*.js",
       "cypress/e2e/02-registration-data-import/*.js",
