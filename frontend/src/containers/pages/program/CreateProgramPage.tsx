@@ -69,9 +69,7 @@ export const CreateProgramPage = (): ReactElement => {
         ],
       });
       showMessage('Programme created.');
-      navigate(
-        `/${baseUrl}/details/${response.data.createProgram.program.id}`,
-      );
+      navigate(`/${baseUrl}/details/${response.data.createProgram.program.id}`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
@@ -170,24 +168,26 @@ export const CreateProgramPage = (): ReactElement => {
               }
             />
             <Box p={6}>
-              <Stepper activeStep={step}>
-                <Step>
-                  <StepButton
-                    data-cy="step-button-details"
-                    onClick={() => setStep(0)}
-                  >
-                    {t('Details')}
-                  </StepButton>
-                </Step>
-                <Step>
-                  <StepButton
-                    data-cy="step-button-partners"
-                    onClick={() => setStep(1)}
-                  >
-                    {t('Programme Partners')}
-                  </StepButton>
-                </Step>
-              </Stepper>
+              <Box mb={2}>
+                <Stepper activeStep={step}>
+                  <Step>
+                    <StepButton
+                      data-cy="step-button-details"
+                      onClick={() => setStep(0)}
+                    >
+                      {t('Details')}
+                    </StepButton>
+                  </Step>
+                  <Step>
+                    <StepButton
+                      data-cy="step-button-partners"
+                      onClick={() => setStep(1)}
+                    >
+                      {t('Programme Partners')}
+                    </StepButton>
+                  </Step>
+                </Stepper>
+              </Box>
               {step === 0 && (
                 <DetailsStep values={values} handleNext={handleNext} />
               )}
