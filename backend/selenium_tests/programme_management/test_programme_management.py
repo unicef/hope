@@ -1,3 +1,4 @@
+import os
 import random
 from datetime import datetime
 
@@ -6,9 +7,17 @@ from dateutil.relativedelta import relativedelta
 from helpers.date_time_format import FormatTime
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
-from selenium.webdriver import Keys
+from selenium.webdriver import Chrome, Keys
 
 pytestmark = pytest.mark.django_db(transaction=True)
+
+
+def screenshot(driver: Chrome, node_id: str) -> None:
+    if not os.path.exists("screenshot"):
+        os.makedirs("screenshot")
+    file_name = f'{node_id}_{datetime.today().strftime("%Y-%m-%d_%H:%M")}.png'.replace("/", "_").replace("::", "__")
+    file_path = os.path.join("screenshot", file_name)
+    driver.get_screenshot_as_file(file_path)
 
 
 @pytest.mark.usefixtures("login")
@@ -261,82 +270,6 @@ class TestProgrammeManagement:
         assert "DRAFT" in elements[1]
         assert "Health" in elements[2]
 
-    @pytest.mark.parametrize(
-        "test_data",
-        [
-            pytest.param(
-                {
-                    "program_name": "CheckParents - " + str(random.random()),
-                    "selector": "Health",
-                    "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
-                    "dataCollectingType": "Partial",
-                },
-                id="programme_management_page",
-            ),
-        ],
-    )
-    @pytest.mark.skip
-    def test_create_programme_add_partners_Business_Area(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
-    ) -> None:
-        # Go to Programme Management
-        pageProgrammeManagement.getNavProgrammeManagement().click()
-        # Create Programme
-        pageProgrammeManagement.getButtonNewProgram().click()
-        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
-        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
-        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
-        pageProgrammeManagement.getInputCashPlus().click()
-        pageProgrammeManagement.getButtonNext().click()
-        pageProgrammeManagement.getButtonAddPartner().click()
-        pageProgrammeManagement.choosePartnerOption("UNHCR")
-        pageProgrammeManagement.getButtonSave().click()
-        # Check Details page
-        assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
-        assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
-
-    @pytest.mark.parametrize(
-        "test_data",
-        [
-            pytest.param(
-                {
-                    "program_name": "CheckParents - " + str(random.random()),
-                    "selector": "Health",
-                    "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
-                    "dataCollectingType": "Partial",
-                },
-                id="programme_management_page",
-            ),
-        ],
-    )
-    @pytest.mark.skip
-    def test_create_programme_add_partners_Admin_Area(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
-    ) -> None:
-        # Go to Programme Management
-        pageProgrammeManagement.getNavProgrammeManagement().click()
-        # Create Programme
-        pageProgrammeManagement.getButtonNewProgram().click()
-        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
-        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
-        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
-        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
-        pageProgrammeManagement.getInputCashPlus().click()
-        pageProgrammeManagement.getButtonNext().click()
-        pageProgrammeManagement.getButtonAddPartner().click()
-        pageProgrammeManagement.choosePartnerOption("UNHCR")
-        pageProgrammeManagement.getLabelAdminArea().click()
-        pageProgrammeManagement.chooseAreaAdmin1ByName("Baghlan").click()
-        pageProgrammeManagement.getButtonSave().click()
-        # Check Details page
-        assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
-        assert "16" in pageProgrammeDetails.getLabelAreaAccess().text
-
     def test_create_programme_check_empty_mandatory_fields(self, pageProgrammeManagement: ProgrammeManagement) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -388,6 +321,108 @@ class TestProgrammeManagement:
         with pytest.raises(Exception):
             assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
+    def test_create_programme_cancel_scenario(
+        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
+    ) -> None:
+        # Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        # Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getButtonCancel().click()
+        assert "Programme Management" in pageProgrammeManagement.getHeaderTitle().text
+
+
+# ToDo: Check Unicef partner! and delete classes
+@pytest.mark.usefixtures("login")
+class TestBusinessAreas:
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param(
+                {
+                    "program_name": "CheckParents - " + str(random.random()),
+                    "selector": "Health",
+                    "startDate": FormatTime(1, 1, 2022),
+                    "endDate": FormatTime(1, 2, 2022),
+                    "dataCollectingType": "Partial",
+                },
+                id="programme_management_page",
+            ),
+        ],
+    )
+    def test_create_programme_add_partners_Business_Area(
+        self,
+        change_super_user: None,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
+    ) -> None:
+        # Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        # Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
+        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
+        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonAddPartner().click()
+        pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.getButtonSave().click()
+        # Check Details page
+        assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
+        assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
+
+
+@pytest.mark.usefixtures("login")
+class TestAdminAreas:
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            pytest.param(
+                {
+                    "program_name": "CheckParents - " + str(random.random()),
+                    "selector": "Health",
+                    "startDate": FormatTime(1, 1, 2022),
+                    "endDate": FormatTime(1, 2, 2022),
+                    "dataCollectingType": "Partial",
+                },
+                id="programme_management_page",
+            ),
+        ],
+    )
+    def test_create_programme_add_partners_Admin_Area(
+        self,
+        change_super_user: None,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
+    ) -> None:
+        # Go to Programme Management
+        pageProgrammeManagement.getNavProgrammeManagement().click()
+        # Create Programme
+        pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
+        pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
+        pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
+        pageProgrammeManagement.getInputCashPlus().click()
+        pageProgrammeManagement.getButtonNext().click()
+        pageProgrammeManagement.getButtonAddPartner().click()
+        pageProgrammeManagement.choosePartnerOption("UNHCR")
+        pageProgrammeManagement.getLabelAdminArea().click()
+        pageProgrammeManagement.chooseAreaAdmin1ByName("Baghlan").click()
+        pageProgrammeManagement.getButtonSave().click()
+        # Check Details page
+        assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
+        assert "16" in pageProgrammeDetails.getLabelAreaAccess().text
+
+
+@pytest.mark.usefixtures("login")
+class TestComeBackScenarios:
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -403,9 +438,12 @@ class TestProgrammeManagement:
             ),
         ],
     )
-    @pytest.mark.skip
     def test_create_programme_back_scenarios(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
+        self,
+        change_super_user: None,
+        pageProgrammeManagement: ProgrammeManagement,
+        pageProgrammeDetails: ProgrammeDetails,
+        test_data: dict,
     ) -> None:
         # Go to Programme Management
         pageProgrammeManagement.getNavProgrammeManagement().click()
@@ -441,16 +479,9 @@ class TestProgrammeManagement:
         assert "0" in pageProgrammeDetails.getLabelTotalNumberOfHouseholds().text
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
-    def test_create_programme_cancel_scenario(
-        self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails
-    ) -> None:
-        # Go to Programme Management
-        pageProgrammeManagement.getNavProgrammeManagement().click()
-        # Create Programme
-        pageProgrammeManagement.getButtonNewProgram().click()
-        pageProgrammeManagement.getButtonCancel().click()
-        assert "Programme Management" in pageProgrammeManagement.getHeaderTitle().text
 
+@pytest.mark.usefixtures("login")
+class TestManualCalendar:
     @pytest.mark.parametrize(
         "test_data",
         [
@@ -464,7 +495,6 @@ class TestProgrammeManagement:
             ),
         ],
     )
-    @pytest.mark.skip
     def test_create_programme_chose_dates_via_calendar(
         self, pageProgrammeManagement: ProgrammeManagement, pageProgrammeDetails: ProgrammeDetails, test_data: dict
     ) -> None:
