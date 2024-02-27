@@ -12,7 +12,7 @@ class Common:
     def __init__(self, driver: Chrome):
         self.driver = driver
         self.action = ActionChains(self.driver)
-        self._wait = WebDriverWait(self.driver, 10)
+        self._wait = WebDriverWait(self.driver, 20)
 
     def get(self, locator: str, element_type: str = By.CSS_SELECTOR) -> WebElement:
         return self.driver.find_element(element_type, locator)
