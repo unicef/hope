@@ -38,7 +38,9 @@ class UserFactory(DjangoModelFactory):
     last_name = factory.Faker("last_name")
     partner = factory.SubFactory(PartnerFactory)
     email = factory.LazyAttribute(lambda o: f"{o.first_name.lower()}.{o.last_name.lower()}_{time.time_ns()}@unicef.com")
-    username = factory.LazyAttribute(lambda o: f"{o.first_name}{o.last_name}_{time.time_ns()}{str(random.randint(111, 999))}")
+    username = factory.LazyAttribute(
+        lambda o: f"{o.first_name}{o.last_name}_{time.time_ns()}{str(random.randint(111, 999))}"
+    )
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> User:
