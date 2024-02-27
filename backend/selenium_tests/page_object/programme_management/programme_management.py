@@ -104,6 +104,9 @@ class ProgrammeManagement(BaseComponents):
     def chooseInputStartDateViaCalendar(self, day: int) -> None:
         self.find_in_element(self.getLabelStartDate(), self.calendarIcon)[0].click()
         self.getCalendar()
+        # ToDo: Create additional waiting mechanism
+        from time import sleep
+        sleep(1)
         self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
         self.wait_for_disappear(self.calendar)
 

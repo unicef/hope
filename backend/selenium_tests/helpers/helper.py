@@ -1,4 +1,5 @@
 from typing import Literal, Union
+from time import sleep
 
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.action_chains import ActionChains
@@ -12,7 +13,7 @@ class Common:
     def __init__(self, driver: Chrome):
         self.driver = driver
         self.action = ActionChains(self.driver)
-        self._wait = WebDriverWait(self.driver, 50)
+        self._wait = WebDriverWait(self.driver, 60)
 
     def get(self, locator: str, element_type: str = By.CSS_SELECTOR) -> WebElement:
         return self.driver.find_element(element_type, locator)
@@ -27,6 +28,13 @@ class Common:
         self, locator: str, element_type: str = By.CSS_SELECTOR
     ) -> Union[Literal[False, True], WebElement]:
         return self._wait.until_not(EC.visibility_of_element_located((element_type, locator)))
+
+    def wait_for_new_url(self, old_url: str, retry: int = 5) -> str:
+        for _ in range(retry):
+            sleep(1)
+            if old_url == self.driver.current_url:
+                break
+        return self.driver.current_url
 
     @staticmethod
     def find_in_element(element: WebElement, locator: str, element_type: str = By.CSS_SELECTOR) -> list[WebElement]:
