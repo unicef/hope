@@ -6,6 +6,7 @@ import { Bar } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import { formatThousands } from '@utils/utils';
 import { AllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { categoriesAndColors } from '@components/grievances/utils/createGrievanceUtils';
 
 interface TicketsByLocationAndCategoryChartProps {
   data: AllGrievanceDashboardChartsQuery['ticketsByLocationAndCategory'];
@@ -25,27 +26,19 @@ export const TicketsByLocationAndCategoryChart: React.FC<
   ): number[] | string[] =>
     showAll ? dataToSlice : dataToSlice.slice(0, lessDataCount);
 
-  const categoriesAndColors = [
-    { category: 'Data Change', color: '#FFAA20' },
-    { category: 'Grievance Complaint', color: '#023E90' },
-    { category: 'Needs Adjudication', color: '#05C9B7' },
-    { category: 'Negative Feedback', color: '#FF0200' },
-    { category: 'Payment Verification', color: '#FFE399' },
-    { category: 'Positive Feedback', color: '#13CB17' },
-    { category: 'Refferal', color: '#FFAA20' },
-    { category: 'Sensitive Grievance', color: '#7FCB28' },
-    { category: 'System Flagging', color: '#00867B' },
-  ];
-
-  const mappedDatasets = data.datasets.map((el, index) => ({
-    categoryPercentage: 0.5,
-    label: el.label,
-    backgroundColor: categoriesAndColors[index].color,
-    // @ts-ignore
-    data: matchDataSize(data.datasets[index].data).map((item) => item || ''),
-    stack: 2,
-    maxBarThickness: 15,
-  }));
+  const mappedDatasets = data.datasets.map((dataset) => {
+    const color = categoriesAndColors.find(
+      (c) => c.category.toLowerCase() === dataset.label.toLowerCase(),
+    )?.color;
+    return {
+      ...dataset,
+      categoryPercentage: 0.5,
+      backgroundColor: color || '#000',
+      data: matchDataSize(dataset.data).map((item) => item || ''),
+      stack: 2,
+      maxBarThickness: 15,
+    };
+  });
 
   const chartData: any = {
     labels: matchDataSize(data.labels),
@@ -60,26 +53,20 @@ export const TicketsByLocationAndCategoryChart: React.FC<
       },
     },
     scales: {
-      xAxes: [
-        {
-          scaleLabel: {
-            display: false,
-          },
-          position: 'top',
-          ticks: {
-            beginAtZero: true,
-            callback: formatThousands,
-          },
+      x: {
+        display: true,
+        position: 'top',
+        beginAtZero: true,
+        ticks: {
+          callback: formatThousands,
         },
-      ],
-      yAxes: [
-        {
-          position: 'left',
-          gridLines: {
-            display: false,
-          },
+      },
+      y: {
+        position: 'left',
+        grid: {
+          display: false,
         },
-      ],
+      },
     },
   };
 
