@@ -11,7 +11,6 @@ from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-
 from environ.environ import Env
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
@@ -248,6 +247,7 @@ CSP_CONNECT_SRC: Tuple[str, ...] = (
     "trn-hope.unitst.org",  # trn
     "stg-hope.unitst.org",  # stg
     "dev-hope.unitst.org",  # dev
+    "*.unitst.org",
 )
 
 DEBUG = env.bool("DEBUG", default=False)
