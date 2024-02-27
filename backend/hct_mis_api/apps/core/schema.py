@@ -182,7 +182,7 @@ class FieldAttributeNode(graphene.ObjectType):
             Iterable,
         ):
             return sorted(choices, key=lambda elem: elem["label"]["English(EN)"])
-        return choices.order_by("name").all()
+        return choices.all()
 
     def resolve_is_flex_field(self, info: Any) -> bool:
         return isinstance(self, FlexibleAttribute)
