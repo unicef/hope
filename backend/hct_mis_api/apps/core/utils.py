@@ -215,7 +215,7 @@ def serialize_flex_attributes() -> Dict[str, Dict[str, Any]]:
     """
     from hct_mis_api.apps.core.models import FlexibleAttribute
 
-    flex_attributes = FlexibleAttribute.objects.all()
+    flex_attributes = FlexibleAttribute.objects.prefetch_related("choices").all()
 
     result_dict = {
         "individuals": {},
