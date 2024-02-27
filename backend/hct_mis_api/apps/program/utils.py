@@ -201,12 +201,12 @@ def copy_bank_account_info_per_individual(new_individual: Individual) -> List[Ba
     return bank_accounts_for_individual
 
 
-def enrol_household_to_program(household: Household, program: Program) -> Tuple[Household, int]:
+def enroll_household_to_program(household: Household, program: Program) -> Tuple[Household, int]:
     if household.program == program:
         return household, 0
     elif household_representation_in_new_program := Household.original_and_repr_objects.filter(
         program=program,
-        copied_from=household,
+        unicef_id=household.unicef_id,
     ).first():
         return household_representation_in_new_program, 0
     with transaction.atomic():
@@ -222,7 +222,6 @@ def create_new_household_representation(household: Household, program: Program) 
     original_head_of_household_id = household.head_of_household.pk
     household.copied_from_id = original_household_id
     household.pk = None
-    household.unicef_id = None
     household.program = program
     household.total_cash_received = None
     household.total_cash_received_usd = None
@@ -230,7 +229,7 @@ def create_new_household_representation(household: Household, program: Program) 
     # create individuals
     individuals_to_create = []
     for individual in Individual.objects.filter(pk__in=individuals_pk):
-        individuals_to_create.append(enrol_individual_to_program(individual, program))
+        individuals_to_create.append(enroll_individual_to_program(individual, program))
 
     # assign head of household
     household.head_of_household = Individual.original_and_repr_objects.filter(
@@ -250,7 +249,7 @@ def create_new_household_representation(household: Household, program: Program) 
     return household
 
 
-def enrol_individual_to_program(
+def enroll_individual_to_program(
     individual: Individual,
     program: Program,
 ) -> Individual:
@@ -273,7 +272,6 @@ def create_new_individual_representation(
     original_individual_id = individual.id
     individual.copied_from_id = original_individual_id
     individual.pk = None
-    individual.unicef_id = None
     individual.program = program
     individual.household = None
     individual.save()
