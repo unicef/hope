@@ -350,7 +350,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     @property
     def business_areas(self) -> QuerySet[BusinessArea]:
         return BusinessArea.objects.filter(
-            Q(user_roles__user=self) | Q(id__in=self.partner.business_area_ids)
+            Q(Q(user_roles__user=self) & ~Q(user_roles__expiry_date__lt=timezone.now()))
+            | Q(id__in=self.partner.business_area_ids)
         ).distinct()
 
     @test_conditional(lru_cache())
