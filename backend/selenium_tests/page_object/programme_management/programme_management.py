@@ -106,6 +106,7 @@ class ProgrammeManagement(BaseComponents):
         self.getCalendar()
         # ToDo: Create additional waiting mechanism
         from time import sleep
+
         sleep(1)
         self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
         self.wait_for_disappear(self.calendar)

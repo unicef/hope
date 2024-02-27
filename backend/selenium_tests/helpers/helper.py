@@ -1,5 +1,5 @@
-from typing import Literal, Union
 from time import sleep
+from typing import Literal, Union
 
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.action_chains import ActionChains
