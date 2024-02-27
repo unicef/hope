@@ -3,46 +3,50 @@
 exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] = `
 <div>
   <div
-    class="sc-iBdnpw dcYiFg"
+    class="makeStyles-root-13"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root makeStyles-paper-14 MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-0"
+          class="MuiBox-root MuiBox-root-19"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
+            class="MuiToolbar-root MuiToolbar-regular makeStyles-root-20 MuiToolbar-gutters"
           >
             <h6
-              class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
+              class="MuiTypography-root makeStyles-title-22 MuiTypography-h6"
               data-cy="table-title"
             >
               Payment Plans
             </h6>
           </div>
           <div
-            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+            class="MuiBox-root MuiBox-root-23"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
+          aria-label="enhanced table"
+          aria-labelledby="tableTitle"
+          class="MuiTable-root makeStyles-table-15"
+          data-cy="table-title"
         >
           <thead
-            class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
+            class="MuiTableHead-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-head css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-head"
             >
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -50,8 +54,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Payment Plan ID
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -62,35 +65,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
-                  data-cy="table-label"
-                  role="button"
-                  tabindex="0"
-                >
-                  Name
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                    />
-                  </svg>
-                </span>
-              </th>
-              <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
-                scope="col"
-              >
-                <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -98,8 +78,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Status
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -110,11 +89,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -122,8 +102,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Target Population
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -134,11 +113,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -146,8 +126,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Num. of Households
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -158,11 +137,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -170,8 +150,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Currency
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -182,11 +161,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -194,8 +174,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Total Entitled Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -206,11 +185,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -218,8 +198,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Total Delivered Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -230,11 +209,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -242,8 +222,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Total Undelivered Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -254,11 +233,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -266,8 +246,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Dispersion Start Date
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -278,11 +257,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -290,8 +270,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Dispersion End Date
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -302,11 +281,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -314,8 +294,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   Follow-up Payment Plans
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -328,118 +307,124 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
             </tr>
           </thead>
           <tbody
-            class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
+            class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root"
               data-cy="table-row"
+              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
+                class="MuiTableCell-root MuiTableCell-body"
+                colspan="11"
               >
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
                   style="width: 100%; height: 70px;"
                 />
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root"
               data-cy="table-row"
+              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
+                class="MuiTableCell-root MuiTableCell-body"
+                colspan="11"
               >
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
                   style="width: 100%; height: 70px;"
                 />
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root"
               data-cy="table-row"
+              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
+                class="MuiTableCell-root MuiTableCell-body"
+                colspan="11"
               >
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
                   style="width: 100%; height: 70px;"
                 />
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root"
               data-cy="table-row"
+              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
+                class="MuiTableCell-root MuiTableCell-body"
+                colspan="11"
               >
                 <span
-                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
+                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
                   style="width: 100%; height: 70px;"
                 />
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
-              style="height: 70px;"
+              class="MuiTableRow-root"
+              data-cy="table-row"
+              style="height: 70px; min-height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
-              />
+                class="MuiTableCell-root MuiTableCell-body"
+                colspan="11"
+              >
+                <span
+                  class="MuiSkeleton-root MuiSkeleton-rect MuiSkeleton-pulse"
+                  style="width: 100%; height: 70px;"
+                />
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
       <div
-        class="MuiTablePagination-root css-jtlhu6-MuiTablePagination-root"
+        class="MuiTablePagination-root"
         data-cy="table-pagination"
       >
         <div
-          class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-wogcmv-MuiToolbar-root-MuiTablePagination-toolbar"
+          class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
         >
           <div
-            class="MuiTablePagination-spacer css-1psng7p-MuiTablePagination-spacer"
+            class="MuiTablePagination-spacer"
           />
           <p
-            class="MuiTablePagination-selectLabel css-pdct74-MuiTablePagination-selectLabel"
-            id=":r4:"
+            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+            id="mui-5806"
           >
             Rows per page:
           </p>
           <div
-            class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-input css-16c50h-MuiInputBase-root-MuiTablePagination-select"
+            class="MuiInputBase-root MuiTablePagination-input MuiTablePagination-selectRoot"
           >
             <div
-              aria-controls=":r5:"
-              aria-expanded="false"
               aria-haspopup="listbox"
-              aria-labelledby=":r4: :r3:"
-              class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-194a1fa-MuiSelect-select-MuiInputBase-input"
-              id=":r3:"
-              role="combobox"
+              aria-labelledby="mui-5806 mui-73230"
+              class="MuiSelect-root MuiSelect-select MuiTablePagination-select MuiSelect-selectMenu MuiInputBase-input"
+              id="mui-73230"
+              role="button"
               tabindex="0"
             >
               5
             </div>
             <input
               aria-hidden="true"
-              aria-invalid="false"
-              class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+              class="MuiSelect-nativeInput"
               tabindex="-1"
               value="5"
             />
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon"
-              data-testid="ArrowDropDownIcon"
+              class="MuiSvgIcon-root MuiSelect-icon MuiTablePagination-selectIcon"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -449,52 +434,58 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
             </svg>
           </div>
           <p
-            class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
+            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1–2 of 2
+            1-NaN of undefined
           </p>
           <div
-            class="MuiBox-root css-nkn1dz"
+            class="MuiTablePagination-actions"
           >
             <button
-              aria-label="previous page"
-              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+              aria-label="Previous page"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
               disabled=""
               tabindex="-1"
+              title="Previous page"
               type="button"
             >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
-                data-testid="KeyboardArrowLeftIcon"
-                focusable="false"
-                viewBox="0 0 24 24"
+              <span
+                class="MuiIconButton-label"
               >
-                <path
-                  d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z"
-                />
-              </svg>
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
+                  />
+                </svg>
+              </span>
             </button>
             <button
-              aria-label="next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
-              tabindex="0"
+              aria-label="Next page"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+              disabled=""
+              tabindex="-1"
+              title="Next page"
               type="button"
             >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
-                data-testid="KeyboardArrowRightIcon"
-                focusable="false"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
-                />
-              </svg>
               <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
+                class="MuiIconButton-label"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
+                  />
+                </svg>
+              </span>
             </button>
           </div>
         </div>
@@ -507,46 +498,50 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
 exports[`containers/tables/payments/PaymentPlansTable should render with data 1`] = `
 <div>
   <div
-    class="sc-iBdnpw dcYiFg"
+    class="makeStyles-root-1"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
+      class="MuiPaper-root makeStyles-paper-2 MuiPaper-elevation1 MuiPaper-rounded"
     >
       <div
-        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
+        class="MuiTableContainer-root"
       >
         <div
-          class="sc-csKJxZ enzmTw MuiBox-root css-0"
+          class="MuiBox-root MuiBox-root-7"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
+            class="MuiToolbar-root MuiToolbar-regular makeStyles-root-8 MuiToolbar-gutters"
           >
             <h6
-              class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
+              class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
               data-cy="table-title"
             >
               Payment Plans
             </h6>
           </div>
           <div
-            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
+            class="MuiBox-root MuiBox-root-11"
           />
         </div>
         <table
-          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
+          aria-label="enhanced table"
+          aria-labelledby="tableTitle"
+          class="MuiTable-root makeStyles-table-3"
+          data-cy="table-title"
         >
           <thead
-            class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
+            class="MuiTableHead-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-head css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-head"
             >
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -554,8 +549,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Payment Plan ID
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -566,35 +560,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
-                  data-cy="table-label"
-                  role="button"
-                  tabindex="0"
-                >
-                  Name
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
-                    />
-                  </svg>
-                </span>
-              </th>
-              <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
-                scope="col"
-              >
-                <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -602,8 +573,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Status
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -614,11 +584,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -626,8 +597,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Target Population
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -638,11 +608,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -650,8 +621,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Num. of Households
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -662,11 +632,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -674,8 +645,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Currency
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -686,11 +656,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -698,8 +669,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Total Entitled Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -710,11 +680,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -722,8 +693,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Total Delivered Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -734,11 +704,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -746,8 +717,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Total Undelivered Quantity
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -758,11 +728,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -770,8 +741,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Dispersion Start Date
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -782,11 +752,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -794,8 +765,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Dispersion End Date
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -806,11 +776,12 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
                 scope="col"
               >
                 <span
-                  class="MuiButtonBase-root MuiTableSortLabel-root sc-jTQCzO iYmYap css-1qgma8u-MuiButtonBase-root-MuiTableSortLabel-root"
+                  aria-disabled="false"
+                  class="MuiButtonBase-root MuiTableSortLabel-root sc-ifAKCX ddlfpg"
                   data-cy="table-label"
                   role="button"
                   tabindex="0"
@@ -818,8 +789,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   Follow-up Payment Plans
                   <svg
                     aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc css-1vweko9-MuiSvgIcon-root-MuiTableSortLabel-icon"
-                    data-testid="ArrowDownwardIcon"
+                    class="MuiSvgIcon-root MuiTableSortLabel-icon MuiTableSortLabel-iconDirectionAsc"
                     focusable="false"
                     viewBox="0 0 24 24"
                   >
@@ -832,118 +802,58 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
             </tr>
           </thead>
           <tbody
-            class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
+            class="MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
-              data-cy="table-row"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
-              >
-                <span
-                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
-                  style="width: 100%; height: 70px;"
-                />
-              </td>
-            </tr>
-            <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
-              data-cy="table-row"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
-              >
-                <span
-                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
-                  style="width: 100%; height: 70px;"
-                />
-              </td>
-            </tr>
-            <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
-              data-cy="table-row"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
-              >
-                <span
-                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
-                  style="width: 100%; height: 70px;"
-                />
-              </td>
-            </tr>
-            <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
-              data-cy="table-row"
-            >
-              <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
-              >
-                <span
-                  class="MuiSkeleton-root MuiSkeleton-rectangular MuiSkeleton-pulse css-153n0d3-MuiSkeleton-root"
-                  style="width: 100%; height: 70px;"
-                />
-              </td>
-            </tr>
-            <tr
-              class="MuiTableRow-root sc-jsEeTM fpInNo css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root"
               style="height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUuLbk css-1ex1afd-MuiTableCell-root"
-                colspan="12"
+                class="MuiTableCell-root MuiTableCell-body"
+                colspan="11"
               />
             </tr>
           </tbody>
         </table>
       </div>
       <div
-        class="MuiTablePagination-root css-jtlhu6-MuiTablePagination-root"
+        class="MuiTablePagination-root"
         data-cy="table-pagination"
       >
         <div
-          class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-wogcmv-MuiToolbar-root-MuiTablePagination-toolbar"
+          class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
         >
           <div
-            class="MuiTablePagination-spacer css-1psng7p-MuiTablePagination-spacer"
+            class="MuiTablePagination-spacer"
           />
           <p
-            class="MuiTablePagination-selectLabel css-pdct74-MuiTablePagination-selectLabel"
-            id=":r1:"
+            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+            id="mui-5806"
           >
             Rows per page:
           </p>
           <div
-            class="MuiInputBase-root MuiInputBase-colorPrimary MuiTablePagination-input css-16c50h-MuiInputBase-root-MuiTablePagination-select"
+            class="MuiInputBase-root MuiTablePagination-input MuiTablePagination-selectRoot"
           >
             <div
-              aria-controls=":r2:"
-              aria-expanded="false"
               aria-haspopup="listbox"
-              aria-labelledby=":r1: :r0:"
-              class="MuiSelect-select MuiTablePagination-select MuiSelect-standard MuiInputBase-input css-194a1fa-MuiSelect-select-MuiInputBase-input"
-              id=":r0:"
-              role="combobox"
+              aria-labelledby="mui-5806 mui-73230"
+              class="MuiSelect-root MuiSelect-select MuiTablePagination-select MuiSelect-selectMenu MuiInputBase-input"
+              id="mui-73230"
+              role="button"
               tabindex="0"
             >
               5
             </div>
             <input
               aria-hidden="true"
-              aria-invalid="false"
-              class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
+              class="MuiSelect-nativeInput"
               tabindex="-1"
               value="5"
             />
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiTablePagination-selectIcon MuiSelect-iconStandard css-pqjvzy-MuiSvgIcon-root-MuiSelect-icon"
-              data-testid="ArrowDropDownIcon"
+              class="MuiSvgIcon-root MuiSelect-icon MuiTablePagination-selectIcon"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -953,52 +863,58 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
             </svg>
           </div>
           <p
-            class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
+            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
           >
-            1–2 of 2
+            1-2 of 2
           </p>
           <div
-            class="MuiBox-root css-nkn1dz"
+            class="MuiTablePagination-actions"
           >
             <button
-              aria-label="previous page"
-              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+              aria-label="Previous page"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
               disabled=""
               tabindex="-1"
+              title="Previous page"
               type="button"
             >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
-                data-testid="KeyboardArrowLeftIcon"
-                focusable="false"
-                viewBox="0 0 24 24"
+              <span
+                class="MuiIconButton-label"
               >
-                <path
-                  d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z"
-                />
-              </svg>
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
+                  />
+                </svg>
+              </span>
             </button>
             <button
-              aria-label="next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
-              tabindex="0"
+              aria-label="Next page"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+              disabled=""
+              tabindex="-1"
+              title="Next page"
               type="button"
             >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
-                data-testid="KeyboardArrowRightIcon"
-                focusable="false"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
-                />
-              </svg>
               <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
+                class="MuiIconButton-label"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
+                  />
+                </svg>
+              </span>
             </button>
           </div>
         </div>

@@ -492,7 +492,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         if received is None and received_amount is not None:
             log_and_raise("You can't set received_amount {received_amount} and not set received to YES")
         elif received_amount == 0 and received:
-            log_and_raise("If received_amount is 0, you should set received to NO")
+            log_and_raise("If 'Amount Received' equals to 0, please set status as 'Not Received'")
         elif received_amount is not None and received_amount != 0 and not received:
             log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
