@@ -16,9 +16,6 @@ export const HouseholdQuestionnaire = ({
   const { baseUrl } = useBaseUrl();
   const { t } = useTranslation();
   const selectedHouseholdData = values.selectedHousehold;
-
-  console.log(selectedHouseholdData)
-
   return (
     <Grid container spacing={6}>
       {[
