@@ -29,7 +29,8 @@ def export_survey_sample_task(survey_id: str, user_id: str) -> None:
         service = ExportSurveySampleService(survey, user)
         service.export_sample()
 
-        send_email_notification(service, user, survey.business_area.enable_email_notification)
+        if survey.business_area.enable_email_notification:
+            send_email_notification(service, user)
 
     except Exception as e:
         logger.exception(e)
