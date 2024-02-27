@@ -2,7 +2,7 @@ import { Box, Checkbox, Collapse, Grid, IconButton } from '@mui/material';
 import { ArrowDropDown, ArrowRight } from '@mui/icons-material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TreeItem, TreeView } from '@mui/lab';
+import { TreeItem, TreeView } from '@mui/x-tree-view';
 import { Field } from 'formik';
 import * as React from 'react';
 import { useState } from 'react';
@@ -51,7 +51,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   setFieldValue,
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const adminAreas = allAreasTreeData.map(obj => obj.id);
+  const adminAreas = allAreasTreeData.map((obj) => obj.id);
   const selectedAreasLength = values.partners[index]?.adminAreas?.length;
   const initialExpanded = selectedAreasLength > 0;
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] =
@@ -59,7 +59,9 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
 
   let adminAreasOccurrenceLength = 0;
   if (selectedAreasLength) {
-    adminAreasOccurrenceLength = values.partners[index]?.adminAreas.filter(item => adminAreas.includes(item)).length;
+    adminAreasOccurrenceLength = values.partners[index]?.adminAreas.filter(
+      (item) => adminAreas.includes(item),
+    ).length;
   }
   const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
     AreaTreeNode.buildTree(
@@ -125,7 +127,8 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           </SmallText>
           <Box mt={2} mb={2}>
             <SmallText>
-              Selected Admin Areas: {(selectedAreasLength - adminAreasOccurrenceLength) || 0}
+              Selected Admin Areas:{' '}
+              {selectedAreasLength - adminAreasOccurrenceLength || 0}
             </SmallText>
           </Box>
         </Box>
