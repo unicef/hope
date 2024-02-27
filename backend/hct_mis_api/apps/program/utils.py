@@ -158,7 +158,7 @@ def copy_individual_related_data(program: Program) -> None:
         individuals_to_update.append(set_household_per_individual(new_individual, program))
         documents_to_create.extend(
             copy_document_per_individual(
-                list(new_individual.documents.all()),
+                list(new_individual.copied_from.documents.all()),
                 new_individual,
             )
         )
@@ -170,7 +170,7 @@ def copy_individual_related_data(program: Program) -> None:
         )
         bank_account_infos_to_create.extend(
             copy_bank_account_info_per_individual(
-                list(new_individual.bank_account_info.all()),
+                list(new_individual.copied_from.bank_account_info.all()),
                 new_individual,
             )
         )
