@@ -55,7 +55,6 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
   const { paymentPlan } = paymentPlanData;
 
   const initialValues = {
-    name: paymentPlan.name,
     targetingId: paymentPlan.targetPopulation.id,
     startDate: paymentPlan.startDate,
     endDate: paymentPlan.endDate,
@@ -109,7 +108,6 @@ export const EditPaymentPlanPage = (): React.ReactElement => {
           input: {
             paymentPlanId: id,
             targetingId: values.targetingId,
-            name: values.name,
             startDate: values.startDate,
             endDate: values.endDate,
             dispersionStartDate: values.dispersionStartDate,
