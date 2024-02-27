@@ -731,7 +731,6 @@ input CreatePaymentPlanInput {
   dispersionStartDate: Date!
   dispersionEndDate: Date!
   currency: String!
-  name: String!
 }
 
 type CreatePaymentPlanMutation {
@@ -2257,11 +2256,11 @@ type IndividualIdentityNode implements Node {
   created: DateTime!
   modified: DateTime!
   isRemoved: Boolean!
+  isOriginal: Boolean!
   individual: IndividualNode!
   number: String!
   partner: String
   country: String
-  isOriginal: Boolean!
   isMigrationHandled: Boolean!
   copiedFrom: IndividualIdentityNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
@@ -2434,13 +2433,13 @@ enum IndividualRelationship {
 type IndividualRoleInHouseholdNode {
   id: UUID!
   isRemoved: Boolean!
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
   individual: IndividualNode!
   household: HouseholdNode!
   role: IndividualRoleInHouseholdRole
-  isOriginal: Boolean!
   isMigrationHandled: Boolean!
   migratedAt: DateTime
   copiedFrom: IndividualRoleInHouseholdNode
@@ -4949,7 +4948,6 @@ input UpdatePaymentPlanInput {
   dispersionStartDate: Date
   dispersionEndDate: Date
   currency: String
-  name: String
 }
 
 type UpdatePaymentPlanMutation {

@@ -39,7 +39,7 @@ export function AgencyField({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   return (
-    <>
+    <Grid container alignItems="center" spacing={3}>
       <Grid item xs={4}>
         <Field
           name={`${agencyFieldName}.partner`}
@@ -82,6 +82,6 @@ export function AgencyField({
           </IconButton>
         </Grid>
       ) : null}
-    </>
+    </Grid>
   );
 }

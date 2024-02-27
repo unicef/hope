@@ -1,5 +1,5 @@
+import { Autocomplete } from '@mui/material';
 import styled from 'styled-components';
-import Autocomplete from '@mui/lab/Autocomplete';
 
 export const StyledAutocomplete = styled(Autocomplete)`
   width: 100%;

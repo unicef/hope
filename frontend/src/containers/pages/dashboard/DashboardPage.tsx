@@ -1,4 +1,4 @@
-import { Tab, Tabs, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import { PermissionDenied } from '@components/core/PermissionDenied';
 import { DashboardFilters } from '@components/dashboard/DashboardFilters';
 import { DashboardPaper } from '@components/dashboard/DashboardPaper';
 import { ExportModal } from '@components/dashboard/ExportModal';
+import { Tabs, Tab } from '@core/Tabs';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';

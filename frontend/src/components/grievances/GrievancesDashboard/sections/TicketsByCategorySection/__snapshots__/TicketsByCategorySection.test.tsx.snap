@@ -11,7 +11,7 @@ exports[`components/grievances/GrievancesDashboard/TicketsByCategorySection shou
       Tickets by Category
     </div>
     <div
-      style="height: 400px;"
+      style="height: 400px; width: 100%;"
     >
       <canvas
         height="0"

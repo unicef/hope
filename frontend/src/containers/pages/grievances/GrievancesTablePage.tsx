@@ -1,4 +1,3 @@
-import { Tab, Tabs } from '@mui/material';
 import { useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useGrievancesChoiceDataQuery } from '@generated/graphql';
@@ -16,6 +15,7 @@ import {
   GrievanceTypes,
 } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
+import { Tabs, Tab } from '@core/Tabs';
 
 export function GrievancesTablePage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();

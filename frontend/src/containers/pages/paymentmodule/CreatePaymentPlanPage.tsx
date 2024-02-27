@@ -44,7 +44,6 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
     return <PermissionDenied />;
 
   const validationSchema = Yup.object().shape({
-    currency: Yup.string(),
     targetingId: Yup.string().required(t('Target Population is required')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
@@ -57,6 +56,9 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
             )
           : schema,
       ),
+    currency: Yup.string()
+      .nullable()
+      .required(t('Currency is required')),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
     ),
@@ -110,8 +112,6 @@ export const CreatePaymentPlanPage = (): React.ReactElement => {
             endDate,
             dispersionStartDate,
             dispersionEndDate,
-            //TODO: remove this when the backend is updated
-            name: 'Payment Plan',
           },
         },
       });
