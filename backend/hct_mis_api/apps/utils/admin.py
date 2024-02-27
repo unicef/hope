@@ -3,10 +3,12 @@ from typing import Any, Dict, Optional, Sequence, Tuple, Union
 from uuid import UUID
 
 from django.conf import settings
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.db.models import JSONField, QuerySet
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
+from django.urls import reverse
 
 from admin_extra_buttons.buttons import Button
 from admin_extra_buttons.decorators import button
@@ -17,7 +19,8 @@ from jsoneditor.forms import JSONEditor
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 from hct_mis_api.apps.administration.widgets import JsonWidget
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.celery import app as celery_app
+from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.payment.models import PaymentPlan
 from hct_mis_api.apps.utils.celery_utils import get_task_in_queue_or_running
 from hct_mis_api.apps.utils.security import is_root
@@ -148,23 +151,12 @@ def is_enabled(btn: Button) -> bool:
     return btn.request.user.is_superuser
 
 
-def get_payment_plan_from_button_context(btn: Button) -> Optional[PaymentPlan]:
-    if btn:
-        payment_plan_id = btn.request.resolver_match.kwargs.get("object_id")
-        return PaymentPlan.objects.get(id=payment_plan_id)
-    return None
-
-
 def is_payment_plan_in_status(btn: Button, status: str) -> bool:
-    if payment_plan := get_payment_plan_from_button_context(btn):
-        return payment_plan.status == status
-    return False
+    return btn.original.status == status
 
 
 def is_background_action_in_status(btn: Button, background_status: str) -> bool:
-    if payment_plan := get_payment_plan_from_button_context(btn):
-        return payment_plan.background_action_status == background_status
-    return False
+    return btn.original.background_action_status == background_status
 
 
 def is_preparing_payment_plan(btn: Button) -> bool:
@@ -191,6 +183,10 @@ def is_exporting_xlsx_file(btn: Button) -> bool:
     return is_background_action_in_status(btn, PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING)
 
 
+def revoke_with_termination(task_id: str) -> None:
+    celery_app.control.revoke(task_id=task_id, terminate=True, signal="SIGKILL")
+
+
 class PaymentPlanCeleryTasksMixin:
     prefix = "hct_mis_api.apps.payment.celery_tasks"
     prepare_payment_plan_task = f"{prefix}.prepare_payment_plan_task"
@@ -198,6 +194,8 @@ class PaymentPlanCeleryTasksMixin:
     import_payment_plan_payment_list_per_fsp_from_xlsx = f"{prefix}.import_payment_plan_payment_list_per_fsp_from_xlsx"
     create_payment_plan_payment_list_xlsx = f"{prefix}.create_payment_plan_payment_list_xlsx"
     create_payment_plan_payment_list_xlsx_per_fsp = f"{prefix}.create_payment_plan_payment_list_xlsx_per_fsp"
+
+    url = "admin:payment_paymentplan_change"
 
     @button(visible=lambda btn: is_preparing_payment_plan(btn), enabled=lambda btn: is_enabled(btn))
     def restart_preparing_payment_plan(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
@@ -208,70 +206,24 @@ class PaymentPlanCeleryTasksMixin:
         if request.method == "POST":
             task_name = self.prepare_payment_plan_task
             args = [uuid.UUID(pk)]
-            task_data = get_task_in_queue_or_running(name=task_name, args=args)
+            task_data = get_task_in_queue_or_running(name=self.prepare_payment_plan_task, args=args)
             if task_data:
-                prepare_payment_plan_task.apply_async(task_id=task_data["id"], args=args)
+                task_id = task_data["id"]
+                revoke_with_termination(task_id)
+                prepare_payment_plan_task.apply_async(args=args)
+
+                messages.add_message(request, messages.INFO, "Successfully executed.")
+            else:
+                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
+
+            return redirect(reverse(self.url, args=[pk]))
         else:
             return confirm_action(
                 modeladmin=self,
                 request=request,
                 action=self.restart_preparing_payment_plan,
                 message="Do you confirm to restart payment plan task?",
-                success_message="Successfully executed",
             )
-        return None
-
-    @button(
-        visible=lambda btn: is_importing_entitlements_xlsx_file(btn) and is_locked_payment_plan(btn),
-        enabled=lambda btn: is_enabled(btn),
-    )
-    def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
-        """Importing entitlement file"""
-
-        from hct_mis_api.apps.payment.celery_tasks import (
-            import_payment_plan_payment_list_from_xlsx,
-        )
-
-        if request.method == "POST":
-            task_name = self.prepare_payment_plan_task
-            args = [uuid.UUID(pk)]
-            task_data = get_task_in_queue_or_running(name=task_name, args=args)
-            if task_data:
-                import_payment_plan_payment_list_from_xlsx.apply_async(task_id=task_data["id"], args=args)
-        else:
-            return confirm_action(
-                modeladmin=self,
-                request=request,
-                action=self.restart_importing_entitlements_xlsx_file,
-                message="Do you confirm to restart importing entitlements xlsx file task?",
-            )
-        return None
-
-    @button(
-        visible=lambda btn: is_importing_reconciliation_xlsx_file(btn) and is_accepted_payment_plan(btn),
-        enabled=lambda btn: is_enabled(btn),
-    )
-    def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
-        """Importing payment plan list (from xlsx)"""
-
-        from hct_mis_api.apps.payment.celery_tasks import (
-            import_payment_plan_payment_list_per_fsp_from_xlsx,
-        )
-
-        if request.method == "POST":
-            task_name = self.import_payment_plan_payment_list_per_fsp_from_xlsx
-            args = [uuid.UUID(pk)]
-            task_data = get_task_in_queue_or_running(name=task_name, args=args)
-            if task_data:
-                import_payment_plan_payment_list_per_fsp_from_xlsx.apply_async(task_id=task_data["id"], args=args)
-        else:
-            return confirm_action(
-                modeladmin=self,
-                request=request,
-                action=self.restart_importing_reconciliation_xlsx_file,
-                message="Do you confirm to restart importing entitlements xlsx file task?",
-            )
-        return None
 
     @button(
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_locked_payment_plan(btn),
@@ -290,20 +242,56 @@ class PaymentPlanCeleryTasksMixin:
             kwargs = {"payment_plan_id": uuid.UUID(pk), "user_id": uuid.UUID(str(payment_plan.created_by.id))}
             task_data = get_task_in_queue_or_running(name=task_name, kwargs=kwargs)
             if task_data:
+                task_id = task_data["id"]
+                revoke_with_termination(task_id)
                 create_payment_plan_payment_list_xlsx.apply_async(
-                    task_id=task_data["id"],
-                    kwargs={"payment_plan_id": uuid.UUID(pk), "user_id": uuid.UUID(request.user.id)},
+                    kwargs={"payment_plan_id": uuid.UUID(pk), "user_id": uuid.UUID(str(request.user.id))},
                 )
+                messages.add_message(request, messages.INFO, "Successfully executed.")
+            else:
+                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
 
+            return redirect(reverse(self.url, args=[pk]))
         else:
             return confirm_action(
                 modeladmin=self,
                 request=request,
                 action=self.restart_exporting_template_for_entitlement,
                 message="Do you confirm to restart exporting xlsx file task?",
-                success_message="Successfully executed",
             )
-        return None
+
+    @button(
+        visible=lambda btn: is_importing_entitlements_xlsx_file(btn) and is_locked_payment_plan(btn),
+        enabled=lambda btn: is_enabled(btn),
+    )
+    def restart_importing_entitlements_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+        """Importing entitlement file"""
+
+        from hct_mis_api.apps.payment.celery_tasks import (
+            import_payment_plan_payment_list_from_xlsx,
+        )
+
+        if request.method == "POST":
+            task_name = self.import_payment_plan_payment_list_from_xlsx
+            args = [uuid.UUID(pk)]
+            task_data = get_task_in_queue_or_running(name=task_name, args=args)
+            if task_data:
+                task_id = task_data["id"]
+                revoke_with_termination(task_id)
+                import_payment_plan_payment_list_from_xlsx.apply_async(args=args)
+
+                messages.add_message(request, messages.INFO, "Successfully executed.")
+            else:
+                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
+
+            return redirect(reverse(self.url, args=[pk]))
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.restart_importing_entitlements_xlsx_file,
+                message="Do you confirm to restart importing entitlements xlsx file task?",
+            )
 
     @button(
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_accepted_payment_plan(btn),
@@ -318,16 +306,56 @@ class PaymentPlanCeleryTasksMixin:
 
         if request.method == "POST":
             task_name = self.create_payment_plan_payment_list_xlsx_per_fsp
-            args = [uuid.UUID(pk)]
+            payment_plan = PaymentPlan.objects.get(pk=pk)
+            args = [uuid.UUID(pk), uuid.UUID(str(payment_plan.created_by.id))]
             task_data = get_task_in_queue_or_running(name=task_name, args=args)
             if task_data:
-                create_payment_plan_payment_list_xlsx_per_fsp.apply_async(task_id=task_data["id"], args=args)
+                task_id = task_data["id"]
+                revoke_with_termination(task_id)
+                create_payment_plan_payment_list_xlsx_per_fsp.apply_async(args=args)
+
+                messages.add_message(request, messages.INFO, "Successfully executed.")
+            else:
+                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
+            return redirect(reverse(self.url, args=[pk]))
         else:
             return confirm_action(
                 modeladmin=self,
                 request=request,
                 action=self.restart_exporting_exporting_payment_plan_list,
                 message="Do you confirm to restart exporting xlsx file task?",
-                success_message="Successfully executed",
             )
-        return None
+
+    @button(
+        visible=lambda btn: is_importing_reconciliation_xlsx_file(btn) and is_accepted_payment_plan(btn),
+        enabled=lambda btn: is_enabled(btn),
+    )
+    def restart_importing_reconciliation_xlsx_file(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+        """Importing payment plan list (from xlsx)"""
+
+        from hct_mis_api.apps.payment.celery_tasks import (
+            import_payment_plan_payment_list_per_fsp_from_xlsx,
+        )
+
+        if request.method == "POST":
+            task_name = self.import_payment_plan_payment_list_per_fsp_from_xlsx
+            file_id = FileTemp.objects.get(object_id=pk).pk
+            args = [uuid.UUID(pk), file_id]
+            task_data = get_task_in_queue_or_running(name=task_name, args=args)
+            if task_data:
+                task_id = task_data["id"]
+                revoke_with_termination(task_id)
+                import_payment_plan_payment_list_per_fsp_from_xlsx.apply_async(args=args)
+
+                messages.add_message(request, messages.INFO, "Successfully executed.")
+            else:
+                messages.add_message(request, messages.ERROR, f"There is no current {task_name} for this payment plan")
+
+            return redirect(reverse(self.url, args=[pk]))
+        else:
+            return confirm_action(
+                modeladmin=self,
+                request=request,
+                action=self.restart_importing_reconciliation_xlsx_file,
+                message="Do you confirm to restart importing entitlements xlsx file task?",
+            )
