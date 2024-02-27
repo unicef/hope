@@ -48,17 +48,18 @@ def copy_program_object(copy_from_program_id: str, program_data: dict) -> Progra
 
 
 def copy_program_related_data(copy_from_program_id: str, new_program: Program) -> None:
-    copy_individuals_from_whole_program(copy_from_program_id, new_program)
-    copy_households_from_whole_program(copy_from_program_id, new_program)
-    copy_household_related_data(new_program)
-    copy_individual_related_data(new_program)
-    populate_index(
-        Individual.objects.filter(program=new_program),
-        get_individual_doc(new_program.business_area.slug),
-    )
-    populate_index(Household.objects.filter(program=new_program), HouseholdDocument)
+    with transaction.atomic():
+        copy_individuals_from_whole_program(copy_from_program_id, new_program)
+        copy_households_from_whole_program(copy_from_program_id, new_program)
+        copy_household_related_data(new_program)
+        copy_individual_related_data(new_program)
+        populate_index(
+            Individual.objects.filter(program=new_program),
+            get_individual_doc(new_program.business_area.slug),
+        )
+        populate_index(Household.objects.filter(program=new_program), HouseholdDocument)
 
-    create_program_cycle(new_program)
+        create_program_cycle(new_program)
 
 
 def create_program_cycle(program: Program) -> None:
