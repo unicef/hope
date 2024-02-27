@@ -299,7 +299,7 @@ class HouseholdAdmin(
             form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
             if form.is_valid():
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
-                households_ids = [str(hh.id) for hh in qs.distinct("unicef_id")]
+                households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
                 enroll_households_to_program_task.delay(
                     households_ids=households_ids, program_for_enroll_id=str(program_for_enroll.id)
                 )
