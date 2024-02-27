@@ -32,7 +32,6 @@ export const PaymentPlanDetails = ({
     dispersionStartDate,
     dispersionEndDate,
     followUps,
-    name,
   } = paymentPlan;
 
   return (
@@ -64,9 +63,6 @@ export const PaymentPlanDetails = ({
                     {targetPopulation.name}
                   </BlackLink>
                 </LabelizedField>
-              </Grid>
-              <Grid item xs={3}>
-                <LabelizedField label={t('Name')}>{name}</LabelizedField>
               </Grid>
               <Grid item xs={3}>
                 <LabelizedField label={t('Currency')}>

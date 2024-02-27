@@ -44,7 +44,7 @@ export function DocumentField({
   )}`;
 
   return (
-    <>
+    <Grid container alignItems="center" spacing={3}>
       <Grid item xs={3}>
         <Field
           name={`${docFieldName}.key`}
@@ -94,6 +94,6 @@ export function DocumentField({
           </IconButton>
         </Grid>
       ) : null}
-    </>
+    </Grid>
   );
 }

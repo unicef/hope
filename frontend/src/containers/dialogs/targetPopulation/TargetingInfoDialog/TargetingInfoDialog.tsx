@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, IconButton, Tab, Tabs } from '@mui/material';
+import { Dialog, DialogContent, IconButton } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import * as React from 'react';
 import { useState } from 'react';
@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';
 import { TabPanel } from '@components/core/TabPanel';
 import { FlexFieldTab } from './FlexFieldTab';
+import { Tabs, Tab } from '@core/Tabs';
 
 const DialogWrapper = styled(Dialog)`
   && {

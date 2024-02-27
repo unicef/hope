@@ -1,5 +1,4 @@
-import { Tab, Typography } from '@mui/material';
-import Tabs from '@mui/material/Tabs';
+import { Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -9,6 +8,7 @@ import {
   useHouseholdChoiceDataQuery,
   useRegistrationDataImportQuery,
 } from '@generated/graphql';
+import { Tabs, Tab } from '@core/Tabs';
 import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
 import { LoadingComponent } from '@components/core/LoadingComponent';
 import { PermissionDenied } from '@components/core/PermissionDenied';
