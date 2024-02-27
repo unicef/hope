@@ -20,7 +20,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
-from hct_mis_api.apps.program.utils import enroll_household_to_program
+from hct_mis_api.apps.program.utils import enroll_households_to_program
 
 
 class TestEnrolHouseholdToProgram(TestCase):
@@ -62,6 +62,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         self.individual_2_original = IndividualFactory(household=None, program=self.program1)
         self.individual_2_already_enrolled = IndividualFactory(household=None, program=self.program2)
         self.individual_2_already_enrolled.copied_from = self.individual_2_original
+        self.individual_2_already_enrolled.unicef_id = self.individual_2_original.unicef_id
         self.individual_2_already_enrolled.save()
         self.individual_2_already_enrolled_document = DocumentFactory(
             individual=self.individual_2_already_enrolled,
@@ -116,9 +117,7 @@ class TestEnrolHouseholdToProgram(TestCase):
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
-        hh, value = enroll_household_to_program(self.household_already_enrolled, self.program2)
-        self.assertEqual(hh, self.household_already_enrolled)
-        self.assertEqual(value, 0)
+        enroll_households_to_program(Household.objects.filter(id=self.household_already_enrolled.id), self.program2)
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
@@ -126,9 +125,9 @@ class TestEnrolHouseholdToProgram(TestCase):
         hh_count = Household.objects.count()
         ind_count = Individual.objects.count()
 
-        hh, value = enroll_household_to_program(self.household_original_already_enrolled, self.program2)
-        self.assertEqual(hh, self.household_already_enrolled)
-        self.assertEqual(value, 0)
+        enroll_households_to_program(
+            Household.objects.filter(id=self.household_original_already_enrolled.id), self.program2
+        )
         self.assertEqual(hh_count, Household.objects.count())
         self.assertEqual(ind_count, Individual.objects.count())
 
@@ -139,9 +138,10 @@ class TestEnrolHouseholdToProgram(TestCase):
         identities_count = IndividualIdentity.objects.count()
         bank_account_info_count = BankAccountInfo.objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()
-
-        hh, value = enroll_household_to_program(self.household, self.program2)
-        self.assertEqual(value, 1)
+        enroll_households_to_program(
+            Household.objects.filter(id=self.household.id),
+            self.program2,
+        )
 
         self.individual_2_already_enrolled.refresh_from_db()
         # 1 new hh enrolled to program2
@@ -156,6 +156,8 @@ class TestEnrolHouseholdToProgram(TestCase):
 
         original_household = Household.objects.get(id=self.original_household_id)
         enrolled_household = original_household.copied_to.first()
+
+        self.assertEqual(self.individual_2_already_enrolled.household, enrolled_household)
         self.assertEqual(original_household.copied_to.count(), 1)
         self.assertEqual(enrolled_household.program, self.program2)
         self.assertEqual(enrolled_household.unicef_id, original_household.unicef_id)
@@ -193,8 +195,11 @@ class TestEnrolHouseholdToProgram(TestCase):
         ind_count = Individual.original_and_repr_objects.count()
         roles_count = IndividualRoleInHousehold.objects.count()
 
-        hh, value = enroll_household_to_program(self.household_external, self.program2)
-        self.assertEqual(value, 1)
+        enroll_households_to_program(
+            Household.objects.filter(id=self.household_external.id),
+            self.program2,
+        )
+        hh = Household.objects.order_by("created_at").last()
         self.assertEqual(hh_count + 1, Household.original_and_repr_objects.count())
         # 2 new individuals enrolled - individual_external and individual_hoh
         self.assertEqual(ind_count + 2, Individual.original_and_repr_objects.count())
