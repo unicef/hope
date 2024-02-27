@@ -28,32 +28,30 @@ export const TicketsByCategoryChart = ({
   const options: any = {
     responsive: true,
     maintainAspectRatio: false,
-    legend: {
-      display: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
     },
     tooltips: {
       mode: 'point',
     },
     scales: {
-      xAxes: [
-        {
-          position: 'top',
-          ticks: {
-            beginAtZero: true,
-            stepSize: 1,
-            callback: formatThousands,
-            suggestedMax: Math.max(...data.datasets[0].data) + 1,
-          },
+      x: {
+        position: 'top',
+        ticks: {
+          beginAtZero: true,
+          stepSize: 1,
+          callback: formatThousands,
+          suggestedMax: Math.max(...data.datasets[0].data) + 1,
         },
-      ],
-      yAxes: [
-        {
-          position: 'left',
-          gridLines: {
-            display: false,
-          },
+      },
+      y: {
+        position: 'left',
+        grid: {
+          display: false,
         },
-      ],
+      },
     },
     indexAxis: 'y',
   };
