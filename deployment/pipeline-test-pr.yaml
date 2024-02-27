@@ -280,7 +280,7 @@ stages:
           - task: DockerCompose@0
             displayName: "Run selenium tests"
             continueOnError: true
-            retryCountOnTaskFailure: 2
+            retryCountOnTaskFailure: 0
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
