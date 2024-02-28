@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
-from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.combo import ChoicesFieldComboFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
@@ -70,6 +70,7 @@ class IndividualAdmin(
         "sex",
         "relationship",
         "birth_date",
+        "program",
     )
     advanced_filter_fields = (
         "updated_at",
@@ -88,7 +89,9 @@ class IndividualAdmin(
         QueryStringFilter,
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
-        ("business_area", AutoCompleteFilter),
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
         "updated_at",
         "last_sync_at",
     )
