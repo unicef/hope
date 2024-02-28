@@ -19,7 +19,7 @@ interface ProgramFormPropTypes {
   values;
 }
 
-export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
+export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
   const { t } = useTranslation();
   const { data } = useProgrammeChoiceDataQuery();
   const { data: dataCollectionTypeChoicesData } =
@@ -95,7 +95,6 @@ export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
             data-cy="input-sector"
           />
         </Grid>
-        <Grid item xs={6} />
         <Grid item xs={6}>
           <Field
             name="dataCollectingTypeCode"
@@ -133,8 +132,7 @@ export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
             data-cy="input-budget"
           />
         </Grid>
-        <Grid item xs={6} />
-        <Grid item xs={12}>
+        <Grid item xs={6}>
           <Field
             name="administrativeAreasOfImplementation"
             label={t('Administrative Areas of Implementation')}
@@ -180,4 +178,4 @@ export function ProgramForm({ values }: ProgramFormPropTypes): ReactElement {
       </Grid>
     </Form>
   );
-}
+};

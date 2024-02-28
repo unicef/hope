@@ -88,6 +88,7 @@ export function AdminAreaAutocompleteMultiple({
               ...params.inputProps,
               value: inputValue,
             }}
+            size="small"
             placeholder={
               newValue.length > 0 ? null : t('Administrative Level 2')
             }

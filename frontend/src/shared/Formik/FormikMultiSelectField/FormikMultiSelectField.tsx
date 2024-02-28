@@ -63,7 +63,7 @@ export function FormikMultiSelectField({
     return null;
   }
   return (
-    <StyledFormControl>
+    <StyledFormControl size="small">
       {label ? (
         <InputLabel id="mutiple-chip-label">{label}</InputLabel>
       ) : (

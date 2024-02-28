@@ -43,6 +43,7 @@ export function FormikDecimalField({
       name={field.name}
       id={`textField-${field.name}`}
       margin="dense"
+      size="small"
       value={field.value}
       onChange={handleChange}
       error={isInvalid}

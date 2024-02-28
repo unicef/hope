@@ -54,7 +54,7 @@ export function ProgrammesFilters({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <div style={{ position: 'relative', top: '3px' }}>
             <SearchTextField
               label="Search"
@@ -64,7 +64,7 @@ export function ProgrammesFilters({
             />
           </div>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label="Status"
@@ -78,7 +78,7 @@ export function ProgrammesFilters({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <DatePickerFilter
             label="Start Date"
             data-cy="filters-start-date"
@@ -91,7 +91,7 @@ export function ProgrammesFilters({
             value={filter.startDate}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <DatePickerFilter
             label="End Date"
             data-cy="filters-end-date"
@@ -104,24 +104,22 @@ export function ProgrammesFilters({
             value={filter.endDate}
           />
         </Grid>
-        <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('sector', e.target.value)}
-              label="Sector"
-              data-cy="filters-sector"
-              value={filter.sector}
-              multiple
-            >
-              {choicesData.programSectorChoices.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+        <Grid item xs={4}>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('sector', e.target.value)}
+            label="Sector"
+            data-cy="filters-sector"
+            value={filter.sector}
+            multiple
+          >
+            {choicesData.programSectorChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <NumberTextField
             data-cy="filters-number-of-households-min"
             topLabel="Num. of Households"
@@ -133,7 +131,7 @@ export function ProgrammesFilters({
             icon={<GroupIcon />}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <NumberTextField
             data-cy="filters-number-of-households-max"
             value={filter.numberOfHouseholdsMax}
@@ -144,7 +142,7 @@ export function ProgrammesFilters({
             icon={<GroupIcon />}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <NumberTextField
             data-cy="filters-budget-min"
             topLabel="Budget (USD)"
@@ -153,7 +151,7 @@ export function ProgrammesFilters({
             onChange={(e) => handleFilterChange('budgetMin', e.target.value)}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <NumberTextField
             data-cy="filters-budget-max"
             value={filter.budgetMax}

@@ -61,11 +61,12 @@ export const SelectFilter = ({
         theme={{ borderRadius }}
         fullWidth={fullWidth}
         variant="outlined"
+        size="small"
       >
         <Box display="flex" alignItems="center">
           <InputLabel>{label}</InputLabel>
           <StyledSelect
-            size="medium"
+            size="small"
             onChange={onChange}
             variant="outlined"
             label={label}

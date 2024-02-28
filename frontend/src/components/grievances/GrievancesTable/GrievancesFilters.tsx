@@ -120,7 +120,7 @@ export const GrievancesFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container alignItems="flex-end" item xs={6} spacing={0}>
+        <Grid container alignItems="flex-end" item xs={4} spacing={0}>
           <Grid item xs={8}>
             <SearchTextField
               value={filter.search}
@@ -167,7 +167,7 @@ export const GrievancesFilters = ({
             />
           </Grid>
         )}
-        <Grid container item xs={3}>
+        <Grid container item xs={2}>
           <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -184,19 +184,17 @@ export const GrievancesFilters = ({
             </SelectFilter>
           </div>
         </Grid>
-        <Grid item xs={3}>
-          <div style={{ position: 'relative', top: '3px', width: '100%' }}>
-            <SearchTextField
-              value={filter.fsp}
-              label="FSP"
-              icon={<AccountBalance style={{ color: '#5f6368' }} />}
-              fullWidth
-              onChange={(e) => handleFilterChange('fsp', e.target.value)}
-              data-cy="filters-fsp"
-            />
-          </div>
+        <Grid item xs={2}>
+          <SearchTextField
+            value={filter.fsp}
+            label="FSP"
+            icon={<AccountBalance style={{ color: '#5f6368' }} />}
+            fullWidth
+            onChange={(e) => handleFilterChange('fsp', e.target.value)}
+            data-cy="filters-fsp"
+          />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
             placeholder="From"
@@ -206,7 +204,7 @@ export const GrievancesFilters = ({
             data-cy="filters-creation-date-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <DatePickerFilter
             placeholder="To"
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
@@ -231,7 +229,7 @@ export const GrievancesFilters = ({
           </SelectFilter>
         </Grid>
         {showIssueType && (
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <SelectFilter
               onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label="Issue Type"
@@ -311,63 +309,63 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         <Grid item xs={3}>
-          <div style={{ position: 'relative', top: '3px', width: '100%' }}>
-            <RdiAutocomplete
-              filter={filter}
-              name="registrationDataImport"
-              value={filter.registrationDataImport}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-              setFilter={setFilter}
-            />
-          </div>
+          <RdiAutocomplete
+            filter={filter}
+            name="registrationDataImport"
+            value={filter.registrationDataImport}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
+          />
         </Grid>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', top: '3px', width: '100%' }}>
-            <LanguageAutocomplete
-              filter={filter}
-              name="preferredLanguage"
-              value={filter.preferredLanguage}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-              setFilter={setFilter}
-              dataCy="filters-preferred-language"
-            />
+          <LanguageAutocomplete
+            filter={filter}
+            name="preferredLanguage"
+            value={filter.preferredLanguage}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            setFilter={setFilter}
+            dataCy="filters-preferred-language"
+          />
+        </Grid>
+        <Grid item container xs={3}>
+          <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('priority', e.target.value)}
+              label={t('Priority')}
+              value={filter.priority}
+              data-cy="filters-priority"
+              fullWidth
+            >
+              {updatedPriorityChoices?.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
           </div>
         </Grid>
-        <Grid item container xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('priority', e.target.value)}
-            label={t('Priority')}
-            value={filter.priority}
-            data-cy="filters-priority"
-            fullWidth
-          >
-            {updatedPriorityChoices?.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
+        <Grid item container xs={2}>
+          <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('urgency', e.target.value)}
+              label={t('Urgency')}
+              value={filter.urgency}
+              data-cy="filters-urgency"
+              fullWidth
+            >
+              {updatedUrgencyChoices?.map((item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </SelectFilter>
+          </div>
         </Grid>
-        <Grid item container xs={3}>
-          <SelectFilter
-            onChange={(e) => handleFilterChange('urgency', e.target.value)}
-            label={t('Urgency')}
-            value={filter.urgency}
-            data-cy="filters-urgency"
-            fullWidth
-          >
-            {updatedUrgencyChoices?.map((item) => (
-              <MenuItem key={item.value} value={item.value}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </SelectFilter>
-        </Grid>
-        <Grid item container xs={3}>
+        <Grid item container xs={2}>
           <SelectFilter
             onChange={(e) =>
               handleFilterChange('grievanceStatus', e.target.value)
@@ -387,7 +385,7 @@ export const GrievancesFilters = ({
           </SelectFilter>
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)
@@ -405,7 +403,7 @@ export const GrievancesFilters = ({
         )}
         {selectedTab === GRIEVANCE_TICKETS_TYPES.systemGenerated &&
           areaScopeData?.crossAreaFilterAvailable && (
-            <Grid item xs={3}>
+            <Grid item xs={2}>
               <SelectFilter
                 onChange={(e) =>
                   handleFilterChange('areaScope', e.target.value)

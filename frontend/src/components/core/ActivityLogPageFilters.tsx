@@ -60,14 +60,16 @@ export function ActivityLogPageFilters({
       clearHandler={handleClearFilter}
       applyHandler={handleApplyFilter}
     >
-      <Grid container alignItems="flex-end" spacing={3}>
+      <Grid container alignItems="center" spacing={3}>
         <Grid item xs={3}>
-          <SearchTextField
-            label={t('Search')}
-            value={filter.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-            data-cy="filters-search"
-          />
+          <div style={{ position: 'relative', bottom: '3px' }}>
+            <SearchTextField
+              label={t('Search')}
+              value={filter.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              data-cy="filters-search"
+            />
+          </div>
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
