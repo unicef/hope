@@ -1095,7 +1095,7 @@
             "country_origin_h_c": "ukr",
             "bank_account_number": "CZ6003000000000306979952",
             "confirm_phone_number": "+420774844183",
-            "national_passport_i_c": "GB500567",
+            "national_passport_no_i_c": "GB500567",
             "preferred_language_i_c": "uk-ua",
             "bank_account_number_h_f": "CZ6003000000000306979952",
             "czech_formal_employment": "no",
@@ -1136,7 +1136,7 @@
             "national_id_no_i_c": "123214",
             "disability_card_i_c": "y",
             "disability_degree_i_c": "2",
-            "national_passport_i_c": "",
+            "national_passport_no_i_c": "",
             "disability_card_no_i_c": "1213",
             "medical_certificate_i_c": "y",
             "preregistration_case_id": "10937",
@@ -1162,7 +1162,7 @@
             "relationship_i_c": "head",
             "national_id_no_i_c": "",
             "confirm_phone_number": "+420123123666",
-            "national_passport_i_c": "1234567890",
+            "national_passport_no_i_c": "1234567890",
             "legal_guardia_not_primary_carer": "y"
           },
           {
