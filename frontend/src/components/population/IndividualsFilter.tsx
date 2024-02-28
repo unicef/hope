@@ -112,7 +112,7 @@ export function IndividualsFilter({
           </Grid>
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
@@ -130,7 +130,7 @@ export function IndividualsFilter({
           </Grid>
         )}
         {showAdminAreaFilter && (
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <AdminAreaAutocomplete
               name="admin2"
               value={filter.admin2}
@@ -143,7 +143,7 @@ export function IndividualsFilter({
             />
           </Grid>
         )}
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <div style={{ position: 'relative', bottom: '3px' }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('sex', e.target.value)}
@@ -158,7 +158,7 @@ export function IndividualsFilter({
             </SelectFilter>
           </div>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <NumberTextField
             fullWidth
             topLabel={t('Age')}
@@ -172,7 +172,7 @@ export function IndividualsFilter({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <NumberTextField
             fullWidth
             placeholder={t('To')}
@@ -186,26 +186,24 @@ export function IndividualsFilter({
           />
         </Grid>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('flags', e.target.value)}
-              label={t('Flags')}
-              multiple
-              fullWidth
-              value={filter.flags}
-              data-cy="ind-filters-flags"
-            >
-              {choicesData?.flagChoices.map((each, index) => (
-                <MenuItem
-                  key={each.value}
-                  value={each.value}
-                  data-cy={`select-option-${index}`}
-                >
-                  {each.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('flags', e.target.value)}
+            label={t('Flags')}
+            multiple
+            fullWidth
+            value={filter.flags}
+            data-cy="ind-filters-flags"
+          >
+            {choicesData?.flagChoices.map((each, index) => (
+              <MenuItem
+                key={each.value}
+                value={each.value}
+                data-cy={`select-option-${index}`}
+              >
+                {each.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
@@ -223,7 +221,7 @@ export function IndividualsFilter({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
@@ -241,7 +239,7 @@ export function IndividualsFilter({
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -252,7 +250,7 @@ export function IndividualsFilter({
             data-cy="ind-filters-reg-date-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
@@ -263,7 +261,7 @@ export function IndividualsFilter({
           />
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)

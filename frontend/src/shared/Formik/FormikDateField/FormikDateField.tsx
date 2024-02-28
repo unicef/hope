@@ -18,7 +18,6 @@ export const FormikDateField = ({
   tooltip = null,
   ...otherProps
 }): React.ReactElement => {
-  console.log(form.errors);
   const isInvalid =
     get(form.errors, field.name) &&
     (get(form.touched, field.name) || form.submitCount > 0);
@@ -29,17 +28,24 @@ export const FormikDateField = ({
     formattedValue = parseISO(field.value);
   }
   const datePickerComponent = (
-    <FullWidthFormControl>
+    <FullWidthFormControl size="small">
       <DatePicker
         {...field}
         {...otherProps}
         format="yyyy-MM-dd"
         name={field.name}
+        slotProps={{ textField: { size: 'small' } }}
+        sx={{
+          '& .MuiSvgIcon-root': {
+            outline: 'none',
+          },
+        }}
         renderInput={(params) => (
           <TextField
             {...params}
             variant="outlined"
             margin="dense"
+            size="small"
             fullWidth
             error={isInvalid}
             helperText={isInvalid && get(form.errors, field.name)}

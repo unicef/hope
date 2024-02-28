@@ -62,7 +62,7 @@ export function CommunicationFilters({
             setAppliedFilter={setAppliedFilter}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <CreatedByAutocomplete
             label={t('Created by')}
             filter={filter}

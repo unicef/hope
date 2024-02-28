@@ -49,7 +49,7 @@ export function SurveysFilters({
       clearHandler={handleClearFilter}
     >
       <Grid container alignItems="center" spacing={3}>
-        <Grid xs={3} item>
+        <Grid xs={4} item>
           <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
             <SearchTextField
               value={filter.search}
@@ -71,23 +71,21 @@ export function SurveysFilters({
             setAppliedFilter={setAppliedFilter}
           />
         </Grid>
+        <Grid item xs={4}>
+          <CreatedByAutocomplete
+            name="createdBy"
+            label={t('Created by')}
+            value={filter.createdBy}
+            filter={filter}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            additionalVariables={{ isSurveyCreator: true }}
+          />
+        </Grid>
         <Grid container item xs={12} spacing={3} alignItems="flex-end">
-          <Grid item xs={4}>
-            <div style={{ position: 'relative', top: '3px', width: '100%' }}>
-              <CreatedByAutocomplete
-                name="createdBy"
-                label={t('Created by')}
-                value={filter.createdBy}
-                filter={filter}
-                setFilter={setFilter}
-                initialFilter={initialFilter}
-                appliedFilter={appliedFilter}
-                setAppliedFilter={setAppliedFilter}
-                additionalVariables={{ isSurveyCreator: true }}
-              />
-            </div>
-          </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <DatePickerFilter
               topLabel={t('Creation Date')}
               label="From"
@@ -96,7 +94,7 @@ export function SurveysFilters({
               dataCy="filters-creation-date-from"
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <DatePickerFilter
               label={t('To')}
               onChange={(date) => handleFilterChange('createdAtRangeMax', date)}

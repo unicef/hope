@@ -89,6 +89,7 @@ export const AdminAreaFixedAutocomplete = ({
         renderInput={(params) => (
           <TextField
             {...params}
+            size="small"
             label={
               level === 1
                 ? t('Administrative Level 1')

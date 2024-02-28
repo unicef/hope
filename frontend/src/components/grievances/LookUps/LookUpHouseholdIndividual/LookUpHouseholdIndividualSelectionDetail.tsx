@@ -1,4 +1,4 @@
-import { Box, Tab, Tabs } from '@mui/material';
+import { Box } from '@mui/material';
 import * as React from 'react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
 import { getFilterFromQueryParams } from '@utils/utils';
 import { LoadingComponent } from '@core/LoadingComponent';
+import { Tab, Tabs } from '@core/Tabs';
 import { TabPanel } from '@core/TabPanel';
 import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';

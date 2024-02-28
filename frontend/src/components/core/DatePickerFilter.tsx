@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, FormControl } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatISO, parseISO } from 'date-fns';
 import * as React from 'react';
@@ -16,19 +16,22 @@ export const DatePickerFilter = ({
   return (
     <Box display="flex" flexDirection="column">
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
-      <DatePicker
-        data-y={dataCy}
-        onChange={(date) => {
-          if (date) {
-            onChange(formatISO(date));
-          } else {
-            onChange(null);
-          }
-        }}
-        value={datePickerValue || null}
-        format="yyyy-MM-dd"
-        {...props}
-      />
+      <FormControl size="small">
+        <DatePicker
+          slotProps={{ textField: { size: 'small' } }}
+          data-y={dataCy}
+          onChange={(date) => {
+            if (date) {
+              onChange(formatISO(date));
+            } else {
+              onChange(null);
+            }
+          }}
+          value={datePickerValue || null}
+          format="yyyy-MM-dd"
+          {...props}
+        />
+      </FormControl>
     </Box>
   );
 };

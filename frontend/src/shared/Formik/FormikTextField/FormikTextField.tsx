@@ -61,6 +61,7 @@ export function FormikTextField({
       name={field.name}
       id={`textField-${field.name}`}
       margin="dense"
+      size="small"
       value={field.value}
       onChange={handleChange}
       onBlur={onBlur}

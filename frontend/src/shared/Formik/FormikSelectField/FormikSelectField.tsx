@@ -51,11 +51,18 @@ export function FormikSelectField({
   const showX = isValue && !disableClearable && !otherProps.disabled;
 
   return (
-    <FormControl variant="outlined" margin="dense" fullWidth {...otherProps}>
+    <FormControl
+      variant="outlined"
+      margin="dense"
+      size="small"
+      fullWidth
+      {...otherProps}
+    >
       <InputLabel>{otherProps.label}</InputLabel>
       <Select
         {...field}
         {...otherProps}
+        size="small"
         name={field.name}
         multiple={multiple}
         value={value}
@@ -80,7 +87,7 @@ export function FormikSelectField({
           showX && (
             <EndInputAdornment position="end">
               <IconButton
-                size="medium"
+                size="small"
                 onClick={() => {
                   form.setFieldValue(field.name, multiple ? [] : '');
                 }}

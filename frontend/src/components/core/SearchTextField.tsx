@@ -30,7 +30,7 @@ export function SearchTextField({
   return (
     <StyledTextField
       {...props}
-      size="medium"
+      size="small"
       fullWidth={fullWidth}
       borderRadius={borderRadius}
       variant="outlined"

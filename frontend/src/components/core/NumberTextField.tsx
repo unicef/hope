@@ -27,7 +27,7 @@ export function NumberTextField({
       <TextContainer
         {...otherProps}
         value={value}
-        size="medium"
+        size="small"
         placeholder={placeholder}
         onChange={onChange}
         variant="outlined"
