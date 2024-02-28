@@ -172,8 +172,7 @@ class CheckAgainstSanctionListPreMergeTask:
         GrievanceTicket.objects.bulk_create(tickets_to_create)
         GrievanceTicketProgramThrough.objects.bulk_create(tickets_programs)
         for ticket in tickets_to_create:
-            if ticket.business_area.enable_email_notification:
-                GrievanceNotification.send_all_notifications(
-                    GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
-                )
+            GrievanceNotification.send_all_notifications(
+                GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
+            )
         TicketSystemFlaggingDetails.objects.bulk_create(ticket_details_to_create)

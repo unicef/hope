@@ -779,14 +779,13 @@ class CreateTicketNoteMutation(PermissionMutation):
 
         description = note_input["description"]
         ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=user)
-        if grievance_ticket.business_area.enable_email_notification:
-            notification = GrievanceNotification(
-                grievance_ticket,
-                GrievanceNotification.ACTION_NOTES_ADDED,
-                created_by=user,
-                ticket_note=ticket_note,
-            )
-            notification.send_email_notification()
+        notification = GrievanceNotification(
+            grievance_ticket,
+            GrievanceNotification.ACTION_NOTES_ADDED,
+            created_by=user,
+            ticket_note=ticket_note,
+        )
+        notification.send_email_notification()
         return cls(grievance_ticket_note=ticket_note)
 
 
