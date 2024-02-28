@@ -470,8 +470,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
 
-        if grievance_ticket.business_area.enable_email_notification:
-            GrievanceNotification.send_all_notifications(messages)
+        GrievanceNotification.send_all_notifications(messages)
         return grievance_ticket
 
 
@@ -627,8 +626,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             grievance_ticket,
         )
 
-        if grievance_ticket.business_area.enable_email_notification:
-            GrievanceNotification.send_all_notifications(notifications)
+        GrievanceNotification.send_all_notifications(notifications)
         return cls(grievance_ticket=grievance_ticket)
 
 

@@ -108,10 +108,9 @@ class TicketCreatorService:
 
         grievances = self._create_details(extras, grievance_ticket)
 
-        if grievance_ticket.business_area.enable_email_notification:
-            GrievanceNotification.send_all_notifications(
-                GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
-            )
+        GrievanceNotification.send_all_notifications(
+            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+        )
 
         for grievance in grievances:
             log_create(
