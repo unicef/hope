@@ -41,11 +41,11 @@ ChartJS.defaults.plugins.legend.labels.usePointStyle = true;
 ChartJS.defaults.plugins.legend.labels.boxWidth = 8;
 
 setupInternalization();
-if (process.env.NODE_ENV !== 'development' && process.env.SENTRY_DSN) {
+if (process.env.NODE_ENV !== 'development' && window.SENTRY_DSN) {
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+    dsn: window.SENTRY_DSN,
     release: packageJson.version,
-    environment: process.env.SENTRY_ENVIRONMENT,
+    environment: window.SENTRY_ENVIRONMENT,
     ignoreErrors: ['Permission Denied'],
     integrations: [
       Sentry.reactRouterV6BrowserTracingIntegration({

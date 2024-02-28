@@ -14,6 +14,13 @@
   {% for css in assets.css %}
     <link rel="stylesheet" href="{{ css }}" />
   {% endfor %}
+  <script type="module">
+    {% if settings.SENTRY_DSN %}
+      window.SENTRY_DSN = "{{ settings.SENTRY_DSN }}";
+      window.SENTRY_ENVIRONMENT = "{{ settings.SENTRY_ENVIRONMENT }}";
+    {% endif %}
+  </script>
+
   <script type="module" src="{{ assets.file }}"></script>
 </head>
 <body>
