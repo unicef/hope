@@ -11,6 +11,7 @@ from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+
 from environ.environ import Env
 from sentry_sdk.integrations.celery import CeleryIntegration
 from single_source import get_version
@@ -143,6 +144,8 @@ STATICFILES_FINDERS = (
     "compressor.finders.CompressorFinder",
 )
 
+MANIFEST_FILE = PROJECT_ROOT + "/apps/web/static/web/.vite/manifest.json"
+
 AZURE_ACCOUNT_NAME = env("STORAGE_AZURE_ACCOUNT_NAME", default="")
 AZURE_ACCOUNT_KEY = env("STORAGE_AZURE_ACCOUNT_KEY", default="")
 
@@ -165,6 +168,8 @@ if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY:
 
     DEFAULT_FILE_STORAGE = "hct_mis_api.apps.core.storage.AzureMediaStorage"
     STATICFILES_STORAGE = "hct_mis_api.apps.core.storage.AzureStaticStorage"
+
+    MANIFEST_FILE = STATIC_URL + "web/.vite/manifest.json"
 
 SENTRY_DSN = env("SENTRY_DSN")
 if SENTRY_DSN:
