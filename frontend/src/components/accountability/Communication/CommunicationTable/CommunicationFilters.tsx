@@ -52,28 +52,32 @@ export function CommunicationFilters({
     >
       <Grid container alignItems="flex-end" spacing={3}>
         <Grid xs={4} item>
-          <TargetPopulationAutocomplete
-            name="targetPopulation"
-            value={filter.targetPopulation}
-            filter={filter}
-            setFilter={setFilter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-          />
+          <div style={{ position: 'relative', top: '3px' }}>
+            <TargetPopulationAutocomplete
+              name="targetPopulation"
+              value={filter.targetPopulation}
+              filter={filter}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+            />
+          </div>
         </Grid>
         <Grid item xs={2}>
-          <CreatedByAutocomplete
-            label={t('Created by')}
-            filter={filter}
-            name="createdBy"
-            value={filter.createdBy}
-            setFilter={setFilter}
-            initialFilter={initialFilter}
-            appliedFilter={appliedFilter}
-            setAppliedFilter={setAppliedFilter}
-            additionalVariables={{ isMessageCreator: true }}
-          />
+          <div style={{ position: 'relative', top: '3px' }}>
+            <CreatedByAutocomplete
+              label={t('Created by')}
+              filter={filter}
+              name="createdBy"
+              value={filter.createdBy}
+              setFilter={setFilter}
+              initialFilter={initialFilter}
+              appliedFilter={appliedFilter}
+              setAppliedFilter={setAppliedFilter}
+              additionalVariables={{ isMessageCreator: true }}
+            />
+          </div>
         </Grid>
         <Grid container item xs={6} spacing={3} alignItems="flex-end">
           <Grid item xs={6}>
