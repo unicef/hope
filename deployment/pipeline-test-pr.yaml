@@ -279,8 +279,7 @@ stages:
               containerRegistry: $(Docker.registryConnection)
           - task: DockerCompose@0
             displayName: "Run selenium tests"
-            continueOnError: true
-            retryCountOnTaskFailure: 2
+            retryCountOnTaskFailure: 1
             inputs:
               containerregistrytype: 'Azure Container Registry'
               azureContainerRegistry: $(Docker.registryConnection)
@@ -290,3 +289,8 @@ stages:
               dockerComposeFileArgs: |
                dev_backend_image=$(Docker.url)/$(Docker.backend.repository):dev-$(tag)
                dist_backend_image=$(Docker.url)/$(Docker.backend.repository):$(tag)
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Test Report Artifacts'
+            condition: always()
+            inputs:
+              PathtoPublish: './backend/screenshot/'
