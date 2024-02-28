@@ -2,22 +2,25 @@ import json
 import logging
 from typing import Dict
 
-import requests
 from django.conf import settings
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.decorators.cache import never_cache
 
+import requests
+
 logger = logging.getLogger(__name__)
 
 
 def get_manifest() -> Dict[str, Dict[str, str]]:
-    manifest_file = settings.MANIFEST_FILE
+    manifest_path = settings.MANIFEST_FILE
     if settings.DEBUG:
-        with open(manifest_file, "r") as f:
+        path = f"{settings.PROJECT_ROOT}/{manifest_path}"
+        with open(path, "r") as f:
             return json.loads(f.read())
-    response = requests.get(manifest_file)
+    response = requests.get(staticfiles_storage.url(manifest_path))
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
