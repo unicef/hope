@@ -189,49 +189,43 @@ def set_household_per_individual(new_individual: Individual, program: Program) -
     return new_individual
 
 
-def create_new_individual_representation(
-    individual: Individual,
-    program: Program,
-) -> Individual:
-    if not individual.individual_collection:
-        individual.individual_collection = IndividualCollection.objects.create()
-        individual.save()
-    identities = list(individual.identities.all())
-    documents = list(individual.documents.all())
-    bank_account_info = list(individual.bank_account_info.all())
-    original_individual_id = individual.id
-    individual.copied_from_id = original_individual_id
-    individual.pk = None
-    individual.program = program
-    individual.household = None
-    individual.save()
-    individual.refresh_from_db()
-    # create individual related data
-    Document.objects.bulk_create(copy_document_per_individual(documents, individual))
-    IndividualIdentity.objects.bulk_create(copy_individual_identity_per_individual(identities, individual))
-    BankAccountInfo.objects.bulk_create(copy_bank_account_info_per_individual(bank_account_info, individual))
-
-    return individual
-
-
 def create_roles_for_new_representation(new_household: Household, program: Program) -> None:
     old_roles = IndividualRoleInHousehold.objects.filter(
         household=new_household.copied_from,
     )
+    individuals_to_create = []
+    documents_to_create = []
+    identities_to_create = []
+    bank_account_info_to_create = []
+    roles_to_create = []
     for role in old_roles:
         individual_representation = Individual.objects.filter(
             program=program,
             unicef_id=role.individual.unicef_id,
         ).first()
         if not individual_representation:
-            individual_representation = create_new_individual_representation(
-                program=program, individual=role.individual
-            )
+            (
+                individual_representation,
+                documents_to_create_batch,
+                identities_to_create_batch,
+                bank_account_info_to_create_batch,
+            ) = copy_individual(role.individual, program)
+
+            individuals_to_create.append(individual_representation)
+            documents_to_create.extend(documents_to_create_batch)
+            identities_to_create.extend(identities_to_create_batch)
+            bank_account_info_to_create.extend(bank_account_info_to_create_batch)
 
         role.pk = None
         role.household = new_household
         role.individual = individual_representation
-        role.save()
+        roles_to_create.append(role)
+
+    Individual.objects.bulk_create(individuals_to_create)
+    Document.objects.bulk_create(documents_to_create)
+    IndividualIdentity.objects.bulk_create(identities_to_create)
+    BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
+    IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
 
 def enroll_households_to_program(households: QuerySet, program: Program) -> None:
@@ -246,17 +240,14 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                 household.household_collection = HouseholdCollection.objects.create()
                 household.save()
 
+            individuals = household.individuals.prefetch_related("documents", "identities", "bank_account_info")
             individuals_to_exclude_dict = {
                 str(x["unicef_id"]): str(x["pk"])
                 for x in Individual.objects.filter(
                     program=program,
-                    unicef_id__in=household.individuals.values_list("unicef_id", flat=True),
+                    unicef_id__in=individuals.values_list("unicef_id", flat=True),
                 ).values("unicef_id", "pk")
             }
-
-            individuals = Individual.objects.filter(household=household).prefetch_related(
-                "documents", "identities", "bank_account_info"
-            )
 
             documents_to_create = []
             identities_to_create = []
