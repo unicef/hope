@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build-for-backend": "yarn build --outDir '../backend/hct_mis_api/apps/web/static/web'",
+    "build-and-watch": "yarn build-for-backend --watch",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "TZ=UTC jest --config jest.config.ts",
     "preview": "vite preview",
