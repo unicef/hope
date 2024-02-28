@@ -865,7 +865,7 @@ class GenerateReportService:
             self.report.status = Report.FAILED
         self.report.save()
 
-        if self.report.file:
+        if self.report.file and self.report.business_area.enable_email_notification:
             self._send_email()
 
     def _send_email(self) -> None:
