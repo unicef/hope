@@ -301,7 +301,7 @@ class GenericRegistrationService(BaseRegistrationService):
                 "drivers_license_no_i_c": "document.doc_driver-document_number",
                 "drivers_license_photo_i_c": "document.doc_driver-photo",
                 "national_passport_type_i_c": "document.doc_passport-key",
-                "national_passport_i_c": "document.doc_passport-document_number",
+                "national_passport_no_i_c": "document.doc_passport-document_number",
                 "national_passport_photo_i_c": "document.doc_passport-photo",
                 "national_id_type_i_c": "document.doc_national-key",
                 "national_id_i_c": "document.doc_national-document_number",
