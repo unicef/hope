@@ -879,5 +879,4 @@ IDENTIFICATION_TYPE_TO_KEY_MAPPING = {
 def chunks(lst: list, n: int) -> list:
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
-        logger.info(f"Processing batch {int(i / n)+1} of {int(ceil(len(lst) / n))}")
         yield lst[i : i + n]
