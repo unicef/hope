@@ -7,3 +7,11 @@ body,
   display: flex;
   flex-direction: column;
 }
+.MuiButton-containedPrimary:hover {
+  background-color: #3f51b5 !important;
+  color: white !important;
+}
+.MuiButton-outlinedPrimary:hover {
+  background-color: transparent !important;
+  color: #3f51b5 !important;
+}
