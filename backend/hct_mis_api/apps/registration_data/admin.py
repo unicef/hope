@@ -21,11 +21,11 @@ from adminfilters.mixin import AdminAutoCompleteSearchMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.documents import get_individual_doc
 from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.program.utils import enroll_household_to_program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub import models as datahub_models
 from hct_mis_api.apps.registration_datahub.celery_tasks import (
@@ -283,18 +283,19 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
         if "apply" in request.POST or "acknowledge" in request.POST:
             form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
             if form.is_valid():
-                enrolled_hh_count = 0
                 program_for_enroll = form.cleaned_data["program_for_enroll"]
-                for household in qs:
-                    _, created = enroll_household_to_program(household, program_for_enroll)
-                    enrolled_hh_count += created
+                households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
+                enroll_households_to_program_task.delay(
+                    households_ids=households_ids, program_for_enroll_id=str(program_for_enroll.id)
+                )
                 self.message_user(
                     request,
-                    f"Successfully enrolled {enrolled_hh_count} households to {program_for_enroll}",
+                    f"Enrolling households to program: {program_for_enroll}",
                     level=messages.SUCCESS,
                 )
                 return HttpResponseRedirect(url)
         form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
         context["form"] = form
         context["action"] = "mass_enroll_to_another_program"
+        context["enroll_from"] = "RDI"
         return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)

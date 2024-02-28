@@ -5,6 +5,10 @@
     {% csrf_token %}
 
     {{ form.as_p }}
+    {% if enroll_from == 'RDI' %}
+        <p style="font-size: small"> Please note that you are not assigning the RDI to the chosen program.
+        <br> You are importing RDI’s households to a new program, creating new representations.</p>
+    {% endif %}
     {% if form.non_field_errors %}
         <div class="warning-message">
             <input type="hidden" name="action" value={{ action }} />
