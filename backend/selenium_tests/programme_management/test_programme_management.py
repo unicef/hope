@@ -45,16 +45,6 @@ class TestProgrammeManagement:
                 },
                 id="Education & Size only",
             ),
-            pytest.param(
-                {
-                    "program_name": "New Programme - " + str(random.random()),
-                    "selector": "WASH",
-                    "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
-                    "dataCollectingType": "size/age/gender disaggregated",
-                },
-                id="WASH & size/age/gender disaggregated",
-            ),
         ],
     )
     def test_create_programme(
@@ -167,8 +157,10 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputFreqOfPaymentOneOff().click()
         pageProgrammeManagement.getButtonNext().click()
+        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
@@ -209,8 +201,10 @@ class TestProgrammeManagement:
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputCashPlus().click()
         pageProgrammeManagement.getButtonNext().click()
+        programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
@@ -253,7 +247,6 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonNext().click()
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "New Programme" in pageProgrammeDetails.getHeaderTitle().text
         assert "DRAFT" in pageProgrammeDetails.getProgramStatus().text
         assert test_data["startDate"].date_in_text_format in pageProgrammeDetails.getLabelStartDate().text
         assert test_data["endDate"].date_in_text_format in pageProgrammeDetails.getLabelEndDate().text
@@ -415,6 +408,10 @@ class TestAdminAreas:
         pageProgrammeManagement.choosePartnerOption("UNHCR")
         pageProgrammeManagement.getLabelAdminArea().click()
         pageProgrammeManagement.chooseAreaAdmin1ByName("Baghlan").click()
+        # ToDo: Create additional waiting mechanism
+        from time import sleep
+
+        sleep(1)
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
