@@ -372,7 +372,9 @@ class TestBusinessAreas:
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
         # Check Details page
-        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")        # Check Details page
+        assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split(
+            "/"
+        )  # Check Details page
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
         assert "Business Area" in pageProgrammeDetails.getLabelAreaAccess().text
 
