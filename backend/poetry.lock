@@ -1058,18 +1058,17 @@ test = ["black", "celery", "check-manifest", "django-admin-extra-urls", "django-
 
 [[package]]
 name = "django-adminfilters"
-version = "2.4"
+version = "2.4.1"
 description = "Extra filters for django admin site"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django-adminfilters-2.4.tar.gz", hash = "sha256:2574b57eb69ffebaa525591fa32e1c3217f6b9185ec35cbd6dc3ac0f8b926c9a"},
-    {file = "django_adminfilters-2.4-py2.py3-none-any.whl", hash = "sha256:96f67dcf20661c4383346fab14186220774b8d3d3c3ee747d7499627c95e8e2b"},
+    {file = "django-adminfilters-2.4.1.tar.gz", hash = "sha256:bb52486ea1049fa629da42e9766c1f7a22327378c2fc120f80d9ca5e80e8d62a"},
 ]
 
 [package.extras]
-dev = ["black", "check-manifest", "django", "django-environ", "factory-boy", "flake8", "isort", "pdbpp", "pre-commit", "prettytable (==3.9.0)", "psycopg2-binary", "pytest", "pytest (<7)", "pytest-cov", "pytest-django", "pytest-echo", "pytest-selenium (<4)", "selenium (==4.9.1)", "sphinx", "sphinx-rtd-theme", "sphinxcontrib.video", "tox"]
+dev = ["black", "check-manifest", "check-manifest", "django", "django-environ", "factory-boy", "flake8", "flake8", "isort", "pdbpp", "pre-commit", "prettytable (==3.9.0)", "psycopg2-binary", "pytest", "pytest (<7)", "pytest-cov", "pytest-django", "pytest-echo", "pytest-selenium (<4)", "selenium (==4.9.1)", "sphinx", "sphinx_rtd_theme", "sphinxcontrib.video", "tox"]
 test = ["check-manifest", "django-environ", "factory-boy", "flake8", "isort", "pdbpp", "prettytable (==3.9.0)", "psycopg2-binary", "pytest (<7)", "pytest-cov", "pytest-django", "pytest-echo", "pytest-selenium (<4)", "selenium (==4.9.1)", "tox"]
 
 [[package]]
@@ -5414,4 +5413,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.*"
-content-hash = "ae961fcb6f8d8f14d4e044116e9bb64edadbb6626160c061e61c1e7ac2253a4d"
+content-hash = "c2c73c04dae90ca1a4672dba0375ba300271efff7d2c4f0688965a9b680e0a7b"
