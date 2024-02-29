@@ -731,7 +731,6 @@ input CreatePaymentPlanInput {
   dispersionStartDate: Date!
   dispersionEndDate: Date!
   currency: String!
-  name: String!
 }
 
 type CreatePaymentPlanMutation {
@@ -4937,7 +4936,6 @@ input UpdatePaymentPlanInput {
   dispersionStartDate: Date
   dispersionEndDate: Date
   currency: String
-  name: String
 }
 
 type UpdatePaymentPlanMutation {
@@ -5127,6 +5125,7 @@ type UserRoleNode {
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
   role: RoleNode!
+  expiryDate: Date
 }
 
 enum UserStatus {
