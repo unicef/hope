@@ -106,8 +106,6 @@ interface TableComponentProps<T> {
   actions?: Array<React.ReactElement>;
   onSelectAllClick?: (event, rows) => void;
   numSelected?: number;
-  count?: number;
-  onPageChange?: (event, page) => void;
 }
 
 export function TableComponent<T>({
@@ -125,8 +123,6 @@ export function TableComponent<T>({
   order,
   orderBy,
   onSelectAllClick,
-  count,
-  onPageChange,
   loading = false,
   allowSort = true,
   isOnPaper = true,
@@ -137,11 +133,11 @@ export function TableComponent<T>({
 
   const TablePaginationActions = () => {
     const handleBackButtonClick = (event) => {
-      onPageChange(event, page - 1);
+      handleChangePage(event, page - 1);
     };
 
     const handleNextButtonClick = (event) => {
-      onPageChange(event, page + 1);
+      handleChangePage(event, page + 1);
     };
 
     return (
@@ -155,7 +151,7 @@ export function TableComponent<T>({
         </IconButton>
         <IconButton
           onClick={handleNextButtonClick}
-          disabled={page >= Math.ceil(count / rowsPerPage) - 1 || loading}
+          disabled={page >= Math.ceil(itemsCount / rowsPerPage) - 1 || loading}
           aria-label="next page"
         >
           <KeyboardArrowRight />

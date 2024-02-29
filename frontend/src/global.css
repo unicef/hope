@@ -8,10 +8,19 @@ body,
   flex-direction: column;
 }
 .MuiButton-containedPrimary:hover {
-  background-color: #3f51b5 !important;
-  color: white !important;
+  opacity: 0.9 !important;
+  color: #fff;
 }
-.MuiButton-outlinedPrimary:hover {
-  background-color: transparent !important;
-  color: #3f51b5 !important;
+
+*:focus {
+  outline: none !important;
+}
+
+*:hover {
+  outline: none !important;
+}
+
+/* primary */
+a:hover {
+  color: #003c8f;
 }

@@ -1,7 +1,7 @@
 import { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import Collapse from '@mui/material/Collapse';
-import { Paper } from '@mui/material';
+import { Box, IconButton, Paper } from '@mui/material';
 import TablePagination from '@mui/material/TablePagination';
 import { AllLogEntriesQuery, LogEntryNode } from '@generated/graphql';
 import {
@@ -11,6 +11,7 @@ import {
 import { useArrayToDict } from '@hooks/useArrayToDict';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
 
 const Table = styled.div`
   display: flex;
@@ -62,6 +63,36 @@ export function MainActivityLogTable({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [expanded, setExpanded] = useState(true);
   const choicesDict = useArrayToDict(actionChoices, 'value', 'name');
+
+  const TablePaginationActions = () => {
+    const handleBackButtonClick = (event) => {
+      onChangePage(event, page - 1);
+    };
+
+    const handleNextButtonClick = (event) => {
+      onChangePage(event, page + 1);
+    };
+
+    return (
+      <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+        <IconButton
+          onClick={handleBackButtonClick}
+          disabled={page === 0 || loading}
+          aria-label="previous page"
+        >
+          <KeyboardArrowLeft />
+        </IconButton>
+        <IconButton
+          onClick={handleNextButtonClick}
+          disabled={page >= Math.ceil(totalCount / rowsPerPage) - 1 || loading}
+          aria-label="next page"
+        >
+          <KeyboardArrowRight />
+        </IconButton>
+      </Box>
+    );
+  };
+
   return (
     <PaperContainer>
       <Collapse in={expanded}>
@@ -92,8 +123,7 @@ export function MainActivityLogTable({
           page={page}
           onPageChange={onChangePage}
           onRowsPerPageChange={onChangeRowsPerPage}
-          backIconButtonProps={{ ...(loading && { disabled: true }) }}
-          nextIconButtonProps={{ ...(loading && { disabled: true }) }}
+          ActionsComponent={TablePaginationActions}
         />
       </Collapse>
     </PaperContainer>
