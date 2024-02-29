@@ -64,7 +64,9 @@ export const SelectFilter = ({
         size="small"
       >
         <Box display="flex" alignItems="center">
-          <InputLabel>{label}</InputLabel>
+          <Box mb={1}>
+            <InputLabel>{label}</InputLabel>
+          </Box>
           <StyledSelect
             size="small"
             onChange={onChange}
