@@ -83,12 +83,12 @@ class APITokenForm(forms.ModelForm):
             self.fields["valid_for"].queryset = BusinessArea.objects.filter(user_roles__user=instance.user).distinct()
 
     def clean(self) -> None:
-        if self.instance:
+        if self.instance and hasattr(self.instance, "user"):
             user = self.instance.user
         else:
             user = self.cleaned_data["user"]
         if not BusinessArea.objects.filter(user_roles__user=user).exists():
-            raise ValidationError("This user do not have any Business Areas assigned to him")
+            raise ValidationError("This user does not have any Business Areas assigned to him")
 
 
 class NoBusinessAreaAvailable(Exception):

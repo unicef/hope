@@ -96,43 +96,23 @@ class DecimalRangeFilter(BaseRangeFilter):
     field_class = DecimalRangeField
 
 
-def filter_age(field_name: str, qs: QuerySet, min: Optional[int], max: Optional[int]) -> QuerySet:
+def filter_age(field_name: str, qs: QuerySet, min_age: Optional[int], max_age: Optional[int]) -> QuerySet:
     current = timezone.now().date()
     lookup_expr = "range"
     values: Union[date, Tuple[date, date]]
-    if min is not None and max is not None:
+    if min_age is not None and max_age is not None:
         lookup_expr = "range"
         # min year +1 , day-1
-        max_date = date(
-            current.year - min,
-            current.month,
-            current.day,
-        )
-        min_date = date(
-            current.year - max - 1,
-            current.month,
-            current.day,
-        )
-        min_date = min_date + timedelta(days=1)
+        max_date = current - timedelta(days=min_age * 365.25)
+        min_date = current - timedelta(days=(max_age - 1) * 365.25) + timedelta(days=1)
         values = (min_date, max_date)
-    elif min is not None and max is None:
+    elif min_age is not None and max_age is None:
         lookup_expr = "lte"
-        max_date = date(
-            current.year - min,
-            current.month,
-            current.day,
-        )
-        values = max_date
-    elif min is None and max is not None:
+        values = current - timedelta(days=min_age * 365.25)
+    elif min_age is None and max_age is not None:
         lookup_expr = "gte"
         # min year -1 , day+1
-        min_date = date(
-            current.year - max - 1,
-            current.month,
-            current.day,
-        )
-        min_date = min_date + timedelta(days=1)
-        values = min_date
+        values = current - timedelta(days=(max_age - 1) * 365.25) + timedelta(days=1)
     else:
         return qs
     return qs.filter(**{f"{field_name}__{lookup_expr}": values})

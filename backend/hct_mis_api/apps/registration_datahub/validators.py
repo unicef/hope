@@ -98,7 +98,7 @@ class ImportDataInstanceValidator:
         "drivers_license_issuer_i_c": "drivers_license_no_i_c",
         "electoral_card_issuer_i_c": "electoral_card_no_i_c",
         "national_id_issuer_i_c": "national_id_no_i_c",
-        "national_passport_issuer_i_c": "national_passport_i_c",
+        "national_passport_issuer_i_c": "national_passport_no_i_c",
         "tax_id_issuer_i_c": "tax_id_no_i_c",
         "other_id_issuer_i_c": "other_id_type_i_c",
         # identities
@@ -530,7 +530,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     "numbers": [],
                     "issuing_countries": [],
                 },
-                "national_passport_i_c": {
+                "national_passport_no_i_c": {
                     "type": "NATIONAL_PASSPORT",
                     "validation_data": [],
                     "numbers": [],
@@ -1190,7 +1190,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                     "numbers": [],
                     "issuing_countries": [],
                 },
-                "national_passport_i_c": {
+                "national_passport_no_i_c": {
                     "type": "NATIONAL_PASSPORT",
                     "validation_data": [],
                     "numbers": [],
