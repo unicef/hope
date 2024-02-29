@@ -1189,7 +1189,6 @@ export type CreatePaymentPlanInput = {
   dispersionStartDate: Scalars['Date'],
   dispersionEndDate: Scalars['Date'],
   currency: Scalars['String'],
-  name: Scalars['String'],
 };
 
 export type CreatePaymentPlanMutation = {
@@ -8342,7 +8341,6 @@ export type UpdatePaymentPlanInput = {
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>,
   currency?: Maybe<Scalars['String']>,
-  name?: Maybe<Scalars['String']>,
 };
 
 export type UpdatePaymentPlanMutation = {
@@ -8977,6 +8975,7 @@ export type UserRoleNode = {
   updatedAt: Scalars['DateTime'],
   businessArea: UserBusinessAreaNode,
   role: RoleNode,
+  expiryDate?: Maybe<Scalars['Date']>,
 };
 
 export enum UserStatus {
@@ -33177,6 +33176,7 @@ export type UserRoleNodeResolvers<ContextType = any, ParentType extends Resolver
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   role?: Resolver<ResolversTypes['RoleNode'], ParentType, ContextType>,
+  expiryDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
 };
 
 export interface UuidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['UUID'], any> {
