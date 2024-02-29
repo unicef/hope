@@ -119,7 +119,7 @@ individual_header_mapping = {
     "Y": ("unhcr_id_no_i_c", None),
     "Z": ("unhcr_id_issuer_i_c", None),
     "AA": ("unhcr_id_photo_i_c", None),
-    "AB": ("national_passport_i_c", None),
+    "AB": ("national_passport_no_i_c", None),
     "AC": ("national_passport_issuer_i_c", None),
     "AD": ("national_passport_photo_i_c", None),
     "AE": ("national_id_no_i_c", random_number),
