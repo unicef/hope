@@ -38,6 +38,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
     RegistrationDataImportDatahub,
 )
+from hct_mis_api.apps.registration_datahub.signals import rdi_merged
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
@@ -101,8 +102,7 @@ class RdiMergeTask:
         "returnee",
         "fchild_hoh",
         "child_hoh",
-        "kobo_asset_id",
-        "row_id",
+        "detail_id",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -137,8 +137,7 @@ class RdiMergeTask:
         "who_answers_alt_phone",
         "pregnant",
         "work_status",
-        "kobo_asset_id",
-        "row_id",
+        "detail_id",
         "disability_certificate_picture",
         "preferred_language",
         "age_at_registration",
@@ -223,6 +222,7 @@ class RdiMergeTask:
                 photo=imported_document.photo,
                 expiry_date=imported_document.expiry_date,
                 issuance_date=imported_document.issuance_date,
+                program=individual.program,
             )
             documents_to_create.append(document)
         identities_to_create = []
@@ -367,7 +367,7 @@ class RdiMergeTask:
                     kobo_submissions = []
                     for imported_household in imported_households:
                         kobo_submission_uuid = imported_household.kobo_submission_uuid
-                        kobo_asset_id = imported_household.kobo_asset_id
+                        kobo_asset_id = imported_household.detail_id
                         kobo_submission_time = imported_household.kobo_submission_time
                         if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
                             submission = KoboImportedSubmission(
@@ -450,6 +450,7 @@ class RdiMergeTask:
                     imported_households.delete()
                     logger.info(f"RDI:{registration_data_import_id} Saved registration data import")
                     transaction.on_commit(lambda: deduplicate_documents.delay())
+                    rdi_merged.send(sender=obj_hct.__class__, instance=obj_hct)
                     log_create(
                         RegistrationDataImport.ACTIVITY_LOG_MAPPING,
                         "business_area",

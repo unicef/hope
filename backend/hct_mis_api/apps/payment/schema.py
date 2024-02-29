@@ -176,6 +176,12 @@ class FinancialServiceProviderXlsxReportNode(BaseNodePermissionMixin, DjangoObje
 class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PM_LOCK_AND_UNLOCK_FSP),)
     full_name = graphene.String(source="name")
+    is_payment_gateway = graphene.Boolean()
+
+    def resolve_is_payment_gateway(self, info: Any) -> bool:
+        return (
+            self.payment_gateway_id and self.communication_channel == FinancialServiceProvider.COMMUNICATION_CHANNEL_API
+        )
 
     class Meta:
         model = FinancialServiceProvider
@@ -545,6 +551,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     can_create_follow_up = graphene.Boolean()
     total_withdrawn_households_count = graphene.Int()
     unsuccessful_payments_count = graphene.Int()
+    name = graphene.String()
 
     class Meta:
         model = PaymentPlan
@@ -1043,8 +1050,9 @@ class Query(graphene.ObjectType):
 
         def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
             fsps = FinancialServiceProvider.objects.filter(
+                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism)
+                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
                 delivery_mechanisms__contains=[mechanism],
-                fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism,
             ).distinct()
             return (
                 [

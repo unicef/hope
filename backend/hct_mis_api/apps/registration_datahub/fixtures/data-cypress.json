@@ -61,7 +61,6 @@
     "kobo_asset_id": "",
     "kobo_submission_time": null,
     "row_id": 3,
-    "diia_rec_id": "",
     "flex_registrations_record": null,
     "mis_unicef_id": "HH-20-0000.0014"
   }
@@ -128,7 +127,6 @@
     "kobo_asset_id": "",
     "kobo_submission_time": null,
     "row_id": 4,
-    "diia_rec_id": "",
     "flex_registrations_record": null,
     "mis_unicef_id": "HH-20-0000.0013"
   }
@@ -185,8 +183,7 @@
     "comms_disability": "",
     "who_answers_phone": "",
     "who_answers_alt_phone": "",
-    "kobo_asset_id": "",
-    "row_id": 7,
+    "detail_id": 7,
     "disability_certificate_picture": "",
     "mis_unicef_id": "IND-88-0000.0041"
   }
@@ -243,8 +240,7 @@
     "comms_disability": "",
     "who_answers_phone": "",
     "who_answers_alt_phone": "",
-    "kobo_asset_id": "",
-    "row_id": 6,
+    "detail_id": 6,
     "disability_certificate_picture": "",
     "mis_unicef_id": "IND-88-0000.0042"
   }
@@ -301,8 +297,7 @@
     "comms_disability": "",
     "who_answers_phone": "",
     "who_answers_alt_phone": "",
-    "kobo_asset_id": "",
-    "row_id": 8,
+    "detail_id": 8,
     "disability_certificate_picture": "",
     "mis_unicef_id": "IND-42-0000.0037"
   }
@@ -368,8 +363,7 @@
     "comms_disability": "",
     "who_answers_phone": "",
     "who_answers_alt_phone": "",
-    "kobo_asset_id": "",
-    "row_id": 5,
+    "detail_id": 5,
     "disability_certificate_picture": "",
     "mis_unicef_id": "IND-88-0000.0040"
   }
@@ -426,8 +420,7 @@
     "comms_disability": "",
     "who_answers_phone": "",
     "who_answers_alt_phone": "",
-    "kobo_asset_id": "",
-    "row_id": 4,
+    "detail_id": 4,
     "disability_certificate_picture": "",
     "mis_unicef_id": "IND-69-0000.0038"
   }
@@ -493,8 +486,7 @@
     "comms_disability": "",
     "who_answers_phone": "",
     "who_answers_alt_phone": "",
-    "kobo_asset_id": "",
-    "row_id": 3,
+    "detail_id": 3,
     "disability_certificate_picture": "",
     "mis_unicef_id": "IND-74-0000.0039"
   }
@@ -861,163 +853,6 @@
     "document_number": "johniak pany",
     "partner": "UNHCR",
     "country": "PL"
-  }
-},
-{
-  "model": "registration_datahub.diiahousehold",
-  "pk": 1,
-  "fields": {
-    "rec_id": "111111",
-    "vpo_doc": "test_file_name.jpg",
-    "vpo_doc_id": "VPO-DOC-001",
-    "vpo_doc_date": "30-04-2022",
-    "address": "Староміська майдан, 854, кв. 794, 80571, Одеса, Луганська область, Ukraine",
-    "consent": true,
-    "source_data": "",
-    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_household": null,
-    "status": null
-  }
-},
-{
-  "model": "registration_datahub.diiahousehold",
-  "pk": 2,
-  "fields": {
-    "rec_id": "222222",
-    "vpo_doc": "test_file_name.jpg",
-    "vpo_doc_id": "VPO-DOC-2222",
-    "vpo_doc_date": "29-04-2022",
-    "address": "Ліста майдан, 3, кв. 257, 78242, Мелітополь, Чернівецька область, Ukraine",
-    "consent": true,
-    "source_data": "",
-    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_household": null,
-    "status": null
-  }
-},
-{
-  "model": "registration_datahub.diiaindividual",
-  "pk": 1,
-  "fields": {
-    "rec_id": "111111",
-    "individual_id": "111222333111",
-    "last_name": "Hurst",
-    "first_name": "Fiona",
-    "second_name": "Second",
-    "relationship": "WIFE_HUSBAND",
-    "sex": "F",
-    "birth_date": "15-10-2001",
-    "birth_doc": "",
-    "marital_status": "MARRIED",
-    "disability": "False",
-    "iban": "",
-    "bank_name": "",
-    "doc_type": null,
-    "doc_serie": null,
-    "doc_number": null,
-    "doc_issue_date": null,
-    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_individual": null
-  }
-},
-{
-  "model": "registration_datahub.diiaindividual",
-  "pk": 2,
-  "fields": {
-    "rec_id": "111111",
-    "individual_id": "111222333444",
-    "last_name": "Clay",
-    "first_name": "Francis",
-    "second_name": "Mid",
-    "relationship": "HEAD",
-    "sex": "M",
-    "birth_date": "11-01-1999",
-    "birth_doc": "",
-    "marital_status": "MARRIED",
-    "disability": "False",
-    "iban": "1234123412341234",
-    "bank_name": "PrivatBank",
-    "doc_type": null,
-    "doc_serie": "FA",
-    "doc_number": "123321123",
-    "doc_issue_date": "11-10-2035",
-    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_individual": null
-  }
-},
-{
-  "model": "registration_datahub.diiaindividual",
-  "pk": 3,
-  "fields": {
-    "rec_id": "222222",
-    "individual_id": "123412341234 999 222",
-    "last_name": "Duarte",
-    "first_name": "Erik",
-    "second_name": "Mid",
-    "relationship": "HEAD",
-    "sex": "M",
-    "birth_date": "22-02-1989",
-    "birth_doc": "",
-    "marital_status": "MARRIED",
-    "disability": "False",
-    "iban": "6543789043215678",
-    "bank_name": "MonoBank",
-    "doc_type": null,
-    "doc_serie": "KO",
-    "doc_number": "222233334444",
-    "doc_issue_date": "12-03-2023",
-    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_individual": null
-  }
-},
-{
-  "model": "registration_datahub.diiaindividual",
-  "pk": 4,
-  "fields": {
-    "rec_id": "222222",
-    "individual_id": "76543113349",
-    "last_name": "Burnett",
-    "first_name": "Lydia",
-    "second_name": "Lin",
-    "relationship": "WIFE_HUSBAND",
-    "sex": "F",
-    "birth_date": "19-01-1993",
-    "birth_doc": "",
-    "marital_status": "MARRIED",
-    "disability": "False",
-    "iban": "",
-    "bank_name": "",
-    "doc_type": null,
-    "doc_serie": null,
-    "doc_number": null,
-    "doc_issue_date": null,
-    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_individual": null
-  }
-},
-{
-  "model": "registration_datahub.diiaindividual",
-  "pk": 5,
-  "fields": {
-    "rec_id": "222222",
-    "individual_id": "",
-    "last_name": "Bautista",
-    "first_name": "Sam",
-    "second_name": "Bautista1",
-    "relationship": "SON_DAUGHTER",
-    "sex": "M",
-    "birth_date": "16-06-2009",
-    "birth_doc": "BRS321333",
-    "marital_status": "",
-    "disability": "True",
-    "iban": "",
-    "bank_name": "",
-    "doc_type": null,
-    "doc_serie": null,
-    "doc_number": null,
-    "doc_issue_date": null,
-    "registration_data_import": "c57848bf-a5df-154b-4938-f30b6b29aaab",
-    "imported_individual": null
   }
 }
 ]

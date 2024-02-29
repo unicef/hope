@@ -60,7 +60,11 @@ class HouseholdRepresentationInline(admin.TabularInline):
     verbose_name_plural = "Household representations"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return Household.all_objects.all()
+        return (
+            Household.all_objects.all()
+            .prefetch_related("program")
+            .only("unicef_id", "is_original", "copied_from", "program__name")
+        )
 
 
 @admin.register(Household)

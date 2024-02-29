@@ -3,6 +3,7 @@ import logging
 from datetime import date, datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from zipfile import BadZipFile
 
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -751,6 +752,7 @@ class ActionPaymentPlanMutation(PermissionMutation):
             PaymentPlan.Action.REVIEW.name: Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
             PaymentPlan.Action.REJECT.name: _get_reject_permission(pp_status),
             PaymentPlan.Action.FINISH.name: [],
+            PaymentPlan.Action.SEND_TO_PAYMENT_GATEWAY.name: [Permissions.PM_SEND_TO_PAYMENT_GATEWAY],
         }
         cls.has_permission(info, action_to_permissions_map[action], business_area)
 
@@ -1061,7 +1063,13 @@ class ImportXLSXPaymentPlanPaymentListPerFSPMutation(PermissionMutation):
             raise GraphQLError(msg)
 
         import_service = XlsxPaymentPlanImportPerFspService(payment_plan, file)
-        import_service.open_workbook()
+        try:
+            import_service.open_workbook()
+        except BadZipFile:
+            msg = "Wrong file type or password protected .zip file. Upload another file, or remove the password."
+            logger.info(msg)
+            raise GraphQLError(msg)
+
         import_service.validate()
         if import_service.errors:
             return cls(payment_plan=None, errors=import_service.errors)

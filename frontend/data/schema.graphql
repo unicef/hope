@@ -44,6 +44,7 @@ enum Action {
   REVIEW
   REJECT
   FINISH
+  SEND_TO_PAYMENT_GATEWAY
 }
 
 input ActionPaymentPlanInput {
@@ -603,6 +604,7 @@ input CopyProgramInput {
   individualDataNeeded: Boolean
   dataCollectingTypeCode: String
   partners: [PartnerProgramInput]
+  programmeCode: String
 }
 
 input CopyTargetPopulationInput {
@@ -729,6 +731,7 @@ input CreatePaymentPlanInput {
   dispersionStartDate: Date!
   dispersionEndDate: Date!
   currency: String!
+  name: String!
 }
 
 type CreatePaymentPlanMutation {
@@ -765,6 +768,7 @@ input CreateProgramInput {
   individualDataNeeded: Boolean
   dataCollectingTypeCode: String
   partners: [PartnerProgramInput]
+  programmeCode: String
 }
 
 type CreateReport {
@@ -929,6 +933,7 @@ type DeliveryMechanismNode implements Node {
   status: String!
   deliveryMechanism: DeliveryMechanismPerPaymentPlanDeliveryMechanism
   deliveryMechanismOrder: Int!
+  sentToPaymentGateway: Boolean!
   name: String
   order: Int
   fsp: FinancialServiceProviderNode
@@ -1219,10 +1224,12 @@ type FinancialServiceProviderNode implements Node {
   communicationChannel: FinancialServiceProviderCommunicationChannel!
   dataTransferConfiguration: JSONString
   xlsxTemplates(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxTemplateNodeConnection!
+  paymentGatewayId: String
   financialserviceproviderxlsxreportSet(offset: Int, before: String, after: String, first: Int, last: Int): FinancialServiceProviderXlsxReportNodeConnection!
   deliveryMechanismsPerPaymentPlan(offset: Int, before: String, after: String, first: Int, last: Int): DeliveryMechanismNodeConnection!
   paymentSet(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
   fullName: String
+  isPaymentGateway: Boolean
 }
 
 type FinancialServiceProviderNodeConnection {
@@ -1710,7 +1717,6 @@ enum ImportDataDataType {
   XLSX
   JSON
   FLEX
-  DIIA
 }
 
 type ImportDataNode implements Node {
@@ -2037,7 +2043,6 @@ type ImportedHouseholdNode implements Node {
   koboAssetId: String!
   koboSubmissionTime: DateTime
   rowId: Int
-  diiaRecId: String!
   enumeratorRecId: Int
   misUnicefId: String
   programId: UUID
@@ -2176,8 +2181,8 @@ type ImportedIndividualNode implements Node {
   disabilityCertificatePicture: String
   preferredLanguage: String
   misUnicefId: String
-  ageAtRegistration: Int
   programId: UUID
+  ageAtRegistration: Int
   importedhousehold: ImportedHouseholdNode
   documents(offset: Int, before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities(offset: Int, before: String, after: String, first: Int, last: Int): ImportedIndividualIdentityNodeConnection!
@@ -2909,6 +2914,8 @@ enum PaymentPlanBackgroundActionStatus {
   XLSX_IMPORTING_RECONCILIATION
   EXCLUDE_BENEFICIARIES
   EXCLUDE_BENEFICIARIES_ERROR
+  SEND_TO_PAYMENT_GATEWAY
+  SEND_TO_PAYMENT_GATEWAY_ERROR
 }
 
 enum PaymentPlanCurrency {
@@ -3117,6 +3124,7 @@ type PaymentPlanNode implements Node {
   isFollowUp: Boolean!
   exclusionReason: String!
   excludeHouseholdError: String!
+  name: String
   followUps(offset: Int, before: String, after: String, first: Int, last: Int): PaymentPlanNodeConnection!
   deliveryMechanisms: [DeliveryMechanismNode]
   paymentItems(offset: Int, before: String, after: String, first: Int, last: Int): PaymentNodeConnection!
@@ -3472,6 +3480,9 @@ type ProgramNode implements Node {
   individualDataNeeded: Boolean
   dataCollectingType: DataCollectingTypeNode
   isVisible: Boolean!
+  householdCount: Int!
+  individualCount: Int!
+  programmeCode: String
   households(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   householdSet(offset: Int, before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   individuals(offset: Int, before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
@@ -3533,7 +3544,7 @@ type Query {
   allAccountabilityCommunicationMessageRecipients(offset: Int, before: String, after: String, first: Int, last: Int, messageId: String!, recipientId: String, fullName: String, phoneNo: String, sex: String, orderBy: String): CommunicationMessageRecipientMapNodeConnection
   accountabilityCommunicationMessageSampleSize(input: GetAccountabilityCommunicationMessageSampleSizeInput): GetCommunicationMessageSampleSizeNode
   feedback(id: ID!): FeedbackNode
-  allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, isActiveProgram: Boolean, program: String, orderBy: String): FeedbackNodeConnection
+  allFeedbacks(offset: Int, before: String, after: String, first: Int, last: Int, businessArea: String, issueType: String, createdAtRange: String, createdBy: String, feedbackId: String, isActiveProgram: String, program: String, orderBy: String): FeedbackNodeConnection
   feedbackIssueTypeChoices: [ChoiceObject]
   survey(id: ID!): SurveyNode
   allSurveys(offset: Int, before: String, after: String, first: Int, last: Int, program: ID, targetPopulation: ID, businessArea: String, createdAtRange: String, search: String, createdBy: String, orderBy: String): SurveyNodeConnection
@@ -3786,7 +3797,6 @@ type RefuseRegistrationDataImportMutation {
 enum RegistrationDataImportDataSource {
   XLS
   KOBO
-  DIIA
   FLEX_REGISTRATION
   API
   EDOPOMOGA
@@ -4927,6 +4937,7 @@ input UpdatePaymentPlanInput {
   dispersionStartDate: Date
   dispersionEndDate: Date
   currency: String
+  name: String
 }
 
 type UpdatePaymentPlanMutation {
@@ -4962,6 +4973,7 @@ input UpdateProgramInput {
   individualDataNeeded: Boolean
   dataCollectingTypeCode: String
   partners: [PartnerProgramInput]
+  programmeCode: String
 }
 
 input UpdateTargetPopulationInput {

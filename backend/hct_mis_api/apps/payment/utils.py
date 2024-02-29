@@ -13,7 +13,6 @@ from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import chart_create_filter_query, chart_get_filtered_qs
 from hct_mis_api.apps.payment.models import (
     CashPlan,
-    GenericPayment,
     Payment,
     PaymentPlan,
     PaymentRecord,
@@ -60,12 +59,12 @@ def from_received_to_status(
         return PaymentVerification.STATUS_NOT_RECEIVED
 
 
-def to_decimal(received_amount: Optional[Union[Decimal, float, int]]) -> Optional[Decimal]:
-    if received_amount is None:
+def to_decimal(received_amount: Optional[Union[Decimal, float, int, str]]) -> Optional[Decimal]:
+    if received_amount is None or str(received_amount).strip() == "":
         return None
 
-    if isinstance(received_amount, Decimal):
-        return received_amount
+    if isinstance(received_amount, str):
+        received_amount = float(received_amount.strip())
 
     return Decimal(f"{round(received_amount, 2):.2f}")
 
@@ -165,26 +164,3 @@ def get_payment_plan_object(cash_or_payment_plan_id: str) -> Union["PaymentPlan"
         payment_plan_object = get_object_or_404(PaymentPlan, pk=obj_id)
 
     return payment_plan_object
-
-
-def get_payment_status(payment: Union[Payment, PaymentRecord]) -> str:
-    status = "-"
-    if payment.status == GenericPayment.STATUS_PENDING:
-        status = "Pending"
-
-    elif payment.status in (GenericPayment.STATUS_DISTRIBUTION_SUCCESS, GenericPayment.STATUS_SUCCESS):
-        status = "Delivered Fully"
-
-    elif payment.status == GenericPayment.STATUS_DISTRIBUTION_PARTIAL:
-        status = "Delivered Partially"
-
-    elif payment.status == GenericPayment.STATUS_NOT_DISTRIBUTED:
-        status = "Not Delivered"
-
-    elif payment.status == GenericPayment.STATUS_ERROR:
-        status = "Unsuccessful"
-
-    elif payment.status == GenericPayment.STATUS_FORCE_FAILED:
-        status = "Force Failed"
-
-    return status

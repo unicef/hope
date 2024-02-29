@@ -44,7 +44,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
 )
-from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.celery_tasks import (
     automate_rdi_creation_task,
     process_flex_records_task,
@@ -54,6 +53,7 @@ from hct_mis_api.aurora.fixtures import (
     ProjectFactory,
     RegistrationFactory,
 )
+from hct_mis_api.aurora.models import Record
 from hct_mis_api.aurora.services.base_flex_registration_service import (
     BaseRegistrationService,
 )
@@ -224,7 +224,6 @@ def create_record(fields: Dict, registration: int, status: str, files: Optional[
             }
         ],
     }
-    Record = get_record_model()
     return Record.objects.create(
         registration=registration,
         status=status,
@@ -330,7 +329,6 @@ class TestAutomatingRDICreationTask(TestCase):
     def test_not_running_with_record_status_not_to_import(self, mock_validate_data_collection_type: Any) -> None:
         create_ukraine_business_area()
         create_imported_document_types()
-        Record = get_record_model()
         record = create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_ERROR)
 
         page_size = 1
@@ -347,7 +345,6 @@ class TestAutomatingRDICreationTask(TestCase):
 
         amount_of_records = 10
         page_size = 3
-        Record = get_record_model()
         for _ in range(amount_of_records):
             create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
 
@@ -373,7 +370,6 @@ class TestAutomatingRDICreationTask(TestCase):
 
         amount_of_records = 10
         page_size = 3
-        Record = get_record_model()
         for _ in range(amount_of_records):
             create_record(fields=UKRAINE_FIELDS, registration=self.registration.id, status=Record.STATUS_TO_IMPORT)
 
@@ -394,7 +390,6 @@ class TestAutomatingRDICreationTask(TestCase):
             assert merge_task_mock.called
 
     def test_successful_run_and_fix_task_id(self, mock_validate_data_collection_type: Any) -> None:
-        Record = get_record_model()
         create_ukraine_business_area()
         create_imported_document_types()
 
@@ -430,7 +425,6 @@ class TestAutomatingRDICreationTask(TestCase):
         Czech Republic - 18, 19 -> NotImplementedError for now
 
         """
-        Record = get_record_model()
         create_ukraine_business_area()
         create_imported_document_types()
         create_czech_republic_business_area()
@@ -503,7 +497,6 @@ class TestAutomatingRDICreationTask(TestCase):
                 assert result[1][1] == page_size
 
     def test_atomic_rollback_if_record_invalid(self, mock_validate_data_collection_type: Any) -> None:
-        Record = get_record_model()
         for document_key in UkraineBaseRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
             ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()
@@ -536,7 +529,6 @@ class TestAutomatingRDICreationTask(TestCase):
         assert ImportedHousehold.objects.count() == 0
 
     def test_ukraine_new_registration_form(self, mock_validate_data_collection_type: Any) -> None:
-        Record = get_record_model()
         for document_key in UkraineRegistrationService.DOCUMENT_MAPPING_KEY_DICT.keys():
             ImportedDocumentType.objects.get_or_create(key=document_key, label="abc")
         create_ukraine_business_area()

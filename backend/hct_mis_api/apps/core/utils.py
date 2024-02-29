@@ -79,7 +79,7 @@ def get_program_id_from_headers(info_context_headers: Dict) -> Optional[str]:
     # sometimes it get from info.context.headers or kwargs["Program"]: str
 
     program_id = info_context_headers.get("Program")
-    program_id = decode_id_string(program_id) if program_id != "all" else None
+    program_id = decode_id_string(program_id) if program_id != "all" and program_id != "undefined" else None
     return program_id
 
 

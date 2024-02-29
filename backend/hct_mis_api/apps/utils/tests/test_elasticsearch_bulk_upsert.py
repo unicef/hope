@@ -46,16 +46,18 @@ class TestBulkUpsert(BaseElasticSearchTestCase, APITestCase):
         DocumentTypeFactory(key="national_passport")
 
         # this goes to es
-        cls.household_1 = HouseholdFactory.build(business_area=cls.business_area)
+        cls.household_1 = HouseholdFactory.build(business_area=cls.business_area, program=cls.program)
         cls.household_1.registration_data_import.imported_by.save()
+        cls.household_1.registration_data_import.program = cls.program
         cls.household_1.registration_data_import.save()
 
-        cls.individual_1 = IndividualFactory(household=cls.household_1)
+        cls.individual_1 = IndividualFactory(household=cls.household_1, program=cls.program)
 
         DocumentFactory(
             document_number="123-456-789",
             type=DocumentType.objects.get(key="national_id"),
             individual=cls.individual_1,
+            program=cls.individual_1.program,
         )
 
         cls.household_1.head_of_household = cls.individual_1
@@ -68,16 +70,18 @@ class TestBulkUpsert(BaseElasticSearchTestCase, APITestCase):
         cls.rebuild_search_index()
 
         # This goes to postgres and is not in es
-        cls.household_2 = HouseholdFactory.build(business_area=cls.business_area)
+        cls.household_2 = HouseholdFactory.build(business_area=cls.business_area, program=cls.program)
         cls.household_2.registration_data_import.imported_by.save()
+        cls.household_2.registration_data_import.program = cls.program
         cls.household_2.registration_data_import.save()
 
-        cls.individual_2 = IndividualFactory(household=cls.household_2)
+        cls.individual_2 = IndividualFactory(household=cls.household_2, program=cls.program)
 
         DocumentFactory(
             document_number="987-654-321",
             type=DocumentType.objects.get(key="national_passport"),
             individual=cls.individual_2,
+            program=cls.individual_2.program,
         )
 
         cls.household_2.head_of_household = cls.individual_2

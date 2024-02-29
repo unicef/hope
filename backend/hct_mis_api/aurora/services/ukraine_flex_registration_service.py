@@ -9,6 +9,7 @@ from django_countries.fields import Country
 from hct_mis_api.apps.core.utils import (
     IDENTIFICATION_TYPE_TO_KEY_MAPPING,
     build_arg_dict_from_dict,
+    build_flex_arg_dict_from_list_if_exists,
 )
 from hct_mis_api.apps.household.models import (
     DISABLED,
@@ -112,7 +113,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
         household = self._create_object_and_validate(household_data, ImportedHousehold)
         household.set_admin_areas()
 
-        household.kobo_asset_id = record.source_id
+        household.detail_id = record.source_id
         household.save(
             update_fields=(
                 "admin_area",
@@ -121,7 +122,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 "admin2_title",
                 "admin3_title",
                 "admin4_title",
-                "kobo_asset_id",
+                "detail_id",
             )
         )
 
@@ -134,7 +135,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
                 individual: ImportedIndividual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.disability_certificate_picture = individual_data.get("disability_certificate_picture")
                 individual.phone_no = phone_no
-                individual.kobo_asset_id = record.source_id
+                individual.detail_id = record.source_id
                 individual.save()
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)
@@ -175,7 +176,7 @@ class UkraineBaseRegistrationService(BaseRegistrationService):
     ) -> Dict:
         household_data = dict(
             **build_arg_dict_from_dict(household_dict, self.HOUSEHOLD_MAPPING_DICT),
-            flex_registrations_record=record,
+            # flex_registrations_record=record,
             registration_data_import=registration_data_import,
             first_registration_date=record.timestamp,
             last_registration_date=record.timestamp,
@@ -318,3 +319,19 @@ class UkraineRegistrationService(UkraineBaseRegistrationService):
         "admin3": "admin3_h_c",
         "admin4": "admin4_h_c",
     }
+
+
+class Registration2024(UkraineBaseRegistrationService):
+    INDIVIDUAL_FLEX_FIELDS: List[str] = ["low_income_hh_h_f", "single_headed_hh_h_f"]
+
+    def _prepare_individual_data(
+        self,
+        individual_dict: Dict,
+        household: ImportedHousehold,
+        registration_data_import: RegistrationDataImportDatahub,
+    ) -> Dict:
+        individual_data = super()._prepare_individual_data(individual_dict, household, registration_data_import)
+        individual_data["flex_fields"] = build_flex_arg_dict_from_list_if_exists(
+            individual_dict, self.INDIVIDUAL_FLEX_FIELDS
+        )
+        return individual_data

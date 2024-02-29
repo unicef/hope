@@ -1,5 +1,6 @@
 import datetime
 import json
+from typing import Dict
 
 from django.conf import settings
 from django.test import TestCase
@@ -16,19 +17,21 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
     ImportedHousehold,
+    ImportedIndividual,
 )
-from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.aurora.fixtures import (
     OrganizationFactory,
     ProjectFactory,
     RegistrationFactory,
 )
+from hct_mis_api.aurora.models import Record
 from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
+    Registration2024,
     UkraineBaseRegistrationService,
 )
 
 
-class TestUkrainianRegistrationService(TestCase):
+class BaseTestUkrainianRegistrationService(TestCase):
     databases = {
         "default",
         "registration_datahub",
@@ -36,33 +39,8 @@ class TestUkrainianRegistrationService(TestCase):
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
-    def setUp(cls) -> None:
-        Record = get_record_model()
-        ImportedDocumentType.objects.create(
-            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
-            label=IDENTIFICATION_TYPE_TAX_ID,
-        )
-        cls.business_area = BusinessAreaFactory(slug="some-ukraine-slug")
-
-        cls.data_collecting_type = DataCollectingType.objects.create(label="SomeFull", code="some_full")
-        cls.data_collecting_type.limit_to.add(cls.business_area)
-
-        cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
-        cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
-        cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
-        cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
-
-        household = [
-            {
-                "residence_status_h_c": "non_host",
-                "where_are_you_now": "",
-                "admin1_h_c": "UA07",
-                "admin2_h_c": "UA0702",
-                "admin3_h_c": "UA0702001",
-                "size_h_c": 5,
-            }
-        ]
-        individual_wit_bank_account_and_tax_and_disability = {
+    def individual_wit_bank_account_and_tax_and_disability(cls) -> Dict:
+        return {
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
             "relationship_i_c": "head",
@@ -78,6 +56,34 @@ class TestUkrainianRegistrationService(TestCase):
             "account_holder_name_i_c": "Test Holder Name 111",
             "bank_branch_name_i_c": "Branch Name 111",
         }
+
+    @classmethod
+    def setUpTestData(cls) -> None:
+        ImportedDocumentType.objects.create(
+            key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_TAX_ID],
+            label=IDENTIFICATION_TYPE_TAX_ID,
+        )
+        cls.business_area = BusinessAreaFactory(slug="some-ukraine-slug")
+
+        cls.data_collecting_type = DataCollectingType.objects.create(label="SomeFull", code="some_full")
+        cls.data_collecting_type.limit_to.add(cls.business_area)
+
+        cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
+        cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)
+        cls.project = ProjectFactory(name="fake_project", organization=cls.organization, programme=cls.program)
+        cls.registration = RegistrationFactory(name="fake_registration", project=cls.project)
+
+        cls.household = [
+            {
+                "residence_status_h_c": "non_host",
+                "where_are_you_now": "",
+                "admin1_h_c": "UA07",
+                "admin2_h_c": "UA0702",
+                "admin3_h_c": "UA0702001",
+                "size_h_c": 5,
+            }
+        ]
+
         individual_wit_bank_account_and_tax = {
             "tax_id_no_i_c": "123123123",
             "bank_account_h_f": "y",
@@ -151,25 +157,28 @@ class TestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=1,
-                fields={"household": household, "individuals": [individual_wit_bank_account_and_tax_and_disability]},
+                fields={
+                    "household": cls.household,
+                    "individuals": [cls.individual_wit_bank_account_and_tax_and_disability()],
+                },
                 files=json.dumps(files).encode(),
             ),
             Record(
                 **defaults,
                 source_id=2,
-                fields={"household": household, "individuals": [individual_wit_bank_account_and_tax]},
+                fields={"household": cls.household, "individuals": [individual_wit_bank_account_and_tax]},
                 files=json.dumps({}).encode(),
             ),
             Record(
                 **defaults,
                 source_id=3,
-                fields={"household": household, "individuals": [individual_with_no_tax]},
+                fields={"household": cls.household, "individuals": [individual_with_no_tax]},
                 files=json.dumps(files).encode(),
             ),
             Record(
                 **defaults,
                 source_id=4,
-                fields={"household": household, "individuals": [individual_without_bank_account]},
+                fields={"household": cls.household, "individuals": [individual_without_bank_account]},
                 files=json.dumps(files).encode(),
             ),
         ]
@@ -177,7 +186,7 @@ class TestUkrainianRegistrationService(TestCase):
             Record(
                 **defaults,
                 source_id=1,
-                fields={"household": household, "individuals": [individual_with_tax_id_which_is_too_long]},
+                fields={"household": cls.household, "individuals": [individual_with_tax_id_which_is_too_long]},
                 files=json.dumps(files).encode(),
             ),
         ]
@@ -185,8 +194,13 @@ class TestUkrainianRegistrationService(TestCase):
         cls.bad_records = Record.objects.bulk_create(bad_records)
         cls.user = UserFactory.create()
 
+
+class TestUkrainianRegistrationService(BaseTestUkrainianRegistrationService):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+
     def test_import_data_to_datahub(self) -> None:
-        Record = get_record_model()
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids = [x.id for x in self.records]
@@ -211,7 +225,6 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(registration_data_import.program, self.program)
 
     def test_import_data_to_datahub_retry(self) -> None:
-        Record = get_record_model()
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
         records_ids_all = [x.id for x in self.records]
@@ -227,7 +240,6 @@ class TestUkrainianRegistrationService(TestCase):
         self.assertEqual(ImportedHousehold.objects.count(), 4)
 
     def test_import_document_validation(self) -> None:
-        Record = get_record_model()
         service = UkraineBaseRegistrationService(self.registration)
         rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
 
@@ -235,3 +247,39 @@ class TestUkrainianRegistrationService(TestCase):
         self.bad_records[0].refresh_from_db()
         self.assertEqual(self.bad_records[0].status, Record.STATUS_ERROR)
         self.assertEqual(ImportedHousehold.objects.count(), 0)
+
+
+class TestRegistration2024(BaseTestUkrainianRegistrationService):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.record = Record.objects.create(
+            registration=2,
+            timestamp=timezone.make_aware(datetime.datetime(2024, 2, 4)),
+            source_id=5,
+            fields={
+                "household": cls.household,
+                "individuals": [cls.individual_wit_bank_account_and_tax_and_disability()],
+            },
+        )
+
+    @classmethod
+    def individual_wit_bank_account_and_tax_and_disability(cls) -> Dict:
+        return {
+            **super().individual_wit_bank_account_and_tax_and_disability(),
+            "low_income_hh_h_f": True,
+            "single_headed_hh_h_f": False,
+        }
+
+    def test_import_data_to_datahub(self) -> None:
+        service = Registration2024(self.registration)
+        rdi = service.create_rdi(self.user, f"ukraine rdi {datetime.datetime.now()}")
+        service.process_records(rdi.id, [self.record.id])
+
+        self.assertEqual(Record.objects.filter(id__in=[self.record.id], ignored=False).count(), 1)
+        self.assertEqual(ImportedHousehold.objects.count(), 1)
+        self.assertEqual(ImportedIndividual.objects.count(), 1)
+        self.assertEqual(
+            ImportedIndividual.objects.get(family_name="Romaniak").flex_fields,
+            {"low_income_hh_h_f": True, "single_headed_hh_h_f": False},
+        )

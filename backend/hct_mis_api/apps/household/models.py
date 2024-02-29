@@ -1,7 +1,7 @@
 import logging
 import re
 from datetime import date, timedelta
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
 from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
@@ -28,6 +28,12 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.core.models import BusinessArea, StorageFile
 from hct_mis_api.apps.geo.models import Area
+from hct_mis_api.apps.household.signals import (
+    household_deleted,
+    household_withdrawn,
+    individual_deleted,
+    individual_withdrawn,
+)
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
     ConcurrencyModel,
@@ -390,6 +396,7 @@ class Household(
             "unhcr_id",
             "kobo_asset_id",
             "row_id",
+            "detail_id",
             "registration_id",
         ]
     )
@@ -486,8 +493,12 @@ class Household(
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
     user_fields = JSONField(default=dict, blank=True)
+    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK, db_index=True)
     row_id = models.PositiveIntegerField(blank=True, null=True)  # XLS row id
+    detail_id = models.CharField(
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
+    )
     registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
     total_cash_received_usd = models.DecimalField(
         null=True,
@@ -539,6 +550,10 @@ class Household(
         cache.delete_pattern(f"count_{self.business_area.slug}_HouseholdNodeConnection_*")
         super().save(*args, **kwargs)
 
+    def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
+        household_deleted.send(self.__class__, instance=self)
+        return super().delete(*args, **kwargs)
+
     @property
     def status(self) -> str:
         return STATUS_INACTIVE if self.withdrawn else STATUS_ACTIVE
@@ -550,6 +565,7 @@ class Household(
         user_fields["withdrawn_tag"] = tag
         self.user_fields = user_fields
         self.save()
+        household_withdrawn.send(sender=self.__class__, instance=self)
 
     def unwithdraw(self) -> None:
         self.withdrawn = False
@@ -867,8 +883,7 @@ class Individual(
             "comms_disability",
             "who_answers_phone",
             "who_answers_alt_phone",
-            "kobo_asset_id",
-            "row_id",
+            "detail_id",
             "registration_id",
             "payment_delivery_phone_no",
         ]
@@ -968,8 +983,12 @@ class Individual(
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     fchild_hoh = models.BooleanField(default=False)
     child_hoh = models.BooleanField(default=False)
+    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    detail_id = models.CharField(
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
+    )
     registration_id = models.IntegerField(blank=True, null=True, verbose_name="Registration ID (Aurora)")
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
@@ -995,6 +1014,10 @@ class Individual(
     migrated_at = models.DateTimeField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
+
+    def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
+        individual_deleted.send(self.__class__, instance=self)
+        return super().delete(*args, **kwargs)
 
     @property
     def phone_no_text(self) -> str:
@@ -1064,6 +1087,7 @@ class Individual(
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
         self.save()
+        individual_withdrawn.send(sender=self.__class__, instance=self)
 
     def unwithdraw(self) -> None:
         self.documents.update(status=Document.STATUS_NEED_INVESTIGATION)

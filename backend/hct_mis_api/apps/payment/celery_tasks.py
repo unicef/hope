@@ -13,11 +13,10 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
-from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
-from hct_mis_api.apps.payment.models import PaymentVerificationPlan
+from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportSevice,
 )
@@ -32,7 +31,7 @@ from hct_mis_api.apps.payment.xlsx.xlsx_verification_export_service import (
     XlsxVerificationExportService,
 )
 from hct_mis_api.apps.utils.logs import log_start_and_end
-from hct_mis_api.apps.utils.sentry import sentry_tags
+from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +53,7 @@ def get_sync_run_rapid_pro_task(self: Any) -> None:
 
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
+@sentry_tags
 def fsp_generate_xlsx_report_task(self: Any, fsp_id: str) -> None:
     try:
         from hct_mis_api.apps.payment.models import FinancialServiceProvider
@@ -77,24 +77,23 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
         user = get_user_model().objects.get(pk=user_id)
         payment_verification_plan = PaymentVerificationPlan.objects.get(id=payment_verification_plan_id)
 
-        with configure_scope() as scope:
-            scope.set_tag("business_area", payment_verification_plan.business_area)
+        set_sentry_business_area_tag(payment_verification_plan.business_area.name)
 
-            service = XlsxVerificationExportService(payment_verification_plan)
-            # if no file will start creating it
-            if not payment_verification_plan.has_xlsx_payment_verification_plan_file:
-                service.save_xlsx_file(user)
+        service = XlsxVerificationExportService(payment_verification_plan)
+        # if no file will start creating it
+        if not payment_verification_plan.has_xlsx_payment_verification_plan_file:
+            service.save_xlsx_file(user)
 
-            payment_verification_plan.xlsx_file_exporting = False
-            payment_verification_plan.save()
+        payment_verification_plan.xlsx_file_exporting = False
+        payment_verification_plan.save()
 
-            context = service.get_email_context(user)
-            user.email_user(
-                context["title"],
-                render_to_string(service.text_template, context=context),
-                settings.EMAIL_HOST_USER,
-                html_message=render_to_string(service.html_template, context=context),
-            )
+        context = service.get_email_context(user)
+        user.email_user(
+            context["title"],
+            render_to_string(service.text_template, context=context),
+            settings.EMAIL_HOST_USER,
+            html_message=render_to_string(service.html_template, context=context),
+        )
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -133,33 +132,30 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-
-        with configure_scope() as scope:
-            scope.set_tag("business_area", payment_plan.business_area)
-
-            try:
-                with transaction.atomic():
-                    # regenerate always xlsx
-                    service = XlsxPaymentPlanExportService(payment_plan)
-                    service.save_xlsx_file(user)
-                    payment_plan.background_action_status_none()
-                    payment_plan.save()
-
-                    context = service.get_email_context(user)
-                    transaction.on_commit(
-                        lambda: user.email_user(
-                            context["title"],
-                            render_to_string(service.text_template, context=context),
-                            settings.EMAIL_HOST_USER,
-                            html_message=render_to_string(service.html_template, context=context),
-                        )
-                    )
-
-            except Exception as e:
-                payment_plan.background_action_status_xlsx_export_error()
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        try:
+            with transaction.atomic():
+                # regenerate always xlsx
+                service = XlsxPaymentPlanExportService(payment_plan)
+                service.save_xlsx_file(user)
+                payment_plan.background_action_status_none()
                 payment_plan.save()
-                logger.exception("Create Payment Plan Generate XLSX Error")
-                raise self.retry(exc=e)
+
+                context = service.get_email_context(user)
+                transaction.on_commit(
+                    lambda: user.email_user(
+                        context["title"],
+                        render_to_string(service.text_template, context=context),
+                        settings.EMAIL_HOST_USER,
+                        html_message=render_to_string(service.html_template, context=context),
+                    )
+                )
+
+        except Exception as e:
+            payment_plan.background_action_status_xlsx_export_error()
+            payment_plan.save()
+            logger.exception("Create Payment Plan Generate XLSX Error")
+            raise self.retry(exc=e)
 
     except Exception as e:
         logger.exception("Create Payment Plan List XLSX Error")
@@ -178,33 +174,30 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
 
         user = get_user_model().objects.get(pk=user_id)
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
-
-        with configure_scope() as scope:
-            scope.set_tag("business_area", payment_plan.business_area)
-
-            try:
-                with transaction.atomic():
-                    # regenerate always xlsx
-                    service = XlsxPaymentPlanExportPerFspService(payment_plan)
-                    service.export_per_fsp(user)
-                    payment_plan.background_action_status_none()
-                    payment_plan.save()
-
-                    context = service.get_email_context(user)
-                    transaction.on_commit(
-                        lambda: user.email_user(
-                            context["title"],
-                            render_to_string(service.text_template, context=context),
-                            settings.EMAIL_HOST_USER,
-                            html_message=render_to_string(service.html_template, context=context),
-                        )
-                    )
-
-            except Exception as e:
-                payment_plan.background_action_status_xlsx_export_error()
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        try:
+            with transaction.atomic():
+                # regenerate always xlsx
+                service = XlsxPaymentPlanExportPerFspService(payment_plan)
+                service.export_per_fsp(user)
+                payment_plan.background_action_status_none()
                 payment_plan.save()
-                logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
-                raise self.retry(exc=e)
+
+                context = service.get_email_context(user)
+                transaction.on_commit(
+                    lambda: user.email_user(
+                        context["title"],
+                        render_to_string(service.text_template, context=context),
+                        settings.EMAIL_HOST_USER,
+                        html_message=render_to_string(service.html_template, context=context),
+                    )
+                )
+
+        except Exception as e:
+            payment_plan.background_action_status_xlsx_export_error()
+            payment_plan.save()
+            logger.exception("Create Payment Plan Generate XLSX Per FSP Error")
+            raise self.retry(exc=e)
 
     except Exception as e:
         logger.exception("Create Payment Plan List XLSX Per FSP Error")
@@ -222,30 +215,28 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
         )
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
 
-        with configure_scope() as scope:
-            scope.set_tag("business_area", payment_plan.business_area)
+        if not payment_plan.imported_file:
+            raise Exception(
+                f"Error import from xlsx, file does not exist for Payment Plan ID {payment_plan.unicef_id}."
+            )
 
-            if not payment_plan.imported_file:
-                raise Exception(
-                    f"Error import from xlsx, file does not exist for Payment Plan ID {payment_plan.unicef_id}."
-                )
-
-            service = XlsxPaymentPlanImportService(payment_plan, payment_plan.imported_file.file)
-            service.open_workbook()
-            try:
-                with transaction.atomic():
-                    service.import_payment_list()
-                    payment_plan.imported_file_date = timezone.now()
-                    payment_plan.background_action_status_none()
-                    payment_plan.remove_export_file()
-                    payment_plan.save()
-                    payment_plan.update_money_fields()
-            except Exception as e:
-                logger.exception("PaymentPlan Error import from xlsx")
-                payment_plan.background_action_status_xlsx_import_error()
+        service = XlsxPaymentPlanImportService(payment_plan, payment_plan.imported_file.file)
+        service.open_workbook()
+        try:
+            with transaction.atomic():
+                service.import_payment_list()
+                payment_plan.imported_file_date = timezone.now()
+                payment_plan.background_action_status_none()
+                payment_plan.remove_export_file()
                 payment_plan.save()
-                raise self.retry(exc=e)
+                payment_plan.update_money_fields()
+        except Exception as e:
+            logger.exception("PaymentPlan Error import from xlsx")
+            payment_plan.background_action_status_xlsx_import_error()
+            payment_plan.save()
+            raise self.retry(exc=e)
 
     except Exception as e:
         logger.exception("PaymentPlan Unexpected Error import from xlsx")
@@ -264,27 +255,25 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
         )
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
         try:
-            with configure_scope() as scope:
-                scope.set_tag("business_area", payment_plan.business_area)
+            service = XlsxPaymentPlanImportPerFspService(payment_plan, FileTemp.objects.get(pk=file_pk).file)
+            service.open_workbook()
+            with transaction.atomic():
+                service.import_payment_list()
+                payment_plan.remove_export_file()
+                payment_plan.background_action_status_none()
+                payment_plan.update_money_fields()
 
-                service = XlsxPaymentPlanImportPerFspService(payment_plan, FileTemp.objects.get(pk=file_pk).file)
-                service.open_workbook()
-                with transaction.atomic():
-                    service.import_payment_list()
-                    payment_plan.remove_export_file()
-                    payment_plan.background_action_status_none()
-                    payment_plan.update_money_fields()
+                if payment_plan.is_reconciled:
+                    payment_plan.status_finished()
 
-                    if payment_plan.is_reconciled:
-                        payment_plan.status_finished()
+                payment_plan.save()
 
-                    payment_plan.save()
+                logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
 
-                    logger.info(f"Scheduled update payments signature for payment plan {payment_plan_id}")
-
-                    # started update signature for payments sync because we want to be sure that this is atomic
-                    PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
+                # started update signature for payments sync because we want to be sure that this is atomic
+                PaymentPlanService(payment_plan).recalculate_signatures_in_batch()
 
         except Exception as e:
             logger.exception("Unexpected error during xlsx per fsp import")
@@ -321,42 +310,40 @@ def create_cash_plan_reconciliation_xlsx(
 
         reconciliation_xlsx_obj = StorageFile.objects.get(id=reconciliation_xlsx_file_id)
         business_area = reconciliation_xlsx_obj.business_area
+        set_sentry_business_area_tag(business_area.name)
 
-        with configure_scope() as scope:
-            scope.set_tag("business_area", business_area)
+        cash_plan_form_data["program"] = Program.objects.get(id=program_id)
+        cash_plan_form_data["service_provider"] = ServiceProvider.objects.get(id=service_provider_id)
 
-            cash_plan_form_data["program"] = Program.objects.get(id=program_id)
-            cash_plan_form_data["service_provider"] = ServiceProvider.objects.get(id=service_provider_id)
+        service = CreateCashPlanReconciliationService(
+            business_area,
+            reconciliation_xlsx_obj.file,
+            column_mapping,
+            cash_plan_form_data,
+            currency,
+            delivery_type,
+            delivery_date,
+        )
 
-            service = CreateCashPlanReconciliationService(
-                business_area,
-                reconciliation_xlsx_obj.file,
-                column_mapping,
-                cash_plan_form_data,
-                currency,
-                delivery_type,
-                delivery_date,
-            )
+        try:
+            service.parse_xlsx()
+            error_msg = None
+        except Exception as e:
+            error_msg = f"Error parse xlsx: {e} \nFile name: {reconciliation_xlsx_obj.file_name}"
 
-            try:
-                service.parse_xlsx()
-                error_msg = None
-            except Exception as e:
-                error_msg = f"Error parse xlsx: {e} \nFile name: {reconciliation_xlsx_obj.file_name}"
+        context = service.get_email_context(
+            reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg
+        )
+        reconciliation_xlsx_obj.created_by.email_user(
+            context["title"],
+            render_to_string(service.text_template, context=context),
+            settings.EMAIL_HOST_USER,
+            html_message=render_to_string(service.html_template, context=context),
+        )
 
-            context = service.get_email_context(
-                reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg
-            )
-            reconciliation_xlsx_obj.created_by.email_user(
-                context["title"],
-                render_to_string(service.text_template, context=context),
-                settings.EMAIL_HOST_USER,
-                html_message=render_to_string(service.html_template, context=context),
-            )
-
-            # remove file every time
-            reconciliation_xlsx_obj.file.delete()
-            reconciliation_xlsx_obj.delete()
+        # remove file every time
+        reconciliation_xlsx_obj.file.delete()
+        reconciliation_xlsx_obj.delete()
 
     except Exception as e:
         logger.exception(e)
@@ -371,6 +358,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
     from hct_mis_api.apps.steficon.models import Rule, RuleCommit
 
     payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+    set_sentry_business_area_tag(payment_plan.business_area.name)
     engine_rule = Rule.objects.get(id=engine_rule_id)
     rule: RuleCommit = engine_rule.latest
     if rule.id != payment_plan.steficon_rule_id:
@@ -446,6 +434,7 @@ def prepare_payment_plan_task(self: Any, payment_plan_id: str) -> bool:
             )
 
             payment_plan = PaymentPlan.objects.select_related("target_population").get(id=payment_plan_id)
+            set_sentry_business_area_tag(payment_plan.business_area.name)
 
             PaymentPlanService.create_payments(payment_plan)
             payment_plan.update_population_count_fields()
@@ -470,6 +459,7 @@ def prepare_follow_up_payment_plan_task(self: Any, payment_plan_id: str) -> bool
         )
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
         PaymentPlanService(payment_plan=payment_plan).create_follow_up_payments()
         payment_plan.refresh_from_db()
         create_payment_plan_snapshot_data(payment_plan)
@@ -496,6 +486,7 @@ def payment_plan_exclude_beneficiaries(
         from hct_mis_api.apps.payment.models import Payment, PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
         pp_payment_items = payment_plan.payment_items
         payment_plan_title = "Follow-up Payment Plan" if payment_plan.is_follow_up else "Payment Plan"
         error_msg, info_msg = [], []
@@ -581,6 +572,7 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
         from hct_mis_api.apps.payment.models import PaymentPlan
 
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
         user = get_user_model().objects.get(pk=user_id)
 
         with transaction.atomic():
@@ -618,4 +610,60 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
 
     except Exception as e:
         logger.exception("Export PDF Payment Plan Summary Error")
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_gateway_fsp(self: Any) -> None:
+    try:
+        from hct_mis_api.apps.payment.services.payment_gateway import (
+            PaymentGatewayService,
+        )
+
+        PaymentGatewayService().sync_fsps()
+    except Exception as e:
+        logger.exception(e)
+        raise self.retry(exc=e)
+
+
+@app.task(bind=True)
+@log_start_and_end
+@sentry_tags
+def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayService
+
+    try:
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        user = get_user_model().objects.get(pk=user_id)
+
+        payment_plan.background_action_status_send_to_payment_gateway()
+        payment_plan.save(update_fields=["background_action_status"])
+
+        PaymentGatewayService().create_payment_instructions(payment_plan, user.email)
+        PaymentGatewayService().add_records_to_payment_instructions(payment_plan)
+
+        payment_plan.background_action_status_none()
+        payment_plan.save(update_fields=["background_action_status"])
+    except Exception:
+        msg = "Error while sending to Payment Gateway"
+        logger.exception(msg)
+        payment_plan.background_action_status_send_to_payment_gateway_error()
+        payment_plan.save(update_fields=["background_action_status"])
+
+
+@app.task(bind=True, default_retry_delay=60, max_retries=3)
+@log_start_and_end
+@sentry_tags
+def periodic_sync_payment_gateway_records(self: Any) -> None:
+    try:
+        from hct_mis_api.apps.payment.services.payment_gateway import (
+            PaymentGatewayService,
+        )
+
+        PaymentGatewayService().sync_records()
+    except Exception as e:
+        logger.exception(e)
         raise self.retry(exc=e)

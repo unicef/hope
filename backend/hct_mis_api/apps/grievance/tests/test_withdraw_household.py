@@ -60,7 +60,9 @@ class TestWithdrawHousehold(APITestCase):
         household = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
+        household.registration_data_import.program = self.program_one
         household.registration_data_import.save()
+        household.program = self.program_one
         household.programs.add(self.program_one)
 
         individual_data = {
@@ -71,6 +73,7 @@ class TestWithdrawHousehold(APITestCase):
             "phone_no": "+18773523904",
             "birth_date": "1965-03-15",
             "household": household,
+            "program": self.program_one,
         }
 
         individual = IndividualFactory(**individual_data)

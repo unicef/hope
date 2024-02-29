@@ -12,7 +12,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
 
 
-class Test(TestCase):
+class TestHandleRole(TestCase):
     def test_handle_role(self) -> None:
         business_area = create_afghanistan()
         program = ProgramFactory(
@@ -20,10 +20,11 @@ class Test(TestCase):
             business_area=business_area,
             status=Program.ACTIVE,
         )
-        household = HouseholdFactory.build()
-        household.registration_data_import.save()
+        household = HouseholdFactory.build(program=program)
         household.household_collection.save()
         household.registration_data_import.imported_by.save()
+        household.registration_data_import.program = household.program
+        household.registration_data_import.save()
         household.programs.add(program)
         individual = IndividualFactory(household=household, program=program)
         household.head_of_household = individual

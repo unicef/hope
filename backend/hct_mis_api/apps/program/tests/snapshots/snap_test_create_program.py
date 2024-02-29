@@ -155,6 +155,66 @@ snapshots['TestCreateProgram::test_create_program_with_inactive_dct 1'] = {
     ]
 }
 
+snapshots['TestCreateProgram::test_create_program_with_programme_code_greater_than_4_chars 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Programme code should be 4 alphanumeric characters.',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_with_programme_code_less_than_4_chars 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Programme code should be 4 alphanumeric characters.',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_create_program_with_programme_code_not_alphanumeric 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Programme code should be alphanumeric.',
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
 snapshots['TestCreateProgram::test_create_program_without_dct 1'] = {
     'data': {
         'createProgram': None
@@ -168,6 +228,26 @@ snapshots['TestCreateProgram::test_create_program_without_dct 1'] = {
                 }
             ],
             'message': "['DataCollectingType is required for creating new Program']",
+            'path': [
+                'createProgram'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCreateProgram::test_programme_code_should_be_unique_among_the_same_business_area 1'] = {
+    'data': {
+        'createProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Programme code is already used.',
             'path': [
                 'createProgram'
             ]

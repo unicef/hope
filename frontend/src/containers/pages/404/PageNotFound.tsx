@@ -87,6 +87,7 @@ export const PageNotFound: React.FC = () => {
             variant='outlined'
             color='primary'
             onClick={goBackAndClearCache}
+            data-cy='button-refresh-page'
           >
             REFRESH PAGE
           </Button>
@@ -96,6 +97,7 @@ export const PageNotFound: React.FC = () => {
           color='primary'
           variant='contained'
           component={Link}
+          data-cy='go-to-programme-management'
           to={`/${businessArea}/programs/all/list`}
         >
           GO TO PROGRAMME MANAGEMENT
