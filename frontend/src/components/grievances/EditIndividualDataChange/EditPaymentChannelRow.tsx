@@ -83,11 +83,27 @@ export function EditPaymentChannelRow({
           />
         </DisabledDiv>
       </Grid>
-      <Grid item xs={4}>
+      <Grid item xs={3}>
         <DisabledDiv disabled={removed}>
           <LabelizedField
             label={t('Bank name')}
             value={paymentChannel.bankName}
+          />
+        </DisabledDiv>
+      </Grid>
+      <Grid item xs={2}>
+        <DisabledDiv disabled={removed}>
+          <LabelizedField
+            label={t('Account holder name')}
+            value={paymentChannel.accountHolderName}
+          />
+        </DisabledDiv>
+      </Grid>
+      <Grid item xs={2}>
+        <DisabledDiv disabled={removed}>
+          <LabelizedField
+            label={t('Bank branch name')}
+            value={paymentChannel.bankBranchName}
           />
         </DisabledDiv>
       </Grid>
