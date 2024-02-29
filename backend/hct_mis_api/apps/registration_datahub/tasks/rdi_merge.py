@@ -1,9 +1,10 @@
 import contextlib
 import logging
 from typing import Dict, List, Tuple
+from uuid import UUID
 
 from django.core.cache import cache
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.forms import model_to_dict
 
 from hct_mis_api.apps.account.models import Partner
@@ -394,12 +395,7 @@ class RdiMergeTask:
                         program_registration_id = imported_household.program_registration_id
                         if program_registration_id:
                             household = households_dict[imported_household.id]
-                            reg_id_count = Household.objects.filter(
-                                registration_id__istartswith=program_registration_id
-                            ).count()
-                            Household.objects.filter(id=household.id).update(
-                                registration_id=f"{program_registration_id}#{reg_id_count}"
-                            )
+                            self._update_program_registration_id(household.id, program_registration_id)
 
                     # DEDUPLICATION
 
@@ -508,3 +504,10 @@ class RdiMergeTask:
         except Exception as e:
             logger.error(e)
             raise
+
+    def _update_program_registration_id(self, household_id: UUID, program_registration_id: str, count: int = 0) -> None:
+        try:
+            with transaction.atomic():
+                Household.objects.filter(id=household_id).update(registration_id=f"{program_registration_id}#{count}")
+        except IntegrityError:
+            self._update_program_registration_id(household_id, program_registration_id, count=count + 1)
