@@ -9,6 +9,7 @@ from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
@@ -16,10 +17,13 @@ from admin_extra_buttons.api import confirm_action
 from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.mixin import AdminAutoCompleteSearchMixin
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
 from hct_mis_api.apps.household.documents import get_individual_doc
+from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
@@ -40,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 
 @admin.register(RegistrationDataImport)
-class RegistrationDataImportAdmin(HOPEModelAdminBase):
+class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "import_date", "data_source", "business_area")
     search_fields = ("name",)
     list_filter = (
@@ -267,3 +271,32 @@ class RegistrationDataImportAdmin(HOPEModelAdminBase):
     def households(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?&registration_data_import__exact={pk}")
+
+    @button(permission="program.enroll_beneficiaries")
+    def enroll_to_program(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:
+        url = reverse("admin:registration_data_registrationdataimport_change", args=[pk])
+        qs = RegistrationDataImport.objects.filter(pk=pk).first().households.all()
+        if not qs.exists():
+            self.message_user(request, "No households found in this RDI", level=messages.ERROR)
+            return None
+        context = self.get_common_context(request, title="Mass enroll households to another program")
+        business_area_id = qs.first().business_area_id
+        if "apply" in request.POST or "acknowledge" in request.POST:
+            form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
+            if form.is_valid():
+                program_for_enroll = form.cleaned_data["program_for_enroll"]
+                households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
+                enroll_households_to_program_task.delay(
+                    households_ids=households_ids, program_for_enroll_id=str(program_for_enroll.id)
+                )
+                self.message_user(
+                    request,
+                    f"Enrolling households to program: {program_for_enroll}",
+                    level=messages.SUCCESS,
+                )
+                return HttpResponseRedirect(url)
+        form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
+        context["form"] = form
+        context["action"] = "mass_enroll_to_another_program"
+        context["enroll_from"] = "RDI"
+        return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
