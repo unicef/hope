@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def get_manifest() -> Dict[str, Dict[str, str]]:
     manifest_path = settings.MANIFEST_FILE
     if settings.DEBUG:
-        path = f"{settings.PROJECT_ROOT}/{manifest_path}"
+        path = f"{settings.PROJECT_ROOT}/apps/web/static/{manifest_path}"
         with open(path, "r") as f:
             return json.loads(f.read())
     response = requests.get(staticfiles_storage.url(manifest_path))
