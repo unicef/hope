@@ -16,6 +16,7 @@ import * as Yup from 'yup';
 import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
+import { useProgramContext } from "../../programContext";
 import {
   chooseFieldType,
   clearField,
@@ -29,7 +30,6 @@ import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
-import {useProgramContext} from "../../programContext";
 
 const AndDividerLabel = styled.div`
   position: absolute;
