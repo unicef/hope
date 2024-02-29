@@ -788,7 +788,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "get_query": get_national_passport_document_number_query,
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "national_passport_i_c",
+        "xlsx_field": "national_passport_no_i_c",
         "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
         "lookup_function": get_national_passport_no,
     },
