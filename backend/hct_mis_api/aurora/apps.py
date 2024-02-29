@@ -16,6 +16,7 @@ class Config(AppConfig):
             SriLankaRegistrationService,
         )
         from hct_mis_api.aurora.services.ukraine_flex_registration_service import (
+            Registration2024,
             UkraineBaseRegistrationService,
             UkraineRegistrationService,
         )
@@ -27,3 +28,4 @@ class Config(AppConfig):
         registry.register(UkraineBaseRegistrationService)
         registry.register(UkraineRegistrationService)
         registry.register(CzechRepublicFlexRegistration)
+        registry.register(Registration2024)

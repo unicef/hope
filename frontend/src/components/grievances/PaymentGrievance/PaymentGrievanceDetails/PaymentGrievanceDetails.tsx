@@ -37,13 +37,13 @@ const GreenIcon = styled.div`
   color: #28cb15;
 `;
 
-export function PaymentGrievanceDetails({
+export const PaymentGrievanceDetails = ({
   ticket,
   canApprovePaymentVerification,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApprovePaymentVerification: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [mutate] = useApprovePaymentDetailsMutation();
@@ -56,6 +56,7 @@ export function PaymentGrievanceDetails({
   } = ticket.paymentVerificationTicketDetails;
 
   const deliveredQuantity = ticket.paymentRecord?.deliveredQuantity;
+  const entitlementQuantity = ticket.paymentRecord?.entitlementQuantity;
 
   let dialogText = t('Are you sure you want to disapprove this payment?');
   if (!approveStatus) {
@@ -115,6 +116,7 @@ export function PaymentGrievanceDetails({
         <TableHead>
           <TableRow>
             <TableCell align='right' />
+            <TableCell align='right'>{t('Entitlement Value')} ($)</TableCell>
             <TableCell align='right'>{t('Delivered Value')} ($)</TableCell>
             <TableCell align='right'>{t('Received Value')} ($)</TableCell>
             <TableCell align='right'>{t('New Verified Value')} ($)</TableCell>
@@ -129,6 +131,7 @@ export function PaymentGrievanceDetails({
                 </GreenIcon>
               ) : null}
             </TableCell>
+            <TableCell align='right'>{entitlementQuantity}</TableCell>
             <TableCell align='right'>{deliveredQuantity}</TableCell>
             <TableCell align='right'>
               {oldReceivedAmount == null ? receivedAmount : oldReceivedAmount}
@@ -139,4 +142,4 @@ export function PaymentGrievanceDetails({
       </StyledTable>
     </StyledBox>
   );
-}
+};

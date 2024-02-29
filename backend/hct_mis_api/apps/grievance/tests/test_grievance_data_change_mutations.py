@@ -108,15 +108,20 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
         )
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country=country)
-        household_two = HouseholdFactory.build(id="ac540aa1-5c7a-47d0-a013-32054e2af454")
+        household_one = HouseholdFactory.build(
+            id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country=country, program=cls.program
+        )
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = household_one.program
         household_one.registration_data_import.save()
+        household_one.programs.add(program_one)
+
+        household_two = HouseholdFactory.build(id="ac540aa1-5c7a-47d0-a013-32054e2af454", program=cls.program)
         household_two.household_collection.save()
         household_two.registration_data_import.imported_by.save()
+        household_two.registration_data_import.program = household_two.program
         household_two.registration_data_import.save()
-        household_one.programs.add(program_one)
         household_two.programs.add(program_two)
 
         cls.individuals_to_create = [
@@ -212,6 +217,10 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
             number="1111",
             country=country_pl,
         )
+
+        area_type_level_1 = AreaTypeFactory(name="State1", area_level=1)
+        cls.area = AreaFactory(name="City Test1", area_type=area_type_level_1, p_code="area1")
+
         super().setUpTestData()
 
     @parameterized.expand(
@@ -580,6 +589,34 @@ class TestGrievanceCreateDataChangeMutation(BaseElasticSearchTestCase, APITestCa
                 },
             }
         }
+        self.snapshot_graphql_request(
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},
+            variables=variables,
+        )
+
+    def test_grievance_create_household_data_change_with_admin_area(self) -> None:
+        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_CREATE], self.business_area)
+
+        variables = {
+            "input": {
+                "businessArea": self.business_area.slug,
+                "description": "AreaTest",
+                "category": 2,
+                "issueType": 13,
+                "consent": True,
+                "language": "",
+                "extras": {
+                    "issueType": {
+                        "householdDataUpdateIssueTypeExtras": {
+                            "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
+                            "householdData": {"adminAreaTitle": self.area.p_code, "flexFields": {}},
+                        }
+                    }
+                },
+            }
+        }
+
         self.snapshot_graphql_request(
             request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
             context={"user": self.user, "headers": {"Program": self.id_to_base64(self.program.id, "ProgramNode")}},

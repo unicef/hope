@@ -1,5 +1,7 @@
 import { Box } from '@material-ui/core';
+import { v4 as uuidv4 } from 'uuid';
 import Paper from '@material-ui/core/Paper';
+import Skeleton from '@material-ui/lab/Skeleton';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -10,7 +12,6 @@ import TableRow from '@material-ui/core/TableRow';
 import FindInPageIcon from '@material-ui/icons/FindInPage';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingComponent } from '../LoadingComponent';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 
@@ -101,22 +102,24 @@ export function TableComponent<T>({
     ? rowsPerPage - Math.min(rowsPerPage, itemsCount - page * rowsPerPage)
     : rowsPerPage;
   let body;
+
   if (loading) {
-    body = (
+    body = Array.from({ length: rowsPerPage }).map(() => (
       <TableRow
+        key={uuidv4()}
         data-cy='table-row'
-        style={{ height: 54 * rowsPerPage, minHeight: 54 }}
+        style={{ height: 70, minHeight: 70 }}
       >
         <TableCell colSpan={headCells.length}>
-          <LoadingComponent />
+          <Skeleton variant='rect' width='100%' height={70} />
         </TableCell>
       </TableRow>
-    );
-  } else if (!data.length) {
+    ));
+  } else if (!data?.length) {
     body = (
       <TableRow
         data-cy='table-row'
-        style={{ height: 54 * emptyRows, minHeight: 54 }}
+        style={{ height: 70 * emptyRows, minHeight: 70 }}
       >
         <TableCell colSpan={headCells.length}>
           <div className={classes.empty}>
@@ -138,7 +141,7 @@ export function TableComponent<T>({
           return renderRow(row);
         })}
         {emptyRows > 0 && (
-          <TableRow style={{ height: 54 }}>
+          <TableRow style={{ height: 70 }}>
             <TableCell colSpan={headCells.length} />
           </TableRow>
         )}

@@ -55,6 +55,7 @@ class TestCopyProgram(APITestCase):
             status=Program.ACTIVE,
             business_area=cls.business_area,
             data_collecting_type=data_collecting_type,
+            programme_code="TEST",
         )
         cls.copy_data = {
             "programData": {
@@ -69,17 +70,17 @@ class TestCopyProgram(APITestCase):
                 "cashPlus": True,
                 "populationGoal": 150000,
                 "administrativeAreasOfImplementation": "Lorem Ipsum",
+                "programmeCode": "T3ST",
             },
         }
         cls.household1, cls.individuals1 = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
-                "program_id": cls.program.pk,
+                "program": cls.program,
             },
             individuals_data=[
                 {
                     "business_area": cls.business_area,
-                    "program_id": cls.program.pk,
                 },
             ],
         )
@@ -89,18 +90,17 @@ class TestCopyProgram(APITestCase):
             individual=individual,
             household=cls.household1,
         )
-        cls.document1 = DocumentFactory(individual=individual)
+        cls.document1 = DocumentFactory(individual=individual, program=individual.program)
         cls.individual_identity1 = IndividualIdentityFactory(individual=individual)
         cls.bank_account_info1 = BankAccountInfoFactory(individual=individual)
         cls.household2, individuals2 = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
-                "program_id": cls.program.pk,
+                "program": cls.program,
             },
             individuals_data=[
                 {
                     "business_area": cls.business_area,
-                    "program_id": cls.program.pk,
                 },
             ],
         )
@@ -108,16 +108,14 @@ class TestCopyProgram(APITestCase):
         cls.household3, cls.individuals3 = create_household_and_individuals(
             household_data={
                 "business_area": cls.business_area,
-                "program_id": cls.program.pk,
+                "program": cls.program,
             },
             individuals_data=[
                 {
                     "business_area": cls.business_area,
-                    "program_id": cls.program.pk,
                 },
                 {
                     "business_area": cls.business_area,
-                    "program_id": cls.program.pk,
                 },
             ],
         )

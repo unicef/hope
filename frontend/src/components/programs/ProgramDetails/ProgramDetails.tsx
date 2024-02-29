@@ -78,7 +78,12 @@ export const ProgramDetails = ({
               value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
-
+          <Grid item xs={4}>
+            <LabelizedField
+              label={t('Programme Code')}
+              value={program.programmeCode}
+            />
+          </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label={t('Sector')}
@@ -140,7 +145,9 @@ export const ProgramDetails = ({
               {program.partners.map((partner) => (
                 <Grid key={partner.id} item xs={3}>
                   <StyledBox p={6} flexDirection='column'>
-                    <Typography variant='h6'>{partner.name}</Typography>
+                    <Typography data-cy='label-partner-name' variant='h6'>
+                      {partner.name}
+                    </Typography>
                     <LabelizedField
                       label={t('Area Access')}
                       value={

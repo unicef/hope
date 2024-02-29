@@ -2,7 +2,7 @@ import { Button, Grid, Typography } from '@material-ui/core';
 import { GetApp } from '@material-ui/icons';
 import CheckIcon from '@material-ui/icons/Check';
 import EmailIcon from '@material-ui/icons/Email';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -60,13 +60,22 @@ export const ReportingDetailsPage = (): React.ReactElement => {
     { loading: restartReportLoading },
   ] = useRestartCreateReportMutation();
 
-  const { data, loading } = useReportQuery({
+  const { data, loading, startPolling, stopPolling } = useReportQuery({
     variables: { id },
   });
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useReportChoiceDataQuery();
+
+  useEffect(() => {
+    if (data?.report?.status === REPORTING_STATES.PROCESSING) {
+      startPolling(30000);
+    } else {
+      stopPolling();
+    }
+    return stopPolling;
+  }, [data, startPolling, stopPolling]);
 
   if (loading || choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;

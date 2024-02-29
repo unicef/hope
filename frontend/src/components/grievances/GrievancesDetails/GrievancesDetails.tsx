@@ -98,26 +98,72 @@ export const GrievancesDetails = ({
     );
   };
 
-  const renderPaymentUrl = (): React.ReactElement => {
-    if (ticket?.paymentRecord?.objType === 'PaymentRecord') {
-      return (
-        <ContentLink
-          href={`/${baseUrl}/payment-records/${ticket.paymentRecord.id}`}
-        >
-          {ticket.paymentRecord.caId}
-        </ContentLink>
-      );
-    }
-    if (ticket?.paymentRecord?.objType === 'Payment') {
-      return (
-        <ContentLink
-          href={`/${baseUrl}/payment-module/payments/${ticket.paymentRecord.id}`}
-        >
-          {ticket.paymentRecord.caId}
-        </ContentLink>
-      );
+  const renderUrl = (
+    obj,
+    objType: string,
+    href: string,
+    displayedId: string,
+  ): React.ReactElement => {
+    if (isAllPrograms) {
+      return <>{displayedId}</>;
     }
 
+    if (obj?.objType === objType) {
+      return <ContentLink href={href}>{displayedId}</ContentLink>;
+    }
+
+    return <>-</>;
+  };
+
+  const getUrl = (objType: string, id: string): string => {
+    switch (objType) {
+      case 'PaymentRecord':
+        return `/${baseUrl}/payment-records/${id}`;
+      case 'Payment':
+        return `/${baseUrl}/payment-module/payments/${id}`;
+      case 'PaymentPlan':
+        return `/${baseUrl}/payment-module/payment-plans/${id}`;
+      case 'CashPlan':
+        return `/${baseUrl}/cashplans/${id}`;
+      default:
+        return '';
+    }
+  };
+
+  const renderPaymentUrl = (): React.ReactElement => {
+    const paymentRecord = ticket?.paymentRecord;
+    if (paymentRecord) {
+      return renderUrl(
+        paymentRecord,
+        paymentRecord.objType,
+        getUrl(paymentRecord.objType, paymentRecord.id),
+        paymentRecord.caId,
+      );
+    }
+    return <>-</>;
+  };
+
+  const renderPaymentPlanUrl = (): React.ReactElement => {
+    const parent = ticket?.paymentRecord?.parent;
+    if (parent) {
+      return renderUrl(
+        parent,
+        parent.objType,
+        getUrl(parent.objType, parent.id),
+        parent.unicefId,
+      );
+    }
+    return <>-</>;
+  };
+
+  const renderPaymentPlanVerificationUrl = (): React.ReactElement => {
+    const parent = ticket?.paymentRecord?.parent;
+    if (parent) {
+      const url = `/${baseUrl}/payment-verification/${
+        parent.objType === 'CashPlan' ? 'cash-plan' : 'payment-plan'
+      }/${parent.id}`;
+      return renderUrl(parent, parent.objType, url, parent.unicefId);
+    }
     return <>-</>;
   };
 
@@ -252,6 +298,16 @@ export const GrievancesDetails = ({
               {
                 label: t('Payment ID'),
                 value: <span>{renderPaymentUrl()}</span>,
+                size: 3,
+              },
+              {
+                label: t('Payment Plan'),
+                value: <span>{renderPaymentPlanUrl()}</span>,
+                size: 3,
+              },
+              {
+                label: t('Payment Plan Verification'),
+                value: <span>{renderPaymentPlanVerificationUrl()}</span>,
                 size: 3,
               },
               {

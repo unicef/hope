@@ -51,6 +51,8 @@ from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
 
+logger = logging.getLogger(__name__)
+
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"
 UNIQUE_IN_BATCH = "UNIQUE_IN_BATCH"
@@ -61,16 +63,6 @@ DEDUPLICATION_BATCH_STATUS_CHOICE = (
     (UNIQUE_IN_BATCH, "Unique in batch"),
     (NOT_PROCESSED, "Not Processed"),
 )
-
-# using in Diia models
-MALE = "M"
-FEMALE = "F"
-DIIA_SEX_CHOICE = (
-    (MALE, _("Male")),
-    (FEMALE, _("Female")),
-)
-
-logger = logging.getLogger(__name__)
 
 COLLECT_TYPE_UNKNOWN = ""
 COLLECT_TYPE_NONE = "0"
@@ -151,10 +143,13 @@ class ImportedHousehold(TimeStampedUUIDModel):
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
-    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
+    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
-    diia_rec_id = models.CharField(max_length=50, blank=True, default=BLANK)
+    detail_id = models.CharField(
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
+    )
     enumerator_rec_id = models.PositiveIntegerField(blank=True, null=True)
     flex_registrations_record = models.ForeignKey(
         "registration_datahub.Record",
@@ -279,8 +274,12 @@ class ImportedIndividual(TimeStampedUUIDModel):
     comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
+    # TODO: remove 'kobo_asset_id' and 'row_id' after migrate data
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
     row_id = models.PositiveIntegerField(blank=True, null=True)
+    detail_id = models.CharField(
+        max_length=150, blank=True, null=True, help_text="Kobo asset ID, Xlsx row ID, Aurora source ID"
+    )
     disability_certificate_picture = models.ImageField(blank=True, null=True)
     preferred_language = models.CharField(max_length=6, choices=Languages.get_tuple(), null=True, blank=True)
     mis_unicef_id = models.CharField(max_length=255, null=True)
@@ -288,9 +287,6 @@ class ImportedIndividual(TimeStampedUUIDModel):
         null=True, db_index=True, blank=True
     )  # TODO temporary null=True until we migrate backward all data
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
-    program_id = models.UUIDField(
-        null=True, db_index=True, blank=True
-    )  # TODO temporary null=True until we migrate backward all data
 
     @property
     def age(self) -> int:
@@ -405,12 +401,10 @@ class ImportData(TimeStampedUUIDModel):
     XLSX = "XLSX"
     JSON = "JSON"
     FLEX_REGISTRATION = "FLEX"
-    DIIA = "DIIA"
     DATA_TYPE_CHOICES = (
         (XLSX, _("XLSX File")),
         (JSON, _("JSON File")),
         (FLEX_REGISTRATION, _("Flex Registration")),
-        (DIIA, _("DIIA")),
     )
     STATUS_PENDING = "PENDING"
     STATUS_RUNNING = "RUNNING"
@@ -588,116 +582,4 @@ class ImportedBankAccountInfo(TimeStampedUUIDModel):
             self.bank_account_number = str(self.bank_account_number).replace(" ", "")
         if self.debit_card_number:
             self.debit_card_number = str(self.debit_card_number).replace(" ", "")
-        super().save(*args, **kwargs)
-
-
-class DiiaHousehold(models.Model):
-    STATUS_TO_IMPORT = None
-    STATUS_IMPORTED = "IMPORTED"
-    STATUS_ERROR = "ERROR"
-    STATUS_IGNORED = "IGNORED"
-    STATUS_TAX_ID_ERROR = "TAX_ID_ERROR"
-
-    STATUSES_CHOICES = (
-        (STATUS_TO_IMPORT, "To import"),
-        (STATUS_IMPORTED, "Imported"),
-        (STATUS_ERROR, "Error"),
-        (STATUS_TAX_ID_ERROR, "Tax ID Error"),
-    )
-
-    rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
-    vpo_doc = ImageField(validators=[validate_image_file_extension], blank=True, null=True)
-    vpo_doc_id = models.CharField(max_length=128, blank=True, null=True)
-    vpo_doc_date = models.CharField(max_length=64, blank=True, null=True)
-    address = models.CharField(max_length=1024, blank=True, null=True)
-    consent = models.BooleanField(null=True)
-    source_data = models.TextField(default="", blank=True, null=True)
-    registration_data_import = models.ForeignKey(
-        "RegistrationDataImportDatahub",
-        related_name="diia_households",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
-    imported_household = models.ForeignKey(
-        "ImportedHousehold", on_delete=models.SET_NULL, related_name="diia_households", null=True, blank=True
-    )
-    status = models.CharField(max_length=16, choices=STATUSES_CHOICES, null=True, blank=True)
-
-    def __str__(self) -> str:
-        return f"Diia Household ID: {self.id}"
-
-
-DIIA_DISABLED = "True"
-DIIA_NOT_DISABLED = "False"
-
-DIIA_DISABILITY_CHOICES = (
-    (
-        DIIA_DISABLED,
-        "disabled",
-    ),
-    (
-        DIIA_NOT_DISABLED,
-        "not disabled",
-    ),
-)
-
-DIIA_RELATIONSHIP_HEAD = "HEAD"
-DIIA_RELATIONSHIP_SON = "SON"
-DIIA_RELATIONSHIP_DAUGHTER = "DAUGHTER"
-DIIA_RELATIONSHIP_WIFE = "WIFE"
-DIIA_RELATIONSHIP_HUSBAND = "HUSBAND"
-DIIA_RELATIONSHIP_RELATIONSHIP_UNKNOWN = None
-
-DIIA_RELATIONSHIP_CHOICE = (
-    (DIIA_RELATIONSHIP_RELATIONSHIP_UNKNOWN, "Unknown"),
-    (DIIA_RELATIONSHIP_HEAD, "Head of household (self)"),
-    (DIIA_RELATIONSHIP_SON, "Son"),
-    (DIIA_RELATIONSHIP_DAUGHTER, "Daughter"),
-    (DIIA_RELATIONSHIP_HUSBAND, "Husband"),
-    (DIIA_RELATIONSHIP_WIFE, "Wife"),
-)
-
-
-class DiiaIndividual(models.Model):
-    rec_id = models.CharField(db_index=True, max_length=20, blank=True, null=True)
-    individual_id = models.CharField(max_length=128, blank=True, null=True)  # RNOKPP - ukrainian tax_id
-    last_name = models.CharField(max_length=85, blank=True, null=True)
-    first_name = models.CharField(max_length=85, blank=True, null=True)
-    second_name = models.CharField(max_length=85, blank=True, null=True)
-    relationship = models.CharField(max_length=255, blank=True, choices=DIIA_RELATIONSHIP_CHOICE, null=True)
-    sex = models.CharField(max_length=255, choices=DIIA_SEX_CHOICE, null=True, blank=True)
-    birth_date = models.CharField(max_length=64, blank=True, null=True)
-    birth_doc = models.CharField(max_length=128, blank=True, null=True)
-    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, null=True, blank=True)
-    disability = models.CharField(
-        max_length=20, choices=DIIA_DISABILITY_CHOICES, default=NOT_DISABLED, null=True, blank=True
-    )
-    iban = models.CharField(max_length=255, blank=True, null=True)
-    bank_name = models.CharField(max_length=255, blank=True, null=True)
-    doc_type = models.CharField(max_length=128, blank=True, null=True)
-    doc_serie = models.CharField(max_length=64, blank=True, null=True)
-    doc_number = models.CharField(max_length=64, blank=True, null=True)
-    doc_issue_date = models.CharField(max_length=64, blank=True, null=True)
-    email = models.CharField(max_length=255, blank=True)
-    age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
-
-    registration_data_import = models.ForeignKey(
-        "RegistrationDataImportDatahub",
-        related_name="diia_individuals",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
-    imported_individual = models.ForeignKey(
-        "ImportedIndividual", on_delete=models.SET_NULL, related_name="diia_individuals", null=True, blank=True
-    )
-
-    @property
-    def full_name(self) -> str:
-        return f"{self.last_name} {self.first_name} {self.second_name}"
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        if self.iban:
-            self.iban = str(self.iban).replace(" ", "")
         super().save(*args, **kwargs)

@@ -604,7 +604,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     field_type = current_field["type"]
                     fn: Callable = switch_dict[field_type]
 
-                    if fn(value, header.value, cell) is False and household_id_can_be_empty is False:
+                    if (
+                        fn(value, header.value, cell) is False
+                        and household_id_can_be_empty is False
+                        and header.value not in ("admin1_h_c", "admin2_h_c")
+                    ):
                         message = (
                             f"Sheet: {sheet.title!r}, Unexpected value: "
                             f"{value} for type "
@@ -683,7 +687,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 area = queryset.filter(p_code=p_code).first()
                 if not area:
                     message = f"Sheet Households: Area with code: {p_code} does not exist"
-                if area.area_type.country not in business_area_countries:
+                elif area.area_type.country not in business_area_countries:
                     message = (
                         f"Sheet Households: Admin Area: {p_code} unavailable in Business Area: {business_area_slug}"
                     )

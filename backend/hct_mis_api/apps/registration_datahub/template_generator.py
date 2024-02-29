@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import openpyxl
 
@@ -56,7 +56,9 @@ class TemplateFileGenerator:
         return names, labels
 
     @classmethod
-    def _add_template_columns(cls, wb: openpyxl.Workbook) -> openpyxl.Workbook:
+    def _add_template_columns(
+        cls, wb: openpyxl.Workbook, business_area_slug: Optional[str] = None
+    ) -> openpyxl.Workbook:
         households_sheet_title = "Households"
         individuals_sheet_title = "Individuals"
 
@@ -68,7 +70,8 @@ class TemplateFileGenerator:
 
         fields = FieldFactory.from_scopes(
             [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
-        ).apply_business_area()
+        ).apply_business_area(business_area_slug=business_area_slug)
+
         households_fields = {
             **fields.associated_with_household().to_dict_by("xlsx_field"),
             **flex_fields[households_sheet_title.lower()],
@@ -93,5 +96,5 @@ class TemplateFileGenerator:
         return wb
 
     @classmethod
-    def get_template_file(cls) -> openpyxl.Workbook:
-        return cls._add_template_columns(cls._create_workbook())
+    def get_template_file(cls, business_area_slug: Optional[str] = None) -> openpyxl.Workbook:
+        return cls._add_template_columns(cls._create_workbook(), business_area_slug)

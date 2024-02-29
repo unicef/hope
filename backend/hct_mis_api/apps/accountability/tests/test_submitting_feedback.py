@@ -103,15 +103,18 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             ],
             cls.business_area,
         )
-        cls.registration_data_import = RegistrationDataImportFactory(business_area=cls.business_area)
+        cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program", status=Program.ACTIVE)
+        cls.registration_data_import = RegistrationDataImportFactory(
+            business_area=cls.business_area, program=cls.program
+        )
         cls.household, cls.individuals = create_household_and_individuals(
             household_data={
                 "registration_data_import": cls.registration_data_import,
                 "business_area": cls.business_area,
+                "program": cls.program,
             },
             individuals_data=[{}],
         )
-        cls.program = ProgramFactory(business_area=cls.business_area, name="Test Program", status=Program.ACTIVE)
         cls.update_user_partner_perm_for_program(cls.user, cls.business_area, cls.program)
 
         country = geo_models.Country.objects.create(name="Afghanistan")
@@ -166,6 +169,15 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         )
         assert "errors" not in response, response["errors"]
         self.assertEqual(len(response["data"]["allFeedbacks"]["edges"]), 1)
+
+    def test_permission_denied_when_user_is_not_provided(self) -> None:
+        self.create_new_feedback()
+        response = self.graphql_request(
+            request_string=self.ALL_FEEDBACKS_QUERY,
+            variables={},
+        )
+        self.assertIsNotNone(response.get("errors"))
+        self.assertIn("Permission Denied", response["errors"][0]["message"])
 
     def test_filtering_feedbacks(self) -> None:
         self.create_new_feedback(
@@ -363,6 +375,7 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
             household_data={
                 "registration_data_import": self.registration_data_import,
                 "business_area": self.business_area,
+                "program": self.program,
             },
             individuals_data=[{}],
         )
@@ -370,7 +383,13 @@ mutation CreateGrievanceTicket($input: CreateGrievanceTicketInput!) {
         amount = Feedback.objects.count()
         response = self.graphql_request(
             request_string=self.CREATE_NEW_FEEDBACK_MUTATION,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug,
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                },
+            },
             variables={
                 "input": self.create_dummy_correct_input()
                 | {

@@ -112,7 +112,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         zip_code = household_address.get("zip_code_h_c", "")
 
         household_data = {
-            "flex_registrations_record": record,
+            # "flex_registrations_record": record,
             "registration_data_import": registration_data_import,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
@@ -310,14 +310,14 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
         household = self._create_object_and_validate(household_data, ImportedHousehold)
         household.set_admin_areas()
 
-        household.kobo_asset_id = record.source_id
+        household.detail_id = record.source_id
         household.save(
             update_fields=(
                 "admin_area",
                 "admin_area_title",
                 "admin1_title",
                 "admin2_title",
-                "kobo_asset_id",
+                "detail_id",
             )
         )
 
@@ -332,7 +332,7 @@ class CzechRepublicFlexRegistration(BaseRegistrationService):
 
                 individual: ImportedIndividual = self._create_object_and_validate(individual_data, ImportedIndividual)
                 individual.phone_no = phone_no
-                individual.kobo_asset_id = record.source_id
+                individual.detail_id = record.source_id
                 individual.save()
 
                 bank_account_data = self._prepare_bank_account_info(individual_dict, individual)

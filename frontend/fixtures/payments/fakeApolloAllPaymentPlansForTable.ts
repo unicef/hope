@@ -37,6 +37,7 @@ export const fakeApolloAllPaymentPlansForTable = [
                 id:
                   'UGF5bWVudFBsYW5Ob2RlOmJmOTBkOWQzLTkyY2QtNGMyMC1iODc3LTU1OTFiNzUwZjlkZQ==',
                 unicefId: 'PP-0060-22-11223344',
+                name: "pp1",
                 isFollowUp: false,
                 followUps: {
                   totalCount: 0,
@@ -89,6 +90,7 @@ export const fakeApolloAllPaymentPlansForTable = [
                 id:
                   'UGF5bWVudFBsYW5Ob2RlOjAwMDAwMDAwLWZlZWQtYmVlZi0wMDAwLTAwMDAwYmFkZjAwZA==',
                 unicefId: 'PP-0060-23-00000013',
+                name: "pp2",
                 isFollowUp: false,
                 followUps: {
                   totalCount: 0,

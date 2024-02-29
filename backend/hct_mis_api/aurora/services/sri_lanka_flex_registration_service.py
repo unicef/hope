@@ -64,7 +64,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
     ) -> Dict:
         household_data = {
             **build_arg_dict_from_dict(localization_dict, SriLankaRegistrationService.HOUSEHOLD_MAPPING_DICT),
-            "flex_registrations_record": record,
+            # "flex_registrations_record": record,
             "registration_data_import": registration_data_import,
             "first_registration_date": record.timestamp,
             "last_registration_date": record.timestamp,
@@ -249,7 +249,7 @@ class SriLankaRegistrationService(BaseRegistrationService):
             self._prepare_birth_certificate(individual_data_dict, imported_individual)
         household.size = len(individuals_to_create) + 1
         household.head_of_household = head_of_household
-        household.kobo_asset_id = record.source_id
+        household.detail_id = record.source_id
         household.save()
 
         record.mark_as_imported()

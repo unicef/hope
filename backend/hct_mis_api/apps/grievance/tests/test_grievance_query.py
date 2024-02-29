@@ -174,15 +174,8 @@ class TestGrievanceQuery(APITestCase):
     def setUpTestData(cls) -> None:
         create_afghanistan()
         call_command("loadcountries")
-
-        cls.partner = PartnerFactory(name="Partner1")
-        cls.partner_2 = PartnerFactory(name="Partner2")
-        cls.user = UserFactory.create(partner=cls.partner)
-        cls.user2 = UserFactory.create(partner=cls.partner_2)
-
         cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
-
         country = Country.objects.first()
         area_type = AreaTypeFactory(
             name="Admin type one",
@@ -191,6 +184,26 @@ class TestGrievanceQuery(APITestCase):
         )
         cls.admin_area_1 = AreaFactory(name="City Test", area_type=area_type, p_code="123aa123")
         cls.admin_area_2 = AreaFactory(name="City Example", area_type=area_type, p_code="sadasdasfd222")
+
+        cls.partner = PartnerFactory(name="Partner1")
+        cls.partner_2 = PartnerFactory(name="Partner2")
+        # update partner perms
+        cls.partner.permissions = {
+            str(cls.business_area.pk): {
+                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        cls.partner_2.permissions = {
+            str(cls.business_area.pk): {
+                "programs": {str(cls.program.id): [str(cls.admin_area_1.pk), str(cls.admin_area_2.pk)]},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        cls.partner.save()
+        cls.partner_2.save()
+        cls.user = UserFactory.create(partner=cls.partner)
+        cls.user2 = UserFactory.create(partner=cls.partner_2)
 
         _, individuals = create_household({"size": 2})
         cls.individual_1 = individuals[0]
@@ -334,11 +347,34 @@ class TestGrievanceQuery(APITestCase):
             },
             variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
+        # access also from All Programs
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
         # add admin2 for Grievance
         gt.admin2 = self.admin_area_1
         gt.save()
-        # no access because no program id in header like All Programmes
         assert gt.admin2 is self.admin_area_1
+        # still has access from query for specific Program and All Programs
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
         self.snapshot_graphql_request(
             request_string=self.GRIEVANCE_QUERY,
             context={
@@ -389,7 +425,7 @@ class TestGrievanceQuery(APITestCase):
             },
             variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
         )
-        # add admin_area_1 for for Partner
+        # add admin_area_1 for Partner
         self.partner.permissions = {
             str(self.business_area.pk): {
                 "programs": {str(self.program.id): [str(self.admin_area_1.pk)]},
@@ -403,6 +439,26 @@ class TestGrievanceQuery(APITestCase):
                 "user": self.user,
                 "headers": {
                     "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
+            variables={"id": self.id_to_base64(gt_id, "GrievanceTicketNode")},
+        )
+
+        # no access to any program in BA
+        self.partner.permissions = {
+            str(self.business_area.pk): {
+                "programs": {},
+                "roles": ["e9e8c91a-c711-45b7-be8c-501c14d46330"],
+            }
+        }
+        self.partner.save()
+        self.snapshot_graphql_request(
+            request_string=self.GRIEVANCE_QUERY,
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": "all",
                     "Business-Area": self.business_area.slug,
                 },
             },

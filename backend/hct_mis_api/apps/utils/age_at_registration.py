@@ -4,14 +4,11 @@ from dateutil import parser
 from dateutil.relativedelta import relativedelta
 
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.models import (
-    DiiaIndividual,
-    RegistrationDataImportDatahub,
-)
+from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 
 
 def calculate_age_at_registration(
-    rdi: Optional[Union[RegistrationDataImport, RegistrationDataImportDatahub, DiiaIndividual]],
+    rdi: Optional[Union[RegistrationDataImport, RegistrationDataImportDatahub]],
     birth_date: str,
 ) -> Optional[int]:
     try:

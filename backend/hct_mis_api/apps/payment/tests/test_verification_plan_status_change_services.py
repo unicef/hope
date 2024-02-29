@@ -60,12 +60,13 @@ class TestPhoneNumberVerification(TestCase):
         cls.individuals = []
         for i in range(cls.payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
-                imported_by=user, business_area=BusinessArea.objects.first()
+                imported_by=user, business_area=BusinessArea.objects.first(), program=program
             )
             household, individuals = create_household(
                 {
                     "registration_data_import": registration_data_import,
                     "admin_area": Area.objects.order_by("?").first(),
+                    "program": program,
                 },
                 {
                     "registration_data_import": registration_data_import,
@@ -106,7 +107,7 @@ class TestPhoneNumberVerification(TestCase):
             business_area=BusinessArea.objects.first(),
         )
         other_cash_plan = CashPlanFactory(
-            program=program,
+            program=other_program,
             business_area=BusinessArea.objects.first(),
         )
         other_cash_plan.save()
@@ -118,12 +119,13 @@ class TestPhoneNumberVerification(TestCase):
         cls.other_individuals = []
         for _ in range(cls.payment_record_amount):
             other_registration_data_import = RegistrationDataImportFactory(
-                imported_by=user, business_area=BusinessArea.objects.first()
+                imported_by=user, business_area=BusinessArea.objects.first(), program=other_program
             )
             other_household, other_individuals = create_household(
                 {
                     "registration_data_import": other_registration_data_import,
                     "admin_area": Area.objects.order_by("?").first(),
+                    "program": other_program,
                 },
                 {"registration_data_import": other_registration_data_import},
             )

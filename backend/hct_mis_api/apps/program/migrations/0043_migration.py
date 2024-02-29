@@ -12,6 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='program',
-            options={'permissions': [('enroll_beneficiaries', 'Can enroll beneficiaries')], 'verbose_name': 'Programme'},
+            options={'permissions': [('enroll_beneficiaries', 'Can enroll beneficiaries')],
+                     'verbose_name': 'Programme'},
         ),
     ]

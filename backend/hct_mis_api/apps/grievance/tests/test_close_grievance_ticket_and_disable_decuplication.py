@@ -14,7 +14,6 @@ from hct_mis_api.apps.geo.fixtures import AreaFactory, AreaTypeFactory
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
-    TicketIndividualDataUpdateDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import (
@@ -75,10 +74,12 @@ class TestCloseGrievanceTicketAndDisableDeduplication(BaseElasticSearchTestCase,
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example")
         household_one.household_collection.save()
         household_one.registration_data_import.imported_by.save()
+        household_one.registration_data_import.program = program_one
         household_one.registration_data_import.save()
+        household_one.program = program_one
         household_one.programs.add(program_one)
 
-        cls.individual = IndividualFactory(household=household_one)
+        cls.individual = IndividualFactory(household=household_one, program=program_one)
         national_id_type = DocumentType.objects.get(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID]
         )
@@ -86,10 +87,18 @@ class TestCloseGrievanceTicketAndDisableDeduplication(BaseElasticSearchTestCase,
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE]
         )
         cls.national_id = DocumentFactory(
-            type=national_id_type, document_number="789-789-645", individual=cls.individual, country=country
+            type=national_id_type,
+            document_number="789-789-645",
+            individual=cls.individual,
+            country=country,
+            program=program_one,
         )
         cls.birth_certificate = DocumentFactory(
-            type=birth_certificate_type, document_number="ITY8456", individual=cls.individual, country=country
+            type=birth_certificate_type,
+            document_number="ITY8456",
+            individual=cls.individual,
+            country=country,
+            program=program_one,
         )
         household_one.head_of_household = cls.individual
         household_one.save()
@@ -103,6 +112,7 @@ class TestCloseGrievanceTicketAndDisableDeduplication(BaseElasticSearchTestCase,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
             created_by=cls.user,
         )
+        cls.add_individual_grievance_ticket.programs.add(program_one)
         TicketAddIndividualDetailsFactory(
             ticket=cls.add_individual_grievance_ticket,
             household=cls.household_one,
@@ -125,36 +135,6 @@ class TestCloseGrievanceTicketAndDisableDeduplication(BaseElasticSearchTestCase,
                 ],
             },
             approve_status=True,
-        )
-
-        TicketIndividualDataUpdateDetailsFactory(
-            ticket=cls.add_individual_grievance_ticket,
-            individual=cls.individual,
-            individual_data={
-                "given_name": {"value": "Test", "approve_status": True},
-                "full_name": {"value": "Test Example", "approve_status": True},
-                "family_name": {"value": "Example", "approve_status": True},
-                "relationship": RELATIONSHIP_UNKNOWN,
-                "estimated_birth_date": False,
-                "sex": {"value": "MALE", "approve_status": False},
-                "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
-                "marital_status": {"value": SINGLE, "approve_status": True},
-                "role": {"value": ROLE_PRIMARY, "approve_status": True},
-                "documents": [
-                    {
-                        "value": {
-                            "country": "POL",
-                            "key": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_NATIONAL_ID],
-                            "number": "999-888-777",
-                        },
-                        "approve_status": True,
-                    },
-                ],
-                "documents_to_remove": [
-                    {"value": cls.id_to_base64(cls.national_id.id, "DocumentNode"), "approve_status": True},
-                    {"value": cls.id_to_base64(cls.birth_certificate.id, "DocumentNode"), "approve_status": False},
-                ],
-            },
         )
         super().setUpTestData()
 

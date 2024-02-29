@@ -109,13 +109,14 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         if delivered_quantity is not None and delivered_quantity != "":
             delivered_quantity = to_decimal(delivered_quantity)
             if delivered_quantity != payment.delivered_quantity:  # update value
-                if delivered_quantity > payment.entitlement_quantity:
+                entitlement_quantity = payment.entitlement_quantity or Decimal(0)
+                if delivered_quantity > entitlement_quantity:
                     self.errors.append(
                         XlsxError(
                             self.sheetname,
                             cell.coordinate,
                             f"Payment {payment_id}: Delivered quantity {delivered_quantity} is bigger than "
-                            f"Entitlement quantity {payment.entitlement_quantity}",
+                            f"Entitlement quantity {entitlement_quantity}",
                         )
                     )
                 else:
@@ -295,7 +296,7 @@ class XlsxPaymentPlanImportPerFspService(XlsxImportBaseService):
         if payment_delivery_date := payment.delivery_date:
             payment_delivery_date = payment.delivery_date.replace(tzinfo=None)
 
-        if delivered_quantity is not None and delivered_quantity != "":
+        if delivered_quantity is not None and str(delivered_quantity).strip() != "":
             status, delivered_quantity = self._get_delivered_quantity_status_and_value(
                 delivered_quantity, payment.entitlement_quantity, payment_id
             )

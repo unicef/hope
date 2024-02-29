@@ -12,7 +12,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.fields import ArrayField, IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator,
+    MinLengthValidator,
+    MinValueValidator,
+)
 from django.db import models
 from django.db.models import (
     Count,
@@ -349,6 +353,29 @@ class GenericPayment(TimeStampedUUIDModel):
     def get_unicef_id(self) -> str:
         return self.ca_id if isinstance(self, PaymentRecord) else self.unicef_id
 
+    @property
+    def payment_status(self) -> str:
+        status = "-"
+        if self.status == GenericPayment.STATUS_PENDING:
+            status = "Pending"
+
+        elif self.status in (GenericPayment.STATUS_DISTRIBUTION_SUCCESS, GenericPayment.STATUS_SUCCESS):
+            status = "Delivered Fully"
+
+        elif self.status == GenericPayment.STATUS_DISTRIBUTION_PARTIAL:
+            status = "Delivered Partially"
+
+        elif self.status == GenericPayment.STATUS_NOT_DISTRIBUTED:
+            status = "Not Delivered"
+
+        elif self.status == GenericPayment.STATUS_ERROR:
+            status = "Unsuccessful"
+
+        elif self.status == GenericPayment.STATUS_FORCE_FAILED:
+            status = "Force Failed"
+
+        return status
+
 
 class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, UnicefIdentifiedModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -392,12 +419,15 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         XLSX_IMPORTING_RECONCILIATION = "XLSX_IMPORTING_RECONCILIATION", "Importing Reconciliation XLSX file"
         EXCLUDE_BENEFICIARIES = "EXCLUDE_BENEFICIARIES", "Exclude Beneficiaries Running"
         EXCLUDE_BENEFICIARIES_ERROR = "EXCLUDE_BENEFICIARIES_ERROR", "Exclude Beneficiaries Error"
+        SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Sending to Payment Gateway"
+        SEND_TO_PAYMENT_GATEWAY_ERROR = "SEND_TO_PAYMENT_GATEWAY_ERROR", "Send to Payment Gateway Error"
 
     BACKGROUND_ACTION_ERROR_STATES = [
         BackgroundActionStatus.XLSX_EXPORT_ERROR,
         BackgroundActionStatus.XLSX_IMPORT_ERROR,
         BackgroundActionStatus.RULE_ENGINE_ERROR,
         BackgroundActionStatus.EXCLUDE_BENEFICIARIES_ERROR,
+        BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
     ]
 
     class Action(models.TextChoices):
@@ -411,6 +441,7 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         REVIEW = "REVIEW", "Review"
         REJECT = "REJECT", "Reject"
         FINISH = "FINISH", "Finish"
+        SEND_TO_PAYMENT_GATEWAY = "SEND_TO_PAYMENT_GATEWAY", "Send to Payment Gateway"
 
     program_cycle = models.ForeignKey("program.ProgramCycle", null=True, blank=True, on_delete=models.CASCADE)
     created_by = models.ForeignKey(
@@ -478,10 +509,12 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     is_follow_up = models.BooleanField(default=False)
     exclusion_reason = models.TextField(blank=True)
     exclude_household_error = models.TextField(blank=True)
+    name = models.CharField(max_length=25, validators=[MinLengthValidator(5)], null=True, blank=True)
 
     class Meta:
         verbose_name = "Payment Plan"
         ordering = ["created_at"]
+        constraints = [models.UniqueConstraint(fields=["name", "program"], name="name_unique_per_program")]
 
     def __str__(self) -> str:
         return self.unicef_id or ""
@@ -597,6 +630,24 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         conditions=[lambda obj: obj.status in [PaymentPlan.Status.OPEN, PaymentPlan.Status.LOCKED]],
     )
     def background_action_status_exclude_beneficiaries_error(self) -> None:
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[None, BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR],
+        target=BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_send_to_payment_gateway(self) -> None:
+        pass
+
+    @transition(
+        field=background_action_status,
+        source=[BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY, BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR],
+        target=BackgroundActionStatus.SEND_TO_PAYMENT_GATEWAY_ERROR,
+        conditions=[lambda obj: obj.status in [PaymentPlan.Status.ACCEPTED]],
+    )
+    def background_action_status_send_to_payment_gateway_error(self) -> None:
         pass
 
     @transition(
@@ -937,6 +988,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("additional_document_type", _("Additional Document Type")),
         ("additional_document_number", _("Additional Document Number")),
         ("registration_token", _("Registration Token")),
+        ("status", _("Status")),
     )
 
     DEFAULT_COLUMNS = [col[0] for col in COLUMNS_CHOICES]
@@ -1030,6 +1082,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "additional_collector_name": (payment, "additional_collector_name"),
             "additional_document_type": (payment, "additional_document_type"),
             "additional_document_number": (payment, "additional_document_number"),
+            "status": (payment, "payment_status"),
         }
         additional_columns = {"registration_token": cls.get_registration_token_doc_number}
         if column_name in additional_columns:
@@ -1135,6 +1188,7 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
         through="FspXlsxTemplatePerDeliveryMechanism",
         related_name="financial_service_providers",
     )
+    payment_gateway_id = models.CharField(max_length=255, null=True)
 
     def __str__(self) -> str:
         return f"{self.name} ({self.vision_vendor_number}): {self.communication_channel}"
@@ -1172,6 +1226,10 @@ class FinancialServiceProvider(TimeStampedUUIDModel):
             return True
 
         return volume <= self.distribution_limit
+
+    @property
+    def is_payment_gateway(self) -> bool:
+        return self.communication_channel == self.COMMUNICATION_CHANNEL_API and self.payment_gateway_id is not None
 
 
 class FinancialServiceProviderXlsxReport(TimeStampedUUIDModel):
@@ -1234,6 +1292,8 @@ class DeliveryMechanismPerPaymentPlan(TimeStampedUUIDModel):
         max_length=255, choices=GenericPayment.DELIVERY_TYPE_CHOICE, db_index=True, null=True
     )
     delivery_mechanism_order = models.PositiveIntegerField()
+
+    sent_to_payment_gateway = models.BooleanField(default=False)
 
     class Meta:
         constraints = [

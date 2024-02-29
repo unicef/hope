@@ -42,12 +42,22 @@ export const CreateProgramPage = (): ReactElement => {
   });
 
   const handleSubmit = async (values): Promise<void> => {
+    const budgetValue = parseFloat(values.budget) ?? 0;
+    const budgetToFixed = !Number.isNaN(budgetValue)
+      ? budgetValue.toFixed(2)
+      : 0;
+    const populationGoalValue = parseInt(values.populationGoal, 10) ?? 0;
+    const populationGoalParsed = !Number.isNaN(populationGoalValue)
+      ? populationGoalValue
+      : 0;
+
     try {
       const response = await mutate({
         variables: {
           programData: {
             ...values,
-            budget: parseFloat(values.budget).toFixed(2),
+            budget: budgetToFixed,
+            populationGoal: populationGoalParsed,
             businessAreaSlug: businessArea,
           },
         },
@@ -69,14 +79,15 @@ export const CreateProgramPage = (): ReactElement => {
 
   const initialValues = {
     name: '',
+    programmeCode: '',
     startDate: '',
     endDate: '',
     sector: '',
     dataCollectingTypeCode: '',
     description: '',
-    budget: '0.00',
+    budget: '',
     administrativeAreasOfImplementation: '',
-    populationGoal: 0,
+    populationGoal: '',
     cashPlus: false,
     frequencyOfPayments: 'REGULAR',
     partners: [],
@@ -85,6 +96,7 @@ export const CreateProgramPage = (): ReactElement => {
   const stepFields = [
     [
       'name',
+      'programmeCode',
       'startDate',
       'endDate',
       'sector',

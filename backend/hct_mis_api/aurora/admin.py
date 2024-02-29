@@ -28,7 +28,6 @@ from smart_admin.decorators import smart_register
 
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
-from hct_mis_api.apps.registration_datahub.utils import get_record_model
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.utils.security import is_root
 from hct_mis_api.aurora import models
@@ -264,9 +263,8 @@ class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
                 if service := registration.rdi_parser:
-                    Record2 = get_record_model()
                     qs = (
-                        Record2.objects.defer("storage", "counters", "files", "fields")
+                        Record.objects.defer("storage", "counters", "files", "fields")
                         .filter(**filters)
                         .exclude(**exclude)
                     )
@@ -317,9 +315,8 @@ class RecordMixinAdmin(ExtraButtonsMixin, admin.ModelAdmin):
                 ctx["filters"] = filters
                 ctx["exclude"] = exclude
                 if service := registration.rdi_parser:
-                    Record2 = get_record_model()
                     qs = (
-                        Record2.objects.defer("storage", "counters", "files", "fields")
+                        Record.objects.defer("storage", "counters", "files", "fields")
                         .filter(**filters)
                         .exclude(**exclude)
                     )

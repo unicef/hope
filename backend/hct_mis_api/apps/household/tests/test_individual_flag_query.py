@@ -18,7 +18,7 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestIndividualFlagQuery(APITestCase):
-    databases = "__all__"
+    databases = {"default"}
 
     QUERY = """
     query AllIndividuals($flags: [String]) {
@@ -52,7 +52,6 @@ class TestIndividualFlagQuery(APITestCase):
                 "birth_date": "1943-07-30",
                 "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
                 "deduplication_golden_record_status": NEEDS_ADJUDICATION,
-                "program": cls.program,
             },
             {
                 "full_name": "Robin Ford",
@@ -62,7 +61,6 @@ class TestIndividualFlagQuery(APITestCase):
                 "birth_date": "1946-02-15",
                 "id": "8ef39244-2884-459b-ad14-8d63a6fe4a4a",
                 "duplicate": True,
-                "program": cls.program,
             },
             {
                 "full_name": "Timothy Perry",
@@ -72,7 +70,6 @@ class TestIndividualFlagQuery(APITestCase):
                 "birth_date": "1983-12-21",
                 "id": "badd2d2d-7ea0-46f1-bb7a-69f385bacdcd",
                 "sanction_list_possible_match": True,
-                "program": cls.program,
             },
             {
                 "full_name": "Eric Torres",
@@ -82,7 +79,6 @@ class TestIndividualFlagQuery(APITestCase):
                 "birth_date": "1973-03-23",
                 "id": "2c1a26a3-2827-4a99-9000-a88091bf017c",
                 "sanction_list_confirmed_match": True,
-                "program": cls.program,
             },
             {
                 "full_name": "Kailan Shan",
@@ -94,7 +90,6 @@ class TestIndividualFlagQuery(APITestCase):
                 "deduplication_golden_record_status": NEEDS_ADJUDICATION,
                 "sanction_list_possible_match": True,
                 "sanction_list_confirmed_match": True,
-                "program": cls.program,
             },
             {
                 "full_name": "Jenna Franklin",
@@ -103,10 +98,9 @@ class TestIndividualFlagQuery(APITestCase):
                 "phone_no": "001-296-358-5428-607",
                 "birth_date": "1969-11-29",
                 "id": "0fc995cc-ea72-4319-9bfe-9c9fda3ec191",
-                "program": cls.program,
             },
         ]
-        create_household_and_individuals(None, individuals_to_create)
+        create_household_and_individuals({"program": cls.program}, individuals_to_create)
         cls.create_user_role_with_permissions(
             cls.user, [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST], cls.business_area
         )

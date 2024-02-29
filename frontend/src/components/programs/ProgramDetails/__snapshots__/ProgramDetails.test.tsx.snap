@@ -106,6 +106,23 @@ exports[`components/ProgramDetails should render 1`] = `
               class="sc-bwzfXH eoWrid"
               color="textSecondary"
             >
+              Programme Code
+            </span>
+            <div
+              data-cy="label-Programme Code"
+            >
+              -
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        >
+          <div>
+            <span
+              class="sc-bwzfXH eoWrid"
+              color="textSecondary"
+            >
               Sector
             </span>
             <div
@@ -278,6 +295,7 @@ exports[`components/ProgramDetails should render 1`] = `
           >
             <h6
               class="MuiTypography-root MuiTypography-h6"
+              data-cy="label-partner-name"
             />
             <div>
               <span
