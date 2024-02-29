@@ -58,6 +58,7 @@ const StyledTable = styled(Table)`
 
 const EmptyMessage = styled.div`
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   flex-direction: column;

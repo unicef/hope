@@ -1,4 +1,5 @@
 import {
+  Box,
   FormControl,
   FormHelperText,
   IconButton,
@@ -58,7 +59,9 @@ export function FormikSelectField({
       fullWidth
       {...otherProps}
     >
-      <InputLabel>{otherProps.label}</InputLabel>
+      <Box mb={1}>
+        <InputLabel>{otherProps.label}</InputLabel>
+      </Box>
       <Select
         {...field}
         {...otherProps}

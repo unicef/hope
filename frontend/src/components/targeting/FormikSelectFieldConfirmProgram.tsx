@@ -1,4 +1,5 @@
 import {
+  Box,
   FormControl,
   FormHelperText,
   InputLabel,
@@ -44,7 +45,9 @@ export function FormikSelectFieldConfirmProgram({
 
   return (
     <FormControl variant="outlined" margin="dense" fullWidth {...otherProps}>
-      <InputLabel>{otherProps.label}</InputLabel>
+      <Box mb={1}>
+        <InputLabel>{otherProps.label}</InputLabel>
+      </Box>
       <Select
         {...field}
         {...otherProps}
