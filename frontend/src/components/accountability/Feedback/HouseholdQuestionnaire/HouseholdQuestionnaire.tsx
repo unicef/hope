@@ -48,9 +48,9 @@ export function HouseholdQuestionnaire({
           label: t('Head of Household'),
           value: (
             <ContentLink
-              href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold.id}`}
+              href={`/${baseUrl}/population/individuals/${selectedHouseholdData.headOfHousehold?.id}`}
             >
-              {selectedHouseholdData.headOfHousehold.fullName}
+              {selectedHouseholdData.headOfHousehold?.fullName}
             </ContentLink>
           ),
           size: 3,

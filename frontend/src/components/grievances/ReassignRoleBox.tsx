@@ -125,7 +125,7 @@ export const ReassignRoleBox = ({
       </Box>
     ));
 
-  const showMessage = () => {
+  const showMessage = (): React.ReactElement => {
     if (
       (ticket.issueType.toString() ===
         GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
@@ -140,7 +140,7 @@ export const ReassignRoleBox = ({
             ?.value === 'NO_ROLE'))
     ) {
       return (
-        <Typography variant="body2">
+        <Typography variant='body2'>
           {t(
             'Upon removing you will need to select new individual(s) for this role.',
           )}
