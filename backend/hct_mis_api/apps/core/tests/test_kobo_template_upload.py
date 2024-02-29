@@ -111,6 +111,7 @@ class TestKoboTemplateUpload(APITestCase):
                 "Field: currency_h_c - Choice: XXX is not present in HOPE",
                 "Field: tax_id_no_i_c - Field is missing",
                 "Field: tax_id_issuer_i_c - Field is missing",
+                "Field: national_passport_no_i_c - Field is missing",
                 "Field: account_holder_name_i_c - Field is missing",
                 "Field: bank_branch_name_i_c - Field is missing",
                 # TODO: fix this? (rebase issue?)
@@ -122,7 +123,7 @@ class TestKoboTemplateUpload(APITestCase):
         self.assertEqual(form.errors, expected_errors)
 
     @patch(
-        "hct_mis_api.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.delay",
+        "hct_mis_api.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.run",
         new=lambda *args, **kwargs: None,
     )
     def test_upload_valid_template(self) -> None:
