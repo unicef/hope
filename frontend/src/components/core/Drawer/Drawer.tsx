@@ -183,18 +183,7 @@ export const Drawer = ({
             </StyledLink>
           </ListItem>
         ))}
-        {open && (
-          <Version>
-            <div>
-              Backend Version:
-              {backendVersion}
-            </div>
-            <div>
-              Frontend Version:
-              {frontendVersion}
-            </div>
-          </Version>
-        )}
+        {open && <Version>Version: {frontendVersion}</Version>}
       </ToolbarScrollBox>
       <AlertDialog
         show={showMismatchedDialog}
