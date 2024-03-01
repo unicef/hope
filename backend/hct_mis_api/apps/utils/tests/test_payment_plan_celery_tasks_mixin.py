@@ -59,11 +59,12 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
         self, pp_status: str, background_action_status: str, html_element: str
     ) -> None:
         self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(self.url)
 
         self.payment_plan.status = pp_status
         self.payment_plan.background_action_status = background_action_status
         self.payment_plan.save()
+
+        response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn(html_element, response.rendered_content)
