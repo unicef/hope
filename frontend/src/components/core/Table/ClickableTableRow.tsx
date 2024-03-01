@@ -4,6 +4,10 @@ import styled from 'styled-components';
 
 const StyledTableRow = styled(TableRow)`
   cursor: pointer;
+  && {
+    white-space: nowrap;
+    overflow: auto;
+  }
 `;
 function getSelectedText(): string {
   let text = '';
