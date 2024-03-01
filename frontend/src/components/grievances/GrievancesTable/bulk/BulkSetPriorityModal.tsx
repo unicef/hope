@@ -1,4 +1,4 @@
-import { MenuItem, Select } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -25,11 +25,11 @@ interface BulkSetPriorityModalProps {
   setSelected;
 }
 
-export function BulkSetPriorityModal({
+export const BulkSetPriorityModal = ({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkSetPriorityModalProps): React.ReactElement {
+}: BulkSetPriorityModalProps): React.ReactElement => {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const [value, setValue] = React.useState<number>(0);
@@ -62,20 +62,20 @@ export function BulkSetPriorityModal({
       onSave={onSave}
       icon={<AlarmAddIcon />}
     >
-      <Select
-        value={value}
-        onChange={(e) => setValue(e.target.value as number)}
-        style={{ width: '100%' }}
-        variant="outlined"
-        margin="dense"
-        label={t('Priority')}
-      >
-        {priorityChoices.map((choice) => (
-          <MenuItem key={choice.value} value={choice.value}>
-            {choice.name}
-          </MenuItem>
-        ))}
-      </Select>
+      <FormControl variant="outlined" margin="dense" style={{ width: '100%' }}>
+        <InputLabel>{t('Priority')}</InputLabel>
+        <Select
+          value={value}
+          onChange={(e) => setValue(e.target.value as number)}
+          label={t('Priority')}
+        >
+          {priorityChoices.map((choice) => (
+            <MenuItem key={choice.value} value={choice.value}>
+              {choice.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
     </BulkBaseModal>
   );
-}
+};

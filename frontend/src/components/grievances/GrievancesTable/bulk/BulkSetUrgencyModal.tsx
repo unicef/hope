@@ -1,4 +1,4 @@
-import { MenuItem, Select } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -62,20 +62,20 @@ export function BulkSetUrgencyModal({
       onSave={onSave}
       icon={<PriorityHighIcon />}
     >
-      <Select
-        value={value}
-        onChange={(e) => setValue(e.target.value as number)}
-        style={{ width: '100%' }}
-        variant="outlined"
-        margin="dense"
-        label={t('Urgency')}
-      >
-        {urgencyChoices.map((choice) => (
-          <MenuItem key={choice.value} value={choice.value}>
-            {choice.name}
-          </MenuItem>
-        ))}
-      </Select>
+      <FormControl variant="outlined" margin="dense" style={{ width: '100%' }}>
+        <InputLabel id="urgency-label">{t('Urgency')}</InputLabel>
+        <Select
+          value={value}
+          onChange={(e) => setValue(e.target.value as number)}
+          label={t('Urgency')}
+        >
+          {urgencyChoices.map((choice) => (
+            <MenuItem key={choice.value} value={choice.value}>
+              {choice.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
     </BulkBaseModal>
   );
 }
