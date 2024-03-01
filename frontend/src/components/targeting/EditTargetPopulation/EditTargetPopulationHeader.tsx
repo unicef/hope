@@ -48,6 +48,7 @@ export function EditTargetPopulationHeader({
             required
             component={FormikTextField}
             data-cy="target-population-name"
+            variant="standard"
           />
         ) : (
           values.name
