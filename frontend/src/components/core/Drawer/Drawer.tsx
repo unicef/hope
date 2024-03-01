@@ -93,6 +93,7 @@ const Version = styled('div')`
   color: #aaa;
   padding: 4px;
   text-align: center;
+  font-size: 14px;
 `;
 
 const Text = styled(ListItemText)`
@@ -127,6 +128,7 @@ export const Drawer = ({
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
   const backendVersion = useBackendVersion();
   const frontendVersion = useFrontendVersion();
+
   useEffect(() => {
     if (
       !showMismatchedDialog &&

@@ -181,7 +181,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -195,7 +195,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -209,7 +209,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -223,7 +223,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -237,7 +237,7 @@ exports[`containers/tables/ProgrammesTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -535,7 +535,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -549,7 +549,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -563,7 +563,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -577,7 +577,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -587,7 +587,7 @@ exports[`containers/tables/ProgrammesTable should render with data 1`] = `
                 </td>
               </tr>
               <tr
-                class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq juJvId css-n2dwpd-MuiTableRow-root"
+                class="MuiTableRow-root MuiTableRow-hover sc-hIPBNq kGXfmv css-n2dwpd-MuiTableRow-root"
                 data-cy="table-row-Notice hair fall college enough perhaps."
                 role="checkbox"
               >

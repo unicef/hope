@@ -156,7 +156,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -170,7 +170,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -184,7 +184,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -198,7 +198,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -212,7 +212,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -226,7 +226,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -240,7 +240,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -254,7 +254,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -268,7 +268,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span
@@ -282,7 +282,7 @@ exports[`containers/tables/population/HouseholdTable should render loading 1`] =
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjjs css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq ePBmkq css-1ex1afd-MuiTableCell-root"
                   colspan="9"
                 >
                   <span

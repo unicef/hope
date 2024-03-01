@@ -194,7 +194,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -208,7 +208,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -222,7 +222,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -236,7 +236,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -250,7 +250,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -264,7 +264,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -278,7 +278,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -292,7 +292,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -306,7 +306,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -320,7 +320,7 @@ exports[`containers/tables//Feedback/FeedbackTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span

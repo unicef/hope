@@ -144,7 +144,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -158,7 +158,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -172,7 +172,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -186,7 +186,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -200,7 +200,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -214,7 +214,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -228,7 +228,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -242,7 +242,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -256,7 +256,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
@@ -270,7 +270,7 @@ exports[`containers/tables/population/IndividualsListTable should render loading
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOriOx css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq XqjWj css-1ex1afd-MuiTableCell-root"
                   colspan="8"
                 >
                   <span
