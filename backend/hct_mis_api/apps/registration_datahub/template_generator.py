@@ -57,7 +57,7 @@ class TemplateFileGenerator:
 
     @classmethod
     def _add_template_columns(
-        cls, wb: openpyxl.Workbook, business_area_slug: Optional[str] = None
+        cls, wb: openpyxl.Workbook, business_area_slug: Optional[str] = None, template_for_social_worker: Optional[bool] = None
     ) -> openpyxl.Workbook:
         households_sheet_title = "Households"
         individuals_sheet_title = "Individuals"
@@ -68,14 +68,20 @@ class TemplateFileGenerator:
 
         flex_fields = serialize_flex_attributes()
 
-        fields = FieldFactory.from_scopes(
-            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
-        ).apply_business_area(business_area_slug=business_area_slug)
+        if template_for_social_worker:
+            # TODO: ???
+            scopes = [Scope.GLOBAL, Scope.XLSX, Scope.XLSX_SOCIAL_WORKER]
+        else:
+            scopes = [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
+        fields = FieldFactory.from_scopes(scopes).apply_business_area(business_area_slug=business_area_slug)
 
-        households_fields = {
-            **fields.associated_with_household().to_dict_by("xlsx_field"),
-            **flex_fields[households_sheet_title.lower()],
-        }
+        if not template_for_social_worker:
+            households_fields = {
+                **fields.associated_with_household().to_dict_by("xlsx_field"),
+                **flex_fields[households_sheet_title.lower()],
+            }
+        else:
+            households_fields = {}
 
         individuals_fields = {
             **fields.associated_with_individual().to_dict_by("xlsx_field"),
@@ -83,10 +89,12 @@ class TemplateFileGenerator:
         }
 
         households_rows = cls._handle_name_and_label_row(households_fields)
+        print("households_rows === ", households_rows)
         individuals_rows = cls._handle_name_and_label_row(individuals_fields)
 
         for h_row, i_row in zip(households_rows, individuals_rows):
-            ws_households.append(h_row)
+            if not template_for_social_worker:
+                ws_households.append(h_row)
             ws_individuals.append(i_row)
 
         choices = cls._handle_choices({**households_fields, **individuals_fields})
@@ -96,5 +104,7 @@ class TemplateFileGenerator:
         return wb
 
     @classmethod
-    def get_template_file(cls, business_area_slug: Optional[str] = None) -> openpyxl.Workbook:
-        return cls._add_template_columns(cls._create_workbook(), business_area_slug)
+    def get_template_file(cls, business_area_slug: Optional[str] = None, template_for_social_worker: Optional[bool] = None) -> openpyxl.Workbook:
+        # template_for_social_worker
+        # TODO: get columns for social_worker
+        return cls._add_template_columns(cls._create_workbook(), business_area_slug, template_for_social_worker)
