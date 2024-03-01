@@ -10,13 +10,19 @@ import styled from 'styled-components';
 
 const StyledFormControl = styled(FormControl)`
   margin: ${(props) => props.theme.spacing(1)};
-  min-width: 300px;
+  min-width: 500px;
   max-width: 500px;
+`;
+
+const StyledInput = styled(Input)`
+  width: 500px !important;
 `;
 
 const StyledChips = styled.div`
   display: flex;
   flex-wrap: wrap;
+  max-height: 150px;
+  overflow-y: auto;
 `;
 
 const StyledChip = styled(Chip)`
@@ -63,7 +69,7 @@ export function FormikMultiSelectField({
     return null;
   }
   return (
-    <StyledFormControl size="small">
+    <StyledFormControl>
       {label ? (
         <InputLabel id="mutiple-chip-label">{label}</InputLabel>
       ) : (
@@ -73,10 +79,11 @@ export function FormikMultiSelectField({
         labelId="mutiple-chip-label"
         id="mutiple-chip"
         multiple
+        fullWidth
         data-cy={`select-${field.name}`}
         value={field.value}
         onChange={handleChange}
-        input={<Input id="select-multiple-chip" />}
+        input={<StyledInput id="select-multiple-chip" />}
         renderValue={(selected: string[]) => (
           <StyledChips>
             {selected.map((value) => (
