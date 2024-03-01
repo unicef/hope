@@ -40,6 +40,10 @@ const StyledTableRow = styled(MuiTableRow)`
 
 const StyledTableCell = styled(MuiTableCell)`
   col-span: ${(props) => props.colSpan};
+  && {
+    white-space: nowrap;
+    overflow: auto;
+  }
 `;
 
 const StyledTableContainer = styled(MuiTableContainer)``;
