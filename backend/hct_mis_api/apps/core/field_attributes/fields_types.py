@@ -50,3 +50,4 @@ class Scope(str, enum.Enum):
     GLOBAL = "GLOBAL"
     XLSX = "XLSX"
     PAYMENT_CHANNEL = "PAYMENT_CHANNEL"
+    XLSX_SOCIAL_WORKER = "XLSX_SOCIAL_WORKER"
