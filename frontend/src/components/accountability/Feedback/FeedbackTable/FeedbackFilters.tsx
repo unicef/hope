@@ -20,13 +20,13 @@ interface FeedbackFiltersProps {
   setAppliedFilter: (filter) => void;
   filter;
 }
-export function FeedbackFilters({
+export const FeedbackFilters = ({
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
   filter,
-}: FeedbackFiltersProps): React.ReactElement {
+}: FeedbackFiltersProps): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -82,7 +82,7 @@ export function FeedbackFilters({
           </Grid>
         )}
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
+          <div style={{ position: 'relative', bottom: '4px', width: '100%' }}>
             <SelectFilter
               onChange={(e) => handleFilterChange('issueType', e.target.value)}
               label={t('Issue Type')}
@@ -98,20 +98,19 @@ export function FeedbackFilters({
           </div>
         </Grid>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', top: '3px', width: '100%' }}>
-            <CreatedByAutocomplete
-              name="createdBy"
-              filter={filter}
-              value={filter.createdBy}
-              label={t('Created by')}
-              setFilter={setFilter}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-              additionalVariables={{ isFeedbackCreator: true }}
-            />
-          </div>
+          <CreatedByAutocomplete
+            name="createdBy"
+            filter={filter}
+            value={filter.createdBy}
+            label={t('Created by')}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            additionalVariables={{ isFeedbackCreator: true }}
+          />
         </Grid>
+        <Grid item xs={3} />
         <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Creation Date')}
@@ -149,4 +148,4 @@ export function FeedbackFilters({
       </Grid>
     </FiltersSection>
   );
-}
+};
