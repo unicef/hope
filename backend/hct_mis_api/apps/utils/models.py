@@ -102,7 +102,7 @@ class SoftDeletableIsOriginalModel(models.Model):
     """
 
     is_removed = models.BooleanField(default=False)
-    is_original = models.BooleanField(default=False)
+    is_original = models.BooleanField(db_index=True, default=False)
 
     class Meta:
         abstract = True
@@ -146,7 +146,7 @@ class SoftDeletableModelWithDate(models.Model):
     class Meta:
         abstract = True
 
-    objects = SoftDeletableRepresentationManager()  # SoftDeletableManager update after data migrations last step
+    objects = SoftDeletableRepresentationManager()
     all_objects = models.Manager()
     original_and_repr_objects = SoftDeletableManager(_emit_deprecation_warnings=True)
 
