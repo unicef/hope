@@ -172,7 +172,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -186,7 +186,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -200,7 +200,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -214,7 +214,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -228,7 +228,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render loadi
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -516,7 +516,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -530,7 +530,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -544,7 +544,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -558,7 +558,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               >
                 <span
@@ -572,7 +572,7 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
               style="height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPCZC css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH ejUXbs css-1ex1afd-MuiTableCell-root"
                 colspan="5"
               />
             </tr>
@@ -658,8 +658,9 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
             </button>
             <button
               aria-label="next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
-              tabindex="0"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+              disabled=""
+              tabindex="-1"
               type="button"
             >
               <svg
@@ -673,9 +674,6 @@ exports[`containers/tables/payments/PaymentVerificationTable should render with 
                   d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
                 />
               </svg>
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
             </button>
           </div>
         </div>

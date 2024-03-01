@@ -191,7 +191,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -205,7 +205,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -219,7 +219,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -233,7 +233,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -247,7 +247,7 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render lo
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <span
@@ -555,11 +555,11 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
               style="height: 350px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
                 colspan="6"
               >
                 <div
-                  class="sc-brSamD gafQqG"
+                  class="sc-brSamD iEiEgH"
                 >
                   <div
                     class="sc-hABBmJ jIjMDA MuiBox-root css-0"
@@ -671,8 +671,9 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
             </button>
             <button
               aria-label="next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
-              tabindex="0"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+              disabled=""
+              tabindex="-1"
               type="button"
             >
               <svg
@@ -686,9 +687,6 @@ exports[`containers/tables/payments/PaymentRecordHouseholdTable should render wi
                   d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
                 />
               </svg>
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
             </button>
           </div>
         </div>

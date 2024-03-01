@@ -131,7 +131,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -178,7 +178,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -225,7 +225,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -313,8 +313,9 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
             </button>
             <button
               aria-label="next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
-              tabindex="0"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+              disabled=""
+              tabindex="-1"
               type="button"
             >
               <svg
@@ -328,9 +329,6 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render l
                   d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
                 />
               </svg>
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
             </button>
           </div>
         </div>
@@ -471,7 +469,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -523,7 +521,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -575,7 +573,7 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi eBLdNd css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-ktwOfi hVkfLD css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
@@ -668,8 +666,9 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
             </button>
             <button
               aria-label="next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
-              tabindex="0"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+              disabled=""
+              tabindex="-1"
               type="button"
             >
               <svg
@@ -683,9 +682,6 @@ exports[`containers/tables/rdi/HouseholdImportedIndividualsTable should render w
                   d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
                 />
               </svg>
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
             </button>
           </div>
         </div>

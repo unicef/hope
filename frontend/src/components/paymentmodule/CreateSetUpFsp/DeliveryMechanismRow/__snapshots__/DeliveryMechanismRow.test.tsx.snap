@@ -22,12 +22,16 @@ exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should ren
               class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth css-zevgu-MuiFormControl-root"
               label="Delivery Mechanism"
             >
-              <label
-                class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined css-n5t7lh-MuiFormLabel-root-MuiInputLabel-root"
-                data-shrink="false"
+              <div
+                class="MuiBox-root css-1itv5e3"
               >
-                Delivery Mechanism
-              </label>
+                <label
+                  class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined css-n5t7lh-MuiFormLabel-root-MuiInputLabel-root"
+                  data-shrink="false"
+                >
+                  Delivery Mechanism
+                </label>
+              </div>
               <div
                 choices="[object Object],[object Object]"
                 class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall  css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
