@@ -43,14 +43,6 @@ const SubList = styled(List)<SubListProps>`
   padding-left: ${({ open }) => (open ? '32px !important' : 0)};
 `;
 
-export const StyledLink = styled.a`
-  color: #233944;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 16px;
-  text-decoration: none;
-`;
-
 export const ArrowIconWrapper = styled.div`
   position: absolute;
   right: -2px;
@@ -242,13 +234,12 @@ export const DrawerItems = ({
             component={NavLink}
             key={item?.name + item.href}
             to={item.href}
+            target="_blank"
           >
-            <StyledLink target="_blank" href={item.href}>
-              <Box display="flex">
-                <Icon>{item.icon}</Icon>
-                <Text primary={item?.name} />
-              </Box>
-            </StyledLink>
+            <Box display="flex">
+              <Icon>{item.icon}</Icon>
+              <Text primary={item?.name} />
+            </Box>
           </ListItemButton>
         ) : (
           <ListItemButton
