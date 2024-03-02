@@ -52,7 +52,6 @@ export function CriteriaAutocomplete({
           {...params}
           {...otherProps}
           variant="outlined"
-          margin="dense"
           fullWidth
           helperText={isInvalid && get(otherProps.form.errors, field.name)}
           error={isInvalid}
@@ -68,20 +67,19 @@ export function CriteriaAutocomplete({
         />
       )}
       data-cy="autocomplete-target-criteria"
-      component={React.forwardRef(function CriteriaAutocompletePaperComponent(
-        props,
-        ref,
-      ) {
-        return (
-          <Paper
-            {...{
-              ...props,
-              ref,
-            }}
-            data-cy="autocomplete-target-criteria-options"
-          />
-        );
-      })}
+      component={React.forwardRef(
+        function CriteriaAutocompletePaperComponent(props, ref) {
+          return (
+            <Paper
+              {...{
+                ...props,
+                ref,
+              }}
+              data-cy="autocomplete-target-criteria-options"
+            />
+          );
+        },
+      )}
     />
   );
 }

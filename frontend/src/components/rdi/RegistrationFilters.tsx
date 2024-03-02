@@ -20,13 +20,13 @@ interface RegistrationFiltersProps {
   setAppliedFilter: (filter) => void;
 }
 
-export function RegistrationFilters({
+export const RegistrationFilters = ({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: RegistrationFiltersProps): React.ReactElement {
+}: RegistrationFiltersProps): React.ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -82,22 +82,20 @@ export function RegistrationFilters({
           />
         </Grid>
         <Grid item xs={4}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SelectFilter
-              value={filter.status}
-              label={t('Status')}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              data-cy="filter-status"
-            >
-              {registrationChoicesData.registrationDataStatusChoices.map(
-                (item) => (
-                  <MenuItem key={item.value} value={item.value}>
-                    {item.name}
-                  </MenuItem>
-                ),
-              )}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            value={filter.status}
+            label={t('Status')}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            data-cy="filter-status"
+          >
+            {registrationChoicesData.registrationDataStatusChoices.map(
+              (item) => (
+                <MenuItem key={item.value} value={item.value}>
+                  {item.name}
+                </MenuItem>
+              ),
+            )}
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField
@@ -140,4 +138,4 @@ export function RegistrationFilters({
       </Grid>
     </FiltersSection>
   );
-}
+};

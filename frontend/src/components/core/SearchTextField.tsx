@@ -34,7 +34,6 @@ export function SearchTextField({
       fullWidth={fullWidth}
       borderRadius={borderRadius}
       variant="outlined"
-      margin="dense"
       placeholder="Search"
       inputProps={{ maxLength: 200 }}
       // https://github.com/mui-org/material-ui/issues/12805

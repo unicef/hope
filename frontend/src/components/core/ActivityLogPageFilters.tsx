@@ -62,14 +62,12 @@ export function ActivityLogPageFilters({
     >
       <Grid container alignItems="center" spacing={3}>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SearchTextField
-              label={t('Search')}
-              value={filter.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy="filters-search"
-            />
-          </div>
+          <SearchTextField
+            label={t('Search')}
+            value={filter.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="filters-search"
+          />
         </Grid>
         <Grid item xs={3}>
           <SelectFilter

@@ -62,7 +62,7 @@ export const BulkSetPriorityModal = ({
       onSave={onSave}
       icon={<AlarmAddIcon />}
     >
-      <FormControl variant="outlined" margin="dense" style={{ width: '100%' }}>
+      <FormControl variant="outlined" style={{ width: '100%' }}>
         <InputLabel>{t('Priority')}</InputLabel>
         <Select
           value={value}

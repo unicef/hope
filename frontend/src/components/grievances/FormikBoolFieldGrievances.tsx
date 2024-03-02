@@ -64,7 +64,6 @@ export function FormikBoolFieldGrievances({
     <FormControl
       required={required}
       variant="outlined"
-      margin="dense"
       fullWidth
       {...otherProps}
     >

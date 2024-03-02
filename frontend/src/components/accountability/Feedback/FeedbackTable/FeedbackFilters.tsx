@@ -82,20 +82,18 @@ export const FeedbackFilters = ({
           </Grid>
         )}
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '4px', width: '100%' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('issueType', e.target.value)}
-              label={t('Issue Type')}
-              value={filter.issueType}
-              data-cy="filters-issue-type"
-            >
-              {choicesData?.feedbackIssueTypeChoices?.map((issueType) => (
-                <MenuItem key={issueType.name} value={issueType.value}>
-                  {issueType.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('issueType', e.target.value)}
+            label={t('Issue Type')}
+            value={filter.issueType}
+            data-cy="filters-issue-type"
+          >
+            {choicesData?.feedbackIssueTypeChoices?.map((issueType) => (
+              <MenuItem key={issueType.name} value={issueType.value}>
+                {issueType.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <CreatedByAutocomplete
@@ -110,7 +108,7 @@ export const FeedbackFilters = ({
             additionalVariables={{ isFeedbackCreator: true }}
           />
         </Grid>
-        <Grid item xs={3} />
+        {!isAllPrograms && <Grid item xs={3} />}
         <Grid item xs={3}>
           <DatePickerFilter
             topLabel={t('Creation Date')}

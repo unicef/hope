@@ -109,7 +109,7 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
           <DialogTitle>{t('Select File to Import')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <FormControl variant="outlined" margin="dense">
+          <FormControl variant="outlined">
             <StyledInputLabel>{t('Import From')}</StyledInputLabel>
             <ComboBox
               value={importType}

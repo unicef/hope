@@ -47,7 +47,7 @@ export function KoboProjectSelect(): React.ReactElement {
 
   return (
     <>
-      <FormControl variant="outlined" margin="dense">
+      <FormControl variant="outlined">
         <StyledInputLabel>{t('Select Project')}</StyledInputLabel>
         <ComboBox
           {...field}

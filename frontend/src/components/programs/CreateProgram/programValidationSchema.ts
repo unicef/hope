@@ -14,7 +14,10 @@ export const programValidationSchema = (
     programmeCode: Yup.string()
       .min(4, t('Too short'))
       .max(4, t('Too long'))
-      .matches(/^[A-Z0-9\-/.]{4}$/, t('Programme code may only contain letters, digits and \'-\', \'/\', \'.\'.'))
+      .matches(
+        /^[A-Z0-9\-/.]{4}$/,
+        t("Programme code may only contain letters, digits and '-', '/', '.'."),
+      )
       .nullable(),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
@@ -23,11 +26,11 @@ export const programValidationSchema = (
       .when('startDate', (startDate, schema) =>
         startDate
           ? schema.min(
-            startDate,
-            `${t('End date have to be greater than')} ${moment(
               startDate,
-            ).format('YYYY-MM-DD')}`,
-          )
+              `${t('End date have to be greater than')} ${moment(
+                startDate,
+              ).format('YYYY-MM-DD')}`,
+            )
           : schema,
       ),
     sector: Yup.string().required(t('Sector is required')),

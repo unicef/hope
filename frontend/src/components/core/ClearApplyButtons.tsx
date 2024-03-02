@@ -35,7 +35,7 @@ export function ClearApplyButtons({
 
   return (
     <Grid container justifyContent="flex-end" spacing={3}>
-      <Box mt={4}>
+      <Box mt={6}>
         <Button
           color="primary"
           data-cy="button-filters-clear"

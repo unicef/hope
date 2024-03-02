@@ -44,7 +44,7 @@ export function FormikSelectFieldConfirmProgram({
   );
 
   return (
-    <FormControl variant="outlined" margin="dense" fullWidth {...otherProps}>
+    <FormControl variant="outlined" fullWidth {...otherProps}>
       <Box mb={1}>
         <InputLabel>{otherProps.label}</InputLabel>
       </Box>

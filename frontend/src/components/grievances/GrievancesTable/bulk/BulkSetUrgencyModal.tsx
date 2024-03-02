@@ -62,7 +62,7 @@ export function BulkSetUrgencyModal({
       onSave={onSave}
       icon={<PriorityHighIcon />}
     >
-      <FormControl variant="outlined" margin="dense" style={{ width: '100%' }}>
+      <FormControl variant="outlined" style={{ width: '100%' }}>
         <InputLabel id="urgency-label">{t('Urgency')}</InputLabel>
         <Select
           value={value}
