@@ -57,15 +57,13 @@ export const PaymentVerificationFilters = ({
     >
       <Grid container alignItems="flex-start" spacing={3}>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '8px' }}>
-            <SearchTextField
-              value={filter.search}
-              data-cy="filter-search"
-              label="Payment Plan ID"
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              fullWidth
-            />
-          </div>
+          <SearchTextField
+            value={filter.search}
+            data-cy="filter-search"
+            label="Payment Plan ID"
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            fullWidth
+          />
         </Grid>
         <Grid item xs={3}>
           <SelectFilter
@@ -86,17 +84,15 @@ export const PaymentVerificationFilters = ({
           </SelectFilter>
         </Grid>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '8px' }}>
-            <SearchTextField
-              value={filter.serviceProvider}
-              data-cy="filter-fsp"
-              label="FSP"
-              fullWidth
-              onChange={(e) =>
-                handleFilterChange('serviceProvider', e.target.value)
-              }
-            />
-          </div>
+          <SearchTextField
+            value={filter.serviceProvider}
+            data-cy="filter-fsp"
+            label="FSP"
+            fullWidth
+            onChange={(e) =>
+              handleFilterChange('serviceProvider', e.target.value)
+            }
+          />
         </Grid>
         <Grid item xs={3}>
           <SelectFilter

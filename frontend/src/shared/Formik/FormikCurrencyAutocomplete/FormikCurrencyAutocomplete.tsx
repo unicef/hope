@@ -42,7 +42,6 @@ export const FormikCurrencyAutocomplete = ({
             {...params}
             label={t('Currency')}
             variant="outlined"
-            margin="dense"
             error={isInvalid}
             helperText={`${isInvalid ? get(form.errors, field.name) : ''}`}
             {...otherProps}

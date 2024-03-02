@@ -96,7 +96,6 @@ export const AdminAreaFixedAutocomplete = ({
                 : t('Administrative Level 2')
             }
             variant="outlined"
-            margin="dense"
             value={inputValue}
             onChange={(event) => setInputValue(event.target.value)}
             InputProps={{

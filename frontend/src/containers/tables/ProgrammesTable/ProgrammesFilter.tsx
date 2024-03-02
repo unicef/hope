@@ -55,14 +55,12 @@ export function ProgrammesFilters({
     >
       <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={2}>
-          <div style={{ position: 'relative', top: '3px' }}>
-            <SearchTextField
-              label="Search"
-              value={filter.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy="filters-search"
-            />
-          </div>
+          <SearchTextField
+            label="Search"
+            value={filter.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="filters-search"
+          />
         </Grid>
         <Grid item xs={2}>
           <SelectFilter
@@ -160,22 +158,20 @@ export function ProgrammesFilters({
           />
         </Grid>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('dataCollectingType', e.target.value)
-              }
-              label="Data Collecting Type"
-              value={filter.dataCollectingType}
-              data-cy="filters-data-collecting-type"
-            >
-              {choicesData.dataCollectingTypeChoices.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) =>
+              handleFilterChange('dataCollectingType', e.target.value)
+            }
+            label="Data Collecting Type"
+            value={filter.dataCollectingType}
+            data-cy="filters-data-collecting-type"
+          >
+            {choicesData.dataCollectingTypeChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
       </Grid>
     </FiltersSection>

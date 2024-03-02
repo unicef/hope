@@ -106,7 +106,6 @@ export const AssignedToDropdown: React.FC<AssignedToDropdownProps> = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          margin="dense"
           value={inputValue}
           variant={label ? 'outlined' : 'standard'}
           label={label}

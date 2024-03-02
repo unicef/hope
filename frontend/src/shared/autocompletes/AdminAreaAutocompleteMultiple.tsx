@@ -93,7 +93,6 @@ export function AdminAreaAutocompleteMultiple({
               newValue.length > 0 ? null : t('Administrative Level 2')
             }
             variant="outlined"
-            margin="dense"
             value={inputValue}
             onChange={(e) => setInputTextChange(e.target.value)}
           />

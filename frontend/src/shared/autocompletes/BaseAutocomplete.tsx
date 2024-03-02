@@ -105,7 +105,6 @@ export function BaseAutocomplete({
           {...params}
           label={label}
           variant="outlined"
-          margin="dense"
           size="small"
           data-cy={`${label}-input`}
           value={inputValue}

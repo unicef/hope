@@ -33,7 +33,7 @@ exports[`components/paymentmodule/PaymentPlanTargeting should render 1`] = `
           >
             <div
               choices="[object Object]"
-              class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth css-zevgu-MuiFormControl-root"
+              class="MuiFormControl-root MuiFormControl-fullWidth css-q8hpuo-MuiFormControl-root"
               data-cy="input-target-population"
               label="Target Population"
             >

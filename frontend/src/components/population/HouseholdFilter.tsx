@@ -75,27 +75,23 @@ export function HouseholdFilters({
             />
           </Grid>
           <Grid item xs={4}>
-            <div style={{ paddingBottom: '4px', width: '100%' }}>
-              <SelectFilter
-                onChange={(e) =>
-                  handleFilterChange('searchType', e.target.value)
-                }
-                label={t('Search Type')}
-                value={filter.searchType}
-                borderRadius="0px 4px 4px 0px"
-                data-cy="filter-search-type"
-                fullWidth
-                disableClearable
-              >
-                {choicesData?.householdSearchTypesChoices.map(
-                  ({ name, value }) => (
-                    <MenuItem key={value} value={value}>
-                      {name}
-                    </MenuItem>
-                  ),
-                )}
-              </SelectFilter>
-            </div>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('searchType', e.target.value)}
+              label={t('Search Type')}
+              value={filter.searchType}
+              borderRadius="0px 4px 4px 0px"
+              data-cy="filter-search-type"
+              fullWidth
+              disableClearable
+            >
+              {choicesData?.householdSearchTypesChoices.map(
+                ({ name, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {name}
+                  </MenuItem>
+                ),
+              )}
+            </SelectFilter>
           </Grid>
         </Grid>
         {isAllPrograms && (
@@ -117,24 +113,22 @@ export function HouseholdFilters({
           </Grid>
         )}
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SelectFilter
-              onChange={(e) =>
-                handleFilterChange('residenceStatus', e.target.value)
-              }
-              label={t('Residence Status')}
-              fullWidth
-              value={filter.residenceStatus}
-              icon={<AssignmentIndRoundedIcon />}
-              data-cy="hh-filters-residence-status"
-            >
-              {choicesData.residenceStatusChoices?.map((status) => (
-                <MenuItem key={status.value} value={status.value}>
-                  {status.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) =>
+              handleFilterChange('residenceStatus', e.target.value)
+            }
+            label={t('Residence Status')}
+            fullWidth
+            value={filter.residenceStatus}
+            icon={<AssignmentIndRoundedIcon />}
+            data-cy="hh-filters-residence-status"
+          >
+            {choicesData.residenceStatusChoices?.map((status) => (
+              <MenuItem key={status.value} value={status.value}>
+                {status.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <AdminAreaAutocomplete
@@ -174,41 +168,37 @@ export function HouseholdFilters({
           />
         </Grid>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('orderBy', e.target.value)}
-              label={t('Sort by')}
-              value={filter.orderBy}
-              data-cy="hh-filters-order-by"
-              disableClearable
-            >
-              {householdTableOrderOptions.map((order) => (
-                <MenuItem key={order.value} value={order.value}>
-                  {order.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('orderBy', e.target.value)}
+            label={t('Sort by')}
+            value={filter.orderBy}
+            data-cy="hh-filters-order-by"
+            disableClearable
+          >
+            {householdTableOrderOptions.map((order) => (
+              <MenuItem key={order.value} value={order.value}>
+                {order.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
-              label={t('Status')}
-              value={filter.withdrawn}
-              data-cy="hh-filters-status"
-            >
-              <MenuItem key="all" value="null">
-                All
-              </MenuItem>
-              <MenuItem key="active" value="false">
-                Active
-              </MenuItem>
-              <MenuItem key="inactive" value="true">
-                Withdrawn
-              </MenuItem>
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('withdrawn', e.target.value)}
+            label={t('Status')}
+            value={filter.withdrawn}
+            data-cy="hh-filters-status"
+          >
+            <MenuItem key="all" value="null">
+              All
+            </MenuItem>
+            <MenuItem key="active" value="false">
+              Active
+            </MenuItem>
+            <MenuItem key="inactive" value="true">
+              Withdrawn
+            </MenuItem>
+          </SelectFilter>
         </Grid>
         {isAllPrograms && (
           <Grid item xs={3}>

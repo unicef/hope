@@ -52,13 +52,7 @@ export function FormikSelectField({
   const showX = isValue && !disableClearable && !otherProps.disabled;
 
   return (
-    <FormControl
-      variant="outlined"
-      margin="dense"
-      size="small"
-      fullWidth
-      {...otherProps}
-    >
+    <FormControl variant="outlined" size="small" fullWidth {...otherProps}>
       <Box mb={1}>
         <InputLabel>{otherProps.label}</InputLabel>
       </Box>
