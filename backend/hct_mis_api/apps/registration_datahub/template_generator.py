@@ -57,7 +57,10 @@ class TemplateFileGenerator:
 
     @classmethod
     def _add_template_columns(
-        cls, wb: openpyxl.Workbook, business_area_slug: Optional[str] = None, template_for_social_worker: Optional[bool] = None
+        cls,
+        wb: openpyxl.Workbook,
+        business_area_slug: Optional[str] = None,
+        template_for_social_worker: Optional[bool] = None,
     ) -> openpyxl.Workbook:
         households_sheet_title = "Households"
         individuals_sheet_title = "Individuals"
@@ -104,7 +107,9 @@ class TemplateFileGenerator:
         return wb
 
     @classmethod
-    def get_template_file(cls, business_area_slug: Optional[str] = None, template_for_social_worker: Optional[bool] = None) -> openpyxl.Workbook:
+    def get_template_file(
+        cls, business_area_slug: Optional[str] = None, template_for_social_worker: Optional[bool] = None
+    ) -> openpyxl.Workbook:
         # template_for_social_worker
         # TODO: get columns for social_worker
         return cls._add_template_columns(cls._create_workbook(), business_area_slug, template_for_social_worker)
