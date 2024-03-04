@@ -188,7 +188,7 @@ class TestActionPaymentPlanMutation(APITestCase):
     @patch("hct_mis_api.apps.payment.notifications.PaymentNotification.__init__")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
     @override_config(PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS=True)
-    def test_call_email_notification(self, mock_send: Any) -> None:
+    def test_call_email_notification(self, mock_init: Any) -> None:
         self.create_user_role_with_permissions(
             self.user,
             [
@@ -210,7 +210,6 @@ class TestActionPaymentPlanMutation(APITestCase):
             "REVIEW",
             "REVIEW",
             "REVIEW",
-            "REVIEW",
         ]
         for action in actions:
             self.graphql_request(
@@ -224,10 +223,10 @@ class TestActionPaymentPlanMutation(APITestCase):
                 },
             )
         self.assertEqual(
-            mock_send.call_count,
+            mock_init.call_count,
             4,
         )
-        mock_send.assert_any_call(self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.value)
-        mock_send.assert_any_call(self.payment_plan, PaymentPlan.Action.APPROVE.value)
-        mock_send.assert_any_call(self.payment_plan, PaymentPlan.Action.AUTHORIZE.value)
-        mock_send.assert_any_call(self.payment_plan, PaymentPlan.Action.REVIEW.value)
+        mock_init.assert_any_call(self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.value)
+        mock_init.assert_any_call(self.payment_plan, PaymentPlan.Action.APPROVE.value)
+        mock_init.assert_any_call(self.payment_plan, PaymentPlan.Action.AUTHORIZE.value)
+        mock_init.assert_any_call(self.payment_plan, PaymentPlan.Action.REVIEW.value)
