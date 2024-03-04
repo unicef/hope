@@ -5,6 +5,7 @@ def format_task(task: dict, status: str) -> dict:
     if "request" in task:
         task = task["request"]
     return {
+        "id": task["id"],
         "name": task["name"],
         "args": task["args"],
         "kwargs": task["kwargs"],
