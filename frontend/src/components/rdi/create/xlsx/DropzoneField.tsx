@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Accept, useDropzone } from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import styled from 'styled-components';
 import { useField } from 'formik';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -31,6 +31,11 @@ export function DropzoneField({ loading }): React.ReactElement {
   const { showMessage } = useSnackbar();
   const onDrop = useCallback(
     (acceptedFiles) => {
+      // Log the MIME types of the accepted files
+      acceptedFiles.forEach((file) => {
+        console.log(file.type);
+      });
+
       if (acceptedFiles.length !== 1) {
         return;
       }
@@ -50,8 +55,8 @@ export function DropzoneField({ loading }): React.ReactElement {
   );
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
-    accept:
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' as unknown as Accept,
+    //@ts-ignore
+    accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     onDrop,
   });
 

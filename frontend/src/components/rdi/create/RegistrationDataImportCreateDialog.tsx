@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import {
+  Box,
   Button,
   DialogContent,
   DialogTitle,
@@ -110,9 +111,13 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
         </DialogTitleWrapper>
         <DialogContent>
           <FormControl variant="outlined">
-            <StyledInputLabel>{t('Import From')}</StyledInputLabel>
+            <StyledInputLabel size="small" htmlFor="import-type-select">
+              {t('Import From')}
+            </StyledInputLabel>
             <ComboBox
+              id="import-type-select"
               value={importType}
+              size="small"
               defaultValue=""
               variant="outlined"
               label=""
@@ -130,7 +135,7 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
               </MenuItem>
             </ComboBox>
           </FormControl>
-          {importTypeForm}
+          <Box mt={2}>{importTypeForm}</Box>
         </DialogContent>
         <StyledDialogFooter data-cy="dialog-actions-container">
           <Button
