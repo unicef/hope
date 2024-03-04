@@ -647,3 +647,17 @@ def periodic_sync_payment_gateway_records(self: Any) -> None:
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
+
+
+@app.task(bind=True)
+@log_start_and_end
+@sentry_tags
+def send_payment_notification_emails(self: Any, payment_plan_id: str, action: str) -> None:
+    from hct_mis_api.apps.payment.notifications import PaymentNotification
+
+    try:
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        PaymentNotification(payment_plan, action).send_email_notification()
+    except Exception as e:
+        logger.exception(e)

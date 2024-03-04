@@ -714,6 +714,11 @@ CONSTANCE_CONFIG = {
         "Should send grievances notification",
         bool,
     ),
+    "SEND_PAYMENT_PLANS_NOTIFICATION": (
+        False,
+        "Should send payment plans notification",
+        bool,
+    ),
     "IGNORED_USER_LINKED_OBJECTS": (
         "created_advanced_filters,advancedfilter,logentry,social_auth,query,querylog,logs",
         "list of relation to hide in 'linked objects' user page",
