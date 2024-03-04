@@ -8,7 +8,7 @@ export const programValidationSchema = (
 ): Yup.ObjectSchema<any, any, any, any> =>
   Yup.object().shape({
     name: Yup.string()
-      .required(t('Programme name is required'))
+      .required(t('Programme Name is required'))
       .min(3, t('Too short'))
       .max(150, t('Too long')),
     programmeCode: Yup.string()
@@ -23,13 +23,13 @@ export const programValidationSchema = (
       .nullable(),
     startDate: Yup.date()
       .required(t('Start Date is required'))
-      .transform((v) => (v instanceof Date && !isNaN(v) ? v : null)),
+      .transform((v) => (v instanceof Date && !isNaN(v.getTime()) ? v : null)),
     endDate: Yup.date()
       .transform((curr, orig) => (orig === '' ? null : curr))
       .required(t('End Date is required'))
       .min(today, t('End Date cannot be in the past'))
       .when('startDate', (startDate, schema) =>
-        startDate instanceof Date && !isNaN(startDate)
+        startDate instanceof Date && !isNaN(startDate.getTime())
           ? schema.min(
               startDate,
               `${t('End date have to be greater than')} ${moment(
