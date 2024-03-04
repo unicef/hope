@@ -35,10 +35,16 @@ export const FormikDateField = ({
       <DatePicker
         {...field}
         {...otherProps}
-        label={otherProps.label}
+        label={required ? `${otherProps.label}*` : otherProps.label}
         format="yyyy-MM-dd"
         name={field.name}
-        slotProps={{ textField: { size: 'small' } }}
+        slotProps={{
+          textField: {
+            size: 'small',
+            error: isInvalid,
+            helperText: isInvalid && get(form.errors, field.name),
+          },
+        }}
         sx={{
           '& .MuiSvgIcon-root': {
             outline: 'none',
