@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { FormLabel, InputAdornment, Tooltip, TextField } from '@mui/material';
+import { InputAdornment, Tooltip, TextField } from '@mui/material';
+import moment from 'moment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import styled from 'styled-components';
 import FormControl from '@mui/material/FormControl';
@@ -28,12 +29,13 @@ export const FormikDateField = ({
   if (field.value && typeof field.value === 'string') {
     formattedValue = parseISO(field.value);
   }
+
   const datePickerComponent = (
     <FullWidthFormControl size="small">
       <DatePicker
         {...field}
         {...otherProps}
-        label={required ? `${otherProps.label} *` : otherProps.label}
+        label={otherProps.label}
         format="yyyy-MM-dd"
         name={field.name}
         slotProps={{ textField: { size: 'small' } }}
@@ -78,24 +80,20 @@ export const FormikDateField = ({
         }}
         onChange={(date) => {
           if (date instanceof Date && !isNaN(date.getTime())) {
-            // Date is valid
-            const event = {
+            field.onChange({
               target: {
+                value: moment(date).format('YYYY-MM-DD'),
                 name: field.name,
-                value: date,
               },
-            };
-            field.onChange(event);
+            });
           } else {
-            // Date is not valid
             console.error('Invalid date:', date);
-            const event = {
+            field.onChange({
               target: {
-                name: field.name,
                 value: null,
+                name: field.name,
               },
-            };
-            field.onChange(event);
+            });
           }
         }}
       />

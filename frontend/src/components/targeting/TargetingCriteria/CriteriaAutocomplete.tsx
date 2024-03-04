@@ -51,6 +51,7 @@ export function CriteriaAutocomplete({
         <TextField
           {...params}
           {...otherProps}
+          size="small"
           variant="outlined"
           fullWidth
           helperText={isInvalid && get(otherProps.form.errors, field.name)}
