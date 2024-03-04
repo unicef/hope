@@ -5,7 +5,12 @@ import localForage from 'localforage';
 import { GRAPHQL_URL } from '../config';
 import { clearCache } from '@utils/utils';
 import { ValidationGraphQLError } from './ValidationGraphQLError';
-import { ApolloLink, ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client';
+import {
+  ApolloLink,
+  ApolloClient,
+  InMemoryCache,
+  NormalizedCacheObject,
+} from '@apollo/client';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -51,7 +56,8 @@ const hasResponseErrors = (response): boolean => {
 
 const redirectLink = new ApolloLink((operation, forward) => {
   // Check if the app is not running on localhost, dev, or stg environment
-  const isNotLocalhostDevOrStg = !window.location.hostname.includes('localhost') &&
+  const isNotLocalhostDevOrStg =
+    !window.location.hostname.includes('localhost') &&
     !window.location.href.includes('dev') &&
     !window.location.href.includes('stg');
 
@@ -66,13 +72,15 @@ const redirectLink = new ApolloLink((operation, forward) => {
     );
 
     // Check if the error message is "Permission Denied"
-    const isPermissionDenied = response?.errors?.some((error) => error.message === 'Permission Denied');
+    const isPermissionDenied = response?.errors?.some(
+      (error) => error.message === 'Permission Denied',
+    );
 
     // If the error message is "Permission Denied" or data is null, redirect to the access denied page
-    if (isPermissionDenied || isDataNull(response.data) && !isMutation)
-      window.location.href = `/access-denied/${businessArea}`;
-    // Check if the response has any errors
-    else if (hasResponseErrors(response)) {
+    if (isPermissionDenied || (isDataNull(response.data) && !isMutation)) {
+      window.history.replaceState(null, '', `/access-denied/${businessArea}`);
+      // Check if the response has any errors
+    } else if (hasResponseErrors(response)) {
       // If it's a mutation, log the error to the console
       if (isMutation)
         // eslint-disable-next-line no-console
@@ -81,9 +89,8 @@ const redirectLink = new ApolloLink((operation, forward) => {
       else if (isNotLocalhostDevOrStg)
         window.location.href = `/error/${businessArea}`;
       // If it's not a mutation and the app is running on localhost, dev, or stg environment, log the error to the console
-      else
-        // eslint-disable-next-line no-console
-        console.error(response.data?.error || response.data?.errors);
+      // eslint-disable-next-line no-console
+      else console.error(response.data?.error || response.data?.errors);
     }
 
     return response;
