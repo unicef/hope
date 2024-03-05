@@ -1,6 +1,0 @@
-{% extends 'base_notification_email.html' %}
-{% block content %}
-    Please be informed that Payment Plan {{ payment_plan_id }} has been approved by {{ action_user.get_full_name }} on {{ action_date|date:"j N Y" }}.
-    Payment Plan {{ payment_plan_id }} belongs to program "{{ program.name }}" and has been created by {{ payment_plan.created_by.get_full_name }} on {{ payment_plan.created_at|date:"j N Y" }}.
-    Please access HOPE MIS {{ payment_plan_url }} to perform needed actions timely.
-{% endblock %}

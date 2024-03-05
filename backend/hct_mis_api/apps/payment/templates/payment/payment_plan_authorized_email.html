@@ -1,7 +1,0 @@
-{% extends 'base_notification_email.html' %}
-{% block content %}
-    <p> Please be informed that Payment Plan {{ payment_plan_id }} has been authorized by {{ action_user.get_full_name }} on {{ action_date|date:"j N Y" }}.
-        <br> Payment Plan {{ payment_plan_id }} belongs to program "{{ program.name }}" and has been created by {{ payment_plan.created_by.get_full_name }} on {{ payment_plan.created_at|date:"j N Y" }}.
-    </p>
-    <p> Please access HOPE MIS <a href="{{ payment_plan_url }}">{{ payment_plan_id }}</a> to perform needed actions timely.</p>
-{% endblock %}

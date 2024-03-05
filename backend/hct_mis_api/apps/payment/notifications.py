@@ -33,10 +33,33 @@ class PaymentNotification:
         ACTION_REVIEW: Permissions.PM_DOWNLOAD_XLSX_FOR_FSP.name,
     }
 
+    ACTION_PREPARE_EMAIL_BODIES_MAP = {
+        ACTION_SEND_FOR_APPROVAL: {
+            "action_name": "sent for approval",
+            "subject": "Payment pending for Approval",
+        },
+        ACTION_APPROVE: {
+            "action_name": "approved",
+            "subject": "Payment pending for Authorization",
+        },
+        ACTION_AUTHORIZE: {
+            "action_name": "authorized",
+            "subject": "Payment pending for Release",
+        },
+        ACTION_REVIEW: {
+            "action_name": "released",
+            "subject": "Payment is Released",
+        },
+    }
+
     def __init__(self, payment_plan: PaymentPlan, action: str) -> None:
         self.payment_plan = payment_plan
         self.action = action
         self.approval_process = self.payment_plan.approval_process.first()
+        self.payment_plan_creator = self.payment_plan.created_by
+        self.payment_plan_creation_date = self.payment_plan.created_at
+        self.email_subject = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["subject"]
+        self.action_name = self.ACTION_PREPARE_EMAIL_BODIES_MAP[self.action]["action_name"]
         self.user_recipients = self._prepare_user_recipients()
         self._prepare_action_user_and_date()
         self.emails = self._prepare_emails()
@@ -47,6 +70,7 @@ class PaymentNotification:
         context = {
             "first_name": user_recipient.first_name,
             "last_name": user_recipient.last_name,
+            "action_name": self.action_name,
             "payment_plan_url": (
                 f"{protocol}://{settings.FRONTEND_HOST}/{self.payment_plan.business_area.slug}/programs/"
                 f'{encode_id_base64(self.payment_plan.program.id, "Program")}/payment-module/payment-plans/'
@@ -54,6 +78,8 @@ class PaymentNotification:
             ),
             "payment_plan_id": self.payment_plan.unicef_id,
             "payment_plan": self.payment_plan,
+            "payment_plan_creator": self.payment_plan_creator,
+            "payment_plan_creation_date": self.payment_plan_creation_date,
             "action_user": self.action_user,
             "action_date": self.action_date,
             "program": self.payment_plan.program,
@@ -122,11 +148,10 @@ class PaymentNotification:
             logger.exception(e)
 
     def _prepare_bodies(self, user_recipient: User) -> Tuple[str, str, str]:
-        body_map = self.ACTION_PREPARE_BODIES_MAP[self.action]
         context = self._prepare_default_context(user_recipient)
-        text_body = render_to_string(body_map["text_body"], context)
-        html_body = render_to_string(body_map["html_body"], context)
-        return text_body, html_body, body_map["subject"]
+        text_body = render_to_string("payment/payment_plan_action.html", context)
+        html_body = render_to_string("payment/payment_plan_action.txt", context)
+        return text_body, html_body, self.email_subject
 
     def _get_sent_for_approval_action_data(self) -> None:
         self.action_user = self.approval_process.sent_for_approval_by
@@ -138,7 +163,9 @@ class PaymentNotification:
         self.action_date = approval.created_at
 
     def _get_authorized_action_data(self) -> None:
-        authorization = self.approval_process.approvals.filter(type=Approval.AUTHORIZATION).order_by("created_at").last()
+        authorization = (
+            self.approval_process.approvals.filter(type=Approval.AUTHORIZATION).order_by("created_at").last()
+        )
         self.action_user = authorization.created_by
         self.action_date = authorization.created_at
 
@@ -146,29 +173,6 @@ class PaymentNotification:
         release = self.approval_process.approvals.filter(type=Approval.FINANCE_RELEASE).order_by("created_at").last()
         self.action_user = release.created_by
         self.action_date = release.created_at
-
-    ACTION_PREPARE_BODIES_MAP = {
-        ACTION_SEND_FOR_APPROVAL: {
-            "text_body": "payment/payment_plan_sent_for_approval_email.txt",
-            "html_body": "payment/payment_plan_sent_for_approval_email.html",
-            "subject": "Payment pending for Approval",
-        },
-        ACTION_APPROVE: {
-            "text_body": "payment/payment_plan_approved_email.txt",
-            "html_body": "payment/payment_plan_approved_email.html",
-            "subject": "Payment pending for Authorization",
-        },
-        ACTION_AUTHORIZE: {
-            "text_body": "payment/payment_plan_authorized_email.txt",
-            "html_body": "payment/payment_plan_authorized_email.html",
-            "subject": "Payment pending for Release",
-        },
-        ACTION_REVIEW: {
-            "text_body": "payment/payment_plan_released_email.txt",
-            "html_body": "payment/payment_plan_released_email.html",
-            "subject": "Payment is Released",
-        },
-    }
 
     ACTION_GET_DATA_MAP = {
         ACTION_SEND_FOR_APPROVAL: _get_sent_for_approval_action_data,
