@@ -128,28 +128,30 @@ export const ReassignRoleBox = ({
       </Box>
     ));
 
-  const showMessage = () => {
+  const showMessage = (): React.ReactElement => {
     if (
-        (
-            ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
-            (ticket.individual?.role === "PRIMARY" || ticket.individual?.relationship === "HEAD")
-        ) || (
-            ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
-            ticket.individualDataUpdateTicketDetails?.individualData?.role?.previous_value === "PRIMARY" &&
-            (
-                ticket.individualDataUpdateTicketDetails?.individualData?.role?.value === "ALTERNATE" ||
-                ticket.individualDataUpdateTicketDetails?.individualData?.role?.value === "NO_ROLE"
-            )
-        )
+      (ticket.issueType.toString() ===
+        GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+        (ticket.individual?.role === 'PRIMARY' ||
+          ticket.individual?.relationship === 'HEAD')) ||
+      (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL &&
+        ticket.individualDataUpdateTicketDetails?.individualData?.role
+          ?.previous_value === 'PRIMARY' &&
+        (ticket.individualDataUpdateTicketDetails?.individualData?.role
+          ?.value === 'ALTERNATE' ||
+          ticket.individualDataUpdateTicketDetails?.individualData?.role
+            ?.value === 'NO_ROLE'))
     ) {
       return (
         <Typography variant='body2'>
-          {t('Upon removing you will need to select new individual(s) for this role.')}
+          {t(
+            'Upon removing you will need to select new individual(s) for this role.',
+          )}
         </Typography>
-      )
+      );
     }
-    return null
-  }
+    return null;
+  };
 
   return (
     <StyledBox>
