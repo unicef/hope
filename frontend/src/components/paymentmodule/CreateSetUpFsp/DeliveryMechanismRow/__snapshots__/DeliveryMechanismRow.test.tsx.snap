@@ -3,58 +3,68 @@
 exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should render 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-1"
+    class="MuiBox-root css-cgq59l"
   >
     <div
-      class="MuiGrid-root MuiGrid-container"
+      class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-3 css-1equabv-MuiGrid-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root"
         >
           <div
-            class="MuiBox-root MuiBox-root-2"
+            class="MuiBox-root css-70qvj9"
           >
             <div
               choices="[object Object],[object Object]"
-              class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth"
+              class="MuiFormControl-root MuiFormControl-fullWidth css-q8hpuo-MuiFormControl-root"
               label="Delivery Mechanism"
             >
-              <label
-                class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-marginDense MuiInputLabel-outlined"
-                data-shrink="false"
+              <div
+                class="MuiBox-root css-1itv5e3"
               >
-                Delivery Mechanism
-              </label>
+                <label
+                  class="MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-sizeSmall MuiInputLabel-outlined css-n5t7lh-MuiFormLabel-root-MuiInputLabel-root"
+                  data-shrink="false"
+                >
+                  Delivery Mechanism
+                </label>
+              </div>
               <div
                 choices="[object Object],[object Object]"
-                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-formControl MuiInputBase-marginDense MuiOutlinedInput-marginDense"
+                class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall  css-26qevy-MuiInputBase-root-MuiOutlinedInput-root-MuiSelect-root"
               >
                 <div
+                  aria-controls=":r0:"
+                  aria-expanded="false"
                   aria-haspopup="listbox"
                   aria-labelledby="textField-deliveryMechanisms[0].deliveryMechanism"
-                  class="MuiSelect-root MuiSelect-select MuiSelect-selectMenu MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMarginDense MuiOutlinedInput-inputMarginDense"
+                  class="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-jedpe8-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input"
                   data-cy="select-deliveryMechanisms[0].deliveryMechanism"
                   id="textField-deliveryMechanisms[0].deliveryMechanism"
-                  role="button"
+                  role="combobox"
                   tabindex="0"
                 >
-                  <span>
+                  <span
+                    class="notranslate"
+                  >
                     ​
                   </span>
                 </div>
                 <input
                   aria-hidden="true"
-                  class="MuiSelect-nativeInput"
+                  aria-invalid="false"
+                  class="MuiSelect-nativeInput css-yf8vq0-MuiSelect-nativeInput"
                   name="deliveryMechanisms[0].deliveryMechanism"
                   tabindex="-1"
                   value=""
                 />
                 <svg
                   aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSelect-icon MuiSelect-iconOutlined"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined css-hfutr2-MuiSvgIcon-root-MuiSelect-icon"
+                  data-testid="ArrowDropDownIcon"
                   focusable="false"
                   viewBox="0 0 24 24"
                 >
@@ -64,10 +74,10 @@ exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should ren
                 </svg>
                 <fieldset
                   aria-hidden="true"
-                  class="PrivateNotchedOutline-root-3 MuiOutlinedInput-notchedOutline"
+                  class="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
                 >
                   <legend
-                    class="PrivateNotchedOutline-legendLabelled-5"
+                    class="css-yjsfm1"
                   >
                     <span>
                       Delivery Mechanism

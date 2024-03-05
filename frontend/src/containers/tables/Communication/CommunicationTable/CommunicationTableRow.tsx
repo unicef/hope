@@ -1,12 +1,12 @@
-import React from 'react';
-import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { renderUserName } from '../../../../utils/utils';
-import { CommunicationMessageNode } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import * as React from 'react';
+import TableCell from '@mui/material/TableCell';
+import { useNavigate } from 'react-router-dom';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { renderUserName } from '@utils/utils';
+import { CommunicationMessageNode } from '@generated/graphql';
+import { BlackLink } from '@components/core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface CommunicationTableRowProps {
   message: CommunicationMessageNode;
@@ -17,30 +17,30 @@ export function CommunicationTableRow({
   message,
   canViewDetails,
 }: CommunicationTableRowProps): React.ReactElement {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { baseUrl } = useBaseUrl();
   const messageDetailsPath = `/${baseUrl}/accountability/communication/${message.id}`;
   const handleClick = (): void => {
-    history.push(messageDetailsPath);
+    navigate(messageDetailsPath);
   };
   return (
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={message.unicefId}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={messageDetailsPath}>{message.unicefId}</BlackLink>
         ) : (
           message.unicefId
         )}
       </TableCell>
-      <TableCell align='left'>{message.title}</TableCell>
-      <TableCell align='left'>{message.numberOfRecipients}</TableCell>
-      <TableCell align='left'>{renderUserName(message.createdBy)}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{message.title}</TableCell>
+      <TableCell align="left">{message.numberOfRecipients}</TableCell>
+      <TableCell align="left">{renderUserName(message.createdBy)}</TableCell>
+      <TableCell align="left">
         <UniversalMoment>{message.createdAt}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

@@ -1,17 +1,17 @@
-import TableCell from '@material-ui/core/TableCell';
-import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { PaymentRecordAndPaymentNode } from '../../../../__generated__/graphql';
-import { ClickableTableRow } from '../../../../components/core/Table/ClickableTableRow';
-import { StatusBox } from '../../../../components/core/StatusBox';
+import TableCell from '@mui/material/TableCell';
+import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PaymentRecordAndPaymentNode } from '@generated/graphql';
+import { ClickableTableRow } from '@components/core/Table/ClickableTableRow';
+import { StatusBox } from '@components/core/StatusBox';
 import {
   formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
   paymentStatusDisplayMap,
-} from '../../../../utils/utils';
-import { UniversalMoment } from '../../../../components/core/UniversalMoment';
-import { BlackLink } from '../../../../components/core/BlackLink';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@utils/utils';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { BlackLink } from '@components/core/BlackLink';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface PaymentRecordAndPaymentTableRowProps {
   paymentRecordOrPayment: PaymentRecordAndPaymentNode;
@@ -25,7 +25,7 @@ export function PaymentRecordAndPaymentHouseholdTableRow({
   canViewDetails,
 }: PaymentRecordAndPaymentTableRowProps): React.ReactElement {
   const { baseUrl } = useBaseUrl();
-  const history = useHistory();
+  const navigate = useNavigate();
   const paymentRecordDetailsPath = `/${baseUrl}/payment-records/${paymentRecordOrPayment.id}`;
   const paymentDetailsPath = `/${baseUrl}/payment-module/payments/${paymentRecordOrPayment.id}`;
   const detailsPath =
@@ -36,44 +36,44 @@ export function PaymentRecordAndPaymentHouseholdTableRow({
     if (openInNewTab) {
       window.open(detailsPath);
     } else {
-      history.push(detailsPath);
+      navigate(detailsPath);
     }
   };
   return (
     <ClickableTableRow
       hover
       onClick={canViewDetails ? handleClick : undefined}
-      role='checkbox'
+      role="checkbox"
       key={paymentRecordOrPayment.id}
     >
-      <TableCell align='left'>
+      <TableCell align="left">
         {canViewDetails ? (
           <BlackLink to={detailsPath}>{paymentRecordOrPayment.caId}</BlackLink>
         ) : (
           paymentRecordOrPayment.caId
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <StatusBox
           status={paymentRecordOrPayment.status}
           statusToColor={paymentRecordStatusToColor}
           statusNameMapping={paymentStatusDisplayMap}
         />
       </TableCell>
-      <TableCell align='left'>{paymentRecordOrPayment.fullName}</TableCell>
-      <TableCell align='right'>
+      <TableCell align="left">{paymentRecordOrPayment.fullName}</TableCell>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentRecordOrPayment.entitlementQuantity,
           paymentRecordOrPayment.currency,
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         {formatCurrencyWithSymbol(
           paymentRecordOrPayment.deliveredQuantity,
           paymentRecordOrPayment.currency,
         )}
       </TableCell>
-      <TableCell align='right'>
+      <TableCell align="right">
         <UniversalMoment>{paymentRecordOrPayment.deliveryDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>

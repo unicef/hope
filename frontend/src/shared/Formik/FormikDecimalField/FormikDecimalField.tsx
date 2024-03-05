@@ -1,7 +1,7 @@
-import React from 'react';
-import { InputAdornment, TextField } from '@material-ui/core';
+import * as React from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import { TextField, InputAdornment } from '@mui/material';
 
 const StyledTextField = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -13,13 +13,13 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
-export const FormikDecimalField = ({
+export function FormikDecimalField({
   field,
   form,
   decoratorStart,
   decoratorEnd,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const isInvalid =
     get(form.errors, field.name) &&
     (get(form.touched, field.name) || form.submitCount > 0);
@@ -37,34 +37,32 @@ export const FormikDecimalField = ({
   };
 
   return (
-    <>
-      <StyledTextField
-        {...field}
-        {...otherProps}
-        name={field.name}
-        id={`textField-${field.name}`}
-        margin='dense'
-        value={field.value}
-        onChange={handleChange}
-        error={isInvalid}
-        autoComplete='off'
-        type='number'
-        helperText={isInvalid && get(form.errors, field.name)}
-        InputProps={{
-          onKeyPress: handleKeyPress,
-          startAdornment: decoratorStart && (
-            <InputAdornment position='start'>{decoratorStart}</InputAdornment>
-          ),
-          endAdornment: decoratorEnd && (
-            <InputAdornment position='end'>{decoratorEnd}</InputAdornment>
-          ),
-        }}
-        // https://github.com/mui-org/material-ui/issues/12805
-        // eslint-disable-next-line react/jsx-no-duplicate-props
-        inputProps={{
-          'data-cy': `input-${field.name}`,
-        }}
-      />
-    </>
+    <StyledTextField
+      {...field}
+      {...otherProps}
+      name={field.name}
+      id={`textField-${field.name}`}
+      size="small"
+      value={field.value}
+      onChange={handleChange}
+      error={isInvalid}
+      autoComplete="off"
+      type="number"
+      helperText={isInvalid && get(form.errors, field.name)}
+      InputProps={{
+        onKeyPress: handleKeyPress,
+        startAdornment: decoratorStart && (
+          <InputAdornment position="start">{decoratorStart}</InputAdornment>
+        ),
+        endAdornment: decoratorEnd && (
+          <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+        ),
+      }}
+      // https://github.com/mui-org/material-ui/issues/12805
+      // eslint-disable-next-line react/jsx-no-duplicate-props
+      inputProps={{
+        'data-cy': `input-${field.name}`,
+      }}
+    />
   );
-};
+}

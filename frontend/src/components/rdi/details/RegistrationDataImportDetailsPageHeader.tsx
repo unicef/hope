@@ -1,19 +1,19 @@
-import { Button } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Button } from '@mui/material';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
   useEraseRdiMutation,
   useRefuseRdiMutation,
-} from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { BreadCrumbsItem } from '../../core/BreadCrumbs';
-import { useConfirmation } from '../../core/ConfirmationDialog';
-import { LoadingButton } from '../../core/LoadingButton';
-import { PageHeader } from '../../core/PageHeader';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { LoadingButton } from '@core/LoadingButton';
+import { PageHeader } from '@core/PageHeader';
 import { useProgramContext } from '../../../programContext';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
@@ -28,20 +28,20 @@ export interface RegistrationDataImportDetailsPageHeaderPropTypes {
 }
 
 const MergeButtonContainer = styled.span`
-  margin-left: ${({ theme }) => theme.spacing(4)}px;
+  margin-left: ${({ theme }) => theme.spacing(4)};
 `;
 
-export const RegistrationDataImportDetailsPageHeader = ({
+export function RegistrationDataImportDetailsPageHeader({
   registration,
   canMerge,
   canRerunDedupe,
   canViewList,
   canRefuse,
-}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement => {
+}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { isActiveProgram } = useProgramContext();
   const [refuseMutate, { loading: refuseLoading }] = useRefuseRdiMutation();
   const [eraseRdiMutate, { loading: eraseLoading }] = useEraseRdiMutation();
@@ -64,8 +64,8 @@ export const RegistrationDataImportDetailsPageHeader = ({
           });
         })
       }
-      variant='contained'
-      color='primary'
+      variant="contained"
+      color="primary"
       disabled={!isActiveProgram}
     >
       {t('Erase import')}
@@ -84,8 +84,8 @@ export const RegistrationDataImportDetailsPageHeader = ({
             <LoadingButton
               loading={refuseLoading}
               onClick={() => setShowRefuseRdiForm(true)}
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               disabled={!isActiveProgram}
             >
               {t('Refuse Import')}
@@ -115,8 +115,8 @@ export const RegistrationDataImportDetailsPageHeader = ({
       buttons = (
         <MergeButtonContainer>
           <Button
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             component={Link}
             to={`/${baseUrl}/grievance/rdi/${registration.id}`}
           >
@@ -139,7 +139,7 @@ export const RegistrationDataImportDetailsPageHeader = ({
       <PageHeader
         title={registration.name}
         breadCrumbs={canViewList ? breadCrumbsItems : null}
-        handleBack={() => history.push(`/${baseUrl}/registration-data-import/`)}
+        handleBack={() => navigate(`/${baseUrl}/registration-data-import/`)}
       >
         {registration.erased ? null : buttons}
       </PageHeader>
@@ -151,4 +151,4 @@ export const RegistrationDataImportDetailsPageHeader = ({
       />
     </>
   );
-};
+}

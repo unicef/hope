@@ -1,18 +1,18 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import { Group, Person } from '@material-ui/icons';
-import React from 'react';
+import { Grid, MenuItem } from '@mui/material';
+import { Group, Person } from '@mui/icons-material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { TargetPopulationStatus } from '../../../../__generated__/graphql';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { TargetPopulationStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
-} from '../../../../utils/utils';
-import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { FiltersSection } from '../../../core/FiltersSection';
-import { NumberTextField } from '../../../core/NumberTextField';
-import { SearchTextField } from '../../../core/SearchTextField';
-import { SelectFilter } from '../../../core/SelectFilter';
+} from '@utils/utils';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 
 interface LookUpTargetPopulationFiltersCommunicationProps {
   filter;
@@ -21,32 +21,28 @@ interface LookUpTargetPopulationFiltersCommunicationProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const LookUpTargetPopulationFiltersCommunication = ({
+export function LookUpTargetPopulationFiltersCommunication({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpTargetPopulationFiltersCommunicationProps): React.ReactElement => {
+}: LookUpTargetPopulationFiltersCommunicationProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -65,13 +61,13 @@ export const LookUpTargetPopulationFiltersCommunication = ({
       applyHandler={handleApplyFilter}
       isOnPaper={false}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
             onChange={(e) => handleFilterChange('name', e.target.value)}
-            data-cy='filters-search'
+            data-cy="filters-search"
             fullWidth
           />
         </Grid>
@@ -82,7 +78,7 @@ export const LookUpTargetPopulationFiltersCommunication = ({
             label={t('Status')}
             icon={<Person />}
             fullWidth
-            data-cy='filters-status'
+            data-cy="filters-status"
           >
             {preparedStatusChoices.sort().map((key) => (
               <MenuItem key={key} value={key}>
@@ -103,7 +99,7 @@ export const LookUpTargetPopulationFiltersCommunication = ({
               )
             }
             icon={<Group />}
-            data-cy='filters-total-households-count-min'
+            data-cy="filters-total-households-count-min"
           />
         </Grid>
         <Grid item xs={3}>
@@ -117,7 +113,7 @@ export const LookUpTargetPopulationFiltersCommunication = ({
               )
             }
             icon={<Group />}
-            data-cy='filters-total-households-count-max'
+            data-cy="filters-total-households-count-max"
           />
         </Grid>
         <Grid item xs={3}>
@@ -138,4 +134,4 @@ export const LookUpTargetPopulationFiltersCommunication = ({
       </Grid>
     </FiltersSection>
   );
-};
+}

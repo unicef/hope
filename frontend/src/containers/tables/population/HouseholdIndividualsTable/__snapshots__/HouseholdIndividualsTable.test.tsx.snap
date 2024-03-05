@@ -3,115 +3,112 @@
 exports[`components/tables/population/HouseholdIndividualsTable should render 1`] = `
 <div>
   <div
-    class="makeStyles-root-1"
+    class="sc-iBdnpw dcYiFg"
   >
     <div
-      class="MuiPaper-root makeStyles-paper-2 MuiPaper-elevation1 MuiPaper-rounded"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-fsYfdN bNxSeJ css-1ps6pg7-MuiPaper-root"
     >
       <div
-        class="MuiTableContainer-root"
+        class="MuiTableContainer-root sc-irLvIq css-rorn0c-MuiTableContainer-root"
       >
         <div
-          class="MuiBox-root MuiBox-root-7"
+          class="sc-csKJxZ enzmTw MuiBox-root css-0"
         >
           <div
-            class="MuiToolbar-root MuiToolbar-regular makeStyles-root-8 MuiToolbar-gutters"
+            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1w02pvu-MuiToolbar-root"
           >
             <h6
-              class="MuiTypography-root makeStyles-title-10 MuiTypography-h6"
+              class="MuiTypography-root MuiTypography-h6 css-cdr39q-MuiTypography-root"
               data-cy="table-title"
             >
               Individuals in Household
             </h6>
           </div>
           <div
-            class="MuiBox-root MuiBox-root-11"
+            class="sc-csKJxZ enzmTw MuiBox-root css-1ruxp1v"
           />
         </div>
         <table
-          aria-label="enhanced table"
-          aria-labelledby="tableTitle"
-          class="MuiTable-root makeStyles-table-3"
-          data-cy="table-title"
+          class="MuiTable-root sc-qZrbh sc-eTNRI haQfFY bGeKmT css-b1kpk9-MuiTable-root"
         >
           <thead
-            class="MuiTableHead-root"
+            class="MuiTableHead-root css-15wwp11-MuiTableHead-root"
           >
             <tr
-              class="MuiTableRow-root MuiTableRow-head"
+              class="MuiTableRow-root MuiTableRow-head css-n2dwpd-MuiTableRow-root"
             >
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  class="sc-EHOje hUWbrG"
+                  class="sc-gLLuof cPzlH"
                   data-cy="table-label"
                 >
                   Individual ID
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  class="sc-EHOje hUWbrG"
+                  class="sc-gLLuof cPzlH"
                   data-cy="table-label"
                 >
                   Individual
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  class="sc-EHOje hUWbrG"
+                  class="sc-gLLuof cPzlH"
                   data-cy="table-label"
                 >
                   Status
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  class="sc-EHOje hUWbrG"
+                  class="sc-gLLuof cPzlH"
                   data-cy="table-label"
                 >
                   Role
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  class="sc-EHOje hUWbrG"
+                  class="sc-gLLuof cPzlH"
                   data-cy="table-label"
                 >
                   Relationship to HoH
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignRight MuiTableCell-sizeMedium css-1azl6jz-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  class="sc-EHOje hUWbrG"
+                  class="sc-gLLuof cPzlH"
                   data-cy="table-label"
                 >
                   Date of Birth
                 </span>
               </th>
               <th
-                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-head MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ygcj2i-MuiTableCell-root"
                 scope="col"
               >
                 <span
-                  class="sc-EHOje hUWbrG"
+                  class="sc-gLLuof cPzlH"
                   data-cy="table-label"
                 >
                   Gender
@@ -120,51 +117,52 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
             </tr>
           </thead>
           <tbody
-            class="MuiTableBody-root"
+            class="MuiTableBody-root css-apqrd9-MuiTableBody-root"
           >
             <tr
-              class="MuiTableRow-root sc-bxivhb ksDfcC MuiTableRow-hover"
+              class="MuiTableRow-root MuiTableRow-hover sc-hLQSwg fjpYDR css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <a
-                  class="sc-bdVaJa hWuxQp"
+                  class="sc-beySPh ikyHhp"
                   href="/afghanistan/programs/UHJvZ3JhbU5vZGU6YzRkNTY1N2QtMWEyOS00NmUxLTgxOTAtZGY3Zjg1YTBkMmVm/population/individuals/SW5kaXZpZHVhbE5vZGU6Y2MwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAx"
                 >
                   IND-23-0000.0007
                 </a>
               </td>
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 Jan Kowalski
               </td>
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <div
-                  class="sc-bwzfXH jDYBWd"
+                  class="sc-guDLey eueYPa"
                 >
                   <div
-                    class="sc-htpNat dNIAUP"
+                    class="sc-dmyCSP ljkNfL"
                     data-cy="status-container"
+                    status="ACTIVE"
                   >
                     ACTIVE
                   </div>
                 </div>
               </td>
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 Primary collector
               </td>
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               />
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 <time
                   datetime="759369600000"
@@ -173,7 +171,7 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
                 </time>
               </td>
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
               >
                 Male
               </td>
@@ -182,68 +180,60 @@ exports[`components/tables/population/HouseholdIndividualsTable should render 1`
         </table>
       </div>
       <div
-        class="MuiTablePagination-root"
+        class="MuiTablePagination-root css-jtlhu6-MuiTablePagination-root"
         data-cy="table-pagination"
       >
         <div
-          class="MuiToolbar-root MuiToolbar-regular MuiTablePagination-toolbar MuiToolbar-gutters"
+          class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar css-wogcmv-MuiToolbar-root-MuiTablePagination-toolbar"
         >
           <div
-            class="MuiTablePagination-spacer"
+            class="MuiTablePagination-spacer css-1psng7p-MuiTablePagination-spacer"
           />
           <p
-            class="MuiTypography-root MuiTablePagination-caption MuiTypography-body2 MuiTypography-colorInherit"
+            class="MuiTablePagination-displayedRows css-levciy-MuiTablePagination-displayedRows"
           >
-            1-1 of 1
+            1–1 of 1
           </p>
           <div
-            class="MuiTablePagination-actions"
+            class="MuiBox-root css-nkn1dz"
           >
             <button
-              aria-label="Previous page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+              aria-label="previous page"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
               disabled=""
               tabindex="-1"
-              title="Previous page"
               type="button"
             >
-              <span
-                class="MuiIconButton-label"
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                data-testid="KeyboardArrowLeftIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z"
-                  />
-                </svg>
-              </span>
+                <path
+                  d="M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z"
+                />
+              </svg>
             </button>
             <button
-              aria-label="Next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit Mui-disabled Mui-disabled"
+              aria-label="next page"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
               disabled=""
               tabindex="-1"
-              title="Next page"
               type="button"
             >
-              <span
-                class="MuiIconButton-label"
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                data-testid="KeyboardArrowRightIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z"
-                  />
-                </svg>
-              </span>
+                <path
+                  d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
+                />
+              </svg>
             </button>
           </div>
         </div>

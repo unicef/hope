@@ -1,6 +1,5 @@
-import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { SentryRoute } from '../../components/core/SentryRoute';
+import * as React from 'react';
+import { useRoutes } from 'react-router-dom';
 import { CreatePaymentPlanPage } from '../pages/paymentmodule/CreatePaymentPlanPage';
 import { EditFollowUpPaymentPlanPage } from '../pages/paymentmodule/EditFollowUpPaymentPlanPage';
 import { EditFollowUpSetUpFspPage } from '../pages/paymentmodule/EditFollowUpSetUpFspPage';
@@ -13,63 +12,48 @@ import { PaymentPlanDetailsPage } from '../pages/paymentmodule/PaymentPlanDetail
 import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
 
 export const PaymentModuleRoutes = (): React.ReactElement => {
-  const { path } = useRouteMatch();
-
   const paymentModuleRoutes = [
     {
-      path: `${path}/payment-module/new-plan`,
-      component: <CreatePaymentPlanPage />,
+      path: 'payment-module/new-plan',
+      element: <CreatePaymentPlanPage />,
     },
     {
-      path: `${path}/payment-module`,
-      component: <PaymentModulePage />,
-      exact: true,
-    },
-
-    {
-      path: `${path}/payment-module/followup-payment-plans/:id/edit`,
-      component: <EditFollowUpPaymentPlanPage />,
-    },
-
-    {
-      path: `${path}/payment-module/followup-payment-plans/:id/setup-fsp/edit`,
-      component: <EditFollowUpSetUpFspPage />,
+      path: 'payment-module',
+      element: <PaymentModulePage />,
     },
     {
-      path: `${path}/payment-module/payment-plans/:id/setup-fsp/create`,
-      component: <SetUpFspPage />,
+      path: 'payment-module/followup-payment-plans/:id/edit',
+      element: <EditFollowUpPaymentPlanPage />,
     },
     {
-      path: `${path}/payment-module/payment-plans/:id/setup-fsp/edit`,
-      component: <EditSetUpFspPage />,
-    },
-
-    {
-      path: `${path}/payment-module/payment-plans/:id/edit`,
-      component: <EditPaymentPlanPage />,
-    },
-
-    {
-      path: `${path}/payment-module/payments/:id`,
-      component: <PaymentDetailsPage />,
+      path: 'payment-module/followup-payment-plans/:id/setup-fsp/edit',
+      element: <EditFollowUpSetUpFspPage />,
     },
     {
-      path: `${path}/payment-module/payment-plans/:id`,
-      component: <PaymentPlanDetailsPage />,
+      path: 'payment-module/payment-plans/:id/setup-fsp/create',
+      element: <SetUpFspPage />,
     },
     {
-      path: `${path}/payment-module/followup-payment-plans/:id`,
-      component: <FollowUpPaymentPlanDetailsPage />,
+      path: 'payment-module/payment-plans/:id/setup-fsp/edit',
+      element: <EditSetUpFspPage />,
+    },
+    {
+      path: 'payment-module/payment-plans/:id/edit',
+      element: <EditPaymentPlanPage />,
+    },
+    {
+      path: 'payment-module/payments/:id',
+      element: <PaymentDetailsPage />,
+    },
+    {
+      path: 'payment-module/payment-plans/:id',
+      element: <PaymentPlanDetailsPage />,
+    },
+    {
+      path: 'payment-module/followup-payment-plans/:id',
+      element: <FollowUpPaymentPlanDetailsPage />,
     },
   ];
 
-  return (
-    <Switch>
-      {paymentModuleRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path} exact={route.exact}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
+  return useRoutes(paymentModuleRoutes);
 };

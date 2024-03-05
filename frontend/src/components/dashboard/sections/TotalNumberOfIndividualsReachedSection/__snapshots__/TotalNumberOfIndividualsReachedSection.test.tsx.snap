@@ -3,41 +3,43 @@
 exports[`components/dashboard/TotalNumberOfIndividualsReachedSection should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-dnqmqq QsoBu MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-iBdnpw fnPCjC css-1ps6pg7-MuiPaper-root"
     color="#345DA0"
   >
     <div
-      class="sc-htpNat izTSWH"
+      class="sc-dmyCSP fASdeP"
     >
       TOTAL NUMBER OF INDIVIDUALS REACHED
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center MuiGrid-justify-content-xs-space-between"
+      class="MuiGrid-root MuiGrid-container css-9cyib4-MuiGrid-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item"
+        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
       >
         <div
-          class="sc-htoDjs fhSiPP"
+          class="sc-qZrbh iPyAyQ"
         >
           0
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item"
+        class="MuiGrid-root MuiGrid-item css-13i4rnv-MuiGrid-root"
       >
         <div
-          class="sc-bZQynM jhNgfH"
+          bg="#D9E2EF"
+          class="sc-gLLuof grlvxO"
           color="#023F90"
         >
           <svg
             aria-hidden="true"
-            class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit"
+            class="MuiSvgIcon-root MuiSvgIcon-fontSizeInherit css-1vooibu-MuiSvgIcon-root"
+            data-testid="PersonIcon"
             focusable="false"
             viewBox="0 0 24 24"
           >
             <path
-              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4m0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4"
             />
           </svg>
         </div>

@@ -1,55 +1,51 @@
 import { Form, Formik } from 'formik';
 import moment from 'moment';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useHistory } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import {
   useAllTargetPopulationsQuery,
   usePaymentPlanQuery,
   useUpdatePpMutation,
-} from '../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { PaymentPlanParameters } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
-import { PaymentPlanTargeting } from '../../../components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
-import { EditPaymentPlanHeader } from '../../../components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
+} from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { PaymentPlanParameters } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanParameters';
+import { PaymentPlanTargeting } from '@components/paymentmodule/CreatePaymentPlan/PaymentPlanTargeting/PaymentPlanTargeting';
+import { EditPaymentPlanHeader } from '@components/paymentmodule/EditPaymentPlan/EditPaymentPlanHeader';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { today } from '../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { today } from '@utils/utils';
 
 export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { id } = useParams();
   const { t } = useTranslation();
-  const {
-    data: paymentPlanData,
-    loading: loadingPaymentPlan,
-  } = usePaymentPlanQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: paymentPlanData, loading: loadingPaymentPlan } =
+    usePaymentPlanQuery({
+      variables: {
+        id,
+      },
+      fetchPolicy: 'cache-and-network',
+    });
 
   const [mutate] = useUpdatePpMutation();
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea, programId } = useBaseUrl();
   const permissions = usePermissions();
 
-  const {
-    data: allTargetPopulationsData,
-    loading: loadingTargetPopulations,
-  } = useAllTargetPopulationsQuery({
-    variables: {
-      businessArea,
-      paymentPlanApplicable: false,
-      program: [programId],
-    },
-  });
+  const { data: allTargetPopulationsData, loading: loadingTargetPopulations } =
+    useAllTargetPopulationsQuery({
+      variables: {
+        businessArea,
+        paymentPlanApplicable: false,
+        program: [programId],
+      },
+    });
   if (loadingTargetPopulations || loadingPaymentPlan)
     return <LoadingComponent />;
   if (!allTargetPopulationsData || !paymentPlanData) return null;
@@ -73,20 +69,19 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
 
   const validationSchema = Yup.object().shape({
     targetingId: Yup.string().required(t('Target Population is required')),
+    currency: Yup.string().nullable().required(t('Currency is required')),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
       .required(t('End Date is required'))
-      .when(
-        'startDate',
-        (startDate, schema) =>
-          startDate &&
-          schema.min(
-            startDate,
-            `${t('End date has to be greater than')} ${moment(startDate).format(
-              'YYYY-MM-DD',
-            )}`,
-          ),
-        '',
+      .when('startDate', (startDate: any, schema: Yup.DateSchema) =>
+        startDate
+          ? schema.min(
+              startDate,
+              `${t('End date has to be greater than')} ${moment(
+                startDate,
+              ).format('YYYY-MM-DD')}`,
+            )
+          : schema,
       ),
     dispersionStartDate: Yup.date().required(
       t('Dispersion Start Date is required'),
@@ -96,15 +91,15 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
       .min(today, t('Dispersion End Date cannot be in the past'))
       .when(
         'dispersionStartDate',
-        (dispersionStartDate, schema) =>
-          dispersionStartDate &&
-          schema.min(
-            dispersionStartDate,
-            `${t('Dispersion End Date has to be greater than')} ${moment(
-              dispersionStartDate,
-            ).format('YYYY-MM-DD')}`,
-          ),
-        '',
+        (dispersionStartDate: any, schema: Yup.DateSchema) =>
+          dispersionStartDate
+            ? schema.min(
+                dispersionStartDate,
+                `${t('Dispersion End Date has to be greater than')} ${moment(
+                  dispersionStartDate,
+                ).format('YYYY-MM-DD')}`,
+              )
+            : schema,
       ),
   });
 
@@ -126,7 +121,7 @@ export const EditFollowUpPaymentPlanPage = (): React.ReactElement => {
         },
       });
       showMessage(t('Follow-up Payment Plan Edited'));
-      history.push(
+      navigate(
         `/${baseUrl}/payment-module/followup-payment-plans/${res.data.updatePaymentPlan.paymentPlan.id}`,
       );
     } catch (e) {

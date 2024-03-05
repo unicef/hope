@@ -1,13 +1,12 @@
-import { Box, Typography } from '@material-ui/core';
-import React, { ReactElement } from 'react';
+import { Box, Typography } from '@mui/material';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { GreyText } from './GreyText';
 
 const PaperContainer = styled(Box)`
   display: flex;
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
   flex-direction: column;
   background-color: #fff;
   border-bottom: 1px solid rgba(224, 224, 224, 1);
@@ -16,8 +15,7 @@ const PaperContainer = styled(Box)`
 
 const BoxContainer = styled(Box)`
   display: flex;
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(3)} ${({ theme }) => theme.spacing(4)};
   flex-direction: column;
   width: 100%;
 `;
@@ -31,23 +29,23 @@ interface BaseSectionProps {
   noPaper?: boolean;
 }
 
-export const BaseSection = ({
+export function BaseSection({
   children = <></>,
   buttons,
   title,
   description,
   p = 3,
   noPaper = false,
-}: BaseSectionProps): React.ReactElement => {
+}: BaseSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const Container = noPaper ? BoxContainer : PaperContainer;
 
   return (
     <Container>
       <Box p={p}>
-        <Box display='flex' justifyContent='space-between' alignItems='center'>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           {typeof title === 'string' ? (
-            <Typography variant='h6'>{t(title)}</Typography>
+            <Typography variant="h6">{t(title)}</Typography>
           ) : (
             title
           )}
@@ -62,4 +60,4 @@ export const BaseSection = ({
       </Box>
     </Container>
   );
-};
+}

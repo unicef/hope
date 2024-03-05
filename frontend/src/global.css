@@ -1,0 +1,27 @@
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+.MuiButton-containedPrimary:hover {
+  opacity: 0.9 !important;
+  color: #fff;
+}
+
+*:focus {
+  outline: none !important;
+}
+
+*:hover {
+  outline: none !important;
+}
+
+/* primary */
+a:hover {
+  color: #003c8f;
+}

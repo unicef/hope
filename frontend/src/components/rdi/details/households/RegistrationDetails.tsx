@@ -1,16 +1,16 @@
-import { Grid, Typography } from '@material-ui/core';
-import Paper from '@material-ui/core/Paper';
-import React from 'react';
+import { Grid, Typography } from '@mui/material';
+import Paper from '@mui/material/Paper';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
-import { Title } from '../../../core/Title';
+import { LabelizedField } from '@core/LabelizedField';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useRegistrationDataImportQuery } from '@generated/graphql';
+import { Title } from '@core/Title';
 
 const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
   margin-top: 20px;
   &:first-child {
     margin-top: 0px;
@@ -46,7 +46,7 @@ export function RegistrationDetails({
   return (
     <Overview>
       <Title>
-        <Typography variant='h6'>{t('Registration Details')}</Typography>
+        <Typography variant="h6">{t('Registration Details')}</Typography>
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={4}>
@@ -68,7 +68,7 @@ export function RegistrationDetails({
       {registrationDataImport.dataSource === 'XLS' ? null : (
         <>
           <hr />
-          <Typography variant='h6'>{t('Data Collection')}</Typography>
+          <Typography variant="h6">{t('Data Collection')}</Typography>
           <Grid container spacing={6}>
             <Grid item xs={4}>
               <LabelizedField label={t('Start time')}>

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
-import { Collapse, IconButton } from '@material-ui/core';
-import { ExpandLessRounded, ExpandMoreRounded } from '@material-ui/icons';
-import { XlsxRowErrorNode } from '../../../../__generated__/graphql';
+import { Collapse, IconButton } from '@mui/material';
+import { ExpandLessRounded, ExpandMoreRounded } from '@mui/icons-material';
+import { XlsxRowErrorNode } from '@generated/graphql';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -25,20 +26,24 @@ export function XlsxErrors({
   }
   return (
     <>
-      <ErrorsContainer data-cy='errors-container'>
+      <ErrorsContainer data-cy="errors-container">
         <Error>Errors</Error>
         <IconButton
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
-          aria-label='show more'
+          aria-label="show more"
         >
           {expanded ? <ExpandLessRounded /> : <ExpandMoreRounded />}
         </IconButton>
       </ErrorsContainer>
-      <Collapse in={expanded} timeout='auto' unmountOnExit>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
         {errors.map((item) => (
           <Error key={item.message}>
-            <strong>Row: {item.rowNumber}</strong> {item.message}
+            <strong>
+              Row:
+              {item.rowNumber}
+            </strong>{' '}
+            {item.message}
           </Error>
         ))}
       </Collapse>

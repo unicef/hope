@@ -1,14 +1,14 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllSurveysQueryVariables,
   SurveyNode,
   SurveysChoiceDataQuery,
   useAllSurveysQuery,
-} from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { choicesToDict, dateToIsoString } from '../../../../utils/utils';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { choicesToDict, dateToIsoString } from '@utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './SurveysTableHeadCells';
 import { SurveysTableRow } from './SurveysTableRow';
@@ -19,11 +19,11 @@ interface SurveysTableProps {
   choicesData: SurveysChoiceDataQuery;
 }
 
-export const SurveysTable = ({
+export function SurveysTable({
   filter,
   canViewDetails,
   choicesData,
-}: SurveysTableProps): ReactElement => {
+}: SurveysTableProps): ReactElement {
   const { programId } = useBaseUrl();
   const { t } = useTranslation();
 
@@ -46,9 +46,9 @@ export const SurveysTable = ({
         title={t('Surveys List')}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllSurveysQuery}
-        queriedObjectName='allSurveys'
-        defaultOrderBy='createdAt'
-        defaultOrderDirection='desc'
+        queriedObjectName="allSurveys"
+        defaultOrderBy="createdAt"
+        defaultOrderDirection="desc"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <SurveysTableRow
@@ -61,4 +61,4 @@ export const SurveysTable = ({
       />
     </TableWrapper>
   );
-};
+}

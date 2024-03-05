@@ -1,8 +1,15 @@
-import React from 'react';
-import { InputAdornment, Tooltip } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import * as React from 'react';
+import { InputAdornment, Tooltip, TextField } from '@mui/material';
 import moment from 'moment';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import styled from 'styled-components';
+import FormControl from '@mui/material/FormControl';
+import { parseISO } from 'date-fns';
 import get from 'lodash/get';
+
+const FullWidthFormControl = styled(FormControl)`
+  width: 100%;
+`;
 
 export const FormikDateField = ({
   field,
@@ -10,67 +17,93 @@ export const FormikDateField = ({
   decoratorStart,
   decoratorEnd,
   tooltip = null,
+  required = false,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
     get(form.errors, field.name) &&
     (get(form.touched, field.name) || form.submitCount > 0);
-  const dateFormat = 'YYYY-MM-DD';
-  let formattedValue = field.value === '' ? null : field.value;
-  if (formattedValue) {
-    formattedValue = moment(formattedValue).toISOString();
+
+  let formattedValue = null;
+
+  if (field.value && typeof field.value === 'string') {
+    formattedValue = parseISO(field.value);
   }
 
   const datePickerComponent = (
-    <KeyboardDatePicker
-      {...field}
-      {...otherProps}
-      name={field.name}
-      variant='inline'
-      inputVariant='outlined'
-      margin='dense'
-      value={formattedValue || null}
-      error={isInvalid}
-      onBlur={null}
-      helperText={isInvalid && get(form.errors, field.name)}
-      autoOk
-      onClose={() => {
-        setTimeout(() => {
-          form.handleBlur({ target: { name: field.name } });
-        }, 0);
-      }}
-      onChange={(date) => {
-        if (date?.isValid()) {
-          field.onChange({
-            target: {
-              value: moment(date).format('YYYY-MM-DD') || null,
-              name: field.name,
-            },
-          });
-        }
-      }}
-      format={dateFormat}
-      InputProps={{
-        startAdornment: decoratorStart && (
-          <InputAdornment position='start'>{decoratorStart}</InputAdornment>
-        ),
-        endAdornment: decoratorEnd && (
-          <InputAdornment position='end'>{decoratorEnd}</InputAdornment>
-        ),
-      }}
-      // https://github.com/mui-org/material-ui/issues/12805
-      // eslint-disable-next-line react/jsx-no-duplicate-props
-      inputProps={{
-        'data-cy': `date-input-${field.name}`,
-      }}
-      PopoverProps={{
-        PaperProps: { 'data-cy': 'date-picker-container' },
-      }}
-      KeyboardButtonProps={{
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...({ 'data-cy': 'calendar-icon' } as any),
-      }}
-    />
+    <FullWidthFormControl size="small">
+      <DatePicker
+        {...field}
+        {...otherProps}
+        label={required ? `${otherProps.label}*` : otherProps.label}
+        format="yyyy-MM-dd"
+        name={field.name}
+        slotProps={{
+          textField: {
+            size: 'small',
+            error: isInvalid,
+            helperText: isInvalid && get(form.errors, field.name),
+          },
+        }}
+        sx={{
+          '& .MuiSvgIcon-root': {
+            outline: 'none',
+          },
+        }}
+        slots={{
+          TextField: (props) => (
+            <TextField
+              {...props}
+              variant="outlined"
+              size="small"
+              fullWidth
+              error={isInvalid}
+              helperText={isInvalid && get(form.errors, field.name)}
+              InputProps={{
+                startAdornment: decoratorStart && (
+                  <InputAdornment position="start">
+                    {decoratorStart}
+                  </InputAdornment>
+                ),
+                endAdornment: decoratorEnd && (
+                  <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+                ),
+              }}
+              required={required}
+              // https://github.com/mui-org/material-ui/issues/12805
+              // eslint-disable-next-line react/jsx-no-duplicate-props
+              inputProps={{
+                'data-cy': `date-input-${field.name}`,
+              }}
+            />
+          ),
+        }}
+        value={formattedValue || null}
+        onBlur={() => {
+          setTimeout(() => {
+            form.handleBlur({ target: { name: field.name } });
+          }, 0);
+        }}
+        onChange={(date) => {
+          if (date instanceof Date && !isNaN(date.getTime())) {
+            field.onChange({
+              target: {
+                value: moment(date).format('YYYY-MM-DD'),
+                name: field.name,
+              },
+            });
+          } else {
+            console.error('Invalid date:', date);
+            field.onChange({
+              target: {
+                value: null,
+                name: field.name,
+              },
+            });
+          }
+        }}
+      />
+    </FullWidthFormControl>
   );
 
   if (tooltip) {

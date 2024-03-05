@@ -1,27 +1,27 @@
-import { Box, Button } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/EditRounded';
-import React from 'react';
+import { Box, Button } from '@mui/material';
+import EditIcon from '@mui/icons-material/EditRounded';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
-} from '../../__generated__/graphql';
-import { useSnackbar } from '../../hooks/useSnackBar';
+} from '@generated/graphql';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
-import { BreadCrumbsItem } from '../core/BreadCrumbs';
-import { ButtonDialog } from '../core/ButtonDialog';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { LoadingButton } from '../core/LoadingButton';
-import { PageHeader } from '../core/PageHeader';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useProgramContext } from "../../programContext";
+} from '@utils/constants';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { ButtonDialog } from '@core/ButtonDialog';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { LoadingButton } from '@core/LoadingButton';
+import { PageHeader } from '@core/PageHeader';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useProgramContext } from '../../programContext';
 import { getGrievanceEditPath } from './utils/createGrievanceUtils';
 
 const Separator = styled.div`
@@ -49,7 +49,7 @@ const countApprovedAndUnapproved = (
   return { approved, notApproved };
 };
 
-export const GrievanceDetailsToolbar = ({
+export function GrievanceDetailsToolbar({
   ticket,
   canEdit,
   canSetInProgress,
@@ -67,12 +67,12 @@ export const GrievanceDetailsToolbar = ({
   canSendBack: boolean;
   canClose: boolean;
   canAssign: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { isActiveProgram } = useProgramContext();
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -96,50 +96,52 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
-  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange = (): string => {
-    const householdData =
-      ticket.householdDataUpdateTicketDetails?.householdData || {};
-    const individualData =
-      ticket.individualDataUpdateTicketDetails?.individualData || {};
-    const allData = {
-      ...householdData,
-      ...individualData,
-      ...householdData?.flex_fields,
-      ...individualData?.flex_fields,
-    };
-    const excludedKeys = [
-      'previous_documents',
-      'previous_identities',
-      'previous_payment_channels',
-      'flex_fields',
-    ];
+  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange =
+    (): string => {
+      const householdData =
+        ticket.householdDataUpdateTicketDetails?.householdData || {};
+      const individualData =
+        ticket.individualDataUpdateTicketDetails?.individualData || {};
+      const allData = {
+        ...householdData,
+        ...individualData,
+        ...householdData?.flex_fields,
+        ...individualData?.flex_fields,
+      };
+      const excludedKeys = [
+        'previous_documents',
+        'previous_identities',
+        'previous_payment_channels',
+        'flex_fields',
+      ];
 
-    const filteredData = Object.keys(allData)
-      .filter((key) => !excludedKeys.includes(key))
-      .reduce((obj, key) => {
-        return {
-          ...obj,
-          [key]: allData[key],
-        };
-      }, {});
+      const filteredData = Object.keys(allData)
+        .filter((key) => !excludedKeys.includes(key))
+        .reduce(
+          (obj, key) => ({
+            ...obj,
+            [key]: allData[key],
+          }),
+          {},
+        );
 
-    const { approved, notApproved } = countApprovedAndUnapproved(
-      Object.values(filteredData),
-    );
-
-    if (!notApproved) {
-      return '';
-    }
-
-    if (!approved) {
-      return t(
-        `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`,
+      const { approved, notApproved } = countApprovedAndUnapproved(
+        Object.values(filteredData),
       );
-    }
 
-    const approvedText = `${approved} change${approved > 1 ? 's' : ''}`;
-    return `You approved ${approvedText}. Remaining change requests (${notApproved}) will be automatically rejected.`;
-  };
+      if (!notApproved) {
+        return '';
+      }
+
+      if (!approved) {
+        return t(
+          'You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.',
+        );
+      }
+
+      const approvedText = `${approved} change${approved > 1 ? 's' : ''}`;
+      return `You approved ${approvedText}. Remaining change requests (${notApproved}) will be automatically rejected.`;
+    };
 
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
     const hasApproveOption =
@@ -215,8 +217,8 @@ export const GrievanceDetailsToolbar = ({
   const closingWarningText =
     ticket?.businessArea.postponeDeduplication === true
       ? t(
-          'This ticket will be closed without running the deduplication process.',
-        )
+        'This ticket will be closed without running the deduplication process.',
+      )
       : null;
 
   const changeState = async (status): Promise<void> => {
@@ -260,8 +262,8 @@ export const GrievanceDetailsToolbar = ({
   let closeButton = (
     <LoadingButton
       loading={loading}
-      color='primary'
-      variant='contained'
+      color="primary"
+      variant="contained"
       onClick={() =>
         confirm({
           title: t('Close ticket'),
@@ -275,12 +277,12 @@ export const GrievanceDetailsToolbar = ({
         }).then(async () => {
           try {
             await changeState(GRIEVANCE_TICKET_STATES.CLOSED);
-          } catch(e) {
+          } catch (e) {
             e.graphQLErrors.map((x) => showMessage(x.message));
           }
         })
       }
-      data-cy='button-close-ticket'
+      data-cy="button-close-ticket"
       disabled={!isActiveProgram}
     >
       {t('Close Ticket')}
@@ -320,12 +322,11 @@ export const GrievanceDetailsToolbar = ({
     );
   }
 
-  const canCreateDataChange = (): boolean => {
-    return [
+  const canCreateDataChange = (): boolean =>
+    [
       GRIEVANCE_ISSUE_TYPES.PAYMENT_COMPLAINT,
       GRIEVANCE_ISSUE_TYPES.FSP_COMPLAINT,
     ].includes(ticket.issueType?.toString());
-  };
 
   const grievanceEditPath = getGrievanceEditPath(
     ticket.id,
@@ -338,16 +339,16 @@ export const GrievanceDetailsToolbar = ({
       title={`Ticket ID: ${ticket.unicefId}`}
       breadCrumbs={breadCrumbsItems}
     >
-      <Box display='flex' alignItems='center'>
+      <Box display="flex" alignItems="center">
         {isEditable && canEdit && (
           <Box mr={3}>
             <Button
-              color='primary'
-              variant='outlined'
+              color="primary"
+              variant="outlined"
               component={Link}
               to={grievanceEditPath}
               startIcon={<EditIcon />}
-              data-cy='button-edit'
+              data-cy="button-edit"
               disabled={!isActiveProgram}
             >
               {t('Edit')}
@@ -356,29 +357,27 @@ export const GrievanceDetailsToolbar = ({
         )}
         {isNew && canEdit && canAssign && <Separator />}
         {isNew && canEdit && canAssign && (
-          <>
-            <LoadingButton
-              loading={loading}
-              color='primary'
-              variant='contained'
-              onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
-              data-cy='button-assign-to-me'
-              disabled={!isActiveProgram}
-            >
-              {t('ASSIGN TO ME')}
-            </LoadingButton>
-          </>
+          <LoadingButton
+            loading={loading}
+            color="primary"
+            variant="contained"
+            onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
+            data-cy="button-assign-to-me"
+            disabled={!isActiveProgram}
+          >
+            {t('ASSIGN TO ME')}
+          </LoadingButton>
         )}
         {isAssigned && canSetInProgress && (
           <Box mr={3}>
             <LoadingButton
               loading={loading}
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               onClick={() => {
                 changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
               }}
-              data-cy='button-set-to-in-progress'
+              data-cy="button-set-to-in-progress"
               disabled={!isActiveProgram}
             >
               {t('Set to in progress')}
@@ -391,10 +390,10 @@ export const GrievanceDetailsToolbar = ({
               <Box mr={3}>
                 <LoadingButton
                   loading={loading}
-                  color='primary'
-                  variant='outlined'
+                  color="primary"
+                  variant="outlined"
                   onClick={() => changeState(GRIEVANCE_TICKET_STATES.ON_HOLD)}
-                  data-cy='button-set-on-hold'
+                  data-cy="button-set-on-hold"
                   disabled={!isActiveProgram}
                 >
                   {t('Set On Hold')}
@@ -405,12 +404,12 @@ export const GrievanceDetailsToolbar = ({
               <Box mr={3}>
                 <LoadingButton
                   loading={loading}
-                  color='primary'
-                  variant='contained'
+                  color="primary"
+                  variant="contained"
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
-                  data-cy='button-send-for-approval'
+                  data-cy="button-send-for-approval"
                   disabled={!isActiveProgram}
                 >
                   {t('Send For Approval')}
@@ -419,15 +418,15 @@ export const GrievanceDetailsToolbar = ({
             )}
             {isFeedbackType && canClose && (
               <Button
-                color='primary'
-                variant='contained'
+                color="primary"
+                variant="contained"
                 onClick={() =>
                   confirm({
                     content: closingConfirmationText,
                     continueText: 'close ticket',
                   }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
                 }
-                data-cy='button-close-ticket'
+                data-cy="button-close-ticket"
                 disabled={!isActiveProgram}
               >
                 {t('Close Ticket')}
@@ -441,12 +440,12 @@ export const GrievanceDetailsToolbar = ({
               <Box mr={3}>
                 <LoadingButton
                   loading={loading}
-                  color='primary'
-                  variant='contained'
+                  color="primary"
+                  variant="contained"
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
-                  data-cy='button-set-to-in-progress'
+                  data-cy="button-set-to-in-progress"
                   disabled={!isActiveProgram}
                 >
                   {t('Set to in progress')}
@@ -457,12 +456,12 @@ export const GrievanceDetailsToolbar = ({
               <Box mr={3}>
                 <LoadingButton
                   loading={loading}
-                  color='primary'
-                  variant='contained'
+                  color="primary"
+                  variant="contained"
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
                   }
-                  data-cy='button-send-for-approval'
+                  data-cy="button-send-for-approval"
                   disabled={!isActiveProgram}
                 >
                   {t('Send For Approval')}
@@ -472,15 +471,15 @@ export const GrievanceDetailsToolbar = ({
             {isFeedbackType && canClose && (
               <LoadingButton
                 loading={loading}
-                color='primary'
-                variant='contained'
+                color="primary"
+                variant="contained"
                 onClick={() =>
                   confirm({
                     content: closingConfirmationText,
                     continueText: 'close ticket',
                   }).then(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))
                 }
-                data-cy='button-close-ticket'
+                data-cy="button-close-ticket"
                 disabled={!isActiveProgram}
               >
                 {t('Close Ticket')}
@@ -494,12 +493,12 @@ export const GrievanceDetailsToolbar = ({
               <Box mr={3}>
                 <LoadingButton
                   loading={loading}
-                  color='primary'
-                  variant='contained'
+                  color="primary"
+                  variant="contained"
                   onClick={() =>
                     changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
                   }
-                  data-cy='button-send-back'
+                  data-cy="button-send-back"
                   disabled={!isActiveProgram}
                 >
                   {t('Send Back')}
@@ -510,8 +509,7 @@ export const GrievanceDetailsToolbar = ({
               <Box mr={3}>
                 <Button
                   onClick={() =>
-                    history.push({
-                      pathname: `/${baseUrl}/grievance/new-ticket`,
+                    navigate(`/${baseUrl}/grievance/new-ticket`, {
                       state: {
                         category: GRIEVANCE_CATEGORIES.DATA_CHANGE,
                         selectedIndividual: ticket.individual,
@@ -520,9 +518,9 @@ export const GrievanceDetailsToolbar = ({
                       },
                     })
                   }
-                  variant='outlined'
-                  color='primary'
-                  data-cy='button-create-data-change'
+                  variant="outlined"
+                  color="primary"
+                  data-cy="button-create-data-change"
                   disabled={!isActiveProgram}
                 >
                   {t('Create a Data Change ticket')}
@@ -535,4 +533,4 @@ export const GrievanceDetailsToolbar = ({
       </Box>
     </PageHeader>
   );
-};
+}

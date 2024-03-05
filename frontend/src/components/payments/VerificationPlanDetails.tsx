@@ -1,20 +1,17 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   CashPlanQuery,
   CashPlanVerificationSamplingChoicesQuery,
   PaymentPlanQuery,
-} from '../../__generated__/graphql';
-import {
-  choicesToDict,
-  paymentVerificationStatusToColor,
-} from '../../utils/utils';
-import { LabelizedField } from '../core/LabelizedField';
-import { StatusBox } from '../core/StatusBox';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
+} from '@generated/graphql';
+import { choicesToDict, paymentVerificationStatusToColor } from '@utils/utils';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { VerificationPlanActions } from './VerificationPlanActions';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
 
@@ -23,8 +20,8 @@ const Container = styled.div`
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
   flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
@@ -37,11 +34,11 @@ interface VerificationPlanDetailsProps {
   planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
-export const VerificationPlanDetails = ({
+export function VerificationPlanDetails({
   verificationPlan,
   samplingChoicesData,
   planNode,
-}: VerificationPlanDetailsProps): React.ReactElement => {
+}: VerificationPlanDetailsProps): React.ReactElement {
   const { t } = useTranslation();
 
   const samplingChoicesDict = choicesToDict(
@@ -49,9 +46,9 @@ export const VerificationPlanDetails = ({
   );
   return (
     <Container>
-      <Box display='flex' alignItems='center' justifyContent='space-between'>
+      <Box display="flex" alignItems="center" justifyContent="space-between">
         <Title>
-          <Typography variant='h6'>
+          <Typography variant="h6">
             {t('Verification Plan')} #{verificationPlan.unicefId}
           </Typography>
         </Title>
@@ -69,7 +66,7 @@ export const VerificationPlanDetails = ({
                 <StatusBox
                   status={verificationPlan.status}
                   statusToColor={paymentVerificationStatusToColor}
-                  dataCy='verification-plan-status'
+                  dataCy="verification-plan-status"
                 />
               </LabelizedField>
             </Grid>
@@ -131,4 +128,4 @@ export const VerificationPlanDetails = ({
       </Grid>
     </Container>
   );
-};
+}

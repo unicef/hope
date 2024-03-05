@@ -1,71 +1,72 @@
-import { Box, Button, makeStyles } from '@material-ui/core';
-import MuiAppBar from '@material-ui/core/AppBar';
-import IconButton from '@material-ui/core/IconButton';
-import Toolbar from '@material-ui/core/Toolbar';
-import MenuIcon from '@material-ui/icons/Menu';
-import TextsmsIcon from '@material-ui/icons/Textsms';
-import clsx from 'clsx';
-import React from 'react';
-import styled from 'styled-components';
-import { BusinessAreaSelect } from '../../containers/BusinessAreaSelect';
-import { GlobalProgramSelect } from '../../containers/GlobalProgramSelect';
-import { UserProfileMenu } from '../../containers/UserProfileMenu';
-import { useCachedMe } from '../../hooks/useCachedMe';
-import { MiśTheme } from '../../theme';
+import { BusinessAreaSelect } from '@containers/BusinessAreaSelect';
+import { GlobalProgramSelect } from '@containers/GlobalProgramSelect';
+import { UserProfileMenu } from '@containers/UserProfileMenu';
+import { useCachedMe } from '@hooks/useCachedMe';
+import MenuIcon from '@mui/icons-material/Menu';
+import TextsmsIcon from '@mui/icons-material/Textsms';
+import { Box, Button } from '@mui/material';
+import MuiAppBar from '@mui/material/AppBar';
+import IconButton from '@mui/material/IconButton';
+import Toolbar from '@mui/material/Toolbar';
+import { styled } from '@mui/system';
+import * as React from 'react';
+import { MiśTheme, theme } from 'src/theme';
 
-const useStyles = makeStyles((theme: MiśTheme) => ({
-  root: {
-    display: 'flex',
-  },
-  toolbarIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '0 8px',
-    ...theme.mixins.toolbar,
-  },
-  appBar: {
-    position: 'fixed',
-    top: 0,
-    zIndex: theme.zIndex.drawer + 1,
-    backgroundColor: theme.palette.secondary.main,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    marginLeft: theme.drawer.width,
-    width: `calc(100% - ${theme.drawer.width}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  menuButton: {
-    marginRight: 36,
-  },
-  menuButtonHidden: {
-    display: 'none',
-  },
-  title: {
-    flexGrow: 1,
-  },
-  appBarSpacer: theme.mixins.toolbar,
+const StyledToolbar = styled(Toolbar)(() => ({
+  display: 'flex',
+  justifyContent: 'space-between',
 }));
 
-const StyledToolbar = styled(Toolbar)`
-  display: flex;
-  justify-content: space-between;
-`;
-const StyledLink = styled.a`
-  text-decoration: none;
-  color: #e3e6e7;
-`;
+const StyledLink = styled('a')({
+  textDecoration: 'none',
+  color: '#e3e6e7',
+});
+
+interface AppBarProps {
+  open: boolean;
+}
+
+interface StyledAppBarProps extends AppBarProps {
+  theme: MiśTheme;
+}
+const StyledAppBar = styled(MuiAppBar)<StyledAppBarProps>(
+  ({ theme: muiTheme, open }) => ({
+    position: 'fixed',
+    top: 0,
+    zIndex: muiTheme.zIndex.drawer + 1,
+    backgroundColor: muiTheme.palette.secondary.main,
+    transition: muiTheme.transitions.create(['width', 'margin'], {
+      easing: muiTheme.transitions.easing.sharp,
+      duration: muiTheme.transitions.duration.leavingScreen,
+    }),
+    ...(open && {
+      marginLeft: '240px',
+      width: 'calc(100% - 240px)',
+      transition: muiTheme.transitions.create(['width', 'margin'], {
+        easing: muiTheme.transitions.easing.sharp,
+        duration: muiTheme.transitions.duration.enteringScreen,
+      }),
+    }),
+    ...(!open && {
+      marginLeft: '0',
+      width: '100%',
+      transition: muiTheme.transitions.create(['width', 'margin'], {
+        easing: muiTheme.transitions.easing.sharp,
+        duration: muiTheme.transitions.duration.leavingScreen,
+      }),
+    }),
+  }),
+);
+
+const StyledIconButton = styled(IconButton)<AppBarProps>(({ open }) => ({
+  marginRight: 36,
+  ...(open && {
+    display: 'none',
+  }),
+}));
 
 export const AppBar = ({ open, handleDrawerOpen }): React.ReactElement => {
   const { data: meData, loading: meLoading } = useCachedMe();
-  const classes = useStyles({});
   const servicenow = `https://unicef.service-now.com/cc?id=sc_cat_item&sys_id=762ae3128747d91021cb670a0cbb35a7&HOPE - ${
     window.location.pathname.split('/')[2]
   }&Workspace: ${window.location.pathname.split('/')[1]} \n Url: ${
@@ -76,41 +77,38 @@ export const AppBar = ({ open, handleDrawerOpen }): React.ReactElement => {
     return null;
   }
   return (
-    <MuiAppBar className={clsx(classes.appBar, open && classes.appBarShift)}>
+    <StyledAppBar theme={theme} open={open}>
       <StyledToolbar>
-        <Box display='flex' alignItems='center' justifyContent='center'>
+        <Box display="flex" alignItems="center" justifyContent="center">
           <Box ml={1}>
-            <IconButton
-              edge='start'
-              color='inherit'
-              aria-label='open drawer'
+            <StyledIconButton
+              edge="start"
+              color="inherit"
+              aria-label="open drawer"
               onClick={handleDrawerOpen}
-              className={clsx(
-                classes.menuButton,
-                open && classes.menuButtonHidden,
-              )}
+              open={open}
             >
               <MenuIcon />
-            </IconButton>
+            </StyledIconButton>
           </Box>
-          <Box display='flex' alignItems='center'>
-            <Box ml={6} data-cy='business-area-container'>
+          <Box display="flex" alignItems="center">
+            <Box ml={6} data-cy="business-area-container">
               <BusinessAreaSelect />
             </Box>
-            <Box ml={6} data-cy='global-program-filter-container'>
+            <Box ml={6} data-cy="global-program-filter-container">
               <GlobalProgramSelect />
             </Box>
           </Box>
         </Box>
-        <Box display='flex' justifyContent='flex-end'>
+        <Box display="flex" justifyContent="flex-end">
           <Button startIcon={<TextsmsIcon style={{ color: '#e3e6e7' }} />}>
-            <StyledLink target='_blank' href={servicenow}>
+            <StyledLink target="_blank" href={servicenow}>
               Support
             </StyledLink>
           </Button>
           <UserProfileMenu meData={meData} />
         </Box>
       </StyledToolbar>
-    </MuiAppBar>
+    </StyledAppBar>
   );
 };

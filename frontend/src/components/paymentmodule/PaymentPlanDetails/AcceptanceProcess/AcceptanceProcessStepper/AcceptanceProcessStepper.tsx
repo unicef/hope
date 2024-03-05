@@ -1,11 +1,11 @@
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
-import CancelIcon from '@material-ui/icons/Cancel';
-import React from 'react';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
+import CancelIcon from '@mui/icons-material/Cancel';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '../../../../../__generated__/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 
 const StyledCancelIcon = styled(CancelIcon)`
   color: #e90202;
@@ -15,10 +15,16 @@ interface AcceptanceProcessStepperProps {
   acceptanceProcess: PaymentPlanQuery['paymentPlan']['approvalProcess']['edges'][0]['node'];
 }
 
-export const AcceptanceProcessStepper = ({
+export function AcceptanceProcessStepper({
   acceptanceProcess,
-}: AcceptanceProcessStepperProps): React.ReactElement => {
-  const { rejectedOn, actions, approvalNumberRequired, authorizationNumberRequired, financeReleaseNumberRequired } = acceptanceProcess;
+}: AcceptanceProcessStepperProps): React.ReactElement {
+  const {
+    rejectedOn,
+    actions,
+    approvalNumberRequired,
+    authorizationNumberRequired,
+    financeReleaseNumberRequired,
+  } = acceptanceProcess;
   const { t } = useTranslation();
   const steps = [
     {
@@ -68,4 +74,4 @@ export const AcceptanceProcessStepper = ({
       ))}
     </Stepper>
   );
-};
+}

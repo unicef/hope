@@ -1,28 +1,24 @@
-import React from 'react';
+import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { SetUpFspCore } from '../../../components/paymentmodule/CreateSetUpFsp/SetUpFspCore/SetUpFspCore';
-import { EditSetUpFspHeader } from '../../../components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { SetUpFspCore } from '@components/paymentmodule/CreateSetUpFsp/SetUpFspCore/SetUpFspCore';
+import { EditSetUpFspHeader } from '@components/paymentmodule/EditSetUpFsp/EditSetUpFspHeader';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { usePaymentPlanQuery } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { usePaymentPlanQuery } from '@generated/graphql';
 
-export const EditSetUpFspPage = (): React.ReactElement => {
+export function EditSetUpFspPage(): React.ReactElement {
   const { id } = useParams();
 
-  const {
-    data: paymentPlanData,
-    loading: paymentPlanLoading,
-  } = usePaymentPlanQuery({
-    variables: {
-      id,
-    },
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: paymentPlanData, loading: paymentPlanLoading } =
+    usePaymentPlanQuery({
+      variables: {
+        id,
+      },
+      fetchPolicy: 'cache-and-network',
+    });
 
-  const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
 
   if (permissions === null) return null;
@@ -31,12 +27,11 @@ export const EditSetUpFspPage = (): React.ReactElement => {
   if (!paymentPlanData) return null;
   if (paymentPlanLoading) return <LoadingComponent />;
 
-  const mappedInitialDeliveryMechanisms = paymentPlanData.paymentPlan.deliveryMechanisms.map(
-    (el) => ({
+  const mappedInitialDeliveryMechanisms =
+    paymentPlanData.paymentPlan.deliveryMechanisms.map((el) => ({
       deliveryMechanism: el.name,
       fsp: el.fsp?.id || '',
-    }),
-  );
+    }));
 
   const initialValues = {
     deliveryMechanisms: mappedInitialDeliveryMechanisms,
@@ -44,12 +39,11 @@ export const EditSetUpFspPage = (): React.ReactElement => {
 
   return (
     <>
-      <EditSetUpFspHeader baseUrl={baseUrl} permissions={permissions} />
+      <EditSetUpFspHeader permissions={permissions} />
       <SetUpFspCore
-        baseUrl={baseUrl}
         permissions={permissions}
         initialValues={initialValues}
       />
     </>
   );
-};
+}

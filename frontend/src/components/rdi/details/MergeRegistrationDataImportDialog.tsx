@@ -4,19 +4,20 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
-import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';
-import React, { useState } from 'react';
+} from '@mui/material';
+import MergeTypeRoundedIcon from '@mui/icons-material/MergeTypeRounded';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   RegistrationDetailedFragment,
   useMergeRdiMutation,
-} from '../../../__generated__/graphql';
-import { LoadingButton } from '../../core/LoadingButton';
+} from '@generated/graphql';
+import { LoadingButton } from '@core/LoadingButton';
 import { useProgramContext } from '../../../programContext';
 
 interface MergeRegistrationDataImportDialogProps {
@@ -46,8 +47,8 @@ export function MergeRegistrationDataImportDialog({
     <span>
       <Button
         startIcon={<MergeTypeRoundedIcon />}
-        color='primary'
-        variant='contained'
+        color="primary"
+        variant="contained"
         onClick={() => setOpen(true)}
         disabled={!isActiveProgram}
       >
@@ -56,8 +57,8 @@ export function MergeRegistrationDataImportDialog({
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Merge Import')}</DialogTitle>
@@ -80,9 +81,9 @@ export function MergeRegistrationDataImportDialog({
             <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
             <LoadingButton
               loading={loading}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={merge}
             >
               {t('MERGE')}

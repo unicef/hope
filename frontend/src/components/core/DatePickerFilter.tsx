@@ -1,47 +1,37 @@
-import { Box } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import moment from 'moment';
-import React from 'react';
+import { Box, FormControl } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { formatISO, parseISO } from 'date-fns';
+import * as React from 'react';
 import { FieldLabel } from './FieldLabel';
 
 export const DatePickerFilter = ({
   topLabel = null,
   onChange,
   value = null,
-  fullWidth = true,
   dataCy = 'date-picker-filter',
   ...props
 }): React.ReactElement => {
-  const datePickerValue = value ? moment(value) : null;
+  const datePickerValue = value ? parseISO(value) : null;
 
   return (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
-      <KeyboardDatePicker
-        variant='inline'
-        inputVariant='outlined'
-        data-cy={dataCy}
-        margin='dense'
-        autoOk
-        onChange={(date, inputString) => {
-          if (date?.valueOf()) {
-            const momentDate = moment(date);
-            onChange(momentDate?.toISOString());
-          }
-          if (!inputString) {
-            onChange(null);
-          }
-        }}
-        value={datePickerValue}
-        format='YYYY-MM-DD'
-        InputAdornmentProps={{ position: 'end' }}
-        KeyboardButtonProps={{
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...({ 'data-cy': 'calendar-icon' } as any),
-        }}
-        fullWidth={fullWidth}
-        {...props}
-      />
+      <FormControl size="small">
+        <DatePicker
+          slotProps={{ textField: { size: 'small' } }}
+          data-y={dataCy}
+          onChange={(date) => {
+            if (date) {
+              onChange(formatISO(date));
+            } else {
+              onChange(null);
+            }
+          }}
+          value={datePickerValue || null}
+          format="yyyy-MM-dd"
+          {...props}
+        />
+      </FormControl>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ERASE_RDI = gql`
   mutation eraseRDI($id: ID!) {
