@@ -16,7 +16,7 @@ from django.utils.safestring import mark_safe
 from admin_cursor_paginator import CursorPaginatorAdmin
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import confirm_action
-from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.autocomplete import LinkedAutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.querystring import QueryStringFilter
 from power_query.mixin import PowerQueryMixin
@@ -28,7 +28,8 @@ from hct_mis_api.apps.household.admin.mixins import (
     CustomTargetPopulationMixin,
     HouseholdWithDrawnMixin,
 )
-from hct_mis_api.apps.household.forms import MassEnrolForm
+from hct_mis_api.apps.household.celery_tasks import enroll_households_to_program_task
+from hct_mis_api.apps.household.forms import MassEnrollForm
 from hct_mis_api.apps.household.models import (
     HEAD,
     ROLE_ALTERNATE,
@@ -37,7 +38,6 @@ from hct_mis_api.apps.household.models import (
     HouseholdCollection,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.program.utils import enrol_household_to_program
 from hct_mis_api.apps.utils.admin import (
     BusinessAreaForHouseholdCollectionListFilter,
     HOPEModelAdminBase,
@@ -87,10 +87,13 @@ class HouseholdAdmin(
         "head_of_household",
         "size",
         "withdrawn",
+        "program",
     )
     list_filter = (
         DepotManager,
-        ("business_area", AutoCompleteFilter),
+        ("business_area", LinkedAutoCompleteFilter.factory(parent=None)),
+        ("program", LinkedAutoCompleteFilter.factory(parent="business_area")),
+        ("registration_data_import", LinkedAutoCompleteFilter.factory(parent="program")),
         QueryStringFilter,
         "withdrawn",
     )
@@ -148,7 +151,7 @@ class HouseholdAdmin(
         "count_queryset",
         "create_target_population",
         "add_to_target_population",
-        "mass_enrol_to_another_program",
+        "mass_enroll_to_another_program",
     ]
     cursor_ordering_field = "unicef_id"
     inlines = [HouseholdRepresentationInline]
@@ -295,20 +298,20 @@ class HouseholdAdmin(
             "Successfully executed",
         )
 
-    def mass_enrol_to_another_program(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
-        context = self.get_common_context(request, title="Mass enrol households to another program")
+    def mass_enroll_to_another_program(self, request: HttpRequest, qs: QuerySet) -> Optional[HttpResponse]:
+        context = self.get_common_context(request, title="Mass enroll households to another program")
         business_area_id = qs.first().business_area_id
         if "apply" in request.POST or "acknowledge" in request.POST:
-            form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+            form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
             if form.is_valid():
-                enrolled_hh_count = 0
-                program_for_enrol = form.cleaned_data["program_for_enrol"]
-                for household in qs:
-                    _, created = enrol_household_to_program(household, program_for_enrol)
-                    enrolled_hh_count += created
+                program_for_enroll = form.cleaned_data["program_for_enroll"]
+                households_ids = list(qs.distinct("unicef_id").values_list("id", flat=True))
+                enroll_households_to_program_task.delay(
+                    households_ids=households_ids, program_for_enroll_id=str(program_for_enroll.id)
+                )
                 self.message_user(
                     request,
-                    f"Successfully enrolled {enrolled_hh_count} households to {program_for_enrol}",
+                    f"Enrolling households to program: {program_for_enroll}",
                     level=messages.SUCCESS,
                 )
                 return None
@@ -321,12 +324,12 @@ class HouseholdAdmin(
                     level=messages.ERROR,
                 )
                 return None
-        form = MassEnrolForm(request.POST, business_area_id=business_area_id, households=qs)
+        form = MassEnrollForm(request.POST, business_area_id=business_area_id, households=qs)
         context["form"] = form
-        context["action"] = "mass_enrol_to_another_program"
-        return TemplateResponse(request, "admin/household/household/enrol_households_to_program.html", context)
+        context["action"] = "mass_enroll_to_another_program"
+        return TemplateResponse(request, "admin/household/household/enroll_households_to_program.html", context)
 
-    mass_enrol_to_another_program.short_description = "Mass enrol households to another program"
+    mass_enroll_to_another_program.short_description = "Mass enroll households to another program"
 
 
 @admin.register(HouseholdCollection)
