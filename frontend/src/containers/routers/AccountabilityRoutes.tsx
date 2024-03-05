@@ -10,7 +10,7 @@ import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
 export const AccountabilityRoutes = (): React.ReactElement => {
   const accountabilityRoutes = [
     {
-      path: 'accountability/surveys/create',
+      path: 'accountability/surveys/create/*',
       element: <CreateSurveyPage />,
     },
     {
