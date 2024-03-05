@@ -13,3 +13,6 @@ class BaseComponents(Common):
 
     def getNavFeedback(self) -> WebElement:
         return self.wait_for(self.navFeedback)
+
+    def getNavGrievance(self) -> WebElement:
+        return self.wait_for(self.navGrievance)

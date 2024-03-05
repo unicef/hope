@@ -8,6 +8,8 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+
+from page_object.grievance.feedback import Feedback
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
@@ -88,6 +90,9 @@ def pageProgrammeDetails(request: FixtureRequest, browser: Chrome) -> ProgrammeD
 def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
     yield AdminPanel(browser)
 
+@pytest.fixture
+def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
+    yield Feedback(browser)
 
 @pytest.fixture
 def change_super_user() -> None:
