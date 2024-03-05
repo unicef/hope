@@ -1,5 +1,5 @@
-import { Box, Paper } from '@material-ui/core';
-import React from 'react';
+import { Box, Paper } from '@mui/material';
+import * as React from 'react';
 import styled from 'styled-components';
 
 const Container = styled(Paper)`
@@ -7,8 +7,8 @@ const Container = styled(Paper)`
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
   flex-direction: row;
   align-items: center;
 
@@ -27,9 +27,9 @@ export function ContainerWithBorder({
     <Container>
       <Box
         style={{ width: '100%' }}
-        display='flex'
-        flexDirection='column'
-        alignItems='flex-end'
+        display="flex"
+        flexDirection="column"
+        alignItems="flex-end"
       >
         {children}
       </Box>

@@ -31,10 +31,8 @@ export const getIndexForId = (array, id?: string): number => {
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const removeIdPropertyFromObjects = (objects) => {
-  return objects?.map((obj) => {
-    const rest = { ...obj };
-    delete rest.id;
-    return rest;
-  });
-};
+export const removeIdPropertyFromObjects = (objects) => objects?.map((obj) => {
+  const rest = { ...obj };
+  delete rest.id;
+  return rest;
+});

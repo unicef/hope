@@ -1,24 +1,24 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import CakeIcon from '@material-ui/icons/Cake';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
-import WcIcon from '@material-ui/icons/Wc';
-import React from 'react';
+import { Grid, MenuItem } from '@mui/material';
+import CakeIcon from '@mui/icons-material/Cake';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import WcIcon from '@mui/icons-material/Wc';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   DataCollectingTypeType,
   IndividualChoiceDataQuery,
   ProgramNode,
-} from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { AdminAreaAutocomplete } from '../../shared/autocompletes/AdminAreaAutocomplete';
-import { individualTableOrderOptions } from '../../utils/constants';
-import { createHandleApplyFilterChange } from '../../utils/utils';
-import { DatePickerFilter } from '../core/DatePickerFilter';
-import { FiltersSection } from '../core/FiltersSection';
-import { NumberTextField } from '../core/NumberTextField';
-import { SearchTextField } from '../core/SearchTextField';
-import { SelectFilter } from '../core/SelectFilter';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { AdminAreaAutocomplete } from '@shared/autocompletes/AdminAreaAutocomplete';
+import { individualTableOrderOptions } from '@utils/constants';
+import { createHandleApplyFilterChange } from '@utils/utils';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 import { useProgramContext } from '../../programContext';
 
 interface IndividualsFilterProps {
@@ -32,7 +32,7 @@ interface IndividualsFilterProps {
   isOnPaper?: boolean;
 }
 
-export const IndividualsFilter = ({
+export function IndividualsFilter({
   filter,
   programs,
   choicesData,
@@ -41,27 +41,23 @@ export const IndividualsFilter = ({
   appliedFilter,
   setAppliedFilter,
   isOnPaper = true,
-}: IndividualsFilterProps): React.ReactElement => {
+}: IndividualsFilterProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const { isAllPrograms } = useBaseUrl();
   const { selectedProgram } = useProgramContext();
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -70,7 +66,7 @@ export const IndividualsFilter = ({
     clearFilter();
   };
 
-  //Show admin area filter only for social programs
+  // Show admin area filter only for social programs
   const showAdminAreaFilter =
     selectedProgram?.dataCollectingType?.type?.toUpperCase() ===
     DataCollectingTypeType.Social;
@@ -81,14 +77,14 @@ export const IndividualsFilter = ({
       applyHandler={handleApplyFilter}
       isOnPaper={isOnPaper}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
-        <Grid container item xs={6} spacing={0}>
+      <Grid container alignItems="flex-end" spacing={3}>
+        <Grid container alignItems="flex-end" item xs={6} spacing={0}>
           <Grid item xs={8}>
             <SearchTextField
               label={t('Search')}
               value={filter.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy='ind-filters-search'
+              data-cy="ind-filters-search"
             />
           </Grid>
           <Grid item xs={4}>
@@ -96,8 +92,8 @@ export const IndividualsFilter = ({
               onChange={(e) => handleFilterChange('searchType', e.target.value)}
               label={t('Search Type')}
               value={filter.searchType}
-              borderRadius='0px 4px 4px 0px'
-              data-cy='filter-search-type'
+              borderRadius="0px 4px 4px 0px"
+              data-cy="filter-search-type"
               fullWidth
               disableClearable
             >
@@ -112,14 +108,14 @@ export const IndividualsFilter = ({
           </Grid>
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <SelectFilter
               onChange={(e) => handleFilterChange('program', e.target.value)}
               label={t('Programme')}
               value={filter.program}
               fullWidth
               icon={<FlashOnIcon />}
-              data-cy='filters-program'
+              data-cy="filters-program"
             >
               {programs.map((program) => (
                 <MenuItem key={program.id} value={program.id}>
@@ -130,39 +126,39 @@ export const IndividualsFilter = ({
           </Grid>
         )}
         {showAdminAreaFilter && (
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <AdminAreaAutocomplete
-              name='admin2'
+              name="admin2"
               value={filter.admin2}
               setFilter={setFilter}
               filter={filter}
               initialFilter={initialFilter}
               appliedFilter={appliedFilter}
               setAppliedFilter={setAppliedFilter}
-              dataCy='ind-filters-admin2'
+              dataCy="ind-filters-admin2"
             />
           </Grid>
         )}
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange('sex', e.target.value)}
             value={filter.sex}
             label={t('Gender')}
             icon={<WcIcon />}
-            data-cy='ind-filters-gender'
+            data-cy="ind-filters-gender"
             fullWidth
           >
-            <MenuItem value='FEMALE'>{t('Female')}</MenuItem>
-            <MenuItem value='MALE'>{t('Male')}</MenuItem>
+            <MenuItem value="FEMALE">{t('Female')}</MenuItem>
+            <MenuItem value="MALE">{t('Male')}</MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <NumberTextField
             fullWidth
             topLabel={t('Age')}
             placeholder={t('From')}
             value={filter.ageMin}
-            data-cy='ind-filters-age-from'
+            data-cy="ind-filters-age-from"
             onChange={(e) => {
               if (e.target.value < 0 || e.target.value > 120) return;
               handleFilterChange('ageMin', e.target.value);
@@ -170,12 +166,12 @@ export const IndividualsFilter = ({
             icon={<CakeIcon />}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <NumberTextField
             fullWidth
             placeholder={t('To')}
             value={filter.ageMax}
-            data-cy='ind-filters-age-to'
+            data-cy="ind-filters-age-to"
             onChange={(e) => {
               if (e.target.value < 0 || e.target.value > 120) return;
               handleFilterChange('ageMax', e.target.value);
@@ -190,7 +186,7 @@ export const IndividualsFilter = ({
             multiple
             fullWidth
             value={filter.flags}
-            data-cy='ind-filters-flags'
+            data-cy="ind-filters-flags"
           >
             {choicesData?.flagChoices.map((each, index) => (
               <MenuItem
@@ -209,7 +205,7 @@ export const IndividualsFilter = ({
             label={t('Sort by')}
             value={filter.orderBy}
             fullWidth
-            data-cy='ind-filters-order-by'
+            data-cy="ind-filters-order-by"
             disableClearable
           >
             {individualTableOrderOptions.map((order) => (
@@ -219,25 +215,25 @@ export const IndividualsFilter = ({
             ))}
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <SelectFilter
             onChange={(e) => handleFilterChange('status', e.target.value)}
             label={t('Status')}
             value={filter.status}
-            data-cy='ind-filters-status'
+            data-cy="ind-filters-status"
           >
-            <MenuItem key='active' value='ACTIVE'>
+            <MenuItem key="active" value="ACTIVE">
               Active
             </MenuItem>
-            <MenuItem key='duplicate' value='DUPLICATE'>
+            <MenuItem key="duplicate" value="DUPLICATE">
               Duplicate
             </MenuItem>
-            <MenuItem key='withdrawn' value='WITHDRAWN'>
+            <MenuItem key="withdrawn" value="WITHDRAWN">
               Withdrawn
             </MenuItem>
           </SelectFilter>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <DatePickerFilter
             topLabel={t('Registration Date')}
             placeholder={t('From')}
@@ -245,21 +241,21 @@ export const IndividualsFilter = ({
               handleFilterChange('lastRegistrationDateMin', date)
             }
             value={filter.lastRegistrationDateMin}
-            data-cy='ind-filters-reg-date-from'
+            data-cy="ind-filters-reg-date-from"
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={2}>
           <DatePickerFilter
             placeholder={t('To')}
             onChange={(date) =>
               handleFilterChange('lastRegistrationDateMax', date)
             }
             value={filter.lastRegistrationDateMax}
-            data-cy='ind-filters-reg-date-to'
+            data-cy="ind-filters-reg-date-to"
           />
         </Grid>
         {isAllPrograms && (
-          <Grid item xs={3}>
+          <Grid item xs={2}>
             <SelectFilter
               onChange={(e) =>
                 handleFilterChange('programState', e.target.value)
@@ -268,14 +264,14 @@ export const IndividualsFilter = ({
               value={filter.programState}
               fullWidth
               disableClearable
-              data-cy='filters-program-state'
+              data-cy="filters-program-state"
             >
-              <MenuItem value='active'>{t('Active Programmes')}</MenuItem>
-              <MenuItem value='all'>{t('All Programmes')}</MenuItem>
+              <MenuItem value="active">{t('Active Programmes')}</MenuItem>
+              <MenuItem value="all">{t('All Programmes')}</MenuItem>
             </SelectFilter>
           </Grid>
         )}
       </Grid>
     </FiltersSection>
   );
-};
+}

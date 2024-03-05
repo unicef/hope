@@ -1,8 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '../../__generated__/graphql';
+import { PaymentPlanQuery } from '@generated/graphql';
 
 interface VerificationPlanDetailsChartProps {
   verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
@@ -13,20 +13,24 @@ const ChartContainer = styled.div`
   height: 100%;
 `;
 
-export const VerificationPlanDetailsChart = ({
+export function VerificationPlanDetailsChart({
   verificationPlan,
-}: VerificationPlanDetailsChartProps): React.ReactElement => {
+}: VerificationPlanDetailsChartProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <ChartContainer>
       <Doughnut
-        options={{
-          maintainAspectRatio: false,
-          cutoutPercentage: 80,
-          legend: {
-            display: false,
-          },
-        }}
+        options={
+          {
+            maintainAspectRatio: false,
+            cutout: '%',
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          } as any
+        }
         data={{
           labels: [
             t('RECEIVED'),
@@ -55,4 +59,4 @@ export const VerificationPlanDetailsChart = ({
       />
     </ChartContainer>
   );
-};
+}

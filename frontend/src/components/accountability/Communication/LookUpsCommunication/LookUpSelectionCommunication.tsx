@@ -1,14 +1,15 @@
-import { Box, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   RegistrationDataImportStatus,
   useHouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { CommunicationTabsValues } from '../../../../utils/constants';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+} from '@generated/graphql';
+import { CommunicationTabsValues } from '@utils/constants';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { LookUpHouseholdFiltersCommunication } from './LookUpHouseholdFiltersCommunication';
 import { LookUpRegistrationFiltersCommunication } from './LookUpRegistrationFiltersCommunication';
 import { LookUpSelectionTablesCommunication } from './LookUpSelectionTablesCommunication';
@@ -21,7 +22,7 @@ const BoxWithBorderBottom = styled(Box)`
   padding: 15px 0;
 `;
 
-export const LookUpSelectionCommunication = ({
+export function LookUpSelectionCommunication({
   businessArea,
   onValueChange,
   setValues,
@@ -35,7 +36,7 @@ export const LookUpSelectionCommunication = ({
   values;
   selectedTab;
   setSelectedTab;
-}): React.ReactElement => {
+}): React.ReactElement {
   const location = useLocation();
 
   const initialFilterRDI = {
@@ -91,12 +92,8 @@ export const LookUpSelectionCommunication = ({
 
   const { t } = useTranslation();
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const handleChange = (type: number, value: string[] | string): void => {
     setValues({
@@ -124,18 +121,18 @@ export const LookUpSelectionCommunication = ({
       <BoxWithBorderBottom
         p={4}
         m={4}
-        display='flex'
-        alignItems='center'
-        bgcolor='#F5F5F5'
+        display="flex"
+        alignItems="center"
+        bgcolor="#F5F5F5"
       >
-        <Box pr={5} fontWeight='500' fontSize='medium'>
+        <Box pr={5} fontWeight="500" fontSize="medium">
           {t('Look up for')}
         </Box>
         <RadioGroup
-          aria-labelledby='selection-radio-buttons-group'
+          aria-labelledby="selection-radio-buttons-group"
           value={selectedTab}
           row
-          name='radio-buttons-group'
+          name="radio-buttons-group"
         >
           {communicationTabs.map((tab, index) => (
             <FormControlLabel
@@ -143,7 +140,7 @@ export const LookUpSelectionCommunication = ({
               onChange={() => {
                 setSelectedTab(index);
               }}
-              control={<Radio color='primary' />}
+              control={<Radio color="primary" />}
               label={tab}
               key={tab}
             />
@@ -193,4 +190,4 @@ export const LookUpSelectionCommunication = ({
       />
     </Box>
   );
-};
+}

@@ -144,6 +144,8 @@ STATICFILES_FINDERS = (
     "compressor.finders.CompressorFinder",
 )
 
+MANIFEST_FILE = "web/.vite/manifest.json"
+
 AZURE_ACCOUNT_NAME = env("STORAGE_AZURE_ACCOUNT_NAME", default="")
 AZURE_ACCOUNT_KEY = env("STORAGE_AZURE_ACCOUNT_KEY", default="")
 
@@ -247,6 +249,7 @@ CSP_CONNECT_SRC: Tuple[str, ...] = (
     "trn-hope.unitst.org",  # trn
     "stg-hope.unitst.org",  # stg
     "dev-hope.unitst.org",  # dev
+    "*.unitst.org",
 )
 
 DEBUG = env.bool("DEBUG", default=False)

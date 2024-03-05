@@ -1,13 +1,13 @@
-import React from 'react';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { choicesToDict, dateToIsoString } from '../../../utils/utils';
+import * as React from 'react';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { choicesToDict, dateToIsoString } from '@utils/utils';
 import {
   AllReportsQueryVariables,
   MeQuery,
   ReportChoiceDataQuery,
   ReportNode,
   useAllReportsQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './ReportingHeadCells';
 import { ReportingTableRow } from './ReportingTableRow';
@@ -18,12 +18,12 @@ interface ReportingTableProps {
   choicesData: ReportChoiceDataQuery;
   meData: MeQuery;
 }
-export const ReportingTable = ({
+export function ReportingTable({
   businessArea,
   filter,
   choicesData,
   meData,
-}: ReportingTableProps): React.ReactElement => {
+}: ReportingTableProps): React.ReactElement {
   const initialVariables = {
     businessArea,
     createdFrom: dateToIsoString(filter.createdFrom, 'startOfDay'),
@@ -44,7 +44,7 @@ export const ReportingTable = ({
       <UniversalTable<ReportNode, AllReportsQueryVariables>
         headCells={headCells}
         query={useAllReportsQuery}
-        queriedObjectName='allReports'
+        queriedObjectName="allReports"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <ReportingTableRow
@@ -57,4 +57,4 @@ export const ReportingTable = ({
       />
     </TableWrapper>
   );
-};
+}

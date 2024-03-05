@@ -7,11 +7,12 @@ import {
   StepLabel,
   Stepper,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Field, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import {
@@ -21,32 +22,32 @@ import {
   useAllUsersQuery,
   useCreateFeedbackTicketMutation,
   useFeedbackIssueTypeChoicesQuery,
-} from '../../../../__generated__/graphql';
-import { HouseholdQuestionnaire } from '../../../../components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
-import { IndividualQuestionnaire } from '../../../../components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../../components/core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../../components/core/LabelizedField';
-import { LoadingButton } from '../../../../components/core/LoadingButton';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { OverviewContainer } from '../../../../components/core/OverviewContainer';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
-import { Consent } from '../../../../components/grievances/Consent';
-import { LookUpHouseholdIndividualSelection } from '../../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
+} from '@generated/graphql';
+import { HouseholdQuestionnaire } from '@components/accountability/Feedback/HouseholdQuestionnaire/HouseholdQuestionnaire';
+import { IndividualQuestionnaire } from '@components/accountability/Feedback/IndividualQuestionnnaire/IndividualQuestionnaire';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { OverviewContainer } from '@components/core/OverviewContainer';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { Consent } from '@components/grievances/Consent';
+import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
 import {
   PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
 } from '../../../../config/permissions';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../../../shared/Formik/FormikTextField';
-import { FeedbackSteps } from '../../../../utils/constants';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { FeedbackSteps } from '@utils/constants';
 
 const steps = [
   'Category Selection',
@@ -83,12 +84,8 @@ const BoxWithBorders = styled.div`
 
 export const validationSchemaWithSteps = (currentStep: number): unknown => {
   const datum = {
-    category: Yup.string()
-      .required('Category is required')
-      .nullable(),
-    issueType: Yup.string()
-      .required('Issue Type is required')
-      .nullable(),
+    category: Yup.string().required('Category is required').nullable(),
+    issueType: Yup.string().required('Issue Type is required').nullable(),
     admin: Yup.string().nullable(),
     description: Yup.string().nullable(),
     consent: Yup.bool().nullable(),
@@ -139,7 +136,7 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 // const MIN_SELECTED_ITEMS = 5;
 // const selectedItems = verficationStepFields.filter((item) => values[item]);
 
-//TODO: enable this when questionnaire verification is required
+// TODO: enable this when questionnaire verification is required
 
 // if (selectedItems.length < MIN_SELECTED_ITEMS) {
 //   setValidateData(true);
@@ -149,8 +146,8 @@ export const validationSchemaWithSteps = (currentStep: number): unknown => {
 //   return errors;
 // }
 
-export const CreateFeedbackPage = (): React.ReactElement => {
-  const history = useHistory();
+export function CreateFeedbackPage(): React.ReactElement {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms, programId } = useBaseUrl();
   const permissions = usePermissions();
@@ -177,20 +174,16 @@ export const CreateFeedbackPage = (): React.ReactElement => {
     variables: { businessArea, first: 1000 },
   });
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useFeedbackIssueTypeChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useFeedbackIssueTypeChoicesQuery();
 
-  const {
-    data: programsData,
-    loading: programsDataLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: {
-      first: 100,
-      businessArea,
-    },
-  });
+  const { data: programsData, loading: programsDataLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: {
+        first: 100,
+        businessArea,
+      },
+    });
 
   const [mutate, { loading }] = useCreateFeedbackTicketMutation();
 
@@ -244,7 +237,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
               variables: { input: prepareVariables(values) },
             });
             showMessage(t('Feedback created'));
-            history.push(
+            navigate(
               `/${baseUrl}/grievance/feedback/${response.data.createFeedback.feedback.id}`,
             );
           } catch (e) {
@@ -268,7 +261,7 @@ export const CreateFeedbackPage = (): React.ReactElement => {
         return (
           <>
             <PageHeader
-              title='New Feedback'
+              title="New Feedback"
               breadCrumbs={
                 hasPermissionInModule(
                   'GRIEVANCES_FEEDBACK_VIEW_LIST',
@@ -307,20 +300,20 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           </Grid>
                           <Grid item xs={6}>
                             <Field
-                              name='issueType'
-                              label='Issue Type'
-                              variant='outlined'
+                              name="issueType"
+                              label="Issue Type"
+                              variant="outlined"
                               required
                               choices={choicesData.feedbackIssueTypeChoices}
                               component={FormikSelectField}
-                              data-cy='input-issue-type'
+                              data-cy="input-issue-type"
                             />
                           </Grid>
                         </Grid>
                       )}
                       {activeStep === FeedbackSteps.Lookup && (
                         <BoxWithBorders>
-                          <Box display='flex' flexDirection='column'>
+                          <Box display="flex" flexDirection="column">
                             <LookUpHouseholdIndividualSelection
                               values={values}
                               onValueChange={setFieldValue}
@@ -341,14 +334,14 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                                 )}
                               </Typography> */}
                               <Box py={4}>
-                                <Typography variant='subtitle2'>
+                                <Typography variant="subtitle2">
                                   {t('Household Questionnaire')}
                                 </Typography>
                                 <Box py={4}>
                                   <HouseholdQuestionnaire values={values} />
                                 </Box>
                               </Box>
-                              <Typography variant='subtitle2'>
+                              <Typography variant="subtitle2">
                                 {t('Individual Questionnaire')}
                               </Typography>
                               <Box py={4}>
@@ -359,14 +352,14 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           )}
                           <Consent />
                           <Field
-                            name='consent'
-                            label={t('Received Consent*')}
-                            color='primary'
+                            name="consent"
+                            label={t('Received Consent')}
+                            color="primary"
                             fullWidth
                             required
                             container={false}
                             component={FormikCheckboxField}
-                            data-cy='input-consent'
+                            data-cy="input-consent"
                           />
                         </BoxWithBorders>
                       )}
@@ -406,33 +399,33 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           <Grid container spacing={3}>
                             <Grid item xs={12}>
                               <Field
-                                name='description'
+                                name="description"
                                 multiline
                                 fullWidth
-                                variant='outlined'
+                                variant="outlined"
                                 label={t('Description')}
                                 required
                                 component={FormikTextField}
-                                data-cy='input-description'
+                                data-cy="input-description"
                               />
                             </Grid>
                             <Grid item xs={12}>
                               <Field
-                                name='comments'
+                                name="comments"
                                 multiline
                                 fullWidth
-                                variant='outlined'
+                                variant="outlined"
                                 label={t('Comments')}
                                 component={FormikTextField}
-                                data-cy='input-comments'
+                                data-cy="input-comments"
                               />
                             </Grid>
                             <Grid item xs={6}>
                               <Field
-                                name='admin2'
-                                variant='outlined'
+                                name="admin2"
+                                variant="outlined"
                                 component={FormikAdminAreaAutocomplete}
-                                dataCy='input-admin2'
+                                dataCy="input-admin2"
                                 disabled={Boolean(
                                   values.selectedHousehold?.admin2,
                                 )}
@@ -440,31 +433,31 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                             </Grid>
                             <Grid item xs={6}>
                               <Field
-                                name='area'
+                                name="area"
                                 fullWidth
-                                variant='outlined'
+                                variant="outlined"
                                 label={t('Area / Village / Pay point')}
                                 component={FormikTextField}
-                                data-cy='input-area'
+                                data-cy="input-area"
                               />
                             </Grid>
                             <Grid item xs={6}>
                               <Field
-                                name='language'
+                                name="language"
                                 multiline
                                 fullWidth
-                                variant='outlined'
+                                variant="outlined"
                                 label={t('Languages Spoken')}
                                 component={FormikTextField}
-                                data-cy='input-languages'
+                                data-cy="input-languages"
                               />
                             </Grid>
                             <Grid item xs={3}>
                               <Field
-                                name='program'
+                                name="program"
                                 label={t('Programme Name')}
                                 fullWidth
-                                variant='outlined'
+                                variant="outlined"
                                 choices={mappedProgramChoices}
                                 component={FormikSelectField}
                                 disabled={!isAllPrograms || !isAnonymousTicket}
@@ -478,30 +471,30 @@ export const CreateFeedbackPage = (): React.ReactElement => {
                           {errors.verificationRequired}
                         </FormHelperText>
                       ) : null}
-                      <Box pt={3} display='flex' flexDirection='row'>
+                      <Box pt={3} display="flex" flexDirection="row">
                         <Box mr={3}>
                           <Button
                             component={Link}
                             to={`/${baseUrl}/grievance/feedback`}
-                            data-cy='button-cancel'
+                            data-cy="button-cancel"
                           >
                             {t('Cancel')}
                           </Button>
                         </Box>
-                        <Box display='flex' ml='auto'>
+                        <Box display="flex" ml="auto">
                           <Button
                             disabled={activeStep === 0}
                             onClick={handleBack}
-                            data-cy='button-back'
+                            data-cy="button-back"
                           >
                             {t('Back')}
                           </Button>
                           <LoadingButton
                             loading={loading}
-                            color='primary'
-                            variant='contained'
+                            color="primary"
+                            variant="contained"
                             onClick={submitForm}
-                            data-cy='button-submit'
+                            data-cy="button-submit"
                           >
                             {activeStep === steps.length - 1
                               ? t('Save')
@@ -519,4 +512,4 @@ export const CreateFeedbackPage = (): React.ReactElement => {
       }}
     </Formik>
   );
-};
+}

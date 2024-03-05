@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const RESTART_CREATE_REPORT_MUTATION = gql`
   mutation RestartCreateReport($reportData: RestartCreateReportInput!) {

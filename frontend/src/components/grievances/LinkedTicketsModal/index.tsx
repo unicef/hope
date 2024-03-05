@@ -1,1 +1,1 @@
-import { LinkedTicketsModal } from './LinkedTicketsModal';
+export { LinkedTicketsModal } from './LinkedTicketsModal';

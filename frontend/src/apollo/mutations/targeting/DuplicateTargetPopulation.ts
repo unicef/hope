@@ -1,10 +1,8 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const DuplicateTargetPopulation = gql`
   mutation CopyTargetPopulation($input: CopyTargetPopulationMutationInput!) {
-    copyTargetPopulation(
-      input: $input
-    ) {
+    copyTargetPopulation(input: $input) {
       clientMutationId
       targetPopulation {
         id
