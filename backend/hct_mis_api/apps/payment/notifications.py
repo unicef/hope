@@ -127,9 +127,9 @@ class PaymentNotification:
         return [self._prepare_email(user) for user in self.user_recipients.exclude(id=self.action_user.id)]
 
     def _prepare_email(self, user_recipient: User) -> EmailMultiAlternatives:
-        text_body, html_body, subject = self._prepare_bodies(user_recipient)
+        text_body, html_body = self._prepare_bodies(user_recipient)
         email = EmailMultiAlternatives(
-            subject=subject,
+            subject=self.email_subject,
             from_email=settings.EMAIL_HOST_USER,
             to=[user_recipient.email],
             body=text_body,
@@ -147,11 +147,11 @@ class PaymentNotification:
         except Exception as e:
             logger.exception(e)
 
-    def _prepare_bodies(self, user_recipient: User) -> Tuple[str, str, str]:
+    def _prepare_bodies(self, user_recipient: User) -> Tuple[str, str]:
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("payment/payment_plan_action.html", context)
         html_body = render_to_string("payment/payment_plan_action.txt", context)
-        return text_body, html_body, self.email_subject
+        return text_body, html_body
 
     def _get_sent_for_approval_action_data(self) -> None:
         self.action_user = self.approval_process.sent_for_approval_by
