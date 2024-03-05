@@ -213,7 +213,6 @@ CSP_SCRIPT_SRC: Tuple[str, ...] = (
     "saunihopetrn.blob.core.windows.net",
     "saunihopeprd.blob.core.windows.net",
     "gov-bam.nr-data.net",
-    "js-agent.newrelic.com",
     "cdn.jsdelivr.net",
     "cdnjs.cloudflare.com",
     "unpkg.com",
