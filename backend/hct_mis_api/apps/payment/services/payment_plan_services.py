@@ -16,7 +16,7 @@ from graphql import GraphQLError
 from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
-from hct_mis_api.apps.core.utils import decode_id_string, chunks
+from hct_mis_api.apps.core.utils import chunks, decode_id_string
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
