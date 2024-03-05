@@ -2,20 +2,26 @@ from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404
 
+from hct_mis_api.apps.core.models import DataCollectingType
+from hct_mis_api.apps.core.utils import get_program_id_from_headers
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.template_generator import (
     TemplateFileGenerator,
 )
 
 
 def download_template(request: HttpRequest) -> HttpResponse:
-    # program = request.headers["Program"]
-    # TODO: based on Program.DCT generate xlsx file
+    program_id = get_program_id_from_headers(request.headers)
     parse_result = urlparse(request.headers["Referer"])
     business_area_slug = parse_result.path[1:].split("/")[0]
-
-    is_program_for_social_worker = False
-
+    if program_id:
+        program = get_object_or_404(Program, id=program_id)
+        is_program_for_social_worker = program.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+    else:
+        # TODO change after FE update
+        is_program_for_social_worker = True
     mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     filename = (
         "registration_data_import_template_social_worker.xlsx"
