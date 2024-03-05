@@ -730,10 +730,10 @@ class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
         "recalculate_composition",
     )
     list_filter = (
-        ("limit_to", AutoCompleteFilter),
+        ("available_for", AutoCompleteFilter),
         "active",
         "individual_filters_available",
         "household_filters_available",
         "recalculate_composition",
     )
-    filter_horizontal = ("compatible_types", "limit_to")
+    filter_horizontal = ("compatible_types", "available_for")
