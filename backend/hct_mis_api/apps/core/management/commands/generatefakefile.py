@@ -140,7 +140,7 @@ class Command(BaseCommand):
                         "electoral_card_photo_i_c",
                         "unhcr_id_no_i_c",
                         "unhcr_id_photo_i_c",
-                        "national_passport_i_c",
+                        "national_passport_no_i_c",
                         "national_passport_photo_i_c",
                         "national_id_no_i_c",
                         "national_id_photo_i_c",
