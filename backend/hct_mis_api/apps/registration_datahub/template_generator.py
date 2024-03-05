@@ -10,11 +10,12 @@ from hct_mis_api.apps.geo.models import Area
 
 class TemplateFileGenerator:
     @classmethod
-    def _create_workbook(cls) -> openpyxl.Workbook:
+    def _create_workbook(cls, template_for_social_worker: Optional[bool] = None) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_households = wb.active
-        ws_households.title = "Households"
-        wb.create_sheet("Individuals")
+        ws_households.title = "Households" if not template_for_social_worker else "Individuals"
+        if not template_for_social_worker:
+            wb.create_sheet("Individuals")
         wb.create_sheet("Choices")
 
         return wb
@@ -65,14 +66,17 @@ class TemplateFileGenerator:
         households_sheet_title = "Households"
         individuals_sheet_title = "Individuals"
 
-        ws_households = wb[households_sheet_title]
+        if not template_for_social_worker:
+            ws_households = wb[households_sheet_title]
+        else:
+            ws_households = None
+
         ws_individuals = wb[individuals_sheet_title]
         ws_choices = wb["Choices"]
 
         flex_fields = serialize_flex_attributes()
 
         if template_for_social_worker:
-            # TODO: ???
             scopes = [Scope.GLOBAL, Scope.XLSX, Scope.XLSX_SOCIAL_WORKER]
         else:
             scopes = [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
@@ -92,7 +96,6 @@ class TemplateFileGenerator:
         }
 
         households_rows = cls._handle_name_and_label_row(households_fields)
-        print("households_rows === ", households_rows)
         individuals_rows = cls._handle_name_and_label_row(individuals_fields)
 
         for h_row, i_row in zip(households_rows, individuals_rows):
@@ -110,6 +113,6 @@ class TemplateFileGenerator:
     def get_template_file(
         cls, business_area_slug: Optional[str] = None, template_for_social_worker: Optional[bool] = None
     ) -> openpyxl.Workbook:
-        # template_for_social_worker
-        # TODO: get columns for social_worker
-        return cls._add_template_columns(cls._create_workbook(), business_area_slug, template_for_social_worker)
+        return cls._add_template_columns(
+            cls._create_workbook(template_for_social_worker), business_area_slug, template_for_social_worker
+        )
