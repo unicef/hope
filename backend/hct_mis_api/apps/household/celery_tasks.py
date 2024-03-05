@@ -13,11 +13,14 @@ from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.household.models import (
     COLLECT_TYPE_FULL,
     COLLECT_TYPE_PARTIAL,
+    Household,
     Individual,
 )
 from hct_mis_api.apps.household.services.household_recalculate_data import (
     recalculate_data,
 )
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.program.utils import enroll_households_to_program
 from hct_mis_api.apps.utils.logs import log_start_and_end
 from hct_mis_api.apps.utils.phone import calculate_phone_numbers_validity
 from hct_mis_api.apps.utils.sentry import sentry_tags, set_sentry_business_area_tag
@@ -153,23 +156,25 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
     )
 
     uploaded_by = User.objects.get(id=uploaded_by_id)
+    xlsx_update_file = XlsxUpdateFile.objects.get(id=xlsx_update_file_id)
+    enable_email_notification = xlsx_update_file.business_area.enable_email_notification
     try:
-        xlsx_update_file = XlsxUpdateFile.objects.get(id=xlsx_update_file_id)
-
         set_sentry_business_area_tag(xlsx_update_file.business_area.name)
         updater = IndividualsIBANXlsxUpdate(xlsx_update_file)
         updater.validate()
-        if updater.validation_errors:
+        if updater.validation_errors and enable_email_notification:
             updater.send_failure_email()
             return
 
         updater.update()
-        updater.send_success_email()
+        if enable_email_notification:
+            updater.send_success_email()
 
     except Exception as e:
-        IndividualsIBANXlsxUpdate.send_error_email(
-            error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
-        )
+        if enable_email_notification:
+            IndividualsIBANXlsxUpdate.send_error_email(
+                error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
+            )
 
 
 @app.task()
@@ -183,3 +188,12 @@ def revalidate_phone_number_task(individual_ids: List[UUID]) -> None:
     Individual.objects.bulk_update(
         individuals_to_update, fields=("phone_no_valid", "phone_no_alternative_valid"), batch_size=1000
     )
+
+
+@app.task()
+@log_start_and_end
+@sentry_tags
+def enroll_households_to_program_task(households_ids: List, program_for_enroll_id: str) -> None:
+    households = Household.objects.filter(pk__in=households_ids)
+    program_for_enroll = Program.objects.get(id=program_for_enroll_id)
+    enroll_households_to_program(households, program_for_enroll)

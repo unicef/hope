@@ -1,6 +1,8 @@
+
 import { Typography } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -24,7 +26,6 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
 import { getFullNodeFromEdgesById } from '../../../utils/utils';
-import { useHistory } from 'react-router-dom';
 
 const Label = styled.p`
   color: #b1b1b5;
