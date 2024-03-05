@@ -2,7 +2,7 @@ import copy
 import logging
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Tuple
 
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
@@ -815,7 +815,7 @@ class GenerateReportService:
         self.ws_report.append(headers_row)
 
     def _add_rows(self) -> int:
-        get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report.report_type]
+        get_row_methods: Tuple = GenerateReportService.ROW_CONTENT_METHODS[self.report.report_type]
         all_instances = get_row_methods[0](self.report)
         self.report.number_of_records = all_instances.count()
         number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report.report_type])
