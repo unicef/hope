@@ -66,7 +66,7 @@ class BaseTestUkrainianRegistrationService(TestCase):
         cls.business_area = BusinessAreaFactory(slug="some-ukraine-slug")
 
         cls.data_collecting_type = DataCollectingType.objects.create(label="SomeFull", code="some_full")
-        cls.data_collecting_type.limit_to.add(cls.business_area)
+        cls.data_collecting_type.available_for.add(cls.business_area)
 
         cls.program = ProgramFactory(status="ACTIVE", data_collecting_type=cls.data_collecting_type)
         cls.organization = OrganizationFactory(business_area=cls.business_area, slug=cls.business_area.slug)

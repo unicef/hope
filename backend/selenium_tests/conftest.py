@@ -158,7 +158,7 @@ def create_super_user() -> User:
         data_collecting_type = DataCollectingType.objects.create(
             label=dct["label"], code=dct["code"], description=dct["description"], active=dct["active"]
         )
-        data_collecting_type.limit_to.add(business_area)
+        data_collecting_type.available_for.add(business_area)
         data_collecting_type.save()
 
     partner.permissions = {

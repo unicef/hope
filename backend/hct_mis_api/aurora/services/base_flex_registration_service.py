@@ -97,7 +97,10 @@ class BaseRegistrationService(AuroraProcessor, abc.ABC):
         if data_collecting_type.deprecated:
             raise ValidationError("Data Collecting Type of program is deprecated")
 
-        if business_area not in data_collecting_type.limit_to.all():
+        if (
+            data_collecting_type.available_for.all().count() > 0
+            and business_area not in data_collecting_type.available_for.all()
+        ):
             raise ValidationError(
                 f"{business_area.slug.capitalize()} is not limited for DataCollectingType: {data_collecting_type.code}"
             )

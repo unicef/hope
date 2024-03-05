@@ -57,7 +57,7 @@ class TestCreateProgram(APITestCase):
             active=True,
             individual_filters_available=True,
         )
-        cls.data_collecting_type.limit_to.add(cls.business_area)
+        cls.data_collecting_type.available_for.add(cls.business_area)
         cls.program_data = {
             "programData": {
                 "name": "Test",
@@ -112,7 +112,6 @@ class TestCreateProgram(APITestCase):
         dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Deprecated", "code": "deprecated", "description": "Deprecated", "deprecated": True}
         )
-        dct.limit_to.add(self.business_area)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         program_data = self.program_data
@@ -126,7 +125,6 @@ class TestCreateProgram(APITestCase):
         dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Inactive", "code": "inactive", "description": "Inactive", "active": False}
         )
-        dct.limit_to.add(self.business_area)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         program_data = self.program_data

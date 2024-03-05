@@ -97,4 +97,4 @@ class DataCollectingTypeFactory(DjangoModelFactory):
 
         if extracted:
             for business_area in extracted:
-                self.limit_to.add(business_area)
+                self.available_for.add(business_area)

@@ -98,7 +98,7 @@ class TestRecalculatingCash(APITestCase):
         cls.data_collecting_type = DataCollectingType.objects.create(
             code="full", description="Full individual collected", active=True
         )
-        cls.data_collecting_type.limit_to.add(cls.business_area)
+        cls.data_collecting_type.available_for.add(cls.business_area)
 
         cls.create_program_mutation_variables = {
             "programData": {

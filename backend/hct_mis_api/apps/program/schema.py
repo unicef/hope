@@ -236,9 +236,14 @@ class Query(graphene.ObjectType):
     def resolve_data_collecting_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return list(
             DataCollectingType.objects.filter(
+                Q(
+                    Q(
+                        available_for__slug=info.context.headers.get("Business-Area").lower(),
+                    )
+                    | Q(available_for__isnull=True)
+                ),
                 active=True,
                 deprecated=False,
-                limit_to__slug=info.context.headers.get("Business-Area").lower(),
             )
             .exclude(code__iexact="unknown")
             .annotate(name=F("label"))

@@ -428,7 +428,7 @@ class DataCollectingType(TimeStampedModel):
     type = models.CharField(choices=Type.choices, null=True, blank=True, max_length=32)
     description = models.TextField(blank=True)
     compatible_types = models.ManyToManyField("self", blank=True, symmetrical=False)
-    limit_to = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types", blank=True)
+    available_for = models.ManyToManyField(to="BusinessArea", related_name="data_collecting_types", blank=True)
     active = models.BooleanField(default=True)
     deprecated = models.BooleanField(
         default=False, help_text="Cannot be used in new programs, totally hidden in UI, only admin have access"
