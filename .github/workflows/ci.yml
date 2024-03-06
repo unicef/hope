@@ -154,8 +154,7 @@ jobs:
         run: |
           backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.tst.yml \
-            up \
-              --exit-code-from backend
+            run backend ./dev.sh test
 
   e2e_tests:
     runs-on: ubuntu-latest
