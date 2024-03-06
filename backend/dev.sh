@@ -22,12 +22,6 @@ else
       coverage combine
       coverage xml
       ;;
-    "sort")
-      isort . -c
-      ;;
-    "format")
-      black . --check
-      ;;
     "lint")
       mkdir -p ./lint-results
       flake8 --format=junit-xml . > ./lint-results/flake8.xml
