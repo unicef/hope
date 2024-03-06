@@ -36,6 +36,8 @@ from hct_mis_api.apps.household.models import (
     Individual,
 )
 from hct_mis_api.apps.payment.models import (
+    Approval,
+    ApprovalProcess,
     CashPlan,
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
@@ -636,6 +638,18 @@ class PaymentFactory(DjangoModelFactory):
         instance = model_class(**update_kwargs_with_usd_currency(kwargs))
         instance.save()
         return instance
+
+
+class ApprovalProcessFactory(DjangoModelFactory):
+    class Meta:
+        model = ApprovalProcess
+
+
+class ApprovalFactory(DjangoModelFactory):
+    created_by = factory.SubFactory(UserFactory)
+
+    class Meta:
+        model = Approval
 
 
 class DeliveryMechanismPerPaymentPlanFactory(DjangoModelFactory):
