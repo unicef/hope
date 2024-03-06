@@ -18,6 +18,8 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
+            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
+            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
             -f ./docker/Dockerfile \
@@ -43,6 +45,8 @@ jobs:
       - name: Push dev
         run: |
           docker buildx build \
+            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
+            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
             -f ./docker/Dockerfile \
@@ -63,6 +67,8 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
+            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dist \
+            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dist \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dist \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dist \
             -f ./docker/Dockerfile \
