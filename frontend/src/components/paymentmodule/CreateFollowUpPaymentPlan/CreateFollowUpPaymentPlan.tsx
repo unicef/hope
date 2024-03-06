@@ -123,7 +123,7 @@ export function CreateFollowUpPaymentPlan({
                 !isActiveProgram
               }
             >
-              {t('Create Follow-up Payment Plan')}
+              {t('Create Follow-up PP')}
             </Button>
           </Box>
           <Dialog

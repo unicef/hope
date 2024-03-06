@@ -163,11 +163,12 @@ export function Entitlement({
           <GreyText>{t('Select Entitlement Formula')}</GreyText>
           <Grid alignItems="center" container>
             <Grid item xs={11}>
-              <FormControl variant="outlined" fullWidth>
+              <FormControl size="small" variant="outlined" fullWidth>
                 <Box mb={1}>
                   <InputLabel>{t('Entitlement Formula')}</InputLabel>
                 </Box>
                 <Select
+                  size="small"
                   disabled={shouldDisableEntitlementSelect}
                   MenuProps={{
                     anchorOrigin: {
