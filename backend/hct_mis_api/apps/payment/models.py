@@ -13,6 +13,7 @@ from django.contrib.postgres.fields import ArrayField, IntegerRangeField
 from django.contrib.postgres.validators import RangeMinValueValidator
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import (
+    MaxLengthValidator,
     MaxValueValidator,
     MinLengthValidator,
     MinValueValidator,
@@ -547,7 +548,15 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     is_follow_up = models.BooleanField(default=False)
     exclusion_reason = models.TextField(blank=True)
     exclude_household_error = models.TextField(blank=True)
-    name = models.CharField(max_length=25, validators=[MinLengthValidator(5)], null=True, blank=True)
+    name = models.CharField(
+        max_length=255,
+        validators=[
+            MinLengthValidator(3),
+            MaxLengthValidator(255),
+        ],
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = "Payment Plan"
@@ -1025,6 +1034,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
         ("entitlement_quantity_usd", _("Entitlement Quantity USD")),
         ("delivered_quantity", _("Delivered Quantity")),
         ("delivery_date", _("Delivery Date")),
+        ("reference_id", _("Reference id")),
         ("reason_for_unsuccessful_payment", _("Reason for unsuccessful payment")),
         ("order_number", _("Order Number")),
         ("token_number", _("Token Number")),
@@ -1120,6 +1130,7 @@ class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
             "entitlement_quantity_usd": (payment, "entitlement_quantity_usd"),
             "delivered_quantity": (payment, "delivered_quantity"),
             "delivery_date": (payment, "delivery_date"),
+            "reference_id": (payment, "transaction_reference_id"),
             "reason_for_unsuccessful_payment": (payment, "reason_for_unsuccessful_payment"),
             "order_number": (payment, "order_number"),
             "token_number": (payment, "token_number"),

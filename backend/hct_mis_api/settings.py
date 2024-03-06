@@ -149,8 +149,8 @@ AZURE_ACCOUNT_KEY = env("STORAGE_AZURE_ACCOUNT_KEY", default="")
 
 if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY:
     # STORAGE
-    STATIC_LOCATION = "static"
-    MEDIA_LOCATION = "media"
+    STATIC_LOCATION = env("STATIC_LOCATION", default="static")
+    MEDIA_LOCATION = env("MEDIA_LOCATION", default="media")
 
     MEDIA_STORAGE_AZURE_ACCOUNT_NAME = env("MEDIA_STORAGE_AZURE_ACCOUNT_NAME", default=AZURE_ACCOUNT_NAME)
     MEDIA_STORAGE_AZURE_ACCOUNT_KEY = env("MEDIA_STORAGE_AZURE_ACCOUNT_KEY", default=AZURE_ACCOUNT_KEY)
@@ -211,7 +211,6 @@ CSP_SCRIPT_SRC: Tuple[str, ...] = (
     "saunihopetrn.blob.core.windows.net",
     "saunihopeprd.blob.core.windows.net",
     "gov-bam.nr-data.net",
-    "js-agent.newrelic.com",
     "cdn.jsdelivr.net",
     "cdnjs.cloudflare.com",
     "unpkg.com",

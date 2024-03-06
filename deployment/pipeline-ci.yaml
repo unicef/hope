@@ -5,8 +5,7 @@ trigger:
     - develop
     - staging
     - master
-    - global-program-filter
-    - testing-ephemeral
+    - ephemeral-1
     - ops/*
   paths:
     exclude:
@@ -14,6 +13,7 @@ trigger:
 pr: none
 resources:
   - repo: self
+
 
 variables:
   # ========================================================================
@@ -43,6 +43,8 @@ variables:
     pipelineId: 1160
   ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}:
     pipelineId: 1161,1165
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'ephemeral-1') }}:
+    pipelineId: 1164
   ${{ else }}:
     pipelineId: null
 
@@ -174,7 +176,7 @@ stages:
 
   - stage: trigger_deploy
     displayName: Trigger deploy
-    dependsOn: [test]
+    dependsOn: [test, test_frontend]
     jobs:
       - job: trigger_deploy
         pool:

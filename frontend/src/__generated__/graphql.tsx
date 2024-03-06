@@ -1189,7 +1189,6 @@ export type CreatePaymentPlanInput = {
   dispersionStartDate: Scalars['Date'],
   dispersionEndDate: Scalars['Date'],
   currency: Scalars['String'],
-  name: Scalars['String'],
 };
 
 export type CreatePaymentPlanMutation = {
@@ -6279,7 +6278,8 @@ export type QueryAllBusinessAreasArgs = {
 
 export type QueryAllFieldsAttributesArgs = {
   flexField?: Maybe<Scalars['Boolean']>,
-  businessAreaSlug?: Maybe<Scalars['String']>
+  businessAreaSlug?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['String']>
 };
 
 
@@ -8362,7 +8362,6 @@ export type UpdatePaymentPlanInput = {
   dispersionStartDate?: Maybe<Scalars['Date']>,
   dispersionEndDate?: Maybe<Scalars['Date']>,
   currency?: Maybe<Scalars['String']>,
-  name?: Maybe<Scalars['String']>,
 };
 
 export type UpdatePaymentPlanMutation = {
@@ -8997,6 +8996,7 @@ export type UserRoleNode = {
   updatedAt: Scalars['DateTime'],
   businessArea: UserBusinessAreaNode,
   role: RoleNode,
+  expiryDate?: Maybe<Scalars['Date']>,
 };
 
 export enum UserStatus {
@@ -11878,7 +11878,8 @@ export type FlexFieldsQuery = (
 );
 
 export type ImportedIndividualFieldsQueryVariables = {
-  businessAreaSlug?: Maybe<Scalars['String']>
+  businessAreaSlug?: Maybe<Scalars['String']>,
+  programId?: Maybe<Scalars['String']>
 };
 
 
@@ -21814,8 +21815,8 @@ export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
 export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
 export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
 export const ImportedIndividualFieldsDocument = gql`
-    query ImportedIndividualFields($businessAreaSlug: String) {
-  allFieldsAttributes(businessAreaSlug: $businessAreaSlug) {
+    query ImportedIndividualFields($businessAreaSlug: String, $programId: String) {
+  allFieldsAttributes(businessAreaSlug: $businessAreaSlug, programId: $programId) {
     isFlexField
     id
     type
@@ -21871,6 +21872,7 @@ export function withImportedIndividualFields<TProps, TChildProps = {}>(operation
  * const { data, loading, error } = useImportedIndividualFieldsQuery({
  *   variables: {
  *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      programId: // value for 'programId'
  *   },
  * });
  */
@@ -33291,6 +33293,7 @@ export type UserRoleNodeResolvers<ContextType = any, ParentType extends Resolver
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   role?: Resolver<ResolversTypes['RoleNode'], ParentType, ContextType>,
+  expiryDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
 };
 
 export interface UuidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['UUID'], any> {

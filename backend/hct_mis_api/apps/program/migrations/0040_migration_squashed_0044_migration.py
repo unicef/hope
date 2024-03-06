@@ -40,13 +40,4 @@ class Migration(migrations.Migration):
             name='individual_count',
             field=models.PositiveIntegerField(default=0),
         ),
-        migrations.AddField(
-            model_name='program',
-            name='programme_code',
-            field=models.CharField(blank=True, max_length=4, null=True),
-        ),
-        migrations.AddConstraint(
-            model_name='program',
-            constraint=models.UniqueConstraint(condition=models.Q(('is_removed', False)), fields=('business_area', 'programme_code'), name='unique_for_business_area_and_programme_code_if_not_removed'),
-        ),
     ]

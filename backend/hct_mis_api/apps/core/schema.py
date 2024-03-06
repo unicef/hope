@@ -182,7 +182,7 @@ class FieldAttributeNode(graphene.ObjectType):
             Iterable,
         ):
             return sorted(choices, key=lambda elem: elem["label"]["English(EN)"])
-        return choices.order_by("name").all()
+        return choices.all()
 
     def resolve_is_flex_field(self, info: Any) -> bool:
         return isinstance(self, FlexibleAttribute)
@@ -316,6 +316,7 @@ class Query(graphene.ObjectType):
         FieldAttributeNode,
         flex_field=graphene.Boolean(),
         business_area_slug=graphene.String(required=False, description="The business area slug"),
+        program_id=graphene.String(required=False, description="program id"),
         description="All field datatype meta.",
     )
     all_groups_with_fields = graphene.List(
@@ -352,6 +353,7 @@ class Query(graphene.ObjectType):
         info: Any,
         flex_field: Optional[bool] = None,
         business_area_slug: Optional[str] = None,
+        program_id: Optional[str] = None,
     ) -> List[Any]:
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):

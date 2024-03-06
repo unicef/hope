@@ -8,7 +8,7 @@ import {
 } from '../__generated__/graphql';
 
 export function useCachedImportedIndividualFieldsQuery(
-  businessArea,
+  businessArea, selectedProgramId
 ): {
   loading: boolean;
   data: ImportedIndividualFieldsQuery;
@@ -16,26 +16,31 @@ export function useCachedImportedIndividualFieldsQuery(
 } {
   const [loading, setLoading] = useState(true);
   const [oldBusinessArea, setOldBusinessArea] = useState('');
+  const [oldSelectedProgramId, setOldSelectedProgramId] = useState('');
   const [cache, setCache] = useState(null);
+
   const lastUpdatedTimestamp =
     Number.parseInt(
       localStorage.getItem(
-        `cache-targeting-core-fields-attributes-${businessArea}-timestamp`,
+        `cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}-timestamp`,
       ),
       10,
     ) || 0;
   const ttl = 2 * 60 * 60 * 1000;
-  const [getAttributes, results] = useImportedIndividualFieldsLazyQuery({
-    variables: {
-      businessAreaSlug: businessArea,
-    },
-  });
+  const [getAttributes, results] = useImportedIndividualFieldsLazyQuery();
+
   useEffect(() => {
     if (Date.now() - lastUpdatedTimestamp < ttl) {
       return;
     }
-    getAttributes();
-  }, []);
+    getAttributes({
+      variables: {
+        businessAreaSlug: businessArea,
+        programId: selectedProgramId
+      },
+    });
+  }, [businessArea, selectedProgramId]);
+
   useEffect(() => {
     if (results.data || results.error) {
       setLoading(results.loading);
@@ -43,28 +48,29 @@ export function useCachedImportedIndividualFieldsQuery(
   }, [results.loading]);
 
   useEffect(() => {
-    if (businessArea === oldBusinessArea) {
+    if (businessArea === oldBusinessArea && selectedProgramId === oldSelectedProgramId) {
       return;
     }
     setOldBusinessArea(businessArea);
+    setOldSelectedProgramId(selectedProgramId);
     localForage
-      .getItem(`cache-targeting-core-fields-attributes-${businessArea}`)
+      .getItem(`cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}`)
       .then((value) => {
         if (value) {
           setCache(value);
         }
       });
-  }, [businessArea]);
+  }, [businessArea, selectedProgramId]);
   useEffect(() => {
     if (!results.data) {
       return;
     }
     localForage.setItem(
-      `cache-targeting-core-fields-attributes-${businessArea}`,
+      `cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}`,
       results.data,
     );
     localStorage.setItem(
-      `cache-targeting-core-fields-attributes-${businessArea}-timestamp`,
+      `cache-targeting-core-fields-attributes-${businessArea}-${selectedProgramId}-timestamp`,
       Date.now().toString(),
     );
   }, [results.data]);
