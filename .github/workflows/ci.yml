@@ -23,12 +23,12 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
-            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
-            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
-            --cache-to ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
-            --cache-to ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
             -f ./docker/Dockerfile \
             --target dev \
             --push \
@@ -48,9 +48,9 @@ jobs:
 
       - name: Check
         run: |
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev
+          docker pull ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev
           docker run --rm -i \
-            ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
+            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
             isort . --check-only
 
   black:
@@ -68,7 +68,7 @@ jobs:
       - name: Check
         run: |
           docker run --rm -i \
-            ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
+            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
             black . --check
 
   flake8:
@@ -86,7 +86,7 @@ jobs:
       - name: Check
         run: |
           docker run --rm -i \
-            ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
+            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
             flake8 .
 
   mypy:
@@ -104,7 +104,7 @@ jobs:
       - name: Check
         run: |
           docker run --rm -i \
-            ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
+            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
             mypy .
 
   build_and_push_dist:
@@ -125,14 +125,14 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
-            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
-            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
-            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dist \
-            --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dist \
-            --cache-to ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dist \
-            --cache-to ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dist \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dist \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dist \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dist \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dist \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dist \
             -f ./docker/Dockerfile \
             --target dist \
             --push \
@@ -152,7 +152,7 @@ jobs:
 
       - name: Unit tests
         run: |
-          backend_image=${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev docker compose \
+          backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.tst.yml \
             up \
               --exit-code-from backend
@@ -171,7 +171,7 @@ jobs:
 
       - name: E2E tests
         run: |
-          dist_backend_image=${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dist dev_backend_image=${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev docker compose \
+          dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist dev_backend_image=${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.selenium.yml \
             run selenium
 
@@ -189,4 +189,4 @@ jobs:
 
       - name: Trivy
         run: |
-          docker run --rm -i aquasec/trivy:latest ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dist
+          docker run --rm -i aquasec/trivy:latest ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist
