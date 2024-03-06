@@ -4,40 +4,78 @@ import pytest
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
 from page_object.grievance.new_feedback import NewFeedback
+from django.conf import settings
+from django.core.management import call_command
+
+from hct_mis_api.apps.core.models import BusinessArea
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
-@pytest.fixture(autouse=True)
-def go_to_feedback_page(pageFeedback):
-    pageFeedback.getNavGrievance().click()
-    pageFeedback.getNavFeedback().click()
+@pytest.fixture
+def add_feedbacks():
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
+    return
 
 @pytest.mark.usefixtures("login")
 class TestSmokeFeedback:
     def test_check_feedback_page(
-        self,
-        pageFeedback: Feedback,
-        test_data: dict,
+            self,
+            pageFeedback: Feedback,
     ) -> None:
         """
-        "Go to Grievance page",
-        "Go to Feedback page",
-        "Elements of Grievance menu are visible",
-        "Check if all elements on page exist",
+        Go to Grievance page
+        Go to Feedback page
+        Check if all elements on page exist
         """
         # Go to Feedback
+        pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         # Check Feedback page
+        pageFeedback.getTitlePage()
+        pageFeedback.getButtonSubmitNewFeedback()
+        pageFeedback.getFilterSearch()
+        pageFeedback.getFilterIssueType()
+        pageFeedback.getFilterCreatedBy()
+        pageFeedback.getFilterCreationDateFrom()
+        pageFeedback.getFilterCreationDateTo()
+        pageFeedback.getButtonClear()
+        pageFeedback.getButtonApply()
+        assert pageFeedback.textTableTitle in pageFeedback.getTableTitle().text
+        assert pageFeedback.textFeedbackID in pageFeedback.getFeedbackID().text
+        assert pageFeedback.textIssueType in pageFeedback.getIssueType().text
+        assert pageFeedback.textHouseholdID in pageFeedback.getHouseholdID().text
+        assert pageFeedback.textLinkedGrievance in pageFeedback.getLinkedGrievance().text
+        assert pageFeedback.textCreatedBy in pageFeedback.getCreatedBy().text
+        assert pageFeedback.textCreationDate in pageFeedback.getCreationDate().text
 
     def test_check_feedback_details_page(
-        self,
-        pageFeedback: Feedback,
-        test_data: dict,
+            self,
+            add_feedbacks: None,
+            pageFeedback: Feedback,
+            pageFeedbackDetails: FeedbackDetailsPage,
     ) -> None:
+        """
+        Go to Grievance page
+        Go to Feedback page
+        Choose Feedback
+        Check if all elements on page exist
+        """
         # Go to Feedback
+        pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
+        pageFeedback.getRows()[0].click()
         # Check Feedback details page
+        assert pageFeedbackDetails.textTitle in pageFeedbackDetails.getTitlePage().text
+        pageFeedbackDetails.getButtonEdit()
+        assert pageFeedbackDetails.textCategory in pageFeedbackDetails.getCategory().text
+        assert pageFeedbackDetails.textIssueType in pageFeedbackDetails.getIssueType().text
+        pageFeedbackDetails.getHouseholdID()
+        pageFeedbackDetails.getIndividualID()
+        pageFeedbackDetails.getCreatedBy()
+        pageFeedbackDetails.getDateCreated()
+        pageFeedbackDetails.getLastModifiedDate()
+        pageFeedbackDetails.getAdministrativeLevel2()
 
 
 @pytest.mark.skip(reason="ToDo")

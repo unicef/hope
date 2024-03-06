@@ -8,7 +8,7 @@ class Feedback(BaseComponents):
     buttonSubmitNewFeedback = 'a[data-cy="button-submit-new-feedback"]'
     filterSearch = 'div[data-cy="filters-search"]'
     filterIssueType = 'div[data-cy="filters-issue-type"]'
-    filterCreatedBy = 'div[data-cy="filters-created-by"]'
+    filterCreatedBy = 'div[data-cy="Created by-input"]'
     filterCreationDateFrom = 'div[data-cy="filters-creation-date-from"]'
     filterCreationDateTo = 'div[data-cy="filters-creation-date-to"]'
     buttonClear = 'button[data-cy="button-filters-clear"]'
@@ -70,25 +70,25 @@ class Feedback(BaseComponents):
         return self.wait_for(self.tableTitle)
 
     def getFeedbackID(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(0)
+        return self.get_elements(self.tableColumns)[0]
 
     def getIssueType(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(1)
+        return self.get_elements(self.tableColumns)[1]
 
     def getHouseholdID(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(2)
+        return self.get_elements(self.tableColumns)[2]
 
     def getLinkedGrievance(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(3)
+        return self.get_elements(self.tableColumns)[3]
 
     def getCreatedBy(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(4)
+        return self.get_elements(self.tableColumns)[4]
 
     def getCreationDate(self) -> WebElement:
-        return self.wait_for(self.tableColumns).eq(5)
+        return self.get_elements(self.tableColumns)[5]
 
-    def getRows(self) -> WebElement:
-        return self.wait_for(self.tableRow)
+    def getRows(self) -> list[WebElement]:
+        return self.get_elements(self.tableRow)
 
     def getDaysFilterPopup(self) -> WebElement:
         return self.wait_for(self.daysFilterPopup)

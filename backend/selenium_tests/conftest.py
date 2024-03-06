@@ -9,6 +9,7 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 
+from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.programme_details.programme_details import ProgrammeDetails
@@ -90,9 +91,16 @@ def pageProgrammeDetails(request: FixtureRequest, browser: Chrome) -> ProgrammeD
 def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
     yield AdminPanel(browser)
 
+
 @pytest.fixture
 def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
     yield Feedback(browser)
+
+
+@pytest.fixture
+def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
+    yield FeedbackDetailsPage(browser)
+
 
 @pytest.fixture
 def change_super_user() -> None:
@@ -117,6 +125,7 @@ def create_super_user() -> User:
     country = Country.objects.get(name="Afghanistan")
     business_area = BusinessArea.objects.create(
         **{
+            "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
             "code": "0060",
             "name": "Afghanistan",
             "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
