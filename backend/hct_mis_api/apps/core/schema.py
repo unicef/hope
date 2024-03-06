@@ -408,10 +408,7 @@ class Query(graphene.ObjectType):
     def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         data_collecting_types = (
             DataCollectingType.objects.filter(
-                Q(
-                    Q(available_for__slug=info.context.headers.get("Business-Area").lower())
-                    | Q(available_for__isnull=True)
-                ),
+                Q(Q(limit_to__slug=info.context.headers.get("Business-Area").lower()) | Q(limit_to__isnull=True)),
                 active=True,
                 deprecated=False,
             )

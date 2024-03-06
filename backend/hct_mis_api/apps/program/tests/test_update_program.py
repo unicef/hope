@@ -115,7 +115,7 @@ class TestUpdateProgram(APITestCase):
     def test_update_active_program_with_dct(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
-        data_collecting_type.available_for.add(self.business_area)
+        data_collecting_type.limit_to.add(self.business_area)
         Program.objects.filter(id=self.program.id).update(
             status=Program.ACTIVE, data_collecting_type=data_collecting_type
         )
@@ -141,7 +141,7 @@ class TestUpdateProgram(APITestCase):
     def test_update_draft_not_empty_program_with_dct(self) -> None:
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
         data_collecting_type = DataCollectingType.objects.get(code="full_collection")
-        data_collecting_type.available_for.add(self.business_area)
+        data_collecting_type.limit_to.add(self.business_area)
         create_household(household_args={"program": self.program})
 
         self.snapshot_graphql_request(
@@ -162,7 +162,7 @@ class TestUpdateProgram(APITestCase):
         dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Deprecated", "code": "deprecated", "description": "Deprecated", "deprecated": True}
         )
-        dct.available_for.add(self.business_area)
+        dct.limit_to.add(self.business_area)
 
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
@@ -183,7 +183,7 @@ class TestUpdateProgram(APITestCase):
         dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Inactive", "code": "inactive", "description": "Inactive", "active": False}
         )
-        dct.available_for.add(self.business_area)
+        dct.limit_to.add(self.business_area)
 
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_UPDATE], self.business_area)
 
@@ -205,7 +205,7 @@ class TestUpdateProgram(APITestCase):
         dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA"}
         )
-        dct.available_for.add(other_ba)
+        dct.limit_to.add(other_ba)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         self.snapshot_graphql_request(
