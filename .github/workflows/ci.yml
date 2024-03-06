@@ -28,7 +28,7 @@ jobs:
 
       - name: Checks
         run: |
-          docker run --rm -i ${{ secrets.DOCKERHUB_USERNAME }}/hope-core:${{ github.sha }}-dev sh -c "
+          docker run --rm -i ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev sh -c "
             ./dev.sh sort
             ./dev.sh format
             ./dev.sh lint
