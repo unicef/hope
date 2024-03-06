@@ -19,8 +19,7 @@ jobs:
 
       - name: Build
         run: |
-          docker buildx create --use
-          docker buildx build \
+          docker build \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/hope-core:${{ github.sha }}-dev \
             -f ./docker/Dockerfile \
             --target dev \
