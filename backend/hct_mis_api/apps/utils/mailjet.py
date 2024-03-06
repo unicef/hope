@@ -2,15 +2,16 @@ import json
 from typing import Any, Dict, Optional
 
 from django.conf import settings
-from constance import config
 
 import requests
+from constance import config
 
 
 class MailjetClient:
     """
     Mailjet client to send emails using Mailjet API.
     """
+
     def __init__(
         self,
         mailjet_template_id: int,
