@@ -25,31 +25,34 @@ const DropzoneContainer = styled.div<DropzoneContainerProps>`
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
-export function DropzoneField({ loading }): React.ReactElement {
+export const DropzoneField = ({ loading }): React.ReactElement => {
   const [, , helpers] = useField('file');
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const onDrop = useCallback(
     (acceptedFiles) => {
-      // Log the MIME types of the accepted files
       acceptedFiles.forEach((file) => {
-        console.log(file.type);
-      });
+        if (
+          file.type !==
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ) {
+          showMessage(
+            `${t('Invalid file type. Please upload a spreadsheet.')}`,
+          );
+          return;
+        }
 
-      if (acceptedFiles.length !== 1) {
-        return;
-      }
-      const file = acceptedFiles[0];
-      const fileSizeMB = file.size / (1024 * 1024);
-      if (fileSizeMB > 200) {
-        showMessage(
-          `${t('File size is to big. It should be under 200MB')}, ${t(
-            'File size is',
-          )} ${fileSizeMB}MB`,
-        );
-        return;
-      }
-      helpers.setValue(file);
+        const fileSizeMB = file.size / (1024 * 1024);
+        if (fileSizeMB > 200) {
+          showMessage(
+            `${t('File size is too big. It should be under 200MB')}, ${t(
+              'File size is',
+            )} ${fileSizeMB}MB`,
+          );
+          return;
+        }
+        helpers.setValue(file);
+      });
     },
     [helpers, showMessage, t],
   );
@@ -65,9 +68,13 @@ export function DropzoneField({ loading }): React.ReactElement {
   return (
     <div>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
-        <input {...getInputProps()} data-cy="file-input" />
+        <input
+          {...getInputProps()}
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          data-cy="file-input"
+        />
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
     </div>
   );
-}
+};

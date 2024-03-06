@@ -53,9 +53,7 @@ export function FormikSelectField({
 
   return (
     <FormControl variant="outlined" size="small" fullWidth {...otherProps}>
-      <Box mb={1}>
-        <InputLabel>{otherProps.label}</InputLabel>
-      </Box>
+      <InputLabel error={isInvalid}>{otherProps.label}</InputLabel>
       <Select
         {...field}
         {...otherProps}

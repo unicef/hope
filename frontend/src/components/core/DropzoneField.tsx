@@ -54,7 +54,11 @@ export function DropzoneField({
     <Box display="flex" justifyContent="center" p={5}>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
-        <input {...getInputProps()} data-cy="file-input" />
+        <input
+          {...getInputProps()}
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          data-cy="file-input"
+        />{' '}
         {dontShowFilename || !acceptedFilename
           ? t('UPLOAD FILE')
           : acceptedFilename}
