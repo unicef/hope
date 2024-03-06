@@ -189,4 +189,4 @@ jobs:
 
       - name: Trivy
         run: |
-          docker run --rm -i aquasec/trivy:latest ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist
+          docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 -e TRIVY_SEVERITY=HIGH,CRITICAL aquasec/trivy:latest image ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist
