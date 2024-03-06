@@ -21,7 +21,7 @@ class TemplateFileGenerator:
         return wb
 
     @classmethod
-    def _handle_choices(cls, fields: Dict) -> List[List[str]]:
+    def _handle_choices(cls, fields: Dict, template_for_social_worker: Optional[bool] = None) -> List[List[str]]:
         rows: list[list[str]] = [["Field Name", "Label", "Value to be used in template"]]
 
         for field_name, field_value in fields.items():
@@ -29,8 +29,27 @@ class TemplateFileGenerator:
             choices = field_value["choices"]
             if is_admin_level:
                 choices = Area.get_admin_areas_as_choices(field_name[-5])
+            if field_name == "relationship_i_c" and template_for_social_worker:
+                # hardcoded for social_worker template
+                choices = [
+                    {
+                        "label": {
+                            "English(EN)": "An individual is only an external collector (primary_collector_id, "
+                            "alternate_collector_id fields have to point out for whom this person "
+                            "is a collector)"
+                        },
+                        "value": "NON_BENEFICIARY",
+                    },
+                    {
+                        "label": {
+                            "English(EN)": "An individual is a beneficiary but also can be a collector and even "
+                            "an external collector"
+                        },
+                        "value": "HEAD",
+                    },
+                ]
             if choices:
-                for choice in field_value["choices"]:
+                for choice in choices:
                     row = [
                         field_name,
                         str(choice["label"]["English(EN)"]),
@@ -77,7 +96,7 @@ class TemplateFileGenerator:
         flex_fields = serialize_flex_attributes()
 
         if template_for_social_worker:
-            scopes = [Scope.GLOBAL, Scope.XLSX, Scope.XLSX_SOCIAL_WORKER]
+            scopes = [Scope.GLOBAL, Scope.XLSX, Scope.XLSX_SOCIAL_WORKER, Scope.COLLECTOR]
         else:
             scopes = [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
         fields = FieldFactory.from_scopes(scopes).apply_business_area(business_area_slug=business_area_slug)
@@ -103,7 +122,7 @@ class TemplateFileGenerator:
                 ws_households.append(h_row)
             ws_individuals.append(i_row)
 
-        choices = cls._handle_choices({**households_fields, **individuals_fields})
+        choices = cls._handle_choices({**households_fields, **individuals_fields}, template_for_social_worker)
         for row in choices:
             ws_choices.append(row)
 
