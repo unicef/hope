@@ -28,7 +28,7 @@ const DropzoneContainer = styled.div<DropzoneContainerProps>`
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
-export function DropzoneField({
+export const DropzoneField = ({
   onChange,
   loading,
   dontShowFilename,
@@ -36,7 +36,7 @@ export function DropzoneField({
   onChange: (acceptedFiles: File[]) => void;
   loading: boolean;
   dontShowFilename: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const onDrop = useCallback((acceptedFiles: File[]) => {
     onChange(acceptedFiles);
@@ -44,8 +44,11 @@ export function DropzoneField({
 
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
-    //@ts-ignore
-    accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    accept: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
+      ],
+    },
     onDrop,
   });
   const acceptedFilename =
@@ -65,4 +68,4 @@ export function DropzoneField({
       </DropzoneContainer>
     </Box>
   );
-}
+};
