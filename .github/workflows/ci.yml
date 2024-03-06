@@ -48,6 +48,7 @@ jobs:
 
       - name: Check
         run: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev
           docker run --rm -i \
             ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
             isort . --check-only
