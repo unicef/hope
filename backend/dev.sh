@@ -23,10 +23,10 @@ else
       coverage xml
       ;;
     "sort")
-      isort .
+      isort . -c
       ;;
     "format")
-      black .
+      black . --check
       ;;
     "lint")
       mkdir -p ./lint-results
