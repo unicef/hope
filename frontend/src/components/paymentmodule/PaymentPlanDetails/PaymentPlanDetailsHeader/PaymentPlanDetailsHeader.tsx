@@ -73,7 +73,8 @@ export function PaymentPlanDetailsHeader({
   const canSendToPaymentGateway =
     hasPermissions(PERMISSIONS.PM_SEND_TO_PAYMENT_GATEWAY, permissions) &&
     paymentPlan.canSendToPaymentGateway;
-    const canSplit = hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
+  const canSplit =
+    hasPermissions(PERMISSIONS.PM_SPLIT, permissions) && paymentPlan.canSplit;
 
   let buttons: React.ReactElement | null = null;
   switch (paymentPlan.status) {
@@ -171,9 +172,11 @@ export function PaymentPlanDetailsHeader({
     <PageHeader
       title={
         <Box display="flex" alignItems="center">
-          {t('Payment Plan')} ID:{' '}
-          <Box ml={1}>
-            <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
+          <Box display="flex" flexDirection="column">
+            <Box> {t('Payment Plan')} ID: </Box>
+            <Box>
+              <span data-cy="pp-unicef-id">{paymentPlan.unicefId}</span>
+            </Box>
           </Box>
           <StatusWrapper ml={2}>
             <StatusBox

@@ -55,7 +55,7 @@ const DrawerComponent = styled(MUIDrawer)<DrawerComponentProps>`
     height: 100vh;
     position: relative;
     white-space: nowrap;
-    width: ${(props) => (props.open ? '240px' : '55px')};
+    width: ${(props) => (props.open ? '270px' : '55px')};
     transition:
       width 225ms cubic-bezier(0, 0, 0.2, 1) 0ms,
       width 195ms cubic-bezier(0, 0, 0.2, 1) 0ms;
