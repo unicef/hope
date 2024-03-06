@@ -219,6 +219,13 @@ jobs:
             pipelineId=1160
           elif [ ${{ github.ref }} == 'refs/heads/master' ]; then
             pipelineId=1161,1165
+          elif [ ${{ github.ref }} == 'refs/heads/ephemeral-1' ]; then
+            pipelineId=1164
+          elif [ ${{ github.ref }} == 'refs/heads/ephemeral-2' ]; then
+            pipelineId=1253
+          else
+            echo "No pipeline to trigger for ref ${{ github.ref }}"
+            exit 0
           fi
 
           IFS=',' read -ra pipelines <<< "$pipelineId"
