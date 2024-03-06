@@ -171,10 +171,8 @@ jobs:
       - name: E2E tests
         run: |
           dist_backend_image=${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dist dev_backend_image=${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev docker compose \
-            -f ./deployment/docker-compose.tst.yml \
-            up \
-              --exit-code-from backend \
-              --abort-on-container-exit
+            -f ./deployment/docker-compose.selenium.yml \
+            run selenium
 
   trivy:
     runs-on: ubuntu-latest
