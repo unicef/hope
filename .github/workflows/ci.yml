@@ -20,8 +20,6 @@ jobs:
           docker buildx build \
             --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
             --cache-from ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
-            --cache-to ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
-            --cache-to ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
             -f ./docker/Dockerfile \
