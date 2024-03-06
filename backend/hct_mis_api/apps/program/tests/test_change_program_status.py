@@ -78,7 +78,7 @@ class TestChangeProgramStatus(APITestCase):
         data_collecting_type, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Full", "code": "full_collection", "description": "Full"}
         )
-        data_collecting_type.available_for.add(self.business_area)
+        data_collecting_type.limit_to.add(self.business_area)
         program = ProgramFactory.create(
             status=initial_status,
             business_area=self.business_area,

@@ -57,7 +57,7 @@ class TestCreateProgram(APITestCase):
             active=True,
             individual_filters_available=True,
         )
-        cls.data_collecting_type.available_for.add(cls.business_area)
+        cls.data_collecting_type.limit_to.add(cls.business_area)
         cls.program_data = {
             "programData": {
                 "name": "Test",
@@ -139,7 +139,7 @@ class TestCreateProgram(APITestCase):
         dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA", "active": True}
         )
-        dct.available_for.add(other_ba)
+        dct.limit_to.add(other_ba)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         program_data = self.program_data
