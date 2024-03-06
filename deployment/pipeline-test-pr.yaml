@@ -1,9 +1,5 @@
 trigger: none
-pr:
-  - master
-  # - develop # TEMP
-  - global-program-filter
-  - feature/*
+pr: none
 resources:
   - repo: self
 
