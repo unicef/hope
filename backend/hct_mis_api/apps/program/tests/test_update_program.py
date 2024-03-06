@@ -202,10 +202,10 @@ class TestUpdateProgram(APITestCase):
 
     def test_update_program_with_dct_from_other_ba(self) -> None:
         other_ba = BusinessAreaFactory()
-        dct = DataCollectingType.objects.update_or_create(
+        dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA"}
         )
-        dct.data_collecting_type.available_for.add(other_ba)
+        dct.available_for.add(other_ba)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         self.snapshot_graphql_request(
