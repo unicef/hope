@@ -11,7 +11,7 @@ interface Props {
 }
 const StatusContainer = styled.div`
   min-width: 120px;
-  max-width: 200px;
+  max-width: 300px;
 `;
 
 interface StatusBoxContainerProps {

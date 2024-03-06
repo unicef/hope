@@ -330,6 +330,7 @@ type BusinessAreaNode implements Node {
   isPaymentPlanApplicable: Boolean!
   isAccountabilityApplicable: Boolean
   active: Boolean!
+  enableEmailNotification: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   userRoles: [UserRoleNode!]!
@@ -5042,6 +5043,7 @@ type UserBusinessAreaNode implements Node {
   isPaymentPlanApplicable: Boolean!
   isAccountabilityApplicable: Boolean
   active: Boolean!
+  enableEmailNotification: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   userRoles: [UserRoleNode!]!

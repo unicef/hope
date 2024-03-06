@@ -86,6 +86,7 @@ const ResourcesText = styled('p')`
 
 const ToolbarScrollBox = styled(Box)`
   overflow-y: auto;
+  max-height: calc(100vh - 64px);
   height: 100%;
 `;
 
