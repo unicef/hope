@@ -13,7 +13,6 @@ def go_to_feedback_page(pageFeedback):
     pageFeedback.getNavGrievance().click()
     pageFeedback.getNavFeedback().click()
 
-@pytest.mark.skip(reason="ToDo")
 @pytest.mark.usefixtures("login")
 class TestSmokeFeedback:
     def test_check_feedback_page(
