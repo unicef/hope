@@ -58,8 +58,11 @@ export const DropzoneField = ({ loading }): React.ReactElement => {
   );
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
-    //@ts-ignore
-    accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    accept: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
+      ],
+    },
     onDrop,
   });
 
