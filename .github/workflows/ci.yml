@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - gha
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build
+        run: |
+          docker buildx create --use
+          docker buildx build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope-core:${{ github.sha }}-dev \
+            -f ./docker/Dockerfile \
+            --target dev \
+            --load \
+            ./
+
+      - name: Checks
+        run: |
+          docker run --rm -it ${{ secrets.DOCKERHUB_USERNAME }}/hope-core:${{ github.sha }}-dev sh -c "
+            ./dev.sh sort
+            ./dev.sh format
+            ./dev.sh lint
+            ./dev.sh mypy
+          "
