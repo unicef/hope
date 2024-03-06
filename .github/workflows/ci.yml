@@ -23,10 +23,10 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dev \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dev \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dev \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
             -f ./docker/Dockerfile \
@@ -125,12 +125,12 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dist \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dist \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dist \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dist \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dist \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dist \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dist \
             -f ./docker/Dockerfile \
