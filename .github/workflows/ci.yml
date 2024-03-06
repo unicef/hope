@@ -12,6 +12,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: Check Docker Availability
+        run: |
+          which docker
+          docker --version
+
       - name: Build
         run: |
           docker buildx create --use
