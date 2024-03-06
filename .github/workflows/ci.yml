@@ -35,6 +35,12 @@ jobs:
             ./dev.sh mypy
           "
 
+      - name: DockerHub login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Push dev
         run: |
           docker buildx build \
