@@ -6,11 +6,13 @@ on:
     - develop
     - staging
     - master
+    - ephemeral-*
   pull_request:
     branches:
     - develop
     - staging
     - master
+    - ephemeral-*
 
 jobs:
   build_and_push_dev:
@@ -203,11 +205,12 @@ jobs:
     needs: [e2e_tests, unit_tests]
     if: |
       github.event_name == 'push' &&
-      github.event.pull_request == 'false' &&
       (
         github.ref == 'refs/heads/develop' ||
         github.ref == 'refs/heads/staging' ||
-        github.ref == 'refs/heads/master'
+        github.ref == 'refs/heads/master' ||
+        github.ref == 'refs/heads/ephemeral-1' ||
+        github.ref == 'refs/heads/ephemeral-2'
       )
     steps:
       - name: Trigger deploy
@@ -230,7 +233,7 @@ jobs:
 
           IFS=',' read -ra pipelines <<< "$pipelineId"
           for pipeline in "${pipelines[@]}"; do
-            jsonBody='{"variables": {"tag": {"isSecret": false, "value": "${{ github.sha }}"}}}'
+            jsonBody='{"variables": {"tag": {"isSecret": false, "value": "${{ github.sha }}"}, "image": {"isSecret": false, "value": "${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist"}}}'
             contentLength=$(echo -n $jsonBody | wc -c)
             project=ICTD-HCT-MIS
             organization=unicef
@@ -238,7 +241,7 @@ jobs:
             echo Triggering deploy for pipeline $pipeline
             echo JSON body: $jsonBody
 
-            curl -v -L -f \
+            curl -v -L \
               -u ":${{ secrets.AZURE_PAT }}" \
               -H "Content-Type: application/json" \
               -H "Content-Length: $contentLength" \
