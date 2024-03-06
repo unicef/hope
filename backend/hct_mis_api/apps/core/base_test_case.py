@@ -126,12 +126,15 @@ class APITestCase(SnapshotTestTestCase):
 
     @classmethod
     def create_user_role_with_permissions(
-        cls, user: "User", permissions: Iterable, business_area: "BusinessArea", program: Optional["Program"] = None
+        cls,
+        user: "User",
+        permissions: Iterable,
+        business_area: "BusinessArea",
+        program: Optional["Program"] = None,
+        name: Optional[str] = "Role with Permissions",
     ) -> UserRole:
         permission_list = [perm.value for perm in permissions]
-        role, created = Role.objects.update_or_create(
-            name="Role with Permissions", defaults={"permissions": permission_list}
-        )
+        role, created = Role.objects.update_or_create(name=name, defaults={"permissions": permission_list})
         user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
 
         # update Partner permissions for the program
