@@ -10,7 +10,7 @@
         "active": true,
         "individual_filters_available": false,
         "compatible_types": [],
-        "available_for": []
+        "limit_to": []
     }
 },
 {
@@ -24,7 +24,7 @@
         "active": true,
         "individual_filters_available": false,
         "compatible_types": [],
-        "available_for": []
+        "limit_to": []
     }
 },
 {
@@ -38,7 +38,7 @@
         "active": true,
         "individual_filters_available": false,
         "compatible_types": [],
-        "available_for": []
+        "limit_to": []
     }
 },
 {
@@ -52,7 +52,7 @@
         "active": true,
         "individual_filters_available": false,
         "compatible_types": [],
-        "available_for": []
+        "limit_to": []
     }
 },
 {
@@ -66,7 +66,7 @@
         "active": true,
         "individual_filters_available": false,
         "compatible_types": [],
-        "available_for": []
+        "limit_to": []
     }
 }
 ]
