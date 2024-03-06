@@ -77,6 +77,11 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
 
 
 class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer):
+    unicef_id = serializers.SerializerMethodField()  # type: ignore
+
+    def get_unicef_id(self, obj: Any) -> str:
+        return f"{obj.payment_plan.unicef_id}-{obj.order}"
+
     class Meta:
         model = PaymentPlanSplit
         fields = [
@@ -136,6 +141,7 @@ class PaymentRecordData:
     hope_status: str
     extra_data: dict
     fsp_code: str
+    message: Optional[str] = None
 
 
 @dataclass
@@ -298,10 +304,9 @@ class PaymentGatewayService:
 
     def add_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
         def _handle_errors(_response: AddRecordsResponseData, _payments: List[Payment]) -> None:
-            for _idx, _error in _response.errors.values():
-                _payment = _payments[_idx]
+            for _idx, _payment in enumerate(_payments):
                 _payment.status = Payment.STATUS_ERROR
-                _payment.reason_for_unsuccessful_payment = _error
+                _payment.reason_for_unsuccessful_payment = _response.errors.get(str(_idx), "")
                 _payment.save(update_fields=["status", "reason_for_unsuccessful_payment"])
 
         def _add_records(
@@ -363,7 +368,7 @@ class PaymentGatewayService:
             try:
                 matching_pg_payment = next(p for p in _pg_payment_records if p.remote_id == str(_payment.id))
             except StopIteration:
-                logger.error(
+                logger.warning(
                     f"Payment {_payment.id} for Payment Instruction {_container.id} not found in Payment Gateway"
                 )
                 return
@@ -371,6 +376,10 @@ class PaymentGatewayService:
             _payment.status = matching_pg_payment.hope_status
             _payment.status_date = now()
             update_fields = ["status", "status_date"]
+
+            if _payment.status not in Payment.ALLOW_CREATE_VERIFICATION and matching_pg_payment.message:
+                _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+                update_fields.append("reason_for_unsuccessful_payment")
 
             delivered_quantity = matching_pg_payment.extra_data.get("delivered_quantity", None)
             if _payment.status in [
@@ -389,7 +398,7 @@ class PaymentGatewayService:
                         currency_exchange_date=_payment_plan.currency_exchange_date,
                     )
                 except (ValueError, TypeError):
-                    logger.error(f"Invalid delivered_amount for Payment {_payment.id}: {delivered_quantity}")
+                    logger.warning(f"Invalid delivered_amount for Payment {_payment.id}: {delivered_quantity}")
                     _payment.delivered_quantity = None
                     _payment.delivered_quantity_usd = None
 
