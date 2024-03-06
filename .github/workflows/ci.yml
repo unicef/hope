@@ -150,8 +150,7 @@ jobs:
           backend_image=${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.tst.yml \
             up \
-              --exit-code-from backend \
-              --abort-on-container-exit
+              --exit-code-from backend
 
   e2e_tests:
     runs-on: ubuntu-latest
