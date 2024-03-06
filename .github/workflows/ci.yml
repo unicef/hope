@@ -212,6 +212,33 @@ jobs:
     steps:
       - name: Trigger deploy
         run: |
-          echo TODO
-          python3 --version
-          echo $@
+          # TODO: make it prettier
+          if [ ${{ github.ref }} == 'refs/heads/develop' ]; then
+            pipelineId=1159
+          elif [ ${{ github.ref }} == 'refs/heads/staging' ]; then
+            pipelineId=1160
+          elif [ ${{ github.ref }} == 'refs/heads/master' ]; then
+            pipelineId=1161,1165
+          fi
+
+          IFS=',' read -ra pipelines <<< "$pipelineId"
+          for pipeline in "${pipelines[@]}"; do
+            jsonBody='{"variables": {"tag": {"isSecret": false, "value": "${{ github.sha }}"}}}'
+            contentLength=$(echo -n $jsonBody | wc -c)
+            project=ICTD-HCT-MIS
+            organization=unicef
+
+            echo Triggering deploy for pipeline $pipeline
+            echo JSON body: $jsonBody
+
+            curl -v -L -f \
+              -u ":${{ secrets.AZURE_PAT }}" \
+              -H "Content-Type: application/json" \
+              -H "Content-Length: $contentLength" \
+              -d "$jsonBody" \
+              https://dev.azure.com/$organization/$project/_apis/pipelines/$pipeline/runs?api-version=7.1-preview.1
+            if [ $? -ne 0 ]; then
+              echo "Failed to trigger deploy for pipeline $pipeline"
+              exit 1
+            fi
+          done
