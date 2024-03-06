@@ -6,7 +6,7 @@ on:
     - gha
 
 jobs:
-  build:
+  build_and_push:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
@@ -15,11 +15,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Build
+      - name: Build dev
         run: |
           docker buildx create --use
           docker buildx build \
-            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope-core:${{ github.sha }}-dev \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
             -f ./docker/Dockerfile \
             --target dev \
             --load \
@@ -27,9 +28,19 @@ jobs:
 
       - name: Checks
         run: |
-          docker run --rm -it ${{ secrets.DOCKERHUB_USERNAME }}/hope-core:${{ github.sha }}-dev sh -c "
+          docker run --rm -i ${{ secrets.DOCKERHUB_USERNAME }}/hope-core:${{ github.sha }}-dev sh -c "
             ./dev.sh sort
             ./dev.sh format
             ./dev.sh lint
             ./dev.sh mypy
           "
+
+      - name: Push dev
+        run: |
+          docker buildx build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-${{ github.sha }}-dev \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/hope:core-latest-dev \
+            -f ./docker/Dockerfile \
+            --target dev \
+            --push \
+            ./
