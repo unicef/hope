@@ -75,10 +75,7 @@ def validate_data_collecting_type(
     original_program_data_collecting_type: Optional["DataCollectingType"] = None,
     data_collecting_type: Optional["DataCollectingType"] = None,
 ) -> None:
-    if (
-        data_collecting_type.available_for.all().count() > 0
-        and business_area not in data_collecting_type.available_for.all()
-    ):
+    if data_collecting_type.available_for.exists() and business_area not in data_collecting_type.available_for.all():
         raise ValidationError("This Data Collection Type is not assigned to the Program's Business Area")
 
     if not original_program_data_collecting_type:

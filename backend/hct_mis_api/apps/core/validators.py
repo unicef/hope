@@ -330,7 +330,7 @@ class DataCollectingTypeValidator(BaseValidator):
         business_area = kwargs.get("business_area") or getattr(program, "business_area", None)
 
         # validate program BA and DCT.available_for
-        if data_collecting_type and business_area and data_collecting_type.available_for.all().count() > 0:
+        if data_collecting_type and business_area and data_collecting_type.available_for.exists():
             if business_area not in data_collecting_type.available_for.all():
                 raise ValidationError("This Data Collection Type is not assigned to the Program's Business Area")
 
