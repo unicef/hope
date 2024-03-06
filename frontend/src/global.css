@@ -25,3 +25,22 @@ body,
 a:hover {
   color: #003c8f;
 }
+
+/* For Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ffffff;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff #f1f1f1;
+}
