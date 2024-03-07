@@ -1,10 +1,8 @@
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q, QuerySet
-from django.template.loader import render_to_string
 from django.utils import timezone
 
 from constance import config
@@ -16,6 +14,7 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.payment.models import Approval, PaymentPlan
+from hct_mis_api.apps.utils.mailjet import MailjetClient
 
 logger = logging.getLogger(__name__)
 
@@ -65,27 +64,6 @@ class PaymentNotification:
         self.emails = self._prepare_emails()
         self.enable_email_notification = self.payment_plan.business_area.enable_email_notification
 
-    def _prepare_default_context(self, user_recipient: User) -> Dict[str, Any]:
-        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
-        context = {
-            "first_name": user_recipient.first_name,
-            "last_name": user_recipient.last_name,
-            "action_name": self.action_name,
-            "payment_plan_url": (
-                f"{protocol}://{settings.FRONTEND_HOST}/{self.payment_plan.business_area.slug}/programs/"
-                f'{encode_id_base64(self.payment_plan.program.id, "Program")}/payment-module/payment-plans/'
-                f'{encode_id_base64(self.payment_plan.id, "PaymentPlan")}'
-            ),
-            "payment_plan_id": self.payment_plan.unicef_id,
-            "payment_plan": self.payment_plan,
-            "payment_plan_creator": self.payment_plan_creator,
-            "payment_plan_creation_date": self.payment_plan_creation_date,
-            "action_user": self.action_user,
-            "action_date": self.action_date,
-            "program": self.payment_plan.program,
-        }
-        return context
-
     def _prepare_user_recipients(self) -> QuerySet[User]:
         permission = PaymentNotification.ACTION_TO_RECIPIENTS_PERMISSIONS_MAP[self.action]
         business_area = self.payment_plan.business_area
@@ -123,19 +101,18 @@ class PaymentNotification:
     def _prepare_action_user_and_date(self) -> None:
         PaymentNotification.ACTION_GET_DATA_MAP[self.action](self)
 
-    def _prepare_emails(self) -> List[EmailMultiAlternatives]:
+    def _prepare_emails(self) -> List[MailjetClient]:
         return [self._prepare_email(user) for user in self.user_recipients.exclude(id=self.action_user.id)]
 
-    def _prepare_email(self, user_recipient: User) -> EmailMultiAlternatives:
-        text_body, html_body = self._prepare_bodies(user_recipient)
-        email = EmailMultiAlternatives(
+    def _prepare_email(self, user_recipient: User) -> MailjetClient:
+        body_variables = self._prepare_body_variables(user_recipient)
+        email = MailjetClient(
+            mailjet_template_id=config.MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION,
             subject=self.email_subject,
-            from_email=settings.EMAIL_HOST_USER,
-            to=[user_recipient.email],
-            body=text_body,
-            cc=[self.action_user.email],
+            recipients=[user_recipient.email],
+            ccs=[self.action_user.email],
+            variables=body_variables,
         )
-        email.attach_alternative(html_body, "text/html")
         return email
 
     def send_email_notification(self) -> None:
@@ -143,15 +120,29 @@ class PaymentNotification:
             return
         try:
             for email in self.emails:
-                email.send()
+                email.send_email()
         except Exception as e:
             logger.exception(e)
 
-    def _prepare_bodies(self, user_recipient: User) -> Tuple[str, str]:
-        context = self._prepare_default_context(user_recipient)
-        text_body = render_to_string("payment/payment_plan_action.html", context)
-        html_body = render_to_string("payment/payment_plan_action.txt", context)
-        return text_body, html_body
+    def _prepare_body_variables(self, user_recipient: User) -> Dict[str, Any]:
+        protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
+        variables = {
+            "first_name": user_recipient.first_name,
+            "last_name": user_recipient.last_name,
+            "action_name": self.action_name,
+            "payment_plan_url": (
+                f"{protocol}://{settings.FRONTEND_HOST}/{self.payment_plan.business_area.slug}/programs/"
+                f'{encode_id_base64(self.payment_plan.program.id, "Program")}/payment-module/payment-plans/'
+                f'{encode_id_base64(self.payment_plan.id, "PaymentPlan")}'
+            ),
+            "payment_plan_id": self.payment_plan.unicef_id,
+            "payment_plan_creator": self.payment_plan_creator.get_full_name(),
+            "payment_plan_creation_date": f"{self.payment_plan_creation_date:%-d %B %Y}",
+            "action_user": self.action_user.get_full_name(),
+            "action_date": f"{self.action_date:%-d %B %Y}",
+            "program_name": self.payment_plan.program.name,
+        }
+        return variables
 
     def _get_sent_for_approval_action_data(self) -> None:
         self.action_user = self.approval_process.sent_for_approval_by
