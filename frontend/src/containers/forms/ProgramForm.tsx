@@ -54,6 +54,7 @@ export const ProgramForm = ({ values }: ProgramFormPropTypes): ReactElement => {
             fullWidth
             variant="outlined"
             component={FormikTextField}
+            maxLength={4}
             data-cy="input-programme-code"
           />
         </Grid>

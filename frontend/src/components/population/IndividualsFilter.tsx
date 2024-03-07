@@ -1,7 +1,6 @@
 import { Grid, MenuItem } from '@mui/material';
 import CakeIcon from '@mui/icons-material/Cake';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
-import WcIcon from '@mui/icons-material/Wc';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -144,7 +143,6 @@ export function IndividualsFilter({
             onChange={(e) => handleFilterChange('sex', e.target.value)}
             value={filter.sex}
             label={t('Gender')}
-            icon={<WcIcon />}
             data-cy="ind-filters-gender"
             fullWidth
           >
