@@ -257,6 +257,79 @@ snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_status 1'] = {
     }
 }
 
+snapshots['TestGrievanceQuery::test_grievance_query_all_0_with_permission 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'admin': 'City Test',
+                        'category': 7,
+                        'consent': True,
+                        'createdAt': '2020-03-12T00:00:00+00:00',
+                        'description': 'Ticket with program, in admin area 1, new',
+                        'language': 'Polish',
+                        'status': 1
+                    }
+                },
+                {
+                    'node': {
+                        'admin': 'City Example',
+                        'category': 5,
+                        'consent': True,
+                        'createdAt': '2020-07-12T00:00:00+00:00',
+                        'description': 'Ticket with program, in admin area 2, on hold',
+                        'language': 'English',
+                        'status': 4
+                    }
+                },
+                {
+                    'node': {
+                        'admin': 'City Example',
+                        'category': 7,
+                        'consent': True,
+                        'createdAt': '2020-08-22T00:00:00+00:00',
+                        'description': 'Ticket with program, in admin area 2, in progress',
+                        'language': 'Polish, English',
+                        'status': 3
+                    }
+                },
+                {
+                    'node': {
+                        'admin': None,
+                        'category': 7,
+                        'consent': True,
+                        'createdAt': '2020-08-23T00:00:00+00:00',
+                        'description': 'Ticket with program, without admin area',
+                        'language': 'Polish, English',
+                        'status': 3
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceQuery::test_grievance_query_all_1_without_permission 1'] = {
+    'data': {
+        'allGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allGrievanceTicket'
+            ]
+        }
+    ]
+}
+
 snapshots['TestGrievanceQuery::test_grievance_query_single_0_with_permission 1'] = {
     'data': {
         'grievanceTicket': {

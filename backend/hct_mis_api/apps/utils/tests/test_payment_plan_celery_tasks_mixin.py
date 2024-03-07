@@ -51,7 +51,7 @@ class TestPaymentPlanCeleryTasksMixin(TestCase):
             (
                 PaymentPlan.Status.ACCEPTED,
                 PaymentPlan.BackgroundActionStatus.XLSX_EXPORTING,
-                'id="btn-restart_exporting_exporting_payment_plan_list"',
+                'id="btn-restart_exporting_payment_plan_list"',
             ),
         ]
     )

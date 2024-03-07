@@ -360,10 +360,10 @@ def deduplicate_documents() -> bool:
     return True
 
 
-@app.task
+@app.task(bind=True, default_retry_delay=60 * 5, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def check_rdi_import_periodic_task(business_area_slug: Optional[str] = None) -> bool:
+def check_rdi_import_periodic_task(self: Any, business_area_slug: Optional[str] = None) -> Optional[bool]:
     with cache.lock(
         f"check_rdi_import_periodic_task_{business_area_slug}",
         blocking_timeout=60 * 5,
@@ -378,9 +378,14 @@ def check_rdi_import_periodic_task(business_area_slug: Optional[str] = None) -> 
         business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
         if business_area:
             set_sentry_business_area_tag(business_area.name)
-        manager = RegistrationDataXlsxImportCeleryManager(business_area=business_area)
-        manager.execute()
-        return True
+
+        try:
+            manager = RegistrationDataXlsxImportCeleryManager(business_area=business_area)
+            manager.execute()
+            return True
+        except Exception as e:
+            logger.error(e)
+            raise self.retry(exc=e)
 
 
 @app.task

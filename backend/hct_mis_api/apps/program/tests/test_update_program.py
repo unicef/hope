@@ -2,7 +2,11 @@ from typing import Any, List
 
 from parameterized import parameterized
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import (
@@ -197,9 +201,11 @@ class TestUpdateProgram(APITestCase):
         )
 
     def test_update_program_with_dct_from_other_ba(self) -> None:
-        DataCollectingType.objects.update_or_create(
+        other_ba = BusinessAreaFactory()
+        dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA"}
         )
+        dct.limit_to.add(other_ba)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         self.snapshot_graphql_request(

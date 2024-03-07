@@ -14,6 +14,7 @@ from typing import (
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.db.models import Q
 
 import graphene
 from constance import config
@@ -407,9 +408,9 @@ class Query(graphene.ObjectType):
     def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         data_collecting_types = (
             DataCollectingType.objects.filter(
+                Q(Q(limit_to__slug=info.context.headers.get("Business-Area").lower()) | Q(limit_to__isnull=True)),
                 active=True,
                 deprecated=False,
-                limit_to__slug=info.context.headers.get("Business-Area").lower(),
             )
             .exclude(code__iexact="unknown")
             .only("code", "label", "description")

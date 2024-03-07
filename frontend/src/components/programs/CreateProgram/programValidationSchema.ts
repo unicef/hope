@@ -14,12 +14,7 @@ export const programValidationSchema = (
     programmeCode: Yup.string()
       .min(4, t('Programme code has to be 4 characters'))
       .max(4, t('Programme code has to be 4 characters'))
-      .matches(
-        /^[A-Z0-9\-/.]{4}$/,
-        t(
-          "Programme code may only contain capital letters, digits and '-', '/', '.'.",
-        ),
-      )
+      .matches(/^[A-Za-z0-9\-/.]{4}$/, t('Programme code may only contain letters, digits and \'-\', \'/\', \'.\'.'))
       .nullable(),
     startDate: Yup.date()
       .required(t('Start Date is required'))
