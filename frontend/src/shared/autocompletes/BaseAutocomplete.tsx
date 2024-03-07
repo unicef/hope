@@ -77,18 +77,6 @@ export function BaseAutocomplete({
       data-cy={dataCy}
       open={open}
       options={[{ value: '', label: '' }, ...allEdges]}
-      filterOptions={(options: OptionType[], params) => {
-        const filtered = options.filter(
-          (option) =>
-            option.value !== '' &&
-            (params.inputValue === '' ||
-              (option.label &&
-                option.label
-                  .toLowerCase()
-                  .includes(params.inputValue.toLowerCase()))),
-        );
-        return filtered;
-      }}
       onChange={handleChange}
       onOpen={handleOpen}
       onClose={handleClose}
