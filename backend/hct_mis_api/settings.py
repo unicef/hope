@@ -39,6 +39,8 @@ DEFAULTS = {
     "EMAIL_HOST_USER": (str, ""),
     "EMAIL_HOST_PASSWORD": (str, ""),
     "EMAIL_USE_TLS": (bool, True),
+    "MAILJET_API_KEY": (str, ""),
+    "MAILJET_SECRET_KEY": (str, ""),
     "KOBO_KF_URL": (str, "https://kf-hope.unitst.org"),
     "KOBO_KC_URL": (str, "https://kc-hope.unitst.org"),
     "KOBO_MASTER_API_TOKEN": (str, "KOBO_TOKEN"),
@@ -251,6 +253,8 @@ EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+MAILJET_API_KEY = env("MAILJET_API_KEY")
+MAILJET_SECRET_KEY = env("MAILJET_SECRET_KEY")
 
 KOBO_KF_URL = env("KOBO_KF_URL")
 KOBO_KC_URL = env("KOBO_KC_URL")
@@ -694,6 +698,21 @@ CONSTANCE_CONFIG = {
         False,
         "Should send grievances notification",
         bool,
+    ),
+    "SEND_PAYMENT_PLANS_NOTIFICATION": (
+        False,
+        "Should send payment plans notification",
+        bool,
+    ),
+    "ENABLE_MAILJET": (
+        False,
+        "Enable sending emails via Mailjet",
+        bool,
+    ),
+    "MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION": (
+        0,
+        "Mailjet template id for payment plan notification",
+        int,
     ),
     "IGNORED_USER_LINKED_OBJECTS": (
         "created_advanced_filters,advancedfilter,logentry,social_auth,query,querylog,logs",
