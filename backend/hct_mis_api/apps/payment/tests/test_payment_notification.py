@@ -288,7 +288,7 @@ class TestPaymentNotification(APITestCase):
             self.approval_release.created_at,
         )
 
-    @mock.patch("hct_mis_api.apps.payment.notifications.EmailMultiAlternatives.send")
+    @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
     def test_send_email_notification(self, mock_send: Any) -> None:
         payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.name)

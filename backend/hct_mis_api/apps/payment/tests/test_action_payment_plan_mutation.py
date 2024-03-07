@@ -157,7 +157,7 @@ class TestActionPaymentPlanMutation(APITestCase):
         ]
     )
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    @patch("hct_mis_api.apps.payment.notifications.EmailMultiAlternatives.send")
+    @patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     @override_config(PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS=True)
     def test_update_status_payment_plan(
         self,
