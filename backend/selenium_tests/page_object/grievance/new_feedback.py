@@ -1,5 +1,6 @@
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.select import Select
 
 
 class NewFeedback(BaseComponents):
@@ -49,20 +50,20 @@ class NewFeedback(BaseComponents):
     def getButtonNext(self) -> WebElement:
         return self.wait_for(self.buttonNext)
 
-    def getOption(self) -> WebElement:
-        return self.wait_for(self.option)
+    def getOptions(self) -> list[WebElement]:
+        return self.get_elements(self.option)
 
-    def getHouseholdTab(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs).contains(self.textLookUpHousehold)
+    def getHouseholdTab(self) -> None:
+        assert self.textLookUpHousehold in self.wait_for(self.lookUpTabs).text
 
-    def getLookUpIndividual(self) -> WebElement:
-        return self.wait_for(self.lookUpTabs).contains(self.textLookUpIndividual)
+    def getLookUpIndividual(self) -> None:
+        assert self.textLookUpIndividual in self.wait_for(self.lookUpTabs).text
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
-        return self.wait_for(self.householdTableRow).eq(number)
+        return self.get_elements(self.householdTableRow)[number]
 
     def getIndividualTableRow(self, number: int) -> WebElement:
-        return self.wait_for(self.individualTableRow).eq(number)
+        return self.get_elements(self.individualTableRow)[number]
 
     def getReceivedConsent(self) -> WebElement:
         return self.wait_for(self.receivedConsent)
@@ -91,11 +92,16 @@ class NewFeedback(BaseComponents):
     def checkElementsOnPage(self) -> None:
         self.getTitlePage().contains(self.textTitle)
         self.getLabelCategory().contains(self.textCategory)
-        self.getSelectIssueType().should("be.visible")
-        self.getButtonCancel().should("be.visible")
-        self.getButtonBack().should("be.visible")
-        self.getButtonNext().should("be.visible")
+        self.getSelectIssueType()
+        self.getButtonCancel()
+        self.getButtonBack()
+        self.getButtonNext()
 
     def chooseOptionByName(self, name: str) -> None:
         self.getSelectIssueType().click()
-        self.getOption().contains(name).click()
+        select_element = self.wait_for('ul[data-cy="select-options-container"]')
+        select = Select(select_element)
+        print(select.options)
+        select.select_by_visible_text('name')
+        # self.getSelectIssueType().click()
+        # self.choose_option(self.getOptions(), name)

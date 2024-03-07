@@ -37,5 +37,13 @@ class Common:
         return self.driver.current_url
 
     @staticmethod
+    def choose_option(list_options: list, name: str) -> None:
+        for option in list_options:
+            if name in option.text:
+                option.click()
+                return
+        assert False
+
+    @staticmethod
     def find_in_element(element: WebElement, locator: str, element_type: str = By.CSS_SELECTOR) -> list[WebElement]:
         return element.find_elements(element_type, locator)
