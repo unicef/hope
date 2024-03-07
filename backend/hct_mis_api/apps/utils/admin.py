@@ -297,7 +297,7 @@ class PaymentPlanCeleryTasksMixin:
         visible=lambda btn: is_exporting_xlsx_file(btn) and is_accepted_payment_plan(btn),
         enabled=lambda btn: is_enabled(btn),
     )
-    def restart_exporting_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
+    def restart_exporting_payment_plan_list(self, request: HttpRequest, pk: str) -> Optional[HttpResponse]:
         """Exporting payment plan list"""
 
         from hct_mis_api.apps.payment.celery_tasks import (
@@ -322,7 +322,7 @@ class PaymentPlanCeleryTasksMixin:
             return confirm_action(
                 modeladmin=self,
                 request=request,
-                action=self.restart_exporting_exporting_payment_plan_list,
+                action=self.restart_exporting_payment_plan_list,
                 message="Do you confirm to restart exporting xlsx file task?",
             )
 
