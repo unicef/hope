@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from django.db.models import Q, QuerySet
+from django.db.models import Q
 from django.utils.timezone import now
 
 from _decimal import Decimal
@@ -13,6 +13,7 @@ from requests.adapters import HTTPAdapter
 from rest_framework import serializers
 from urllib3 import Retry
 
+from hct_mis_api.apps.core.utils import chunks
 from hct_mis_api.apps.payment.models import (
     DeliveryMechanismPerPaymentPlan,
     FinancialServiceProvider,
@@ -76,6 +77,11 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
 
 
 class PaymentInstructionFromSplitSerializer(PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer):
+    unicef_id = serializers.SerializerMethodField()  # type: ignore
+
+    def get_unicef_id(self, obj: Any) -> str:
+        return f"{obj.payment_plan.unicef_id}-{obj.order}"
+
     class Meta:
         model = PaymentPlanSplit
         fields = [
@@ -135,6 +141,7 @@ class PaymentRecordData:
     hope_status: str
     extra_data: dict
     fsp_code: str
+    message: Optional[str] = None
 
 
 @dataclass
@@ -162,7 +169,8 @@ class FspData:
 @dataclass
 class AddRecordsResponseData:
     remote_id: str  # payment instruction id
-    records: dict  # {"record_code": "remote_id"}
+    records: Optional[dict] = None  # {"record_code": "remote_id"}
+    errors: Optional[dict] = None  # {index: "error_message"}
 
 
 class PaymentGatewayAPI:
@@ -195,21 +203,22 @@ class PaymentGatewayAPI:
         self._client.mount(self.api_url, HTTPAdapter(max_retries=retries))
         self._client.headers.update({"Authorization": f"Token {self.api_key}"})
 
-    def validate_response(self, response: Response) -> Dict:
+    def validate_response(self, response: Response) -> Response:
         if not response.ok:
             raise self.PaymentGatewayAPIException(f"Invalid response: {response}, {response.content!r}, {response.url}")
 
-        return response.json()
+        return response
 
-    def _post(self, endpoint: str, data: Optional[Union[Dict, List]] = None) -> Dict:
+    def _post(self, endpoint: str, data: Optional[Union[Dict, List]] = None, validate_response: bool = True) -> Dict:
         response = self._client.post(f"{self.api_url}{endpoint}", json=data)
-        response_data = self.validate_response(response)
-        return response_data
+        if validate_response:
+            response = self.validate_response(response)
+        return response.json()
 
     def _get(self, endpoint: str, params: Optional[Dict] = None) -> Dict:
         response = self._client.get(f"{self.api_url}{endpoint}", params=params)
-        response_data = self.validate_response(response)
-        return response_data
+        response = self.validate_response(response)
+        return response.json()
 
     def get_fsps(self) -> List[FspData]:
         response_data = self._get(self.Endpoints.GET_FSPS)
@@ -235,11 +244,13 @@ class PaymentGatewayAPI:
         return response_data["status"]
 
     def add_records_to_payment_instruction(
-        self, payment_records: QuerySet[Payment], remote_id: str
+        self, payment_records: List[Payment], remote_id: str, validate_response: bool = True
     ) -> AddRecordsResponseData:
         serializer = PaymentSerializer(payment_records, many=True)
         response_data = self._post(
-            self.Endpoints.PAYMENT_INSTRUCTION_ADD_RECORDS.format(remote_id=remote_id), serializer.data
+            self.Endpoints.PAYMENT_INSTRUCTION_ADD_RECORDS.format(remote_id=remote_id),
+            serializer.data,
+            validate_response=validate_response,
         )
         return AddRecordsResponseData(**response_data)
 
@@ -251,6 +262,8 @@ class PaymentGatewayAPI:
 
 
 class PaymentGatewayService:
+    ADD_RECORDS_CHUNK_SIZE = 500
+
     def __init__(self) -> None:
         self.api = PaymentGatewayAPI()
 
@@ -290,36 +303,45 @@ class PaymentGatewayService:
         return None
 
     def add_records_to_payment_instructions(self, payment_plan: PaymentPlan) -> None:
-        def handle_response(
-            resp: AddRecordsResponseData,
-            obj: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit],
-            payments_count: int,
-        ) -> None:
-            assert resp.remote_id == str(obj.id), f"{resp}, {obj} {obj.id}"
-            assert len(resp.records) == payments_count, f"{len(resp.records)} != {payments_count}"
+        def _handle_errors(_response: AddRecordsResponseData, _payments: List[Payment]) -> None:
+            for _idx, _payment in enumerate(_payments):
+                _payment.status = Payment.STATUS_ERROR
+                _payment.reason_for_unsuccessful_payment = _response.errors.get(str(_idx), "")
+                _payment.save(update_fields=["status", "reason_for_unsuccessful_payment"])
 
-            status = self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, obj)
-            assert status == PaymentInstructionStatus.CLOSED.value, status
-            status = self.change_payment_instruction_status(PaymentInstructionStatus.READY, obj)
-            assert status == PaymentInstructionStatus.READY.value, status
-            obj.sent_to_payment_gateway = True
-            obj.save(update_fields=["sent_to_payment_gateway"])
+        def _add_records(
+            _payments: List[Payment], _container: Union[DeliveryMechanismPerPaymentPlan, PaymentPlanSplit]
+        ) -> None:
+            add_records_error = False
+            for payments_chunk in chunks(_payments, self.ADD_RECORDS_CHUNK_SIZE):
+                response = self.api.add_records_to_payment_instruction(
+                    payments_chunk, _container.id, validate_response=False
+                )
+                if response.errors:
+                    add_records_error = True
+                    _handle_errors(response, payments_chunk)
+
+            _container.sent_to_payment_gateway = True
+            _container.save(update_fields=["sent_to_payment_gateway"])
+            if not add_records_error:
+                self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, _container)
+                self.change_payment_instruction_status(PaymentInstructionStatus.READY, _container)
 
         if payment_plan.splits.exists():
-            for split in payment_plan.splits.all().order_by("order"):
+            for split in payment_plan.splits.filter(sent_to_payment_gateway=False).all().order_by("order"):
                 if split.financial_service_provider.is_payment_gateway:
-                    payments = split.payments.order_by("unicef_id")
-                    response = self.api.add_records_to_payment_instruction(payments, split.id)
-                    handle_response(response, split, payments.count())
+                    payments = list(split.payments.order_by("unicef_id"))
+                    _add_records(payments, split)
 
         else:
             for delivery_mechanism in payment_plan.delivery_mechanisms.all():
                 if delivery_mechanism.financial_service_provider.is_payment_gateway:
-                    payments = payment_plan.eligible_payments.filter(
-                        financial_service_provider=delivery_mechanism.financial_service_provider
-                    ).order_by("unicef_id")
-                    response = self.api.add_records_to_payment_instruction(payments, delivery_mechanism.id)
-                    handle_response(response, delivery_mechanism, payments.count())
+                    payments = list(
+                        payment_plan.eligible_payments.filter(
+                            financial_service_provider=delivery_mechanism.financial_service_provider
+                        ).order_by("unicef_id")
+                    )
+                    _add_records(payments, delivery_mechanism)
 
     def sync_fsps(self) -> None:
         fsps = self.api.get_fsps()
@@ -346,7 +368,7 @@ class PaymentGatewayService:
             try:
                 matching_pg_payment = next(p for p in _pg_payment_records if p.remote_id == str(_payment.id))
             except StopIteration:
-                logger.error(
+                logger.warning(
                     f"Payment {_payment.id} for Payment Instruction {_container.id} not found in Payment Gateway"
                 )
                 return
@@ -354,6 +376,10 @@ class PaymentGatewayService:
             _payment.status = matching_pg_payment.hope_status
             _payment.status_date = now()
             update_fields = ["status", "status_date"]
+
+            if _payment.status not in Payment.ALLOW_CREATE_VERIFICATION and matching_pg_payment.message:
+                _payment.reason_for_unsuccessful_payment = matching_pg_payment.message
+                update_fields.append("reason_for_unsuccessful_payment")
 
             delivered_quantity = matching_pg_payment.extra_data.get("delivered_quantity", None)
             if _payment.status in [
@@ -372,7 +398,7 @@ class PaymentGatewayService:
                         currency_exchange_date=_payment_plan.currency_exchange_date,
                     )
                 except (ValueError, TypeError):
-                    logger.error(f"Invalid delivered_amount for Payment {_payment.id}: {delivered_quantity}")
+                    logger.warning(f"Invalid delivered_amount for Payment {_payment.id}: {delivered_quantity}")
                     _payment.delivered_quantity = None
                     _payment.delivered_quantity_usd = None
 
