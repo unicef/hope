@@ -32,6 +32,7 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
+            --platform linux/amd64,linux/arm64/v8 \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dev \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dev \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dev \
@@ -134,6 +135,7 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
+            --platform linux/amd64,linux/arm64/v8 \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dev \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dev \
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dist \
