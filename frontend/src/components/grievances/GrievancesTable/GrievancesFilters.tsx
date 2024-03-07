@@ -120,8 +120,8 @@ export const GrievancesFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container alignItems="flex-end" item xs={4} spacing={0}>
-          <Grid item xs={8}>
+        <Grid container alignItems="flex-end" item xs={5} spacing={0}>
+          <Grid item xs={5}>
             <SearchTextField
               value={filter.search}
               label="Search"
@@ -130,7 +130,7 @@ export const GrievancesFilters = ({
               borderRadius="4px 0px 0px 4px"
             />
           </Grid>
-          <Grid container item xs={4}>
+          <Grid container item xs={7}>
             <SelectFilter
               onChange={(e) => handleFilterChange('searchType', e.target.value)}
               label="Search Type"

@@ -36,6 +36,13 @@ const StyledSelect = styled(Select)`
   white-space: nowrap;
 `;
 
+const OverflowDiv = styled.div`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+`;
+
 export const SelectFilter = ({
   label,
   children,
@@ -93,9 +100,11 @@ export const SelectFilter = ({
                       {icon}
                     </StartInputAdornment>
                   )}
-                  {selectedOption
-                    ? selectedOption.props.children
-                    : String(selected)}
+                  <OverflowDiv>
+                    {selectedOption
+                      ? selectedOption.props.children
+                      : String(selected)}
+                  </OverflowDiv>
                 </Box>
               );
             }}

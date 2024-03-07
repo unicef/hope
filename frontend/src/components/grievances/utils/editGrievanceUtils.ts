@@ -501,8 +501,14 @@ export function prepareVariables(businessArea, values, ticket) {
     area: values.area,
     household: values.selectedHousehold?.id,
     individual: values.selectedIndividual?.id,
-    priority: values.priority === 'Not set' ? 0 : values.priority,
-    urgency: values.urgency === 'Not set' ? 0 : values.urgency,
+    priority:
+    values.priority === 'Not set' || values.priority === null || values.priority === ''
+      ? 0
+      : values.priority,
+  urgency:
+    values.urgency === 'Not set' || values.urgency === null || values.urgency === ''
+      ? 0
+      : values.urgency,
     partner: values.partner,
     comments: values.comments,
     program: ticket.programs?.[0]?.id || values?.program,
