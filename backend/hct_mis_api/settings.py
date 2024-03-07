@@ -55,6 +55,8 @@ DEFAULTS = {
     "ROOT_ACCESS_TOKEN": (str, ""),
     "SENTRY_DSN": (str, ""),
     "SENTRY_URL": (str, ""),
+    "SENTRY_ENVIRONMENT": (str, ""),
+    "SENTRY_ENABLE_TRACING": (bool, False),
     "CELERY_BROKER_URL": (str, ""),
     "CELERY_RESULT_BACKEND": (str, ""),
     "CELERY_TASK_ALWAYS_EAGER": (bool, False),
@@ -69,6 +71,52 @@ DEFAULTS = {
     "SECURE_HSTS_SECONDS": (int, 3600),
     "FLOWER_ADDRESS": (str, "https://hope.unicef.org/flower"),
     "CACHE_ENABLED": (bool, True),
+    "CSP_REPORT_URI": (tuple, ("",)),
+    "CSP_REPORT_ONLY": (bool, True),
+    "CSP_REPORT_PERCENTAGE": (float, 0.1),
+    "CSP_DEFAULT_SRC": (tuple, ("'self'",)),
+    "CSP_FRAME_ANCESTORS": (tuple, ("'none'",)),
+    "CSP_STYLE_SRC": (
+        tuple,
+        (
+            "'self'",
+            "'unsafe-inline'",
+            "'unsafe-eval'",
+        ),
+    ),
+    "CSP_MANIFEST_SRC": (tuple, ("'self'",)),
+    "CSP_SCRIPT_SRC": (
+        tuple,
+        (
+            "'self'",
+            "'unsafe-inline'",
+            "'unsafe-eval'",
+        ),
+    ),
+    "CSP_IMG_SRC": (
+        tuple,
+        (
+            "'self'",
+            "data:",
+        ),
+    ),
+    "CSP_FONT_SRC": (
+        tuple,
+        (
+            "'self'",
+            "data:",
+            "fonts.gstatic.com",
+            "maxcdn.bootstrapcdn.com",
+        ),
+    ),
+    "CSP_MEDIA_SRC": (tuple, ("'self'",)),
+    "CSP_CONNECT_SRC": (
+        tuple,
+        (
+            "gov-bam.nr-data.net",
+            "cdn.jsdelivr.net",
+        ),
+    ),
 }
 
 env = Env(**DEFAULTS)
@@ -169,88 +217,20 @@ if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY:
     DEFAULT_FILE_STORAGE = "hct_mis_api.apps.core.storage.AzureMediaStorage"
     STATICFILES_STORAGE = "hct_mis_api.apps.core.storage.AzureStaticStorage"
 
-SENTRY_DSN = env("SENTRY_DSN")
-if SENTRY_DSN:
-    import re
-
-    sentry_key = re.search(r"//(.*)@", SENTRY_DSN).group(1)
-    sentry_id = re.search(r"@.*/(\d*)$", SENTRY_DSN).group(1)
-    CSP_REPORT_URI = (f"https://excubo.unicef.io/api/{sentry_id}/security/?sentry_key={sentry_key}",)
-    CSP_REPORT_ONLY = True  # TODO: change to False after testing
-CSP_REPORT_PERCENTAGE = 0.1
+CSP_REPORT_URI = env.tuple("CSP_REPORT_URI")
+CSP_REPORT_ONLY = env("CSP_REPORT_ONLY")
+CSP_REPORT_PERCENTAGE = env("CSP_REPORT_PERCENTAGE")
 
 # default source as self
-CSP_DEFAULT_SRC: Tuple[str, ...] = ("'self'",)
-CSP_FRAME_ANCESTORS: Tuple[str, ...] = ("'none'",)
-CSP_STYLE_SRC: Tuple[str, ...] = (
-    "'self'",
-    "'unsafe-inline'",
-    "'unsafe-eval'",
-    "fonts.googleapis.com",
-    "cdn.jsdelivr.net",
-    "cdnjs.cloudflare.com",
-    "maxcdn.bootstrapcdn.com",
-    "unpkg.com",
-    "hctmisdev.blob.core.windows.net",  # dev
-    "saunihopestg.blob.core.windows.net",  # stg
-    "saunihopetrn.blob.core.windows.net",  # trn
-    "saunihopeprd.blob.core.windows.net",  # prod
-)
-CSP_MANIFEST_SRC: Tuple[str, ...] = (
-    "'self'",
-    "hctmisdev.blob.core.windows.net",
-    "saunihopestg.blob.core.windows.net",
-    "saunihopetrn.blob.core.windows.net",
-    "saunihopeprd.blob.core.windows.net",
-)
-
-CSP_SCRIPT_SRC: Tuple[str, ...] = (
-    "'self'",
-    "'unsafe-inline'",
-    "'unsafe-eval'",
-    "hctmisdev.blob.core.windows.net",
-    "saunihopestg.blob.core.windows.net",
-    "saunihopetrn.blob.core.windows.net",
-    "saunihopeprd.blob.core.windows.net",
-    "gov-bam.nr-data.net",
-    "cdn.jsdelivr.net",
-    "cdnjs.cloudflare.com",
-    "unpkg.com",
-)
-CSP_IMG_SRC: Tuple[str, ...] = (
-    "'self'",
-    "data:",
-    "cdn.datatables.net",
-    "hctmisdev.blob.core.windows.net",
-    "saunihopestg.blob.core.windows.net",
-    "saunihopetrn.blob.core.windows.net",
-    "saunihopeprd.blob.core.windows.net",
-    "map1a.vis.earthdata.nasa.gov",
-    "map1b.vis.earthdata.nasa.gov",
-    "map1c.vis.earthdata.nasa.gov",
-)
-CSP_FONT_SRC: Tuple[str, ...] = (
-    "'self'",
-    "data:",
-    "fonts.gstatic.com",
-    "maxcdn.bootstrapcdn.com",
-    "hctmisdev.blob.core.windows.net",
-    "saunihopestg.blob.core.windows.net",
-    "saunihopetrn.blob.core.windows.net",
-    "saunihopeprd.blob.core.windows.net",
-)
-CSP_MEDIA_SRC: Tuple[str, ...] = ("'self'",)
-CSP_CONNECT_SRC: Tuple[str, ...] = (
-    "excubo.unicef.io",
-    "sentry.io",
-    "gov-bam.nr-data.net",
-    "cdn.jsdelivr.net",
-    "hope.unicef.org",  # prod
-    "trn-hope.unitst.org",  # trn
-    "stg-hope.unitst.org",  # stg
-    "dev-hope.unitst.org",  # dev
-    "*.unitst.org",
-)
+CSP_DEFAULT_SRC: Tuple[str, ...] = env.tuple("CSP_DEFAULT_SRC")
+CSP_FRAME_ANCESTORS: Tuple[str, ...] = env.tuple("CSP_FRAME_ANCESTORS")
+CSP_STYLE_SRC: Tuple[str, ...] = env.tuple("CSP_STYLE_SRC")
+CSP_MANIFEST_SRC: Tuple[str, ...] = env.tuple("CSP_MANIFEST_SRC")
+CSP_SCRIPT_SRC: Tuple[str, ...] = env.tuple("CSP_SCRIPT_SRC")
+CSP_IMG_SRC: Tuple[str, ...] = env.tuple("CSP_IMG_SRC")
+CSP_FONT_SRC: Tuple[str, ...] = env.tuple("CSP_FONT_SRC")
+CSP_MEDIA_SRC: Tuple[str, ...] = env.tuple("CSP_MEDIA_SRC")
+CSP_CONNECT_SRC: Tuple[str, ...] = env.tuple("CSP_CONNECT_SRC")
 
 DEBUG = env.bool("DEBUG", default=False)
 if DEBUG:
@@ -261,7 +241,6 @@ if DEBUG:
     CSP_STYLE_SRC += (FRONTEND_HOST,)
     CSP_MANIFEST_SRC += (FRONTEND_HOST,)
 
-if DEBUG:
     ALLOWED_HOSTS.extend(["backend", "localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
@@ -806,6 +785,9 @@ ROOT_TOKEN = env.str("ROOT_ACCESS_TOKEN", uuid4().hex)
 
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_URL = env("SENTRY_URL")
+SENTRY_ENVIRONMENT = env("SENTRY_ENVIRONMENT")
+SENTRY_ENABLE_TRACING = env("SENTRY_ENABLE_TRACING")
+
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
@@ -822,7 +804,7 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(transaction_style="url"), sentry_logging, CeleryIntegration()],
         release=get_full_version(),
-        enable_tracing=env("SENTRY_ENABLE_TRACING", default=False),
+        enable_tracing=SENTRY_ENABLE_TRACING,
         traces_sample_rate=1.0,
         send_default_pii=True,
         ignore_errors=[
@@ -833,7 +815,7 @@ if SENTRY_DSN:
             "TokenNotProvided",
         ],
         before_send=SentryFilter().before_send,
-        environment=env("SENTRY_ENVIRONMENT", default=None),
+        environment=SENTRY_ENVIRONMENT,
     )
     ignore_logger("graphql.execution.utils")
 
