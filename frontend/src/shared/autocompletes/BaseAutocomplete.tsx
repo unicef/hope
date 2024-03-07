@@ -73,10 +73,11 @@ export function BaseAutocomplete({
     <StyledAutocomplete
       key={prevValueRef.current}
       freeSolo={false}
+      filterOptions={(x) => x}
       value={value}
       data-cy={dataCy}
       open={open}
-      options={[{ value: '', label: '' }, ...allEdges]}
+      options={allEdges}
       onChange={handleChange}
       onOpen={handleOpen}
       onClose={handleClose}
