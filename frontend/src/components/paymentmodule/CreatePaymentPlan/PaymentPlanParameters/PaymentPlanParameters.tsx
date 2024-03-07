@@ -47,19 +47,6 @@ export const PaymentPlanParameters = ({
         <Grid spacing={3} container>
           <Grid item xs={4}>
             <Field
-              name='name'
-              label={t('Name')}
-              type='text'
-              fullWidth
-              required
-              variant='outlined'
-              component={FormikTextField}
-              decoratorEnd={<PaymentIcon color='disabled' />}
-              data-cy='input-payment-plan-name'
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <Field
               name='startDate'
               label={t('Start Date')}
               component={FormikDateField}

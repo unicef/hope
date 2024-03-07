@@ -11,6 +11,7 @@ export const programValidationSchema = (t): Yup.ObjectSchema =>
     programmeCode: Yup.string()
       .min(4, t('Too short'))
       .max(4, t('Too long'))
+      .matches(/^[A-Za-z0-9\-/.]{4}$/, t('Programme code may only contain letters, digits and \'-\', \'/\', \'.\'.'))
       .nullable(),
     startDate: Yup.date().required(t('Start Date is required')),
     endDate: Yup.date()
