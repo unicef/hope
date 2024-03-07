@@ -19,7 +19,7 @@ exports[`components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow should ren
           >
             <div
               choices="[object Object],[object Object]"
-              class="MuiFormControl-root MuiFormControl-marginDense MuiFormControl-fullWidth css-zevgu-MuiFormControl-root"
+              class="MuiFormControl-root MuiFormControl-fullWidth css-q8hpuo-MuiFormControl-root"
               label="Delivery Mechanism"
             >
               <label

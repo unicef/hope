@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { InputAdornment, Tooltip, TextField } from '@mui/material';
+import moment from 'moment';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import styled from 'styled-components';
 import FormControl from '@mui/material/FormControl';
@@ -16,6 +17,7 @@ export const FormikDateField = ({
   decoratorStart,
   decoratorEnd,
   tooltip = null,
+  required = false,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
@@ -27,45 +29,55 @@ export const FormikDateField = ({
   if (field.value && typeof field.value === 'string') {
     formattedValue = parseISO(field.value);
   }
+
   const datePickerComponent = (
     <FullWidthFormControl size="small">
       <DatePicker
         {...field}
         {...otherProps}
+        label={required ? `${otherProps.label}*` : otherProps.label}
         format="yyyy-MM-dd"
         name={field.name}
-        slotProps={{ textField: { size: 'small' } }}
+        slotProps={{
+          textField: {
+            size: 'small',
+            error: isInvalid,
+            helperText: isInvalid && get(form.errors, field.name),
+          },
+        }}
         sx={{
           '& .MuiSvgIcon-root': {
             outline: 'none',
           },
         }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            margin="dense"
-            size="small"
-            fullWidth
-            error={isInvalid}
-            helperText={isInvalid && get(form.errors, field.name)}
-            InputProps={{
-              startAdornment: decoratorStart && (
-                <InputAdornment position="start">
-                  {decoratorStart}
-                </InputAdornment>
-              ),
-              endAdornment: decoratorEnd && (
-                <InputAdornment position="end">{decoratorEnd}</InputAdornment>
-              ),
-            }}
-            // https://github.com/mui-org/material-ui/issues/12805
-            // eslint-disable-next-line react/jsx-no-duplicate-props
-            inputProps={{
-              'data-cy': `date-input-${field.name}`,
-            }}
-          />
-        )}
+        slots={{
+          TextField: (props) => (
+            <TextField
+              {...props}
+              variant="outlined"
+              size="small"
+              fullWidth
+              error={isInvalid}
+              helperText={isInvalid && get(form.errors, field.name)}
+              InputProps={{
+                startAdornment: decoratorStart && (
+                  <InputAdornment position="start">
+                    {decoratorStart}
+                  </InputAdornment>
+                ),
+                endAdornment: decoratorEnd && (
+                  <InputAdornment position="end">{decoratorEnd}</InputAdornment>
+                ),
+              }}
+              required={required}
+              // https://github.com/mui-org/material-ui/issues/12805
+              // eslint-disable-next-line react/jsx-no-duplicate-props
+              inputProps={{
+                'data-cy': `date-input-${field.name}`,
+              }}
+            />
+          ),
+        }}
         value={formattedValue || null}
         onBlur={() => {
           setTimeout(() => {
@@ -74,17 +86,20 @@ export const FormikDateField = ({
         }}
         onChange={(date) => {
           if (date instanceof Date && !isNaN(date.getTime())) {
-            // Date is valid
-            const event = {
+            field.onChange({
               target: {
+                value: moment(date).format('YYYY-MM-DD'),
                 name: field.name,
-                value: date,
               },
-            };
-            field.onChange(event);
+            });
           } else {
-            // Date is not valid
             console.error('Invalid date:', date);
+            field.onChange({
+              target: {
+                value: null,
+                name: field.name,
+              },
+            });
           }
         }}
       />

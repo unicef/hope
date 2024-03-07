@@ -82,22 +82,20 @@ export function PaymentPlansFilters({
           />
         </Grid>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              variant="outlined"
-              label={t('Status')}
-              multiple
-              value={filter.status}
-              fullWidth
-            >
-              {statusChoicesData.paymentPlanStatusChoices.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            variant="outlined"
+            label={t('Status')}
+            multiple
+            value={filter.status}
+            fullWidth
+          >
+            {statusChoicesData.paymentPlanStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item xs={3}>
           <NumberTextField

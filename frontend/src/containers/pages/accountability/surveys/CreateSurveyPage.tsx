@@ -90,7 +90,7 @@ function prepareVariables(
   };
 }
 
-export function CreateSurveyPage(): React.ReactElement {
+export const CreateSurveyPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [mutate, { loading }] = useCreateSurveyAccountabilityMutation();
@@ -434,30 +434,35 @@ export function CreateSurveyPage(): React.ReactElement {
                     </RadioGroup>
                   </Box>
                   <TabPanel value={selectedSampleSizeType} index={0}>
-                    {mappedAdminAreas && (
-                      <Field
-                        name="excludedAdminAreasFull"
-                        choices={mappedAdminAreas}
-                        variant="outlined"
-                        label={t('Filter Out Administrative Level Areas')}
-                        component={FormikMultiSelectField}
-                      />
-                    )}
-                    <Box pt={3}>
-                      <Box
-                        pb={3}
-                        pt={3}
-                        fontSize={16}
-                        fontWeight="fontWeightBold"
-                      >
-                        Sample size:{' '}
-                        {sampleSizesData?.accountabilitySampleSize?.sampleSize}{' '}
-                        out of{' '}
-                        {
-                          sampleSizesData?.accountabilitySampleSize
-                            ?.numberOfRecipients
-                        }{' '}
-                        {getSampleSizePercentage()}
+                    <Box pt={6}>
+                      {mappedAdminAreas && (
+                        <Field
+                          name="excludedAdminAreasFull"
+                          choices={mappedAdminAreas}
+                          variant="outlined"
+                          label={t('Filter Out Administrative Level Areas')}
+                          component={FormikMultiSelectField}
+                        />
+                      )}
+                      <Box pt={3}>
+                        <Box
+                          pb={3}
+                          pt={3}
+                          fontSize={16}
+                          fontWeight="fontWeightBold"
+                        >
+                          Sample size:{' '}
+                          {
+                            sampleSizesData?.accountabilitySampleSize
+                              ?.sampleSize
+                          }{' '}
+                          out of{' '}
+                          {
+                            sampleSizesData?.accountabilitySampleSize
+                              ?.numberOfRecipients
+                          }{' '}
+                          {getSampleSizePercentage()}
+                        </Box>
                       </Box>
                     </Box>
                   </TabPanel>
@@ -667,4 +672,4 @@ export function CreateSurveyPage(): React.ReactElement {
       )}
     </Formik>
   );
-}
+};

@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { Field, FormikProvider, useFormik } from 'formik';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -105,9 +105,9 @@ export function CreateImportFromXlsxForm({
   }, [xlsxImportData]);
 
   return (
-    <div>
-      <FormikProvider value={formik}>
-        <DropzoneField loading={saveXlsxLoading} />
+    <FormikProvider value={formik}>
+      <DropzoneField loading={saveXlsxLoading} />
+      <Box mt={2}>
         <Field
           name="name"
           fullWidth
@@ -116,18 +116,18 @@ export function CreateImportFromXlsxForm({
           variant="outlined"
           component={FormikTextField}
         />
-        <ScreenBeneficiaryField />
-        {saveXlsxLoading ? (
-          <CircularProgressContainer>
-            <CircularProgress />
-          </CircularProgressContainer>
-        ) : (
-          <XlsxImportDataRepresentation
-            xlsxImportData={xlsxImportData}
-            loading={saveXlsxLoading}
-          />
-        )}
-      </FormikProvider>
-    </div>
+      </Box>
+      <ScreenBeneficiaryField />
+      {saveXlsxLoading ? (
+        <CircularProgressContainer>
+          <CircularProgress />
+        </CircularProgressContainer>
+      ) : (
+        <XlsxImportDataRepresentation
+          xlsxImportData={xlsxImportData}
+          loading={saveXlsxLoading}
+        />
+      )}
+    </FormikProvider>
   );
 }

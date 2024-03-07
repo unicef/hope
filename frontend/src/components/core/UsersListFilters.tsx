@@ -57,13 +57,11 @@ export function UsersListFilters({
     >
       <Grid container spacing={3}>
         <Grid item xs={3}>
-          <div style={{ position: 'relative', bottom: '8px', width: '100%' }}>
-            <SearchTextField
-              label={t('Search')}
-              value={filter.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-            />
-          </div>
+          <SearchTextField
+            label={t('Search')}
+            value={filter.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+          />
         </Grid>
         <Grid item xs={3}>
           <SelectFilter

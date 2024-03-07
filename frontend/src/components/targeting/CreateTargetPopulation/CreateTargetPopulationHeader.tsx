@@ -42,6 +42,7 @@ export function CreateTargetPopulationHeader({
           fullWidth
           required
           component={FormikTextField}
+          variant="standard"
           data-cy="input-name"
         />
       }

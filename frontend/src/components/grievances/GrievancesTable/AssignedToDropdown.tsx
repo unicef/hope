@@ -17,6 +17,9 @@ const StyledAutocomplete = styled(Autocomplete)`
   .MuiInput-underline:after {
     border: 0px;
   }
+  .MuiFormControl-root {
+    width: 260px;
+  }
 `;
 
 interface AssignedToDropdownProps {
@@ -103,7 +106,6 @@ export const AssignedToDropdown: React.FC<AssignedToDropdownProps> = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          margin="dense"
           value={inputValue}
           variant={label ? 'outlined' : 'standard'}
           label={label}

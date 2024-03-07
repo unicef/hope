@@ -239,7 +239,7 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -253,7 +253,7 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -267,7 +267,7 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -281,7 +281,7 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -295,7 +295,7 @@ exports[`containers/tables/payments/CashPlanTable should render loading 1`] = `
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -650,7 +650,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -664,7 +664,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -678,7 +678,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -692,7 +692,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -702,7 +702,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql iZJhhY css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -753,7 +753,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql iZJhhY css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -804,7 +804,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql iZJhhY css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -855,7 +855,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql iZJhhY css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >
@@ -906,7 +906,7 @@ exports[`containers/tables/payments/CashPlanTable should render with data 1`] = 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql iZJhhY css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-dJGMql eNEZkO css-n2dwpd-MuiTableRow-root"
               data-cy="cash-plan-table-row"
               role="checkbox"
             >

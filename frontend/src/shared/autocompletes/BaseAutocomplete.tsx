@@ -1,8 +1,7 @@
-import { TextField } from '@mui/material';
 import * as React from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useEffect, useRef } from 'react';
-import { StyledAutocomplete } from './StyledAutocomplete';
+import { StyledAutocomplete, StyledTextField } from './StyledAutocomplete';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type OptionType = any;
@@ -101,11 +100,10 @@ export function BaseAutocomplete({
       disabled={disabled}
       loading={loading}
       renderInput={(params) => (
-        <TextField
+        <StyledTextField
           {...params}
           label={label}
           variant="outlined"
-          margin="dense"
           size="small"
           data-cy={`${label}-input`}
           value={inputValue}

@@ -199,7 +199,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -213,7 +213,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -227,7 +227,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -241,7 +241,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -255,7 +255,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -269,7 +269,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -283,7 +283,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -297,7 +297,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -311,7 +311,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -325,7 +325,7 @@ exports[`containers/tables/UsersTable should render loading 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -641,7 +641,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -655,7 +655,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -669,7 +669,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -683,7 +683,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -697,7 +697,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -711,7 +711,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -725,7 +725,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -739,7 +739,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -753,7 +753,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 data-cy="table-row"
               >
                 <td
-                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq gOrjwX css-1ex1afd-MuiTableCell-root"
+                  class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-irLvIq hRblyh css-1ex1afd-MuiTableCell-root"
                   colspan="6"
                 >
                   <span
@@ -792,6 +792,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                 </td>
                 <td
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
+                  style="width: 300px;"
                 >
                    
                 </td>
@@ -799,7 +800,7 @@ exports[`containers/tables/UsersTable should render with data 1`] = `
                   class="MuiTableCell-root MuiTableCell-body MuiTableCell-alignLeft MuiTableCell-sizeMedium css-1ex1afd-MuiTableCell-root"
                 >
                   <div
-                    class="sc-blmEgr eRMyHT"
+                    class="sc-blmEgr gQJBaW"
                   >
                     <div
                       class="sc-ifyrAs dOeJdZ"

@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import {
+  Box,
   Button,
   DialogContent,
   DialogTitle,
@@ -109,10 +110,14 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
           <DialogTitle>{t('Select File to Import')}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
-          <FormControl variant="outlined" margin="dense">
-            <StyledInputLabel>{t('Import From')}</StyledInputLabel>
+          <FormControl variant="outlined">
+            <StyledInputLabel size="small" htmlFor="import-type-select">
+              {t('Import From')}
+            </StyledInputLabel>
             <ComboBox
+              id="import-type-select"
               value={importType}
+              size="small"
               defaultValue=""
               variant="outlined"
               label=""
@@ -130,7 +135,7 @@ export function RegistrationDataImportCreateDialog(): React.ReactElement {
               </MenuItem>
             </ComboBox>
           </FormControl>
-          {importTypeForm}
+          <Box mt={2}>{importTypeForm}</Box>
         </DialogContent>
         <StyledDialogFooter data-cy="dialog-actions-container">
           <Button

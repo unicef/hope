@@ -66,7 +66,6 @@ export function BulkAddNoteModal({
         fullWidth
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        margin="dense"
       />
     </BulkBaseModal>
   );

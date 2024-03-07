@@ -153,7 +153,7 @@ export function UniversalTable<T, K>({
         }
         refetch(variables);
       }}
-      handleRequestSort={(event, property) => {
+      handleRequestSort={(_event, property) => {
         let direction: Order = 'asc';
         if (property === orderBy) {
           direction = orderDirection === 'asc' ? 'desc' : 'asc';

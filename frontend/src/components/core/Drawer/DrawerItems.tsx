@@ -26,6 +26,7 @@ const Text = styled(ListItemText)`
     font-size: 14px;
     font-weight: 500;
     line-height: 16px;
+    margin-right: 100px;
   }
 `;
 const Icon = styled(ListItemIcon)`
@@ -42,22 +43,20 @@ const SubList = styled(List)<SubListProps>`
   padding-left: ${({ open }) => (open ? '32px !important' : 0)};
 `;
 
-export const StyledLink = styled.a`
-  color: #233944;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 16px;
-  text-decoration: none;
+export const ArrowIconWrapper = styled.div`
+  position: absolute;
+  right: -2px;
+  top: 8px;
 `;
 
 interface DrawerItemsProps {
   currentLocation: string;
   open: boolean;
 }
-export function DrawerItems({
+export const DrawerItems = ({
   currentLocation,
   open,
-}: DrawerItemsProps): React.ReactElement {
+}: DrawerItemsProps): React.ReactElement => {
   const { data: cashAssistUrlData } = useCashAssistUrlPrefixQuery({
     fetchPolicy: 'cache-first',
   });
@@ -191,9 +190,13 @@ export function DrawerItems({
                 <Icon>{item.icon}</Icon>
                 <Text primary={item?.name} />
                 {expandedItem !== null && expandedItem === index ? (
-                  <ExpandLess />
+                  <ArrowIconWrapper>
+                    <ExpandLess />
+                  </ArrowIconWrapper>
                 ) : (
-                  <ExpandMore />
+                  <ArrowIconWrapper>
+                    <ExpandMore />
+                  </ArrowIconWrapper>
                 )}
               </ListItemButton>
               <Collapse in={expandedItem !== null && expandedItem === index}>
@@ -231,13 +234,12 @@ export function DrawerItems({
             component={NavLink}
             key={item?.name + item.href}
             to={item.href}
+            target="_blank"
           >
-            <StyledLink target="_blank" href={item.href}>
-              <Box display="flex">
-                <Icon>{item.icon}</Icon>
-                <Text primary={item?.name} />
-              </Box>
-            </StyledLink>
+            <Box display="flex">
+              <Icon>{item.icon}</Icon>
+              <Text primary={item?.name} />
+            </Box>
           </ListItemButton>
         ) : (
           <ListItemButton
@@ -257,4 +259,4 @@ export function DrawerItems({
       })}
     </div>
   );
-}
+};

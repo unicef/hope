@@ -229,7 +229,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -243,7 +243,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -257,7 +257,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -271,7 +271,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -285,7 +285,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -299,7 +299,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -313,7 +313,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -327,7 +327,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -341,7 +341,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -355,7 +355,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render loading 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -700,7 +700,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -714,7 +714,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -728,7 +728,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -742,7 +742,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -756,7 +756,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -770,7 +770,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -784,7 +784,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -798,7 +798,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -812,7 +812,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPBiL css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jGuQtF css-1ex1afd-MuiTableCell-root"
                 colspan="8"
               >
                 <span
@@ -822,7 +822,7 @@ exports[`containers/tables/rdi/ImportedIndividualsTable should render with data 
               </td>
             </tr>
             <tr
-              class="MuiTableRow-root MuiTableRow-hover sc-blmEgr UdMJi css-n2dwpd-MuiTableRow-root"
+              class="MuiTableRow-root MuiTableRow-hover sc-blmEgr hvEZiA css-n2dwpd-MuiTableRow-root"
               role="checkbox"
             >
               <td

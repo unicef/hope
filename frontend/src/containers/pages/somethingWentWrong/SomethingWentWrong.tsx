@@ -59,10 +59,15 @@ export const SomethingWentWrong: React.FC = () => {
   const errorMessage = location.state?.errorMessage;
 
   const handleGoBack = (): void => {
-    if (window.history.length > 2) {
-      window.history.go(-2);
+    const lastSuccessfulPage = location.state?.lastSuccessfulPage;
+    if (lastSuccessfulPage) {
+      window.location.href = lastSuccessfulPage;
     } else {
-      window.history.back();
+      if (window.history.length > 2) {
+        window.history.go(-2);
+      } else {
+        window.history.back();
+      }
     }
   };
 

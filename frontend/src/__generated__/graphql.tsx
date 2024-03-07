@@ -9510,7 +9510,7 @@ export type UpdateProgramMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean } | null } | null } | null };
+export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<string | null> | null } | null> | null } | null } | null };
 
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
@@ -14475,10 +14475,12 @@ export const UpdateProgramDocument = gql`
     program {
       id
       name
+      programmeCode
       startDate
       endDate
       status
       caId
+      caHashId
       description
       budget
       frequencyOfPayments
@@ -14487,6 +14489,7 @@ export const UpdateProgramDocument = gql`
       scope
       sector
       totalNumberOfHouseholds
+      totalNumberOfHouseholdsWithTpInProgram
       administrativeAreasOfImplementation
       individualDataNeeded
       version
@@ -14497,6 +14500,13 @@ export const UpdateProgramDocument = gql`
         active
         individualFiltersAvailable
         householdFiltersAvailable
+        description
+      }
+      partners {
+        id
+        name
+        areaAccess
+        adminAreas
       }
     }
     validationErrors

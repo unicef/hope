@@ -50,15 +50,13 @@ export function SurveysFilters({
     >
       <Grid container alignItems="center" spacing={3}>
         <Grid xs={4} item>
-          <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
-            <SearchTextField
-              value={filter.search}
-              label="Search"
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              data-cy="filters-search"
-              fullWidth
-            />
-          </div>
+          <SearchTextField
+            value={filter.search}
+            label="Search"
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            data-cy="filters-search"
+            fullWidth
+          />
         </Grid>
         <Grid xs={4} item>
           <TargetPopulationAutocomplete

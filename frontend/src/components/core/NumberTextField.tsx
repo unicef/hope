@@ -31,7 +31,6 @@ export function NumberTextField({
         placeholder={placeholder}
         onChange={onChange}
         variant="outlined"
-        margin="dense"
         type="number"
         InputProps={
           icon

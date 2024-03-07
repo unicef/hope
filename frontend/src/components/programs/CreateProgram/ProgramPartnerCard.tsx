@@ -141,7 +141,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
         </IconButton>
       </Box>
       <Collapse in={isAdminAreaExpanded}>
-        <Box style={{ maxHeight: '30vh', overflow: 'auto' }}>
+        <Box style={{ maxHeight: '30vh', overflow: 'auto', width: '50%' }}>
           <TreeView
             defaultCollapseIcon={<ExpandMoreIcon />}
             defaultExpandIcon={<ChevronRightIcon />}

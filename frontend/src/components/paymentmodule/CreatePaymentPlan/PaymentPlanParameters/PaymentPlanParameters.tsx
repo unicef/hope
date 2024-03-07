@@ -80,16 +80,12 @@ export const PaymentPlanParameters = ({
             />
           </Grid>
           <Grid item xs={4}>
-            <div
-              style={{ position: 'relative', bottom: '12px', width: '100%' }}
-            >
-              <Field
-                name="currency"
-                component={FormikCurrencyAutocomplete}
-                required
-                disabled={Boolean(paymentPlan?.isFollowUp)}
-              />
-            </div>
+            <Field
+              name="currency"
+              component={FormikCurrencyAutocomplete}
+              required
+              disabled={Boolean(paymentPlan?.isFollowUp)}
+            />
           </Grid>
           <Grid item xs={4}>
             <Field

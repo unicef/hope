@@ -1,4 +1,5 @@
 import {
+  Box,
   FormControl,
   FormHelperText,
   IconButton,
@@ -51,14 +52,8 @@ export function FormikSelectField({
   const showX = isValue && !disableClearable && !otherProps.disabled;
 
   return (
-    <FormControl
-      variant="outlined"
-      margin="dense"
-      size="small"
-      fullWidth
-      {...otherProps}
-    >
-      <InputLabel>{otherProps.label}</InputLabel>
+    <FormControl variant="outlined" size="small" fullWidth {...otherProps}>
+      <InputLabel error={isInvalid}>{otherProps.label}</InputLabel>
       <Select
         {...field}
         {...otherProps}

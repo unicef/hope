@@ -177,7 +177,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -191,7 +191,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -205,7 +205,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -219,7 +219,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -233,7 +233,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -247,7 +247,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -261,7 +261,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -275,7 +275,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -289,7 +289,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -303,7 +303,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render loading 1`] 
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -595,7 +595,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -609,7 +609,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -623,7 +623,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -637,7 +637,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -651,7 +651,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -665,7 +665,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -679,7 +679,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -693,7 +693,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -707,7 +707,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             data-cy="table-row"
           >
             <td
-              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH iAPDsd css-1ex1afd-MuiTableCell-root"
+              class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH bXtomf css-1ex1afd-MuiTableCell-root"
               colspan="6"
             >
               <span
@@ -717,7 +717,7 @@ exports[`containers/tables/rdi/ImportedHouseholdTable should render with data 1`
             </td>
           </tr>
           <tr
-            class="MuiTableRow-root MuiTableRow-hover sc-fHejqy gwfPnQ css-n2dwpd-MuiTableRow-root"
+            class="MuiTableRow-root MuiTableRow-hover sc-fHejqy hlUStu css-n2dwpd-MuiTableRow-root"
             data-cy="imported-households-row"
             role="checkbox"
           >
