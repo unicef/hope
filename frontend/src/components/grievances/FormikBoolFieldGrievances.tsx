@@ -6,6 +6,7 @@ import {
   MenuItem,
   InputLabel,
   Select,
+  Box,
 } from '@mui/material';
 import get from 'lodash/get';
 
@@ -63,11 +64,12 @@ export function FormikBoolFieldGrievances({
     <FormControl
       required={required}
       variant="outlined"
-      margin="dense"
       fullWidth
       {...otherProps}
     >
-      <InputLabel>{otherProps.label}</InputLabel>
+      <Box mb={1}>
+        <InputLabel>{otherProps.label}</InputLabel>
+      </Box>
       <Select
         {...field}
         {...otherProps}

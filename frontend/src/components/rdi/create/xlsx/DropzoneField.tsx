@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Accept, useDropzone } from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import styled from 'styled-components';
 import { useField } from 'formik';
 import { useSnackbar } from '@hooks/useSnackBar';
@@ -25,33 +25,44 @@ const DropzoneContainer = styled.div<DropzoneContainerProps>`
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
-export function DropzoneField({ loading }): React.ReactElement {
+export const DropzoneField = ({ loading }): React.ReactElement => {
   const [, , helpers] = useField('file');
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const onDrop = useCallback(
     (acceptedFiles) => {
-      if (acceptedFiles.length !== 1) {
-        return;
-      }
-      const file = acceptedFiles[0];
-      const fileSizeMB = file.size / (1024 * 1024);
-      if (fileSizeMB > 200) {
-        showMessage(
-          `${t('File size is to big. It should be under 200MB')}, ${t(
-            'File size is',
-          )} ${fileSizeMB}MB`,
-        );
-        return;
-      }
-      helpers.setValue(file);
+      acceptedFiles.forEach((file) => {
+        if (
+          file.type !==
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ) {
+          showMessage(
+            `${t('Invalid file type. Please upload a spreadsheet.')}`,
+          );
+          return;
+        }
+
+        const fileSizeMB = file.size / (1024 * 1024);
+        if (fileSizeMB > 200) {
+          showMessage(
+            `${t('File size is too big. It should be under 200MB')}, ${t(
+              'File size is',
+            )} ${fileSizeMB}MB`,
+          );
+          return;
+        }
+        helpers.setValue(file);
+      });
     },
     [helpers, showMessage, t],
   );
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
-    accept:
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' as unknown as Accept,
+    accept: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
+      ],
+    },
     onDrop,
   });
 
@@ -60,9 +71,13 @@ export function DropzoneField({ loading }): React.ReactElement {
   return (
     <div>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
-        <input {...getInputProps()} data-cy="file-input" />
+        <input
+          {...getInputProps()}
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          data-cy="file-input"
+        />
         {acceptedFilename || 'UPLOAD FILE'}
       </DropzoneContainer>
     </div>
   );
-}
+};

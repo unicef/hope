@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Box } from '@mui/material';
 import { useCallback } from 'react';
-import { Accept, useDropzone } from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { LoadingComponent } from './LoadingComponent';
@@ -28,7 +28,7 @@ const DropzoneContainer = styled.div<DropzoneContainerProps>`
   ${({ disabled }) => (disabled ? 'filter: grayscale(100%);' : '')}
 `;
 
-export function DropzoneField({
+export const DropzoneField = ({
   onChange,
   loading,
   dontShowFilename,
@@ -36,7 +36,7 @@ export function DropzoneField({
   onChange: (acceptedFiles: File[]) => void;
   loading: boolean;
   dontShowFilename: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   const onDrop = useCallback((acceptedFiles: File[]) => {
     onChange(acceptedFiles);
@@ -44,8 +44,11 @@ export function DropzoneField({
 
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     disabled: loading,
-    accept:
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' as unknown as Accept,
+    accept: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
+      ],
+    },
     onDrop,
   });
   const acceptedFilename =
@@ -54,11 +57,15 @@ export function DropzoneField({
     <Box display="flex" justifyContent="center" p={5}>
       <DropzoneContainer {...getRootProps()} disabled={loading}>
         <LoadingComponent isLoading={loading} absolute />
-        <input {...getInputProps()} data-cy="file-input" />
+        <input
+          {...getInputProps()}
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          data-cy="file-input"
+        />{' '}
         {dontShowFilename || !acceptedFilename
           ? t('UPLOAD FILE')
           : acceptedFilename}
       </DropzoneContainer>
     </Box>
   );
-}
+};

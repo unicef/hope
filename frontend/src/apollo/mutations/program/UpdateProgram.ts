@@ -6,10 +6,12 @@ export const UPDATE_PROGRAM_MUTATION = gql`
       program {
         id
         name
+        programmeCode
         startDate
         endDate
         status
         caId
+        caHashId
         description
         budget
         frequencyOfPayments
@@ -18,6 +20,7 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         scope
         sector
         totalNumberOfHouseholds
+        totalNumberOfHouseholdsWithTpInProgram
         administrativeAreasOfImplementation
         individualDataNeeded
         version
@@ -28,6 +31,13 @@ export const UPDATE_PROGRAM_MUTATION = gql`
           active
           individualFiltersAvailable
           householdFiltersAvailable
+          description
+        }
+        partners {
+          id
+          name
+          areaAccess
+          adminAreas
         }
       }
       validationErrors

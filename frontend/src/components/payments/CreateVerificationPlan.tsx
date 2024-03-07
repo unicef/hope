@@ -114,11 +114,11 @@ export interface Props {
   canCreatePaymentVerificationPlan: boolean;
   version: number;
 }
-export function CreateVerificationPlan({
+export const CreateVerificationPlan = ({
   cashOrPaymentPlanId,
   canCreatePaymentVerificationPlan,
   version,
-}: Props): React.ReactElement {
+}: Props): React.ReactElement => {
   const refetchQueries = usePaymentRefetchQueries(cashOrPaymentPlanId);
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -292,55 +292,58 @@ export function CreateVerificationPlan({
                     </StyledTabs>
                   </TabsContainer>
                   <TabPanel value={selectedTab} index={0}>
-                    {mappedAdminAreas && (
-                      <Field
-                        name="excludedAdminAreasFull"
-                        choices={mappedAdminAreas}
-                        variant="outlined"
-                        label={t('Filter Out Administrative Level Areas')}
-                        component={FormikMultiSelectField}
-                      />
-                    )}
-                    <Box pt={3}>
-                      <Box
-                        pb={3}
-                        pt={3}
-                        fontSize={16}
-                        fontWeight="fontWeightBold"
-                      >
-                        Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
-                        out of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
-                        {getSampleSizePercentage()}
-                      </Box>
-                      <Box fontSize={12} color="#797979">
-                        {t('This option is recommended for RapidPro')}
-                      </Box>
-                      <Field
-                        name="verificationChannel"
-                        label={t('Verification Channel')}
-                        style={{ flexDirection: 'row' }}
-                        choices={[
-                          { value: 'RAPIDPRO', name: 'RAPIDPRO' },
-                          { value: 'XLSX', name: 'XLSX' },
-                          { value: 'MANUAL', name: 'MANUAL' },
-                        ]}
-                        component={FormikRadioGroup}
-                        alignItems="center"
-                      />
-                      {values.verificationChannel === 'RAPIDPRO' && (
+                    <Box pt={6}>
+                      {mappedAdminAreas && (
                         <Field
-                          name="rapidProFlow"
-                          label={t('RapidPro Flow')}
-                          style={{ width: '90%' }}
-                          choices={
-                            rapidProFlows?.allRapidProFlows?.map((flow) => ({
-                              value: flow.id,
-                              name: flow.name,
-                            })) || []
-                          }
-                          component={FormikSelectField}
+                          name="excludedAdminAreasFull"
+                          choices={mappedAdminAreas}
+                          variant="outlined"
+                          label={t('Filter Out Administrative Level Areas')}
+                          component={FormikMultiSelectField}
                         />
                       )}
+                      <Box pt={3}>
+                        <Box
+                          pb={3}
+                          pt={3}
+                          fontSize={16}
+                          fontWeight="fontWeightBold"
+                        >
+                          Sample size: {sampleSizesData?.sampleSize?.sampleSize}{' '}
+                          out of{' '}
+                          {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
+                          {getSampleSizePercentage()}
+                        </Box>
+                        <Box fontSize={12} color="#797979">
+                          {t('This option is recommended for RapidPro')}
+                        </Box>
+                        <Field
+                          name="verificationChannel"
+                          label={t('Verification Channel')}
+                          style={{ flexDirection: 'row' }}
+                          choices={[
+                            { value: 'RAPIDPRO', name: 'RAPIDPRO' },
+                            { value: 'XLSX', name: 'XLSX' },
+                            { value: 'MANUAL', name: 'MANUAL' },
+                          ]}
+                          component={FormikRadioGroup}
+                          alignItems="center"
+                        />
+                        {values.verificationChannel === 'RAPIDPRO' && (
+                          <Field
+                            name="rapidProFlow"
+                            label={t('RapidPro Flow')}
+                            style={{ width: '90%' }}
+                            choices={
+                              rapidProFlows?.allRapidProFlows?.map((flow) => ({
+                                value: flow.id,
+                                name: flow.name,
+                              })) || []
+                            }
+                            component={FormikSelectField}
+                          />
+                        )}
+                      </Box>
                     </Box>
                   </TabPanel>
                   <TabPanel value={selectedTab} index={1}>
@@ -498,4 +501,4 @@ export function CreateVerificationPlan({
       }}
     </Formik>
   );
-}
+};

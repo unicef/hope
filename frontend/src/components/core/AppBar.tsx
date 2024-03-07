@@ -40,8 +40,8 @@ const StyledAppBar = styled(MuiAppBar)<StyledAppBarProps>(
       duration: muiTheme.transitions.duration.leavingScreen,
     }),
     ...(open && {
-      marginLeft: '240px',
-      width: 'calc(100% - 240px)',
+      marginLeft: '270px',
+      width: 'calc(100% - 270px)',
       transition: muiTheme.transitions.create(['width', 'margin'], {
         easing: muiTheme.transitions.easing.sharp,
         duration: muiTheme.transitions.duration.enteringScreen,

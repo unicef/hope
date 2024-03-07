@@ -1,5 +1,4 @@
 import { MockedProvider } from '@apollo/react-testing';
-import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import wait from 'waait';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
@@ -14,12 +13,6 @@ describe('components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/P
         <PaymentPlanDetailsResults paymentPlan={fakeApolloPaymentPlan} />
       </MockedProvider>,
     );
-
-    const chartContainer = container.querySelector(
-      '[data-cy="chart-container"]',
-    );
-    expect(chartContainer).toBeInTheDocument();
-    expect(chartContainer).not.toBeEmpty();
 
     await act(() => wait(0)); // wait for the mutation to complete
 

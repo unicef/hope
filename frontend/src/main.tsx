@@ -55,7 +55,10 @@ if (process.env.NODE_ENV !== 'development' && window.SENTRY_DSN) {
         createRoutesFromChildren,
         matchRoutes,
       }),
-      Sentry.replayIntegration(),
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
     ],
     replaysSessionSampleRate: 0.1, // 10% in production
     replaysOnErrorSampleRate: 1.0, // 100% when sampling sessions where errors occur

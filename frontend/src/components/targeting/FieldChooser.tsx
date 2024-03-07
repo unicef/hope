@@ -1,17 +1,11 @@
-import { IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { Field } from 'formik';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { CriteriaAutocomplete } from './TargetingCriteria/CriteriaAutocomplete';
 
-const FlexWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-`;
-
-export function FieldChooser({
+export const FieldChooser = ({
   onChange,
   fieldName,
   onDelete,
@@ -27,10 +21,10 @@ export function FieldChooser({
   onDelete: () => void;
   baseName: string;
   showDelete: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { t } = useTranslation();
   return (
-    <FlexWrapper>
+    <Box mb={2} display="flex" justifyContent="space-between">
       <Field
         name={`${baseName}.fieldName`}
         label={t('Select Field')}
@@ -47,6 +41,6 @@ export function FieldChooser({
           <Delete />
         </IconButton>
       )}
-    </FlexWrapper>
+    </Box>
   );
-}
+};

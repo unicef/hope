@@ -39,7 +39,10 @@ export function UsersTableRow({
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell align="left">{`${user.firstName} ${user.lastName}`}</TableCell>
+        <TableCell
+          style={{ width: '300px' }}
+          align="left"
+        >{`${user.firstName} ${user.lastName}`}</TableCell>
         <TableCell align="left">
           <StatusBox status={user.status} statusToColor={userStatusToColor} />
         </TableCell>

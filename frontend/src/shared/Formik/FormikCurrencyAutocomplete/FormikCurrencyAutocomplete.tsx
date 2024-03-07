@@ -29,27 +29,25 @@ export const FormikCurrencyAutocomplete = ({
 
   if (!data) return null;
   return (
-    <Box mt={1}>
-      <Autocomplete
-        options={data?.currencyChoices || []}
-        defaultValue={field.value}
-        getOptionLabel={(option: any) => option.name}
-        onChange={handleChange}
-        disabled={disabled}
-        fullWidth
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={t('Currency')}
-            variant="outlined"
-            margin="dense"
-            error={isInvalid}
-            helperText={`${isInvalid ? get(form.errors, field.name) : ''}`}
-            {...otherProps}
-          />
-        )}
-        data-cy="input-currency"
-      />
-    </Box>
+    <Autocomplete
+      options={data?.currencyChoices || []}
+      defaultValue={field.value}
+      getOptionLabel={(option: any) => option.name}
+      onChange={handleChange}
+      disabled={disabled}
+      fullWidth
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={t('Currency')}
+          variant="outlined"
+          size="small"
+          error={isInvalid}
+          helperText={`${isInvalid ? get(form.errors, field.name) : ''}`}
+          {...otherProps}
+        />
+      )}
+      data-cy="input-currency"
+    />
   );
 };

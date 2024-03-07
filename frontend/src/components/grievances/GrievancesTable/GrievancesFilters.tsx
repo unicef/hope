@@ -120,8 +120,8 @@ export const GrievancesFilters = ({
       applyHandler={handleApplyFilter}
     >
       <Grid container alignItems="flex-end" spacing={3}>
-        <Grid container alignItems="flex-end" item xs={4} spacing={0}>
-          <Grid item xs={8}>
+        <Grid container alignItems="flex-end" item xs={5} spacing={0}>
+          <Grid item xs={5}>
             <SearchTextField
               value={filter.search}
               label="Search"
@@ -130,28 +130,24 @@ export const GrievancesFilters = ({
               borderRadius="4px 0px 0px 4px"
             />
           </Grid>
-          <Grid container item xs={4}>
-            <div style={{ paddingBottom: '4px', width: '100%' }}>
-              <SelectFilter
-                onChange={(e) =>
-                  handleFilterChange('searchType', e.target.value)
-                }
-                label="Search Type"
-                value={filter.searchType}
-                borderRadius="0px 4px 4px 0px"
-                data-cy="filters-search-type"
-                fullWidth
-                disableClearable
-              >
-                {choicesData?.grievanceTicketSearchTypesChoices?.map(
-                  ({ name, value }) => (
-                    <MenuItem key={value} value={value}>
-                      {name}
-                    </MenuItem>
-                  ),
-                )}
-              </SelectFilter>
-            </div>
+          <Grid container item xs={7}>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('searchType', e.target.value)}
+              label="Search Type"
+              value={filter.searchType}
+              borderRadius="0px 4px 4px 0px"
+              data-cy="filters-search-type"
+              fullWidth
+              disableClearable
+            >
+              {choicesData?.grievanceTicketSearchTypesChoices?.map(
+                ({ name, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {name}
+                  </MenuItem>
+                ),
+              )}
+            </SelectFilter>
           </Grid>
         </Grid>
         {isAllPrograms && (
@@ -168,21 +164,19 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         <Grid container item xs={2}>
-          <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              label={t('Status')}
-              value={filter.status}
-              fullWidth
-              data-cy="filters-status"
-            >
-              {choicesData.grievanceTicketStatusChoices.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            label={t('Status')}
+            value={filter.status}
+            fullWidth
+            data-cy="filters-status"
+          >
+            {choicesData.grievanceTicketStatusChoices.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item xs={2}>
           <SearchTextField
@@ -245,18 +239,16 @@ export const GrievancesFilters = ({
           </Grid>
         )}
         <Grid item xs={3}>
-          <div style={{ position: 'relative', top: '3px', width: '100%' }}>
-            <AdminAreaAutocomplete
-              filter={filter}
-              name="admin2"
-              value={filter.admin2}
-              setFilter={setFilter}
-              initialFilter={initialFilter}
-              appliedFilter={appliedFilter}
-              setAppliedFilter={setAppliedFilter}
-              dataCy="filters-admin-level"
-            />
-          </div>
+          <AdminAreaAutocomplete
+            filter={filter}
+            name="admin2"
+            value={filter.admin2}
+            setFilter={setFilter}
+            initialFilter={initialFilter}
+            appliedFilter={appliedFilter}
+            setAppliedFilter={setAppliedFilter}
+            dataCy="filters-admin-level"
+          />
         </Grid>
         <Grid item xs={3}>
           <AssigneeAutocomplete
@@ -332,38 +324,34 @@ export const GrievancesFilters = ({
           />
         </Grid>
         <Grid item container xs={3}>
-          <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('priority', e.target.value)}
-              label={t('Priority')}
-              value={filter.priority}
-              data-cy="filters-priority"
-              fullWidth
-            >
-              {updatedPriorityChoices?.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('priority', e.target.value)}
+            label={t('Priority')}
+            value={filter.priority}
+            data-cy="filters-priority"
+            fullWidth
+          >
+            {updatedPriorityChoices?.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item container xs={2}>
-          <div style={{ position: 'relative', bottom: '3px', width: '100%' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('urgency', e.target.value)}
-              label={t('Urgency')}
-              value={filter.urgency}
-              data-cy="filters-urgency"
-              fullWidth
-            >
-              {updatedUrgencyChoices?.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('urgency', e.target.value)}
+            label={t('Urgency')}
+            value={filter.urgency}
+            data-cy="filters-urgency"
+            fullWidth
+          >
+            {updatedUrgencyChoices?.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </SelectFilter>
         </Grid>
         <Grid item container xs={2}>
           <SelectFilter

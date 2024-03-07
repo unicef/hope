@@ -34,6 +34,7 @@ export const BigValue = styled.div`
 
 const Error = styled.p`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
+  font-size: 12px;
 `;
 interface RegistrationDetailsProps {
   registration: RegistrationDetailedFragment;

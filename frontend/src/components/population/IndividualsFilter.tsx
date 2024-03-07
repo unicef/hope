@@ -88,27 +88,23 @@ export function IndividualsFilter({
             />
           </Grid>
           <Grid item xs={4}>
-            <div style={{ paddingBottom: '4px', width: '100%' }}>
-              <SelectFilter
-                onChange={(e) =>
-                  handleFilterChange('searchType', e.target.value)
-                }
-                label={t('Search Type')}
-                value={filter.searchType}
-                borderRadius="0px 4px 4px 0px"
-                data-cy="filter-search-type"
-                fullWidth
-                disableClearable
-              >
-                {choicesData?.individualSearchTypesChoices.map(
-                  ({ name, value }) => (
-                    <MenuItem key={value} value={value}>
-                      {name}
-                    </MenuItem>
-                  ),
-                )}
-              </SelectFilter>
-            </div>
+            <SelectFilter
+              onChange={(e) => handleFilterChange('searchType', e.target.value)}
+              label={t('Search Type')}
+              value={filter.searchType}
+              borderRadius="0px 4px 4px 0px"
+              data-cy="filter-search-type"
+              fullWidth
+              disableClearable
+            >
+              {choicesData?.individualSearchTypesChoices.map(
+                ({ name, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {name}
+                  </MenuItem>
+                ),
+              )}
+            </SelectFilter>
           </Grid>
         </Grid>
         {isAllPrograms && (
@@ -144,19 +140,17 @@ export function IndividualsFilter({
           </Grid>
         )}
         <Grid item xs={2}>
-          <div style={{ position: 'relative', bottom: '3px' }}>
-            <SelectFilter
-              onChange={(e) => handleFilterChange('sex', e.target.value)}
-              value={filter.sex}
-              label={t('Gender')}
-              icon={<WcIcon />}
-              data-cy="ind-filters-gender"
-              fullWidth
-            >
-              <MenuItem value="FEMALE">{t('Female')}</MenuItem>
-              <MenuItem value="MALE">{t('Male')}</MenuItem>
-            </SelectFilter>
-          </div>
+          <SelectFilter
+            onChange={(e) => handleFilterChange('sex', e.target.value)}
+            value={filter.sex}
+            label={t('Gender')}
+            icon={<WcIcon />}
+            data-cy="ind-filters-gender"
+            fullWidth
+          >
+            <MenuItem value="FEMALE">{t('Female')}</MenuItem>
+            <MenuItem value="MALE">{t('Male')}</MenuItem>
+          </SelectFilter>
         </Grid>
         <Grid item xs={2}>
           <NumberTextField

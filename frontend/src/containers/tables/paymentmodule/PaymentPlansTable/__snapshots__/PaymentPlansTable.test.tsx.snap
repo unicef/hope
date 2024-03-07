@@ -311,7 +311,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -325,7 +325,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -339,7 +339,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -353,7 +353,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -367,7 +367,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
               style="height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               />
             </tr>
@@ -453,8 +453,9 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
             </button>
             <button
               aria-label="next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
-              tabindex="0"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+              disabled=""
+              tabindex="-1"
               type="button"
             >
               <svg
@@ -468,9 +469,6 @@ exports[`containers/tables/payments/PaymentPlansTable should render loading 1`] 
                   d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
                 />
               </svg>
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
             </button>
           </div>
         </div>
@@ -791,7 +789,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -805,7 +803,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -819,7 +817,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -833,7 +831,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
               data-cy="table-row"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               >
                 <span
@@ -847,7 +845,7 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
               style="height: 70px;"
             >
               <td
-                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jUtXlH css-1ex1afd-MuiTableCell-root"
+                class="MuiTableCell-root MuiTableCell-body MuiTableCell-sizeMedium sc-kFCroH jibNxN css-1ex1afd-MuiTableCell-root"
                 colspan="11"
               />
             </tr>
@@ -933,8 +931,9 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
             </button>
             <button
               aria-label="next page"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
-              tabindex="0"
+              class="MuiButtonBase-root Mui-disabled MuiIconButton-root Mui-disabled MuiIconButton-sizeMedium css-78trlr-MuiButtonBase-root-MuiIconButton-root"
+              disabled=""
+              tabindex="-1"
               type="button"
             >
               <svg
@@ -948,9 +947,6 @@ exports[`containers/tables/payments/PaymentPlansTable should render with data 1`
                   d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
                 />
               </svg>
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
             </button>
           </div>
         </div>

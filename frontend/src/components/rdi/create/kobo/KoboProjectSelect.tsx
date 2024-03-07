@@ -47,11 +47,12 @@ export function KoboProjectSelect(): React.ReactElement {
 
   return (
     <>
-      <FormControl variant="outlined" margin="dense">
-        <StyledInputLabel>{t('Select Project')}</StyledInputLabel>
+      <FormControl variant="outlined">
+        <StyledInputLabel size="small">{t('Select Project')}</StyledInputLabel>
         <ComboBox
           {...field}
           variant="outlined"
+          size="small"
           label={t('Kobo Project')}
           disabled={loading}
           fullWidth

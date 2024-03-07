@@ -25,9 +25,9 @@ interface ActivateProgramProps {
   program: ProgramQuery['program'];
 }
 
-export function ActivateProgram({
+export const ActivateProgram = ({
   program,
-}: ActivateProgramProps): React.ReactElement {
+}: ActivateProgramProps): React.ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -48,14 +48,18 @@ export function ActivateProgram({
         query: ALL_PROGRAMS_QUERY,
         variables: { businessArea },
       });
-      allProgramsData.allPrograms.edges.sort(programCompare);
-      cache.writeQuery({
-        query: ALL_PROGRAMS_QUERY,
-        variables: { businessArea },
-        data: allProgramsData,
-      });
+
+      if (allProgramsData && allProgramsData.allPrograms) {
+        allProgramsData.allPrograms.edges.sort(programCompare);
+        cache.writeQuery({
+          query: ALL_PROGRAMS_QUERY,
+          variables: { businessArea },
+          data: allProgramsData,
+        });
+      }
     },
   });
+
   const activateProgram = async (): Promise<void> => {
     const response = await mutate({
       variables: {
@@ -66,6 +70,7 @@ export function ActivateProgram({
         version: program.version,
       },
     });
+
     if (!response.errors && response.data.updateProgram) {
       setSelectedProgram({
         ...selectedProgram,
@@ -73,9 +78,7 @@ export function ActivateProgram({
       });
 
       showMessage(t('Programme activated.'));
-      navigate(
-        `/${baseUrl}/details/${response.data.updateProgram.program.id}`,
-      );
+      navigate(`/${baseUrl}/details/${response.data.updateProgram.program.id}`);
       setOpen(false);
     } else {
       showMessage(t('Programme activate action failed.'));
@@ -125,4 +128,4 @@ export function ActivateProgram({
       </Dialog>
     </span>
   );
-}
+};

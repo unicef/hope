@@ -55,7 +55,7 @@ const DrawerComponent = styled(MUIDrawer)<DrawerComponentProps>`
     height: 100vh;
     position: relative;
     white-space: nowrap;
-    width: ${(props) => (props.open ? '240px' : '55px')};
+    width: ${(props) => (props.open ? '270px' : '55px')};
     transition:
       width 225ms cubic-bezier(0, 0, 0.2, 1) 0ms,
       width 195ms cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -86,6 +86,7 @@ const ResourcesText = styled('p')`
 
 const ToolbarScrollBox = styled(Box)`
   overflow-y: auto;
+  max-height: calc(100vh - 64px);
   height: 100%;
 `;
 
@@ -93,6 +94,7 @@ const Version = styled('div')`
   color: #aaa;
   padding: 4px;
   text-align: center;
+  font-size: 14px;
 `;
 
 const Text = styled(ListItemText)`
@@ -127,6 +129,7 @@ export const Drawer = ({
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
   const backendVersion = useBackendVersion();
   const frontendVersion = useFrontendVersion();
+
   useEffect(() => {
     if (
       !showMismatchedDialog &&
@@ -181,18 +184,7 @@ export const Drawer = ({
             </StyledLink>
           </ListItem>
         ))}
-        {open && (
-          <Version>
-            <div>
-              Backend Version:
-              {backendVersion}
-            </div>
-            <div>
-              Frontend Version:
-              {frontendVersion}
-            </div>
-          </Version>
-        )}
+        {open && <Version>Version: {frontendVersion}</Version>}
       </ToolbarScrollBox>
       <AlertDialog
         show={showMismatchedDialog}

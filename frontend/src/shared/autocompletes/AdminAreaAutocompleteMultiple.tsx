@@ -1,4 +1,5 @@
 import * as React from 'react';
+import get from 'lodash/get';
 import { Box, TextField } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
 import { useEffect, useState } from 'react';
@@ -93,7 +94,6 @@ export function AdminAreaAutocompleteMultiple({
               newValue.length > 0 ? null : t('Administrative Level 2')
             }
             variant="outlined"
-            margin="dense"
             value={inputValue}
             onChange={(e) => setInputTextChange(e.target.value)}
           />

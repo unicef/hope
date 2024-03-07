@@ -116,7 +116,7 @@ export function ActivityLogPage(): React.ReactElement {
       />
       <StyledPaper>
         <MainActivityLogTable
-          totalCount={data.allLogEntries.totalCount}
+          totalCount={data.allLogEntries.totalCount ?? 0}
           rowsPerPage={rowsPerPage}
           logEntries={logEntries}
           actionChoices={logEntryActionChoices}

@@ -60,7 +60,6 @@ export function FormikTextField({
       {...otherProps}
       name={field.name}
       id={`textField-${field.name}`}
-      margin="dense"
       size="small"
       value={field.value}
       onChange={handleChange}
@@ -69,12 +68,12 @@ export function FormikTextField({
       autoComplete="off"
       type={type}
       helperText={isInvalid && get(form.errors, field.name)}
+      label={otherProps.label} // pass the label directly to the StyledTextField
       InputProps={{
         onKeyPress: handleKeyPress,
         startAdornment: decoratorStart && (
           <InputAdornment position="start">{decoratorStart}</InputAdornment>
         ),
-
         endAdornment: decoratorEnd && (
           <InputAdornment position="end">{decoratorEnd}</InputAdornment>
         ),

@@ -15,7 +15,6 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const StatusContainer = styled.div`
   min-width: 120px;
-  max-width: 200px;
 `;
 
 interface PaymentPlanTableRowProps {
@@ -74,14 +73,12 @@ export const PaymentPlanTableRow = ({
         )}
       </TableCell>
       <TableCell align="left">
-        <StatusContainer>
-          <StatusBox
-            status={plan.status}
-            statusToColor={paymentPlanStatusToColor}
-          />
-        </StatusContainer>
+        <StatusBox
+          status={plan.status}
+          statusToColor={paymentPlanStatusToColor}
+        />
       </TableCell>
-      <TableCell align='left'>{plan.targetPopulation.name}</TableCell>
+      <TableCell align="left">{plan.targetPopulation.name}</TableCell>
       <TableCell align="left">{plan.totalHouseholdsCount || '-'}</TableCell>
       <TableCell align="left">{plan.currencyName}</TableCell>
       <TableCell align="right">

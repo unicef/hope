@@ -110,7 +110,7 @@ function prepareVariables(
   };
 }
 
-export function CreateCommunicationPage(): React.ReactElement {
+export const CreateCommunicationPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const [mutate, { loading }] =
     useCreateAccountabilityCommunicationMessageMutation();
@@ -157,17 +157,17 @@ export function CreateCommunicationPage(): React.ReactElement {
   }, [loadAvailableFlows]);
 
   useEffect(() => {
-    // Redirect to error page if RapidPro unavailable available
     if (!flowsData?.surveyAvailableFlows?.length) {
       navigate(`/error/${businessArea}`, {
         state: {
           errorMessage: t(
             'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
           ),
+          lastSuccessfulPage: `/${baseUrl}/accountability/communication`,
         },
       });
     }
-  }, [flowsData, businessArea, navigate, t]);
+  }, [flowsData, businessArea, baseUrl, navigate, t]);
 
   const validationSchema = useCallback(() => {
     const datum = {
@@ -623,4 +623,4 @@ export function CreateCommunicationPage(): React.ReactElement {
       )}
     </Formik>
   );
-}
+};
