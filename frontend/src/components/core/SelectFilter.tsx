@@ -91,9 +91,11 @@ export const SelectFilter = ({
               },
             }}
             renderValue={(selected) => {
-              const selectedOption = React.Children.toArray(children).find(
+              const selectedValues = Array.isArray(selected) ? selected : [selected];
+
+              const selectedOptions = React.Children.toArray(children).filter(
                 (child): child is React.ReactElement<any> =>
-                  React.isValidElement(child) && child.props.value === selected,
+                  React.isValidElement(child) && selectedValues.includes(child.props.value),
               );
 
               return (
@@ -104,9 +106,7 @@ export const SelectFilter = ({
                     </StartInputAdornment>
                   )}
                   <OverflowDiv>
-                    {selectedOption
-                      ? selectedOption.props.children
-                      : String(selected)}
+                    {selectedOptions.map((option) => option.props.children).join(', ')}
                   </OverflowDiv>
                 </Box>
               );
