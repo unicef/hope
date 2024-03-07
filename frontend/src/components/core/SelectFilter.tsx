@@ -29,6 +29,9 @@ const SelectWrapper = styled.div`
 `;
 
 const StyledSelect = styled(Select)`
+  && .MuiOutlinedInput-input {
+    padding-right: 10px !important;
+  }
   flex: 1;
   max-width: 100%;
   overflow: hidden;
