@@ -11,14 +11,14 @@ export class AreaTreeNode {
 
   children: AreaTreeNode[];
 
-  constructor(id, name) {
+  constructor(id: string, name: string) {
     this.id = id;
     this.name = name;
     this.children = [];
     this.checked = false; // false, true, 'indeterminate'
   }
 
-  addChild(child): void {
+  addChild(child: AreaTreeNode): void {
     this.children.push(child);
     // eslint-disable-next-line no-param-reassign
     child.parent = this;
@@ -43,38 +43,6 @@ export class AreaTreeNode {
     if (this.parent) {
       this.parent.updateCheckStatus();
     }
-  }
-
-  updateCheckStatusFromTop(): void {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let root: AreaTreeNode = this;
-    while (root.parent) {
-      root = root.parent;
-    }
-
-    const updateFromTop = (node: AreaTreeNode): void => {
-      const allChecked = node.children.length
-        ? node.children.every((child) => child.checked === true)
-        : node.checked;
-      const someChecked = node.children.some(
-        (child) => child.checked === true || child.checked === 'indeterminate',
-      );
-
-      if (allChecked) {
-        // eslint-disable-next-line no-param-reassign
-        node.checked = true;
-      } else if (someChecked && !allChecked) {
-        // eslint-disable-next-line no-param-reassign
-        node.checked = 'indeterminate';
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        node.checked = false;
-      }
-
-      node.children.forEach(updateFromTop);
-    };
-
-    updateFromTop(root);
   }
 
   updateCheckStatusFromRoot(): void {
@@ -150,9 +118,11 @@ export class AreaTreeNode {
       return node;
     };
 
-    return areas.map((area) => {
-      const node = createNode(area, null);
-      return node;
-    });
+    return areas.map((area) => createNode(area, null));
+  }
+
+  public clearChecks() {
+    this.checked = false;
+    this.children.forEach((node) => node.clearChecks());
   }
 }

@@ -51,18 +51,11 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   setFieldValue,
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const adminAreas = allAreasTreeData.map((obj) => obj.id);
   const selectedAreasLength = values.partners[index]?.adminAreas?.length;
   const initialExpanded = selectedAreasLength > 0;
   const [isAdminAreaExpanded, setIsAdminAreaExpanded] =
     useState(initialExpanded);
 
-  let adminAreasOccurrenceLength = 0;
-  if (selectedAreasLength) {
-    adminAreasOccurrenceLength = values.partners[index]?.adminAreas.filter(
-      (item) => adminAreas.includes(item),
-    ).length;
-  }
   const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
     AreaTreeNode.buildTree(
       allAreasTreeData,
@@ -88,7 +81,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     setFieldValue(`partners[${index}].areaAccess`, 'ADMIN_AREA');
     setAllAreasTree([...allAreasTree]);
   };
-  let renderTree = null;
+  
   const renderNode = (node: AreaTreeNode): React.ReactElement => (
     <TreeItem
       key={node.id}
@@ -107,15 +100,9 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
         </div>
       }
     >
-      {renderTree(node.children)}
+      {node.children.length > 0 && node.children.map(renderNode)}
     </TreeItem>
   );
-  renderTree = (children: AreaTreeNode[]): React.ReactElement => {
-    if (!children.length) {
-      return null;
-    }
-    return <>{children.map((node) => renderNode(node))}</>;
-  };
 
   const adminAreaOptionLabel = (
     <Box display="flex" flexDirection="column">
@@ -128,7 +115,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           <Box mt={2} mb={2}>
             <SmallText>
               Selected Admin Areas:{' '}
-              {selectedAreasLength - adminAreasOccurrenceLength || 0}
+              {AreaTreeNode.getAllSelectedIds(allAreasTree).length || 0}
             </SmallText>
           </Box>
         </Box>
@@ -148,7 +135,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             multiSelect
             selected={(values.partners[index]?.adminAreas || []).map(String)}
           >
-            {renderTree(allAreasTree)}
+            {allAreasTree.length > 0 && allAreasTree.map(renderNode)}
           </TreeView>
         </Box>
       </Collapse>
@@ -160,6 +147,11 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     if (foundIndex !== -1) {
       arrayHelpers.remove(foundIndex);
     }
+  };
+
+  const clearChecks = (): void => {
+    allAreasTree.forEach((node) => node.clearChecks());
+    setAllAreasTree([...allAreasTree]);
   };
 
   return (
@@ -205,6 +197,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
             setIsAdminAreaExpanded(event.target.value === 'ADMIN_AREA');
             if (event.target.value === 'BUSINESS_AREA') {
               setFieldValue(`partners[${index}].adminAreas`, []);
+              clearChecks();
             }
           }}
         />
