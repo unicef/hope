@@ -1590,6 +1590,7 @@ type HouseholdNode implements Node {
   userFields: JSONString!
   koboAssetId: String!
   rowId: Int
+  detailId: String
   registrationId: Int
   totalCashReceivedUsd: Decimal
   totalCashReceived: Decimal
@@ -2039,9 +2040,10 @@ type ImportedHouseholdNode implements Node {
   currency: ImportedHouseholdCurrency!
   unhcrId: String!
   koboSubmissionUuid: UUID
-  koboAssetId: String!
   koboSubmissionTime: DateTime
+  koboAssetId: String!
   rowId: Int
+  detailId: String
   enumeratorRecId: Int
   misUnicefId: String
   programId: UUID
@@ -2177,6 +2179,7 @@ type ImportedIndividualNode implements Node {
   whoAnswersAltPhone: String!
   koboAssetId: String!
   rowId: Int
+  detailId: String
   disabilityCertificatePicture: String
   preferredLanguage: String
   misUnicefId: String
@@ -2353,6 +2356,7 @@ type IndividualNode implements Node {
   childHoh: Boolean!
   koboAssetId: String!
   rowId: Int
+  detailId: String
   registrationId: Int
   disabilityCertificatePicture: String
   preferredLanguage: String
@@ -5125,7 +5129,6 @@ type UserRoleNode {
   updatedAt: DateTime!
   businessArea: UserBusinessAreaNode!
   role: RoleNode!
-  expiryDate: Date
 }
 
 enum UserStatus {
