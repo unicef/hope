@@ -168,7 +168,12 @@ class TestPaymentNotification(APITestCase):
         )
 
     def test_prepare_user_recipients_for_send_for_approval(self) -> None:
-        payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.name)
+        payment_notification = PaymentNotification(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
+        )
         self.assertEqual(
             payment_notification.user_recipients.count(),
             3,
@@ -188,7 +193,9 @@ class TestPaymentNotification(APITestCase):
         )
 
     def test_prepare_user_recipients_for_approve(self) -> None:
-        payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.APPROVE.name)
+        payment_notification = PaymentNotification(
+            self.payment_plan, PaymentPlan.Action.APPROVE.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
+        )
         self.assertEqual(
             payment_notification.user_recipients.count(),
             2,
@@ -207,7 +214,9 @@ class TestPaymentNotification(APITestCase):
         )
 
     def test_prepare_user_recipients_for_authorize(self) -> None:
-        payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.AUTHORIZE.name)
+        payment_notification = PaymentNotification(
+            self.payment_plan, PaymentPlan.Action.AUTHORIZE.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
+        )
         self.assertEqual(
             payment_notification.user_recipients.count(),
             2,
@@ -226,7 +235,9 @@ class TestPaymentNotification(APITestCase):
         )
 
     def test_prepare_user_recipients_for_release(self) -> None:
-        payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.REVIEW.name)
+        payment_notification = PaymentNotification(
+            self.payment_plan, PaymentPlan.Action.REVIEW.name, self.user_action_user, f"{timezone.now():%-d %B %Y}"
+        )
         self.assertEqual(
             payment_notification.user_recipients.count(),
             2,
@@ -244,54 +255,15 @@ class TestPaymentNotification(APITestCase):
             payment_notification.user_recipients.all(),
         )
 
-    def test_prepare_action_user_and_date_for_send_for_approval(self) -> None:
-        payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.name)
-        self.assertEqual(
-            payment_notification.action_user,
-            self.approval_process.sent_for_approval_by,
-        )
-        self.assertEqual(
-            payment_notification.action_date,
-            self.approval_process.sent_for_approval_date,
-        )
-
-    def test_prepare_action_user_and_date_for_approve(self) -> None:
-        payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.APPROVE.name)
-        self.assertEqual(
-            payment_notification.action_user,
-            self.approval_approval.created_by,
-        )
-        self.assertEqual(
-            payment_notification.action_date,
-            self.approval_approval.created_at,
-        )
-
-    def test_prepare_action_user_and_date_for_authorize(self) -> None:
-        payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.AUTHORIZE.name)
-        self.assertEqual(
-            payment_notification.action_user,
-            self.approval_authorization.created_by,
-        )
-        self.assertEqual(
-            payment_notification.action_date,
-            self.approval_authorization.created_at,
-        )
-
-    def test_prepare_action_user_and_date_for_release(self) -> None:
-        payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.REVIEW.name)
-        self.assertEqual(
-            payment_notification.action_user,
-            self.approval_release.created_by,
-        )
-        self.assertEqual(
-            payment_notification.action_date,
-            self.approval_release.created_at,
-        )
-
     @mock.patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
     def test_send_email_notification(self, mock_send: Any) -> None:
-        payment_notification = PaymentNotification(self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.name)
+        payment_notification = PaymentNotification(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
+        )
         payment_notification.send_email_notification()
         self.assertEqual(
             mock_send.call_count,
