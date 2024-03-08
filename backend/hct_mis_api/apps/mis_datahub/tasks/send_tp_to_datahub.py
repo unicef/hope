@@ -41,7 +41,6 @@ class SendTPToDatahubTask:
         "start_date": "start_date",
         "end_date": "end_date",
         "description": "description",
-        "individual_data_needed": "individual_data_needed",
         "ca_id": "ca_id",
         "ca_hash_id": "ca_hash_id",
         "programme_code": "programme_code",
@@ -214,6 +213,7 @@ class SendTPToDatahubTask:
 
     def _get_individuals_and_hauseholds(self, program: "Program", target_population: "TargetPopulation") -> Any:
         all_targeted_households_ids = target_population.household_list.values_list("id", flat=True)
+        # TODO: ???
         if program.individual_data_needed:
             # all targeted individuals + collectors (primary_collector,alternate_collector)
             all_individuals = Individual.objects.filter(

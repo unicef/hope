@@ -82,7 +82,6 @@ class ProgramFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    individual_data_needed = fuzzy.FuzzyChoice((True, False))
     data_collecting_type = factory.LazyAttribute(lambda o: DataCollectingType.objects.first())
     programme_code = factory.LazyAttribute(
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
