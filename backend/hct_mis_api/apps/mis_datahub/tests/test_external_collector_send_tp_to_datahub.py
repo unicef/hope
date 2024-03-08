@@ -66,11 +66,9 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         cls.program_individual_data_needed_true = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area_with_data_sharing,
         )
         cls.program_individual_data_needed_false = ProgramFactory(
-            individual_data_needed=False,
             business_area=business_area_with_data_sharing,
         )
 

@@ -85,15 +85,12 @@ class TestSendTpToDatahub(TestCase):
         cls.unhcr, _ = Partner.objects.get_or_create(name="UNHCR", defaults={"is_un": True})
 
         cls.program_individual_data_needed_true = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area_with_data_sharing,
         )
         cls.program_individual_data_needed_false = ProgramFactory(
-            individual_data_needed=False,
             business_area=business_area_with_data_sharing,
         )
         cls.program_third = ProgramFactory(
-            individual_data_needed=False,
             business_area=business_area_with_data_sharing,
         )
         rdi = RegistrationDataImportFactory()
@@ -268,11 +265,9 @@ class TestSendTpToDatahub(TestCase):
         business_area_with_data_sharing = BusinessArea.objects.first()
 
         program_individual_data_needed_true = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area_with_data_sharing,
         )
         program_individual_data_needed_false = ProgramFactory(
-            individual_data_needed=False,
             business_area=business_area_with_data_sharing,
         )
         (household, individuals) = create_household(
@@ -328,7 +323,6 @@ class TestSendTpToDatahub(TestCase):
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area,
         )
 
@@ -353,7 +347,6 @@ class TestSendTpToDatahub(TestCase):
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area,
         )
 
@@ -378,7 +371,6 @@ class TestSendTpToDatahub(TestCase):
         business_area = BusinessArea.objects.first()
 
         program = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area,
         )
 
