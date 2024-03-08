@@ -305,7 +305,7 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
         except Exception as e:
             error_messages.append(f"{household.unicef_id}: {str(e)}")
     if error_messages:
-        raise Exception("Following households failed to be enrolled: \n", "\n".join(error_messages))
+        raise Exception("Following households failed to be enrolled: \n" + "\n".join(error_messages))
 
 
 def copy_individual(individual: Individual, program: Program) -> tuple:
