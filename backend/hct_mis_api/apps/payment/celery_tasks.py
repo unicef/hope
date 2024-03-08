@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from concurrency.api import disable_concurrency
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
 from hct_mis_api.apps.core.utils import (
@@ -652,12 +653,15 @@ def periodic_sync_payment_gateway_records(self: Any) -> None:
 @app.task(bind=True)
 @log_start_and_end
 @sentry_tags
-def send_payment_notification_emails(self: Any, payment_plan_id: str, action: str) -> None:
+def send_payment_notification_emails(
+    self: Any, payment_plan_id: str, action: str, action_user_id: str, action_date_formatted: str
+) -> None:
     from hct_mis_api.apps.payment.notifications import PaymentNotification
 
     try:
         payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        action_user = User.objects.get(id=action_user_id)
         set_sentry_business_area_tag(payment_plan.business_area.name)
-        PaymentNotification(payment_plan, action).send_email_notification()
+        PaymentNotification(payment_plan, action, action_user, action_date_formatted).send_email_notification()
     except Exception as e:
         logger.exception(e)
