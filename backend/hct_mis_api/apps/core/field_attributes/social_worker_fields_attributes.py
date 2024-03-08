@@ -43,7 +43,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "address_h_c",
+        "xlsx_field": "address_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -57,7 +57,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "_choices": lambda *args, **kwargs: Country.get_choices(),
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "country_origin_h_c",
+        "xlsx_field": "country_origin_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -71,7 +71,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "_choices": lambda *args, **kwargs: Country.get_choices(),
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "country_h_c",
+        "xlsx_field": "country_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -84,7 +84,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "zip_code_h_c",
+        "xlsx_field": "zip_code_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -93,12 +93,12 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "name": "admin1",
         "lookup": "admin1__p_code",
         "required": False,
-        "label": {"English(EN)": "Social worker resides in which ${admin1_h_c}?"},
+        "label": {"English(EN)": "Social worker resides in which ${admin1_i_c}?"},
         "hint": "",
         "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(1, *args, **kwargs),
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "admin1_h_c",
+        "xlsx_field": "admin1_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -107,12 +107,12 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "name": "admin2",
         "lookup": "admin2__p_code",
         "required": False,
-        "label": {"English(EN)": "Social worker resides in which ${admin2_h_c}?"},
+        "label": {"English(EN)": "Social worker resides in which ${admin2_i_c}?"},
         "hint": "",
         "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(2, *args, **kwargs),
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "admin2_h_c",
+        "xlsx_field": "admin2_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -121,12 +121,12 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "name": "admin3",
         "lookup": "admin3__p_code",
         "required": False,
-        "label": {"English(EN)": "Social worker resides in which ${admin3_h_c}?"},
+        "label": {"English(EN)": "Social worker resides in which ${admin3_i_c}?"},
         "hint": "",
         "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(3, *args, **kwargs),
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "admin3_h_c",
+        "xlsx_field": "admin3_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -135,12 +135,12 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "name": "admin4",
         "lookup": "admin4__p_code",
         "required": False,
-        "label": {"English(EN)": "Social worker resides in which ${admin4_h_c}?"},
+        "label": {"English(EN)": "Social worker resides in which ${admin4_i_c}?"},
         "hint": "",
         "_choices": lambda *args, **kwargs: Area.get_admin_areas_as_choices(4, *args, **kwargs),
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "admin4_h_c",
+        "xlsx_field": "admin4_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -153,7 +153,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in RESIDENCE_STATUS_CHOICE],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "residence_status_h_c",
+        "xlsx_field": "residence_status_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -166,7 +166,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "consent_h_c",
+        "xlsx_field": "consent_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -179,7 +179,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "Ask the social worker to sign or do an X as acknowledgement",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "consent_sign_h_c",
+        "xlsx_field": "consent_sign_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -192,7 +192,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "latitude and longitude of social worker",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "hh_geopoint_h_c",
+        "xlsx_field": "hh_geopoint_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -205,7 +205,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "unhcr_id_h_c",
+        "xlsx_field": "unhcr_id_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -218,7 +218,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "returnee_h_c",
+        "xlsx_field": "returnee_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -231,7 +231,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in REGISTRATION_METHOD_CHOICES],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "registration_method_h_c",
+        "xlsx_field": "registration_method_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -248,7 +248,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
             if code != BLANK
         ],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "currency_h_c",
+        "xlsx_field": "currency_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -261,7 +261,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "village_h_c",
+        "xlsx_field": "village_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -287,7 +287,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "name_enumerator_h_c",
+        "xlsx_field": "name_enumerator_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -300,7 +300,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in ORG_ENUMERATOR_CHOICES],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "org_enumerator_h_c",
+        "xlsx_field": "org_enumerator_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -313,7 +313,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in DATA_SHARING_CHOICES],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "consent_sharing_h_c",
+        "xlsx_field": "consent_sharing_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -326,7 +326,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "org_name_enumerator_h_c",
+        "xlsx_field": "org_name_enumerator_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
     {
@@ -339,7 +339,7 @@ SOCIAL_WORKER_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "first_registration_date_h_c",
+        "xlsx_field": "first_registration_date_i_c",
         "scope": [Scope.XLSX_SOCIAL_WORKER],
     },
 ]
