@@ -16,17 +16,20 @@ logger = logging.getLogger(__name__)
 
 def get_manifest() -> Dict[str, Dict[str, str]]:
     manifest_path = settings.MANIFEST_FILE
-    if settings.DEBUG:
-        path = f"{settings.PROJECT_ROOT}/apps/web/static/{manifest_path}"
-        with open(path, "r") as f:
-            return json.loads(f.read())
-    response = requests.get(staticfiles_storage.url(manifest_path))
-    try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        logger.exception(e)
-        raise
-    return response.json()
+    manifest_url = staticfiles_storage.url(manifest_path)
+
+    if manifest_url.startswith("http"):
+        response = requests.get(manifest_url)
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
+        return response.json()
+
+    path = f"{settings.PROJECT_ROOT}/apps/web/static/{manifest_path}"
+    with open(path, "r") as f:
+        return json.loads(f.read())
 
 
 @never_cache
