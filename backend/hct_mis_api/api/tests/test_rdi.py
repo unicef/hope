@@ -65,7 +65,9 @@ class PushToRDITests(HOPEApiTestCase):
         ImportedDocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
-        cls.rdi = RegistrationDataImportDatahub.objects.create(business_area_slug=cls.business_area.slug)
+        cls.rdi = RegistrationDataImportDatahub.objects.create(
+            business_area_slug=cls.business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
+        )
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
 
     def test_push(self) -> None:
@@ -124,6 +126,15 @@ class PushToRDITests(HOPEApiTestCase):
 
         self.assertEqual(data["households"], 1)
         self.assertEqual(data["individuals"], 2)
+
+    def test_push_fail_if_not_loading(self) -> None:
+        rdi = RegistrationDataImportDatahub.objects.create(
+            business_area_slug=self.business_area.slug,
+            import_done=RegistrationDataImportDatahub.NOT_STARTED,
+        )
+        url = reverse("api:rdi-push", args=[self.business_area.slug, str(rdi.id)])
+        response = self.client.post(url, [], format="json")
+        assert response.status_code == status.HTTP_404_NOT_FOUND, response.data
 
 
 class CompleteRDITests(HOPEApiTestCase):

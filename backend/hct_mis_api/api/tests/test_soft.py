@@ -35,8 +35,20 @@ class PushLaxToRDITests(HOPEApiTestCase):
         ImportedDocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
-        cls.rdi = RegistrationDataImportDatahub.objects.create(business_area_slug=cls.business_area.slug)
+        cls.rdi = RegistrationDataImportDatahub.objects.create(
+            business_area_slug=cls.business_area.slug,
+            import_done=RegistrationDataImportDatahub.LOADING,
+        )
         cls.url = reverse("api:rdi-push-lax", args=[cls.business_area.slug, str(cls.rdi.id)])
+
+    def test_push_error_if_not_loading(self) -> None:
+        rdi = RegistrationDataImportDatahub.objects.create(
+            business_area_slug=self.business_area.slug,
+            import_done=RegistrationDataImportDatahub.NOT_STARTED,
+        )
+        url = reverse("api:rdi-push-lax", args=[self.business_area.slug, str(rdi.id)])
+        response = self.client.post(url, {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_push(self) -> None:
         image = Path(__file__).parent / "logo.png"
