@@ -62,6 +62,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
         )
         return RegistrationDataImport.objects.create(
             **serializer.validated_data,
+            status=RegistrationDataImport.LOADING,
             imported_by=self.request.user,
             data_source=RegistrationDataImport.API,
             number_of_individuals=0,
@@ -110,7 +111,7 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
     permission = Grant.API_RDI_CREATE
 
     @cached_property
-    def selected_rdi(self) -> QuerySet[RegistrationDataImport]:
+    def selected_rdi(self) -> RegistrationDataImportDatahub:
         return RegistrationDataImportDatahub.objects.get(
             id=self.kwargs["rdi"], business_area_slug=self.kwargs["business_area"]
         )
@@ -120,22 +121,31 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
         total_households = 0
         total_errors = 0
         total_accepted = 0
-        out = []
+        errs = []
+        # created = []
         for household_data in request.data:
             total_households += 1
-            serializer = HouseholdSerializer(data=household_data)
+            serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
-                ImportedHousehold.objects.create(registration_data_import=self.selected_rdi, **serializer.data)
-                out.append({"status": "success"})
+                hh: ImportedHousehold = ImportedHousehold.objects.create(
+                    registration_data_import=self.selected_rdi, **serializer.data
+                )
+                members: list[dict] = serializer.validated_data.pop("members", [])
+                for member_data in members:
+                    self.save_member(self.selected_rdi, hh, member_data)
+                errs.append({"pk": hh.pk})
+                # created.append(hh.id)
                 total_accepted += 1
             else:
-                out.append(serializer.errors)
+                errs.append(serializer.errors)
                 total_errors += 1
-        results = humanize_errors({"households": out})
+
+        results = humanize_errors({"households": errs})
         return Response(
             {
                 "id": self.selected_rdi.id,
                 "processed": total_households,
+                # "created": created,
                 "accepted": total_accepted,
                 "errors": total_errors,
                 **results,

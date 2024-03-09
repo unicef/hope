@@ -46,9 +46,10 @@ class CreateRDITests(HOPEApiTestCase):
         hrdi = RegistrationDataImportDatahub.objects.filter(name="aaaa").first()
         self.assertTrue(hrdi)
 
-        rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
+        rdi: RegistrationDataImport = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
         self.assertIsNotNone(rdi)
         self.assertEqual(rdi.program, self.program)
+        self.assertEqual(rdi.status, RegistrationDataImport.LOADING)
 
         self.assertEqual(response.json()["id"], str(hrdi.id))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, str(response.json()))
@@ -135,7 +136,7 @@ class CompleteRDITests(HOPEApiTestCase):
         cls.rdi = RegistrationDataImportDatahub.objects.create(
             business_area_slug=cls.business_area.slug, import_done=RegistrationDataImport.LOADING
         )
-        cls.rdi2 = RegistrationDataImport.objects.create(
+        cls.rdi2: RegistrationDataImport = RegistrationDataImport.objects.create(
             business_area=cls.business_area,
             number_of_individuals=0,
             number_of_households=0,
@@ -153,3 +154,5 @@ class CompleteRDITests(HOPEApiTestCase):
         data = response.json()
         self.assertDictEqual(data[0], {"id": str(self.rdi.id), "status": "DONE"})
         self.assertDictEqual(data[1], {"id": str(self.rdi2.id), "status": "IN_REVIEW"})
+        self.rdi2.refresh_from_db()
+        self.assertEqual(self.rdi2.status, RegistrationDataImport.IN_REVIEW)
