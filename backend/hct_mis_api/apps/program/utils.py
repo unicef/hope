@@ -234,72 +234,78 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
         unicef_id__in=households.values_list("unicef_id", flat=True),
     ).values_list("unicef_id", flat=True)
     households = households.exclude(unicef_id__in=households_to_exclude).prefetch_related("entitlement_cards")
+    error_messages = []
     for household in households:
-        with transaction.atomic():
-            if not household.household_collection:
-                household.household_collection = HouseholdCollection.objects.create()
+        try:
+            with transaction.atomic():
+                if not household.household_collection:
+                    household.household_collection = HouseholdCollection.objects.create()
+                    household.save()
+
+                individuals = household.individuals.prefetch_related("documents", "identities", "bank_account_info")
+                individuals_to_exclude_dict = {
+                    str(x["unicef_id"]): str(x["pk"])
+                    for x in Individual.objects.filter(
+                        program=program,
+                        unicef_id__in=individuals.values_list("unicef_id", flat=True),
+                    ).values("unicef_id", "pk")
+                }
+
+                documents_to_create = []
+                identities_to_create = []
+                bank_account_info_to_create = []
+                individuals_to_create = []
+                external_collectors_id_to_update = []
+
+                for individual in individuals:
+                    if str(individual.unicef_id) in individuals_to_exclude_dict:
+                        external_collectors_id_to_update.append(individuals_to_exclude_dict[str(individual.unicef_id)])
+                        continue
+                    (
+                        individual_to_create,
+                        documents_to_create_batch,
+                        identities_to_create_batch,
+                        bank_account_info_to_create_batch,
+                    ) = copy_individual(individual, program)
+                    documents_to_create.extend(documents_to_create_batch)
+                    identities_to_create.extend(identities_to_create_batch)
+                    bank_account_info_to_create.extend(bank_account_info_to_create_batch)
+                    individuals_to_create.append(individual_to_create)
+
+                individuals_dict = {i.unicef_id: i for i in individuals_to_create}
+                Individual.objects.bulk_create(individuals_to_create)
+                Document.objects.bulk_create(documents_to_create)
+                IndividualIdentity.objects.bulk_create(identities_to_create)
+                BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
+
+                original_household_id = household.id
+                original_head_of_household_unicef_id = household.head_of_household.unicef_id
+                household.copied_from_id = original_household_id
+                household.pk = None
+                household.program = program
+                household.is_original = False
+                household.registration_data_import = None
+                household.total_cash_received = None
+                household.total_cash_received_usd = None
+
+                if original_head_of_household_unicef_id in individuals_dict:
+                    household.head_of_household = individuals_dict[original_head_of_household_unicef_id]
+                else:
+                    copied_individual_id = individuals_to_exclude_dict[str(original_head_of_household_unicef_id)]
+                    household.head_of_household_id = copied_individual_id
+
                 household.save()
+                entitlement_cards = copy_entitlement_cards_per_household(household)
+                EntitlementCard.objects.bulk_create(entitlement_cards)
 
-            individuals = household.individuals.prefetch_related("documents", "identities", "bank_account_info")
-            individuals_to_exclude_dict = {
-                str(x["unicef_id"]): str(x["pk"])
-                for x in Individual.objects.filter(
-                    program=program,
-                    unicef_id__in=individuals.values_list("unicef_id", flat=True),
-                ).values("unicef_id", "pk")
-            }
+                ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
+                Individual.objects.filter(id__in=ids_to_update).update(household=household)
 
-            documents_to_create = []
-            identities_to_create = []
-            bank_account_info_to_create = []
-            individuals_to_create = []
-            external_collectors_id_to_update = []
-
-            for individual in individuals:
-                if str(individual.unicef_id) in individuals_to_exclude_dict:
-                    external_collectors_id_to_update.append(individuals_to_exclude_dict[str(individual.unicef_id)])
-                    continue
-                (
-                    individual_to_create,
-                    documents_to_create_batch,
-                    identities_to_create_batch,
-                    bank_account_info_to_create_batch,
-                ) = copy_individual(individual, program)
-                documents_to_create.extend(documents_to_create_batch)
-                identities_to_create.extend(identities_to_create_batch)
-                bank_account_info_to_create.extend(bank_account_info_to_create_batch)
-                individuals_to_create.append(individual_to_create)
-
-            individuals_dict = {i.unicef_id: i for i in individuals_to_create}
-            Individual.objects.bulk_create(individuals_to_create)
-            Document.objects.bulk_create(documents_to_create)
-            IndividualIdentity.objects.bulk_create(identities_to_create)
-            BankAccountInfo.objects.bulk_create(bank_account_info_to_create)
-
-            original_household_id = household.id
-            original_head_of_household_unicef_id = household.head_of_household.unicef_id
-            household.copied_from_id = original_household_id
-            household.pk = None
-            household.program = program
-            household.is_original = False
-            household.registration_data_import = None
-            household.total_cash_received = None
-            household.total_cash_received_usd = None
-
-            if original_head_of_household_unicef_id in individuals_dict:
-                household.head_of_household = individuals_dict[original_head_of_household_unicef_id]
-            else:
-                copied_individual_id = individuals_to_exclude_dict[str(original_head_of_household_unicef_id)]
-                household.head_of_household_id = copied_individual_id
-
-            household.save()
-            entitlement_cards = copy_entitlement_cards_per_household(household)
-            EntitlementCard.objects.bulk_create(entitlement_cards)
-
-            ids_to_update = [x.pk for x in individuals_to_create] + external_collectors_id_to_update
-            Individual.objects.filter(id__in=ids_to_update).update(household=household)
-
-            create_roles_for_new_representation(household, program)
+                create_roles_for_new_representation(household, program)
+        except Exception as e:
+            error_messages.append(f"{household.unicef_id}: {str(e)}")
+    if error_messages:
+        raise Exception("Following households failed to be enrolled: \n" + "\n".join(error_messages))
 
 
 def copy_individual(individual: Individual, program: Program) -> tuple:
