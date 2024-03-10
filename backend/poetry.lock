@@ -1982,7 +1982,7 @@ files = [
 name = "execnet"
 version = "2.0.2"
 description = "execnet: rapid multi-Python deployment"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -3806,7 +3806,7 @@ pytest = ">=2.2"
 name = "pytest-xdist"
 version = "3.5.0"
 description = "pytest xdist plugin for distributed testing, most importantly across multiple CPUs"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -5385,4 +5385,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.*"
-content-hash = "c2c73c04dae90ca1a4672dba0375ba300271efff7d2c4f0688965a9b680e0a7b"
+content-hash = "7ab4e9f4b314c1dbad5092a10e1cb0e3c23d828a232638ce57feee1d139f104b"

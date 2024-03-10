@@ -354,7 +354,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             | Q(id__in=self.partner.business_area_ids)
         ).distinct()
 
-    @test_conditional(lru_cache())
+    # @test_conditional(lru_cache())
     def cached_has_partner_roles_for_business_area_and_permission(
         self, business_area: BusinessArea, permission: str
     ) -> bool:
@@ -362,7 +362,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             id__in=self.get_partner_role_ids_list(business_area_id=business_area.pk), permissions__contains=[permission]
         ).exists()
 
-    @test_conditional(lru_cache())
+    # @test_conditional(lru_cache())
     def cached_has_user_roles_for_business_area_and_permission(
         self, business_area: BusinessArea, permission: str
     ) -> bool:
