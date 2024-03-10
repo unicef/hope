@@ -18,6 +18,7 @@ from admin_extra_buttons.decorators import button, link
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter
 from adminfilters.mixin import AdminAutoCompleteSearchMixin
+from adminfilters.querystring import QueryStringFilter
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -48,6 +49,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     list_display = ("name", "status", "import_date", "data_source", "business_area")
     search_fields = ("name",)
     list_filter = (
+        QueryStringFilter,
         ("status", ChoicesFieldComboFilter),
         ("data_source", ChoicesFieldComboFilter),
         ("business_area", AutoCompleteFilter),
@@ -80,7 +82,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     @button(
         label="Re-run RDI",
-        permission=lambda r, o: r.user.is_superuser,
+        permission=lambda r, o, handler: r.user.is_superuser,
         enabled=lambda btn: btn.original.status == RegistrationDataImport.IMPORT_ERROR,
     )
     def rerun_rdi(self, request: HttpRequest, pk: UUID) -> None:
@@ -116,7 +118,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     @button(
         label="Re-run Merging RDI",
-        permission=lambda r, o: r.user.is_superuser,
+        permission=lambda r, o, handler: r.user.is_superuser,
         enabled=lambda btn: btn.original.status == RegistrationDataImport.MERGE_ERROR,
     )
     def rerun_merge_rdi(self, request: HttpRequest, pk: UUID) -> None:
@@ -271,6 +273,12 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
     def households(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
         url = reverse("admin:household_household_changelist")
         return HttpResponseRedirect(f"{url}?&registration_data_import__exact={pk}")
+
+    @button()
+    def hub_rdi(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
+        obj: RegistrationDataImport = self.get_object(request, pk)
+        url = reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
+        return HttpResponseRedirect(url)
 
     @button(permission="program.enroll_beneficiaries")
     def enroll_to_program(self, request: HttpRequest, pk: UUID) -> Optional[HttpResponse]:

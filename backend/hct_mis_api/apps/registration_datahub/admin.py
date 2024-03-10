@@ -3,17 +3,17 @@ from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 from uuid import UUID
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin import ModelAdmin, SimpleListFilter
 from django.core.signing import BadSignature, Signer
 from django.db.models import F, QuerySet
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
 
-from admin_extra_buttons.decorators import button, link
+from admin_extra_buttons.decorators import button
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.depot.widget import DepotManager
 from adminfilters.filters import ChoicesFieldComboFilter, NumberFilter, ValueFilter
@@ -43,7 +43,12 @@ logger = logging.getLogger(__name__)
 @admin.register(RegistrationDataImportDatahub)
 class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
     list_display = ("name", "import_date", "import_done", "business_area_slug", "hct_id")
-    list_filter = ("created_at", "import_done", ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")))
+    list_filter = (
+        QueryStringFilter,
+        "created_at",
+        "import_done",
+        ("business_area_slug", ValueFilter.factory(lookup_name="istartswith")),
+    )
     advanced_filter_fields = (
         "created_at",
         "import_done",
@@ -54,20 +59,14 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
     date_hierarchy = "created_at"
     search_fields = ("name",)
 
-    @link(
-        href=None,
-        label="RDI",
-    )
-    def hub(self, button: button) -> Optional[str]:
-        obj = button.context.get("original")
-        if obj:
-            if obj.hct_id:
-                return reverse("admin:registration_data_registrationdataimport_change", args=[obj.hct_id])
-            else:
-                button.html_attrs = {"style": "background-color:#CCCCCC;cursor:not-allowed"}
-                return "javascript:alert('RDI not imported');"
-        button.visible = False
-        return None
+    @button(label="RDI")
+    def hub(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, HttpResponse]:  # type: ignore[return]
+        obj = self.get_object(request, pk)
+        if obj.hct_id:
+            url = reverse("admin:registration_data_registrationdataimport_change", args=[obj.hct_id])
+            return HttpResponseRedirect(url)
+        else:
+            self.message_user(request, "No RDI linked", messages.ERROR)
 
     @button()
     def inspect(self, request: HttpRequest, pk: UUID) -> TemplateResponse:
@@ -103,6 +102,7 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
         "batch_score",
     )
     list_filter = (
+        QueryStringFilter,
         ("deduplication_batch_results", NumberFilter),
         ("deduplication_golden_record_results", NumberFilter),
         ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
@@ -164,7 +164,14 @@ class ImportedIndividualIdentityAdmin(HOPEModelAdminBase):
 @admin.register(ImportedHousehold)
 class ImportedHouseholdAdmin(HOPEModelAdminBase):
     search_fields = ("id", "registration_data_import")
-    list_display = ("registration_data_import", "registration_method", "name_enumerator", "country", "country_origin")
+    list_display = (
+        QueryStringFilter,
+        "registration_data_import",
+        "registration_method",
+        "name_enumerator",
+        "country",
+        "country_origin",
+    )
     raw_id_fields = ("registration_data_import", "head_of_household")
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (
