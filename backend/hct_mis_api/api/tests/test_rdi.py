@@ -65,8 +65,17 @@ class PushToRDITests(HOPEApiTestCase):
         ImportedDocumentType.objects.create(
             key=IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE], label="--"
         )
+        cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.rdi = RegistrationDataImportDatahub.objects.create(
             business_area_slug=cls.business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
+        )
+        cls.rdi2: RegistrationDataImport = RegistrationDataImport.objects.create(
+            business_area=cls.business_area,
+            number_of_individuals=0,
+            number_of_households=0,
+            datahub_id=cls.rdi.pk,
+            status=RegistrationDataImport.LOADING,
+            program=cls.program,
         )
         cls.url = reverse("api:rdi-push", args=[cls.business_area.slug, str(cls.rdi.id)])
 
@@ -120,9 +129,13 @@ class PushToRDITests(HOPEApiTestCase):
         self.assertIsNotNone(hh.primary_collector)
         self.assertIsNone(hh.alternate_collector)
         self.assertEqual(hh.collect_individual_data, COLLECT_TYPE_FULL)
+        self.assertEqual(hh.program_id, self.program.id)
 
         self.assertEqual(hh.primary_collector.full_name, "Mary Primary #1")
         self.assertEqual(hh.head_of_household.full_name, "James Head #1")
+
+        self.assertEqual(hh.primary_collector.program_id, self.program.id)
+        self.assertEqual(hh.head_of_household.program_id, self.program.id)
 
         self.assertEqual(data["households"], 1)
         self.assertEqual(data["individuals"], 2)
@@ -144,6 +157,7 @@ class CompleteRDITests(HOPEApiTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        cls.program = ProgramFactory.create(status=Program.DRAFT, business_area=cls.business_area)
         cls.rdi = RegistrationDataImportDatahub.objects.create(
             business_area_slug=cls.business_area.slug, import_done=RegistrationDataImport.LOADING
         )
@@ -153,6 +167,7 @@ class CompleteRDITests(HOPEApiTestCase):
             number_of_households=0,
             datahub_id=cls.rdi.pk,
             status=RegistrationDataImport.LOADING,
+            program=cls.program,
         )
         assert cls.rdi.linked_rdi == cls.rdi2
 
