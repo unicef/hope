@@ -25,7 +25,7 @@ class Common:
         return self._wait.until(EC.visibility_of_element_located((element_type, locator)))
 
     def wait_for_disappear(
-        self, locator: str, element_type: str = By.CSS_SELECTOR
+            self, locator: str, element_type: str = By.CSS_SELECTOR
     ) -> Union[Literal[False, True], WebElement]:
         return self._wait.until_not(EC.visibility_of_element_located((element_type, locator)))
 
@@ -35,6 +35,19 @@ class Common:
             if old_url == self.driver.current_url:
                 break
         return self.driver.current_url
+
+    def select_listbox_element(self, name: str, listbox: str = 'ul[role="listbox"]',
+                               tag_name: str = 'li') -> WebElement:
+        select_element = self.wait_for(listbox)
+        items = select_element.find_elements("tag name", tag_name)
+        for item in items:
+            if name in item.text:
+                return item
+
+    def check_page_after_click(self, button: WebElement, url_fragment) -> None:
+        programme_creation_url = self.driver.current_url
+        button.click()
+        assert url_fragment in self.wait_for_new_url(programme_creation_url).split("/")[-1]
 
     @staticmethod
     def choose_option(list_options: list, name: str) -> None:

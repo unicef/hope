@@ -131,10 +131,8 @@ class TestFeedback:
         pageNewFeedback.getButtonNext().click()
         assert "Feedback" in pageNewFeedback.getLabelCategory().text
         pageNewFeedback.getDescription().send_keys("Test")
-        programme_creation_url = pageNewFeedback.driver.current_url
-        pageNewFeedback.getButtonNext().click()
+        pageNewFeedback.check_page_after_click(pageNewFeedback.getButtonNext(), "=")
         # Check Details page
-        assert "=" in pageNewFeedback.wait_for_new_url(programme_creation_url).split("/")[-1]
         assert pageFeedbackDetails.textCategory in pageFeedbackDetails.getCategory().text
         assert issue_type in pageFeedbackDetails.getIssueType().text
         assert "-" in pageFeedbackDetails.getHouseholdID().text

@@ -1,4 +1,5 @@
 from page_object.base_components import BaseComponents
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.select import Select
 
@@ -90,8 +91,8 @@ class NewFeedback(BaseComponents):
         return self.wait_for(self.inputIssueType)
 
     def checkElementsOnPage(self) -> None:
-        self.getTitlePage().contains(self.textTitle)
-        self.getLabelCategory().contains(self.textCategory)
+        assert self.textTitle in self.getTitlePage()
+        assert self.textCategory in self.getLabelCategory()
         self.getSelectIssueType()
         self.getButtonCancel()
         self.getButtonBack()
@@ -99,9 +100,4 @@ class NewFeedback(BaseComponents):
 
     def chooseOptionByName(self, name: str) -> None:
         self.getSelectIssueType().click()
-        select_element = self.wait_for('ul[data-cy="select-options-container"]')
-        select = Select(select_element)
-        print(select.options)
-        select.select_by_visible_text('name')
-        # self.getSelectIssueType().click()
-        # self.choose_option(self.getOptions(), name)
+        self.select_listbox_element(name).click()
