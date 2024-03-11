@@ -19,7 +19,7 @@ export const DatePickerFilter = ({
       <FormControl size="small">
         <DatePicker
           slotProps={{ textField: { size: 'small' } }}
-          data-y={dataCy}
+          data-cy={dataCy}
           onChange={(date) => {
             if (date) {
               onChange(formatISO(date));
