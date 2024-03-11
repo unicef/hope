@@ -46,7 +46,7 @@ class CreateRDITests(HOPEApiTestCase):
         hrdi = RegistrationDataImportDatahub.objects.filter(name="aaaa").first()
         self.assertTrue(hrdi)
 
-        rdi: RegistrationDataImport = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
+        rdi = RegistrationDataImport.objects.filter(datahub_id=str(hrdi.pk)).first()
         self.assertIsNotNone(rdi)
         self.assertEqual(rdi.program, self.program)
         self.assertEqual(rdi.status, RegistrationDataImport.LOADING)

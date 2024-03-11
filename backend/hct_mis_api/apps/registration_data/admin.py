@@ -277,7 +277,7 @@ class RegistrationDataImportAdmin(AdminAutoCompleteSearchMixin, HOPEModelAdminBa
 
     @button()
     def hub_rdi(self, request: HttpRequest, pk: UUID) -> HttpResponseRedirect:
-        obj: RegistrationDataImport = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         url = reverse("admin:registration_datahub_registrationdataimportdatahub_change", args=[obj.datahub_id])
         return HttpResponseRedirect(url)
 
