@@ -100,6 +100,7 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
         "dedupe_status",
         "score",
         "batch_score",
+        "program_id",
     )
     list_filter = (
         QueryStringFilter,
@@ -109,6 +110,7 @@ class ImportedIndividualAdmin(HOPEModelAdminBase):
         ("individual_id", ValueFilter.factory(lookup_name="istartswith")),
         "deduplication_batch_status",
         "deduplication_golden_record_status",
+        ("program_id", ValueFilter.factory(lookup_name="istartswith", title="Program ID")),
     )
     date_hierarchy = "updated_at"
     # raw_id_fields = ("household", "registration_data_import")
@@ -167,6 +169,7 @@ class ImportedHouseholdAdmin(HOPEModelAdminBase):
     list_display = (
         "registration_data_import",
         "registration_method",
+        "program_id",
         "name_enumerator",
         "country",
         "country_origin",
@@ -181,6 +184,7 @@ class ImportedHouseholdAdmin(HOPEModelAdminBase):
         "registration_method",
         ("registration_data_import__name", ValueFilter.factory(lookup_name="istartswith")),
         ("kobo_submission_uuid", ValueFilter.factory(lookup_name="istartswith", title="Kobo Submission UUID")),
+        ("program_id", ValueFilter.factory(lookup_name="istartswith", title="Program ID")),
     )
 
 
