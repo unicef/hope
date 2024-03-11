@@ -125,7 +125,12 @@ class PaymentPlanService:
             authorization_number_required=self.payment_plan.authorization_number_required,
             finance_release_number_required=self.payment_plan.finance_release_number_required,
         )
-        send_payment_notification_emails.delay(self.payment_plan.id, PaymentPlan.Action.SEND_FOR_APPROVAL.value)
+        send_payment_notification_emails.delay(
+            self.payment_plan.id,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.value,
+            self.user.id,
+            f"{timezone.now():%-d %B %Y}",
+        )
         return self.payment_plan
 
     def send_to_payment_gateway(self) -> PaymentPlan:
@@ -305,7 +310,9 @@ class PaymentPlanService:
                 self.payment_plan.status_reject()
 
             if notification_action:
-                send_payment_notification_emails.delay(self.payment_plan.id, notification_action.value)
+                send_payment_notification_emails.delay(
+                    self.payment_plan.id, notification_action.value, self.user.id, f"{timezone.now():%-d %B %Y}"
+                )
 
             self.payment_plan.save()
 
