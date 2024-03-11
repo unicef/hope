@@ -243,7 +243,9 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
 
     def test_send_targeting_with_external_collectors_with_individuals(self) -> None:
         task = SendTPToDatahubTask()
-        task.send_target_population(self.target_population_with_individuals)
+        msg = task.send_target_population(self.target_population_with_individuals)
+
+        print("MSG ", msg)
 
         # Check first household in DB
         self.assertEqual(
