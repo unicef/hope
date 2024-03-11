@@ -109,7 +109,6 @@ class TestRecalculatingCash(APITestCase):
                 "description": "",
                 "endDate": "2022-07-26",
                 "frequencyOfPayments": "ONE_OFF",
-                "individualDataNeeded": False,
                 "name": "newprogram",
                 "populationGoal": 1,
                 "sector": "MULTI_PURPOSE",

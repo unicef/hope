@@ -112,7 +112,7 @@ class SendTPToDatahubTask:
                 individuals_to_sync,
                 roles_to_sync,
                 target_population_selections,
-            ) = self._prepare_data_to_send(program, target_population)
+            ) = self._prepare_data_to_send(target_population)
             self._send_program(program)
             self._send_target_population_object(target_population)
             chunk_size = 1000
@@ -182,12 +182,12 @@ class SendTPToDatahubTask:
             logger.exception(e)
             raise
 
-    def _prepare_data_to_send(self, program: "Program", target_population: "TargetPopulation") -> Tuple:
+    def _prepare_data_to_send(self, target_population: "TargetPopulation") -> Tuple:
         (
             all_targeted_households_ids,
             households_to_sync,
             individuals_to_sync,
-        ) = self._get_individuals_and_hauseholds(program, target_population)
+        ) = self._get_individuals_and_households(target_population)
         self._prepare_unhcr_dict(individuals_to_sync)
         documents = self._get_documents(individuals_to_sync)
         # household_id__in - to filter also by vulnerability_score score
@@ -211,21 +211,13 @@ class SendTPToDatahubTask:
         ).distinct()
         self.unhcr_id_dict = {identity.individual_id: identity.number for identity in individual_identities}
 
-    def _get_individuals_and_hauseholds(self, program: "Program", target_population: "TargetPopulation") -> Any:
+    def _get_individuals_and_households(self, target_population: "TargetPopulation") -> Any:
         all_targeted_households_ids = target_population.household_list.values_list("id", flat=True)
-        # TODO: ???
-        if program.individual_data_needed:
-            # all targeted individuals + collectors (primary_collector,alternate_collector)
-            all_individuals = Individual.objects.filter(
-                Q(household__id__in=all_targeted_households_ids)
-                | Q(represented_households__in=all_targeted_households_ids)
-            ).distinct()
-        else:
-            # only head of households + collectors (primary_collector,alternate_collector)
-            all_individuals = Individual.objects.filter(
-                (Q(heading_household__in=all_targeted_households_ids))
-                | Q(represented_households__in=all_targeted_households_ids)
-            ).distinct()
+        # only head of households + collectors (primary_collector,alternate_collector)
+        all_individuals = Individual.objects.filter(
+            (Q(heading_household__in=all_targeted_households_ids))
+            | Q(represented_households__in=all_targeted_households_ids)
+        ).distinct()
         all_households = Household.objects.filter(
             id__in=all_individuals.values_list("household_id", flat=True)
         ).distinct()
