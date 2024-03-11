@@ -311,6 +311,10 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
                     values = document_data.group(2).split(", ")
                     document_dict = dict(zip(keys, values))
                     error_message = f"Document already exists: {document_dict.get('document_number')}"
+            else:
+                detail_index = error_message.find("DETAIL")
+                if detail_index != -1:
+                    error_message = error_message[:detail_index].strip()
             error_messages.append(f"{household.unicef_id}: {error_message}")
     if error_messages:
         raise Exception("Following households failed to be enrolled: \n" + "\n".join(error_messages))
