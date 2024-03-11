@@ -103,9 +103,10 @@ class PushToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIView):
     @atomic(using="registration_datahub")
     def post(self, request: Request, business_area: "BusinessArea", rdi: RegistrationDataImport) -> Response:
         serializer = HouseholdSerializer(data=request.data, many=True)
+        program_id = RegistrationDataImport.objects.get(datahub_id=str(self.selected_rdi.id)).program_id
 
         if serializer.is_valid():
-            totals = self.save_households(self.selected_rdi, serializer.validated_data)
+            totals = self.save_households(self.selected_rdi, program_id, serializer.validated_data)
             return Response({"id": self.selected_rdi.id, **asdict(totals)}, status=status.HTTP_201_CREATED)
         return Response(humanize_errors(serializer.errors), status=status.HTTP_400_BAD_REQUEST)
 
@@ -133,16 +134,19 @@ class PushLaxToRDIView(HOPEAPIBusinessAreaView, HouseholdUploadMixin, HOPEAPIVie
         total_accepted = 0
         errs = []
         # created = []
+
+        program_id = RegistrationDataImport.objects.get(datahub_id=str(self.selected_rdi.id)).program_id
+
         for household_data in request.data:
             total_households += 1
             serializer: HouseholdSerializer = HouseholdSerializer(data=household_data)
             if serializer.is_valid():
                 hh: ImportedHousehold = ImportedHousehold.objects.create(
-                    registration_data_import=self.selected_rdi, **serializer.data
+                    registration_data_import=self.selected_rdi, program_id=program_id, **serializer.data
                 )
                 members: list[dict] = serializer.validated_data.pop("members", [])
                 for member_data in members:
-                    self.save_member(self.selected_rdi, hh, member_data)
+                    self.save_member(self.selected_rdi, program_id, hh, member_data)
                 errs.append({"pk": hh.pk})
                 # created.append(hh.id)
                 total_accepted += 1

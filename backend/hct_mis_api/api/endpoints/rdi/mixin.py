@@ -50,14 +50,16 @@ class HouseholdUploadMixin:
         )
 
     def save_member(
-        self, rdi: RegistrationDataImportDatahub, hh: ImportedHousehold, member_data: Dict
+        self, rdi: RegistrationDataImportDatahub, program_id: UUID, hh: ImportedHousehold, member_data: Dict
     ) -> ImportedIndividual:
         documents = member_data.pop("documents", [])
         member_of = None
         if member_data["relationship"] not in (RELATIONSHIP_UNKNOWN, NON_BENEFICIARY):
             member_of = hh
         role = member_data.pop("role", None)
-        ind = ImportedIndividual.objects.create(household=member_of, registration_data_import=rdi, **member_data)
+        ind = ImportedIndividual.objects.create(
+            household=member_of, program_id=program_id, registration_data_import=rdi, **member_data
+        )
         for doc in documents:
             self.save_document(ind, doc)
         if member_data["relationship"] == HEAD:
@@ -69,13 +71,15 @@ class HouseholdUploadMixin:
             hh.individuals_and_roles.create(individual=ind, role=ROLE_ALTERNATE)
         return ind
 
-    def save_households(self, rdi: RegistrationDataImportDatahub, households_data: List[Dict]) -> Totals:
+    def save_households(
+        self, rdi: RegistrationDataImportDatahub, program_id: UUID, households_data: List[Dict]
+    ) -> Totals:
         totals = Totals(0, 0)
         for household_data in households_data:
             totals.households += 1
             members: list[dict] = household_data.pop("members")
-            hh = ImportedHousehold.objects.create(registration_data_import=rdi, **household_data)
+            hh = ImportedHousehold.objects.create(registration_data_import=rdi, program_id=program_id, **household_data)
             for member_data in members:
-                self.save_member(rdi, hh, member_data)
+                self.save_member(rdi, program_id, hh, member_data)
                 totals.individuals += 1
         return totals
