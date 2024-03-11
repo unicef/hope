@@ -18,6 +18,7 @@ export const FormikDateField = ({
   decoratorEnd,
   tooltip = null,
   required = false,
+  dataCy = 'date-picker-filter',
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
@@ -31,7 +32,7 @@ export const FormikDateField = ({
   }
 
   const datePickerComponent = (
-    <FullWidthFormControl size="small">
+    <FullWidthFormControl data-cy={dataCy} size="small">
       <DatePicker
         {...field}
         {...otherProps}
