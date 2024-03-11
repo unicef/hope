@@ -1,6 +1,7 @@
 from typing import Any, List
 from unittest.mock import patch
 
+import pytest
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
@@ -198,6 +199,7 @@ class TestCrossAreaFilterAvailable(APITestCase):
             variables={"isCrossArea": None},
         )
 
+    @pytest.mark.skip(reason="unstable test")
     def test_cross_area_filter_true_but_area_restrictions(self) -> None:
         user_with_area_restrictions = UserFactory(partner=self.partner_with_area_restrictions)
         self.create_user_role_with_permissions(

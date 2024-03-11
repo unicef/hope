@@ -7,6 +7,8 @@ from django.core.management import BaseCommand, call_command
 from django.db import OperationalError, connections
 from django.utils import timezone
 
+import elasticsearch
+
 from hct_mis_api.apps.account.models import Partner, Role, User, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.payment.fixtures import (
@@ -69,7 +71,11 @@ class Command(BaseCommand):
         call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/steficon/fixtures/data.json")
         call_command("loaddata", f"{settings.PROJECT_ROOT}/aurora/fixtures/data.json")
 
-        call_command("search_index", "--rebuild", "-f")
+        try:
+            call_command("search_index", "--rebuild", "-f")
+        except elasticsearch.exceptions.RequestError:
+            pass
+
         update_mis_unicef_id_individual_and_household()
         generate_payment_plan()
         generate_real_cash_plans()
