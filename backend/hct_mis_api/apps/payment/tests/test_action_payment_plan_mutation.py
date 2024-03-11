@@ -1,7 +1,10 @@
 from typing import Any, List
 from unittest.mock import patch
 
+from django.utils import timezone
+
 from constance.test import override_config
+from freezegun import freeze_time
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -157,7 +160,7 @@ class TestActionPaymentPlanMutation(APITestCase):
         ]
     )
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
-    @patch("hct_mis_api.apps.payment.notifications.EmailMultiAlternatives.send")
+    @patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     @override_config(PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS=True)
     def test_update_status_payment_plan(
         self,
@@ -185,6 +188,7 @@ class TestActionPaymentPlanMutation(APITestCase):
                 },
             )
 
+    @freeze_time("2021-01-01")
     @patch("hct_mis_api.apps.payment.notifications.PaymentNotification.__init__")
     @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
     @override_config(PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS=True)
@@ -226,7 +230,15 @@ class TestActionPaymentPlanMutation(APITestCase):
             mock_init.call_count,
             4,
         )
-        mock_init.assert_any_call(self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.value)
-        mock_init.assert_any_call(self.payment_plan, PaymentPlan.Action.APPROVE.value)
-        mock_init.assert_any_call(self.payment_plan, PaymentPlan.Action.AUTHORIZE.value)
-        mock_init.assert_any_call(self.payment_plan, PaymentPlan.Action.REVIEW.value)
+        mock_init.assert_any_call(
+            self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.value, self.user, f"{timezone.now():%-d %B %Y}"
+        )
+        mock_init.assert_any_call(
+            self.payment_plan, PaymentPlan.Action.APPROVE.value, self.user, f"{timezone.now():%-d %B %Y}"
+        )
+        mock_init.assert_any_call(
+            self.payment_plan, PaymentPlan.Action.AUTHORIZE.value, self.user, f"{timezone.now():%-d %B %Y}"
+        )
+        mock_init.assert_any_call(
+            self.payment_plan, PaymentPlan.Action.REVIEW.value, self.user, f"{timezone.now():%-d %B %Y}"
+        )
