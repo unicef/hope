@@ -165,7 +165,6 @@ class ImportedIndividualIdentityAdmin(HOPEModelAdminBase):
 class ImportedHouseholdAdmin(HOPEModelAdminBase):
     search_fields = ("id", "registration_data_import")
     list_display = (
-        QueryStringFilter,
         "registration_data_import",
         "registration_method",
         "name_enumerator",
@@ -175,6 +174,7 @@ class ImportedHouseholdAdmin(HOPEModelAdminBase):
     raw_id_fields = ("registration_data_import", "head_of_household")
     date_hierarchy = "registration_data_import__import_date"
     list_filter = (
+        QueryStringFilter,
         DepotManager,
         ("country", ChoicesFieldComboFilter),
         ("country_origin", ChoicesFieldComboFilter),
