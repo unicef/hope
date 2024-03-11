@@ -2,6 +2,7 @@ import base64
 import logging
 from dataclasses import dataclass
 from typing import Dict, List, Optional
+from uuid import UUID
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -23,7 +24,7 @@ from hct_mis_api.apps.registration_datahub.models import (
 logger = logging.getLogger(__name__)
 
 
-def get_photo_from_stream(stream: str) -> Optional[SimpleUploadedFile]:
+def get_photo_from_stream(stream: Optional[str]) -> Optional[SimpleUploadedFile]:
     if stream:
         base64_img_bytes = stream.encode("utf-8")
         decoded_image_data = base64.decodebytes(base64_img_bytes)
@@ -39,7 +40,7 @@ class Totals:
 
 
 class HouseholdUploadMixin:
-    def save_document(self, member: ImportedIndividual, doc: ImportedDocument) -> None:
+    def save_document(self, member: ImportedIndividual, doc: Dict) -> None:
         ImportedDocument.objects.create(
             document_number=doc["document_number"],
             photo=get_photo_from_stream(doc.get("image", None)),

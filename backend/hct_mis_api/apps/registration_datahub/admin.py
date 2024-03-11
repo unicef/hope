@@ -61,7 +61,7 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
 
     @button(label="RDI")
     def hub(self, request: HttpRequest, pk: UUID) -> Union[HttpResponseRedirect, HttpResponse]:  # type: ignore[return]
-        obj = self.get_object(request, pk)
+        obj = self.get_object(request, str(pk))
         if obj.hct_id:
             url = reverse("admin:registration_data_registrationdataimport_change", args=[obj.hct_id])
             return HttpResponseRedirect(url)
