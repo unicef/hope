@@ -7,8 +7,6 @@ from page_object.grievance.new_feedback import NewFeedback
 from django.conf import settings
 from django.core.management import call_command
 
-from hct_mis_api.apps.core.models import BusinessArea
-
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
@@ -121,8 +119,6 @@ class TestFeedback:
         pageFeedback.getNavFeedback().click()
         # Create Feedback
         pageFeedback.getButtonSubmitNewFeedback().click()
-        from time import sleep
-        sleep(1)
         pageNewFeedback.chooseOptionByName(issue_type)
         pageNewFeedback.getButtonNext().click()
         pageNewFeedback.getHouseholdTab()
@@ -137,19 +133,44 @@ class TestFeedback:
         assert issue_type in pageFeedbackDetails.getIssueType().text
         assert "-" in pageFeedbackDetails.getHouseholdID().text
         assert "-" in pageFeedbackDetails.getIndividualID().text
-        print(pageFeedbackDetails.getCreatedBy().text)
-        print(pageFeedbackDetails.getProgramme().text)
+        assert "-" in pageFeedbackDetails.getProgramme().text
+        assert "Test" in pageFeedbackDetails.getDescription().text
         pageFeedbackDetails.getLastModifiedDate()
         pageFeedbackDetails.getAdministrativeLevel2()
 
     @pytest.mark.skip(reason="ToDo")
     def test_create_feedback_optional_fields(
             self,
+            issue_type: None,
             pageFeedback: Feedback,
             pageFeedbackDetails: FeedbackDetailsPage,
+            pageNewFeedback: NewFeedback,
     ) -> None:
         # Go to Feedback
+        pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
+        # Create Feedback
+        pageFeedback.getButtonSubmitNewFeedback().click()
+        pageNewFeedback.chooseOptionByName(issue_type)
+        pageNewFeedback.getButtonNext().click()
+        pageNewFeedback.getHouseholdTab()
+        pageNewFeedback.getHouseholdTableRows()[0].click()
+        # I
+        pageNewFeedback.getButtonNext().click()
+        pageNewFeedback.getReceivedConsent().click()
+        pageNewFeedback.getButtonNext().click()
+        assert "Feedback" in pageNewFeedback.getLabelCategory().text
+        pageNewFeedback.getDescription().send_keys("Test")
+        pageNewFeedback.check_page_after_click(pageNewFeedback.getButtonNext(), "=")
+        # Check Details page
+        assert pageFeedbackDetails.textCategory in pageFeedbackDetails.getCategory().text
+        assert issue_type in pageFeedbackDetails.getIssueType().text
+        assert "-" in pageFeedbackDetails.getHouseholdID().text
+        assert "-" in pageFeedbackDetails.getIndividualID().text
+        assert "-" in pageFeedbackDetails.getProgramme().text
+        assert "Test" in pageFeedbackDetails.getDescription().text
+        pageFeedbackDetails.getLastModifiedDate()
+        pageFeedbackDetails.getAdministrativeLevel2()
 
     @pytest.mark.skip(reason="ToDo")
     def test_create_feedback_with_household(
