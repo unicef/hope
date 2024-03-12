@@ -24,6 +24,16 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14'
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            frontend/node_modules
+            frontend/.yarn
+            frontend/.yarn/cache
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - run: yarn install --frozen-lockfile
         working-directory: frontend
       - run: yarn test --watchAll=false
