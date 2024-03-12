@@ -31,7 +31,7 @@ jobs:
             frontend/node_modules
             frontend/.yarn
             frontend/.yarn/cache
-          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-node-
       - run: yarn install --frozen-lockfile
