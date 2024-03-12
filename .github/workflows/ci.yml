@@ -32,10 +32,10 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dev \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dev \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dev \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
             -f ./docker/Dockerfile \
@@ -134,18 +134,28 @@ jobs:
         run: |
           docker buildx create --use
           docker buildx build \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dev \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dev \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dist \
-            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dist \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-${{ github.sha }}-dist \
-            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:cache-core-latest-dist \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
+            --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
+            --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
             -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dist \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} \
             -f ./docker/Dockerfile \
             --target dist \
             --push \
             ./
+
+          # # Builds from master branch are tagged with the version number
+          # if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+          #   version=$(grep -oP '(?<=version = ")[^"]*' backend/pyproject.toml)
+          #   docker tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
+          #   docker push ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
+          # fi
+
+          version=$(grep -oP '(?<=version = ")[^"]*' backend/pyproject.toml)
+          echo Will tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} as ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
 
   unit_tests:
     runs-on: ubuntu-latest
