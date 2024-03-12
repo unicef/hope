@@ -135,14 +135,6 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         GrievanceComplaintTicketFactory.create_batch(5)
         SensitiveGrievanceTicketFactory.create_batch(5)
 
-        cls.variables = {
-            "businessArea": "afghanistan",
-            "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
-            "issueType": str(cls.ticket.ticket.issue_type),
-            "household": cls.household.id,
-            "individual": cls.individuals[0].id,
-        }
-
     @parameterized.expand(
         [
             (
@@ -157,15 +149,17 @@ class TestAlreadyExistingFilterTickets(APITestCase):
     def test_filter_existing_tickets_by_payment_record(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = {
-            **self.variables,
-            "paymentRecord": [self.payment_record.id],
-        }
-
         self.snapshot_graphql_request(
             request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
             context={"user": self.user},
-            variables=input_data,
+            variables={
+                "businessArea": "afghanistan",
+                "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
+                "issueType": str(self.ticket.ticket.issue_type),
+                "household": self.household.id,
+                "individual": self.individuals[0].id,
+                "paymentRecord": [self.payment_record.id],
+            },
         )
 
     @parameterized.expand(
@@ -180,14 +174,17 @@ class TestAlreadyExistingFilterTickets(APITestCase):
     def test_filter_existing_tickets_by_two_payment_records(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = {
-            **self.variables,
-            "paymentRecord": [self.payment_record.id, self.payment_record2.id],
-        }
         self.snapshot_graphql_request(
             request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
             context={"user": self.user},
-            variables=input_data,
+            variables={
+                "businessArea": "afghanistan",
+                "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
+                "issueType": str(self.ticket.ticket.issue_type),
+                "household": self.household.id,
+                "individual": self.individuals[0].id,
+                "paymentRecord": [self.payment_record.id, self.payment_record2.id],
+            },
         )
 
     @parameterized.expand(
@@ -207,7 +204,13 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         self.snapshot_graphql_request(
             request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
             context={"user": self.user},
-            variables=self.variables,
+            variables={
+                "businessArea": "afghanistan",
+                "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
+                "issueType": str(self.ticket.ticket.issue_type),
+                "household": self.household.id,
+                "individual": self.individuals[0].id,
+            }
         )
 
     @parameterized.expand(
@@ -224,11 +227,13 @@ class TestAlreadyExistingFilterTickets(APITestCase):
     def test_filter_existing_tickets_by_individual(self, _: Any, permissions: List[Permissions]) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        input_data = {**self.variables}
-        del input_data["household"]
-
         self.snapshot_graphql_request(
             request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
             context={"user": self.user},
-            variables=input_data,
+            variables={
+                "businessArea": "afghanistan",
+                "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
+                "issueType": str(self.ticket.ticket.issue_type),
+                "individual": self.individuals[0].id,
+            },
         )

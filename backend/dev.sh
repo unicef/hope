@@ -13,14 +13,7 @@ else
   case "$1" in
     "test")
       wait_for_db db
-      wait_for_db cash_assist_datahub_db
-      wait_for_db mis_datahub_db
-      wait_for_db erp_datahub_db
-      wait_for_db registration_datahub_db
-      # pytest hct_mis_api -n logical
-      coverage run --parallel-mode ./manage.py test --settings hct_mis_api.settings_test --noinput --parallel
-      coverage combine
-      coverage xml
+      pytest -n auto -k account --cov-report json:cov.json hct_mis_api/
       ;;
     "lint")
       mkdir -p ./lint-results
