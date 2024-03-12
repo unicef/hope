@@ -68,7 +68,7 @@ if (process.env.NODE_ENV !== 'development' && window.SENTRY_DSN) {
 const root = createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />,
+    <App />
   </React.StrictMode>,
 );
 
