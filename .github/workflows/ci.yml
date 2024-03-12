@@ -147,15 +147,14 @@ jobs:
             --push \
             ./
 
-          # # Builds from master branch are tagged with the version number
-          # if [ "${{ github.ref }}" = "refs/heads/master" ]; then
-          #   version=$(grep -oP '(?<=version = ")[^"]*' backend/pyproject.toml)
-          #   docker tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
-          #   docker push ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
-          # fi
+          # Builds from master branch are tagged with the version number
+          if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('backend/pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
+            tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
+            echo Will tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} as $tagged_image
+            docker push $tagged_image
+          fi
 
-          version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('backend/pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
-          echo Will tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} as ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
 
   unit_tests:
     runs-on: ubuntu-latest
