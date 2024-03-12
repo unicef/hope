@@ -2,7 +2,6 @@ import os
 from time import sleep
 
 from page_object.base_components import BaseComponents
-from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -101,22 +100,24 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.inputFreqOfPaymentRegular, By.XPATH)
 
     def getInputStartDate(self, test_data: dict) -> None:
-        self.driver.get_screenshot_as_file(os.path.join('screenshot', 'aprzed.png'))
-        print(self.driver.capabilities['browserVersion'])
+        self.driver.get_screenshot_as_file(os.path.join("screenshot", "aprzed.png"))
+        print(self.driver.capabilities["browserVersion"])
         import selenium
+
         print(selenium.__version__)
         # x = self.wait_for("MuiFormControl-root MuiTextField-root css-197rvjk-MuiFormControl-root-MuiTextField-root", By.CLASS_NAME).location
         # x.screenshot(os.path.join('screenshot', f'div.png'))
         self.wait_for(self.inputStartDate).send_keys(test_data["startDate"].numerically_formatted_date)
         print(self.wait_for(self.inputStartDate).get_attribute("value"))
         element = self.wait_for(self.inputStartDate)
-        self.driver.execute_script("arguments[0].value='" + test_data["startDate"].numerically_formatted_date + "';", element)
+        self.driver.execute_script(
+            "arguments[0].value='" + test_data["startDate"].numerically_formatted_date + "';", element
+        )
         sleep(1)
         print(self.wait_for(self.inputStartDate).get_attribute("value"))
-        self.driver.get_screenshot_as_file(os.path.join('screenshot', 'foo2.png'))
+        self.driver.get_screenshot_as_file(os.path.join("screenshot", "foo2.png"))
         # self.driver.execute_script("arguments[0].click();", self.wait_for(self.inputStartDate))
         el = self.wait_for(self.inputStartDate)
-        str = el.tag_name
         parent = el.find_element("xpath", "..")
         children = parent.find_elements("xpath", "*")
         print(parent.tag_name, parent.get_attribute("class"))
