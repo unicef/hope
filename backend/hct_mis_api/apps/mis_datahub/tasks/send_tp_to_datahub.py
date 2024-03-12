@@ -214,8 +214,9 @@ class SendTPToDatahubTask:
     def _get_individuals_and_households(self, target_population: "TargetPopulation") -> Any:
         all_targeted_households_ids = target_population.household_list.values_list("id", flat=True)
         # only head of households + collectors (primary_collector,alternate_collector)
+        # | Q(household__id__in=all_targeted_households_ids) for filter only if individual data needed
         all_individuals = Individual.objects.filter(
-            (Q(heading_household__in=all_targeted_households_ids))
+            Q(heading_household__in=all_targeted_households_ids)
             | Q(represented_households__in=all_targeted_households_ids)
         ).distinct()
         all_households = Household.objects.filter(

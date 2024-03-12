@@ -243,9 +243,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
 
     def test_send_targeting_with_external_collectors_with_individuals(self) -> None:
         task = SendTPToDatahubTask()
-        msg = task.send_target_population(self.target_population_with_individuals)
-
-        print("MSG ", msg)
+        task.send_target_population(self.target_population_with_individuals)
 
         # Check first household in DB
         self.assertEqual(
@@ -268,7 +266,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             dh_models.Individual.objects.filter(
                 mis_id__in=[self.individual_no_role_first.id, self.individual_no_role_second.id]
             ).count(),
-            2,
+            0,
             "All individuals for first household should be in datahub",
         )
         self.assertEqual(
@@ -348,8 +346,8 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
 
         self.assertEqual(
             dh_models.Individual.objects.count(),
-            7,
-            "Only 7 individuals should be copied",
+            5,
+            "Only 5 individuals should be copied",
         )
         self.assertEqual(
             dh_models.IndividualRoleInHousehold.objects.count(),

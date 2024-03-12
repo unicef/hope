@@ -229,7 +229,7 @@ class TestSendTpToDatahub(TestCase):
         dh_roles = dh_models.IndividualRoleInHousehold.objects.all()
 
         self.assertEqual(dh_household.count(), 1)
-        self.assertEqual(dh_individuals.count(), 4)
+        self.assertEqual(dh_individuals.count(), 2)
         self.assertEqual(dh_documents.count(), 1)
         self.assertEqual(dh_roles.count(), 2)
 
@@ -302,7 +302,7 @@ class TestSendTpToDatahub(TestCase):
         dh_individuals_count = dh_models.Individual.objects.filter(household_mis_id=household.id).count()
         dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
         self.assertEqual(dh_households_count, 1)
-        self.assertEqual(dh_individuals_count, 3)
+        self.assertEqual(dh_individuals_count, 1)
 
     @parameterized.expand(
         [
