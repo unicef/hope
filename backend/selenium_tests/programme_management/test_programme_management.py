@@ -104,6 +104,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getInputStartDate(test_data)
         from time import sleep
+
         sleep(2)
         # pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
@@ -278,7 +279,7 @@ class TestProgrammeManagement:
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getButtonNext().click()
         # Cehck Mandatory fields texts
-        assert "Programme Name is required" in pageProgrammeManagement.getLabelProgrammeName().text.split('\n')
+        assert "Programme Name is required" in pageProgrammeManagement.getLabelProgrammeName().text.split("\n")
         assert "Start Date is required" in pageProgrammeManagement.getLabelStartDate().text
         assert "End Date is required" in pageProgrammeManagement.getLabelEndDate().text
         assert "Sector is required" in pageProgrammeManagement.getLabelSelector().text
