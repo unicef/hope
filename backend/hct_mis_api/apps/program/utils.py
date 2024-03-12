@@ -1,3 +1,4 @@
+import re
 from typing import Dict, List, Sequence, Union
 
 from django.db import transaction
@@ -303,7 +304,18 @@ def enroll_households_to_program(households: QuerySet, program: Program) -> None
 
                 create_roles_for_new_representation(household, program)
         except Exception as e:
-            error_messages.append(f"{household.unicef_id}: {str(e)}")
+            error_message = str(e)
+            if "unique_if_not_removed_and_valid_for_representations" in error_message:
+                if document_data := re.search(r"\((.*?)\)=\((.*?)\)", error_message):
+                    keys = document_data.group(1).split(", ")
+                    values = document_data.group(2).split(", ")
+                    document_dict = dict(zip(keys, values))
+                    error_message = f"Document already exists: {document_dict.get('document_number')}"
+            else:
+                detail_index = error_message.find("DETAIL")
+                if detail_index != -1:
+                    error_message = error_message[:detail_index].strip()
+            error_messages.append(f"{household.unicef_id}: {error_message}")
     if error_messages:
         raise Exception("Following households failed to be enrolled: \n" + "\n".join(error_messages))
 
