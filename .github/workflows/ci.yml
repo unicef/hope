@@ -25,7 +25,9 @@ jobs:
         with:
           node-version: '14'
       - run: yarn install --frozen-lockfile
+        working-directory: frontend
       - run: yarn test --watchAll=false
+        working-directory: frontend
 
   build_and_push_dev:
     runs-on: ubuntu-latest
