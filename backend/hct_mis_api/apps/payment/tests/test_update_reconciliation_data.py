@@ -97,7 +97,7 @@ class TestDeliveryDate(APITestCase):
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @patch(
         "hct_mis_api.apps.payment.xlsx.xlsx_payment_plan_per_fsp_import_service.timezone.now",
-        return_value=datetime(2023, 10, 23),
+        return_value=datetime(2023, 10, 23).replace(tzinfo=utc),
     )
     def test_uploading_delivery_date_with_xlsx(self, mock_time_zone: Any, mock_exchange_rate: Any) -> None:
         self.payment_1.delivery_date = None

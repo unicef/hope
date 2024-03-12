@@ -17,6 +17,7 @@ from hct_mis_api.apps.program.models import Program, ProgramCycle
 class ProgramCycleFactory(DjangoModelFactory):
     class Meta:
         model = ProgramCycle
+        django_get_or_create = ("iteration", "program")
 
     status = ProgramCycle.ACTIVE
     start_date = factory.Faker(
@@ -32,6 +33,7 @@ class ProgramCycleFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
+    iteration = factory.Sequence(lambda n: n)
 
 
 class ProgramFactory(DjangoModelFactory):
