@@ -154,7 +154,7 @@ jobs:
           #   docker push ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
           # fi
 
-          version=$(grep -oP '(?<=version = ")[^"]*' backend/pyproject.toml)
+          version=$(python3 -c "import sys, tomllib; version=tomllib.load(open('backend/pyproject.toml', 'rb')).get('tool', {}).get('poetry', {}).get('version'); print(version if version else sys.exit(1))")
           echo Will tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} as ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
 
   unit_tests:
