@@ -10,18 +10,21 @@ from hct_mis_api.apps.geo.models import Area
 
 class TemplateFileGenerator:
     @classmethod
-    def _create_workbook(cls, template_for_social_worker: Optional[bool] = None) -> openpyxl.Workbook:
+    def _create_workbook(cls) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
-        ws_households = wb.active
-        ws_households.title = "Households" if not template_for_social_worker else "Individuals"
-        if not template_for_social_worker:
-            wb.create_sheet("Individuals")
+        ws_import_helper = wb.active
+        ws_import_helper.title = "Import helper"
+        wb.create_sheet("Households")
+        wb.create_sheet("Individuals")
+        wb.create_sheet("People")
         wb.create_sheet("Choices")
+
+        wb = cls._add_import_helper(wb)
 
         return wb
 
     @classmethod
-    def _handle_choices(cls, fields: Dict, template_for_social_worker: Optional[bool] = None) -> List[List[str]]:
+    def _handle_choices(cls, fields: Dict) -> List[List[str]]:
         rows: list[list[str]] = [["Field Name", "Label", "Value to be used in template"]]
 
         for field_name, field_value in fields.items():
@@ -29,27 +32,8 @@ class TemplateFileGenerator:
             choices = field_value["choices"]
             if is_admin_level:
                 choices = Area.get_admin_areas_as_choices(field_name[-5])
-            if field_name == "relationship_i_c" and template_for_social_worker:
-                # hardcoded for social_worker template
-                choices = [
-                    {
-                        "label": {
-                            "English(EN)": "An individual is only an external collector (primary_collector_id, "
-                            "alternate_collector_id fields have to point out for whom this person "
-                            "is a collector)"
-                        },
-                        "value": "NON_BENEFICIARY",
-                    },
-                    {
-                        "label": {
-                            "English(EN)": "An individual is a beneficiary but also can be a collector and even "
-                            "an external collector"
-                        },
-                        "value": "HEAD",
-                    },
-                ]
             if choices:
-                for choice in choices:
+                for choice in field_value["choices"]:
                     row = [
                         field_name,
                         str(choice["label"]["English(EN)"]),
@@ -80,58 +64,62 @@ class TemplateFileGenerator:
         cls,
         wb: openpyxl.Workbook,
         business_area_slug: Optional[str] = None,
-        template_for_social_worker: Optional[bool] = None,
     ) -> openpyxl.Workbook:
         households_sheet_title = "Households"
         individuals_sheet_title = "Individuals"
 
-        if not template_for_social_worker:
-            ws_households = wb[households_sheet_title]
-        else:
-            ws_households = None
-
+        ws_households = wb[households_sheet_title]
         ws_individuals = wb[individuals_sheet_title]
+        ws_people = wb["People"]
         ws_choices = wb["Choices"]
 
         flex_fields = serialize_flex_attributes()
 
-        if template_for_social_worker:
-            scopes = [Scope.GLOBAL, Scope.XLSX, Scope.XLSX_SOCIAL_WORKER, Scope.COLLECTOR]
-        else:
-            scopes = [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
+        scopes = [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
         fields = FieldFactory.from_scopes(scopes).apply_business_area(business_area_slug=business_area_slug)
 
-        if not template_for_social_worker:
-            households_fields = {
-                **fields.associated_with_household().to_dict_by("xlsx_field"),
-                **flex_fields[households_sheet_title.lower()],
-            }
-        else:
-            households_fields = {}
+        people_scopes = [Scope.GLOBAL, Scope.XLSX, Scope.XLSX_SOCIAL_WORKER, Scope.COLLECTOR]
+        people_fields = FieldFactory.from_scopes(people_scopes).apply_business_area(
+            business_area_slug=business_area_slug
+        )
+
+        households_fields = {
+            **fields.associated_with_household().to_dict_by("xlsx_field"),
+            **flex_fields[households_sheet_title.lower()],
+        }
 
         individuals_fields = {
             **fields.associated_with_individual().to_dict_by("xlsx_field"),
             **flex_fields[individuals_sheet_title.lower()],
         }
 
+        people_fields = {
+            **people_fields.associated_with_individual().to_dict_by("xlsx_field"),
+            **flex_fields[individuals_sheet_title.lower()],
+        }
+
         households_rows = cls._handle_name_and_label_row(households_fields)
         individuals_rows = cls._handle_name_and_label_row(individuals_fields)
+        people_rows = cls._handle_name_and_label_row(people_fields)
 
-        for h_row, i_row in zip(households_rows, individuals_rows):
-            if not template_for_social_worker:
-                ws_households.append(h_row)
+        for h_row, i_row, p_row in zip(households_rows, individuals_rows, people_rows):
+            ws_households.append(h_row)
             ws_individuals.append(i_row)
+            ws_people.append(p_row)
 
-        choices = cls._handle_choices({**households_fields, **individuals_fields}, template_for_social_worker)
+        choices = cls._handle_choices({**households_fields, **individuals_fields})
         for row in choices:
             ws_choices.append(row)
 
         return wb
 
     @classmethod
-    def get_template_file(
-        cls, business_area_slug: Optional[str] = None, template_for_social_worker: Optional[bool] = None
-    ) -> openpyxl.Workbook:
-        return cls._add_template_columns(
-            cls._create_workbook(template_for_social_worker), business_area_slug, template_for_social_worker
-        )
+    def _add_import_helper(cls, wb: openpyxl.Workbook) -> openpyxl.Workbook:
+        ws_import_helper = wb["Import helper"]
+        ws_import_helper.append(["Some data will be added soon"])
+        # TODO: add info for Import helper
+        return wb
+
+    @classmethod
+    def get_template_file(cls, business_area_slug: Optional[str] = None) -> openpyxl.Workbook:
+        return cls._add_template_columns(cls._create_workbook(), business_area_slug)
