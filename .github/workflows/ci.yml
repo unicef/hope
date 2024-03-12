@@ -210,7 +210,8 @@ jobs:
         github.ref == 'refs/heads/staging' ||
         github.ref == 'refs/heads/master' ||
         github.ref == 'refs/heads/ephemeral-1' ||
-        github.ref == 'refs/heads/ephemeral-2'
+        github.ref == 'refs/heads/ephemeral-2' ||
+        github.ref == 'refs/heads/ephemeral-3'
       )
     steps:
       - name: Trigger deploy
@@ -226,6 +227,8 @@ jobs:
             pipelineId=1164
           elif [ ${{ github.ref }} == 'refs/heads/ephemeral-2' ]; then
             pipelineId=1253
+          elif [ ${{ github.ref }} == 'refs/heads/ephemeral-3' ]; then
+            pipelineId=1283
           else
             echo "No pipeline to trigger for ref ${{ github.ref }}"
             exit 0
