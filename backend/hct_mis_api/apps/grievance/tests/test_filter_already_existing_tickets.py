@@ -210,7 +210,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
                 "issueType": str(self.ticket.ticket.issue_type),
                 "household": self.household.id,
                 "individual": self.individuals[0].id,
-            }
+            },
         )
 
     @parameterized.expand(
