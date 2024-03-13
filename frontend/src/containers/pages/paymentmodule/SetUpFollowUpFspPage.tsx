@@ -6,7 +6,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useBaseUrl } from '../../../hooks/useBaseUrl';
 
-export const SetFollowUpUpFspPage = (): React.ReactElement => {
+export const SetUpFollowUpFspPage = (): React.ReactElement => {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
 
