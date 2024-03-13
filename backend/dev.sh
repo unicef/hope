@@ -13,7 +13,7 @@ else
   case "$1" in
     "test")
       wait_for_db db
-      pytest -n auto -k account --cov-report xml:coverage.xml hct_mis_api/
+      pytest -n auto --reruns 3 --reruns-delay 1 --cov-report xml:coverage.xml hct_mis_api/
       ;;
     "lint")
       mkdir -p ./lint-results
