@@ -264,12 +264,12 @@ class ImportDataInstanceValidator:
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self) -> None:
+    def __init__(self, is_social_worker_program: bool = False) -> None:
         super().__init__()
+        self.is_social_worker_program = is_social_worker_program
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
         self.household_ids = []
-        self.is_social_worker_program = False
 
     def get_combined_fields(self) -> Dict:
         core_fields = (
@@ -762,9 +762,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def validate_everything(
-        self, xlsx_file: Any, business_area_slug: str, is_social_worker_program: bool = False
+        self, xlsx_file: Any, business_area_slug: str
     ) -> List[Dict[str, Any]]:
-        self.is_social_worker_program = is_social_worker_program
         try:
             errors = self.validate_file_extension(xlsx_file)
             if errors:
