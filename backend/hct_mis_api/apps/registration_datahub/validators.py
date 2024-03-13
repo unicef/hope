@@ -269,20 +269,34 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
         self.household_ids = []
+        self.is_social_worker_program = False
 
     def get_combined_fields(self) -> Dict:
-        core_fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
+        core_fields = (
+            FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
+            if not self.is_social_worker_program
+            else FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.XLSX_SOCIAL_WORKER, Scope.COLLECTOR])
+        )
+        # TODO: update flex field for people
         flex_fields = serialize_flex_attributes()
-        return {
-            "households": {
-                **core_fields.associated_with_household().to_dict_by("xlsx_field"),
-                **flex_fields["households"],
-            },
-            "individuals": {
-                **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
-                **flex_fields["individuals"],
-            },
-        }
+        if self.is_social_worker_program:
+            return {
+                "people": {
+                    **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                    **flex_fields["individuals"],
+                },
+            }
+        else:
+            return {
+                "households": {
+                    **core_fields.associated_with_household().to_dict_by("xlsx_field"),
+                    **flex_fields["households"],
+                },
+                "individuals": {
+                    **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                    **flex_fields["individuals"],
+                },
+            }
 
     def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
@@ -747,7 +761,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(self, xlsx_file: Any, business_area_slug: str) -> List[Dict[str, Any]]:
+    def validate_everything(
+        self, xlsx_file: Any, business_area_slug: str, is_social_worker_program: bool = False
+    ) -> List[Dict[str, Any]]:
+        self.is_social_worker_program = is_social_worker_program
         try:
             errors = self.validate_file_extension(xlsx_file)
             if errors:
@@ -760,15 +777,21 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if errors:
                 # return error if WS do not exist in the import file
                 return errors
+            # TODO: update 'validate_collectors_size', 'validate_collectors'
             errors.extend(self.validate_collectors_size(wb))
             errors.extend(self.validate_collectors(wb))
-            individuals_sheet = wb["Individuals"]
-            household_sheet = wb["Households"]
 
-            self.image_loader = SheetImageLoader(household_sheet)
-            errors.extend(self.rows_validator(household_sheet, business_area_slug))
-            self.image_loader = SheetImageLoader(individuals_sheet)
-            errors.extend(self.rows_validator(individuals_sheet))
+            if not self.is_social_worker_program:
+                individuals_sheet = wb["Individuals"]
+                household_sheet = wb["Households"]
+                self.image_loader = SheetImageLoader(household_sheet)
+                errors.extend(self.rows_validator(household_sheet, business_area_slug))
+                self.image_loader = SheetImageLoader(individuals_sheet)
+                errors.extend(self.rows_validator(individuals_sheet))
+            else:
+                people_sheet = wb["People"]
+                self.image_loader = SheetImageLoader(people_sheet)
+                errors.extend(self.rows_validator(people_sheet))
             return errors
         except Exception as e:
             logger.exception(e)
