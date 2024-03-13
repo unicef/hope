@@ -1,5 +1,5 @@
 import { Box, FormControl } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { formatISO, parseISO } from 'date-fns';
 import * as React from 'react';
 import { FieldLabel } from './FieldLabel';
@@ -17,7 +17,7 @@ export const DatePickerFilter = ({
     <Box display="flex" flexDirection="column" >
     {topLabel ? <FieldLabel>{topLabel}</FieldLabel> : null}
     <FormControl data-cy={dataCy} size="small">
-      <DatePicker
+      <DesktopDatePicker
         slotProps={{ textField: { size: 'small' } }}
         onChange={(date) => {
           if (date) {
