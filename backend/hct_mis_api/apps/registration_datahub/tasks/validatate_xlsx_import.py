@@ -16,8 +16,8 @@ class ValidateXlsxImport:
     def execute(self, import_data: ImportData, is_social_worker_program: bool = False) -> Dict:
         import_data.status = ImportData.STATUS_RUNNING
         import_data.save()
-        errors = UploadXLSXInstanceValidator().validate_everything(
-            import_data.file, import_data.business_area_slug, is_social_worker_program
+        errors = UploadXLSXInstanceValidator(is_social_worker_program).validate_everything(
+            import_data.file, import_data.business_area_slug
         )
         if errors:
             errors.sort(key=operator.itemgetter("row_number", "header"))
