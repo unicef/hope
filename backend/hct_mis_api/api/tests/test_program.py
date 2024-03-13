@@ -1,13 +1,27 @@
+import contextlib
+from typing import Iterator
+
 from rest_framework.reverse import reverse
 
-from hct_mis_api.api.models import Grant
+from hct_mis_api.api.models import APIToken, Grant
 from hct_mis_api.api.tests.base import HOPEApiTestCase
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
+
+
+@contextlib.contextmanager
+def token_grant_permission(token: APIToken, grant: Grant) -> Iterator:
+    old = token.grants
+    token.grants += [grant.name]
+    token.save()
+    yield
+    token.grants = old
+    token.save()
 
 
 class CreateProgramTests(HOPEApiTestCase):
     databases = {"default"}
-    user_permissions = [Grant.API_PROGRAM_CREATE]
+    user_permissions = []
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -27,7 +41,18 @@ class CreateProgramTests(HOPEApiTestCase):
             "population_goal": 101,
         }
         response = self.client.post(self.create_url, data, format="json")
+        assert response.status_code == 403
+
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.post(self.create_url, data, format="json")
+            assert response.status_code == 403
+
+        with token_grant_permission(self.token, Grant.API_PROGRAM_CREATE):
+            response = self.client.post(self.create_url, data, format="json")
+
+        assert response.status_code == 201, data
         data = response.json()
+
         if not (program := Program.objects.filter(name="Program #1").first()):
             self.fail("Program was not present")
         self.assertTrue(program)
@@ -48,20 +73,29 @@ class CreateProgramTests(HOPEApiTestCase):
 
         self.assertEqual(program.business_area, self.business_area)
 
-        response = self.client.get(self.list_url)
+    def test_list_program(self) -> None:
+        program: Program = ProgramFactory(
+            budget=10000,
+            start_date="2022-01-12",
+            end_date="2022-09-12",
+            business_area=self.business_area,
+            population_goal=200,
+        )
+        with token_grant_permission(self.token, Grant.API_READ_ONLY):
+            response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 1)
         self.assertDictEqual(
             response.json()[0],
             {
                 "budget": "10000.00",
-                "cash_plus": True,
-                "end_date": "2022-09-27",
-                "frequency_of_payments": "ONE_OFF",
+                "cash_plus": program.cash_plus,
+                "end_date": "2022-09-12",
+                "frequency_of_payments": program.frequency_of_payments,
                 "id": str(program.id),
-                "name": "Program #1",
-                "population_goal": 101,
-                "sector": "CHILD_PROTECTION",
-                "start_date": "2022-09-27",
+                "name": program.name,
+                "population_goal": 200,
+                "sector": program.sector,
+                "start_date": "2022-01-12",
             },
         )
