@@ -8,7 +8,7 @@ from django.db.models import Count
 from django.utils import timezone
 
 from hct_mis_api.apps.core.celery import app
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
 from hct_mis_api.apps.household.models import Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.exceptions import (
@@ -292,16 +292,19 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
+def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
     from hct_mis_api.apps.registration_datahub.models import ImportData
     from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import (
         ValidateXlsxImport,
     )
+    from hct_mis_api.apps.program.models import Program
 
     import_data = ImportData.objects.get(id=import_data_id)
+    program = Program.objects.get(id=program_id)
+    is_social_worker_program = program.data_collecting_type.type == DataCollectingType.Type.SOCIAL
     set_sentry_business_area_tag(import_data.business_area_slug)
     try:
-        return ValidateXlsxImport().execute(import_data)
+        return ValidateXlsxImport().execute(import_data, is_social_worker_program)
     except Exception as e:
         ImportData.objects.filter(
             id=import_data.id,
