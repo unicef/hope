@@ -161,6 +161,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     program_id = models.UUIDField(
         null=True, db_index=True, blank=True
     )  # TODO temporary null=True until we migrate backward all data
+    social_worker = models.BooleanField(default=False)
 
     @property
     def business_area(self) -> str:
@@ -287,6 +288,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         null=True, db_index=True, blank=True
     )  # TODO temporary null=True until we migrate backward all data
     age_at_registration = models.PositiveSmallIntegerField(null=True, blank=True)
+    social_worker = models.BooleanField(default=False)
 
     @property
     def age(self) -> int:
