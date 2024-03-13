@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { InputAdornment, Tooltip, TextField } from '@mui/material';
 import moment from 'moment';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import styled from 'styled-components';
 import FormControl from '@mui/material/FormControl';
 import { parseISO } from 'date-fns';
@@ -33,7 +33,7 @@ export const FormikDateField = ({
 
   const datePickerComponent = (
     <FullWidthFormControl data-cy={dataCy} size="small">
-      <DatePicker
+      <DesktopDatePicker
         {...field}
         {...otherProps}
         label={required ? `${otherProps.label}*` : otherProps.label}
