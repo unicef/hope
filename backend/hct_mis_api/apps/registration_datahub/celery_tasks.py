@@ -293,11 +293,11 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 @log_start_and_end
 @sentry_tags
 def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
+    from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_datahub.models import ImportData
     from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import (
         ValidateXlsxImport,
     )
-    from hct_mis_api.apps.program.models import Program
 
     import_data = ImportData.objects.get(id=import_data_id)
     program = Program.objects.get(id=program_id)

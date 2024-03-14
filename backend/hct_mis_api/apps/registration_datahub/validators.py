@@ -106,11 +106,15 @@ class ImportDataInstanceValidator:
         "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
     }
 
-    def __init__(self) -> None:
+    def __init__(self, is_social_worker_program: bool = False) -> None:
+        self.is_social_worker_program = is_social_worker_program
         self.all_fields = self.get_all_fields()
 
     def get_combined_attributes(self) -> Dict:
-        fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID]).apply_business_area()
+        scope_list = (
+            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID] if not self.is_social_worker_program else [Scope.XLSX_PEOPLE]
+        )
+        fields = FieldFactory.from_scopes(scope_list).apply_business_area()
 
         for field in fields:
             field["choices"] = [x.get("value") for x in field["choices"]]
@@ -265,7 +269,7 @@ class ImportDataInstanceValidator:
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     def __init__(self, is_social_worker_program: bool = False) -> None:
-        super().__init__()
+        super().__init__(is_social_worker_program)
         self.is_social_worker_program = is_social_worker_program
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
@@ -275,9 +279,9 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         core_fields = (
             FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
             if not self.is_social_worker_program
-            else FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.XLSX_SOCIAL_WORKER, Scope.COLLECTOR])
+            else FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
         )
-        # TODO: update flex field for people
+        # TODO: update flex field for People
         flex_fields = serialize_flex_attributes()
         if self.is_social_worker_program:
             return {
@@ -500,6 +504,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 "PHONE_NUMBER": self.phone_validator,
                 "GEOPOINT": self.geolocation_validator,
                 "IMAGE": self.image_validator,
+                "LIST_OF_IDS": self.integer_validator,
             }
 
             invalid_rows = []
@@ -761,9 +766,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_everything(
-        self, xlsx_file: Any, business_area_slug: str
-    ) -> List[Dict[str, Any]]:
+    def validate_everything(self, xlsx_file: Any, business_area_slug: str) -> List[Dict[str, Any]]:
         try:
             errors = self.validate_file_extension(xlsx_file)
             if errors:
@@ -909,29 +912,41 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         try:
             errors = []
 
-            individuals_sheet = wb["Individuals"]
-            households_sheet = wb["Households"]
+            if not self.is_social_worker_program:
+                individuals_sheet = wb["Individuals"]
+                households_sheet = wb["Households"]
 
-            household_count = self._count_households(households_sheet)
-            individuals_count = self._count_individuals(individuals_sheet)
+                household_count = self._count_households(households_sheet)
+                individuals_count = self._count_individuals(individuals_sheet)
 
-            if household_count == 0:
-                errors.append(
-                    {
-                        "row_number": 1,
-                        "header": "Households",
-                        "message": "There aren't households in the file.",
-                    }
-                )
+                if household_count == 0:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "Households",
+                            "message": "There aren't households in the file.",
+                        }
+                    )
 
-            if individuals_count == 0:
-                errors.append(
-                    {
-                        "row_number": 1,
-                        "header": "Individuals",
-                        "message": "There aren't individuals in the file.",
-                    }
-                )
+                if individuals_count == 0:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "Individuals",
+                            "message": "There aren't individuals in the file.",
+                        }
+                    )
+            else:
+                people_sheet = wb["People"]
+                people_count = self._count_individuals(people_sheet)
+                if people_count == 0:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": "There aren't people in the file.",
+                        }
+                    )
 
             return errors
         except Exception as e:
@@ -942,7 +957,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         first_row = individuals_sheet[1]
         individuals_count = 0
         for cell in first_row:
-            if cell.value == "full_name_i_c":
+            if cell.value in ["full_name_i_c", "pp_full_name_i_c"]:
                 for c in individuals_sheet[cell.column_letter][2:]:
                     if c.value:
                         individuals_count += 1

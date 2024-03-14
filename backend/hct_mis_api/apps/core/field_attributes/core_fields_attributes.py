@@ -69,8 +69,8 @@ from hct_mis_api.apps.core.field_attributes.lookup_functions import (
 from hct_mis_api.apps.core.field_attributes.payment_channel_fields_attributes import (
     PAYMENT_CHANNEL_FIELDS_ATTRIBUTES,
 )
-from hct_mis_api.apps.core.field_attributes.social_worker_fields_attributes import (
-    SOCIAL_WORKER_FIELDS_ATTRIBUTES,
+from hct_mis_api.apps.core.field_attributes.people_fields_attributes import (
+    PEOPLE_FIELDS_ATTRIBUTES,
 )
 from hct_mis_api.apps.core.languages import Languages
 from hct_mis_api.apps.geo.models import Area, Country
@@ -95,7 +95,7 @@ from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
 logger = logging.getLogger(__name__)
 
 CORE_FIELDS_ATTRIBUTES = (
-    SOCIAL_WORKER_FIELDS_ATTRIBUTES
+    PEOPLE_FIELDS_ATTRIBUTES
     + [
         {
             "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",

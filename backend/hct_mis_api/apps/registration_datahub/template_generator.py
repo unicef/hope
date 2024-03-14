@@ -67,19 +67,19 @@ class TemplateFileGenerator:
     ) -> openpyxl.Workbook:
         households_sheet_title = "Households"
         individuals_sheet_title = "Individuals"
+        people_sheet_title = "People"
 
         ws_households = wb[households_sheet_title]
         ws_individuals = wb[individuals_sheet_title]
-        ws_people = wb["People"]
+        ws_people = wb[people_sheet_title]
         ws_choices = wb["Choices"]
 
         flex_fields = serialize_flex_attributes()
 
-        scopes = [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
-        fields = FieldFactory.from_scopes(scopes).apply_business_area(business_area_slug=business_area_slug)
-
-        people_scopes = [Scope.GLOBAL, Scope.XLSX, Scope.XLSX_SOCIAL_WORKER, Scope.COLLECTOR]
-        people_fields = FieldFactory.from_scopes(people_scopes).apply_business_area(
+        fields = FieldFactory.from_scopes(
+            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
+        ).apply_business_area(business_area_slug=business_area_slug)
+        people_fields = FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area(
             business_area_slug=business_area_slug
         )
 
