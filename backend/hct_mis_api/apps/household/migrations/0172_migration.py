@@ -12,12 +12,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='household',
-            name='social_worker',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='individual',
-            name='social_worker',
-            field=models.BooleanField(default=False),
+            name='collect_type',
+            field=models.CharField(choices=[('STANDARD', 'Standard'), ('SINGLE', 'Single')], default='STANDARD',
+                                   max_length=8),
         ),
     ]
