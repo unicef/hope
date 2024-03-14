@@ -102,7 +102,7 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.inputStartDate)
 
     def chooseInputStartDateViaCalendar(self, day: int) -> None:
-        self.get(self.labelStartDate).find_element(By.TAG_NAME, 'button').click()
+        self.get(self.labelStartDate).find_element(By.TAG_NAME, "button").click()
         self.getCalendar()
         # ToDo: Create additional waiting mechanism
         sleep(1)

@@ -436,6 +436,7 @@ class TestAdminAreas:
         pageProgrammeManagement.chooseAreaAdmin1ByName("Baghlan").click()
         # ToDo: Create additional waiting mechanism
         from time import sleep
+
         sleep(1)
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
