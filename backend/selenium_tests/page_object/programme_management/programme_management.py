@@ -1,4 +1,3 @@
-import os
 from time import sleep
 
 from page_object.base_components import BaseComponents
@@ -13,9 +12,9 @@ class ProgrammeManagement(BaseComponents):
     inputProgrammeName = 'input[data-cy="input-name"]'
     labelProgrammeName = 'div[data-cy="input-programme-name"]'
     inputStartDate = 'input[name="startDate"]'
-    labelStartDate = 'div[data-cy="input-start-date"]'
+    labelStartDate = 'div[data-cy="date-picker-filter"]'
     inputEndDate = 'input[name="endDate"]'
-    labelEndDate = 'div[data-cy="input-end-date"]'
+    labelEndDate = 'div[data-cy="date-picker-filter"]'
     selectSelector = 'div[data-cy="select-sector"]'
     labelSelector = 'div[data-cy="input-sector"]'
     inputDataCollectingType = 'div[data-cy="input-data-collecting-type"]'
@@ -34,9 +33,9 @@ class ProgrammeManagement(BaseComponents):
     buttonAddPartner = 'button[data-cy="button-add-partner"]'
     inputPartner = 'div[data-cy="select-partners[0].id"]'
     buttonDelete = 'button[data-cy="button-delete"]'
-    labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span/span[1]'
+    labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span'
     calendarIcon = 'button[data-cy="calendar-icon"]'
-    calendar = 'div[data-cy="date-picker-container"]'
+    calendar = 'div[data-popper-placement="bottom-start"]'
     calendarMonthYear = (
         '//*[@class="MuiPickersSlideTransition-transitionContainer ' 'MuiPickersCalendarHeader-transitionContainer"]'
     )
@@ -99,73 +98,13 @@ class ProgrammeManagement(BaseComponents):
     def getInputFreqOfPaymentRegular(self) -> WebElement:
         return self.wait_for(self.inputFreqOfPaymentRegular, By.XPATH)
 
-    def getInputStartDate(self, test_data: dict) -> None:
-        self.driver.get_screenshot_as_file(os.path.join("screenshot", "aprzed.png"))
-        print(self.driver.capabilities["browserVersion"])
-        import selenium
-
-        print(selenium.__version__)
-        # x = self.wait_for("MuiFormControl-root MuiTextField-root css-197rvjk-MuiFormControl-root-MuiTextField-root", By.CLASS_NAME).location
-        # x.screenshot(os.path.join('screenshot', f'div.png'))
-        self.wait_for(self.inputStartDate).send_keys(test_data["startDate"].numerically_formatted_date)
-        print(self.wait_for(self.inputStartDate).get_attribute("value"))
-        element = self.wait_for(self.inputStartDate)
-        self.driver.execute_script(
-            "arguments[0].value='" + test_data["startDate"].numerically_formatted_date + "';", element
-        )
-        sleep(1)
-        print(self.wait_for(self.inputStartDate).get_attribute("value"))
-        self.driver.get_screenshot_as_file(os.path.join("screenshot", "foo2.png"))
-        # self.driver.execute_script("arguments[0].click();", self.wait_for(self.inputStartDate))
-        el = self.wait_for(self.inputStartDate)
-        parent = el.find_element("xpath", "..")
-        children = parent.find_elements("xpath", "*")
-        print(parent.tag_name, parent.get_attribute("class"))
-        for child in children:
-            print(f'- {child.tag_name}, {child.get_attribute("class")}')
-            children2 = child.find_elements("xpath", "*")
-            for child2 in children2:
-                print(f'-- {child2.tag_name}, {child.get_attribute("class")}')
-
-        # self.driver.get_screenshot_as_file(os.path.join('screenshot', 'foo0.png'))
-        # print(self.wait_for(self.inputStartDate).get_attribute('value'))
-        # # from time import sleep
-        # # sleep(2)
-        # self.wait_for(self.inputStartDate).send_keys(test_data["startDate"].numerically_formatted_date)
-        # print(self.wait_for(self.inputStartDate).get_attribute('value'))
-        # self.wait_for(self.inputStartDate).send_keys("2")
-        # print(self.wait_for(self.inputStartDate).get_attribute('value'))
-        # nowyno = self.wait_for(self.inputStartDate)
-        # for i in range(7):
-        #     nowyno = nowyno.find_element(By.XPATH, '..')
-        #     nowyno.screenshot(os.path.join('screenshot', f'parent{i}.png'))
-
-        # calendar_icon = self.get_elements('//button/*[name()="svg"]', By.XPATH)
-        # calendar_icon[0].screenshot(os.path.join('screenshot', f'svg1.png'))
-        # calendar_icon = self.get_elements('svg[data-testid="CalendarIcon"]')
-        # calendar_icon[0].screenshot(os.path.join('screenshot', f'svg2.png'))
-        # calendar_icon[0].click()
-        # elem = self.wait_for(self.inputStartDate)
-        # ac = ActionChains(self.driver)
-        # ac.move_to_element(elem).move_by_offset(xy["x"], xy["y"]).click().perform()
-        # ac = ActionChains(self.driver)
-        # print(xy)
-        # ac.move_by_offset(xy["x"]+10, xy["y"]).click().perform()
-        # sleep(1)
-        # self.driver.get_screenshot_as_file(os.path.join('screenshot', 'foo1.png'))
-        # print(self.wait_for(self.inputStartDate).get_attribute('value'))
-        # self.wait_for(self.inputStartDate).send_keys("0")
-
-        # return self.wait_for(self.inputStartDate, By.XPATH)
-        # text_input = self.driver.find_element(By.CSS_SELECTOR, self.inputStartDate)
-        # ActionChains(self.driver).send_keys_to_element(text_input, "2003").perform()
+    def getInputStartDate(self) -> WebElement:
+        return self.wait_for(self.inputStartDate)
 
     def chooseInputStartDateViaCalendar(self, day: int) -> None:
-        self.find_in_element(self.getLabelStartDate(), self.calendarIcon)[0].click()
+        self.get(self.labelStartDate).find_element(By.TAG_NAME, 'button').click()
         self.getCalendar()
         # ToDo: Create additional waiting mechanism
-        from time import sleep
-
         sleep(1)
         self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
         self.wait_for_disappear(self.calendar)
@@ -184,13 +123,13 @@ class ProgrammeManagement(BaseComponents):
         self.wait_for_disappear(self.calendar)
 
     def getLabelStartDate(self) -> WebElement:
-        return self.wait_for(self.labelStartDate)
+        return self.get_elements(self.labelStartDate)[0]
 
     def getInputEndDate(self) -> WebElement:
         return self.wait_for(self.inputEndDate)
 
     def getLabelEndDate(self) -> WebElement:
-        return self.wait_for(self.labelEndDate)
+        return self.get_elements(self.labelEndDate)[1]
 
     def getButtonNext(self) -> WebElement:
         return self.wait_for(self.buttonNext)
