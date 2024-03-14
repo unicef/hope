@@ -7,14 +7,14 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import React from 'react';
+} from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
-import { TableTitle } from '../../core/TableTitle';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { GrievanceTicketQuery } from '@generated/graphql';
+import { TableTitle } from '@core/TableTitle';
 import { handleSelected } from '../utils/helpers';
 
 const GreenIcon = styled.div`
@@ -33,24 +33,24 @@ export interface PaymentChannelsToRemoveTableProps {
   previousPaymentChannels;
 }
 
-export const PaymentChannelsToRemoveTable = ({
+export function PaymentChannelsToRemoveTable({
   values,
   isEdit,
   ticket,
   paymentChannelsToRemove,
   previousPaymentChannels,
   setFieldValue,
-}: PaymentChannelsToRemoveTableProps): React.ReactElement => {
+}: PaymentChannelsToRemoveTableProps): React.ReactElement {
   const { t } = useTranslation();
   const { selectedPaymentChannelsToRemove } = values;
   const paymentChannelsTableHead = (
     <TableHead>
       <TableRow>
-        <TableCell align='left' />
-        <TableCell data-cy='table-cell-bank-name' align='left'>
+        <TableCell align="left" />
+        <TableCell data-cy="table-cell-bank-name" align="left">
           {t('Bank name')}
         </TableCell>
-        <TableCell data-cy='table-cell-bank-account-number' align='left'>
+        <TableCell data-cy="table-cell-bank-account-number" align="left">
           {t('Bank account number')}
         </TableCell>
       </TableRow>
@@ -68,8 +68,8 @@ export const PaymentChannelsToRemoveTable = ({
   return (
     <>
       <TableTitle>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">
             {t('Payment channels to be removed')}
           </Typography>
         </Box>
@@ -83,14 +83,14 @@ export const PaymentChannelsToRemoveTable = ({
               <TableRow
                 key={`${paymentChannel.bank_name}-${paymentChannel.bank_account_number}`}
               >
-                <TableCell align='left'>
+                <TableCell align="left">
                   {isEdit ? (
                     <Checkbox
-                      data-cy='checkbox-payment-channel-to-remove'
+                      data-cy="checkbox-payment-channel-to-remove"
                       onChange={(): void => {
                         handleSelectPaymentChannelToRemove(index);
                       }}
-                      color='primary'
+                      color="primary"
                       disabled={
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
@@ -99,16 +99,16 @@ export const PaymentChannelsToRemoveTable = ({
                     />
                   ) : (
                     selectedPaymentChannelsToRemove.includes(index) && (
-                      <GreenIcon data-cy='green-check'>
+                      <GreenIcon data-cy="green-check">
                         <CheckCircleIcon />
                       </GreenIcon>
                     )
                   )}
                 </TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {paymentChannel?.bank_name || '-'}
                 </TableCell>
-                <TableCell align='left'>
+                <TableCell align="left">
                   {paymentChannel?.bank_account_number || '-'}
                 </TableCell>
               </TableRow>
@@ -118,4 +118,4 @@ export const PaymentChannelsToRemoveTable = ({
       </StyledTable>
     </>
   );
-};
+}

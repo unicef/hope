@@ -1,12 +1,13 @@
-import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { Box } from '@material-ui/core';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
-import Stepper from '@material-ui/core/Stepper';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Box } from '@mui/material';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import Stepper from '@mui/material/Stepper';
 import { FieldArray, Form, Formik } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AvailableFspsForDeliveryMechanismsDocument,
   PaymentPlanDocument,
@@ -14,12 +15,13 @@ import {
   useAssignFspToDeliveryMechMutation,
   useAvailableFspsForDeliveryMechanismsQuery,
   useChooseDeliveryMechForPaymentPlanMutation,
-} from '../../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LoadingComponent } from '../../../core/LoadingComponent';
+} from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { DeliveryMechanismRow } from '../DeliveryMechanismRow';
 import { SetUpFspButtonActions } from '../SetUpFspButtonActions/SetUpFspButtonActions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 export interface FormValues {
   deliveryMechanisms: {
@@ -29,27 +31,24 @@ export interface FormValues {
 }
 
 interface SetUpFspCoreProps {
-  baseUrl: string;
   permissions: string[];
   initialValues: FormValues;
 }
 
 export const SetUpFspCore = ({
-  baseUrl,
   permissions,
   initialValues,
 }: SetUpFspCoreProps): React.ReactElement => {
-  const history = useHistory();
+  const { baseUrl } = useBaseUrl();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
 
-  const {
-    data: deliveryMechanismsData,
-    loading: deliveryMechanismLoading,
-  } = useAllDeliveryMechanismsQuery({
-    fetchPolicy: 'network-only',
-  });
+  const { data: deliveryMechanismsData, loading: deliveryMechanismLoading } =
+    useAllDeliveryMechanismsQuery({
+      fetchPolicy: 'network-only',
+    });
 
   const { data: fspsData } = useAvailableFspsForDeliveryMechanismsQuery({
     variables: {
@@ -66,9 +65,8 @@ export const SetUpFspCore = ({
   const [activeStep, setActiveStep] = useState(isEdit ? 1 : 0);
   // const [warning, setWarning] = useState('');
 
-  const [
-    chooseDeliveryMechanisms,
-  ] = useChooseDeliveryMechForPaymentPlanMutation();
+  const [chooseDeliveryMechanisms] =
+    useChooseDeliveryMechForPaymentPlanMutation();
 
   const [assignFspToDeliveryMechanism] = useAssignFspToDeliveryMechMutation();
 
@@ -154,7 +152,7 @@ export const SetUpFspCore = ({
         },
       });
       showMessage(t('FSPs have been assigned to the delivery mechanisms'));
-      history.push(
+      navigate(
         `/${baseUrl}/payment-module/${
           isFollowUp ? 'followup-payment-plans' : 'payment-plans'
         }/${id}`,
@@ -179,67 +177,58 @@ export const SetUpFspCore = ({
       onSubmit={(values) => handleSubmit(values)}
       enableReinitialize
     >
-      {({ values, submitForm }) => {
-        return (
-          <Form>
-            <AutoSubmitFormOnEnter />
-            <Box m={5}>
-              <ContainerColumnWithBorder>
-                <Box>
-                  <Stepper activeStep={activeStep}>
-                    {steps.map((step) => {
+      {({ values, submitForm }) => (
+        <Form>
+          <AutoSubmitFormOnEnter />
+          <Box m={5}>
+            <ContainerColumnWithBorder>
+              <Box>
+                <Stepper activeStep={activeStep}>
+                  {steps.map((step) => (
+                    <Step key={step}>
+                      <StepLabel>{step}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
+              </Box>
+              {/* // warning not shown in Payment Module 1.0 */}
+              {/* {warning && <DeliveryMechanismWarning warning={warning} />} */}
+              <FieldArray
+                name="deliveryMechanisms"
+                render={(arrayHelpers) => (
+                  <>
+                    {values.deliveryMechanisms.map((item, index: number) => {
+                      const mapping =
+                        fspsData?.availableFspsForDeliveryMechanisms[index];
+                      const mappedFsps = mapping?.fsps.map((el) => ({
+                        name: el.name,
+                        value: el.id,
+                      }));
+
+                      const deliveryMechanismsChoices =
+                        deliveryMechanismsData.allDeliveryMechanisms.map(
+                          (el) => ({
+                            name: el.name,
+                            value: el.value,
+                          }),
+                        );
+
                       return (
-                        <Step key={step}>
-                          <StepLabel>{step}</StepLabel>
-                        </Step>
+                        <DeliveryMechanismRow
+                          /* eslint-disable-next-line react/no-array-index-key */
+                          key={`${item.deliveryMechanism}-${index}`}
+                          index={index}
+                          arrayHelpers={arrayHelpers}
+                          deliveryMechanismsChoices={deliveryMechanismsChoices}
+                          fspsChoices={mappedFsps}
+                          step={activeStep}
+                          values={values}
+                          permissions={permissions}
+                        />
                       );
                     })}
-                  </Stepper>
-                </Box>
-                {/* // warning not shown in Payment Module 1.0 */}
-                {/* {warning && <DeliveryMechanismWarning warning={warning} />} */}
-                <FieldArray
-                  name='deliveryMechanisms'
-                  render={(arrayHelpers) => {
-                    return (
-                      <>
-                        {values.deliveryMechanisms.map(
-                          (item, index: number) => {
-                            const mapping =
-                              fspsData?.availableFspsForDeliveryMechanisms[
-                                index
-                              ];
-                            const mappedFsps = mapping?.fsps.map((el) => ({
-                              name: el.name,
-                              value: el.id,
-                            }));
-
-                            const deliveryMechanismsChoices = deliveryMechanismsData.allDeliveryMechanisms.map(
-                              (el) => ({
-                                name: el.name,
-                                value: el.value,
-                              }),
-                            );
-
-                            return (
-                              <DeliveryMechanismRow
-                                /* eslint-disable-next-line react/no-array-index-key */
-                                key={`${item.deliveryMechanism}-${index}`}
-                                index={index}
-                                arrayHelpers={arrayHelpers}
-                                deliveryMechanismsChoices={
-                                  deliveryMechanismsChoices
-                                }
-                                fspsChoices={mappedFsps}
-                                step={activeStep}
-                                values={values}
-                                permissions={permissions}
-                              />
-                            );
-                          },
-                        )}
-                        {/* // button not shown in Payment Module 1.0 */}
-                        {/* {activeStep === 0 && (
+                    {/* // button not shown in Payment Module 1.0 */}
+                    {/* {activeStep === 0 && (
                           <Grid container>
                             <Grid item xs={12}>
                               <Box pt={3}>
@@ -260,22 +249,20 @@ export const SetUpFspCore = ({
                             </Grid>
                           </Grid>
                         )} */}
-                      </>
-                    );
-                  }}
-                />
-                <SetUpFspButtonActions
-                  step={activeStep}
-                  submitForm={submitForm}
-                  baseUrl={baseUrl}
-                  paymentPlanId={id}
-                  handleBackStep={handleBackStep}
-                />
-              </ContainerColumnWithBorder>
-            </Box>
-          </Form>
-        );
-      }}
+                  </>
+                )}
+              />
+              <SetUpFspButtonActions
+                step={activeStep}
+                submitForm={submitForm}
+                baseUrl={baseUrl}
+                paymentPlanId={id}
+                handleBackStep={handleBackStep}
+              />
+            </ContainerColumnWithBorder>
+          </Box>
+        </Form>
+      )}
     </Formik>
   );
 };

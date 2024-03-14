@@ -3,23 +3,24 @@
 exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/AcceptanceProcessRow should render 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-1 sc-gqjmRU gggsyL"
+    class="sc-irLvIq jbuvZH MuiBox-root css-zwiamn"
   >
     <div
-      class="MuiPaper-root MuiStepper-root MuiStepper-horizontal MuiPaper-elevation0"
+      class="MuiStepper-root MuiStepper-horizontal css-m5vj9m-MuiStepper-root"
     >
       <div
-        class="MuiStep-root MuiStep-horizontal MuiStep-completed"
+        class="MuiStep-root MuiStep-horizontal Mui-completed css-1bw0nnu-MuiStep-root"
       >
         <span
-          class="MuiStepLabel-root MuiStepLabel-horizontal"
+          class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
         >
           <span
-            class="MuiStepLabel-iconContainer"
+            class="MuiStepLabel-iconContainer Mui-completed css-vnkopk-MuiStepLabel-iconContainer"
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-completed"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-completed css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
+              data-testid="CheckCircleIcon"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -29,10 +30,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
             </svg>
           </span>
           <span
-            class="MuiStepLabel-labelContainer"
+            class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
           >
             <span
-              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-completed MuiTypography-body2 MuiTypography-displayBlock"
+              class="MuiStepLabel-label Mui-completed css-16iqojc-MuiStepLabel-label"
             >
               Approval (1/1)
             </span>
@@ -40,24 +41,24 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
         </span>
       </div>
       <div
-        class="MuiStepConnector-root MuiStepConnector-horizontal MuiStepConnector-active"
+        class="MuiStepConnector-root MuiStepConnector-horizontal Mui-active css-j5w0w9-MuiStepConnector-root"
       >
         <span
-          class="MuiStepConnector-line MuiStepConnector-lineHorizontal"
+          class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
         />
       </div>
       <div
-        class="MuiStep-root MuiStep-horizontal"
+        class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
       >
         <span
-          class="MuiStepLabel-root MuiStepLabel-horizontal"
+          class="MuiStepLabel-root MuiStepLabel-horizontal css-ascpo7-MuiStepLabel-root"
         >
           <span
-            class="MuiStepLabel-iconContainer"
+            class="MuiStepLabel-iconContainer Mui-active css-vnkopk-MuiStepLabel-iconContainer"
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiStepIcon-root MuiStepIcon-active"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root Mui-active css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -67,20 +68,21 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
                 r="12"
               />
               <text
-                class="MuiStepIcon-text"
+                class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+                dominant-baseline="central"
                 text-anchor="middle"
                 x="12"
-                y="16"
+                y="12"
               >
                 2
               </text>
             </svg>
           </span>
           <span
-            class="MuiStepLabel-labelContainer"
+            class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
           >
             <span
-              class="MuiTypography-root MuiStepLabel-label MuiStepLabel-active MuiTypography-body2 MuiTypography-displayBlock"
+              class="MuiStepLabel-label Mui-active css-16iqojc-MuiStepLabel-label"
             >
               Authorization (0/1)
             </span>
@@ -88,24 +90,24 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
         </span>
       </div>
       <div
-        class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled"
+        class="MuiStepConnector-root MuiStepConnector-horizontal Mui-disabled css-j5w0w9-MuiStepConnector-root"
       >
         <span
-          class="MuiStepConnector-line MuiStepConnector-lineHorizontal"
+          class="MuiStepConnector-line MuiStepConnector-lineHorizontal css-z7uhs0-MuiStepConnector-line"
         />
       </div>
       <div
-        class="MuiStep-root MuiStep-horizontal"
+        class="MuiStep-root MuiStep-horizontal css-1bw0nnu-MuiStep-root"
       >
         <span
-          class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled"
+          class="MuiStepLabel-root MuiStepLabel-horizontal Mui-disabled css-ascpo7-MuiStepLabel-root"
         >
           <span
-            class="MuiStepLabel-iconContainer"
+            class="MuiStepLabel-iconContainer Mui-disabled css-vnkopk-MuiStepLabel-iconContainer"
           >
             <svg
               aria-hidden="true"
-              class="MuiSvgIcon-root MuiStepIcon-root"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiStepIcon-root css-1job3b0-MuiSvgIcon-root-MuiStepIcon-root"
               focusable="false"
               viewBox="0 0 24 24"
             >
@@ -115,20 +117,21 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
                 r="12"
               />
               <text
-                class="MuiStepIcon-text"
+                class="MuiStepIcon-text css-117w1su-MuiStepIcon-text"
+                dominant-baseline="central"
                 text-anchor="middle"
                 x="12"
-                y="16"
+                y="12"
               >
                 3
               </text>
             </svg>
           </span>
           <span
-            class="MuiStepLabel-labelContainer"
+            class="MuiStepLabel-labelContainer css-1vyamtt-MuiStepLabel-labelContainer"
           >
             <span
-              class="MuiTypography-root MuiStepLabel-label MuiTypography-body2 MuiTypography-displayBlock"
+              class="MuiStepLabel-label Mui-disabled css-16iqojc-MuiStepLabel-label"
             >
               Finance Release (0/1)
             </span>
@@ -137,22 +140,22 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
       </div>
     </div>
     <div
-      class="MuiGrid-root MuiGrid-container"
+      class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
     >
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
       >
         <div
-          class="MuiBox-root MuiBox-root-2"
+          class="MuiBox-root css-j7qwjs"
         >
           <div
-            class="MuiBox-root MuiBox-root-3"
+            class="MuiBox-root css-38zrbw"
           >
             <div
-              class="sc-dnqmqq gDPaov"
+              class="sc-qZrbh eDQnJH"
             >
               Sent for approval by Root Rootkowski
-               on 
+               on
               <time
                 datetime="1661843731428"
               >
@@ -161,17 +164,17 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
             </div>
           </div>
           <div
-            class="MuiBox-root MuiBox-root-4 sc-gZMcBi kZvOgO"
+            class="sc-kFCroH gqSspL MuiBox-root css-e6xxd1"
           >
             <div
-              class="MuiBox-root MuiBox-root-5"
+              class="MuiBox-root css-fv3lde"
             >
               Approved by Root Rootkowski
               <div
-                class="MuiBox-root MuiBox-root-6"
+                class="MuiBox-root css-15fzge"
               >
                 <div
-                  class="sc-htoDjs kacwMH"
+                  class="sc-fsYfdN jiGCJO"
                 >
                   on 
                   <time
@@ -182,10 +185,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
                 </div>
               </div>
               <div
-                class="MuiBox-root MuiBox-root-7"
+                class="MuiBox-root css-1el3gal"
               >
                 <div
-                  class="sc-iwsKbI bzHTth"
+                  class="sc-jsEeTM czIxti"
                 />
               </div>
             </div>
@@ -193,10 +196,10 @@ exports[`components/paymentmodule/PaymentPlanDetails/AcceptanceProcess/Acceptanc
         </div>
       </div>
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
       />
       <div
-        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+        class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
       />
     </div>
   </div>

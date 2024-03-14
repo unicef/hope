@@ -1,9 +1,9 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import snakeCase from 'lodash/snakeCase';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -12,12 +12,12 @@ import {
   IndividualRoleInHouseholdRole,
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
-} from '../../__generated__/graphql';
-import { useConfirmation } from '../core/ConfirmationDialog';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
+} from '@generated/graphql';
+import { useConfirmation } from '@core/ConfirmationDialog';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 import { ApproveBox } from './GrievancesApproveSection/ApproveSectionStyles';
 
 export type RoleReassignData = {
@@ -120,7 +120,7 @@ export function DeleteIndividualGrievanceDetails({
             textValue = textValue === 'A_' ? null : textValue;
             textValue = textValue
               ? fieldAttribute.choices.find((item) => item.value === textValue)
-                  ?.labelEn
+                ?.labelEn
               : '-';
           }
         }
@@ -164,13 +164,13 @@ export function DeleteIndividualGrievanceDetails({
   return (
     <ApproveBox>
       <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>
+        <Box display="flex" justifyContent="space-between">
+          <Typography variant="h6">
             {t('Individual to be withdrawn')}
           </Typography>
           {canApproveDataChange && (
             <Button
-              data-cy='button-approve'
+              data-cy="button-approve"
               onClick={() =>
                 confirm({
                   title: t('Warning'),
@@ -180,8 +180,8 @@ export function DeleteIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.deleteIndividualTicketDetails
-                          ?.approveStatus,
+                        approveStatus:
+                          !ticket.deleteIndividualTicketDetails?.approveStatus,
                       },
                       refetchQueries: () => [
                         {
@@ -206,7 +206,7 @@ export function DeleteIndividualGrievanceDetails({
                   ? 'outlined'
                   : 'contained'
               }
-              color='primary'
+              color="primary"
               disabled={!approveEnabled}
             >
               {ticket.deleteIndividualTicketDetails?.approveStatus

@@ -1,22 +1,22 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FeedbackQuery } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
+import { FeedbackQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
 import { getGrievanceDetailsPath } from '../../../grievances/utils/createGrievanceUtils';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface LinkedGrievanceProps {
   feedback: FeedbackQuery['feedback'];
 }
 
-export const LinkedGrievance = ({
+export function LinkedGrievance({
   feedback,
-}: LinkedGrievanceProps): React.ReactElement => {
+}: LinkedGrievanceProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const grievanceDetailsPath = getGrievanceDetailsPath(
@@ -30,7 +30,7 @@ export const LinkedGrievance = ({
         <Box p={3}>
           <ContainerColumnWithBorder>
             <Title>
-              <Typography variant='h6'>{t('Linked Grievance')}</Typography>
+              <Typography variant="h6">{t('Linked Grievance')}</Typography>
             </Title>
             <OverviewContainer>
               <LabelizedField label={t('Ticket Id')}>
@@ -44,4 +44,4 @@ export const LinkedGrievance = ({
       ) : null}
     </Grid>
   );
-};
+}

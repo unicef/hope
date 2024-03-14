@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ALL_BUSINESS_AREAS_QUERY = gql`
   query AllBusinessAreas($slug: String) {

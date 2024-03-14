@@ -11,8 +11,6 @@ export const fakeAllTargetPopulation = {
           status: 'OPEN',
           createdAt: '2022-04-13T08:56:10.671921',
           updatedAt: '2022-04-13T08:56:10.671951',
-          candidateListTotalHouseholds: 0,
-          finalListTotalHouseholds: null,
           program: {
             id:
               'UHJvZ3JhbU5vZGU6OGMyZWVhMDQtNzljMC00NGNjLWI0NDctNTdkYzA3ZjNmMTVh',

@@ -1,7 +1,7 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import { Box } from '@mui/material';
+import * as React from 'react';
+import { Bar } from 'react-chartjs-2';
+import { AllChartsQuery } from '@generated/graphql';
 
 interface PaymentVerificationChartProps {
   data: AllChartsQuery['chartPaymentVerification'];
@@ -17,9 +17,9 @@ type Dataset = {
   [key in DatasetTypes]: Array<number>;
 };
 
-export const PaymentVerificationChart = ({
+export function PaymentVerificationChart({
   data,
-}: PaymentVerificationChartProps): React.ReactElement => {
+}: PaymentVerificationChartProps): React.ReactElement {
   if (!data) return null;
 
   const datasets = data.datasets.reduce(
@@ -67,50 +67,48 @@ export const PaymentVerificationChart = ({
         data: [...datasets.PENDING],
       },
     ],
-  };
+  } as any;
 
   const options = {
+    indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
-    legend: {
-      position: 'bottom',
-      labels: {
-        padding: 30,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 30,
+        },
       },
-    },
-    tooltips: {
-      mode: 'point',
-      callbacks: {
-        title: () => '',
-        label: (tooltipItem, dataArgs) =>
-          dataArgs.datasets[tooltipItem.datasetIndex].label,
+      tooltip: {
+        mode: 'point',
+        callbacks: {
+          title: () => '',
+          label: (context) => context.dataset.label,
+        },
       },
     },
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            callback: () => '',
-          },
-          gridLines: {
-            display: false,
-          },
+      x: {
+        ticks: {
+          callback: () => '',
         },
-      ],
-      yAxes: [
-        {
-          gridLines: {
-            display: false,
-          },
-          position: 'right',
+        grid: {
+          display: false,
         },
-      ],
+      },
+      y: {
+        grid: {
+          display: false,
+        },
+        position: 'right',
+      },
     },
-  };
+  } as any;
 
   return (
-    <Box height='150px'>
-      <HorizontalBar data={chartData} options={options} />
+    <Box height="150px">
+      <Bar data={chartData} options={options} />
     </Box>
   );
-};
+}

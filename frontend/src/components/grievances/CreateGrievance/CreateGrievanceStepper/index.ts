@@ -1,1 +1,1 @@
-import { CreateGrievanceStepper } from './CreateGrievanceStepper';
+export { CreateGrievanceStepper } from './CreateGrievanceStepper';

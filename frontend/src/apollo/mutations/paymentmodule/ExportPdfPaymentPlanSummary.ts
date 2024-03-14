@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const EXPORT_PDF_PP_SUMMARY = gql`
   mutation exportPdfPPSummary($paymentPlanId: ID!) {

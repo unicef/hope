@@ -1,15 +1,15 @@
-import { Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { renderUserName } from '../../../../utils/utils';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { FieldBorder } from '../../../core/FieldBorder';
+import { renderUserName } from '@utils/utils';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { FieldBorder } from '@core/FieldBorder';
 import { RelatedFollowUpPaymentPlans } from './RelatedFollowUpPaymentPlans';
 
 interface PaymentPlanDetailsProps {
@@ -38,7 +38,7 @@ export const PaymentPlanDetails = ({
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container>
@@ -90,9 +90,9 @@ export const PaymentPlanDetails = ({
                 </LabelizedField>
               </Grid>
             </Grid>
-            <Grid container direction='column' item xs={3} spacing={6}>
+            <Grid container direction="column" item xs={3} spacing={6}>
               <Grid item xs={12}>
-                <FieldBorder color='#84A1CA'>
+                <FieldBorder color="#84A1CA">
                   <RelatedFollowUpPaymentPlans
                     followUps={followUps}
                     baseUrl={baseUrl}

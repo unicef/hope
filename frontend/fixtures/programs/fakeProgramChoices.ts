@@ -37,6 +37,6 @@ export const fakeProgramChoices = {
   ],
   dataCollectingTypeChoices: [
     { name: 'Full', value: 'full', __typename: 'ChoiceObject' },
-    { name: 'Partial', value: 'partial', __typename: 'ChoiceObject' }
-  ]
+    { name: 'Partial', value: 'partial', __typename: 'ChoiceObject' },
+  ],
 } as ProgrammeChoiceDataQuery;

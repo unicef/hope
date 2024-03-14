@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   hasPermissionInModule,
   PERMISSIONS,
 } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { usePermissions } from '@hooks/usePermissions';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import { FeedbackTable } from '../../../tables/Feedback/FeedbackTable';
-import { FeedbackFilters } from '../../../../components/accountability/Feedback/FeedbackTable/FeedbackFilters';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { ButtonTooltip } from '../../../../components/core/ButtonTooltip';
+import { FeedbackFilters } from '@components/accountability/Feedback/FeedbackTable/FeedbackFilters';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
 
-export const FeedbackPage = (): React.ReactElement => {
+export function FeedbackPage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const { t } = useTranslation();
@@ -56,11 +57,11 @@ export const FeedbackPage = (): React.ReactElement => {
     <>
       <PageHeader title={t('Feedback')}>
         <ButtonTooltip
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           component={Link}
           to={`/${baseUrl}/grievance/feedback/create`}
-          data-cy='button-submit-new-feedback'
+          data-cy="button-submit-new-feedback"
           title={t('Program has to be active to create a new Feedback')}
           disabled={!isActiveProgram}
         >
@@ -77,4 +78,4 @@ export const FeedbackPage = (): React.ReactElement => {
       <FeedbackTable filter={appliedFilter} canViewDetails={canViewDetails} />
     </>
   );
-};
+}

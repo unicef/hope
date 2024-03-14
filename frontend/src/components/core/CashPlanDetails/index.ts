@@ -1,1 +1,1 @@
-export {CashPlanDetails} from "./CashPlanDetails"
+export { CashPlanDetails } from './CashPlanDetails';

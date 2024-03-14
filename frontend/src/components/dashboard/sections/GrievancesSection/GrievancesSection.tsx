@@ -1,9 +1,9 @@
-import { Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { formatNumber } from '../../../../utils/utils';
-import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { formatNumber } from '@utils/utils';
+import { AllChartsQuery } from '@generated/graphql';
 import { GrievancesChart } from '../../charts/GrievancesChart';
 import { DashboardPaper } from '../../DashboardPaper';
 
@@ -18,23 +18,23 @@ interface GrievancesSectionProps {
   data: AllChartsQuery['chartGrievances'];
 }
 
-export const GrievancesSection = ({
+export function GrievancesSection({
   data,
-}: GrievancesSectionProps): React.ReactElement => {
+}: GrievancesSectionProps): React.ReactElement {
   const { t } = useTranslation();
   if (!data) return null;
   return (
-    <DashboardPaper title='Grievances and Feedback'>
+    <DashboardPaper title="Grievances and Feedback">
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <CardTitleSmaller>{t('TOTAL NUMBER OF GRIEVANCES')}</CardTitleSmaller>
-          <Typography variant='caption'>
+          <Typography variant="caption">
             {formatNumber(data?.totalNumberOfGrievances)}
           </Typography>
         </Grid>
         <Grid item xs={6}>
           <CardTitleSmaller>{t('TOTAL NUMBER OF FEEDBACK')}</CardTitleSmaller>
-          <Typography variant='caption'>
+          <Typography variant="caption">
             {formatNumber(data?.totalNumberOfFeedback)}
           </Typography>
         </Grid>
@@ -43,9 +43,9 @@ export const GrievancesSection = ({
       <CardTitleSmaller>
         {t('NUMBER OF OPEN SENSITIVE GRIEVANCES')}
       </CardTitleSmaller>
-      <Typography variant='caption'>
+      <Typography variant="caption">
         {formatNumber(data?.totalNumberOfOpenSensitive)}
       </Typography>
     </DashboardPaper>
   );
-};
+}

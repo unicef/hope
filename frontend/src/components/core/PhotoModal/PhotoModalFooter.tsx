@@ -1,20 +1,20 @@
-import { Button } from '@material-ui/core';
-import React from 'react';
-import { DialogActions } from '../../../containers/dialogs/DialogActions';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
+import { Button } from '@mui/material';
+import * as React from 'react';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
 
-export const PhotoModalFooter = ({
+export function PhotoModalFooter({
   setTurnAngle,
   setDialogOpen,
 }: {
   setTurnAngle: React.Dispatch<React.SetStateAction<number>>;
   setDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}): React.ReactElement => {
+}): React.ReactElement {
   return (
     <DialogFooter>
       <DialogActions>
         <Button
-          data-cy='button-cancel'
+          data-cy="button-cancel"
           onClick={() => {
             setDialogOpen(false);
             setTurnAngle(90);
@@ -25,4 +25,4 @@ export const PhotoModalFooter = ({
       </DialogActions>
     </DialogFooter>
   );
-};
+}

@@ -1,15 +1,15 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { countPercentage } from '../../utils/utils';
-import { CashPlanQuery, PaymentPlanQuery } from '../../__generated__/graphql';
-import { BlackLink } from '../core/BlackLink';
-import { LabelizedField } from '../core/LabelizedField';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { countPercentage } from '@utils/utils';
+import { CashPlanQuery, PaymentPlanQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const ChartContainer = styled.div`
   width: 100%;
@@ -17,7 +17,7 @@ const ChartContainer = styled.div`
 `;
 
 const BorderLeftBox = styled.div`
-  padding-left: ${({ theme }) => theme.spacing(6)}px;
+  padding-left: ${({ theme }) => theme.spacing(6)};
   border-left: 1px solid #e0e0e0;
   height: 100%;
 `;
@@ -26,9 +26,9 @@ interface CashPlanDetailsSectionProps {
   planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
-export const CashPlanDetailsSection = ({
+export function CashPlanDetailsSection({
   planNode,
-}: CashPlanDetailsSectionProps): React.ReactElement => {
+}: CashPlanDetailsSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
 
@@ -45,11 +45,11 @@ export const CashPlanDetailsSection = ({
   return (
     <Grid container>
       <Grid item xs={7}>
-        <Title data-cy='div-payment-plan-details'>
-          <Typography variant='h6'>{t('Payment Plan Details')}</Typography>
+        <Title data-cy="div-payment-plan-details">
+          <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
         <Box pr={2}>
-          <Grid data-cy='grid-payment-plan-details' container spacing={3}>
+          <Grid data-cy="grid-payment-plan-details" container spacing={3}>
             {[
               {
                 label: t('PROGRAMME NAME'),
@@ -79,16 +79,16 @@ export const CashPlanDetailsSection = ({
           </Grid>
         </Box>
       </Grid>
-      <Grid data-cy='grid-bank-reconciliation' item xs={5}>
+      <Grid data-cy="grid-bank-reconciliation" item xs={5}>
         <BorderLeftBox>
           <Title>
-            <Typography variant='h6' data-cy='table-label'>
+            <Typography variant="h6" data-cy="table-label">
               {t('Bank reconciliation')}
             </Typography>
           </Title>
           <Grid container>
             <Grid item xs={3}>
-              <Grid container direction='column'>
+              <Grid container direction="column">
                 <LabelizedField label={t('SUCCESSFUL')}>
                   <p>{bankReconciliationSuccessPercentage}%</p>
                 </LabelizedField>
@@ -100,13 +100,17 @@ export const CashPlanDetailsSection = ({
             <Grid item xs={9}>
               <ChartContainer>
                 <Doughnut
-                  options={{
-                    maintainAspectRatio: false,
-                    cutoutPercentage: 80,
-                    legend: {
-                      display: false,
-                    },
-                  }}
+                  options={
+                    {
+                      maintainAspectRatio: false,
+                      cutout: '80%',
+                      plugins: {
+                        legend: {
+                          display: false,
+                        },
+                      },
+                    } as any
+                  }
                   data={{
                     labels: [t('SUCCESSFUL'), t('ERRONEOUS')],
                     datasets: [
@@ -128,4 +132,4 @@ export const CashPlanDetailsSection = ({
       </Grid>
     </Grid>
   );
-};
+}
