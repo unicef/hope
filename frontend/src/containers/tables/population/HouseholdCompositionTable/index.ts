@@ -1,1 +1,1 @@
-export {HouseholdCompositionTable} from './HouseholdCompositionTable'
+export { HouseholdCompositionTable } from './HouseholdCompositionTable';

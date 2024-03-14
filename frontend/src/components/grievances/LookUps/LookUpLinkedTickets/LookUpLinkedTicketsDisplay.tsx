@@ -1,23 +1,25 @@
-import { Box, Grid } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
+import { Box, Grid } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useLocation } from 'react-router-dom';
-import EditIcon from '@material-ui/icons/Edit';
-import React from 'react';
+import EditIcon from '@mui/icons-material/Edit';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BlueText, StyledBox, LightGrey, DarkGrey } from '../LookUpStyles';
 import { LinkedTicketIdDisplay } from './LinkedTicketIdDisplay';
+
+interface LookUpLinkedTicketsDisplayProps {
+  values;
+  setLookUpDialogOpen: (open: boolean) => void;
+  onValueChange;
+  disabled?: boolean;
+}
 
 export const LookUpLinkedTicketsDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
-  disabled,
-}: {
-  values;
-  setLookUpDialogOpen;
-  onValueChange;
-  disabled?;
-}): React.ReactElement => {
+  disabled = false,
+}: LookUpLinkedTicketsDisplayProps): React.ReactElement => {
   const { t } = useTranslation();
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -28,40 +30,40 @@ export const LookUpLinkedTicketsDisplay = ({
   const renderLinkedTickets = (): React.ReactElement => {
     if (values.selectedLinkedTickets.length) {
       return values.selectedLinkedTickets.map((id) => (
-        <LinkedTicketIdDisplay ticketId={id} />
+        <LinkedTicketIdDisplay key={id} ticketId={id} />
       ));
     }
     return <BlueText>-</BlueText>;
   };
   return (
     <StyledBox disabled={disabled}>
-      <Grid container justifyContent='space-between'>
+      <Grid container justifyContent="space-between">
         <Grid item>
-          <Box display='flex' flexDirection='column'>
+          <Box display="flex" flexDirection="column">
             {t('Ticket ID')}:{renderLinkedTickets()}
           </Box>
         </Grid>
         {!isEditTicket && (
           <Grid item>
             <Box p={2}>
-              <Grid container justifyContent='center' alignItems='center'>
+              <Grid container justifyContent="center" alignItems="center">
                 <Grid item>
                   <LightGrey>
                     <EditIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => setLookUpDialogOpen(true)}
-                      data-cy='button-edit'
+                      data-cy="button-edit"
                     />
                   </LightGrey>
                 </Grid>
                 <Grid item>
                   <DarkGrey>
                     <DeleteIcon
-                      color='inherit'
-                      fontSize='small'
+                      color="inherit"
+                      fontSize="small"
                       onClick={() => handleRemove()}
-                      data-cy='button-delete'
+                      data-cy="button-delete"
                     />
                   </DarkGrey>
                 </Grid>

@@ -1,29 +1,29 @@
-import { Box, Button } from '@material-ui/core';
-import React from 'react';
+import { Box, Button } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { SurveyDetails } from '../../../../components/accountability/Surveys/SurveyDetails';
-import { BreadCrumbsItem } from '../../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { SurveyDetails } from '@components/accountability/Surveys/SurveyDetails';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../../utils/utils';
+import { usePermissions } from '@hooks/usePermissions';
+import { isPermissionDeniedError } from '@utils/utils';
 import {
   SurveyCategory,
   useExportSurveySampleMutation,
   useSurveyQuery,
   useSurveysChoiceDataQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { RecipientsTable } from '../../../tables/Surveys/RecipientsTable/RecipientsTable';
 import { UniversalActivityLogTable } from '../../../tables/UniversalActivityLogTable';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import {ButtonTooltip} from "../../../../components/core/ButtonTooltip";
-import {useProgramContext} from "../../../../programContext";
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { useProgramContext } from '../../../../programContext';
 
-export const SurveyDetailsPage = (): React.ReactElement => {
+export function SurveyDetailsPage(): React.ReactElement {
   const { showMessage } = useSnackbar();
   const { t } = useTranslation();
   const { id } = useParams();
@@ -33,12 +33,10 @@ export const SurveyDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useSurveysChoiceDataQuery({
-    fetchPolicy: 'cache-and-network',
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useSurveysChoiceDataQuery({
+      fetchPolicy: 'cache-and-network',
+    });
 
   const [mutate] = useExportSurveySampleMutation();
   const permissions = usePermissions();
@@ -75,13 +73,13 @@ export const SurveyDetailsPage = (): React.ReactElement => {
     if (survey.category === SurveyCategory.RapidPro) {
       return (
         <ButtonTooltip
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           component={Link}
           to={{
             pathname: survey?.rapidProUrl,
           }}
-          target='_blank'
+          target="_blank"
           title={t('Program has to be active to export Survey sample')}
           disabled={!isActiveProgram}
         >
@@ -94,8 +92,8 @@ export const SurveyDetailsPage = (): React.ReactElement => {
         return (
           <Button
             download
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             href={survey.sampleFilePath}
           >
             {t('Download Survey Sample')}
@@ -104,8 +102,8 @@ export const SurveyDetailsPage = (): React.ReactElement => {
       }
       return (
         <Button
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           onClick={exportSurveySample}
         >
           {t('Export Survey Sample')}
@@ -130,7 +128,7 @@ export const SurveyDetailsPage = (): React.ReactElement => {
       >
         {renderActions()}
       </PageHeader>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <SurveyDetails survey={survey} choicesData={choicesData} />
         <RecipientsTable
           canViewDetails={hasPermissions(
@@ -146,4 +144,4 @@ export const SurveyDetailsPage = (): React.ReactElement => {
       </Box>
     </>
   );
-};
+}

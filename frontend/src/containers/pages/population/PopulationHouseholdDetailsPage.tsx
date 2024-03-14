@@ -1,8 +1,8 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import Paper from '@material-ui/core/Paper';
-import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import Paper from '@mui/material/Paper';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   HouseholdNode,
@@ -10,25 +10,22 @@ import {
   useGrievancesChoiceDataQuery,
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
-} from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { FlagTooltip } from '../../../components/core/FlagTooltip';
-import { LabelizedField } from '../../../components/core/LabelizedField';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { Title } from '../../../components/core/Title';
-import { UniversalMoment } from '../../../components/core/UniversalMoment';
-import { WarningTooltip } from '../../../components/core/WarningTooltip';
-import { HouseholdDetails } from '../../../components/population/HouseholdDetails';
-import { HouseholdVulnerabilities } from '../../../components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
+} from '@generated/graphql';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { FlagTooltip } from '@components/core/FlagTooltip';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { Title } from '@components/core/Title';
+import { UniversalMoment } from '@components/core/UniversalMoment';
+import { WarningTooltip } from '@components/core/WarningTooltip';
+import { HouseholdDetails } from '@components/population/HouseholdDetails';
+import { HouseholdVulnerabilities } from '@components/population/HouseholdVulnerabilities/HouseholdVulnerabilities';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import {
-  isPermissionDeniedError,
-  renderSomethingOrDash,
-} from '../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { isPermissionDeniedError, renderSomethingOrDash } from '@utils/utils';
 import { UniversalActivityLogTable } from '../../tables/UniversalActivityLogTable';
 import { PaymentRecordHouseholdTable } from '../../tables/payments/PaymentRecordAndPaymentHouseholdTable';
 import { HouseholdCompositionTable } from '../../tables/population/HouseholdCompositionTable/HouseholdCompositionTable';
@@ -44,8 +41,8 @@ const Container = styled.div`
 `;
 
 const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
   margin-top: 20px;
   &:first-child {
     margin-top: 0;
@@ -62,25 +59,19 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const { baseUrl, businessArea } = useBaseUrl();
-  const history = useHistory();
+  const location = useLocation();
   const permissions = usePermissions();
 
   const { data, loading, error } = useHouseholdQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: flexFieldsData,
-    loading: flexFieldsDataLoading,
-  } = useAllHouseholdsFlexFieldsAttributesQuery();
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
-  const {
-    data: grievancesChoices,
-    loading: grievancesChoicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: flexFieldsData, loading: flexFieldsDataLoading } =
+    useAllHouseholdsFlexFieldsAttributesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
+  const { data: grievancesChoices, loading: grievancesChoicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   if (
     loading ||
@@ -107,8 +98,8 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
       to: `/${baseUrl}/population/household`,
     },
   ];
-  const breadcrumbTitle = history.location?.state?.breadcrumbTitle;
-  const breadcrumbUrl = history.location?.state?.breadcrumbUrl;
+  const breadcrumbTitle = location?.state?.breadcrumbTitle;
+  const breadcrumbUrl = location?.state?.breadcrumbUrl;
 
   if (breadcrumbTitle && breadcrumbUrl) {
     breadCrumbsItems = [
@@ -196,7 +187,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
         />
         <Overview>
           <Title>
-            <Typography variant='h6'>{t('Registration Details')}</Typography>
+            <Typography variant="h6">{t('Registration Details')}</Typography>
           </Title>
           <Grid container spacing={6}>
             <Grid item xs={3}>
@@ -227,7 +218,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
           {household?.registrationDataImport?.dataSource === 'XLS' ? null : (
             <>
               <hr />
-              <SubTitle variant='h6'>{t('Data Collection')}</SubTitle>
+              <SubTitle variant="h6">{t('Data Collection')}</SubTitle>
               <Grid container spacing={6}>
                 <Grid item xs={3}>
                   <LabelizedField label={t('Start time')}>

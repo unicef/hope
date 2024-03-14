@@ -180,7 +180,7 @@ export const PERMISSIONS = {
   ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR:
     'ACCOUNTABILITY_COMMUNICATION_MESSAGE_VIEW_DETAILS_AS_CREATOR',
 
-  //Feedback
+  // Feedback
   GRIEVANCES_FEEDBACK_VIEW_CREATE: 'GRIEVANCES_FEEDBACK_VIEW_CREATE',
   GRIEVANCES_FEEDBACK_VIEW_LIST: 'GRIEVANCES_FEEDBACK_VIEW_LIST',
   GRIEVANCES_FEEDBACK_VIEW_DETAILS: 'GRIEVANCES_FEEDBACK_VIEW_DETAILS',
@@ -188,7 +188,7 @@ export const PERMISSIONS = {
   GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE:
     'GRIEVANCES_FEEDBACK_MESSAGE_VIEW_CREATE',
 
-  //Surveys
+  // Surveys
   ACCOUNTABILITY_SURVEY_VIEW_CREATE: 'ACCOUNTABILITY_SURVEY_VIEW_CREATE',
   ACCOUNTABILITY_SURVEY_VIEW_LIST: 'ACCOUNTABILITY_SURVEY_VIEW_LIST',
   ACCOUNTABILITY_SURVEY_VIEW_DETAILS: 'ACCOUNTABILITY_SURVEY_VIEW_DETAILS',
@@ -236,8 +236,8 @@ export function hasCreatorOrOwnerPermissions(
 ): boolean {
   // use where we have to check 3 different permissions, for ex. grievances
   return (
-    allowedPermissions.includes(generalPermission) ||
-    (isCreator && allowedPermissions.includes(creatorPermission)) ||
-    (isOwner && allowedPermissions.includes(ownerPermission))
+    allowedPermissions.includes(generalPermission)
+    || (isCreator && allowedPermissions.includes(creatorPermission))
+    || (isOwner && allowedPermissions.includes(ownerPermission))
   );
 }

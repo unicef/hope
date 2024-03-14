@@ -3,16 +3,17 @@
 exports[`components/paymentmodule/WarningMissingAmount should render 1`] = `
 <div>
   <div
-    class="MuiBox-root MuiBox-root-1"
+    class="MuiBox-root css-70qvj9"
   >
     <svg
       aria-hidden="true"
-      class="MuiSvgIcon-root sc-bdVaJa fRiMcS"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium sc-beySPh bKDFpR css-i4bv87-MuiSvgIcon-root"
+      data-testid="WarningIcon"
       focusable="false"
       viewBox="0 0 24 24"
     >
       <path
-        d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"
+        d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2v-4h2z"
       />
     </svg>
     Missing

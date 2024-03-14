@@ -1,10 +1,11 @@
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import React, { useEffect } from 'react';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export function AlertDialog({
@@ -34,17 +35,17 @@ export function AlertDialog({
       <Dialog
         open={open}
         onClose={handleClose}
-        aria-labelledby='alert-dialog-title'
-        aria-describedby='alert-dialog-description'
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id='alert-dialog-title'>{t('Error')}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{t('Error')}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText id="alert-dialog-description">
             {message}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color='primary' autoFocus>
+          <Button onClick={handleClose} color="primary" autoFocus>
             OK
           </Button>
         </DialogActions>

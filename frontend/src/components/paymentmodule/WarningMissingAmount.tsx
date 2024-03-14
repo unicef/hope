@@ -1,6 +1,6 @@
-import { Box } from '@material-ui/core';
-import WarningIcon from '@material-ui/icons/Warning';
-import React from 'react';
+import { Box } from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -20,7 +20,7 @@ export function WarningMissingAmount({
   const { t } = useTranslation();
 
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       <WarnIcon />
       {t('Missing')} {amount} {currency}
     </Box>

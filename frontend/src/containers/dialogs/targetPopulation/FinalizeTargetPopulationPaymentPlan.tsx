@@ -1,25 +1,20 @@
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
-import React from 'react';
+import { Button, DialogContent, DialogTitle, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useFinalizeTpMutation } from '../../../__generated__/graphql';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useFinalizeTpMutation } from '@generated/graphql';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
 import { DialogDescription } from '../DialogDescription';
 import { DialogFooter } from '../DialogFooter';
 import { DialogTitleWrapper } from '../DialogTitleWrapper';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useNavigate } from 'react-router-dom';
 
 export interface FinalizeTargetPopulationPaymentPlanProps {
   open: boolean;
-  setOpen: Function;
+  setOpen: (open: boolean) => void;
   totalHouseholds: number;
   targetPopulationId: string;
 }
@@ -30,7 +25,7 @@ export const FinalizeTargetPopulationPaymentPlan = ({
   totalHouseholds,
   targetPopulationId,
 }: FinalizeTargetPopulationPaymentPlanProps): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { baseUrl } = useBaseUrl();
@@ -43,19 +38,19 @@ export const FinalizeTargetPopulationPaymentPlan = ({
     }).then(() => {
       setOpen(false);
       showMessage(t('Target Population Finalized'));
-      history.push(`/${baseUrl}/target-population/${id}`);
+      navigate(`/${baseUrl}/target-population/${id}`);
     });
   };
   return (
     <Dialog
       open={open}
       onClose={() => setOpen(false)}
-      scroll='paper'
-      aria-labelledby='form-dialog-title'
+      scroll="paper"
+      aria-labelledby="form-dialog-title"
     >
       <DialogTitleWrapper>
         <DialogTitle>
-          <Typography variant='h6'>{t('Mark Ready')}</Typography>
+          <Typography variant="h6">{t('Mark Ready')}</Typography>
         </DialogTitle>
       </DialogTitleWrapper>
       <DialogContent>
@@ -71,11 +66,11 @@ export const FinalizeTargetPopulationPaymentPlan = ({
           <Button onClick={() => setOpen(false)}>{t('CANCEL')}</Button>
           <LoadingButton
             onClick={() => onSubmit(targetPopulationId)}
-            color='primary'
-            variant='contained'
+            color="primary"
+            variant="contained"
             loading={loading}
             disabled={loading || !totalHouseholds}
-            data-cy='button-target-population-modal-send-to-hope'
+            data-cy="button-target-population-modal-send-to-hope"
           >
             {t('Mark Ready')}
           </LoadingButton>

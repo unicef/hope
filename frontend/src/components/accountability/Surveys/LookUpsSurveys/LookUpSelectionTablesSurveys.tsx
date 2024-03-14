@@ -1,10 +1,10 @@
-import React from 'react';
-import { ProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
+import * as React from 'react';
+import { ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { LookUpProgrammesTableSurveys } from '../../../../containers/tables/Surveys/LookUpProgrammesTableSurveys/LookUpProgrammesTableSurveys';
-import { LookUpTargetPopulationTableSurveys } from '../../../../containers/tables/Surveys/LookUpTargetPopulationTableSurveys';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { SurveyTabsValues } from '../../../../utils/constants';
+import { LookUpProgrammesTableSurveys } from '@containers/tables/Surveys/LookUpProgrammesTableSurveys/LookUpProgrammesTableSurveys';
+import { LookUpTargetPopulationTableSurveys } from '@containers/tables/Surveys/LookUpTargetPopulationTableSurveys';
+import { usePermissions } from '@hooks/usePermissions';
+import { SurveyTabsValues } from '@utils/constants';
 
 interface LookUpSelectionTablesSurveysProps {
   selectedTab: number;
@@ -16,7 +16,7 @@ interface LookUpSelectionTablesSurveysProps {
   onValueChange;
   handleChange;
 }
-export const LookUpSelectionTablesSurveys = ({
+export function LookUpSelectionTablesSurveys({
   selectedTab,
   choicesData,
   values,
@@ -25,7 +25,7 @@ export const LookUpSelectionTablesSurveys = ({
   businessArea,
   onValueChange,
   handleChange,
-}: LookUpSelectionTablesSurveysProps): React.ReactElement => {
+}: LookUpSelectionTablesSurveysProps): React.ReactElement {
   const permissions = usePermissions();
 
   return (
@@ -60,4 +60,4 @@ export const LookUpSelectionTablesSurveys = ({
       )}
     </>
   );
-};
+}

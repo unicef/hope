@@ -1,12 +1,12 @@
-import { Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Grid, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { AllIndividualsQuery } from '../../__generated__/graphql';
-import { LabelizedField } from '../core/LabelizedField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { AllIndividualsQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
 import { getIndexForId } from './utils/helpers';
 
 export interface PaymentChannelProps {
@@ -59,7 +59,7 @@ export function PaymentChannelField({
         <Field
           name={`${paymentChannelFieldName}.bankAccountNumber`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
           required
@@ -82,7 +82,7 @@ export function PaymentChannelField({
         <Field
           name={`${paymentChannelFieldName}.bankName`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
           required
@@ -105,7 +105,7 @@ export function PaymentChannelField({
         <Field
           name={`${paymentChannelFieldName}.accountHolderName`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
           required
@@ -128,7 +128,7 @@ export function PaymentChannelField({
         <Field
           name={`${paymentChannelFieldName}.bankBranchName`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('New Value')}
           component={FormikTextField}
           required

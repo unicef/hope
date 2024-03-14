@@ -1,10 +1,10 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { MiśTheme } from '../../../theme';
-import { cashPlanStatusToColor } from '../../../utils/utils';
-import { CashPlanNode } from '../../../__generated__/graphql';
+import { cashPlanStatusToColor } from '@utils/utils';
+import { CashPlanNode } from '@generated/graphql';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { ContentLink } from '../ContentLink';
 import { LabelizedField } from '../LabelizedField';
@@ -14,7 +14,7 @@ import { Title } from '../Title';
 import { UniversalMoment } from '../UniversalMoment';
 
 const NumberOfHouseHolds = styled.div`
-  padding: ${({ theme }) => theme.spacing(8)}px;
+  padding: ${({ theme }) => theme.spacing(8)};
   border-color: #b1b1b5;
   border-left-width: 1px;
   border-left-style: solid;
@@ -25,7 +25,7 @@ const NumberOfHouseHoldsValue = styled.div`
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
-  margin-top: ${({ theme }) => theme.spacing(2)}px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 interface CashPlanProps {
   cashPlan: CashPlanNode;
@@ -58,8 +58,8 @@ export function CashPlanDetails({
 
   const renderTargetPopulations = ():
     | React.ReactElement
-    | Array<React.ReactElement> => {
-    return filteredTps().length ? (
+    | Array<React.ReactElement> =>
+    filteredTps().length ? (
       filteredTps().map((el) => (
         <span key={el.id}>
           <ContentLink href={`/${baseUrl}/target-population/${el.id}`}>
@@ -70,12 +70,11 @@ export function CashPlanDetails({
     ) : (
       <span>-</span>
     );
-  };
   return (
     <ContainerWithBorder>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <Title>
-          <Typography variant='h6'>{t('Payment Plan Details')}</Typography>
+          <Typography variant="h6">{t('Payment Plan Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>
