@@ -167,6 +167,7 @@ class HouseholdSerializer(CollectDataMixin, serializers.ModelSerializer):
             "id",
             "head_of_household",
             "registration_data_import",
+            "program_id",
             "mis_unicef_id",
             "flex_registrations_record",
             "kobo_submission_uuid",
@@ -226,7 +227,7 @@ class RDINestedSerializer(HouseholdUploadMixin, serializers.ModelSerializer):
         rdi_datahub = RegistrationDataImportDatahub.objects.create(
             **validated_data, business_area_slug=self.business_area.slug
         )
-        info = self.save_households(rdi_datahub, households)
+        info = self.save_households(rdi_datahub, program.id, households)
         rdi_mis = RegistrationDataImport.objects.create(
             **validated_data,
             imported_by=created_by,

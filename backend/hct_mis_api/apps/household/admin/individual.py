@@ -95,7 +95,14 @@ class IndividualAdmin(
         "updated_at",
         "last_sync_at",
     )
-    raw_id_fields = ("household", "registration_data_import", "business_area", "copied_from", "program")
+    raw_id_fields = (
+        "household",
+        "registration_data_import",
+        "business_area",
+        "copied_from",
+        "program",
+        "individual_collection",
+    )
     fieldsets = [
         (
             None,
@@ -292,7 +299,14 @@ class IndividualRepresentationInline(admin.TabularInline):
     verbose_name_plural = "Individual representations"
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return Individual.all_objects.all()
+        return (
+            Individual.all_objects.select_related("program")
+            .all()
+            .only("unicef_id", "is_original", "copied_from", "program__name")
+        )
+
+    def has_add_permission(self, request: HttpRequest, obj: Optional[Individual] = None) -> bool:
+        return False  # Disable adding new individual representations inline
 
 
 @admin.register(IndividualCollection)
