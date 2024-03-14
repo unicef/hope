@@ -333,6 +333,10 @@ class Household(
     ConcurrencyModel,
     UnicefIdentifiedModel,
 ):
+    class CollectType(models.TextChoices):
+        STANDARD = "STANDARD", "Standard"
+        SINGLE = "SINGLE", "Single"
+
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "withdrawn",
@@ -532,7 +536,7 @@ class Household(
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
-    social_worker = models.BooleanField(default=False)
+    collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
 
     class Meta:
         verbose_name = "Household"
@@ -1013,7 +1017,6 @@ class Individual(
     migrated_at = models.DateTimeField(null=True, blank=True)
 
     vector_column = SearchVectorField(null=True)
-    social_worker = models.BooleanField(default=False)
 
     def delete(self, *args: Any, **kwargs: Any) -> Tuple[int, Dict[str, int]]:
         individual_deleted.send(self.__class__, instance=self)

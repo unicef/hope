@@ -35,7 +35,6 @@ from hct_mis_api.apps.registration_datahub.models import (
 class PeopleSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
-    household = serializers.ReadOnlyField()
     observed_disability = serializers.CharField(allow_blank=True, required=False)
     marital_status = serializers.CharField(allow_blank=True, required=False)
     documents = DocumentSerializer(many=True, required=False)
@@ -81,7 +80,10 @@ class PeopleUploadMixin:
             household_fields = [field.name for field in ImportedHousehold._meta.get_fields()]
             household_data = {field: value for field, value in person_data.items() if field in household_fields}
             hh = ImportedHousehold.objects.create(
-                registration_data_import=rdi, program_id=program_id, social_worker=True, **household_data
+                registration_data_import=rdi,
+                program_id=program_id,
+                collect_type=ImportedHousehold.CollectType.SINGLE.value,
+                **household_data,
             )
 
             individual_fields = [field.name for field in ImportedIndividual._meta.get_fields()]
@@ -91,7 +93,6 @@ class PeopleUploadMixin:
                 household=hh,
                 registration_data_import=rdi,
                 program_id=program_id,
-                social_worker=True,
                 **individual_data,
             )
             hh.head_of_household = ind
