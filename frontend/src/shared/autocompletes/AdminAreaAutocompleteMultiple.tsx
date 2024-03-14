@@ -1,18 +1,15 @@
-import { Box } from '@material-ui/core';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import * as React from 'react';
 import get from 'lodash/get';
-import React, { useEffect, useState } from 'react';
+import { Box, TextField } from '@mui/material';
+import Autocomplete from '@mui/lab/Autocomplete';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useDebounce } from '../../hooks/useDebounce';
-import TextField from '../TextField';
-import {
-  AllAdminAreasQuery,
-  useAllAdminAreasQuery,
-} from '../../__generated__/graphql';
-import { FieldLabel } from '../../components/core/FieldLabel';
-import { LoadingComponent } from '../../components/core/LoadingComponent';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+import { useDebounce } from '@hooks/useDebounce';
+import { AllAdminAreasQuery, useAllAdminAreasQuery } from '@generated/graphql';
+import { FieldLabel } from '@components/core/FieldLabel';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;
@@ -57,8 +54,9 @@ export function AdminAreaAutocompleteMultiple({
   if (loading) return <LoadingComponent />;
   if (!data) return null;
   return (
-    <Box display='flex' flexDirection='column'>
+    <Box display="flex" flexDirection="column">
       <FieldLabel>{t('Administrative Level 2')}</FieldLabel>
+      {/*@ts-ignore */}
       <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
         open={open}
         multiple
@@ -72,9 +70,9 @@ export function AdminAreaAutocompleteMultiple({
         onClose={() => {
           setOpen(false);
         }}
-        getOptionSelected={(option, value1) => {
-          return value1?.node?.id === option.node.id;
-        }}
+        isOptionEqualToValue={(option, value1) =>
+          value1?.node?.id === option.node.id
+        }
         getOptionLabel={(option) => {
           if (!option.node) {
             return '';
@@ -84,24 +82,22 @@ export function AdminAreaAutocompleteMultiple({
         disabled={disabled}
         options={get(data, 'allAdminAreas.edges', [])}
         loading={loading}
-        renderInput={(params) => {
-          return (
-            <TextField
-              {...params}
-              inputProps={{
-                ...params.inputProps,
-                value: inputValue,
-              }}
-              placeholder={
-                newValue.length > 0 ? null : t('Administrative Level 2')
-              }
-              variant='outlined'
-              margin='dense'
-              value={inputValue}
-              onChange={(e) => setInputTextChange(e.target.value)}
-            />
-          );
-        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            inputProps={{
+              ...params.inputProps,
+              value: inputValue,
+            }}
+            size="small"
+            placeholder={
+              newValue.length > 0 ? null : t('Administrative Level 2')
+            }
+            variant="outlined"
+            value={inputValue}
+            onChange={(e) => setInputTextChange(e.target.value)}
+          />
+        )}
       />
     </Box>
   );

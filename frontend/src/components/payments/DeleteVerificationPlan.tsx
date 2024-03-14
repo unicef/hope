@@ -1,17 +1,18 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
-import ClearIcon from '@material-ui/icons/Clear';
-import React, { useState } from 'react';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDeletePaymentVerificationPlanMutation } from '../../__generated__/graphql';
-import { ErrorButton } from '../core/ErrorButton';
-import { ErrorButtonContained } from '../core/ErrorButtonContained';
-import { usePaymentRefetchQueries } from '../../hooks/usePaymentRefetchQueries';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useDeletePaymentVerificationPlanMutation } from '@generated/graphql';
+import { ErrorButton } from '@core/ErrorButton';
+import { ErrorButtonContained } from '@core/ErrorButtonContained';
+import { usePaymentRefetchQueries } from '@hooks/usePaymentRefetchQueries';
 import { useProgramContext } from '../../programContext';
 
 export interface DeleteVerificationPlanProps {
@@ -48,7 +49,7 @@ export function DeleteVerificationPlan({
         <ErrorButton
           startIcon={<ClearIcon />}
           onClick={() => setDeleteDialogOpen(true)}
-          data-cy='button-delete-plan'
+          data-cy="button-delete-plan"
           disabled={!isActiveProgram}
         >
           DELETE
@@ -57,9 +58,9 @@ export function DeleteVerificationPlan({
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Delete Verification Plan')}</DialogTitle>
@@ -81,9 +82,9 @@ export function DeleteVerificationPlan({
               {t('CANCEL')}
             </Button>
             <ErrorButtonContained
-              type='submit'
+              type="submit"
               onClick={() => handleDeleteVerificationPlan()}
-              data-cy='button-submit'
+              data-cy="button-submit"
             >
               {t('DELETE')}
             </ErrorButtonContained>

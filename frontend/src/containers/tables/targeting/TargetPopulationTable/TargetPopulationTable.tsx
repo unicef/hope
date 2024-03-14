@@ -1,14 +1,14 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   AllTargetPopulationsQueryVariables,
   TargetPopulationNode,
   useAllTargetPopulationsQuery,
-} from '../../../../__generated__/graphql';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { dateToIsoString } from '../../../../utils/utils';
+} from '@generated/graphql';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
@@ -30,7 +30,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export const TargetPopulationTable = ({
+export function TargetPopulationTable({
   filter,
   canViewDetails,
   enableRadioButton,
@@ -38,7 +38,7 @@ export const TargetPopulationTable = ({
   handleChange,
   noTableStyling,
   noTitle,
-}: TargetPopulationProps): ReactElement => {
+}: TargetPopulationProps): ReactElement {
   const { t } = useTranslation();
   const { businessArea, programId } = useBaseUrl();
   const initialVariables: AllTargetPopulationsQueryVariables = {
@@ -57,37 +57,32 @@ export const TargetPopulationTable = ({
     handleChange(id);
   };
 
-  const renderTable = (): React.ReactElement => {
-    return (
-      <TableWrapper>
-        <UniversalTable<
-          TargetPopulationNode,
-          AllTargetPopulationsQueryVariables
-        >
-          title={noTitle ? null : t('Target Populations')}
-          headCells={enableRadioButton ? headCells : headCells.slice(1)}
-          rowsPerPageOptions={[10, 15, 20]}
-          query={useAllTargetPopulationsQuery}
-          queriedObjectName='allTargetPopulation'
-          defaultOrderBy='createdAt'
-          defaultOrderDirection='desc'
-          initialVariables={initialVariables}
-          renderRow={(row) => (
-            <TargetPopulationTableRow
-              radioChangeHandler={enableRadioButton && handleRadioChange}
-              selectedTargetPopulation={selectedTargetPopulation}
-              key={row.id}
-              targetPopulation={row}
-              canViewDetails={canViewDetails}
-            />
-          )}
-        />
-      </TableWrapper>
-    );
-  };
+  const renderTable = (): React.ReactElement => (
+    <TableWrapper>
+      <UniversalTable<TargetPopulationNode, AllTargetPopulationsQueryVariables>
+        title={noTitle ? null : t('Target Populations')}
+        headCells={enableRadioButton ? headCells : headCells.slice(1)}
+        rowsPerPageOptions={[10, 15, 20]}
+        query={useAllTargetPopulationsQuery}
+        queriedObjectName="allTargetPopulation"
+        defaultOrderBy="createdAt"
+        defaultOrderDirection="desc"
+        initialVariables={initialVariables}
+        renderRow={(row) => (
+          <TargetPopulationTableRow
+            radioChangeHandler={enableRadioButton && handleRadioChange}
+            selectedTargetPopulation={selectedTargetPopulation}
+            key={row.id}
+            targetPopulation={row}
+            canViewDetails={canViewDetails}
+          />
+        )}
+      />
+    </TableWrapper>
+  );
   return noTableStyling ? (
     <NoTableStyling>{renderTable()}</NoTableStyling>
   ) : (
     renderTable()
   );
-};
+}

@@ -1,18 +1,18 @@
-import { Grid, MenuItem } from '@material-ui/core';
-import { Group, Person } from '@material-ui/icons';
-import React from 'react';
+import { Grid, MenuItem } from '@mui/material';
+import { Group, Person } from '@mui/icons-material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { TargetPopulationStatus } from '../../../../__generated__/graphql';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { TargetPopulationStatus } from '@generated/graphql';
 import {
   createHandleApplyFilterChange,
   targetPopulationStatusMapping,
-} from '../../../../utils/utils';
-import { DatePickerFilter } from '../../../core/DatePickerFilter';
-import { FiltersSection } from '../../../core/FiltersSection';
-import { NumberTextField } from '../../../core/NumberTextField';
-import { SearchTextField } from '../../../core/SearchTextField';
-import { SelectFilter } from '../../../core/SelectFilter';
+} from '@utils/utils';
+import { DatePickerFilter } from '@core/DatePickerFilter';
+import { FiltersSection } from '@core/FiltersSection';
+import { NumberTextField } from '@core/NumberTextField';
+import { SearchTextField } from '@core/SearchTextField';
+import { SelectFilter } from '@core/SelectFilter';
 
 interface LookUpTargetPopulationFiltersSurveysProps {
   filter;
@@ -21,32 +21,28 @@ interface LookUpTargetPopulationFiltersSurveysProps {
   appliedFilter;
   setAppliedFilter: (filter) => void;
 }
-export const LookUpTargetPopulationFiltersSurveys = ({
+export function LookUpTargetPopulationFiltersSurveys({
   filter,
   setFilter,
   initialFilter,
   appliedFilter,
   setAppliedFilter,
-}: LookUpTargetPopulationFiltersSurveysProps): React.ReactElement => {
+}: LookUpTargetPopulationFiltersSurveysProps): React.ReactElement {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const isAccountability = location.pathname.includes('accountability');
 
-  const {
-    handleFilterChange,
-    applyFilterChanges,
-    clearFilter,
-  } = createHandleApplyFilterChange(
-    initialFilter,
-    history,
-    location,
-    filter,
-    setFilter,
-    appliedFilter,
-    setAppliedFilter,
-  );
-
+  const { handleFilterChange, applyFilterChanges, clearFilter } =
+    createHandleApplyFilterChange(
+      initialFilter,
+      navigate,
+      location,
+      filter,
+      setFilter,
+      appliedFilter,
+      setAppliedFilter,
+    );
   const handleApplyFilter = (): void => {
     applyFilterChanges();
   };
@@ -65,13 +61,13 @@ export const LookUpTargetPopulationFiltersSurveys = ({
       applyHandler={handleApplyFilter}
       isOnPaper={false}
     >
-      <Grid container alignItems='flex-end' spacing={3}>
+      <Grid container alignItems="flex-end" spacing={3}>
         <Grid item xs={3}>
           <SearchTextField
             label={t('Search')}
             value={filter.name}
             onChange={(e) => handleFilterChange('name', e.target.value)}
-            data-cy='filters-search'
+            data-cy="filters-search"
             fullWidth
           />
         </Grid>
@@ -82,7 +78,7 @@ export const LookUpTargetPopulationFiltersSurveys = ({
             label={t('Status')}
             icon={<Person />}
             fullWidth
-            data-cy='filters-status'
+            data-cy="filters-status"
           >
             {preparedStatusChoices.sort().map((key) => (
               <MenuItem key={key} value={key}>
@@ -100,7 +96,7 @@ export const LookUpTargetPopulationFiltersSurveys = ({
               handleFilterChange('totalHouseholdsCountMin', e.target.value)
             }
             icon={<Group />}
-            data-cy='filters-total-households-count-min'
+            data-cy="filters-total-households-count-min"
           />
         </Grid>
         <Grid item xs={3}>
@@ -111,7 +107,7 @@ export const LookUpTargetPopulationFiltersSurveys = ({
               handleFilterChange('totalHouseholdsCountMax', e.target.value)
             }
             icon={<Group />}
-            data-cy='filters-total-households-count-max'
+            data-cy="filters-total-households-count-max"
           />
         </Grid>
         <Grid item xs={3}>
@@ -120,7 +116,7 @@ export const LookUpTargetPopulationFiltersSurveys = ({
             placeholder={t('From')}
             onChange={(date) => handleFilterChange('createdAtRangeMin', date)}
             value={filter.createdAtRangeMin}
-            dataCy='filters-creation-date-from'
+            dataCy="filters-creation-date-from"
           />
         </Grid>
         <Grid item xs={3}>
@@ -128,10 +124,10 @@ export const LookUpTargetPopulationFiltersSurveys = ({
             placeholder={t('To')}
             onChange={(date) => handleFilterChange('createdAtRangeMax', date)}
             value={filter.createdAtRangeMax}
-            dataCy='filters-creation-date-to'
+            dataCy="filters-creation-date-to"
           />
         </Grid>
       </Grid>
     </FiltersSection>
   );
-};
+}

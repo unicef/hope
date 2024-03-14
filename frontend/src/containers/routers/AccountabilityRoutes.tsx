@@ -1,6 +1,5 @@
-import React from 'react';
-import { Switch, useRouteMatch } from 'react-router-dom';
-import { SentryRoute } from '../../components/core/SentryRoute';
+import * as React from 'react';
+import { useRoutes } from 'react-router-dom';
 import { CommunicationDetailsPage } from '../pages/accountability/communication/CommunicationDetailsPage';
 import { CommunicationPage } from '../pages/accountability/communication/CommunicationPage';
 import { CreateCommunicationPage } from '../pages/accountability/communication/CreateCommunicationPage';
@@ -9,44 +8,32 @@ import { SurveyDetailsPage } from '../pages/accountability/surveys/SurveyDetails
 import { SurveysPage } from '../pages/accountability/surveys/SurveysPage';
 
 export const AccountabilityRoutes = (): React.ReactElement => {
-  const { path } = useRouteMatch();
-
   const accountabilityRoutes = [
     {
-      path: `${path}/accountability/surveys/create`,
-      component: <CreateSurveyPage />,
+      path: 'accountability/surveys/create/*',
+      element: <CreateSurveyPage />,
     },
     {
-      path: `${path}/accountability/surveys/:id`,
-      component: <SurveyDetailsPage />,
+      path: 'accountability/surveys/:id',
+      element: <SurveyDetailsPage />,
     },
     {
-      path: `${path}/accountability/surveys`,
-      component: <SurveysPage />,
-      exact: true,
+      path: 'accountability/surveys',
+      element: <SurveysPage />,
     },
     {
-      path: `${path}/accountability/communication/create`,
-      component: <CreateCommunicationPage />,
+      path: 'accountability/communication/create',
+      element: <CreateCommunicationPage />,
     },
     {
-      path: `${path}/accountability/communication/:id`,
-      component: <CommunicationDetailsPage />,
+      path: 'accountability/communication/:id',
+      element: <CommunicationDetailsPage />,
     },
     {
-      path: `${path}/accountability/communication`,
-      component: <CommunicationPage />,
-      exact: true,
+      path: 'accountability/communication',
+      element: <CommunicationPage />,
     },
   ];
 
-  return (
-    <Switch>
-      {accountabilityRoutes.map((route) => (
-        <SentryRoute key={route.path} path={route.path} exact={route.exact}>
-          {route.component}
-        </SentryRoute>
-      ))}
-    </Switch>
-  );
+  return useRoutes(accountabilityRoutes);
 };

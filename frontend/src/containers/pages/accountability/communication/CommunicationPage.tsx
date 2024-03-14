@@ -1,23 +1,24 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
-import { CommunicationFilters } from '../../../../components/accountability/Communication/CommunicationTable/CommunicationFilters';
-import { LoadingComponent } from '../../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../../components/core/PermissionDenied';
+import { useGrievancesChoiceDataQuery } from '@generated/graphql';
+import { CommunicationFilters } from '@components/accountability/Communication/CommunicationTable/CommunicationFilters';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import {
   PERMISSIONS,
   hasPermissionInModule,
 } from '../../../../config/permissions';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { CommunicationTable } from '../../../tables/Communication/CommunicationTable';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { ButtonTooltip } from "../../../../components/core/ButtonTooltip";
-import { useProgramContext } from "../../../../programContext";
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { useProgramContext } from '../../../../programContext';
 
-export const CommunicationPage = (): React.ReactElement => {
+export function CommunicationPage(): React.ReactElement {
   const { baseUrl } = useBaseUrl();
   const permissions = usePermissions();
   const location = useLocation();
@@ -37,10 +38,8 @@ export const CommunicationPage = (): React.ReactElement => {
   const [appliedFilter, setAppliedFilter] = useState(
     getFilterFromQueryParams(location, initialFilter),
   );
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   if (choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
@@ -57,11 +56,11 @@ export const CommunicationPage = (): React.ReactElement => {
     <>
       <PageHeader title={t('Communication')}>
         <ButtonTooltip
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           component={Link}
           to={`/${baseUrl}/accountability/communication/create`}
-          data-cy='button-communication-create-new'
+          data-cy="button-communication-create-new"
           title={t('Program has to be active to create new Message')}
           disabled={!isActiveProgram}
         >
@@ -84,4 +83,4 @@ export const CommunicationPage = (): React.ReactElement => {
       />
     </>
   );
-};
+}

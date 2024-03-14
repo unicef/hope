@@ -10,23 +10,24 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
+} from '@mui/material';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   useCreateDashboardReportMutation,
   useDashboardReportChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export const ExportModal = ({ filter, year }): React.ReactElement => {
+export function ExportModal({ filter, year }): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
   const { businessArea, programId, isAllPrograms } = useBaseUrl();
@@ -35,10 +36,8 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
   const numSelected = selected.length;
   const isSelected = (id: string): boolean => selected.includes(id);
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useDashboardReportChoiceDataQuery({ variables: { businessArea } });
+  const { data: choicesData, loading: choicesLoading } =
+    useDashboardReportChoiceDataQuery({ variables: { businessArea } });
   const [mutate] = useCreateDashboardReportMutation();
 
   useEffect(() => {
@@ -74,27 +73,26 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
     setSelected(newSelected);
   };
 
-  const renderRows = (): Array<React.ReactElement> => {
-    return data.map((el) => {
+  const renderRows = (): Array<React.ReactElement> =>
+    data.map((el) => {
       const isItemSelected = isSelected(el.id);
       return (
         <TableRow onClick={() => onCheckboxClick(el.id)} key={el.id}>
-          <TableCell align='left' padding='checkbox'>
+          <TableCell align="left" padding="checkbox">
             <Checkbox
-              color='primary'
+              color="primary"
               onClick={() => onCheckboxClick(el.id)}
               checked={isItemSelected}
               inputProps={{ 'aria-labelledby': el.id }}
             />
           </TableCell>
-          <TableCell align='left'>{el.name}</TableCell>
+          <TableCell align="left">{el.name}</TableCell>
         </TableRow>
       );
     });
-  };
 
-  const submitFormHandler = async (): Promise<void> => {
-    const response = await mutate({
+  const submitFormHandler = (): void => {
+    mutate({
       variables: {
         reportData: {
           businessAreaSlug: businessArea,
@@ -104,32 +102,37 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
           program: isAllPrograms ? null : programId,
         },
       },
-    });
-    if (!response.errors && response.data.createDashboardReport.success) {
-      showMessage(t('Report was created.'));
-    } else {
-      showMessage(t('Report create action failed.'));
-    }
-    setSelected([]);
-    setDialogOpen(false);
+    })
+      .then((response) => {
+        if (!response.errors && response.data.createDashboardReport.success) {
+          showMessage(t('Report was created.'));
+        } else {
+          showMessage(t('Report create action failed.'));
+        }
+        setSelected([]);
+        setDialogOpen(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
     <>
       <Button
-        color='primary'
-        variant='contained'
+        color="primary"
+        variant="contained"
         onClick={() => setDialogOpen(true)}
-        data-cy='button-ed-plan'
+        data-cy="button-ed-plan"
       >
         Export
       </Button>
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Export Data')}</DialogTitle>
@@ -137,36 +140,36 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
         <DialogContent>
           <DialogContainer>
             <Box mb={6}>
-              <Typography variant='body2'>
+              <Typography variant="body2">
                 {t(
                   'The filters applied on the dashboard will be used for the reports.',
                 )}
               </Typography>
             </Box>
             <Box mb={2}>
-              <Typography variant='subtitle2'>
+              <Typography variant="subtitle2">
                 {t('Select types of reports to be exported')}:
               </Typography>
             </Box>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell padding='checkbox'>
+                  <TableCell padding="checkbox">
                     <Checkbox
-                      color='primary'
+                      color="primary"
                       indeterminate={numSelected > 0 && numSelected < rowCount}
                       checked={rowCount > 0 && numSelected === rowCount}
                       onChange={(event) => onSelectAllClick(event, data)}
                       inputProps={{ 'aria-label': 'select all' }}
                     />
                   </TableCell>
-                  <TableCell align='left'>{t('Report Type')}</TableCell>
+                  <TableCell align="left">{t('Report Type')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>{renderRows()}</TableBody>
             </Table>
-            <Box p={3} m={4} bgcolor='#F5F5F5'>
-              <Typography variant='subtitle2'>
+            <Box p={3} m={4} bgcolor="#F5F5F5">
+              <Typography variant="subtitle2">
                 {t(
                   'Upon clicking export button, report will be generated and send to your email address when ready.',
                 )}
@@ -185,11 +188,11 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
               {t('CANCEL')}
             </Button>
             <Button
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={submitFormHandler}
-              data-cy='button-submit'
+              data-cy="button-submit"
             >
               {t('Export')}
             </Button>
@@ -198,4 +201,4 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
       </Dialog>
     </>
   );
-};
+}

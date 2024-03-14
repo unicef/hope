@@ -1,5 +1,5 @@
 import { MockedProvider } from '@apollo/react-testing';
-import React from 'react';
+import * as React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { ImportedIndividualsTable } from '.';
@@ -12,9 +12,10 @@ describe('containers/tables/rdi/ImportedIndividualsTable', () => {
     const { container } = render(
       <MockedProvider mocks={fakeApolloAllImportedIndividuals}>
         <ImportedIndividualsTable
-          businessArea='afghanistan'
+          isMerged={false}
+          businessArea="afghanistan"
           choicesData={fakeHouseholdChoices}
-          rdiId='UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl'
+          rdiId="UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl"
         />
       </MockedProvider>,
     );
@@ -25,14 +26,12 @@ describe('containers/tables/rdi/ImportedIndividualsTable', () => {
 
   it('should render loading', () => {
     const { container } = render(
-      <MockedProvider
-        link={new ApolloLoadingLink()}
-        mocks={fakeApolloAllImportedIndividuals}
-      >
+      <MockedProvider mocks={fakeApolloAllImportedIndividuals}>
         <ImportedIndividualsTable
-          businessArea='afghanistan'
+          isMerged={false}
+          businessArea="afghanistan"
           choicesData={fakeHouseholdChoices}
-          rdiId='UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl'
+          rdiId="UmVnaXN0cmF0aW9uRGF0YUltcG9ydE5vZGU6YzY1NzRkODQtMzEzYS00MTNlLTgzMDUtMDY5ZmU4NWMyOGRl"
         />
       </MockedProvider>,
     );

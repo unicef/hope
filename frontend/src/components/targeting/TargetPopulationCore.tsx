@@ -1,13 +1,13 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalActivityLogTable } from '@containers/tables/UniversalActivityLogTable';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { PaperContainer } from './PaperContainer';
 import { Results } from './Results';
 import { TargetingCriteria } from './TargetingCriteria';
@@ -44,7 +44,7 @@ export function TargetPopulationCore({
       ) : null}
       {targetPopulation?.excludedIds ? (
         <PaperContainer>
-          <Typography data-cy='title-excluded-entries' variant='h6'>
+          <Typography data-cy="title-excluded-entries" variant="h6">
             {t(
               'Excluded Target Population Entries (Households or Individuals)',
             )}
@@ -77,7 +77,7 @@ export function TargetPopulationCore({
         />
       ) : (
         <PaperContainer>
-          <Typography data-cy='target-population-building' variant='h6'>
+          <Typography data-cy="target-population-building" variant="h6">
             {t('Target Population is building')}
           </Typography>
           <Label>

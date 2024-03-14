@@ -6,14 +6,19 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { useTranslation } from 'react-i18next';
 import * as Yup from 'yup';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { useSnackbar } from '@hooks/useSnackBar';
 
-const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }): React.ReactElement => {
+function RefuseRdiForm({
+  registration,
+  refuseMutate,
+  open,
+  onClose,
+}): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
   const { id, name } = registration;
@@ -56,17 +61,17 @@ const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }): React.Rea
                 Are you sure, that you want to refuse RDI {name}?
               </DialogContentText>
               <Field
-                name='refuseReason'
+                name="refuseReason"
                 fullWidth
                 multiline
-                variant='outlined'
+                variant="outlined"
                 label={t('RDI Refuse Reason')}
                 component={FormikTextField}
               />
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose}>Cancel</Button>
-              <Button onClick={submitForm} color='primary' variant='contained'>
+              <Button onClick={submitForm} color="primary" variant="contained">
                 Save
               </Button>
             </DialogActions>
@@ -75,6 +80,6 @@ const RefuseRdiForm = ({ registration, refuseMutate, open, onClose }): React.Rea
       )}
     </Formik>
   );
-};
+}
 
 export { RefuseRdiForm };

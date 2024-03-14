@@ -1,6 +1,7 @@
-import { Box } from '@material-ui/core';
-import React, { useState } from 'react';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+import { Box } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 interface GrievanceDocumentPhotoModalProps {
   photoSrc: string;
@@ -8,21 +9,21 @@ interface GrievanceDocumentPhotoModalProps {
   fieldName;
 }
 
-export const GrievanceDocumentPhotoModalEditable = ({
+export function GrievanceDocumentPhotoModalEditable({
   photoSrc,
   setFieldValue,
   fieldName,
-}: GrievanceDocumentPhotoModalProps): React.ReactElement => {
+}: GrievanceDocumentPhotoModalProps): React.ReactElement {
   const [isEdited, setEdit] = useState(false);
   const picUrl = photoSrc;
 
   return (
-    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+    <Box style={{ height: '100%' }} display="flex" alignItems="center">
       {isEdited || !picUrl ? (
-        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+        <Box style={{ height: '100%' }} display="flex" alignItems="center">
           <input
-            type='file'
-            accept='image/*'
+            type="file"
+            accept="image/*"
             onChange={(event) => {
               setFieldValue(fieldName, event.currentTarget.files[0]);
             }}
@@ -31,7 +32,7 @@ export const GrievanceDocumentPhotoModalEditable = ({
       ) : (
         <PhotoModal
           src={picUrl}
-          variant='pictureClose'
+          variant="pictureClose"
           closeHandler={() => {
             setEdit(true);
             setFieldValue(fieldName, null);
@@ -41,4 +42,4 @@ export const GrievanceDocumentPhotoModalEditable = ({
       )}
     </Box>
   );
-};
+}

@@ -566,7 +566,7 @@ snapshots['TestGrievanceDocumentsUpload::test_raises_error_when_mutation_updates
                     'line': 5
                 }
             ],
-            'message': 'File scanned_document_update.jpg of size 5242880 is above max size limit',
+            'message': 'File scanned_document_update.jpg of size 5.0MB is above max size limit',
             'path': [
                 'updateGrievanceTicket'
             ]

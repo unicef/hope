@@ -1,5 +1,5 @@
 import { MockedProvider } from '@apollo/react-testing';
-import React from 'react';
+import * as React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { RegistrationDataImportTable } from '.';
@@ -20,10 +20,7 @@ describe('containers/tables/rdi/RegistrationDataImportTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider mocks={fakeApolloAllRegistrationDataImports}>
-        <RegistrationDataImportTable
-          filter={initialFilter}
-          canViewDetails={true}
-        />
+        <RegistrationDataImportTable filter={initialFilter} canViewDetails />
       </MockedProvider>,
     );
     await act(() => wait(0)); // wait for response
@@ -34,13 +31,9 @@ describe('containers/tables/rdi/RegistrationDataImportTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         mocks={fakeApolloAllRegistrationDataImports}
       >
-        <RegistrationDataImportTable
-          filter={initialFilter}
-          canViewDetails={true}
-        />
+        <RegistrationDataImportTable filter={initialFilter} canViewDetails />
       </MockedProvider>,
     );
 
