@@ -1,4 +1,4 @@
-import { Box, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
 import Autocomplete from '@mui/lab/Autocomplete';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
