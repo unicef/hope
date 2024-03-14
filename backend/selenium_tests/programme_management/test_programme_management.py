@@ -508,9 +508,9 @@ class TestComeBackScenarios:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
 
-@pytest.mark.skip(reasne="ToDo")
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
+    @pytest.mark.skip(reason="ToDo")
     @pytest.mark.parametrize(
         "test_data",
         [
