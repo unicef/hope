@@ -10,28 +10,25 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
-import React, { useState } from 'react';
+} from '@mui/material';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import {
-  grievanceTicketStatusToColor,
-  choicesToDict,
-} from '../../../utils/utils';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { grievanceTicketStatusToColor, choicesToDict } from '@utils/utils';
 import {
   GrievancesChoiceDataQuery,
   HouseholdNode,
   useAllGrievanceTicketQuery,
-} from '../../../__generated__/graphql';
-import { BlackLink } from '../../core/BlackLink';
-import { ContentLink } from '../../core/ContentLink';
-import { LabelizedField } from '../../core/LabelizedField';
-import { StatusBox } from '../../core/StatusBox';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+} from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../../grievances/utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`
@@ -59,14 +56,14 @@ interface LinkedGrievancesModalProps {
   grievancesChoices: GrievancesChoiceDataQuery;
 }
 
-export const LinkedGrievancesModal = ({
+export function LinkedGrievancesModal({
   household,
   businessArea,
   baseUrl,
   grievancesChoices,
-}: LinkedGrievancesModalProps): React.ReactElement => {
+}: LinkedGrievancesModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const { data: grievances } = useAllGrievanceTicketQuery({
@@ -92,14 +89,14 @@ export const LinkedGrievancesModal = ({
     return (
       <ClickableTableRow
         hover
-        onClick={() => history.push(grievanceDetailsPath)}
+        onClick={() => navigate(grievanceDetailsPath)}
         key={row.id}
       >
-        <TableCell align='left'>
+        <TableCell align="left">
           <BlackLink to={grievanceDetailsPath}>{row.unicefId}</BlackLink>
         </TableCell>
-        <TableCell align='left'>{categoryChoices[row.category]}</TableCell>
-        <TableCell align='left'>
+        <TableCell align="left">{categoryChoices[row.category]}</TableCell>
+        <TableCell align="left">
           <StatusBox
             status={statusChoices[row.status]}
             statusToColor={grievanceTicketStatusToColor}
@@ -111,15 +108,15 @@ export const LinkedGrievancesModal = ({
 
   const allGrievances = grievances ? grievances.allGrievanceTicket.edges : [];
 
-  const renderGrievances = (): Array<React.ReactElement> => {
-    return allGrievances.length
+  const renderGrievances = (): Array<React.ReactElement> =>
+    allGrievances.length
       ? allGrievances.map((el) => {
-          const grievanceDetailsPath = getGrievanceDetailsPath(
-            el.node.id,
-            el.node.category,
-            baseUrl,
-          );
-          return (
+        const grievanceDetailsPath = getGrievanceDetailsPath(
+          el.node.id,
+          el.node.category,
+          baseUrl,
+        );
+        return (
             <span key={el.node.id}>
               <ContentLink href={grievanceDetailsPath}>
                 {`${el.node.unicefId} - ${
@@ -128,10 +125,9 @@ export const LinkedGrievancesModal = ({
               </ContentLink>{' '}
               <br />
             </span>
-          );
-        })
-      : [<span>-</span>];
-  };
+        );
+      })
+      : [<span key="empty">-</span>];
 
   const renderLink = (): React.ReactElement => {
     if (allGrievances.length === 0) {
@@ -159,11 +155,9 @@ export const LinkedGrievancesModal = ({
     );
   };
 
-  const renderRows = (): React.ReactElement => {
-    return (
-      <>{allGrievances.map((relatedTicket) => renderRow(relatedTicket.node))}</>
-    );
-  };
+  const renderRows = (): React.ReactElement => (
+    <>{allGrievances.map((relatedTicket) => renderRow(relatedTicket.node))}</>
+  );
 
   return (
     <>
@@ -171,9 +165,9 @@ export const LinkedGrievancesModal = ({
       <StyledDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='lg'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="lg"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Linked Grievances')}</DialogTitle>
@@ -181,16 +175,19 @@ export const LinkedGrievancesModal = ({
         <DialogContent>
           <Box mt={2} mb={6}>
             <Typography>
-              <Bold>Household ID {household.unicefId} </Bold>
+              <Bold>
+                Household ID
+                {household.unicefId}
+              </Bold>
               is linked to following Grievances.
             </Typography>
           </Box>
           <StyledTable>
             <TableHead>
               <TableRow>
-                <TableCell align='left'>{t('Ticket Id')}</TableCell>
-                <TableCell align='left'>{t('Category')}</TableCell>
-                <TableCell align='left'>{t('Status')}</TableCell>
+                <TableCell align="left">{t('Ticket Id')}</TableCell>
+                <TableCell align="left">{t('Category')}</TableCell>
+                <TableCell align="left">{t('Status')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>{renderRows()}</TableBody>
@@ -211,4 +208,4 @@ export const LinkedGrievancesModal = ({
       </StyledDialog>
     </>
   );
-};
+}

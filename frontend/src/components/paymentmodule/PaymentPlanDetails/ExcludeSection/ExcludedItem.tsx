@@ -1,6 +1,6 @@
-import { Box, Button, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import React from 'react';
+import { Box, Button, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
+import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +11,11 @@ const StyledBox = styled(Box)`
   color: '#404040';
 `;
 
-const IdDiv = styled.div`
+interface IdDivProps {
+  isDeleted: boolean;
+}
+
+const IdDiv = styled.div<IdDivProps>`
   text-decoration: ${({ isDeleted }) => (isDeleted ? 'line-through' : 'none')};
 `;
 interface ExcludedItemProps {
@@ -22,20 +26,20 @@ interface ExcludedItemProps {
   isEdit: boolean;
 }
 
-export const ExcludedItem = ({
+export function ExcludedItem({
   id,
   onDelete,
   onUndo,
   isDeleted,
   isEdit,
-}: ExcludedItemProps): React.ReactElement => {
+}: ExcludedItemProps): React.ReactElement {
   const { t } = useTranslation();
 
   return (
     <StyledBox
-      display='flex'
-      alignItems='center'
-      justifyContent='space-between'
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
       pl={8}
       pr={8}
       pt={4}
@@ -45,7 +49,7 @@ export const ExcludedItem = ({
       <IdDiv isDeleted={isDeleted}>{id}</IdDiv>
       {isEdit &&
         (isDeleted ? (
-          <Button variant='text' color='primary' onClick={onUndo}>
+          <Button variant="text" color="primary" onClick={onUndo}>
             {t('Undo')}
           </Button>
         ) : (
@@ -55,4 +59,4 @@ export const ExcludedItem = ({
         ))}
     </StyledBox>
   );
-};
+}

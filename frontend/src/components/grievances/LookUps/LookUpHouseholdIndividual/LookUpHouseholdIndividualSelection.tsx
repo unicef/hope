@@ -1,10 +1,10 @@
-import { Box, FormHelperText, Grid } from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
-import { isInvalid } from '../../../../utils/utils';
+import { Box, FormHelperText, Grid } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { isInvalid } from '@utils/utils';
 import { LookUpHouseholdIndividualSelectionDetail } from './LookUpHouseholdIndividualSelectionDetail';
 import { LookUpHouseholdIndividualSelectionDisplay } from './LookUpHouseholdIndividualSelectionDisplay';
 
-export const LookUpHouseholdIndividualSelection = ({
+export function LookUpHouseholdIndividualSelection({
   onValueChange,
   values,
   errors,
@@ -18,7 +18,7 @@ export const LookUpHouseholdIndividualSelection = ({
   touched?;
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const [selectedHousehold, setSelectedHousehold] = useState(
     values.selectedHousehold,
   );
@@ -48,7 +48,7 @@ export const LookUpHouseholdIndividualSelection = ({
         redirectedFromRelatedTicket={redirectedFromRelatedTicket}
         isFeedbackWithHouseholdOnly={isFeedbackWithHouseholdOnly}
       />
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <LookUpHouseholdIndividualSelectionDisplay
           disableUnselectHousehold={
             redirectedFromRelatedTicket || isFeedbackWithHouseholdOnly
@@ -73,8 +73,8 @@ export const LookUpHouseholdIndividualSelection = ({
         {isInvalid('selectedHousehold', errors, touched) &&
           !selectedHousehold && (
             <FormHelperText error>{errors?.selectedHousehold}</FormHelperText>
-          )}
+        )}
       </Box>
     </>
   );
-};
+}

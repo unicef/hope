@@ -6,30 +6,31 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
+} from '@mui/material';
+import * as React from 'react';
+import { AddCircleOutline } from '@mui/icons-material';
 import { FieldArray, Formik } from 'formik';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
-import { useProgramContext } from "../../programContext";
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useCachedImportedIndividualFieldsQuery } from '@hooks/useCachedImportedIndividualFields';
 import {
   chooseFieldType,
   clearField,
   formatCriteriaFilters,
   formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
-} from '../../utils/targetingUtils';
+} from '@utils/targetingUtils';
 import { DialogContainer } from '../dialogs/DialogContainer';
 import { DialogDescription } from '../dialogs/DialogDescription';
 import { DialogFooter } from '../dialogs/DialogFooter';
 import { DialogTitleWrapper } from '../dialogs/DialogTitleWrapper';
 import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
 import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
+import { useProgramContext } from '../../programContext';
 
 const AndDividerLabel = styled.div`
   position: absolute;
@@ -52,7 +53,7 @@ const AndDividerLabel = styled.div`
 `;
 const AndDivider = styled.div`
   border-top: 1px solid #b1b1b5;
-  margin: ${({ theme }) => theme.spacing(10)}px 0;
+  margin: ${({ theme }) => theme.spacing(10)} 0;
   position: relative;
 `;
 
@@ -87,6 +88,7 @@ const validationSchema = Yup.object().shape({
 });
 interface ArrayFieldWrapperProps {
   arrayHelpers;
+  children: React.ReactNode;
 }
 class ArrayFieldWrapper extends React.Component<ArrayFieldWrapperProps> {
   getArrayHelpers(): object {
@@ -124,8 +126,13 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const { selectedProgram: { id } } = useProgramContext();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(businessArea, id);
+  const {
+    selectedProgram: { id },
+  } = useProgramContext();
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(
+    businessArea,
+    id,
+  );
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);
@@ -159,8 +166,8 @@ export function TargetCriteriaForm({
         filter.value.length === 0);
 
     const filterEmptyFromTo = (filter): boolean =>
-      filter.value?.hasOwnProperty('from') &&
-      filter.value?.hasOwnProperty('to') &&
+      Object.prototype.hasOwnProperty.call(filter.value, 'from') &&
+      Object.prototype.hasOwnProperty.call(filter.value, 'to') &&
       !filter.value.from &&
       !filter.value.to;
 
@@ -180,9 +187,8 @@ export function TargetCriteriaForm({
         const hasNulls = block.individualBlockFilters.some(
           filterNullOrNoSelections,
         );
-        const hasFromToError = block.individualBlockFilters.some(
-          filterEmptyFromTo,
-        );
+        const hasFromToError =
+          block.individualBlockFilters.some(filterEmptyFromTo);
 
         return hasNulls || hasFromToError;
       },
@@ -231,72 +237,68 @@ export function TargetCriteriaForm({
           <Dialog
             open={open}
             onClose={onClose}
-            scroll='paper'
-            aria-labelledby='form-dialog-title'
+            scroll="paper"
+            aria-labelledby="form-dialog-title"
             fullWidth
-            maxWidth='md'
+            maxWidth="md"
           >
             {open && <AutoSubmitFormOnEnter />}
             <DialogTitleWrapper>
-              <DialogTitle disableTypography>
-                <Typography data-cy='title-add-filter' variant='h6'>
+              <DialogTitle component="div">
+                <Typography data-cy="title-add-filter" variant="h6">
                   {t('Add Filter')}
                 </Typography>
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
-              {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-              // @ts-ignore
-              errors.nonFieldErrors && (
-                <DialogError>
-                  <ul>
-                    {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                    // @ts-ignore
-                    errors.nonFieldErrors.map((message) => (
-                      <li key={message}>{message}</li>
-                    ))}
-                  </ul>
-                </DialogError>
-              )}
+              {
+                // @ts-ignore
+                errors.nonFieldErrors && (
+                  <DialogError>
+                    <ul>
+                      {
+                        // @ts-ignore
+                        errors.nonFieldErrors.map((message) => (
+                          <li key={message}>{message}</li>
+                        ))
+                      }
+                    </ul>
+                  </DialogError>
+                )
+              }
               <DialogDescription>
                 All rules defined below have to be true for the entire
                 household.
               </DialogDescription>
               <FieldArray
-                name='filters'
+                name="filters"
                 render={(arrayHelpers) => (
                   <ArrayFieldWrapper
                     arrayHelpers={arrayHelpers}
                     ref={filtersArrayWrapperRef}
                   >
-                    {values.filters.map((each, index) => {
-                      return (
-                        <TargetingCriteriaFilter
-                          //eslint-disable-next-line
-                          key={index}
-                          index={index}
-                          data={householdData}
-                          each={each}
-                          onChange={(e, object) => {
-                            if (object) {
-                              return chooseFieldType(
-                                object,
-                                arrayHelpers,
-                                index,
-                              );
-                            }
-                            return clearField(arrayHelpers, index);
-                          }}
-                          values={values}
-                          onClick={() => arrayHelpers.remove(index)}
-                        />
-                      );
-                    })}
+                    {values.filters.map((each, index) => (
+                      <TargetingCriteriaFilter
+                        // eslint-disable-next-line
+                        key={index}
+                        index={index}
+                        data={householdData}
+                        each={each}
+                        onChange={(e, object) => {
+                          if (object) {
+                            return chooseFieldType(object, arrayHelpers, index);
+                          }
+                          return clearField(arrayHelpers, index);
+                        }}
+                        values={values}
+                        onClick={() => arrayHelpers.remove(index)}
+                      />
+                    ))}
                   </ArrayFieldWrapper>
                 )}
               />
               {householdFiltersAvailable ? (
-                <Box display='flex' flexDirection='column'>
+                <Box display="flex" flexDirection="column">
                   <ButtonBox>
                     <Button
                       onClick={() =>
@@ -304,9 +306,9 @@ export function TargetCriteriaForm({
                           .getArrayHelpers()
                           .push({ fieldName: '' })
                       }
-                      color='primary'
+                      color="primary"
                       startIcon={<AddCircleOutline />}
-                      data-cy='button-household-rule'
+                      data-cy="button-household-rule"
                     >
                       ADD HOUSEHOLD RULE
                     </Button>
@@ -328,31 +330,29 @@ export function TargetCriteriaForm({
                     </DialogDescription>
                   ) : null}
                   <FieldArray
-                    name='individualsFiltersBlocks'
+                    name="individualsFiltersBlocks"
                     render={(arrayHelpers) => (
                       <ArrayFieldWrapper
                         arrayHelpers={arrayHelpers}
                         ref={individualsFiltersBlocksWrapperRef}
                       >
-                        {values.individualsFiltersBlocks.map((each, index) => {
-                          return (
-                            <TargetCriteriaFilterBlocks
-                              //eslint-disable-next-line
-                              key={index}
-                              blockIndex={index}
-                              data={individualData}
-                              values={values}
-                              onDelete={() => arrayHelpers.remove(index)}
-                            />
-                          );
-                        })}
+                        {values.individualsFiltersBlocks.map((each, index) => (
+                          <TargetCriteriaFilterBlocks
+                            // eslint-disable-next-line
+                            key={index}
+                            blockIndex={index}
+                            data={individualData}
+                            values={values}
+                            onDelete={() => arrayHelpers.remove(index)}
+                          />
+                        ))}
                       </ArrayFieldWrapper>
                     )}
                   />
-                  <Box display='flex' flexDirection='column'>
+                  <Box display="flex" flexDirection="column">
                     <ButtonBox>
                       <Button
-                        data-cy='button-individual-rule'
+                        data-cy="button-individual-rule"
                         onClick={() =>
                           individualsFiltersBlocksWrapperRef.current
                             .getArrayHelpers()
@@ -360,7 +360,7 @@ export function TargetCriteriaForm({
                               individualBlockFilters: [{ fieldName: '' }],
                             })
                         }
-                        color='primary'
+                        color="primary"
                         startIcon={<AddCircleOutline />}
                       >
                         ADD INDIVIDUAL RULE GROUP
@@ -372,7 +372,7 @@ export function TargetCriteriaForm({
             </DialogContent>
             <DialogFooter>
               <DialogActions>
-                <StyledBox display='flex' justifyContent='flex-end'>
+                <StyledBox display="flex" justifyContent="flex-end">
                   <div>
                     <Button
                       onClick={() => {
@@ -384,10 +384,10 @@ export function TargetCriteriaForm({
                     </Button>
                     <Button
                       onClick={submitForm}
-                      type='submit'
-                      color='primary'
-                      variant='contained'
-                      data-cy='button-target-population-add-criteria'
+                      type="submit"
+                      color="primary"
+                      variant="contained"
+                      data-cy="button-target-population-add-criteria"
                     >
                       Save
                     </Button>

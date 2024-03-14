@@ -6,8 +6,8 @@ import {
   XlsxImportDataQueryResult,
   useUploadImportDataXlsxFileAsyncMutation,
   useXlsxImportDataLazyQuery,
-} from '../../../../__generated__/graphql';
-import { useLazyInterval } from '../../../../hooks/useInterval';
+} from '@generated/graphql';
+import { useLazyInterval } from '@hooks/useInterval';
 
 export interface UseSaveXlsxImportDataAndCheckStatusReturnType {
   saveAndStartPolling: (
@@ -20,16 +20,13 @@ export interface UseSaveXlsxImportDataAndCheckStatusReturnType {
 
 export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndCheckStatusReturnType {
   const [loading, setLoading] = useState(false);
-  const [
-    saveXlsxImportDataMutate,
-    { data: xlsxImportDataFromMutation },
-  ] = useUploadImportDataXlsxFileAsyncMutation();
+  const [saveXlsxImportDataMutate, { data: xlsxImportDataFromMutation }] =
+    useUploadImportDataXlsxFileAsyncMutation();
   const [loadImportData, { data: xlsxImportData }] = useXlsxImportDataLazyQuery(
     {
       variables: {
-        id:
-          xlsxImportDataFromMutation?.uploadImportDataXlsxFileAsync?.importData
-            ?.id,
+        id: xlsxImportDataFromMutation?.uploadImportDataXlsxFileAsync
+          ?.importData?.id,
       },
       fetchPolicy: 'network-only',
     },
@@ -46,9 +43,8 @@ export function useSaveXlsxImportDataAndCheckStatus(): UseSaveXlsxImportDataAndC
   useEffect(() => {
     if (xlsxImportDataFromMutation?.uploadImportDataXlsxFileAsync?.importData) {
       startPollingImportData({
-        id:
-          xlsxImportDataFromMutation.uploadImportDataXlsxFileAsync.importData
-            .id,
+        id: xlsxImportDataFromMutation.uploadImportDataXlsxFileAsync.importData
+          .id,
       });
     }
   }, [xlsxImportDataFromMutation]);

@@ -4,21 +4,22 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-} from '@material-ui/core';
-import React, { useState } from 'react';
+} from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { getPercentage } from '../../utils/utils';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { getPercentage } from '@utils/utils';
 import {
   PaymentPlanQuery,
   useFinishPaymentVerificationPlanMutation,
-} from '../../__generated__/graphql';
-import { useProgramContext } from "../../programContext";
+} from '@generated/graphql';
+import { useProgramContext } from '../../programContext';
 
 export interface FinishVerificationPlanProps {
   verificationPlan: PaymentPlanQuery['paymentPlan']['verificationPlans']['edges'][0]['node'];
@@ -38,7 +39,7 @@ export function FinishVerificationPlan({
       await mutate({
         variables: { paymentVerificationPlanId: verificationPlan.id },
         refetchQueries: ['AllPaymentVerifications'],
-        awaitRefetchQueries: true
+        awaitRefetchQueries: true,
       });
       setFinishDialogOpen(false);
       showMessage(t('Verification plan has been finished'));
@@ -81,10 +82,10 @@ export function FinishVerificationPlan({
     <>
       <Box p={2}>
         <Button
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           onClick={() => setFinishDialogOpen(true)}
-          data-cy='button-ed-plan'
+          data-cy="button-ed-plan"
           disabled={!isActiveProgram}
         >
           {t('Finish')}
@@ -93,9 +94,9 @@ export function FinishVerificationPlan({
       <Dialog
         open={finishDialogOpen}
         onClose={() => setFinishDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Finish Verification Plan')}</DialogTitle>
@@ -104,20 +105,20 @@ export function FinishVerificationPlan({
           <DialogContainer>
             <Box>
               {beneficiariesPercent() && (
-                <Typography variant='body2' style={{ marginTop: '20px' }}>
+                <Typography variant="body2" style={{ marginTop: '20px' }}>
                   {generateModalPrefixText()}
                   {t(
                     ' of the beneficiaries have responded to this payment verification.',
                   )}
                 </Typography>
               )}
-              <Typography variant='body2'>
+              <Typography variant="body2">
                 {t('Are you sure that you want to finish?')}
               </Typography>
               {grievanceTickets() ? (
                 <Typography
                   style={{ marginTop: '20px', marginBottom: '20px' }}
-                  variant='body2'
+                  variant="body2"
                 >
                   {t('Closing this verification will generate')}{' '}
                   {grievanceTickets()} {t('grievance tickets')}.
@@ -132,11 +133,11 @@ export function FinishVerificationPlan({
               {t('CANCEL')}
             </Button>
             <Button
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => finish()}
-              data-cy='button-submit'
+              data-cy="button-submit"
             >
               {t('FINISH')}
             </Button>

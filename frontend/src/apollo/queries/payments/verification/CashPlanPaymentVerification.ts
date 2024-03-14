@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const query = gql`
   query PaymentVerificationPlan($id: ID!) {

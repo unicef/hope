@@ -1,8 +1,8 @@
-import { HeadCell } from '../../core/Table/EnhancedTableHead';
-import { AllSanctionListIndividualsQuery } from '../../../__generated__/graphql';
+import { HeadCell } from '@core/Table/EnhancedTableHead';
+import { AllSanctionListIndividualsQuery } from '@generated/graphql';
 
 export const headCells: HeadCell<
-  AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node']
+AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node']
 >[] = [
   {
     disablePadding: false,

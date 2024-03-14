@@ -3,7 +3,7 @@ import {
   PERMISSIONS,
   hasPermissions,
 } from '../../../../config/permissions';
-import { GRIEVANCE_CATEGORIES } from '../../../../utils/constants';
+import { GRIEVANCE_CATEGORIES } from '@utils/constants';
 
 export const grievancePermissions = (
   isCreator: boolean,

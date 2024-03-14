@@ -1,11 +1,12 @@
-import { Box, FormControlLabel, Radio, RadioGroup } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box, FormControlLabel, Radio, RadioGroup } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { useProgrammeChoiceDataQuery } from '../../../../__generated__/graphql';
-import { SurveyTabsValues } from '../../../../utils/constants';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
+import { useProgrammeChoiceDataQuery } from '@generated/graphql';
+import { SurveyTabsValues } from '@utils/constants';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { LookUpProgrammesFiltersSurveys } from './LookUpProgrammesFiltersSurveys';
 import { LookUpSelectionTablesSurveys } from './LookUpSelectionTablesSurveys';
 import { LookUpTargetPopulationFiltersSurveys } from './LookUpTargetPopulationFiltersSurveys';
@@ -17,7 +18,7 @@ const BoxWithBorderBottom = styled(Box)`
   padding: 15px 0;
 `;
 
-export const LookUpSelectionSurveys = ({
+export function LookUpSelectionSurveys({
   businessArea,
   onValueChange,
   setValues,
@@ -31,7 +32,7 @@ export const LookUpSelectionSurveys = ({
   values;
   selectedTab;
   setSelectedTab;
-}): React.ReactElement => {
+}): React.ReactElement {
   const location = useLocation();
   const initialFilterP = {
     search: '',
@@ -43,7 +44,7 @@ export const LookUpSelectionSurveys = ({
     numberOfHouseholdsMax: '',
     budgetMin: '',
     budgetMax: '',
-    dataCollectingType: ''
+    dataCollectingType: '',
   };
 
   const [filterP, setFilterP] = useState(
@@ -71,12 +72,8 @@ export const LookUpSelectionSurveys = ({
 
   const { t } = useTranslation();
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useProgrammeChoiceDataQuery({
-    variables: { businessArea },
-  });
+  const { data: choicesData, loading: choicesLoading } =
+    useProgrammeChoiceDataQuery();
 
   const handleChange = (type: number, value: string): void => {
     setValues({
@@ -99,18 +96,18 @@ export const LookUpSelectionSurveys = ({
       <BoxWithBorderBottom
         p={4}
         m={4}
-        display='flex'
-        alignItems='center'
-        bgcolor='#F5F5F5'
+        display="flex"
+        alignItems="center"
+        bgcolor="#F5F5F5"
       >
-        <Box pr={5} fontWeight='500' fontSize='medium'>
+        <Box pr={5} fontWeight="500" fontSize="medium">
           {t('Look up for')}
         </Box>
         <RadioGroup
-          aria-labelledby='selection-radio-buttons-group'
+          aria-labelledby="selection-radio-buttons-group"
           value={selectedTab}
           row
-          name='radio-buttons-group'
+          name="radio-buttons-group"
         >
           {surveysTabs.map((tab, index) => (
             <FormControlLabel
@@ -118,7 +115,7 @@ export const LookUpSelectionSurveys = ({
               onChange={() => {
                 setSelectedTab(index);
               }}
-              control={<Radio color='primary' />}
+              control={<Radio color="primary" />}
               label={tab}
               key={tab}
             />
@@ -160,4 +157,4 @@ export const LookUpSelectionSurveys = ({
       />
     </Box>
   );
-};
+}

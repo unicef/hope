@@ -1,4 +1,5 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
+
 export const ApproveDeleteIndividualDataChange = gql`
   mutation ApproveDeleteIndividualDataChange(
     $grievanceTicketId: ID!
