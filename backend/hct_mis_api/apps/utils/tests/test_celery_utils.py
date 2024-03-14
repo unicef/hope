@@ -49,12 +49,14 @@ class TestCeleryUtils(TestCase):
 
         expected_payload = [
             {
+                "id": "aa993de4-0353-44b9-a512-a700ced30a51",
                 "name": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",
                 "args": [],
                 "kwargs": {},
                 "status": "queued",
             },
             {
+                "id": "aa993de4-0353-44b9-a512-a700ced30a51",
                 "name": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",
                 "args": [],
                 "kwargs": {},

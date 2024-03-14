@@ -1,4 +1,4 @@
-import { makeStyles, Snackbar, SnackbarContent } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
@@ -11,7 +11,6 @@ import { AppBar } from '../../components/core/AppBar';
 import { Drawer } from '../../components/core/Drawer/Drawer';
 import { LoadingComponent } from '../../components/core/LoadingComponent';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useSnackbar } from '../../hooks/useSnackBar';
 import { MiśTheme } from '../../theme';
 
 const Root = styled.div`
@@ -32,7 +31,6 @@ export const BaseHomeRouter = ({ children }): React.ReactElement => {
   const { businessArea } = useBaseUrl();
   const classes = useStyles({});
   const location = useLocation();
-  const snackBar = useSnackbar();
   const handleDrawerOpen = (): void => {
     setOpen(true);
   };
@@ -95,18 +93,6 @@ export const BaseHomeRouter = ({ children }): React.ReactElement => {
         <div className={classes.appBarSpacer} />
         {children}
       </MainContent>
-      {snackBar.show && (
-        <Snackbar
-          open={snackBar.show}
-          autoHideDuration={5000}
-          onClose={() => snackBar.setShow(false)}
-        >
-          <SnackbarContent
-            message={snackBar.message}
-            data-cy={snackBar.dataCy}
-          />
-        </Snackbar>
-      )}
     </Root>
   );
 };

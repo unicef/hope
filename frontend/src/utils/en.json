@@ -700,7 +700,7 @@
   "Back": "Back",
   "Edit FSP": "Edit FSP",
   "Payment Channel": "Payment Channel",
-  "Payment channel item": "Payment channel item",
+  "Payment Channel Item": "Payment Channel Item",
   "Add Payment Channel": "Add Payment Channel",
   "Payment channels to be added": "Payment channels to be added",
   "Re-Generate Report": "Re-Generate Report",
@@ -852,7 +852,6 @@
   "Ticket Type": "Ticket Type",
   "Debit Card Number": "Debit Card Number",
   "Debit Card Issuer": "Debit Card Issuer",
-  "Bank branch name": "Bank branch name",
-  "Account holder name": "Account holder name",
+  "Account Holder Name": "Account Holder Name",
   "Payment Plan Verification": "Payment Plan Verification"
 }

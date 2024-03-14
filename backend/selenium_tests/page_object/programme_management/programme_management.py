@@ -36,7 +36,17 @@ class ProgrammeManagement(BaseComponents):
     labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span/span[1]'
     calendarIcon = 'button[data-cy="calendar-icon"]'
     calendar = 'div[data-cy="date-picker-container"]'
-
+    calendarMonthYear = (
+        '//*[@class="MuiPickersSlideTransition-transitionContainer ' 'MuiPickersCalendarHeader-transitionContainer"]'
+    )
+    calendarChangeMonth = '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersCalendarHeader-iconButton"]'
+    calendarDays = (
+        '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
+        'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
+        'MuiPickersDay-daySelected" '
+        'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
+        'MuiPickersDay-dayDisabled"]'
+    )
     filtersSearch = '//*[@data-cy="filters-search"]/div/input'
     buttonApply = 'button[data-cy="button-filters-clear"]'
 
@@ -94,30 +104,24 @@ class ProgrammeManagement(BaseComponents):
     def chooseInputStartDateViaCalendar(self, day: int) -> None:
         self.find_in_element(self.getLabelStartDate(), self.calendarIcon)[0].click()
         self.getCalendar()
-        self.get_elements(
-            '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
-            'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
-            'MuiPickersDay-daySelected" '
-            'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
-            'MuiPickersDay-dayDisabled"]',
-            By.XPATH,
-        )[day - 1].click()
+        # ToDo: Create additional waiting mechanism
+        from time import sleep
+
+        sleep(1)
+        self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
         self.wait_for_disappear(self.calendar)
 
     def chooseInputEndDateViaCalendar(self, day: int) -> None:
         self.find_in_element(self.getLabelEndDate(), self.calendarIcon)[0].click()
         self.getCalendar()
-        self.get(
-            '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersCalendarHeader-iconButton"]', By.XPATH
-        ).click()
-        self.get_elements(
-            '//*[@class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day" '
-            'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day MuiPickersDay-current '
-            'MuiPickersDay-daySelected" '
-            'or @class="MuiButtonBase-root MuiIconButton-root MuiPickersDay-day '
-            'MuiPickersDay-dayDisabled"]',
-            By.XPATH,
-        )[day - 1].click()
+        month = self.get(self.calendarMonthYear, By.XPATH).text
+        self.get_elements(self.calendarChangeMonth, By.XPATH)[0].click()
+        for _ in range(5):
+            next_month = self.get(self.calendarMonthYear, By.XPATH).text
+            sleep(1)
+            if month != next_month:
+                break
+        self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
         self.wait_for_disappear(self.calendar)
 
     def getLabelStartDate(self) -> WebElement:

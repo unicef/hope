@@ -1,10 +1,19 @@
 from typing import Any, Optional
 
 
+class CeleryConnectionException(Exception):
+    pass
+
+
+def is_celery_working(celery_app: Any) -> bool:
+    return bool(celery_app.control.ping())
+
+
 def format_task(task: dict, status: str) -> dict:
     if "request" in task:
         task = task["request"]
     return {
+        "id": task["id"],
         "name": task["name"],
         "args": task["args"],
         "kwargs": task["kwargs"],
@@ -39,6 +48,9 @@ def get_all_celery_tasks(queue_name: str) -> list:
     from hct_mis_api.apps.core.celery import app as celery_app
 
     all_tasks = []
+
+    if not is_celery_working(celery_app):
+        raise CeleryConnectionException
 
     with celery_app.pool.acquire(block=True) as conn:
         tasks = None

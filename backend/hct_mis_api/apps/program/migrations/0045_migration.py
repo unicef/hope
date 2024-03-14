@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('program', '0044_migration'),
+        ('program', '0040_migration_squashed_0044_migration'),
     ]
 
     operations = [

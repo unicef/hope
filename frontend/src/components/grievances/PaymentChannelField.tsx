@@ -44,7 +44,10 @@ export function PaymentChannelField({
         </Grid>
       ) : null}
       <Grid item xs={4}>
-        <LabelizedField label={t('Payment channel item')} value='IBAN' />
+        <LabelizedField
+          label={t('Payment Channel Item')}
+          value={t('Bank Account Number')}
+        />
       </Grid>
       <Grid item xs={4}>
         <LabelizedField
@@ -65,8 +68,8 @@ export function PaymentChannelField({
       </Grid>
       <Grid item xs={4}>
         <LabelizedField
-          label={t('Payment channel item')}
-          value={t('Bank name')}
+          label={t('Payment Channel Item')}
+          value={t('Bank Name')}
         />
       </Grid>
       <Grid item xs={4}>
@@ -87,7 +90,10 @@ export function PaymentChannelField({
         />
       </Grid>
       <Grid item xs={4}>
-        <LabelizedField label={t('Payment channel item')} value='Account holder name' />
+        <LabelizedField
+          label={t('Payment Channel Item')}
+          value={t('Account Holder Name')}
+        />
       </Grid>
       <Grid item xs={4}>
         <LabelizedField
@@ -107,7 +113,10 @@ export function PaymentChannelField({
         />
       </Grid>
       <Grid item xs={4}>
-        <LabelizedField label={t('Payment channel item')} value='Bank branch name' />
+        <LabelizedField
+          label={t('Payment Channel Item')}
+          value={t('Bank Branch Name')}
+        />
       </Grid>
       <Grid item xs={4}>
         <LabelizedField

@@ -11,7 +11,12 @@ export const headCells = [
     id: 'status',
     numeric: false,
   },
-
+  {
+    disablePadding: false,
+    label: 'Target Population',
+    id: 'targetPopulation',
+    numeric: false,
+  },
   {
     disablePadding: false,
     label: 'Num. of Households',

@@ -2,20 +2,23 @@ import datetime
 import logging
 from typing import Any, Dict, List, Optional
 
-from django.conf import settings
 from django.contrib.admin.options import get_content_type_for_model
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.template.loader import render_to_string
 from django.utils import timezone
 
 from concurrency.api import disable_concurrency
 
+from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import FileTemp
+from hct_mis_api.apps.core.utils import (
+    send_email_notification,
+    send_email_notification_on_commit,
+)
 from hct_mis_api.apps.payment.models import PaymentPlan, PaymentVerificationPlan
 from hct_mis_api.apps.payment.pdf.payment_plan_export_pdf_service import (
     PaymentPlanPDFExportSevice,
@@ -87,13 +90,9 @@ def create_payment_verification_plan_xlsx(self: Any, payment_verification_plan_i
         payment_verification_plan.xlsx_file_exporting = False
         payment_verification_plan.save()
 
-        context = service.get_email_context(user)
-        user.email_user(
-            context["title"],
-            render_to_string(service.text_template, context=context),
-            settings.EMAIL_HOST_USER,
-            html_message=render_to_string(service.html_template, context=context),
-        )
+        if payment_verification_plan.business_area.enable_email_notification:
+            send_email_notification(service, user)
+
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -141,15 +140,8 @@ def create_payment_plan_payment_list_xlsx(self: Any, payment_plan_id: str, user_
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
-                context = service.get_email_context(user)
-                transaction.on_commit(
-                    lambda: user.email_user(
-                        context["title"],
-                        render_to_string(service.text_template, context=context),
-                        settings.EMAIL_HOST_USER,
-                        html_message=render_to_string(service.html_template, context=context),
-                    )
-                )
+                if payment_plan.business_area.enable_email_notification:
+                    send_email_notification_on_commit(service, user)
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -183,15 +175,8 @@ def create_payment_plan_payment_list_xlsx_per_fsp(self: Any, payment_plan_id: st
                 payment_plan.background_action_status_none()
                 payment_plan.save()
 
-                context = service.get_email_context(user)
-                transaction.on_commit(
-                    lambda: user.email_user(
-                        context["title"],
-                        render_to_string(service.text_template, context=context),
-                        settings.EMAIL_HOST_USER,
-                        html_message=render_to_string(service.html_template, context=context),
-                    )
-                )
+                if payment_plan.business_area.enable_email_notification:
+                    send_email_notification_on_commit(service, user)
 
         except Exception as e:
             payment_plan.background_action_status_xlsx_export_error()
@@ -229,7 +214,7 @@ def import_payment_plan_payment_list_from_xlsx(self: Any, payment_plan_id: str) 
                 service.import_payment_list()
                 payment_plan.imported_file_date = timezone.now()
                 payment_plan.background_action_status_none()
-                payment_plan.remove_export_file()
+                payment_plan.remove_export_files()
                 payment_plan.save()
                 payment_plan.update_money_fields()
         except Exception as e:
@@ -261,7 +246,7 @@ def import_payment_plan_payment_list_per_fsp_from_xlsx(self: Any, payment_plan_i
             service.open_workbook()
             with transaction.atomic():
                 service.import_payment_list()
-                payment_plan.remove_export_file()
+                payment_plan.remove_export_files()
                 payment_plan.background_action_status_none()
                 payment_plan.update_money_fields()
 
@@ -330,16 +315,13 @@ def create_cash_plan_reconciliation_xlsx(
             error_msg = None
         except Exception as e:
             error_msg = f"Error parse xlsx: {e} \nFile name: {reconciliation_xlsx_obj.file_name}"
-
-        context = service.get_email_context(
-            reconciliation_xlsx_obj.created_by, reconciliation_xlsx_obj.file_name, error_msg
-        )
-        reconciliation_xlsx_obj.created_by.email_user(
-            context["title"],
-            render_to_string(service.text_template, context=context),
-            settings.EMAIL_HOST_USER,
-            html_message=render_to_string(service.html_template, context=context),
-        )
+            user = reconciliation_xlsx_obj.created_by
+            if reconciliation_xlsx_obj.business_area.enable_email_notification:
+                send_email_notification(
+                    service,
+                    user,
+                    {"user": user, "file_name": reconciliation_xlsx_obj.file_name, "error_msg": error_msg},
+                )
 
         # remove file every time
         reconciliation_xlsx_obj.file.delete()
@@ -387,7 +369,7 @@ def payment_plan_apply_engine_rule(self: Any, payment_plan_id: str, engine_rule_
             payment_plan.steficon_applied_date = timezone.now()
             payment_plan.background_action_status_none()
             with disable_concurrency(payment_plan):
-                payment_plan.remove_export_file()
+                payment_plan.remove_export_files()
                 payment_plan.remove_imported_file()
                 payment_plan.save()
                 payment_plan.update_money_fields()
@@ -594,19 +576,10 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
             file_pdf_obj.file.save(filename, ContentFile(pdf))
 
             payment_plan.export_pdf_file_summary = file_pdf_obj
-            # TODO: maybe will add background status
-            # payment_plan.background_action_status_none()
             payment_plan.save()
 
-            context = service.get_email_context(user)
-            transaction.on_commit(
-                lambda: user.email_user(
-                    context["title"],
-                    render_to_string(service.text_template, context=context),
-                    settings.EMAIL_HOST_USER,
-                    html_message=render_to_string(service.html_template, context=context),
-                )
-            )
+            if payment_plan.business_area.enable_email_notification:
+                send_email_notification_on_commit(service, user)
 
     except Exception as e:
         logger.exception("Export PDF Payment Plan Summary Error")
@@ -617,12 +590,16 @@ def export_pdf_payment_plan_summary(self: Any, payment_plan_id: str, user_id: st
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_fsp(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
     try:
         from hct_mis_api.apps.payment.services.payment_gateway import (
             PaymentGatewayService,
         )
 
         PaymentGatewayService().sync_fsps()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
@@ -658,12 +635,33 @@ def send_to_payment_gateway(self: Any, payment_plan_id: str, user_id: str) -> No
 @log_start_and_end
 @sentry_tags
 def periodic_sync_payment_gateway_records(self: Any) -> None:
+    from hct_mis_api.apps.payment.services.payment_gateway import PaymentGatewayAPI
+
     try:
         from hct_mis_api.apps.payment.services.payment_gateway import (
             PaymentGatewayService,
         )
 
         PaymentGatewayService().sync_records()
+    except PaymentGatewayAPI.PaymentGatewayMissingAPICredentialsException:
+        return
     except Exception as e:
         logger.exception(e)
         raise self.retry(exc=e)
+
+
+@app.task(bind=True)
+@log_start_and_end
+@sentry_tags
+def send_payment_notification_emails(
+    self: Any, payment_plan_id: str, action: str, action_user_id: str, action_date_formatted: str
+) -> None:
+    from hct_mis_api.apps.payment.notifications import PaymentNotification
+
+    try:
+        payment_plan = PaymentPlan.objects.get(id=payment_plan_id)
+        action_user = User.objects.get(id=action_user_id)
+        set_sentry_business_area_tag(payment_plan.business_area.name)
+        PaymentNotification(payment_plan, action, action_user, action_date_formatted).send_email_notification()
+    except Exception as e:
+        logger.exception(e)

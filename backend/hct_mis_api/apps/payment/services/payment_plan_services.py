@@ -2,6 +2,7 @@ import datetime
 import logging
 from decimal import Decimal
 from functools import partial
+from itertools import groupby
 from typing import IO, TYPE_CHECKING, Callable, Dict, List, Optional
 
 from django.contrib.admin.options import get_content_type_for_model
@@ -15,7 +16,7 @@ from graphql import GraphQLError
 from psycopg2._psycopg import IntegrityError
 
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
-from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.utils import chunks, decode_id_string
 from hct_mis_api.apps.household.models import ROLE_PRIMARY, IndividualRoleInHousehold
 from hct_mis_api.apps.payment.celery_tasks import (
     create_payment_plan_payment_list_xlsx,
@@ -23,6 +24,7 @@ from hct_mis_api.apps.payment.celery_tasks import (
     import_payment_plan_payment_list_per_fsp_from_xlsx,
     prepare_follow_up_payment_plan_task,
     prepare_payment_plan_task,
+    send_payment_notification_emails,
     send_to_payment_gateway,
 )
 from hct_mis_api.apps.payment.models import (
@@ -31,6 +33,7 @@ from hct_mis_api.apps.payment.models import (
     FinancialServiceProvider,
     Payment,
     PaymentPlan,
+    PaymentPlanSplit,
 )
 from hct_mis_api.apps.payment.services.payment_household_snapshot_service import (
     create_payment_plan_snapshot_data,
@@ -122,6 +125,12 @@ class PaymentPlanService:
             authorization_number_required=self.payment_plan.authorization_number_required,
             finance_release_number_required=self.payment_plan.finance_release_number_required,
         )
+        send_payment_notification_emails.delay(
+            self.payment_plan.id,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.value,
+            self.user.id,
+            f"{timezone.now():%-d %B %Y}",
+        )
         return self.payment_plan
 
     def send_to_payment_gateway(self) -> PaymentPlan:
@@ -160,7 +169,7 @@ class PaymentPlanService:
         self.payment_plan.status_unlock()
         self.payment_plan.update_population_count_fields()
         self.payment_plan.update_money_fields()
-        self.payment_plan.remove_export_file()
+        self.payment_plan.remove_export_files()
 
         self.payment_plan.save()
 
@@ -277,24 +286,33 @@ class PaymentPlanService:
         required_number = self.get_required_number_by_approval_type(approval_process)
 
         if approval_process.approvals.filter(type=approval_type).count() >= required_number:
+            notification_action = None
             if approval_type == Approval.APPROVAL:
                 self.payment_plan.status_approve()
                 approval_process.sent_for_authorization_by = self.user
                 approval_process.sent_for_authorization_date = timezone.now()
                 approval_process.save()
+                notification_action = PaymentPlan.Action.APPROVE
 
             if approval_type == Approval.AUTHORIZATION:
                 self.payment_plan.status_authorize()
                 approval_process.sent_for_finance_release_by = self.user
                 approval_process.sent_for_finance_release_date = timezone.now()
                 approval_process.save()
+                notification_action = PaymentPlan.Action.AUTHORIZE
 
             if approval_type == Approval.FINANCE_RELEASE:
                 self.payment_plan.status_mark_as_reviewed()
+                notification_action = PaymentPlan.Action.REVIEW
                 # remove imported and export files
 
             if approval_type == Approval.REJECT:
                 self.payment_plan.status_reject()
+
+            if notification_action:
+                send_payment_notification_emails.delay(
+                    self.payment_plan.id, notification_action.value, self.user.id, f"{timezone.now():%-d %B %Y}"
+                )
 
             self.payment_plan.save()
 
@@ -670,3 +688,60 @@ class PaymentPlanService:
             for payment in payments:
                 payment.update_signature_hash()
             Payment.objects.bulk_update(payments, ("signature_hash",))
+
+    def split(self, split_type: str, chunks_no: Optional[int] = None) -> PaymentPlan:
+        payments_chunks = []
+        payments = self.payment_plan.eligible_payments.all()
+        payments_count = payments.count()
+        if not payments_count:
+            raise GraphQLError("No payments to split")
+
+        if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
+            if not chunks_no:
+                raise GraphQLError("Payments Number is required for split by records")
+
+            if chunks_no > payments_count or chunks_no < 2:
+                raise GraphQLError("Payment Parts number should be between 2 and total number of payments")
+            payments_chunks = list(chunks(list(payments.order_by("unicef_id").values_list("id", flat=True)), chunks_no))
+
+        elif split_type == PaymentPlanSplit.SplitType.BY_ADMIN_AREA2:
+            grouped_payments = list(
+                payments.order_by("household__admin2__p_code", "unicef_id").select_related("household__admin2")
+            )
+            payments_chunks = []
+            for _, payments in groupby(grouped_payments, key=lambda x: x.household.admin2):  # type: ignore
+                payments_chunks.append([payment.id for payment in payments])
+
+        elif split_type == PaymentPlanSplit.SplitType.BY_COLLECTOR:
+            grouped_payments = list(payments.order_by("collector__unicef_id", "unicef_id").select_related("collector"))
+            payments_chunks = []
+            for _, payments in groupby(grouped_payments, key=lambda x: x.collector):  # type: ignore
+                payments_chunks.append([payment.id for payment in payments])
+
+        payments_chunks_count = len(payments_chunks)
+        if payments_chunks_count > PaymentPlanSplit.MAX_CHUNKS:
+            raise GraphQLError(
+                f"Too many Payment Parts to split: {payments_chunks_count}, maximum is {PaymentPlanSplit.MAX_CHUNKS}"
+            )
+
+        with transaction.atomic():
+            if self.payment_plan.splits.exists():
+                self.payment_plan.splits.all().delete()
+            if self.payment_plan.export_file_per_fsp:
+                self.payment_plan.remove_export_file_per_fsp()
+
+            payment_plan_splits_to_create = []
+            for i, _ in enumerate(payments_chunks):
+                payment_plan_splits_to_create.append(
+                    PaymentPlanSplit(
+                        payment_plan=self.payment_plan,
+                        split_type=split_type,
+                        chunks_no=chunks_no,
+                        order=i,
+                    )
+                )
+            PaymentPlanSplit.objects.bulk_create(payment_plan_splits_to_create)
+            for i, chunk in enumerate(payments_chunks):
+                payment_plan_splits_to_create[i].payments.add(*chunk)
+
+        return self.payment_plan
