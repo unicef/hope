@@ -49,7 +49,6 @@ def create_session(host: str, username: str, password: str, csrf: str = "") -> o
 def driver() -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--blink-settings=primaryPointerType=4")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--window-size=1920,1080")
     return webdriver.Chrome(options=chrome_options)

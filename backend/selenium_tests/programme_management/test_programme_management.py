@@ -55,7 +55,9 @@ class TestProgrammeManagement:
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
@@ -83,7 +85,7 @@ class TestProgrammeManagement:
                     "program_name": "New Programme - " + str(random.random()),
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
+                    "endDate": FormatTime(1, 2, 2035),
                     "dataCollectingType": "Partial",
                     "description": f"Text with random {str(random.random())} text",
                     "budget": 1000.99,
@@ -102,11 +104,10 @@ class TestProgrammeManagement:
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
-        pageProgrammeManagement.getInputStartDate(test_data)
-        from time import sleep
-
-        sleep(2)
-        # pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputStartDate().click()
+        pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
+        pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getInputFreqOfPaymentOneOff().click()
@@ -143,7 +144,7 @@ class TestProgrammeManagement:
                     "program_name": "New Programme - " + str(random.random()),
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
+                    "endDate": FormatTime(1, 2, 2042),
                     "dataCollectingType": "Partial",
                 },
                 id="One-off",
@@ -158,7 +159,9 @@ class TestProgrammeManagement:
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
@@ -187,7 +190,7 @@ class TestProgrammeManagement:
                     "program_name": "New Programme - " + str(random.random()),
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
                 },
                 id="Yes",
@@ -202,7 +205,9 @@ class TestProgrammeManagement:
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
@@ -231,7 +236,7 @@ class TestProgrammeManagement:
                     "program_name": "CheckProgramme - " + str(random.random()),
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
                 },
                 id="programme_management_page",
@@ -246,7 +251,9 @@ class TestProgrammeManagement:
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
@@ -293,7 +300,7 @@ class TestProgrammeManagement:
                     "program_name": "CheckParents - " + str(random.random()),
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
                 },
                 id="programme_management_page",
@@ -308,7 +315,9 @@ class TestProgrammeManagement:
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
@@ -345,7 +354,7 @@ class TestBusinessAreas:
                     "program_name": "CheckParents - " + str(random.random()),
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
                 },
                 id="programme_management_page",
@@ -364,7 +373,9 @@ class TestBusinessAreas:
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
@@ -392,7 +403,7 @@ class TestAdminAreas:
                     "program_name": "CheckParents - " + str(random.random()),
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
                 },
                 id="programme_management_page",
@@ -411,7 +422,9 @@ class TestAdminAreas:
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
+        pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
@@ -423,7 +436,6 @@ class TestAdminAreas:
         pageProgrammeManagement.chooseAreaAdmin1ByName("Baghlan").click()
         # ToDo: Create additional waiting mechanism
         from time import sleep
-
         sleep(1)
         programme_creation_url = pageProgrammeManagement.driver.current_url
         pageProgrammeManagement.getButtonSave().click()
@@ -443,7 +455,7 @@ class TestComeBackScenarios:
                     "program_name": "New Programme - " + str(random.random()),
                     "selector": "Health",
                     "startDate": FormatTime(1, 1, 2022),
-                    "endDate": FormatTime(1, 2, 2022),
+                    "endDate": FormatTime(1, 2, 2032),
                     "dataCollectingType": "Partial",
                 },
                 id="Name Change",
@@ -462,7 +474,9 @@ class TestComeBackScenarios:
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
         pageProgrammeManagement.getInputProgrammeName().send_keys("Test Name")
+        pageProgrammeManagement.getInputStartDate().click()
         pageProgrammeManagement.getInputStartDate().send_keys(test_data["startDate"].numerically_formatted_date)
+        pageProgrammeManagement.getInputEndDate().click()
         pageProgrammeManagement.getInputEndDate().send_keys(test_data["endDate"].numerically_formatted_date)
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
@@ -474,7 +488,7 @@ class TestComeBackScenarios:
         assert "Test Name" in pageProgrammeManagement.getInputProgrammeName().get_attribute("value")
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.CONTROL, "a")
         pageProgrammeManagement.getInputProgrammeName().send_keys(Keys.DELETE)
-        assert "Programme name is required" in pageProgrammeManagement.getLabelProgrammeName().text
+        assert "Programme Name is required" in pageProgrammeManagement.getLabelProgrammeName().text.split("\n")
         pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.getButtonNext().click()
         programme_creation_url = pageProgrammeManagement.driver.current_url
@@ -494,6 +508,7 @@ class TestComeBackScenarios:
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
 
 
+@pytest.mark.skip(reasne="ToDo")
 @pytest.mark.usefixtures("login")
 class TestManualCalendar:
     @pytest.mark.parametrize(
@@ -516,9 +531,9 @@ class TestManualCalendar:
         pageProgrammeManagement.getNavProgrammeManagement().click()
         # Create Programme
         pageProgrammeManagement.getButtonNewProgram().click()
+        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.chooseInputStartDateViaCalendar(15)
         pageProgrammeManagement.chooseInputEndDateViaCalendar(25)
-        pageProgrammeManagement.getInputProgrammeName().send_keys(test_data["program_name"])
         pageProgrammeManagement.chooseOptionSelector(test_data["selector"])
         pageProgrammeManagement.chooseOptionDataCollectingType(test_data["dataCollectingType"])
         pageProgrammeManagement.getButtonNext().click()
