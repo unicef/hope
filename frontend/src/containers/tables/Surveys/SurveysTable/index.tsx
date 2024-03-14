@@ -1,1 +1,1 @@
-import { SurveysTable } from './SurveysTable';
+export { SurveysTable } from './SurveysTable';

@@ -1,19 +1,20 @@
-import { IconButton } from '@material-ui/core';
-import { Info } from '@material-ui/icons';
-import React, { useState } from 'react';
+import { IconButton } from '@mui/material';
+import { Info } from '@mui/icons-material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { ButtonTooltip } from '../../../components/core/ButtonTooltip';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TargetPopulationFilters } from '../../../components/targeting/TargetPopulationFilters';
+import { ButtonTooltip } from '@components/core/ButtonTooltip';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TargetPopulationFilters } from '@components/targeting/TargetPopulationFilters';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { getFilterFromQueryParams } from '../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { getFilterFromQueryParams } from '@utils/utils';
 import { TargetingInfoDialog } from '../../dialogs/targetPopulation/TargetingInfoDialog';
 import { TargetPopulationTable } from '../../tables/targeting/TargetPopulationTable';
-import { useProgramContext } from "../../../programContext";
+import { useProgramContext } from '../../../programContext';
 
 const initialFilter = {
   name: '',
@@ -24,7 +25,7 @@ const initialFilter = {
   createdAtRangeMax: '',
 };
 
-export const TargetPopulationsPage = (): React.ReactElement => {
+export function TargetPopulationsPage(): React.ReactElement {
   const location = useLocation();
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
@@ -52,21 +53,23 @@ export const TargetPopulationsPage = (): React.ReactElement => {
         <>
           <IconButton
             onClick={() => setToggleInfo(true)}
-            color='primary'
-            aria-label='Targeting Information'
-            data-cy='button-target-population-info'
+            color="primary"
+            aria-label="Targeting Information"
+            data-cy="button-target-population-info"
           >
             <Info />
           </IconButton>
           <TargetingInfoDialog open={isInfoOpen} setOpen={setToggleInfo} />
           {canCreate && (
             <ButtonTooltip
-              variant='contained'
-              color='primary'
-              title={t('Program has to be active to create a new Target Population')}
+              variant="contained"
+              color="primary"
+              title={t(
+                'Program has to be active to create a new Target Population',
+              )}
               component={Link}
               to={`/${baseUrl}/target-population/create`}
-              data-cy='button-target-population-create-new'
+              data-cy="button-target-population-create-new"
               disabled={!isActiveProgram}
             >
               Create new
@@ -90,4 +93,4 @@ export const TargetPopulationsPage = (): React.ReactElement => {
       />
     </>
   );
-};
+}

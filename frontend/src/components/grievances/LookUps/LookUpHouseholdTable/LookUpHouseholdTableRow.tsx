@@ -1,14 +1,14 @@
-import { Checkbox, Radio } from '@material-ui/core';
-import TableCell from '@material-ui/core/TableCell';
-import React from 'react';
+import { Checkbox, Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import * as React from 'react';
 import {
   AllHouseholdsForPopulationTableQuery,
   HouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { BlackLink } from '../../../core/BlackLink';
-import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { BlackLink } from '@core/BlackLink';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface LookUpHouseholdTableRowProps {
   household: AllHouseholdsForPopulationTableQuery['allHouseholds']['edges'][number]['node'];
@@ -19,8 +19,8 @@ interface LookUpHouseholdTableRowProps {
   choicesData: HouseholdChoiceDataQuery;
   checkboxClickHandler?: (
     event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
+    | React.MouseEvent<HTMLButtonElement, MouseEvent>
+    | React.MouseEvent<HTMLTableRowElement, MouseEvent>,
     number,
   ) => void;
   selected?: Array<string>;
@@ -29,7 +29,7 @@ interface LookUpHouseholdTableRowProps {
   isFeedbackWithHouseholdOnly?: boolean;
 }
 
-export const LookUpHouseholdTableRow = ({
+export function LookUpHouseholdTableRow({
   household,
   radioChangeHandler,
   selectedHousehold,
@@ -38,7 +38,7 @@ export const LookUpHouseholdTableRow = ({
   householdMultiSelect,
   redirectedFromRelatedTicket,
   isFeedbackWithHouseholdOnly,
-}: LookUpHouseholdTableRowProps): React.ReactElement => {
+}: LookUpHouseholdTableRowProps): React.ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
   const isSelected = (id: string): boolean => selected.includes(id);
   const isItemSelected = isSelected(household.id);
@@ -61,36 +61,36 @@ export const LookUpHouseholdTableRow = ({
         handleClick(event);
       }}
       hover
-      role='checkbox'
+      role="checkbox"
       key={household.id}
-      data-cy='household-table-row'
+      data-cy="household-table-row"
     >
-      <TableCell padding='checkbox'>
+      <TableCell padding="checkbox">
         {householdMultiSelect ? (
           <Checkbox
-            color='primary'
+            color="primary"
             onClick={(event) => checkboxClickHandler(event, household.id)}
             checked={isItemSelected}
-            data-cy='input-checkbox-household'
+            data-cy="input-checkbox-household"
             inputProps={{ 'aria-labelledby': household.id }}
             disabled={isSelectionDisabled}
           />
         ) : (
           <Radio
-            color='primary'
+            color="primary"
             checked={selectedHousehold?.id === household.id}
             onChange={() => {
               radioChangeHandler(household);
             }}
             value={household.id}
-            name='radio-button-household'
+            name="radio-button-household"
             inputProps={{ 'aria-label': household.id }}
-            data-cy='input-radio-household'
+            data-cy="input-radio-household"
             disabled={isSelectionDisabled}
           />
         )}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {!isAllPrograms ? (
           <BlackLink to={`/${baseUrl}/population/household/${household.id}`}>
             {household.unicefId}
@@ -99,14 +99,14 @@ export const LookUpHouseholdTableRow = ({
           <span>{household.unicefId}</span>
         )}
       </TableCell>
-      <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
-      <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household?.admin2?.name || '-'}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{household.headOfHousehold.fullName}</TableCell>
+      <TableCell align="left">{household.size}</TableCell>
+      <TableCell align="left">{household?.admin2?.name || '-'}</TableCell>
+      <TableCell align="left">
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
       {isAllPrograms && (
-        <TableCell align='left'>
+        <TableCell align="left">
           {household.program ? (
             <BlackLink to={`/${baseUrl}/details/${household.program.id}`}>
               {household.program.name}
@@ -118,4 +118,4 @@ export const LookUpHouseholdTableRow = ({
       )}
     </ClickableTableRow>
   );
-};
+}

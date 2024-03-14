@@ -1,16 +1,17 @@
 import {
+  Box,
   FormControl,
   FormHelperText,
   InputLabel,
   MenuItem,
   Select,
-} from '@material-ui/core';
-import React from 'react';
+} from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getFullNodeFromEdgesById } from '../../utils/utils';
-import { useConfirmation } from '../core/ConfirmationDialog';
+import { getFullNodeFromEdgesById } from '@utils/utils';
+import { useConfirmation } from '@core/ConfirmationDialog';
 
-export const FormikSelectFieldConfirmProgram = ({
+export function FormikSelectFieldConfirmProgram({
   field,
   form,
   allProgramsEdges,
@@ -18,7 +19,7 @@ export const FormikSelectFieldConfirmProgram = ({
   setFieldValue,
   values,
   ...otherProps
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const confirm = useConfirmation();
 
@@ -43,8 +44,10 @@ export const FormikSelectFieldConfirmProgram = ({
   );
 
   return (
-    <FormControl variant='outlined' margin='dense' fullWidth {...otherProps}>
-      <InputLabel>{otherProps.label}</InputLabel>
+    <FormControl variant="outlined" fullWidth {...otherProps}>
+      <Box mb={1}>
+        <InputLabel>{otherProps.label}</InputLabel>
+      </Box>
       <Select
         {...field}
         {...otherProps}
@@ -97,4 +100,4 @@ export const FormikSelectFieldConfirmProgram = ({
       )}
     </FormControl>
   );
-};
+}

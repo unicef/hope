@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   AllGrievanceTicketQuery,
   AllUsersForFiltersQuery,
   useAllUsersForFiltersQuery,
   useBulkUpdateGrievanceAssigneeMutation,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { AssignedToDropdown } from '../AssignedToDropdown';
 import { BulkBaseModal } from './BulkBaseModal';
 
@@ -26,14 +27,15 @@ interface BulkAssignModalProps {
   setSelected;
 }
 
-export const BulkAssignModal = ({
+export function BulkAssignModal({
   selectedTickets,
   businessArea,
   setSelected,
-}: BulkAssignModalProps): React.ReactElement => {
+}: BulkAssignModalProps): React.ReactElement {
   const { t } = useTranslation();
   const { showMessage } = useSnackbar();
-  const [value, setValue] = React.useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
+  const [value, setValue] =
+    useState<AllUsersForFiltersQuery['allUsers']['edges'][number]>(null);
   const [mutate] = useBulkUpdateGrievanceAssigneeMutation();
   const [inputValue, setInputValue] = useState('');
   const { data: usersData } = useAllUsersForFiltersQuery({
@@ -50,8 +52,7 @@ export const BulkAssignModal = ({
       setValue(data);
     }
   };
-  const onSave = async (
-  ): Promise<void> => {
+  const onSave = async (): Promise<void> => {
     try {
       await mutate({
         variables: {
@@ -70,22 +71,20 @@ export const BulkAssignModal = ({
   };
 
   return (
-    <>
-      <BulkBaseModal
-        selectedTickets={selectedTickets}
-        title={t('Assign')}
-        buttonTitle={t('Assign')}
-        onSave={onSave}
-        icon={<AssignmentIndIcon />}
-      >
-        <AssignedToDropdown
-          optionsData={optionsData}
-          onFilterChange={onFilterChange}
-          setInputValue={setInputValue}
-          label={t('Assignee')}
-          fullWidth
-        />
-      </BulkBaseModal>
-    </>
+    <BulkBaseModal
+      selectedTickets={selectedTickets}
+      title={t('Assign')}
+      buttonTitle={t('Assign')}
+      onSave={onSave}
+      icon={<AssignmentIndIcon />}
+    >
+      <AssignedToDropdown
+        optionsData={optionsData}
+        onFilterChange={onFilterChange}
+        setInputValue={setInputValue}
+        label={t('Assignee')}
+        fullWidth
+      />
+    </BulkBaseModal>
   );
-};
+}

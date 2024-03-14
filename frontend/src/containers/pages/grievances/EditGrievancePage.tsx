@@ -1,14 +1,8 @@
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Grid,
-  Typography,
-} from '@material-ui/core';
+import { Box, Button, FormHelperText, Grid, Typography } from '@mui/material';
 import { Field, Formik } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   GrievanceTicketDocument,
@@ -21,47 +15,47 @@ import {
   useGrievancesChoiceDataQuery,
   useMeQuery,
   useUpdateGrievanceMutation,
-} from '../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { DividerLine } from '../../../components/core/DividerLine';
-import { LabelizedField } from '../../../components/core/LabelizedField';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { Title } from '../../../components/core/Title';
-import { ExistingDocumentationFieldArray } from '../../../components/grievances/Documentation/ExistingDocumentationFieldArray';
-import { NewDocumentationFieldArray } from '../../../components/grievances/Documentation/NewDocumentationFieldArray';
-import { LookUpLinkedTickets } from '../../../components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
-import { LookUpPaymentRecord } from '../../../components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
-import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
+} from '@generated/graphql';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { BlackLink } from '@components/core/BlackLink';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { DividerLine } from '@components/core/DividerLine';
+import { LabelizedField } from '@components/core/LabelizedField';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { Title } from '@components/core/Title';
+import { ExistingDocumentationFieldArray } from '@components/grievances/Documentation/ExistingDocumentationFieldArray';
+import { NewDocumentationFieldArray } from '@components/grievances/Documentation/NewDocumentationFieldArray';
+import { LookUpLinkedTickets } from '@components/grievances/LookUps/LookUpLinkedTickets/LookUpLinkedTickets';
+import { LookUpPaymentRecord } from '@components/grievances/LookUps/LookUpPaymentRecord/LookUpPaymentRecord';
+import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
 import {
   getGrievanceDetailsPath,
   selectedIssueType,
-} from '../../../components/grievances/utils/createGrievanceUtils';
+} from '@components/grievances/utils/createGrievanceUtils';
 import {
   EmptyComponent,
   dataChangeComponentDict,
   prepareInitialValues,
   prepareVariables,
-} from '../../../components/grievances/utils/editGrievanceUtils';
-import { validate } from '../../../components/grievances/utils/validateGrievance';
-import { validationSchema } from '../../../components/grievances/utils/validationSchema';
+} from '@components/grievances/utils/editGrievanceUtils';
+import { validate } from '@components/grievances/utils/validateGrievance';
+import { validationSchema } from '@components/grievances/utils/validationSchema';
 import {
   PERMISSIONS,
   hasCreatorOrOwnerPermissions,
   hasPermissions,
 } from '../../../config/permissions';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../../shared/Formik/FormikAdminAreaAutocomplete';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { FormikAdminAreaAutocomplete } from '@shared/Formik/FormikAdminAreaAutocomplete';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_CATEGORIES_NAMES,
@@ -70,13 +64,13 @@ import {
   GRIEVANCE_ISSUE_TYPES_NAMES,
   GRIEVANCE_ISSUE_TYPE_DESCRIPTIONS,
   GRIEVANCE_TICKET_STATES,
-} from '../../../utils/constants';
+} from '@utils/constants';
 import {
   choicesToDict,
   isInvalid,
   isPermissionDeniedError,
   thingForSpecificGrievanceType,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { grievancePermissions } from './GrievancesDetailsPage/grievancePermissions';
 
 const BoxPadding = styled.div`
@@ -92,7 +86,7 @@ const BoxWithBottomBorders = styled.div`
 `;
 
 export const EditGrievancePage = (): React.ReactElement => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
@@ -110,19 +104,15 @@ export const EditGrievancePage = (): React.ReactElement => {
     fetchPolicy: 'cache-and-network',
   });
 
-  const {
-    data: currentUserData,
-    loading: currentUserDataLoading,
-  } = useMeQuery();
+  const { data: currentUserData, loading: currentUserDataLoading } =
+    useMeQuery();
 
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea, first: 1000 },
   });
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
@@ -130,19 +120,15 @@ export const EditGrievancePage = (): React.ReactElement => {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const {
-    data: householdFieldsData,
-    loading: householdFieldsLoading,
-  } = useAllEditHouseholdFieldsQuery();
-  const {
-    data: programsData,
-    loading: programsDataLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: {
-      first: 100,
-      businessArea,
-    },
-  });
+  const { data: householdFieldsData, loading: householdFieldsLoading } =
+    useAllEditHouseholdFieldsQuery();
+  const { data: programsData, loading: programsDataLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: {
+        first: 100,
+        businessArea,
+      },
+    });
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -188,10 +174,8 @@ export const EditGrievancePage = (): React.ReactElement => {
   const isCreator = ticket.createdBy?.id === currentUserId;
   const isOwner = ticket.assignedTo?.id === currentUserId;
 
-  const {
-    canViewHouseholdDetails,
-    canViewIndividualDetails,
-  } = grievancePermissions(isCreator, isOwner, ticket, permissions);
+  const { canViewHouseholdDetails, canViewIndividualDetails } =
+    grievancePermissions(isCreator, isOwner, ticket, permissions);
 
   if (
     !hasCreatorOrOwnerPermissions(
@@ -222,14 +206,11 @@ export const EditGrievancePage = (): React.ReactElement => {
     },
   ];
 
-  const showIssueType = (values): boolean => {
-    return (
-      values.category ===
-        parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE, 10) ||
-      values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE, 10) ||
-      values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT, 10)
-    );
-  };
+  const showIssueType = (values): boolean =>
+    values.category ===
+      parseInt(GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE, 10) ||
+    values.category === parseInt(GRIEVANCE_CATEGORIES.DATA_CHANGE, 10) ||
+    values.category === parseInt(GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT, 10);
   const dataChangeErrors = (errors, touched): React.ReactElement[] =>
     [
       'householdDataUpdateFields',
@@ -243,7 +224,9 @@ export const EditGrievancePage = (): React.ReactElement => {
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (
-          <FormHelperText error>{errors[fieldname]}</FormHelperText>
+          <FormHelperText key={errors[fieldname]} error>
+            {errors[fieldname]}
+          </FormHelperText>
         ),
     );
 
@@ -287,7 +270,7 @@ export const EditGrievancePage = (): React.ReactElement => {
             ],
           });
           showMessage(t('Grievance Ticket edited.'));
-          history.push(grievanceDetailsPath);
+          navigate(grievanceDetailsPath);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
@@ -321,7 +304,7 @@ export const EditGrievancePage = (): React.ReactElement => {
               title={`${t('Edit Ticket')} #${ticket.unicefId}`}
               breadCrumbs={breadCrumbsItems}
             >
-              <Box display='flex' alignContent='center'>
+              <Box display="flex" alignContent="center">
                 <Box mr={3}>
                   <Button component={Link} to={grievanceDetailsPath}>
                     {t('Cancel')}
@@ -329,10 +312,10 @@ export const EditGrievancePage = (): React.ReactElement => {
                 </Box>
                 <LoadingButton
                   loading={loading}
-                  color='primary'
-                  variant='contained'
+                  color="primary"
+                  variant="contained"
                   onClick={submitForm}
-                  data-cy='button-submit'
+                  data-cy="button-submit"
                 >
                   {t('Save')}
                 </LoadingButton>
@@ -390,13 +373,13 @@ export const EditGrievancePage = (): React.ReactElement => {
                                 >
                                   {ticket.household.unicefId}
                                 </BlackLink>
-                              ) : (
+                                ) : (
                                 <div>
                                   {ticket.household?.id
                                     ? ticket.household.unicefId
                                     : '-'}
                                 </div>
-                              )}
+                                )}
                             </span>
                           </LabelizedField>
                         </Grid>
@@ -411,13 +394,13 @@ export const EditGrievancePage = (): React.ReactElement => {
                                 >
                                   {ticket.individual.unicefId}
                                 </BlackLink>
-                              ) : (
+                                ) : (
                                 <div>
                                   {ticket.individual?.id
                                     ? ticket.individual.unicefId
                                     : '-'}
                                 </div>
-                              )}
+                                )}
                             </span>
                           </LabelizedField>
                         </Grid>
@@ -427,62 +410,62 @@ export const EditGrievancePage = (): React.ReactElement => {
                       <Grid container spacing={3}>
                         <Grid item xs={12}>
                           <Field
-                            name='description'
+                            name="description"
                             multiline
                             fullWidth
                             disabled={Boolean(ticket.description)}
-                            variant='outlined'
-                            label='Description'
+                            variant="outlined"
+                            label="Description"
                             required
                             component={FormikTextField}
                           />
                         </Grid>
                         <Grid item xs={12}>
                           <Field
-                            name='comments'
+                            name="comments"
                             multiline
                             fullWidth
                             disabled={Boolean(ticket.comments)}
-                            variant='outlined'
-                            label='Comments'
+                            variant="outlined"
+                            label="Comments"
                             component={FormikTextField}
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Field
-                            name='admin'
+                            name="admin"
                             disabled={Boolean(ticket.admin)}
-                            variant='outlined'
+                            variant="outlined"
                             component={FormikAdminAreaAutocomplete}
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Field
-                            name='area'
+                            name="area"
                             fullWidth
                             disabled={Boolean(ticket.area)}
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Area / Village / Pay point')}
                             component={FormikTextField}
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Field
-                            name='language'
+                            name="language"
                             multiline
                             fullWidth
                             disabled={Boolean(ticket.language)}
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Languages Spoken')}
                             component={FormikTextField}
                           />
                         </Grid>
                         <Grid item xs={3}>
                           <Field
-                            name='priority'
+                            name="priority"
                             multiline
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Priority')}
                             choices={choicesData.grievanceTicketPriorityChoices}
                             component={FormikSelectField}
@@ -490,10 +473,10 @@ export const EditGrievancePage = (): React.ReactElement => {
                         </Grid>
                         <Grid item xs={3}>
                           <Field
-                            name='urgency'
+                            name="urgency"
                             multiline
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             label={t('Urgency')}
                             choices={choicesData.grievanceTicketUrgencyChoices}
                             component={FormikSelectField}
@@ -501,10 +484,10 @@ export const EditGrievancePage = (): React.ReactElement => {
                         </Grid>
                         <Grid item xs={3}>
                           <Field
-                            name='program'
+                            name="program"
                             label={t('Programme Name')}
                             fullWidth
-                            variant='outlined'
+                            variant="outlined"
                             choices={mappedProgramChoices}
                             component={FormikSelectField}
                             disabled={
@@ -517,7 +500,7 @@ export const EditGrievancePage = (): React.ReactElement => {
                       {canAddDocumentation && (
                         <Box mt={3}>
                           <Title>
-                            <Typography variant='h6'>
+                            <Typography variant="h6">
                               {t('Documentation')}
                             </Typography>
                           </Title>

@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const PartnerForGrievanceChoices = gql`
   query partnerForGrievanceChoices($householdId: ID, $individualId: ID) {

@@ -7,15 +7,16 @@ import {
   Table,
   TableBody,
   Typography,
-} from '@material-ui/core';
-import React, { useState } from 'react';
+} from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { AllGrievanceTicketQuery } from '../../../../__generated__/graphql';
-import { useProgramContext } from "../../../../programContext";
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { AllGrievanceTicketQuery } from '@generated/graphql';
+import { useProgramContext } from '../../../../programContext';
 
 export const StyledLink = styled.div`
   color: #000;
@@ -48,7 +49,7 @@ interface BulkBaseModalProps {
   disabledSave?: boolean;
 }
 
-export const BulkBaseModal = ({
+export function BulkBaseModal({
   selectedTickets,
   icon,
   buttonTitle,
@@ -56,30 +57,28 @@ export const BulkBaseModal = ({
   children,
   onSave,
   disabledSave,
-}: BulkBaseModalProps): React.ReactElement => {
+}: BulkBaseModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
 
-  const renderButton = (): React.ReactElement => {
-    return (
-      <Button
-        variant='outlined'
-        color='primary'
-        startIcon={icon}
-        disabled={!selectedTickets.length || !isActiveProgram}
-        onClick={() => setDialogOpen(true)}
-      >
-        {buttonTitle}
-      </Button>
-    );
-  };
+  const renderButton = (): React.ReactElement => (
+    <Button
+      variant="outlined"
+      color="primary"
+      startIcon={icon}
+      disabled={!selectedTickets.length || !isActiveProgram}
+      onClick={() => setDialogOpen(true)}
+    >
+      {buttonTitle}
+    </Button>
+  );
   const onAccept = async (): Promise<void> => {
     try {
       await onSave(selectedTickets);
       setDialogOpen(false);
     } catch (e) {
-      //handled by inner function
+      // handled by inner function
     }
   };
 
@@ -89,11 +88,11 @@ export const BulkBaseModal = ({
       <StyledDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
-          <DialogTitle id='scroll-dialog-title'>{title}</DialogTitle>
+          <DialogTitle id="scroll-dialog-title">{title}</DialogTitle>
         </DialogTitleWrapper>
         <DialogContent>
           <Box mt={2} mb={6}>
@@ -120,8 +119,8 @@ export const BulkBaseModal = ({
               {t('CANCEL')}
             </Button>
             <Button
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               onClick={onAccept}
               disabled={disabledSave}
             >
@@ -132,4 +131,4 @@ export const BulkBaseModal = ({
       </StyledDialog>
     </>
   );
-};
+}

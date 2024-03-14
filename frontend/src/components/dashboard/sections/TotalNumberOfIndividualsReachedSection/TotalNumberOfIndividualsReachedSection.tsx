@@ -1,14 +1,15 @@
-import { Box, Button, DialogContent, Grid } from '@material-ui/core';
-import PersonIcon from '@material-ui/icons/Person';
-import React, { useState } from 'react';
+import { Box, Button, DialogContent, Grid } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { Dialog } from '../../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { formatNumber } from '../../../../utils/utils';
-import { AllChartsQuery } from '../../../../__generated__/graphql';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { formatNumber } from '@utils/utils';
+import { AllChartsQuery } from '@generated/graphql';
 import { IndividualsReachedByAgeAndGenderGroupsChart } from '../../charts/IndividualsReachedByAgeAndGenderGroupsChart';
 import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
 import {
@@ -31,28 +32,28 @@ interface TotalNumberOfIndividualsReachedSectionProps {
   chartDataIndividualsDisability: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];
 }
 
-export const TotalNumberOfIndividualsReachedSection = ({
+export function TotalNumberOfIndividualsReachedSection({
   data,
   chartDataIndividuals,
   chartDataIndividualsDisability,
-}: TotalNumberOfIndividualsReachedSectionProps): React.ReactElement => {
+}: TotalNumberOfIndividualsReachedSectionProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { t } = useTranslation();
   if (!data) return null;
 
   return (
     <>
-      <DashboardCard color='#345DA0'>
+      <DashboardCard color="#345DA0">
         <CardTitle>{t('TOTAL NUMBER OF INDIVIDUALS REACHED')}</CardTitle>
-        <Grid container justifyContent='space-between' alignItems='center'>
+        <Grid container justifyContent="space-between" alignItems="center">
           <Grid item>
             <CardAmountLink onClick={() => setDialogOpen(true)}>
               {formatNumber(data?.total)}
             </CardAmountLink>
           </Grid>
           <Grid item>
-            <IconContainer bg='#D9E2EF' color='#023F90'>
-              <PersonIcon fontSize='inherit' />
+            <IconContainer bg="#D9E2EF" color="#023F90">
+              <PersonIcon fontSize="inherit" />
             </IconContainer>
           </Grid>
         </Grid>
@@ -60,10 +61,10 @@ export const TotalNumberOfIndividualsReachedSection = ({
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
         fullWidth
-        maxWidth='md'
+        maxWidth="md"
       >
         <DialogContent>
           <DialogContainer>
@@ -95,4 +96,4 @@ export const TotalNumberOfIndividualsReachedSection = ({
       </Dialog>
     </>
   );
-};
+}

@@ -1,20 +1,21 @@
 import { get } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useAllAdminAreasLazyQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAllAdminAreasLazyQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { useDebounce } from '@hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
   getAutocompleteOptionLabel,
   handleAutocompleteChange,
   handleAutocompleteClose,
   handleOptionSelected,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
-export const AdminAreaAutocomplete = ({
+export function AdminAreaAutocomplete({
   disabled,
   name,
   filter,
@@ -34,12 +35,12 @@ export const AdminAreaAutocomplete = ({
   setAppliedFilter: (filter) => void;
   setFilter: (filter) => void;
   dataCy?: string;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
   const debouncedInputText = useDebounce(inputValue, 800);
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const { businessArea } = useBaseUrl();
 
@@ -56,9 +57,19 @@ export const AdminAreaAutocomplete = ({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (isMounted.current && businessArea) {
-      loadData({ variables: { businessArea, name: debouncedInputText } });
-    }
+    const asyncLoadData = async () => {
+      if (isMounted.current && businessArea) {
+        try {
+          await loadData({
+            variables: { businessArea, name: debouncedInputText },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    void asyncLoadData();
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {
@@ -72,7 +83,7 @@ export const AdminAreaAutocomplete = ({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
@@ -118,4 +129,4 @@ export const AdminAreaAutocomplete = ({
       debouncedInputText={debouncedInputText}
     />
   );
-};
+}

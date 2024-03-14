@@ -1,19 +1,19 @@
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
-import React from 'react';
+import * as React from 'react';
 import wait from 'waait';
 import { ReportingTable } from '.';
 import { fakeApolloAllReports } from '../../../../fixtures/reporting/fakeApolloAllReports';
 import { fakeReportChoiceData } from '../../../../fixtures/reporting/fakeReportChoiceData';
 import { fakeMe } from '../../../../fixtures/core/fakeMe';
-import { ApolloLoadingLink, render } from '../../../testUtils/testUtils';
+import { render } from '../../../testUtils/testUtils';
 
 describe('containers/tables/ReportingTable', () => {
   it('should render with data', async () => {
     const { container } = render(
       <MockedProvider addTypename={false} mocks={fakeApolloAllReports}>
         <ReportingTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={{}}
           choicesData={fakeReportChoiceData}
           meData={fakeMe}
@@ -27,13 +27,9 @@ describe('containers/tables/ReportingTable', () => {
 
   it('should render loading', () => {
     const { container } = render(
-      <MockedProvider
-        link={new ApolloLoadingLink()}
-        addTypename={false}
-        mocks={fakeApolloAllReports}
-      >
+      <MockedProvider addTypename={false} mocks={fakeApolloAllReports}>
         <ReportingTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           filter={{}}
           choicesData={fakeReportChoiceData}
           meData={fakeMe}

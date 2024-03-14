@@ -1,5 +1,5 @@
 import { MockedProvider } from '@apollo/react-testing';
-import React from 'react';
+import * as React from 'react';
 import { act } from '@testing-library/react';
 import wait from 'waait';
 import { ImportedHouseholdTable } from '.';
@@ -12,7 +12,7 @@ describe('containers/tables/rdi/ImportedHouseholdTable', () => {
     const { container } = render(
       <MockedProvider mocks={fakeApolloAllImportedHouseholds}>
         <ImportedHouseholdTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           rdi={fakeRegistrationDetailedFragment}
           isMerged={false}
         />
@@ -26,11 +26,10 @@ describe('containers/tables/rdi/ImportedHouseholdTable', () => {
   it('should render loading', () => {
     const { container } = render(
       <MockedProvider
-        link={new ApolloLoadingLink()}
         mocks={fakeApolloAllImportedHouseholds}
       >
         <ImportedHouseholdTable
-          businessArea='afghanistan'
+          businessArea="afghanistan"
           rdi={fakeRegistrationDetailedFragment}
           isMerged={false}
         />

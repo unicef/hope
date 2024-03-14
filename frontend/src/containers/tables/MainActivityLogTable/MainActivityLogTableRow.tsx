@@ -1,47 +1,45 @@
-/* eslint-disable prefer-template */
-import { IconButton, makeStyles } from '@material-ui/core';
-import Collapse from '@material-ui/core/Collapse';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
-import clsx from 'clsx';
+import { IconButton } from '@mui/material';
+import Collapse from '@mui/material/Collapse';
+import ExpandMore from '@mui/icons-material/ExpandMoreRounded';
 import moment from 'moment';
-import React, { ReactElement, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
-import {
-  AllLogEntriesQuery,
-  LogEntryAction,
-} from '../../../__generated__/graphql';
+import styled, { css } from 'styled-components';
+import { AllLogEntriesQuery, LogEntryAction } from '@generated/graphql';
 import {
   ButtonPlaceHolder,
   Cell,
   Row,
-} from '../../../components/core/ActivityLogTable/TableStyledComponents';
-import { Dashable } from '../../../components/core/Dashable';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { MiśTheme } from '../../../theme';
+} from '@components/core/ActivityLogTable/TableStyledComponents';
+import { Dashable } from '@components/core/Dashable';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './MainActivityLogTableHeadCells';
 
 const ButtonContainer = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
-//random color chosen by Przemek
 const CollapseContainer = styled(Collapse)`
   background-color: #fafafa;
 `;
 const StyledLink = styled(Link)`
   color: #000;
 `;
-// transitions not working in styled components
-const useStyles = makeStyles((theme: MiśTheme) => ({
-  expanded: {},
-  expandIcon: {
-    transform: 'rotate(0deg)',
-    transition: theme.transitions.create('transform', { duration: 400 }),
-    '&$expanded': {
-      transform: 'rotate(180deg)',
-    },
-  },
-}));
+
+interface StyledIconButtonProps {
+  expanded: boolean;
+}
+
+const StyledIconButton = styled(IconButton)<StyledIconButtonProps>`
+  transform: rotate(0deg);
+  transition: ${(props) =>
+    props.theme.transitions.create('transform', { duration: 400 })};
+
+  ${(props) =>
+    props.expanded &&
+    css`
+      transform: rotate(180deg);
+    `}
+`;
 
 function snakeToFieldReadable(str: string): string {
   if (!str) {
@@ -113,12 +111,11 @@ export function MainActivityLogTableRow({
 }: LogRowProps): ReactElement {
   const changes = logEntry.changes || {};
   const [expanded, setExpanded] = useState(false);
-  const classes = useStyles({});
   const keys = Object.keys(changes);
   const { length } = keys;
   if (length <= 1) {
     return (
-      <Row role='checkbox'>
+      <Row role="checkbox">
         <Cell weight={headCells[0].weight}>
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
@@ -169,39 +166,35 @@ export function MainActivityLogTableRow({
         <Cell />
         <Cell />
         <ButtonContainer>
-          <IconButton
-            className={clsx(classes.expandIcon, {
-              [classes.expanded]: expanded,
-            })}
+          <StyledIconButton
+            expanded={expanded}
             onClick={() => setExpanded(!expanded)}
           >
             <ExpandMore />
-          </IconButton>
+          </StyledIconButton>
         </ButtonContainer>
       </Row>
 
       <CollapseContainer in={expanded}>
-        {keys.map((key) => {
-          return (
-            <Row key={logEntry + key}>
-              <Cell weight={headCells[0].weight} />
-              <Cell weight={headCells[1].weight} />
-              <Cell weight={headCells[2].weight} />
-              <Cell weight={headCells[3].weight} />
-              <Cell weight={headCells[4].weight} />
-              <Cell weight={headCells[5].weight}>
-                {snakeToFieldReadable(key)}
-              </Cell>
-              <Cell weight={headCells[6].weight}>
-                <Dashable>{changes[key].from}</Dashable>
-              </Cell>
-              <Cell weight={headCells[7].weight}>
-                <Dashable>{changes[key].to}</Dashable>
-              </Cell>
-              <ButtonPlaceHolder />
-            </Row>
-          );
-        })}
+        {keys.map((key) => (
+          <Row key={logEntry.timestamp}>
+            <Cell weight={headCells[0].weight} />
+            <Cell weight={headCells[1].weight} />
+            <Cell weight={headCells[2].weight} />
+            <Cell weight={headCells[3].weight} />
+            <Cell weight={headCells[4].weight} />
+            <Cell weight={headCells[5].weight}>
+              {snakeToFieldReadable(key)}
+            </Cell>
+            <Cell weight={headCells[6].weight}>
+              <Dashable>{changes[key].from}</Dashable>
+            </Cell>
+            <Cell weight={headCells[7].weight}>
+              <Dashable>{changes[key].to}</Dashable>
+            </Cell>
+            <ButtonPlaceHolder />
+          </Row>
+        ))}
       </CollapseContainer>
     </>
   );

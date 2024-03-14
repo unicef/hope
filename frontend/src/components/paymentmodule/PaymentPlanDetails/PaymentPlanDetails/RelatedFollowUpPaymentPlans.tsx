@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
-import Button from '@material-ui/core/Button';
-import { Box } from '@material-ui/core';
+import * as React from 'react';
+import { useState } from 'react';
+import Button from '@mui/material/Button';
+import { Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../core/BlackLink';
-import { LabelizedField } from '../../../core/LabelizedField';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { LabelizedField } from '@core/LabelizedField';
 
 interface RelatedFollowUpPaymentPlansProps {
   baseUrl: string;
   followUps: PaymentPlanQuery['paymentPlan']['followUps'];
 }
 
-export const RelatedFollowUpPaymentPlans = ({
+export function RelatedFollowUpPaymentPlans({
   followUps,
   baseUrl,
-}: RelatedFollowUpPaymentPlansProps): React.ReactElement => {
+}: RelatedFollowUpPaymentPlansProps): React.ReactElement {
   const { t } = useTranslation();
   const [showAll, setShowAll] = useState(false);
 
@@ -40,12 +41,12 @@ export const RelatedFollowUpPaymentPlans = ({
 
   return (
     <LabelizedField label={t('Related Follow-Up Payment Plans')}>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         {followUpLinks || '-'}
         {followUps?.edges?.length > 5 && (
           <Button
-            variant='outlined'
-            color='primary'
+            variant="outlined"
+            color="primary"
             onClick={handleButtonClick}
           >
             {showAll ? t('Hide') : t('See all')}
@@ -54,4 +55,4 @@ export const RelatedFollowUpPaymentPlans = ({
       </Box>
     </LabelizedField>
   );
-};
+}

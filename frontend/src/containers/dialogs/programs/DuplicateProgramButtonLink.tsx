@@ -1,26 +1,26 @@
-import { IconButton } from '@material-ui/core';
-import { FileCopy } from '@material-ui/icons';
-import React, { ReactElement } from 'react';
+import { IconButton } from '@mui/material';
+import { FileCopy } from '@mui/icons-material';
+import { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
-import { ProgramQuery } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { ProgramQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface DuplicateProgramButtonLinkProps {
   program: ProgramQuery['program'];
 }
 
-export const DuplicateProgramButtonLink = ({
+export function DuplicateProgramButtonLink({
   program,
-}: DuplicateProgramButtonLinkProps): ReactElement => {
+}: DuplicateProgramButtonLinkProps): ReactElement {
   const { baseUrl } = useBaseUrl();
 
   return (
     <IconButton
       component={Link}
       to={`/${baseUrl}/duplicate/${program.id}`}
-      data-cy='button-copy-program'
+      data-cy="button-copy-program"
     >
       <FileCopy />
     </IconButton>
   );
-};
+}

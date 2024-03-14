@@ -1,5 +1,5 @@
-import { Box, Button } from '@material-ui/core';
-import React from 'react';
+import { Box, Button } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -7,11 +7,11 @@ import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import {
   paymentPlanBackgroundActionStatusToColor,
   paymentPlanStatusToColor,
-} from '../../../../utils/utils';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../core/BreadCrumbs';
-import { PageHeader } from '../../../core/PageHeader';
-import { StatusBox } from '../../../core/StatusBox';
+} from '@utils/utils';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { BreadCrumbsItem } from '@core/BreadCrumbs';
+import { PageHeader } from '@core/PageHeader';
+import { StatusBox } from '@core/StatusBox';
 
 const StatusWrapper = styled.div`
   width: 140px;
@@ -25,12 +25,12 @@ interface EditPaymentPlanHeaderProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const EditPaymentPlanHeader = ({
+export function EditPaymentPlanHeader({
   handleSubmit,
   baseUrl,
   permissions,
   paymentPlan,
-}: EditPaymentPlanHeaderProps): React.ReactElement => {
+}: EditPaymentPlanHeaderProps): React.ReactElement {
   const { t } = useTranslation();
   const { id, isFollowUp } = paymentPlan;
 
@@ -46,7 +46,7 @@ export const EditPaymentPlanHeader = ({
   return (
     <PageHeader
       title={
-        <Box display='flex' alignItems='center'>
+        <Box display="flex" alignItems="center">
           {t(isFollowUp ? 'Follow-up Payment Plan' : 'Payment Plan')} ID{' '}
           {paymentPlan.unicefId}
           <StatusWrapper>
@@ -71,7 +71,7 @@ export const EditPaymentPlanHeader = ({
           : null
       }
     >
-      <Box display='flex' mt={2} mb={2}>
+      <Box display="flex" mt={2} mb={2}>
         <Box mr={3}>
           <Button
             component={Link}
@@ -80,10 +80,10 @@ export const EditPaymentPlanHeader = ({
             {t('Cancel')}
           </Button>
         </Box>
-        <Button variant='contained' color='primary' onClick={handleSubmit}>
+        <Button variant="contained" color="primary" onClick={handleSubmit}>
           {t('Save')}
         </Button>
       </Box>
     </PageHeader>
   );
-};
+}
