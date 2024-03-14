@@ -10,6 +10,7 @@ import { PaymentDetailsPage } from '../pages/paymentmodule/PaymentDetailsPage';
 import { PaymentModulePage } from '../pages/paymentmodule/PaymentModulePage';
 import { PaymentPlanDetailsPage } from '../pages/paymentmodule/PaymentPlanDetailsPage';
 import { SetUpFspPage } from '../pages/paymentmodule/SetUpFspPage';
+import { SetUpFollowUpFspPage } from '../pages/paymentmodule/SetUpFollowUpFspPage';
 
 export const PaymentModuleRoutes = (): React.ReactElement => {
   const paymentModuleRoutes = [
@@ -30,8 +31,8 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
       element: <EditFollowUpSetUpFspPage />,
     },
     {
-      path: 'payment-module/payment-plans/:id/setup-fsp/create',
-      element: <SetUpFspPage />,
+      path: 'payment-module/followup-payment-plans/:id/setup-fsp/create',
+      element: <SetUpFollowUpFspPage />,
     },
     {
       path: 'payment-module/payment-plans/:id/setup-fsp/edit',
@@ -44,6 +45,10 @@ export const PaymentModuleRoutes = (): React.ReactElement => {
     {
       path: 'payment-module/payments/:id',
       element: <PaymentDetailsPage />,
+    },
+    {
+      path: 'payment-module/payment-plans/:id/setup-fsp/create',
+      element: <SetUpFspPage />,
     },
     {
       path: 'payment-module/payment-plans/:id',
