@@ -1058,13 +1058,13 @@ test = ["black", "celery", "check-manifest", "django-admin-extra-urls", "django-
 
 [[package]]
 name = "django-adminfilters"
-version = "2.4.1"
+version = "2.4.2"
 description = "Extra filters for django admin site"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django-adminfilters-2.4.1.tar.gz", hash = "sha256:bb52486ea1049fa629da42e9766c1f7a22327378c2fc120f80d9ca5e80e8d62a"},
+    {file = "django-adminfilters-2.4.2.tar.gz", hash = "sha256:65ba270dc11ebde95262bee55f80db66d23c5ab2333714f3dc9b810a4642ec71"},
 ]
 
 [package.extras]
@@ -5385,4 +5385,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.*"
-content-hash = "c2c73c04dae90ca1a4672dba0375ba300271efff7d2c4f0688965a9b680e0a7b"
+content-hash = "80a319175d653cbb2bb8617a26eeb62d87314a84aeb67e600df3f78afd0cf59a"
