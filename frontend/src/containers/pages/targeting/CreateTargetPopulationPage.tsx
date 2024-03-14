@@ -1,6 +1,8 @@
+
 import { Typography } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -45,6 +47,7 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
   const { showMessage } = useSnackbar();
   const { baseUrl, businessArea } = useBaseUrl();
   const permissions = usePermissions();
+  const history = useHistory();
 
   const { data: businessAreaData } = useBusinessAreaDataQuery({
     variables: { businessAreaSlug: businessArea },
@@ -98,10 +101,10 @@ export const CreateTargetPopulationPage = (): React.ReactElement => {
           },
         },
       });
-      showMessage(t('Target Population Created'), {
-        pathname: `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
-        historyMethod: 'push',
-      });
+      showMessage(t('Target Population Created'));
+      history.push(
+        `/${baseUrl}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

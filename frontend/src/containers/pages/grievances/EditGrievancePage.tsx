@@ -8,7 +8,7 @@ import {
 import { Field, Formik } from 'formik';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   GrievanceTicketDocument,
@@ -92,6 +92,7 @@ const BoxWithBottomBorders = styled.div`
 `;
 
 export const EditGrievancePage = (): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const { baseUrl, businessArea, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
@@ -285,10 +286,8 @@ export const EditGrievancePage = (): React.ReactElement => {
               },
             ],
           });
-          showMessage(t('Grievance Ticket edited.'), {
-            pathname: grievanceDetailsPath,
-            historyMethod: 'push',
-          });
+          showMessage(t('Grievance Ticket edited.'));
+          history.push(grievanceDetailsPath);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }

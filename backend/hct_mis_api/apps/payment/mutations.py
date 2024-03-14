@@ -47,6 +47,7 @@ from hct_mis_api.apps.payment.models import (
     GenericPayment,
     Payment,
     PaymentPlan,
+    PaymentPlanSplit,
     PaymentRecord,
     PaymentVerification,
     PaymentVerificationPlan,
@@ -491,7 +492,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         if received is None and received_amount is not None:
             log_and_raise("You can't set received_amount {received_amount} and not set received to YES")
         elif received_amount == 0 and received:
-            log_and_raise("If received_amount is 0, you should set received to NO")
+            log_and_raise("If 'Amount Received' equals to 0, please set status as 'Not Received'")
         elif received_amount is not None and received_amount != 0 and not received:
             log_and_raise(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
@@ -1232,6 +1233,50 @@ class ExportPDFPaymentPlanSummaryMutation(PermissionMutation):
         return cls(payment_plan=payment_plan)
 
 
+class SplitPaymentPlanMutation(PermissionMutation):
+    payment_plan = graphene.Field(PaymentPlanNode)
+
+    class Arguments:
+        payment_plan_id = graphene.ID(required=True)
+        split_type = graphene.String(required=True)
+        payments_no = graphene.Int(required=False)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(
+        cls, root: Any, info: Any, payment_plan_id: str, split_type: str, payments_no: Optional[int], **kwargs: Any
+    ) -> "SplitPaymentPlanMutation":
+        payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(payment_plan_id))
+        cls.has_permission(info, Permissions.PM_SPLIT, payment_plan.business_area)
+
+        if payment_plan.delivery_mechanisms.count() > 1:
+            raise GraphQLError("Payment plan with multiple delivery mechanisms cannot be split")
+
+        sent_pg_delivery_mechanisms = payment_plan.delivery_mechanisms.filter(
+            financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+            financial_service_provider__payment_gateway_id__isnull=False,
+            sent_to_payment_gateway=True,
+        )
+        if sent_pg_delivery_mechanisms.exists():
+            raise GraphQLError("Payment plan is already sent to payment gateway")
+
+        if payment_plan.status != PaymentPlan.Status.ACCEPTED:
+            raise GraphQLError("Payment plan must be accepted to make a split")
+
+        if split_type == PaymentPlanSplit.SplitType.BY_RECORDS:
+            if not payments_no:
+                raise GraphQLError("Payment Number is required for split by records")
+            if (payment_plan.eligible_payments.count() // payments_no) > PaymentPlanSplit.MAX_CHUNKS:
+                raise GraphQLError(f"Cannot split Payment Plan into more than {PaymentPlanSplit.MAX_CHUNKS} parts")
+
+        with transaction.atomic():
+            payment_plan_service = PaymentPlanService(payment_plan=payment_plan)
+            payment_plan_service.split(split_type, payments_no)
+
+        return cls(payment_plan=payment_plan)
+
+
 class Mutations(graphene.ObjectType):
     create_payment_verification_plan = CreateVerificationPlanMutation.Field()
     edit_payment_verification_plan = EditPaymentVerificationMutation.Field()
@@ -1258,6 +1303,7 @@ class Mutations(graphene.ObjectType):
     delete_payment_plan = DeletePaymentPlanMutation.Field()
     choose_delivery_mechanisms_for_payment_plan = ChooseDeliveryMechanismsForPaymentPlanMutation.Field()
     assign_fsp_to_delivery_mechanism = AssignFspToDeliveryMechanismMutation.Field()
+    split_payment_plan = SplitPaymentPlanMutation.Field()
 
     export_xlsx_payment_plan_payment_list = ExportXLSXPaymentPlanPaymentListMutation.Field()
     export_xlsx_payment_plan_payment_list_per_fsp = ExportXLSXPaymentPlanPaymentListPerFSPMutation.Field()

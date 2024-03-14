@@ -16,6 +16,7 @@ import * as Yup from 'yup';
 import { AutoSubmitFormOnEnter } from '../../components/core/AutoSubmitFormOnEnter';
 import { useBaseUrl } from '../../hooks/useBaseUrl';
 import { useCachedImportedIndividualFieldsQuery } from '../../hooks/useCachedImportedIndividualFields';
+import { useProgramContext } from "../../programContext";
 import {
   chooseFieldType,
   clearField,
@@ -123,9 +124,8 @@ export function TargetCriteriaForm({
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
-  const { data, loading } = useCachedImportedIndividualFieldsQuery(
-    businessArea,
-  );
+  const { selectedProgram: { id } } = useProgramContext();
+  const { data, loading } = useCachedImportedIndividualFieldsQuery(businessArea, id);
 
   const filtersArrayWrapperRef = useRef(null);
   const individualsFiltersBlocksWrapperRef = useRef(null);

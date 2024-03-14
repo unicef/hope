@@ -14,6 +14,7 @@ from typing import (
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.db.models import Q
 
 import graphene
 from constance import config
@@ -182,7 +183,7 @@ class FieldAttributeNode(graphene.ObjectType):
             Iterable,
         ):
             return sorted(choices, key=lambda elem: elem["label"]["English(EN)"])
-        return choices.order_by("name").all()
+        return choices.all()
 
     def resolve_is_flex_field(self, info: Any) -> bool:
         return isinstance(self, FlexibleAttribute)
@@ -316,6 +317,7 @@ class Query(graphene.ObjectType):
         FieldAttributeNode,
         flex_field=graphene.Boolean(),
         business_area_slug=graphene.String(required=False, description="The business area slug"),
+        program_id=graphene.String(required=False, description="program id"),
         description="All field datatype meta.",
     )
     all_groups_with_fields = graphene.List(
@@ -352,6 +354,7 @@ class Query(graphene.ObjectType):
         info: Any,
         flex_field: Optional[bool] = None,
         business_area_slug: Optional[str] = None,
+        program_id: Optional[str] = None,
     ) -> List[Any]:
         def is_a_killer_filter(field: Any) -> bool:
             if isinstance(field, FlexibleAttribute):
@@ -405,9 +408,9 @@ class Query(graphene.ObjectType):
     def resolve_data_collection_type_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         data_collecting_types = (
             DataCollectingType.objects.filter(
+                Q(Q(limit_to__slug=info.context.headers.get("Business-Area").lower()) | Q(limit_to__isnull=True)),
                 active=True,
                 deprecated=False,
-                limit_to__slug=info.context.headers.get("Business-Area").lower(),
             )
             .exclude(code__iexact="unknown")
             .only("code", "label", "description")

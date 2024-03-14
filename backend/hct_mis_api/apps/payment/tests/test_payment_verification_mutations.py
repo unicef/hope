@@ -175,7 +175,7 @@ class TestPaymentVerificationMutations(APITestCase):
     @parameterized.expand(
         [
             ("21.36", False, "If received_amount(21.36) is not 0, you should set received to YES"),
-            ("0", True, "If received_amount is 0, you should set received to NO"),
+            ("0", True, "If 'Amount Received' equals to 0, please set status as 'Not Received'"),
         ]
     )
     def test_update_payment_verification_received_and_received_amount_incorrect_arguments(

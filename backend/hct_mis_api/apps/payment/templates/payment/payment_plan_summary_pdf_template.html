@@ -1,99 +1,170 @@
 {% extends "export/pdf_base.html" %}
 
 {% block table %}
-    <section id="title">
-      <h2>LETTER OF AUTHORIZATION</h2>
-    </section>
+
+<section id="title">
+  <h2>LETTER OF AUTHORIZATION</h2>
+</section>
+
 <table class="table">
   <tbody>
-  <tr>
-      <td colspan="4" class="header">PAYMENT PLAN DETAILS</td>
-  </tr>
-  <tr>
-    <td>Start Date</td>
-    <td>{{ payment_plan.start_date|date:"j N Y" }}</td>
-    <td>Programme Name</td>
-    <td>{{ payment_plan.program_cycle.program.name }}</td>
-  </tr>
-  <tr>
-    <td>End Date</td>
-    <td>{{ payment_plan.end_date|date:"j N Y" }}</td>
-    <td>Delivery mechanism</td>
-    <td>{{ delivery_mechanism_per_payment_plan }}</td>
-  </tr>
-  <tr>
-    <td>Dispersion Start Date</td>
-    <td>{{ payment_plan.dispersion_start_date|date:"j N Y" }}</td>
-    <td>FSP</td>
-    <td>{{ fsp.name }}</td>
-  </tr>
-  <tr>
-    <td>Dispersion End Date</td>
-    <td>{{ payment_plan.dispersion_end_date|date:"j N Y" }}</td>
-    <td>Vision Vendor number</td>
-    <td>{{ fsp.vision_vendor_number }}</td>
+    <tr>
+        <td colspan="4" class="header">PAYMENT PLAN DETAILS</td>
     </tr>
-  <tr>
-    <td colspan="4" class="header">SUMMARY</td>
-  </tr>
-  <tr>
-    <td>Total number of households covered</td>
-    <td>{{ payment_plan.total_households_count }}</td>
-    <td>Total entitlement</td>
-    <td>{{ payment_plan.total_entitled_quantity|default_if_none:"0" }}</td>
-  </tr>
-  <tr>
-    <td>Total number of individuals covered</td>
-    <td>{{ payment_plan.total_individuals_count }}</td>
-    <td>Currency</td>
-    <td>{{ payment_plan.currency }}</td>
-  </tr>
+    <tr>
+      <td>Start Date</td>
+      <td>{{ payment_plan.start_date|date:"j N Y" }}</td>
+      <td>Programme Name</td>
+      <td>{{ payment_plan.program_cycle.program.name }}</td>
+    </tr>
+    <tr>
+      <td>End Date</td>
+      <td>{{ payment_plan.end_date|date:"j N Y" }}</td>
+      <td>Delivery mechanism</td>
+      <td>{{ delivery_mechanism_per_payment_plan }}</td>
+    </tr>
+    <tr>
+      <td>Dispersion Start Date</td>
+      <td>{{ payment_plan.dispersion_start_date|date:"j N Y" }}</td>
+      <td>FSP</td>
+      <td>{{ fsp.name }}</td>
+    </tr>
+    <tr>
+      <td>Dispersion End Date</td>
+      <td>{{ payment_plan.dispersion_end_date|date:"j N Y" }}</td>
+      <td>Vision Vendor number</td>
+      <td>{{ fsp.vision_vendor_number }}</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td>Target Population</td>
+      <td>{{ payment_plan.target_population.name }}</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="header">SUMMARY</td>
+    </tr>
+    <tr>
+      <td>Total number of households covered</td>
+      <td>{{ payment_plan.total_households_count }}</td>
+      <td>Total entitlement</td>
+      <td>{{ payment_plan.total_entitled_quantity|default_if_none:"0" }}</td>
+    </tr>
+    <tr>
+      <td>Total number of individuals covered</td>
+      <td>{{ payment_plan.total_individuals_count }}</td>
+      <td>Currency</td>
+      <td>{{ payment_plan.currency }}</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td>Total entitlement (USD)</td>
+      <td>{{ payment_plan.total_entitled_quantity_usd|default_if_none:"0" }}</td>
+    </tr>
   </tbody>
 </table>
-    <section id="title">
-      <h3>PAYMENT PLAN ACCEPTANCE PROCESS</h3>
-    </section>
+
 <table>
   <tbody>
-  <tr>
-      <td colspan="2" class="header">approval</td>
-      <td colspan="2" class="header">authorization</td>
-      <td colspan="2" class="header">release</td>
-  </tr>
-  <tr>
-    <td>Name of Approver</td>
-    <td>{{ approval.created_by.get_full_name }}</td>
-    <td>Name of authorizer</td>
-    <td>{{ authorization.created_by.get_full_name }}</td>
-    <td>Name of Releaser</td>
-    <td>{{ release.created_by.get_full_name }}</td>
-  </tr>
-  <tr>
-    <td>Approval date</td>
-    <td>{{ approval.created_at|date:"j N Y" }}</td>
-    <td>Authorization date</td>
-    <td>{{ authorization.created_at|date:"j N Y" }}</td>
-    <td>Release date</td>
-    <td>{{ release.created_at|date:"j N Y" }}</td>
-  </tr>
-  <tr>
-    <td>Comment</td>
-    <td>{{ approval.comment }}</td>
-    <td>Comment</td>
-    <td>{{ authorization.comment }}</td>
-    <td>Comment</td>
-    <td>{{ release.comment }}</td>
-  </tr>
-  <tr>
-    <td class="height45">Signature</td>
-    <td></td>
-    <td class="height45">Signature</td>
-    <td></td>
-    <td class="height45">Signature</td>
-    <td></td>
-  </tr>
+    <tr>
+      <td colspan="6" class="header">RECONCILIATION SUMMARY</td>
+    </tr>
+    <tr>
+      <td>Total Households redeemed</td>
+      <td>{{reconciliation.reconciled|default_if_none:"0"}}</td>
+      <td>Total amount redeemed ({{ payment_plan.currency }})</td>
+      <td>{{reconciliation.reconciled_local|default_if_none:"0"}}</td>
+      <td>Total amount redeemed (USD)</td>
+      <td>{{reconciliation.reconciled_usd|default_if_none:"0"}}</td>
+    </tr>
+    <tr>
+      <td>Total pending Households</td>
+      <td>{{reconciliation.pending|default_if_none:"0"}}</td>
+      <td>Total amount unredeemed ({{ payment_plan.currency }})</td>
+      <td>{{reconciliation.pending_local|default_if_none:"0"}}</td>
+      <td>Total amount unredeemed (USD)</td>
+      <td>{{reconciliation.pending_usd|default_if_none:"0"}}</td>
+    </tr>
   </tbody>
 </table>
+
+<section id="title">
+  <h3>PAYMENT PLAN ACCEPTANCE PROCESS</h3>
+</section>
+
+<table>
+  <tbody>
+    <tr>
+        <td colspan="2" class="header">approval</td>
+        <td colspan="2" class="header">authorization</td>
+        <td colspan="2" class="header">release</td>
+    </tr>
+    <tr>
+      <td>Name of Approver</td>
+      <td>{{ approval.created_by.get_full_name }}</td>
+      <td>Name of authorizer</td>
+      <td>{{ authorization.created_by.get_full_name }}</td>
+      <td>Name of Releaser</td>
+      <td>{{ release.created_by.get_full_name }}</td>
+    </tr>
+    <tr>
+      <td>Approval date</td>
+      <td>{{ approval.created_at|date:"j N Y" }}</td>
+      <td>Authorization date</td>
+      <td>{{ authorization.created_at|date:"j N Y" }}</td>
+      <td>Release date</td>
+      <td>{{ release.created_at|date:"j N Y" }}</td>
+    </tr>
+    <tr>
+      <td>Comment</td>
+      <td>{{ approval.comment }}</td>
+      <td>Comment</td>
+      <td>{{ authorization.comment }}</td>
+      <td>Comment</td>
+      <td>{{ release.comment }}</td>
+    </tr>
+    <tr>
+      <td class="height45">Signature</td>
+      <td></td>
+      <td class="height45">Signature</td>
+      <td></td>
+      <td class="height45">Signature</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<br>
+
+<table>
+  <tbody>
+    <tr>
+      <td class="header" style="text-transform: none;">This part is reserved for FSP Authorized signatories</td>
+    </tr>
+  </tbody>
+</table>
+
+<table style="float: left; width: 40%; margin-right: 20%;">
+  <tbody>
+    <tr>
+      <td class="height45">FSP Authorized signatory 1</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<table style="float: left; width: 40%;">
+  <tbody>
+    <tr>
+      <td class="height45">FSP Authorized signatory 2</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="clear: both;"></div>
+
 <p></p>
 <p></p>
     <p>Link to Payment Plan: <a href="{{ payment_plan_link }}">{{ payment_plan_link }}</a></p>

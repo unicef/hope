@@ -28,6 +28,7 @@ MANIFEST
 backend/test-results/
 backend/lint-results/
 backend/mypy-results/
+backend/screenshot/
 cypress-results/
 cypress-reports/
 

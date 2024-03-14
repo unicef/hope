@@ -16,6 +16,7 @@ from django.core.validators import (
 )
 from django.db import models
 from django.db.models import JSONField, Q, QuerySet
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from model_utils.models import UUIDModel
@@ -329,11 +330,11 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
             # default perms for is_unicef partner
             all_partner_roles_permissions_list = [DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER]
 
+        user_roles_query = UserRole.objects.filter(user=self, business_area__slug=business_area_slug).exclude(
+            expiry_date__lt=timezone.now()
+        )
         all_user_roles_permissions_list = list(
-            Role.objects.filter(
-                user_roles__user=self,
-                user_roles__business_area__slug=business_area_slug,
-            ).values_list("permissions", flat=True)
+            Role.objects.filter(user_roles__in=user_roles_query).values_list("permissions", flat=True)
         )
         return (
             list(
@@ -349,7 +350,8 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     @property
     def business_areas(self) -> QuerySet[BusinessArea]:
         return BusinessArea.objects.filter(
-            Q(user_roles__user=self) | Q(id__in=self.partner.business_area_ids)
+            Q(Q(user_roles__user=self) & ~Q(user_roles__expiry_date__lt=timezone.now()))
+            | Q(id__in=self.partner.business_area_ids)
         ).distinct()
 
     @test_conditional(lru_cache())
@@ -364,10 +366,12 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def cached_has_user_roles_for_business_area_and_permission(
         self, business_area: BusinessArea, permission: str
     ) -> bool:
+        user_roles_query = UserRole.objects.filter(user=self, business_area=business_area).exclude(
+            expiry_date__lt=timezone.now()
+        )
         return Role.objects.filter(
+            user_roles__in=user_roles_query,
             permissions__contains=[permission],
-            user_roles__user=self,
-            user_roles__business_area=business_area,
         ).exists()
 
     def has_permission(
@@ -457,6 +461,9 @@ class UserRole(NaturalKeyModel, TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+    expiry_date = models.DateField(
+        blank=True, null=True, help_text="After expiry date this User Role will be inactive."
+    )
 
     class Meta:
         unique_together = ("business_area", "user", "role")
