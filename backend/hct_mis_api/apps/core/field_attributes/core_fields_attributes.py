@@ -95,8 +95,7 @@ from hct_mis_api.apps.registration_datahub.models import COLLECT_TYPES
 logger = logging.getLogger(__name__)
 
 CORE_FIELDS_ATTRIBUTES = (
-    PEOPLE_FIELDS_ATTRIBUTES
-    + [
+    [
         {
             "id": "a1741e3c-0e24-4a60-8d2f-463943abaebb",
             "type": TYPE_INTEGER,
@@ -1791,6 +1790,7 @@ CORE_FIELDS_ATTRIBUTES = (
             "scope": [Scope.XLSX, Scope.PAYMENT_CHANNEL, Scope.KOBO_IMPORT],
         },
     ]
+    + PEOPLE_FIELDS_ATTRIBUTES
     + PAYMENT_CHANNEL_FIELDS_ATTRIBUTES
 )
 
