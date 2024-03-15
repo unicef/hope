@@ -16,7 +16,6 @@ def add_feedbacks():
     return
 
 
-@pytest.mark.skip(reason="Done!")
 @pytest.mark.usefixtures("login")
 class TestSmokeFeedback:
     def test_check_feedback_page(
