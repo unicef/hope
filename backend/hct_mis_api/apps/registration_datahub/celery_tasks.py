@@ -65,8 +65,13 @@ def registration_xlsx_import_task(
     self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
 ) -> bool:
     try:
+        from hct_mis_api.apps.core.models import DataCollectingType
+        from hct_mis_api.apps.program.models import Program
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
+            RdiXlsxPeopleCreateTask,
         )
 
         with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
@@ -80,12 +85,24 @@ def registration_xlsx_import_task(
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
             rdi.status = RegistrationDataImport.IMPORTING
             rdi.save()
-            RdiXlsxCreateTask().execute(
-                registration_data_import_id=registration_data_import_id,
-                import_data_id=import_data_id,
-                business_area_id=business_area_id,
-                program_id=str(program_id),
-            )
+
+            program = Program.objects.get(id=program_id)
+            is_social_worker_program = program.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+
+            if is_social_worker_program:
+                RdiXlsxPeopleCreateTask().execute(
+                    registration_data_import_id=registration_data_import_id,
+                    import_data_id=import_data_id,
+                    business_area_id=business_area_id,
+                    program_id=str(program_id),
+                )
+            else:
+                RdiXlsxCreateTask().execute(
+                    registration_data_import_id=registration_data_import_id,
+                    import_data_id=import_data_id,
+                    business_area_id=business_area_id,
+                    program_id=str(program_id),
+                )
             return True
     except (WrongStatusException, AlreadyRunningException) as e:
         logger.info(str(e))

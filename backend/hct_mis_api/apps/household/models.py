@@ -532,7 +532,6 @@ class Household(
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
-    social_worker = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Household"
@@ -1011,7 +1010,6 @@ class Individual(
     is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
-    social_worker = models.BooleanField(default=False)
 
     vector_column = SearchVectorField(null=True)
 
