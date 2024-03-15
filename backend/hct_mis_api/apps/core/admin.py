@@ -716,8 +716,23 @@ class MigrationStatusAdmin(admin.ModelAdmin):
     pass
 
 
+class DataCollectingTypeForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields['type'].required = True
+
+    def clean(self) -> None:
+        household_filters_available = self.cleaned_data["household_filters_available"]
+
+        if self.cleaned_data.get("type") == DataCollectingType.Type.SOCIAL and household_filters_available is True:
+            msg = "Household filters cannot be applied for data collecting type with social type"
+            self.add_error("type", forms.ValidationError(msg))
+
+
 @admin.register(DataCollectingType)
 class DataCollectingTypeAdmin(AdminFiltersMixin, admin.ModelAdmin):
+    form = DataCollectingTypeForm
+
     list_display = (
         "label",
         "code",
