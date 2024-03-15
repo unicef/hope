@@ -10,6 +10,7 @@ from hct_mis_api.apps.account.fixtures import (
     RoleFactory,
     UserFactory,
 )
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class HOPEApiTestCase(APITestCase):
@@ -19,6 +20,7 @@ class HOPEApiTestCase(APITestCase):
         Grant.API_RDI_UPLOAD,
     ]
     token: APIToken
+    business_area: BusinessArea
 
     @classmethod
     def setUpTestData(cls) -> None:
