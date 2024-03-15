@@ -1,26 +1,26 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { paymentVerificationStatusToColor } from '../../utils/utils';
-import { CashPlanQuery, PaymentPlanQuery } from '../../__generated__/graphql';
-import { LabelizedField } from '../core/LabelizedField';
-import { StatusBox } from '../core/StatusBox';
-import { Title } from '../core/Title';
-import { UniversalMoment } from '../core/UniversalMoment';
+import { paymentVerificationStatusToColor } from '@utils/utils';
+import { CashPlanQuery, PaymentPlanQuery } from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface VerificationPlansSummaryProps {
   planNode: CashPlanQuery['cashPlan'] | PaymentPlanQuery['paymentPlan'];
 }
 
-export const VerificationPlansSummary = ({
+export function VerificationPlansSummary({
   planNode,
-}: VerificationPlansSummaryProps): React.ReactElement => {
+}: VerificationPlansSummaryProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <Grid container>
-      <Grid data-cy='grid-verification-plans-summary' item xs={9}>
+      <Grid data-cy="grid-verification-plans-summary" item xs={9}>
         <Title>
-          <Typography variant='h6' data-cy='table-label'>
+          <Typography variant="h6" data-cy="table-label">
             {t('Verification Plans Summary')}
           </Typography>
         </Title>
@@ -29,7 +29,7 @@ export const VerificationPlansSummary = ({
             <Box pt={2} pb={2}>
               <LabelizedField label={t('Status')}>
                 <StatusBox
-                  dataCy='verification-plans-summary-status'
+                  dataCy="verification-plans-summary-status"
                   status={planNode.paymentVerificationSummary?.status}
                   statusToColor={paymentVerificationStatusToColor}
                 />
@@ -39,7 +39,7 @@ export const VerificationPlansSummary = ({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField
-                dataCy='summary-activation-date'
+                dataCy="summary-activation-date"
                 label={t('Activation Date')}
               >
                 <UniversalMoment>
@@ -51,7 +51,7 @@ export const VerificationPlansSummary = ({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField
-                dataCy='summary-completion-date'
+                dataCy="summary-completion-date"
                 label={t('Completion Date')}
               >
                 <UniversalMoment>
@@ -63,7 +63,7 @@ export const VerificationPlansSummary = ({
           <Grid item xs={3}>
             <Box pt={2} pb={2}>
               <LabelizedField
-                dataCy='summary-number-of-plans'
+                dataCy="summary-number-of-plans"
                 label={t('Number of Verification Plans')}
               >
                 {planNode.verificationPlans.totalCount}
@@ -74,4 +74,4 @@ export const VerificationPlansSummary = ({
       </Grid>
     </Grid>
   );
-};
+}

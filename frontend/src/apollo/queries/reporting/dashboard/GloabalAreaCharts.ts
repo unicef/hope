@@ -1,9 +1,7 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const GlobalAreaCharts = gql`
-  query GlobalAreaCharts(
-    $year: Int!
-  ) {
+  query GlobalAreaCharts($year: Int!) {
     chartTotalTransferredCashByCountry(year: $year) {
       datasets {
         data

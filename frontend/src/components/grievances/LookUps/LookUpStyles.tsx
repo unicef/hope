@@ -1,6 +1,10 @@
 import styled from 'styled-components';
 
-export const StyledBox = styled.div`
+interface StyledBoxProps {
+  disabled?: boolean;
+}
+
+export const StyledBox = styled.div<StyledBoxProps>`
   border: ${({ disabled }) => (disabled ? 0 : 1.5)}px solid #043e91;
   border-radius: 5px;
   font-size: 16px;

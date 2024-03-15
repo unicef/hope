@@ -3,39 +3,39 @@
 exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/PaymentPlanDetailsResults should render 1`] = `
 <div>
   <div
-    class="MuiPaper-root sc-htpNat cNIMpP MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 sc-dmyCSP kWtMci css-1ps6pg7-MuiPaper-root"
   >
     <div
-      class="sc-ifAKCX kJJoCT"
+      class="sc-eDLKkx kbjSlf"
     >
       <h6
-        class="MuiTypography-root MuiTypography-h6"
+        class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
       >
         Results
       </h6>
     </div>
     <div
-      class="sc-EHOje fhxHOS"
+      class="sc-jTQCzO kXsWaY"
     >
       <div
-        class="MuiGrid-root MuiGrid-container"
+        class="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
       >
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3"
+            class="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-1efphpz-MuiGrid-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-bxivhb ivtTrx"
+                class="sc-hLQSwg lpoPA-D"
                 color="#5F02CF"
               >
                 <div>
                   <span
-                    class="sc-bdVaJa kwsjSG"
+                    class="sc-beySPh gbuZtJ"
                     color="textSecondary"
                   >
                     Female Children
@@ -44,7 +44,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Female Children"
                   >
                     <span
-                      class="sc-bwzfXH kOktSP"
+                      class="sc-guDLey cyWTlF"
                       color="textSecondary"
                     >
                       0
@@ -54,15 +54,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-bxivhb fjYNWb"
+                class="sc-hLQSwg gOSGSG"
                 color="#DFCCF5"
               >
                 <div>
                   <span
-                    class="sc-bdVaJa kwsjSG"
+                    class="sc-beySPh gbuZtJ"
                     color="textSecondary"
                   >
                     Female Adults
@@ -71,7 +71,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Female Adults"
                   >
                     <span
-                      class="sc-bwzfXH kOktSP"
+                      class="sc-guDLey cyWTlF"
                       color="textSecondary"
                     >
                       1
@@ -81,15 +81,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-bxivhb fGkkog"
+                class="sc-hLQSwg epYyAz"
                 color="#1D6A64"
               >
                 <div>
                   <span
-                    class="sc-bdVaJa kwsjSG"
+                    class="sc-beySPh gbuZtJ"
                     color="textSecondary"
                   >
                     Male Children
@@ -98,7 +98,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Male Children"
                   >
                     <span
-                      class="sc-bwzfXH kOktSP"
+                      class="sc-guDLey cyWTlF"
                       color="textSecondary"
                     >
                       0
@@ -108,15 +108,15 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-bxivhb jiWNFG"
+                class="sc-hLQSwg eHLZxv"
                 color="#B1E3E0"
               >
                 <div>
                   <span
-                    class="sc-bdVaJa kwsjSG"
+                    class="sc-beySPh gbuZtJ"
                     color="textSecondary"
                   >
                     Male Adults
@@ -125,7 +125,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Male Adults"
                   >
                     <span
-                      class="sc-bwzfXH kOktSP"
+                      class="sc-guDLey cyWTlF"
                       color="textSecondary"
                     >
                       2
@@ -137,22 +137,22 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-align-items-xs-center"
+            class="MuiGrid-root MuiGrid-container css-1e2bu2o-MuiGrid-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
             >
               <div
-                class="sc-htoDjs iquLtL"
+                class="sc-fsYfdN kEIWSo"
                 data-cy="chart-container"
               >
                 <canvas
-                  class="chartjs-render-monitor"
                   height="0"
-                  style="display: block;"
+                  role="img"
+                  style="display: block; box-sizing: border-box; height: 0px; width: 0px;"
                   width="0"
                 />
               </div>
@@ -160,20 +160,20 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
           </div>
         </div>
         <div
-          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
+          class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4 css-gj1fbr-MuiGrid-root"
         >
           <div
-            class="MuiGrid-root MuiGrid-container MuiGrid-justify-content-xs-flex-end"
+            class="MuiGrid-root MuiGrid-container css-16g5rpk-MuiGrid-root"
           >
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-bZQynM fQOsJY"
+                class="sc-gLLuof chJFWu"
               >
                 <div>
                   <span
-                    class="sc-bdVaJa kwsjSG"
+                    class="sc-beySPh gbuZtJ"
                     color="textSecondary"
                   >
                     Total Number of Households
@@ -182,7 +182,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Total Number of Households"
                   >
                     <div
-                      class="sc-gzVnrw kojZPw"
+                      class="sc-iBdnpw laLuMi"
                     >
                       1
                     </div>
@@ -191,14 +191,14 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
               </div>
             </div>
             <div
-              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6"
+              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-6 css-1osj8n2-MuiGrid-root"
             >
               <div
-                class="sc-bZQynM fQOsJY"
+                class="sc-gLLuof chJFWu"
               >
                 <div>
                   <span
-                    class="sc-bdVaJa kwsjSG"
+                    class="sc-beySPh gbuZtJ"
                     color="textSecondary"
                   >
                     Targeted Individuals
@@ -207,7 +207,7 @@ exports[`components/paymentmodule/PaymentPlanDetails/PaymentPlanDetailsHeader/Pa
                     data-cy="label-Targeted Individuals"
                   >
                     <div
-                      class="sc-gzVnrw kojZPw"
+                      class="sc-iBdnpw laLuMi"
                     >
                       3
                     </div>

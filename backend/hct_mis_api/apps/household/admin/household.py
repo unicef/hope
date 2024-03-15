@@ -62,9 +62,12 @@ class HouseholdRepresentationInline(admin.TabularInline):
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return (
             Household.all_objects.all()
-            .prefetch_related("program")
+            .select_related("program")
             .only("unicef_id", "is_original", "copied_from", "program__name")
         )
+
+    def has_add_permission(self, request: HttpRequest, obj: Optional[Household] = None) -> bool:
+        return False  # Disable adding new individual representations inline
 
 
 @admin.register(Household)
@@ -113,6 +116,7 @@ class HouseholdAdmin(
         "country_origin",
         "head_of_household",
         "registration_data_import",
+        "household_collection",
     )
     fieldsets = [
         (None, {"fields": (("unicef_id", "head_of_household"),)}),

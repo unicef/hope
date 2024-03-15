@@ -1,12 +1,12 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Paper, Typography } from '@mui/material';
+import * as React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { renderUserName } from '../../../utils/utils';
-import { AccountabilityCommunicationMessageQuery } from '../../../__generated__/graphql';
-import { OverviewContainer } from '../../core/OverviewContainer';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
+import { renderUserName } from '@utils/utils';
+import { AccountabilityCommunicationMessageQuery } from '@generated/graphql';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -28,15 +28,15 @@ export function CommunicationMessageDetails({
       <Box p={5}>
         <StyledBox>
           <Title>
-            <Typography variant='h6'>{t('Message')}</Typography>
+            <Typography variant="h6">{t('Message')}</Typography>
           </Title>
           <OverviewContainer>
             <Grid container spacing={6}>
-              <Grid item container justifyContent='space-between' xs={12}>
-                <Typography variant='subtitle2'>
+              <Grid item container justifyContent="space-between" xs={12}>
+                <Typography variant="subtitle2">
                   {renderUserName(message.createdBy)}
                 </Typography>
-                <Typography color='textSecondary'>
+                <Typography color="textSecondary">
                   <UniversalMoment withTime>
                     {message.createdAt}
                   </UniversalMoment>

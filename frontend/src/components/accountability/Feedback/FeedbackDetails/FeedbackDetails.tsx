@@ -1,18 +1,15 @@
-import { Grid, GridSize, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, GridSize, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { renderUserName } from '../../../../utils/utils';
-import {
-  FeedbackIssueType,
-  FeedbackQuery,
-} from '../../../../__generated__/graphql';
-import { BlackLink } from '../../../core/BlackLink';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { OverviewContainer } from '../../../core/OverviewContainer';
-import { Title } from '../../../core/Title';
-import { UniversalMoment } from '../../../core/UniversalMoment';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+import { renderUserName } from '@utils/utils';
+import { FeedbackIssueType, FeedbackQuery } from '@generated/graphql';
+import { BlackLink } from '@core/BlackLink';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 interface FeedbackDetailsProps {
   feedback: FeedbackQuery['feedback'];
@@ -20,11 +17,11 @@ interface FeedbackDetailsProps {
   canViewIndividualDetails: boolean;
 }
 
-export const FeedbackDetails = ({
+export function FeedbackDetails({
   feedback,
   canViewHouseholdDetails,
   canViewIndividualDetails,
-}: FeedbackDetailsProps): React.ReactElement => {
+}: FeedbackDetailsProps): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, isAllPrograms } = useBaseUrl();
 
@@ -32,7 +29,7 @@ export const FeedbackDetails = ({
     <Grid item xs={12}>
       <ContainerColumnWithBorder>
         <Title>
-          <Typography variant='h6'>{t('Details')}</Typography>
+          <Typography variant="h6">{t('Details')}</Typography>
         </Title>
         <OverviewContainer>
           <Grid container spacing={6}>
@@ -65,13 +62,13 @@ export const FeedbackDetails = ({
                       >
                         {feedback.householdLookup?.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>
                         {feedback.householdLookup?.id
                           ? feedback.householdLookup?.unicefId
                           : '-'}
                       </div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -88,13 +85,13 @@ export const FeedbackDetails = ({
                       >
                         {feedback.individualLookup?.unicefId}
                       </BlackLink>
-                    ) : (
+                      ) : (
                       <div>
                         {feedback.individualLookup?.id
                           ? feedback.individualLookup?.unicefId
                           : '-'}
                       </div>
-                    )}
+                      )}
                   </span>
                 ),
                 size: 3,
@@ -168,4 +165,4 @@ export const FeedbackDetails = ({
       </ContainerColumnWithBorder>
     </Grid>
   );
-};
+}

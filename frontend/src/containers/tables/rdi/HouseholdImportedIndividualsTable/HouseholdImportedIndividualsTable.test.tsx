@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { MockedProvider } from '@apollo/react-testing';
 import { act } from '@testing-library/react';
 import wait from 'waait';
@@ -25,7 +25,7 @@ describe('containers/tables/rdi/HouseholdImportedIndividualsTable', () => {
 
   it('should render loading', () => {
     const { container } = render(
-      <MockedProvider link={new ApolloLoadingLink()} mocks={fakeApolloMe}>
+      <MockedProvider mocks={fakeApolloMe}>
         <HouseholdImportedIndividualsTable
           household={fakeImportedHouseholdNode}
           choicesData={fakeHouseholdChoices}

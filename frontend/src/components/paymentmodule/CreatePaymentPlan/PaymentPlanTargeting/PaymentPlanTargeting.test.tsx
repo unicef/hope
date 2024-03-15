@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { fakeAllTargetPopulation } from '../../../../../fixtures/targeting/fakeAllTargetPopulation';
 import { render } from '../../../../testUtils/testUtils';
 import { PaymentPlanTargeting } from './PaymentPlanTargeting';

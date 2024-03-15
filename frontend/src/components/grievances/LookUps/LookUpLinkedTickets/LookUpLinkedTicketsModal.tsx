@@ -4,18 +4,19 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
-import { Formik } from 'formik';
-import React, { useState } from 'react';
+} from '@mui/material';
+import { Formik, FormikValues } from 'formik';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useGrievancesChoiceDataQuery } from '../../../../__generated__/graphql';
-import { DialogFooter } from '../../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
-import { AutoSubmitFormOnEnter } from '../../../core/AutoSubmitFormOnEnter';
-import { LoadingComponent } from '../../../core/LoadingComponent';
+import { useGrievancesChoiceDataQuery } from '@generated/graphql';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { AutoSubmitFormOnEnter } from '@core/AutoSubmitFormOnEnter';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { LookUpLinkedTicketsFilters } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsFilters';
 import { LookUpLinkedTicketsTable } from '../LookUpLinkedTicketsTable/LookUpLinkedTicketsTable';
 
@@ -45,30 +46,32 @@ export const LookUpLinkedTicketsModal = ({
     getFilterFromQueryParams(location, initialFilter),
   );
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
   if (!choicesData) return null;
   if (choicesLoading) {
     return <LoadingComponent />;
   }
+  const handleSubmit = (values: FormikValues): void => {
+    onValueChange('selectedLinkedTickets', values.selectedLinkedTickets);
+    setLookUpDialogOpen(false);
+  };
+
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={(values) => {
-        onValueChange('selectedLinkedTickets', values.selectedLinkedTickets);
-        setLookUpDialogOpen(false);
+        handleSubmit(values);
       }}
     >
       {({ submitForm, setFieldValue }) => (
         <Dialog
-          maxWidth='lg'
+          maxWidth="lg"
           fullWidth
           open={lookUpDialogOpen}
           onClose={() => setLookUpDialogOpen(false)}
-          scroll='paper'
-          aria-labelledby='form-dialog-title'
+          scroll="paper"
+          aria-labelledby="form-dialog-title"
         >
           {lookUpDialogOpen && <AutoSubmitFormOnEnter />}
           <DialogTitleWrapper>
@@ -93,17 +96,19 @@ export const LookUpLinkedTicketsModal = ({
           <DialogFooter>
             <DialogActions>
               <Button
-                data-cy='button-cancel'
+                data-cy="button-cancel"
                 onClick={() => setLookUpDialogOpen(false)}
               >
                 {t('CANCEL')}
               </Button>
               <Button
-                type='submit'
-                color='primary'
-                variant='contained'
-                onClick={submitForm}
-                data-cy='button-submit'
+                type="submit"
+                color="primary"
+                variant="contained"
+                onClick={() => {
+                  submitForm();
+                }}
+                data-cy="button-submit"
               >
                 {t('SAVE')}
               </Button>
