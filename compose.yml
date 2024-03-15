@@ -20,7 +20,8 @@ services:
     ports:
       - "8082:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
     volumes:
       - backend-data:/data
 
@@ -29,6 +30,11 @@ services:
     image: redis:4.0.11-alpine3.8
     expose:
       - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   backend:
     stdin_open: true
@@ -51,9 +57,26 @@ services:
       - ipython_data_local:/root/.ipython
     command: "dev"
     depends_on:
-      - db
-      - redis
-      - elasticsearch
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: [
+        "CMD",
+        "python3",
+        "-c",
+        "import http.client; \
+        conn = http.client.HTTPConnection('localhost', 8000); \
+        conn.request('GET', '/_health'); \
+        response = conn.getresponse(); \
+        exit(0) if response.status == 200 else exit(1);"
+      ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
 
   celery_worker:
     stdin_open: true
@@ -69,10 +92,19 @@ services:
     restart: always
     command: "celery-worker"
     depends_on:
-      - backend
-      - db
-      - redis
-      - elasticsearch
+      backend:
+        condition: service_started
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "celery", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   celery-beat:
     stdin_open: true
@@ -88,10 +120,19 @@ services:
     restart: always
     command: "celery-beat"
     depends_on:
-      - backend
-      - db
-      - redis
-      - elasticsearch
+      backend:
+        condition: service_started
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "celery", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   db:
     image: kartoza/postgis:14-3
@@ -104,6 +145,11 @@ services:
       - .env
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
   elasticsearch:
     image: unicef/hct-elasticsearch
@@ -126,3 +172,8 @@ services:
       - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
