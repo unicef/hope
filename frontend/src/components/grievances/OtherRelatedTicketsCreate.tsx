@@ -1,14 +1,15 @@
-import { Box, Typography } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box, Typography } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
-import { useBaseUrl } from '../../hooks/useBaseUrl';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { decodeIdString } from '../../utils/utils';
-import { ContentLink } from '../core/ContentLink';
-import { LabelizedField } from '../core/LabelizedField';
-import { LoadingComponent } from '../core/LoadingComponent';
-import { Title } from '../core/Title';
+import { useExistingGrievanceTicketsQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
+import { decodeIdString } from '@utils/utils';
+import { ContentLink } from '@core/ContentLink';
+import { LabelizedField } from '@core/LabelizedField';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Title } from '@core/Title';
 import {
   ApproveBox,
   BlueBold,
@@ -24,10 +25,10 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
     variables: {
       businessArea,
       household:
-        //TODO Janek to jeszcze kiedyś wymyśli
+        // TODO Janek to jeszcze kiedyś wymyśli
         decodeIdString(values?.selectedHousehold?.id) ||
         '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
-      //adding some random ID to get 0 results if there is no household id.
+      // adding some random ID to get 0 results if there is no household id.
     },
   });
   if (loading) return <LoadingComponent />;
@@ -37,41 +38,42 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const renderIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => {
-          const grievanceDetailsPath = getGrievanceDetailsPath(
-            edge.node.id,
-            edge.node.category,
-            baseUrl,
-          );
-          return (
+        const grievanceDetailsPath = getGrievanceDetailsPath(
+          edge.node.id,
+          edge.node.category,
+          baseUrl,
+        );
+        return (
             <Box key={edge.node.id} mb={1}>
               <ContentLink href={grievanceDetailsPath}>
                 {edge.node.unicefId}
               </ContentLink>
             </Box>
-          );
-        })
+        );
+      })
       : '-';
 
   const openExistingTickets = existingTickets.length
     ? existingTickets.filter(
-        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
-      )
+      (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+    )
     : [];
   const closedExistingTickets = existingTickets.length
     ? existingTickets.filter(
-        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
-      )
+      (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+    )
     : [];
 
   return existingTickets.length ? (
     <ApproveBox>
       <Title>
-        <Typography variant='h6'>{t('Other Related Tickets')}</Typography>
+        <Typography variant="h6">{t('Other Related Tickets')}</Typography>
       </Title>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <LabelizedField
-          label={`${t('For Household')} ${values?.selectedHousehold?.unicefId ||
-            '-'} `}
+          label={`${t('For Household')} ${
+            values?.selectedHousehold?.unicefId || '-'
+          } `}
         >
           <>{renderIds(openExistingTickets)}</>
         </LabelizedField>
@@ -86,8 +88,9 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
           <Box mb={3} mt={3}>
             <Typography>{t('Closed Tickets')}</Typography>
             <LabelizedField
-              label={`${t('For Household')} ${values?.selectedHousehold
-                ?.unicefId || '-'} `}
+              label={`${t('For Household')} ${
+                values?.selectedHousehold?.unicefId || '-'
+              } `}
             >
               <>{renderIds(closedExistingTickets)}</>
             </LabelizedField>

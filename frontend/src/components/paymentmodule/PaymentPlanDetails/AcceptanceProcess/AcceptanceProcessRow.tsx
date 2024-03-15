@@ -1,10 +1,10 @@
-import { Box, Grid } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { PaymentPlanQuery } from '../../../../__generated__/graphql';
-import { renderUserName } from '../../../../utils/utils';
-import { DividerLine } from '../../../core/DividerLine';
+import { PaymentPlanQuery } from '@generated/graphql';
+import { renderUserName } from '@utils/utils';
+import { DividerLine } from '@core/DividerLine';
 import { AcceptanceProcessStepper } from './AcceptanceProcessStepper/AcceptanceProcessStepper';
 import { GreyInfoCard } from './GreyInfoCard';
 
@@ -17,10 +17,10 @@ interface AcceptanceProcessRowProps {
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const AcceptanceProcessRow = ({
+export function AcceptanceProcessRow({
   acceptanceProcess,
   paymentPlan,
-}: AcceptanceProcessRowProps): React.ReactElement => {
+}: AcceptanceProcessRowProps): React.ReactElement {
   const { t } = useTranslation();
   const {
     actions,
@@ -121,4 +121,4 @@ export const AcceptanceProcessRow = ({
       {approvalProcess.totalCount > 1 && <DividerLine />}
     </StyledBox>
   );
-};
+}

@@ -1,13 +1,14 @@
-import { Box, Button, DialogContent, DialogTitle } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box, Button, DialogContent, DialogTitle } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { DialogContainer } from '../../containers/dialogs/DialogContainer';
-import { DialogFooter } from '../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { useMarkPayAsFailedMutation } from '../../__generated__/graphql';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogActions } from '@containers/dialogs/DialogActions';
+import { DialogContainer } from '@containers/dialogs/DialogContainer';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { useMarkPayAsFailedMutation } from '@generated/graphql';
 
 export interface ForceFailedButtonProps {
   paymentId: string;
@@ -40,10 +41,10 @@ export function ForceFailedButton({
     <Box>
       <Box p={2}>
         <Button
-          color='primary'
-          variant='contained'
+          color="primary"
+          variant="contained"
           onClick={() => setOpenModal(true)}
-          data-cy='button-mark-as-failed'
+          data-cy="button-mark-as-failed"
           disabled={disabled}
         >
           {t('Mark as failed')}
@@ -52,9 +53,9 @@ export function ForceFailedButton({
       <Dialog
         open={isOpenModal}
         onClose={() => setOpenModal(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='md'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="md"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Mark as failed')}</DialogTitle>
@@ -70,11 +71,11 @@ export function ForceFailedButton({
           <DialogActions>
             <Button onClick={() => setOpenModal(false)}>{t('CANCEL')}</Button>
             <Button
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => submit()}
-              data-cy='button-submit'
+              data-cy="button-submit"
               disabled={loading}
             >
               {t('Mark as failed')}

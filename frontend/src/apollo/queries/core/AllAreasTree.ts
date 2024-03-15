@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ALL_AREAS_TREE_QUERY = gql`
   query AllAreasTree($businessArea: String!) {

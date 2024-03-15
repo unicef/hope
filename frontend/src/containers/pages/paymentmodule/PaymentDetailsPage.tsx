@@ -1,25 +1,25 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   PaymentPlanStatus,
   PaymentStatus,
   useCashAssistUrlPrefixQuery,
   usePaymentQuery,
-} from '../../../__generated__/graphql';
-import { PaymentDetails } from '../../../components/paymentmodule/PaymentDetails';
-import { RevertForceFailedButton } from '../../../components/paymentmodule/RevertForceFailedButton';
-import { ForceFailedButton } from '../../../components/paymentmodule/ForceFailedButton';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { PaymentDetails } from '@components/paymentmodule/PaymentDetails';
+import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
+import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export const PaymentDetailsPage = (): React.ReactElement => {
+export function PaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery({
@@ -83,7 +83,7 @@ export const PaymentDetailsPage = (): React.ReactElement => {
       >
         {renderButton()}
       </PageHeader>
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <PaymentDetails
           payment={payment}
           canViewActivityLog={hasPermissions(
@@ -95,4 +95,4 @@ export const PaymentDetailsPage = (): React.ReactElement => {
       </Box>
     </>
   );
-};
+}

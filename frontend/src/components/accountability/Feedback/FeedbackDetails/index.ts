@@ -1,1 +1,1 @@
-import { FeedbackDetails } from './FeedbackDetails';
+export { FeedbackDetails } from './FeedbackDetails';

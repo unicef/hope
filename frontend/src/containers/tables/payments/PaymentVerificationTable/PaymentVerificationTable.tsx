@@ -1,12 +1,12 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AllCashPlansAndPaymentPlansQueryVariables,
   CashPlanAndPaymentPlanNode,
   useAllCashPlansAndPaymentPlansQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { dateToIsoString } from '../../../../utils/utils';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { dateToIsoString } from '@utils/utils';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './PaymentVerificationHeadCells';
 import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
@@ -16,11 +16,11 @@ interface PaymentVerificationTableProps {
   businessArea: string;
   canViewDetails: boolean;
 }
-export const PaymentVerificationTable = ({
+export function PaymentVerificationTable({
   filter,
   canViewDetails,
   businessArea,
-}: PaymentVerificationTableProps): ReactElement => {
+}: PaymentVerificationTableProps): ReactElement {
   const { t } = useTranslation();
   const { programId } = useBaseUrl();
   const initialVariables: AllCashPlansAndPaymentPlansQueryVariables = {
@@ -36,13 +36,13 @@ export const PaymentVerificationTable = ({
   };
   return (
     <UniversalTable<
-      CashPlanAndPaymentPlanNode,
-      AllCashPlansAndPaymentPlansQueryVariables
+    CashPlanAndPaymentPlanNode,
+    AllCashPlansAndPaymentPlansQueryVariables
     >
       title={t('List of Payment Plans')}
       headCells={headCells}
       query={useAllCashPlansAndPaymentPlansQuery}
-      queriedObjectName='allCashPlansAndPaymentPlans'
+      queriedObjectName="allCashPlansAndPaymentPlans"
       initialVariables={initialVariables}
       renderRow={(cashPlanAndPaymentPlanNode) => (
         <PaymentVerificationTableRow
@@ -53,4 +53,4 @@ export const PaymentVerificationTable = ({
       )}
     />
   );
-};
+}

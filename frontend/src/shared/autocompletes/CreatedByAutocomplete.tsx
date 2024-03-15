@@ -1,17 +1,18 @@
 import get from 'lodash/get';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory, useLocation } from 'react-router-dom';
-import { useAllUsersForFiltersLazyQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useDebounce } from '../../hooks/useDebounce';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAllUsersForFiltersLazyQuery } from '@generated/graphql';
+import { useBusinessArea } from '@hooks/useBusinessArea';
+import { useDebounce } from '@hooks/useDebounce';
 import {
   createHandleApplyFilterChange,
   getAutocompleteOptionLabel,
   handleAutocompleteChange,
   handleAutocompleteClose,
   handleOptionSelected,
-} from '../../utils/utils';
+} from '@utils/utils';
 import { BaseAutocomplete } from './BaseAutocomplete';
 
 export const CreatedByAutocomplete = ({
@@ -38,7 +39,7 @@ export const CreatedByAutocomplete = ({
   additionalVariables;
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
@@ -59,9 +60,19 @@ export const CreatedByAutocomplete = ({
   const isMounted = useRef(true);
 
   const loadDataCallback = useCallback(() => {
-    if (isMounted.current && businessArea) {
-      loadData({ variables: { businessArea, search: debouncedInputText } });
-    }
+    const asyncLoadData = async () => {
+      if (isMounted.current && businessArea) {
+        try {
+          await loadData({
+            variables: { businessArea, search: debouncedInputText },
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    void asyncLoadData();
   }, [loadData, businessArea, debouncedInputText]);
 
   useEffect(() => {
@@ -75,7 +86,7 @@ export const CreatedByAutocomplete = ({
 
   const { handleFilterChange } = createHandleApplyFilterChange(
     initialFilter,
-    history,
+    navigate,
     location,
     filter,
     setFilter,
@@ -90,7 +101,7 @@ export const CreatedByAutocomplete = ({
       value={value}
       disabled={disabled}
       label={label || t('Created By')}
-      dataCy='filters-created-by-autocomplete'
+      dataCy="filters-created-by-autocomplete"
       loadData={loadData}
       loading={loading}
       allEdges={allEdges}

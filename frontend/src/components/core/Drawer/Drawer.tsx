@@ -1,26 +1,18 @@
-import {
-  Box,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  makeStyles,
-} from '@material-ui/core';
-import Divider from '@material-ui/core/Divider';
-import DrawerMaterial from '@material-ui/core/Drawer';
-import IconButton from '@material-ui/core/IconButton';
-import List from '@material-ui/core/List';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import { Box, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import MUIDrawer from '@mui/material/Drawer';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
-import { useBackendVersion } from '../../../hooks/useBackendVersion';
-import { useFrontendVersion } from '../../../hooks/useFrontendVersion';
-import { theme as themeObj } from '../../../theme';
+import { useBackendVersion } from '@hooks/useBackendVersion';
+import { useFrontendVersion } from '@hooks/useFrontendVersion';
 import { AlertDialog } from '../AlertDialog';
 import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 import { resourcesItems } from './menuItems';
+import styled from 'styled-components';
 
 const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
@@ -39,69 +31,50 @@ const matchColorToWindowOrigin = (): string => {
   return '#00ADEF';
 };
 
-const useStyles = makeStyles((theme: typeof themeObj) => ({
-  toolbarHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingLeft: '51px',
-    backgroundColor: matchColorToWindowOrigin(),
-    color: 'white',
-    borderRightWidth: 2,
-    borderRightColor: '#02367D',
-    borderRightStyle: 'solid',
-    boxShadow:
-      '0px 2px 4px 0px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
-    ...theme.mixins.toolbar,
-  },
-  collapseIcon: {
-    color: '#fff',
-    opacity: 0.54,
-  },
-  drawerPaper: {
-    height: '100vh',
-    position: 'relative',
-    whiteSpace: 'nowrap',
-    width: theme.drawer.width,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    borderWidth: 0,
-  },
-  drawerPaperClose: {
-    overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: theme.spacing(16),
-    [theme.breakpoints.up('sm')]: {
-      width: theme.spacing(14),
-    },
-  },
-  version: {
-    color: '#aaa',
-    padding: 4,
-    textAlign: 'center',
-  },
-}));
+const ToolbarHeader = styled('div')`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 51px;
+  background-color: ${matchColorToWindowOrigin()};
+  color: white;
+  box-shadow:
+    0px 2px 4px 0px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  min-height: 64px;
+`;
 
-const StyledLink = styled.a`
+interface DrawerComponentProps {
+  open: boolean;
+}
+
+const DrawerComponent = styled(MUIDrawer)<DrawerComponentProps>`
+  .MuiDrawer-paper {
+    background-color: white;
+    height: 100vh;
+    position: relative;
+    white-space: nowrap;
+    width: ${(props) => (props.open ? '270px' : '55px')};
+    transition:
+      width 225ms cubic-bezier(0, 0, 0.2, 1) 0ms,
+      width 195ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+    border-width: 0;
+    overflow-x: hidden;
+  }
+`;
+
+const CollapseIconButton = styled(IconButton)`
+  color: #fff;
+  opacity: 0.54;
+`;
+
+export const StyledLink = styled.a`
   color: #233944;
   font-size: 14px;
   font-weight: 500;
   line-height: 16px;
   text-decoration: none;
-`;
-
-const Text = styled(ListItemText)`
-  .MuiTypography-body1 {
-    color: #233944;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 16px;
-  }
 `;
 
 const ResourcesText = styled('p')`
@@ -113,17 +86,33 @@ const ResourcesText = styled('p')`
 
 const ToolbarScrollBox = styled(Box)`
   overflow-y: auto;
+  max-height: calc(100vh - 64px);
   height: 100%;
-  border-right: 2px solid #e1e1e1;
+`;
+
+const Version = styled('div')`
+  color: #aaa;
+  padding: 4px;
+  text-align: center;
+  font-size: 14px;
+`;
+
+const Text = styled(ListItemText)`
+  .MuiTypography-body1 {
+    color: #233944;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+  }
 `;
 
 const Icon = styled(ListItemIcon)`
   && {
-    min-width: 0;
-    padding-right: ${({ theme }) => theme.spacing(4)}px;
+    min-width: 40px;
   }
 `;
-interface Props {
+
+interface DrawerProps {
   open: boolean;
   handleDrawerClose: () => void;
   currentLocation: string;
@@ -135,12 +124,12 @@ export const Drawer = ({
   handleDrawerClose,
   currentLocation,
   dataCy,
-}: Props): React.ReactElement => {
-  const classes = useStyles({});
+}: DrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
   const backendVersion = useBackendVersion();
   const frontendVersion = useFrontendVersion();
+
   useEffect(() => {
     if (
       !showMismatchedDialog &&
@@ -151,28 +140,23 @@ export const Drawer = ({
       setShowMismatchedDialog(true);
     }
   }, [backendVersion, frontendVersion, showMismatchedDialog]);
+
   return (
-    <DrawerMaterial
-      variant='permanent'
-      classes={{
-        paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-      }}
-      style={{ height: '100vh' }}
+    <DrawerComponent
+      variant="permanent"
       open={open}
+      style={{ height: '100vh' }}
       data-cy={dataCy}
     >
-      <div className={classes.toolbarHeader}>
+      <ToolbarHeader>
         <Logo
           transparent={matchColorToWindowOrigin() !== '#00ADEF'}
           displayLogoWithoutSubtitle
         />
-        <IconButton
-          onClick={handleDrawerClose}
-          className={classes.collapseIcon}
-        >
+        <CollapseIconButton onClick={handleDrawerClose}>
           <ChevronLeftIcon />
-        </IconButton>
-      </div>
+        </CollapseIconButton>
+      </ToolbarHeader>
       <Divider />
       <ToolbarScrollBox>
         <List>
@@ -187,30 +171,25 @@ export const Drawer = ({
           </Box>
         )}
         {resourcesItems.map((item) => (
-          <ListItem button key={item.name + item.href}>
+          <ListItem key={item.name + item.href}>
             <StyledLink
               data-cy={`nav-resources-${item.name}`}
-              target='_blank'
+              target="_blank"
               href={item.href}
             >
-              <Box display='flex'>
+              <Box display="flex">
                 <Icon>{item.icon}</Icon>
                 <Text primary={item.name} />
               </Box>
             </StyledLink>
           </ListItem>
         ))}
-        {open && (
-          <div className={classes.version}>
-            <div>Backend Version: {backendVersion}</div>
-            <div>Frontend Version: {frontendVersion}</div>
-          </div>
-        )}
+        {open && <Version>Version: {frontendVersion}</Version>}
       </ToolbarScrollBox>
       <AlertDialog
         show={showMismatchedDialog}
         message={t('Version mismatch, please refresh page')}
       />
-    </DrawerMaterial>
+    </DrawerComponent>
   );
 };

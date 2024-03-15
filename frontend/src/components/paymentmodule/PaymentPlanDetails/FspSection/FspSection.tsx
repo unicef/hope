@@ -1,27 +1,23 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Button, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import {
-  PaymentPlanQuery,
-  PaymentPlanStatus,
-} from '../../../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../../../core/ContainerColumnWithBorder';
-import { DividerLine } from '../../../core/DividerLine';
-import { LabelizedField } from '../../../core/LabelizedField';
-import { useProgramContext } from "../../../../programContext";
+import { PaymentPlanQuery, PaymentPlanStatus } from '@generated/graphql';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { DividerLine } from '@core/DividerLine';
+import { LabelizedField } from '@core/LabelizedField';
+import { useProgramContext } from '../../../../programContext';
 import { VolumeByDeliveryMechanismSection } from './VolumeByDeliveryMechanismSection';
-
 
 interface FspSectionProps {
   baseUrl: string;
   paymentPlan: PaymentPlanQuery['paymentPlan'];
 }
 
-export const FspSection = ({
+export function FspSection({
   baseUrl,
   paymentPlan,
-}: FspSectionProps): React.ReactElement => {
+}: FspSectionProps): React.ReactElement {
   const { t } = useTranslation();
   const { id } = useParams();
   const { isActiveProgram } = useProgramContext();
@@ -45,16 +41,16 @@ export const FspSection = ({
     <Box m={5}>
       <ContainerColumnWithBorder>
         <Box
-          display='flex'
-          justifyContent='space-between'
-          alignItems='center'
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
           mt={4}
         >
-          <Typography variant='h6'>{t('FSPs')}</Typography>
+          <Typography variant="h6">{t('FSPs')}</Typography>
           {paymentPlan.status === PaymentPlanStatus.Locked && (
             <Button
-              color='primary'
-              variant='contained'
+              color="primary"
+              variant="contained"
               component={Link}
               to={`/${baseUrl}/payment-module/${
                 isFollowUp ? 'followup-payment-plans' : 'payment-plans'
@@ -80,17 +76,17 @@ export const FspSection = ({
     <Box m={5}>
       <ContainerColumnWithBorder>
         <Box
-          display='flex'
-          justifyContent='space-between'
-          alignItems='center'
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
           mt={4}
         >
-          <Typography variant='h6'>{t('FSPs')}</Typography>
+          <Typography variant="h6">{t('FSPs')}</Typography>
           <Button
-            color='primary'
-            variant='contained'
+            color="primary"
+            variant="contained"
             disabled={shouldDisableSetUpFsp()}
-            data-cy='button-set-up-fsp'
+            data-cy="button-set-up-fsp"
             component={Link}
             to={`/${baseUrl}/payment-module/${
               isFollowUp ? 'followup-payment-plans' : 'payment-plans'
@@ -102,4 +98,4 @@ export const FspSection = ({
       </ContainerColumnWithBorder>
     </Box>
   );
-};
+}

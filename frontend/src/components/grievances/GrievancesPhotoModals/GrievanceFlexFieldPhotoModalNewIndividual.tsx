@@ -1,20 +1,20 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
 import {
   AllAddIndividualFieldsQuery,
   useIndividualFlexFieldsQuery,
-} from '../../../__generated__/graphql';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+} from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalNewIndividualProps {
   flexField: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   individualId: string;
 }
 
-export const GrievanceFlexFieldPhotoModalNewIndividual = ({
+export function GrievanceFlexFieldPhotoModalNewIndividual({
   flexField,
   individualId,
-}: GrievanceFlexFieldPhotoModalNewIndividualProps): React.ReactElement => {
+}: GrievanceFlexFieldPhotoModalNewIndividualProps): React.ReactElement {
   const { data } = useIndividualFlexFieldsQuery({
     variables: { id: individualId },
     fetchPolicy: 'network-only',
@@ -28,14 +28,14 @@ export const GrievanceFlexFieldPhotoModalNewIndividual = ({
   const picUrl: string = flexFields[flexField.name];
 
   return (
-    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+    <Box style={{ height: '100%' }} display="flex" alignItems="center">
       {picUrl ? (
         <PhotoModal src={picUrl} />
       ) : (
-        <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+        <Box style={{ height: '100%' }} display="flex" alignItems="center">
           -
         </Box>
       )}
     </Box>
   );
-};
+}

@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ALL_USERS_QUERY = gql`
   query AllUsers(
@@ -42,7 +42,7 @@ export const ALL_USERS_QUERY = gql`
           lastLogin
           status
           partner {
-              name
+            name
           }
           userRoles {
             businessArea {
