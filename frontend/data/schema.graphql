@@ -330,6 +330,7 @@ type BusinessAreaNode implements Node {
   isPaymentPlanApplicable: Boolean!
   isAccountabilityApplicable: Boolean
   active: Boolean!
+  enableEmailNotification: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   userRoles: [UserRoleNode!]!
@@ -2256,11 +2257,11 @@ type IndividualIdentityNode implements Node {
   created: DateTime!
   modified: DateTime!
   isRemoved: Boolean!
+  isOriginal: Boolean!
   individual: IndividualNode!
   number: String!
   partner: String
   country: String
-  isOriginal: Boolean!
   isMigrationHandled: Boolean!
   copiedFrom: IndividualIdentityNode
   copiedTo(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
@@ -2433,13 +2434,13 @@ enum IndividualRelationship {
 type IndividualRoleInHouseholdNode {
   id: UUID!
   isRemoved: Boolean!
+  isOriginal: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
   individual: IndividualNode!
   household: HouseholdNode!
   role: IndividualRoleInHouseholdRole
-  isOriginal: Boolean!
   isMigrationHandled: Boolean!
   migratedAt: DateTime
   copiedFrom: IndividualRoleInHouseholdNode
@@ -5042,6 +5043,7 @@ type UserBusinessAreaNode implements Node {
   isPaymentPlanApplicable: Boolean!
   isAccountabilityApplicable: Boolean
   active: Boolean!
+  enableEmailNotification: Boolean!
   children(offset: Int, before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   dataCollectingTypes(offset: Int, before: String, after: String, first: Int, last: Int): DataCollectingTypeNodeConnection!
   userRoles: [UserRoleNode!]!

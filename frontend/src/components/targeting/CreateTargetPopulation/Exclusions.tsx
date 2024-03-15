@@ -1,10 +1,11 @@
-import { Box, Button, Collapse, Grid, Typography } from '@material-ui/core';
-import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
-import KeyboardArrowUp from '@material-ui/icons/KeyboardArrowUp';
+import { Box, Button, Collapse, Grid, Typography } from '@mui/material';
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
 import { Field } from 'formik';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 import { PaperContainer } from '../PaperContainer';
 
 export function Exclusions({
@@ -17,14 +18,14 @@ export function Exclusions({
 
   return (
     <PaperContainer>
-      <Box display='flex' justifyContent='space-between'>
-        <Typography data-cy='title-excluded-entries' variant='h6'>
+      <Box display="flex" justifyContent="space-between">
+        <Typography data-cy="title-excluded-entries" variant="h6">
           {t('Excluded Target Population Entries (Households or Individuals)')}
         </Typography>
         <Button
-          variant='outlined'
-          color='primary'
-          data-cy='button-show-hide-exclusions'
+          variant="outlined"
+          color="primary"
+          data-cy="button-show-hide-exclusions"
           onClick={() => setExclusionsOpen(!isExclusionsOpen)}
           endIcon={
             isExclusionsOpen ? <KeyboardArrowUp /> : <KeyboardArrowDown />
@@ -38,10 +39,10 @@ export function Exclusions({
           <Grid container>
             <Grid item xs={6}>
               <Field
-                data-cy='input-excluded-ids'
-                name='excludedIds'
+                data-cy="input-excluded-ids"
+                name="excludedIds"
                 fullWidth
-                variant='outlined'
+                variant="outlined"
                 label={t('Household or Individual IDs to exclude')}
                 component={FormikTextField}
               />
@@ -52,11 +53,11 @@ export function Exclusions({
           <Grid container>
             <Grid item xs={6}>
               <Field
-                data-cy='input-exclusion-reason'
-                name='exclusionReason'
+                data-cy="input-exclusion-reason"
+                name="exclusionReason"
                 fullWidth
                 multiline
-                variant='outlined'
+                variant="outlined"
                 label={t('Exclusion Reason')}
                 component={FormikTextField}
               />

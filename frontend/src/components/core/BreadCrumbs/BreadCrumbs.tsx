@@ -1,8 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import ChevronRightRoundedIcon from '@material-ui/icons/ChevronRightRounded';
-import { Box } from '@material-ui/core';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import { Box } from '@mui/material';
 
 const BreadCrumbsLink = styled(Link)`
   color: rgba(0, 0, 0, 0.87);
@@ -33,12 +33,12 @@ interface BreadCrumbsElementProps {
   onClick?: () => void;
 }
 
-const BreadCrumbsElement = ({
+function BreadCrumbsElement({
   title,
   to,
   last = false,
   onClick = () => null,
-}: BreadCrumbsElementProps): React.ReactElement => {
+}: BreadCrumbsElementProps): React.ReactElement {
   return (
     <BreadCrumbsElementContainer>
       {to ? (
@@ -51,7 +51,7 @@ const BreadCrumbsElement = ({
       {!last ? <ChevronRightRoundedIcon /> : null}
     </BreadCrumbsElementContainer>
   );
-};
+}
 export interface BreadCrumbsItem {
   title: string;
   to?: string;

@@ -1,15 +1,16 @@
-import { Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Grid, IconButton } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { Field, useField } from 'formik';
 import camelCase from 'lodash/camelCase';
-import React, { useEffect } from 'react';
+import * as React from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllEditHouseholdFieldsQuery,
   HouseholdQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { CurrentValue } from './CurrentValue';
 import { EditHouseholdDataChangeField } from './EditHouseholdDataChangeField';
 
@@ -19,7 +20,7 @@ export interface EditHouseholdDataChangeFieldRowProps {
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
-  onDelete: () => {};
+  onDelete: () => void;
   values;
 }
 export const EditHouseholdDataChangeFieldRow = ({
@@ -51,7 +52,7 @@ export const EditHouseholdDataChangeFieldRow = ({
         <Field
           name={`householdDataUpdateFields[${index}].fieldName`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           label={t('Field')}
           required
           component={FormikSelectField}

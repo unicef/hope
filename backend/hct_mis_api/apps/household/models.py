@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 from django.conf import settings
@@ -333,6 +333,10 @@ class Household(
     ConcurrencyModel,
     UnicefIdentifiedModel,
 ):
+    class CollectType(models.TextChoices):
+        STANDARD = "STANDARD", "Standard"
+        SINGLE = "SINGLE", "Single"
+
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "withdrawn",
@@ -532,6 +536,7 @@ class Household(
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
+    collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
 
     class Meta:
         verbose_name = "Household"
@@ -1067,8 +1072,10 @@ class Individual(
         return STATUS_INACTIVE if self.withdrawn or self.duplicate else STATUS_ACTIVE
 
     @property
-    def sanction_list_last_check(self) -> Any:
-        return cache.get("sanction_list_last_check")
+    def sanction_list_last_check(self) -> Optional[datetime]:
+        if self.business_area.should_check_against_sanction_list():
+            return cache.get("sanction_list_last_check")
+        return None
 
     @property
     def bank_name(self) -> str:

@@ -11,10 +11,10 @@ class ProgrammeManagement(BaseComponents):
     buttonNewProgram = 'a[data-cy="button-new-program"]'
     inputProgrammeName = 'input[data-cy="input-name"]'
     labelProgrammeName = 'div[data-cy="input-programme-name"]'
-    inputStartDate = 'input[data-cy="date-input-startDate"]'
-    labelStartDate = 'div[data-cy="input-start-date"]'
-    inputEndDate = 'input[data-cy="date-input-endDate"]'
-    labelEndDate = 'div[data-cy="input-end-date"]'
+    inputStartDate = 'input[name="startDate"]'
+    labelStartDate = 'div[data-cy="date-picker-filter"]'
+    inputEndDate = 'input[name="endDate"]'
+    labelEndDate = 'div[data-cy="date-picker-filter"]'
     selectSelector = 'div[data-cy="select-sector"]'
     labelSelector = 'div[data-cy="input-sector"]'
     inputDataCollectingType = 'div[data-cy="input-data-collecting-type"]'
@@ -24,8 +24,8 @@ class ProgrammeManagement(BaseComponents):
     inputBudget = 'input[data-cy="input-budget"]'
     inputAdministrativeAreasOfImplementation = 'input[data-cy="input-administrativeAreasOfImplementation"]'
     inputPopulation = 'input[data-cy="input-populationGoal"]'
-    inputFreqOfPaymentOneOff = '//*[@data-cy="input-frequency-of-payment"]/div[1]/div/span/span[1]'
-    inputFreqOfPaymentRegular = '//*[@data-cy="input-frequency-of-payment"]/div[2]/div/span/span[1]'
+    inputFreqOfPaymentOneOff = '//*[@data-cy="input-frequency-of-payment"]/div[1]/div/span'
+    inputFreqOfPaymentRegular = '//*[@data-cy="input-frequency-of-payment"]/div[2]/div/span'
     buttonNext = 'button[data-cy="button-next"]'
     buttonBack = 'button[data-cy="button-back"]'
     buttonCancel = 'a[data-cy="button-cancel"]'
@@ -33,9 +33,9 @@ class ProgrammeManagement(BaseComponents):
     buttonAddPartner = 'button[data-cy="button-add-partner"]'
     inputPartner = 'div[data-cy="select-partners[0].id"]'
     buttonDelete = 'button[data-cy="button-delete"]'
-    labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span/span[1]'
+    labelAdminArea = '//*[@id="radioGroup-partners[0].areaAccess"]/div[2]/div/span'
     calendarIcon = 'button[data-cy="calendar-icon"]'
-    calendar = 'div[data-cy="date-picker-container"]'
+    calendar = 'div[data-popper-placement="bottom-start"]'
     calendarMonthYear = (
         '//*[@class="MuiPickersSlideTransition-transitionContainer ' 'MuiPickersCalendarHeader-transitionContainer"]'
     )
@@ -102,11 +102,9 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.inputStartDate)
 
     def chooseInputStartDateViaCalendar(self, day: int) -> None:
-        self.find_in_element(self.getLabelStartDate(), self.calendarIcon)[0].click()
+        self.get(self.labelStartDate).find_element(By.TAG_NAME, "button").click()
         self.getCalendar()
         # ToDo: Create additional waiting mechanism
-        from time import sleep
-
         sleep(1)
         self.get_elements(self.calendarDays, By.XPATH)[day - 1].click()
         self.wait_for_disappear(self.calendar)
@@ -125,13 +123,13 @@ class ProgrammeManagement(BaseComponents):
         self.wait_for_disappear(self.calendar)
 
     def getLabelStartDate(self) -> WebElement:
-        return self.wait_for(self.labelStartDate)
+        return self.get_elements(self.labelStartDate)[0]
 
     def getInputEndDate(self) -> WebElement:
         return self.wait_for(self.inputEndDate)
 
     def getLabelEndDate(self) -> WebElement:
-        return self.wait_for(self.labelEndDate)
+        return self.get_elements(self.labelEndDate)[1]
 
     def getButtonNext(self) -> WebElement:
         return self.wait_for(self.buttonNext)

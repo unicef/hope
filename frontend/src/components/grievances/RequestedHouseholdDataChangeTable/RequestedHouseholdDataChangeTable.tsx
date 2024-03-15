@@ -1,20 +1,20 @@
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import React, { ReactElement } from 'react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { GRIEVANCE_TICKET_STATES } from '../../../utils/constants';
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import { GRIEVANCE_TICKET_STATES } from '@utils/constants';
 import {
   GrievanceTicketQuery,
   useAllEditHouseholdFieldsQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../core/LoadingComponent';
-import { handleSelected } from '../utils/helpers';
+} from '@generated/graphql';
+import { LoadingComponent } from '@core/LoadingComponent';
 import { householdDataRow } from './householdDataRow';
+import { handleSelected } from '../utils/helpers';
 
 interface RequestedHouseholdDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -73,24 +73,24 @@ export function RequestedHouseholdDataChangeTable({
     <StyledTable>
       <TableHead>
         <TableRow>
-          <TableCell align='left' />
-          <TableCell data-cy='table-cell-type-of-data' align='left'>
+          <TableCell align="left" />
+          <TableCell data-cy="table-cell-type-of-data" align="left">
             {t('Type of Data')}
           </TableCell>
-          <TableCell data-cy='table-cell-previous-current-value' align='left'>
+          <TableCell data-cy="table-cell-previous-current-value" align="left">
             {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
               ? t('Previous')
               : t('Current')}{' '}
             {t('Value')}
           </TableCell>
-          <TableCell data-cy='table-cell-new-value' align='left'>
+          <TableCell data-cy="table-cell-new-value" align="left">
             {t('New Value')}
           </TableCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {entries.map((row, index) => {
-          return householdDataRow(
+        {entries.map((row, index) =>
+          householdDataRow(
             row,
             fieldsDict,
             isSelected,
@@ -99,10 +99,10 @@ export function RequestedHouseholdDataChangeTable({
             ticket,
             isEdit,
             handleSelectBioData,
-          );
-        })}
-        {entriesFlexFields.map((row, index) => {
-          return householdDataRow(
+          ),
+        )}
+        {entriesFlexFields.map((row, index) =>
+          householdDataRow(
             row,
             fieldsDict,
             isSelectedFlexfields,
@@ -111,8 +111,8 @@ export function RequestedHouseholdDataChangeTable({
             ticket,
             isEdit,
             handleFlexFields,
-          );
-        })}
+          ),
+        )}
       </TableBody>
     </StyledTable>
   );

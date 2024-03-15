@@ -1,6 +1,5 @@
-import { Tab, Typography } from '@material-ui/core';
-import Tabs from '@material-ui/core/Tabs';
-import React, { useEffect, useState } from 'react';
+import { Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -8,18 +7,19 @@ import {
   RegistrationDataImportStatus,
   useHouseholdChoiceDataQuery,
   useRegistrationDataImportQuery,
-} from '../../../__generated__/graphql';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { Title } from '../../../components/core/Title';
-import { RegistrationDataImportDetailsPageHeader } from '../../../components/rdi/details/RegistrationDataImportDetailsPageHeader';
-import { RegistrationDetails } from '../../../components/rdi/details/RegistrationDetails/RegistrationDetails';
+} from '@generated/graphql';
+import { Tabs, Tab } from '@core/Tabs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { Title } from '@components/core/Title';
+import { RegistrationDataImportDetailsPageHeader } from '@components/rdi/details/RegistrationDataImportDetailsPageHeader';
+import { RegistrationDetails } from '@components/rdi/details/RegistrationDetails/RegistrationDetails';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { isPermissionDeniedError } from '../../../utils/utils';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { isPermissionDeniedError } from '@utils/utils';
 import { ImportedHouseholdTable } from '../../tables/rdi/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../../tables/rdi/ImportedIndividualsTable';
 
@@ -45,37 +45,30 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
-function TabPanel({
+const TabPanel = ({
   children,
   index,
   value,
-}: TabPanelProps): React.ReactElement {
-  const style = {};
-  if (index !== value) {
-    // eslint-disable-next-line dot-notation
-    style['display'] = 'none';
-  }
-  return <div style={style}>{children}</div>;
-}
+}: TabPanelProps): React.ReactElement => {
+  return (
+    <div style={{ display: index !== value ? 'none' : 'block' }}>
+      {children}
+    </div>
+  );
+};
+
 export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   const { t } = useTranslation();
   const { id } = useParams();
   const permissions = usePermissions();
   const { businessArea } = useBaseUrl();
-  const {
-    data,
-    loading,
-    error,
-    stopPolling,
-    startPolling,
-  } = useRegistrationDataImportQuery({
-    variables: { id },
-    fetchPolicy: 'cache-and-network',
-  });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data, loading, error, stopPolling, startPolling } =
+    useRegistrationDataImportQuery({
+      variables: { id },
+      fetchPolicy: 'cache-and-network',
+    });
+  const { data: choicesData, loading: choicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -107,11 +100,11 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
   const isMerged =
     RegistrationDataImportStatus.Merged === data.registrationDataImport.status;
 
-  const RegistrationContainer = ({
+  function RegistrationContainer({
     isErased,
   }: {
     isErased: boolean;
-  }): React.ReactElement => {
+  }): React.ReactElement {
     return (
       <Container>
         <RegistrationDetails registration={data.registrationDataImport} />
@@ -119,20 +112,18 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
           <TableWrapper>
             <ContainerColumnWithBorder>
               <Title>
-                <Typography variant='h6'>
+                <Typography variant="h6">
                   {isMerged ? t('Population Preview') : t('Import Preview')}
                 </Typography>
               </Title>
               <TabsContainer>
                 <StyledTabs
                   value={selectedTab}
-                  onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
-                    setSelectedTab(newValue)
-                  }
-                  indicatorColor='primary'
-                  textColor='primary'
-                  variant='fullWidth'
-                  aria-label='full width tabs example'
+                  onChange={(_, newValue: number) => setSelectedTab(newValue)}
+                  indicatorColor="primary"
+                  textColor="primary"
+                  variant="fullWidth"
+                  aria-label="full width tabs example"
                 >
                   <Tab label={t('Households')} />
                   <Tab label={t('Individuals')} />
@@ -161,7 +152,7 @@ export const RegistrationDataImportDetailsPage = (): React.ReactElement => {
         )}
       </Container>
     );
-  };
+  }
 
   return (
     <div>

@@ -1,5 +1,5 @@
 import { MockedProvider } from '@apollo/react-testing';
-import React from 'react';
+import * as React from 'react';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { fakeImportXlsxPpListMutation } from '../../../../../fixtures/paymentmodule/fakeImportXlsxPpListMutation';
 import { render } from '../../../../testUtils/testUtils';

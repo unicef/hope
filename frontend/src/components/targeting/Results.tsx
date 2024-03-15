@@ -1,15 +1,15 @@
-import { Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
   TargetPopulationBuildStatus,
   TargetPopulationQuery,
-} from '../../__generated__/graphql';
+} from '@generated/graphql';
 import { MiśTheme } from '../../theme';
-import { FieldBorder } from '../core/FieldBorder';
-import { LabelizedField } from '../core/LabelizedField';
+import { FieldBorder } from '@core/FieldBorder';
+import { LabelizedField } from '@core/LabelizedField';
 import { PaperContainer } from './PaperContainer';
 
 const colors = {
@@ -20,7 +20,7 @@ const colors = {
 };
 
 const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(2)}px;
+  padding-bottom: ${({ theme }) => theme.spacing(2)};
 `;
 
 const ContentWrapper = styled.div`
@@ -28,7 +28,7 @@ const ContentWrapper = styled.div`
 `;
 
 const SummaryBorder = styled.div`
-  padding: ${({ theme }) => theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(4)};
   border-color: #b1b1b5;
   border-left-width: 1px;
   border-left-style: solid;
@@ -40,7 +40,7 @@ const SummaryValue = styled.div`
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
-  margin-top: ${({ theme }) => theme.spacing(2)}px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
 const ChartContainer = styled.div`
@@ -64,12 +64,12 @@ export function Results({
     <div>
       <PaperContainer>
         <Title>
-          <Typography variant='h6'>{t('Results')}</Typography>
+          <Typography variant="h6">{t('Results')}</Typography>
         </Title>
         <ContentWrapper>
           <Grid container>
             <Grid item xs={4}>
-              <Grid container spacing={0} justifyContent='flex-start'>
+              <Grid container spacing={0} justifyContent="flex-start">
                 <Grid item xs={6}>
                   <FieldBorder color={colors.femaleChildren}>
                     <LabelizedField
@@ -108,8 +108,8 @@ export function Results({
               <Grid
                 container
                 spacing={0}
-                justifyContent='flex-start'
-                alignItems='center'
+                justifyContent="flex-start"
+                alignItems="center"
               >
                 <Grid item xs={4}>
                   <ChartContainer>
@@ -117,8 +117,10 @@ export function Results({
                       width={100}
                       height={100}
                       options={{
-                        legend: {
-                          display: false,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
                         },
                       }}
                       data={{
@@ -151,7 +153,7 @@ export function Results({
               </Grid>
             </Grid>
             <Grid item xs={4}>
-              <Grid container spacing={0} justifyContent='flex-end'>
+              <Grid container spacing={0} justifyContent="flex-end">
                 <Grid item xs={6}>
                   <SummaryBorder>
                     <LabelizedField label={t('Total Number of Households')}>

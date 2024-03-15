@@ -1,9 +1,27 @@
-import { Box, Button, FormHelperText, Grid } from '@material-ui/core';
-import { Formik } from 'formik';
-import React, { ReactElement, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { AutoSubmitFormOnEnter } from '@components/core/AutoSubmitFormOnEnter';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { ContainerColumnWithBorder } from '@components/core/ContainerColumnWithBorder';
+import { LoadingButton } from '@components/core/LoadingButton';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { AddIndividualDataChange } from '@components/grievances/AddIndividualDataChange';
+import { CreateGrievanceStepper } from '@components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
+import { Description } from '@components/grievances/CreateGrievance/Description/Description';
+import { Selection } from '@components/grievances/CreateGrievance/Selection/Selection';
+import { Verification } from '@components/grievances/CreateGrievance/Verification/Verification';
+import { EditHouseholdDataChange } from '@components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
+import { EditIndividualDataChange } from '@components/grievances/EditIndividualDataChange/EditIndividualDataChange';
+import { LookUpHouseholdIndividualSelection } from '@components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
+import { OtherRelatedTicketsCreate } from '@components/grievances/OtherRelatedTicketsCreate';
+import { TicketsAlreadyExist } from '@components/grievances/TicketsAlreadyExist';
+import {
+  getGrievanceDetailsPath,
+  prepareVariables,
+  selectedIssueType,
+} from '@components/grievances/utils/createGrievanceUtils';
+import { validateUsingSteps } from '@components/grievances/utils/validateGrievance';
+import { validationSchemaWithSteps } from '@components/grievances/utils/validationSchema';
 import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
@@ -11,49 +29,28 @@ import {
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import { AutoSubmitFormOnEnter } from '../../../components/core/AutoSubmitFormOnEnter';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../../components/core/ContainerColumnWithBorder';
-import { LoadingButton } from '../../../components/core/LoadingButton';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { AddIndividualDataChange } from '../../../components/grievances/AddIndividualDataChange';
-import { CreateGrievanceStepper } from '../../../components/grievances/CreateGrievance/CreateGrievanceStepper/CreateGrievanceStepper';
-import { Description } from '../../../components/grievances/CreateGrievance/Description/Description';
-import { Selection } from '../../../components/grievances/CreateGrievance/Selection/Selection';
-import { Verification } from '../../../components/grievances/CreateGrievance/Verification/Verification';
-import { EditHouseholdDataChange } from '../../../components/grievances/EditHouseholdDataChange/EditHouseholdDataChange';
-import { EditIndividualDataChange } from '../../../components/grievances/EditIndividualDataChange/EditIndividualDataChange';
-import { LookUpHouseholdIndividualSelection } from '../../../components/grievances/LookUps/LookUpHouseholdIndividual/LookUpHouseholdIndividualSelection';
-import { OtherRelatedTicketsCreate } from '../../../components/grievances/OtherRelatedTicketsCreate';
-import { TicketsAlreadyExist } from '../../../components/grievances/TicketsAlreadyExist';
+} from '@generated/graphql';
+import { useArrayToDict } from '@hooks/useArrayToDict';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
+import { Box, Button, FormHelperText, Grid } from '@mui/material';
 import {
-  getGrievanceDetailsPath,
-  prepareVariables,
-  selectedIssueType,
-} from '../../../components/grievances/utils/createGrievanceUtils';
-import { validateUsingSteps } from '../../../components/grievances/utils/validateGrievance';
-import { validationSchemaWithSteps } from '../../../components/grievances/utils/validationSchema';
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+  GrievanceSteps,
+} from '@utils/constants';
+import { decodeIdString, thingForSpecificGrievanceType } from '@utils/utils';
+import { Formik } from 'formik';
+import { ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   PERMISSIONS,
   hasPermissionInModule,
   hasPermissions,
 } from '../../../config/permissions';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-  GrievanceSteps,
-} from '../../../utils/constants';
-import {
-  decodeIdString,
-  thingForSpecificGrievanceType,
-} from '../../../utils/utils';
 
 const InnerBoxPadding = styled.div`
   .MuiPaper-root {
@@ -70,7 +67,9 @@ const BoxWithBorders = styled.div`
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
 `;
-const EmptyComponent = (): React.ReactElement => null;
+function EmptyComponent(): React.ReactElement {
+  return null;
+}
 export const dataChangeComponentDict = {
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
     [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: AddIndividualDataChange,
@@ -80,8 +79,9 @@ export const dataChangeComponentDict = {
 };
 
 export const CreateGrievancePage = (): React.ReactElement => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
-  const history = useHistory();
+  const location = useLocation();
   const { baseUrl, businessArea, programId, isAllPrograms } = useBaseUrl();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
@@ -89,14 +89,14 @@ export const CreateGrievancePage = (): React.ReactElement => {
   const [activeStep, setActiveStep] = useState(GrievanceSteps.Selection);
   const [validateData, setValidateData] = useState(false);
 
-  const linkedTicketId = history.location.state?.linkedTicketId;
-  const selectedHousehold = history.location.state?.selectedHousehold;
-  const selectedIndividual = history.location.state?.selectedIndividual;
-  const category = history.location.state?.category;
-  const linkedFeedbackId = history.location.state?.linkedFeedbackId;
+  const linkedTicketId = location.state?.linkedTicketId;
+  const selectedHousehold = location.state?.selectedHousehold;
+  const selectedIndividual = location.state?.selectedIndividual;
+  const category = location.state?.category;
+  const linkedFeedbackId = location.state?.linkedFeedbackId;
   const redirectedFromRelatedTicket = Boolean(category);
   const isFeedbackWithHouseholdOnly =
-    history.location.state?.isFeedbackWithHouseholdOnly;
+    location.state?.isFeedbackWithHouseholdOnly;
 
   const initialValues = {
     description: '',
@@ -125,30 +125,24 @@ export const CreateGrievancePage = (): React.ReactElement => {
     variables: { businessArea, first: 1000 },
   });
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useGrievancesChoiceDataQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useGrievancesChoiceDataQuery();
 
   const [mutate, { loading }] = useCreateGrievanceMutation();
-  const {
-    data: programsData,
-    loading: programsDataLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: {
-      first: 100,
-      businessArea,
-    },
-  });
+  const { data: programsData, loading: programsDataLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: {
+        first: 100,
+        businessArea,
+      },
+    });
 
   const {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  const {
-    data: householdFieldsData,
-    loading: householdFieldsLoading,
-  } = useAllEditHouseholdFieldsQuery();
+  const { data: householdFieldsData, loading: householdFieldsLoading } =
+    useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
     allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
@@ -160,13 +154,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
     '*',
   );
 
-  const showIssueType = (values): boolean => {
-    return (
-      values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-      values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT
-    );
-  };
+  const showIssueType = (values): boolean =>
+    values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+    values.category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT;
 
   if (
     userDataLoading ||
@@ -199,8 +190,8 @@ export const CreateGrievancePage = (): React.ReactElement => {
     },
   ];
 
-  const dataChangeErrors = (errors): ReactElement[] => {
-    return [
+  const dataChangeErrors = (errors): ReactElement[] =>
+    [
       'householdDataUpdateFields',
       'individualDataUpdateFields',
       'individualDataUpdateFieldsDocuments',
@@ -211,7 +202,6 @@ export const CreateGrievancePage = (): React.ReactElement => {
         {errors[fieldname]}
       </FormHelperText>
     ));
-  };
 
   const handleNext = (): void => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -258,7 +248,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
               );
             }
             showMessage(msg);
-            history.push(url);
+            navigate(url);
           } catch (e) {
             e.graphQLErrors.map((x) => showMessage(x.message));
           }
@@ -316,7 +306,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
           <>
             <AutoSubmitFormOnEnter />
             <PageHeader
-              title='New Ticket'
+              title="New Ticket"
               breadCrumbs={
                 hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)
                   ? breadCrumbsItems
@@ -346,7 +336,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                       )}
                       {activeStep === GrievanceSteps.Lookup && (
                         <BoxWithBorders>
-                          <Box display='flex' flexDirection='column'>
+                          <Box display="flex" flexDirection="column">
                             <LookUpHouseholdIndividualSelection
                               values={values}
                               onValueChange={setFieldValue}
@@ -385,7 +375,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                         </>
                       )}
                       {dataChangeErrors(errors)}
-                      <Box pt={3} display='flex' flexDirection='row'>
+                      <Box pt={3} display="flex" flexDirection="row">
                         <Box mr={3}>
                           <Button
                             component={Link}
@@ -394,7 +384,7 @@ export const CreateGrievancePage = (): React.ReactElement => {
                             {t('Cancel')}
                           </Button>
                         </Box>
-                        <Box display='flex' ml='auto'>
+                        <Box display="flex" ml="auto">
                           <Button
                             disabled={activeStep === 0}
                             onClick={handleBack}
@@ -403,10 +393,10 @@ export const CreateGrievancePage = (): React.ReactElement => {
                           </Button>
                           <LoadingButton
                             loading={loading}
-                            color='primary'
-                            variant='contained'
+                            color="primary"
+                            variant="contained"
                             onClick={submitForm}
-                            data-cy='button-submit'
+                            data-cy="button-submit"
                           >
                             {activeStep === GrievanceSteps.Description
                               ? t('Save')

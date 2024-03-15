@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from datetime import date
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.contrib.gis.db.models import PointField
 from django.core.validators import (
@@ -51,6 +51,9 @@ from hct_mis_api.apps.registration_datahub.utils import combine_collections
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.phone import recalculate_phone_numbers_validity
 
+if TYPE_CHECKING:
+    from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
 logger = logging.getLogger(__name__)
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
@@ -78,6 +81,10 @@ COLLECT_TYPES = (
 
 
 class ImportedHousehold(TimeStampedUUIDModel):
+    class CollectType(models.TextChoices):
+        STANDARD = "STANDARD", "Standard"
+        SINGLE = "SINGLE", "Single"
+
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
@@ -161,6 +168,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     program_id = models.UUIDField(
         null=True, db_index=True, blank=True
     )  # TODO temporary null=True until we migrate backward all data
+    collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
 
     @property
     def business_area(self) -> str:
@@ -391,7 +399,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
         return self.business_area_slug
 
     @property
-    def linked_rdi(self) -> Any:  # TODO: (circular import) "RegistrationDataImport":
+    def linked_rdi(self) -> "RegistrationDataImport":
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
         return RegistrationDataImport.objects.get(datahub_id=self.id)

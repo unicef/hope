@@ -6,20 +6,16 @@ exports[`components/grievances/VerifyPaymentGrievance should render with data 1`
     action="#"
   >
     <div
-      class="MuiBox-root MuiBox-root-1"
+      class="MuiBox-root css-hpgf8j"
     >
       <button
-        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+        class="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-dl1jos-MuiButtonBase-root-MuiButton-root"
         tabindex="0"
         type="button"
       >
+        Verify
         <span
-          class="MuiButton-label"
-        >
-          Verify
-        </span>
-        <span
-          class="MuiTouchRipple-root"
+          class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
         />
       </button>
     </div>

@@ -1,5 +1,6 @@
-import { Box, Tab, Tabs } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -8,12 +9,13 @@ import {
   useAllProgramsForChoicesQuery,
   useHouseholdChoiceDataQuery,
   useIndividualChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { GRIEVANCE_ISSUE_TYPES } from '../../../../utils/constants';
-import { getFilterFromQueryParams } from '../../../../utils/utils';
-import { LoadingComponent } from '../../../core/LoadingComponent';
-import { TabPanel } from '../../../core/TabPanel';
+} from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { GRIEVANCE_ISSUE_TYPES } from '@utils/constants';
+import { getFilterFromQueryParams } from '@utils/utils';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { Tab, Tabs } from '@core/Tabs';
+import { TabPanel } from '@core/TabPanel';
 import { HouseholdFilters } from '../../../population/HouseholdFilter';
 import { IndividualsFilter } from '../../../population/IndividualsFilter';
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
@@ -25,7 +27,7 @@ const StyledTabs = styled(Tabs)`
   }
 `;
 
-export const LookUpHouseholdIndividualSelectionDetail = ({
+export function LookUpHouseholdIndividualSelectionDetail({
   onValueChange,
   initialValues,
   selectedIndividual,
@@ -43,7 +45,7 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   setSelectedHousehold;
   redirectedFromRelatedTicket?: boolean;
   isFeedbackWithHouseholdOnly?: boolean;
-}): React.ReactElement => {
+}): React.ReactElement {
   const { t } = useTranslation();
   const location = useLocation();
   const { businessArea, isAllPrograms, programId } = useBaseUrl();
@@ -74,10 +76,8 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     programState: 'active',
   };
 
-  const {
-    data: householdChoicesData,
-    loading: householdChoicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: householdChoicesData, loading: householdChoicesLoading } =
+    useHouseholdChoiceDataQuery();
 
   const [filterIND, setFilterIND] = useState(
     getFilterFromQueryParams(location, initialFilterIND),
@@ -93,18 +93,14 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
     getFilterFromQueryParams(location, initialFilterHH),
   );
 
-  const {
-    data: individualChoicesData,
-    loading: individualChoicesLoading,
-  } = useIndividualChoiceDataQuery();
+  const { data: individualChoicesData, loading: individualChoicesLoading } =
+    useIndividualChoiceDataQuery();
 
-  const {
-    data: programsData,
-    loading: programsLoading,
-  } = useAllProgramsForChoicesQuery({
-    variables: { businessArea, first: 100 },
-    fetchPolicy: 'cache-first',
-  });
+  const { data: programsData, loading: programsLoading } =
+    useAllProgramsForChoicesQuery({
+      variables: { businessArea, first: 100 },
+      fetchPolicy: 'cache-first',
+    });
 
   if (householdChoicesLoading || individualChoicesLoading || programsLoading)
     return <LoadingComponent />;
@@ -123,16 +119,16 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
   return (
     <>
       <Box>
-        <Box id='scroll-dialog-title'>
+        <Box id="scroll-dialog-title">
           <StyledTabs
             value={selectedTab}
-            onChange={(_event: React.ChangeEvent<{}>, newValue: number) => {
+            onChange={(_event: React.ChangeEvent<object>, newValue: number) => {
               setSelectedTab(newValue);
             }}
-            indicatorColor='primary'
-            textColor='primary'
-            variant='fullWidth'
-            aria-label='look up tabs'
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+            aria-label="look up tabs"
           >
             <Tab label={t('LOOK UP HOUSEHOLD')} />
             <Tab
@@ -201,4 +197,4 @@ export const LookUpHouseholdIndividualSelectionDetail = ({
       </Box>
     </>
   );
-};
+}

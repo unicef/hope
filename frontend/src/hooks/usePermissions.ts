@@ -9,8 +9,7 @@ export function usePermissions(): string[] {
   }
   // eslint-disable-next-line no-restricted-syntax
   for (const businessAreaEdge of data.me.businessAreas.edges) {
-    if (businessArea === businessAreaEdge.node.slug)
-      return businessAreaEdge.node.permissions;
+    if (businessArea === businessAreaEdge.node.slug) return businessAreaEdge.node.permissions;
   }
   return [];
 }

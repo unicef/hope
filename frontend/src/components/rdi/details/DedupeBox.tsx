@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
-import { Grid, Box } from '@material-ui/core';
+import { Grid, Box } from '@mui/material';
 import { MiśTheme } from '../../../theme';
 
 const GreyBox = styled.div`
@@ -42,12 +42,12 @@ export function DedupeBox({ label, options }: Props): React.ReactElement {
     <GreyBox>
       <Grid container>
         <Grid item xs={3}>
-          <Box display='flex' alignItems='flex-start'>
-            <Label color='textSecondary'>{label}</Label>
+          <Box display="flex" alignItems="flex-start">
+            <Label color="textSecondary">{label}</Label>
           </Box>
         </Grid>
         <Grid item xs={9}>
-          <Grid container direction='column'>
+          <Grid container direction="column">
             {options.map((option) => (
               <Grid key={option.name} container>
                 <Grid item xs={4}>

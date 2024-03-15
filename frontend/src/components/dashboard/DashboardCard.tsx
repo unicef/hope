@@ -1,5 +1,5 @@
-import { Paper } from '@material-ui/core';
-import React from 'react';
+import { Paper } from '@mui/material';
+import * as React from 'react';
 import styled from 'styled-components';
 
 interface DashboardCardProps {
@@ -33,7 +33,12 @@ export const CardAmount = styled.div`
   font-weight: 600;
   font-size: 24px;
 `;
-export const IconContainer = styled.div`
+interface IconContainerProps {
+  bg: string;
+  color: string;
+}
+
+export const IconContainer = styled.div<IconContainerProps>`
   height: 40px;
   width: 40px;
   padding: 8px;
@@ -42,6 +47,16 @@ export const IconContainer = styled.div`
   color: ${({ color }) => color};
   font-size: 24px;
 `;
+
+interface StyledPaperProps {
+  color: string;
+}
+
+const StyledPaper = styled(Paper)<StyledPaperProps>`
+  border-left: 4px solid ${({ color }) => color};
+  padding: 20px 24px;
+`;
+
 export const CardAmountSmaller = styled.div`
   text-transform: capitalize;
   color: rgba(0, 0, 0, 0.87);
@@ -56,10 +71,7 @@ export const CardAmountLink = styled.div`
   font-weight: 600;
   font-size: 20px;
 `;
-const StyledPaper = styled(Paper)`
-  border-left: 4px solid ${({ color }) => color};
-  padding: 20px 24px;
-`;
+
 export const DashboardCard = ({
   color,
   children,

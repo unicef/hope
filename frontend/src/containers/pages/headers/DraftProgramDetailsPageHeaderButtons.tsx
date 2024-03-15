@@ -1,6 +1,6 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
-import { ProgramQuery } from '../../../__generated__/graphql';
+import { Box } from '@mui/material';
+import * as React from 'react';
+import { ProgramQuery } from '@generated/graphql';
 import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
 import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
 import { DuplicateProgramButtonLink } from '../../dialogs/programs/DuplicateProgramButtonLink';
@@ -13,15 +13,15 @@ export interface DraftProgramDetailsPageHeaderPropTypes {
   canActivate: boolean;
   canDuplicate: boolean;
 }
-export const DraftProgramDetailsPageHeaderButtons = ({
+export function DraftProgramDetailsPageHeaderButtons({
   program,
   canRemove,
   canEdit,
   canActivate,
   canDuplicate,
-}: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+}: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
-    <Box display='flex' alignItems='center'>
+    <Box display="flex" alignItems="center">
       {canRemove && (
         <Box m={2}>
           <DeleteProgram program={program} />
@@ -44,4 +44,4 @@ export const DraftProgramDetailsPageHeaderButtons = ({
       )}
     </Box>
   );
-};
+}
