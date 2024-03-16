@@ -79,7 +79,7 @@ PEOPLE_FIELDS_ATTRIBUTES = [
         "type": TYPE_INTEGER,
         "name": "index_id",
         "lookup": "index_id",
-        "required": False,
+        "required": True,
         "label": {"English(EN)": "Index ID"},
         "hint": "",
         "choices": [],
