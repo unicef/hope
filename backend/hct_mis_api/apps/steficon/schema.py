@@ -35,4 +35,10 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_all_steficon_rules(self, info: Any, **kwargs: Any) -> QuerySet:
-        return Rule.objects.filter(deprecated=False, enabled=True, history__is_release=True).distinct()
+        business_area_slug = info.context.headers.get("Business-Area")
+
+        return (
+            Rule.objects.filter(deprecated=False, enabled=True, history__is_release=True)
+            .distinct()
+            .allowed_to(business_area_slug)
+        )

@@ -11,6 +11,7 @@ from django.utils.functional import cached_property
 
 from concurrency.fields import AutoIncVersionField
 
+from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.steficon.config import SAFETY_HIGH, SAFETY_NONE, SAFETY_STANDARD
 from hct_mis_api.apps.steficon.interpreters import Interpreter, interpreters, mapping
 from hct_mis_api.apps.steficon.result import Result
@@ -18,16 +19,11 @@ from hct_mis_api.apps.steficon.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
-from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 
 MONITORED_FIELDS = ("name", "enabled", "deprecated", "language", "definition")
 
 
-class RuleManager(models.Manager):
-    pass
-
-
-class Rule(LimitBusinessAreaModelMixin, models.Model):
+class Rule(LimitBusinessAreaModelMixin):
     TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
     TYPE_TARGETING = "TARGETING"
 
@@ -67,10 +63,7 @@ class Rule(LimitBusinessAreaModelMixin, models.Model):
     type = models.CharField(
         choices=TYPE_CHOICES, max_length=50, default=TYPE_TARGETING, help_text="Use Rule for Targeting or Payment Plan"
     )
-
     flags = JSONField(default=dict, blank=True)
-
-    objects = RuleManager()
 
     def __str__(self) -> str:
         return self.name

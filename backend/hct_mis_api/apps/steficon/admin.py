@@ -223,7 +223,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by", "stable")
     list_filter = ("language", "enabled", "deprecated", "type")
     search_fields = ("name",)
-    filter_horizontal = ("allowed_business_areas", )
+    filter_horizontal = ("allowed_business_areas",)
     form = RuleForm
     readonly_fields = (
         "created_by",
@@ -272,6 +272,7 @@ class RuleAdmin(SyncMixin, ImportExportMixin, TestRuleMixin, LinkedObjectsMixin,
                 ),
             },
         ),
+        ("Allowed business areas", {"classes": ("collapse",), "fields": ("allowed_business_areas",)}),
     ]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:

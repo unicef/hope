@@ -1,15 +1,20 @@
 from django.db import models
+from django.db.models.query import QuerySet
 
 from hct_mis_api.apps.core.models import BusinessArea
 
 
+class LimitBusinessAreaModelQuerySet(QuerySet):
+    def allowed_to(self, business_area_slug: str) -> QuerySet:
+        return self.filter(allowed_business_areas__slug__in=[business_area_slug])
+
+
 class LimitBusinessAreaModelManager(models.Manager):
-    def allowed_to(self, business_area: BusinessArea):
-        return super().get_queryset().filter(allowed_business_areas__in=[business_area])
+    _queryset_class = LimitBusinessAreaModelQuerySet
 
 
 class LimitBusinessAreaModelMixin(models.Model):
-    allowed_business_areas = models.ManyToManyField(to=BusinessArea, related_name="+")
+    allowed_business_areas = models.ManyToManyField(to=BusinessArea)
 
     objects = LimitBusinessAreaModelManager()
 
