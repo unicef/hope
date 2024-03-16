@@ -717,9 +717,13 @@ class MigrationStatusAdmin(admin.ModelAdmin):
 
 
 class DataCollectingTypeForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.fields['type'].required = True
+        self.fields["type"].required = True
+
+    class Meta:
+        model = DataCollectingType
+        fields = "__all__"
 
     def clean(self) -> None:
         household_filters_available = self.cleaned_data["household_filters_available"]
