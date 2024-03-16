@@ -18,6 +18,7 @@ from hct_mis_api.apps.steficon.validators import (
     DoubleSpaceValidator,
     StartEndSpaceValidator,
 )
+from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 
 MONITORED_FIELDS = ("name", "enabled", "deprecated", "language", "definition")
 
@@ -26,7 +27,7 @@ class RuleManager(models.Manager):
     pass
 
 
-class Rule(models.Model):
+class Rule(LimitBusinessAreaModelMixin, models.Model):
     TYPE_PAYMENT_PLAN = "PAYMENT_PLAN"
     TYPE_TARGETING = "TARGETING"
 
