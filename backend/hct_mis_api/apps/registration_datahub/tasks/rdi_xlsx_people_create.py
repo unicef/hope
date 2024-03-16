@@ -42,14 +42,8 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     def __init__(self) -> None:
         super().__init__()
+        self.index_id = None
         self.households_to_update = []
-        # self.collectors_with_indexes = {
-        #     "individual": {
-        #         "primary_collector_ids_for": [],
-        #         "alternate_collector_ids_for": []
-        #     },
-        #
-        # }
         self.COMBINED_FIELDS: Dict = {
             **FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"),
             **serialize_flex_attributes()["individuals"],
@@ -63,36 +57,27 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        list_of_ids = collectors_str_ids_to_list(value)
-        if list_of_ids is None:
+        list_of_index_ids = collectors_str_ids_to_list(value)
+        if list_of_index_ids is None:
             return
-
-        for hh_id in list_of_ids:
-            if not hh_id:
+        for index_id in list_of_index_ids:
+            if not index_id:
                 continue
             role = ROLE_PRIMARY if header == "pp_primary_collector_id" else ROLE_ALTERNATE
-            self.collectors[hh_id].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
+            self.collectors[int(index_id)].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
 
     def _create_collectors(self) -> None:
         collectors_to_create = []
-        for hh_id, collectors_list in self.collectors.items():
+        for index_id, collectors_list in self.collectors.items():
             for collector in collectors_list:
-                collector.household_id = self.households.get(hh_id).pk
+                collector.household_id = self.households.get(int(index_id)).pk
                 collectors_to_create.append(collector)
         ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
-    # TODO: relationship_i_c == 'NON_BENEFICIARY' >
-    #  The individual is ONLY an external collector
-    #  (primary_collector_id, alternate_collector_id fields specify the entities for which this person collects)
-
-    # TODO: update "primary_collector_id", "alternate_collector_id" based on "index_id" here?
-    def _create_hh_ind(self, obj: Any, row, first_row, complex_fields, complex_types, sheet_title: str) -> None:
-        obj_to_create = obj()
-        registration_data_import = obj.registration_data_import
-
+    def _create_hh_ind(self, obj_to_create: Any, row: Any, first_row: Any, complex_fields: Dict, complex_types: Dict, sheet_title: str) -> None:
+        registration_data_import = obj_to_create.registration_data_import
         excluded = ("pp_age", "pp_index_id")
         for cell, header_cell in zip(row, first_row):
-            cell_number = int(cell.row)
             try:
                 header = header_cell.value
                 combined_fields = self.COMBINED_FIELDS
@@ -100,22 +85,20 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
                 if not current_field and header not in complex_fields[sheet_title]:
                     continue
-
-                if header in excluded:
-                    continue
-
                 is_not_image = current_field.get("type") != "IMAGE"
-
                 cell_value = cell.value
                 if isinstance(cell_value, str):
                     cell_value = cell_value.strip()
-
                 is_not_required_and_empty = not current_field.get("required") and cell.value is None and is_not_image
                 if is_not_required_and_empty:
                     continue
+                if header == "pp_index_id":
+                    self.index_id = int(cell_value)
+                if header in excluded:
+                    continue
 
                 if sheet_title == "individuals":
-                    obj_to_create.household = self.households.get(cell_number)
+                    obj_to_create.household = self.households[self.index_id]
 
                 if header in complex_fields[sheet_title]:
                     fn_complex: Callable = complex_fields[sheet_title][header]
@@ -128,6 +111,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                         household=obj_to_create if sheet_title == "households" else None,
                         is_field_required=current_field.get("required", False),
                     )
+
                     if value is not None:
                         setattr(
                             obj_to_create,
@@ -144,7 +128,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
                     if sheet_title == "individuals":
                         if header == "pp_relationship_i_c" and value == HEAD:
-                            household = self.households.get(cell_number)
+                            household = self.households[self.index_id]
                             if household is not None:
                                 household.head_of_household = obj_to_create
                                 self.households_to_update.append(household)
@@ -172,18 +156,18 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                     f"Error processing cell {header_cell} with `{cell}`: {e.__class__.__name__}({e})"
                 ) from e
 
-            obj_to_create.last_registration_date = obj_to_create.first_registration_date
-            obj_to_create.detail_id = row[0].row
-            print("==>> cell_number =>", cell_number, row[0].row)
-            if sheet_title == "households":
-                obj_to_create.set_admin_areas()
-                self.households[cell_number] = obj_to_create
-            else:
-                obj_to_create = self._validate_birth_date(obj_to_create)
-                obj_to_create.age_at_registration = calculate_age_at_registration(
-                    registration_data_import, str(obj_to_create.birth_date)
-                )
-                self.individuals.append(obj_to_create)
+        obj_to_create.last_registration_date = obj_to_create.first_registration_date
+        obj_to_create.detail_id = row[0].row
+        if sheet_title == "households":
+            obj_to_create.set_admin_areas()
+            obj_to_create.save()
+            self.households[self.index_id] = obj_to_create
+        else:
+            obj_to_create = self._validate_birth_date(obj_to_create)
+            obj_to_create.age_at_registration = calculate_age_at_registration(
+                registration_data_import, str(obj_to_create.birth_date)
+            )
+            self.individuals.append(obj_to_create)
 
     def _create_objects(self, sheet: Worksheet, registration_data_import: RegistrationDataImport) -> None:
         complex_fields: Dict[str, Dict[str, Callable]] = {
@@ -208,12 +192,12 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 "pp_scope_id_issuer_i_c": self._handle_identity_issuing_country_fields,
             },
             "households": {
-                "pp_consent_sign_h_c": self._handle_image_field,
-                "pp_hh_geopoint_h_c": self._handle_geopoint_field,
-                "pp_fchild_hoh_h_c": self._handle_bool_field,
-                "pp_child_hoh_h_c": self._handle_bool_field,
-                "pp_consent_h_c": self._handle_bool_field,
-                "pp_first_registration_date_h_c": self._handle_datetime,
+                "pp_consent_sign_i_c": self._handle_image_field,
+                "pp_hh_geopoint_i_c": self._handle_geopoint_field,
+                "pp_fchild_hoh_i_c": self._handle_bool_field,
+                "pp_child_hoh_i_c": self._handle_bool_field,
+                "pp_consent_i_c": self._handle_bool_field,
+                "pp_first_registration_date_i_c": self._handle_datetime,
             },
         }
         document_complex_types: Dict[str, Callable] = {}
@@ -252,14 +236,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         for row in sheet.iter_rows(min_row=3):
             if not any(has_value(cell) for cell in row):
                 continue
-            try:
-                self._create_hh_ind(hh_obj, row, first_row, complex_fields, complex_types, "households")
-                ImportedHousehold.objects.bulk_create(self.households.values())
-
-                self._create_hh_ind(ind_obj, row, first_row, complex_fields, complex_types, "individuals")
-
-            except Exception as e:
-                raise Exception(f"Error processing row {row[0].row}: {e.__class__.__name__}({e})") from e
+            for sheet_title in ["households", "individuals"]:
+                obj_to_create = hh_obj() if sheet_title == "households" else ind_obj()
+                self._create_hh_ind(obj_to_create, row, first_row, complex_fields, complex_types, sheet_title)
 
         ImportedIndividual.objects.bulk_create(self.individuals)
         ImportedHousehold.objects.bulk_update(
