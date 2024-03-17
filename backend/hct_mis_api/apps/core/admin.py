@@ -48,7 +48,7 @@ from hct_mis_api.apps.core.celery_tasks import (
     create_target_population_task,
     upload_new_kobo_template_and_update_flex_fields_task,
 )
-from hct_mis_api.apps.core.forms import ProgramForm
+from hct_mis_api.apps.core.forms import DataCollectingTypeForm, ProgramForm
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     CountryCodeMap,
@@ -714,23 +714,6 @@ class StorageFileAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 @admin.register(MigrationStatus)
 class MigrationStatusAdmin(admin.ModelAdmin):
     pass
-
-
-class DataCollectingTypeForm(forms.ModelForm):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.fields["type"].required = True
-
-    class Meta:
-        model = DataCollectingType
-        fields = "__all__"
-
-    def clean(self) -> None:
-        household_filters_available = self.cleaned_data["household_filters_available"]
-
-        if self.cleaned_data.get("type") == DataCollectingType.Type.SOCIAL and household_filters_available is True:
-            msg = "Household filters cannot be applied for data collecting type with social type"
-            self.add_error("type", forms.ValidationError(msg))
 
 
 @admin.register(DataCollectingType)
