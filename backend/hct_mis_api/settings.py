@@ -1005,19 +1005,11 @@ FLAGS = {
 }
 
 if DEBUG:
-    INSTALLED_APPS += [
-        "debug_toolbar",
-    ]
-    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
-
-    # DEBUG TOOLBAR
-    def show_ddt(request: HttpRequest) -> None:  # pragma: no-cover
-        from flags.state import flag_enabled
-
-        return flag_enabled("DEVELOP_DEBUG_TOOLBAR", request=request)
+    INSTALLED_APPS += ["debug_toolbar", "graphiql_debug_toolbar"]
+    MIDDLEWARE.append("graphiql_debug_toolbar.middleware.DebugToolbarMiddleware")
 
     DEBUG_TOOLBAR_CONFIG = {
-        "SHOW_TOOLBAR_CALLBACK": show_ddt,
+        "SHOW_TOOLBAR_CALLBACK": lambda request: True,
         "JQUERY_URL": "",
     }
     DEBUG_TOOLBAR_PANELS = [
