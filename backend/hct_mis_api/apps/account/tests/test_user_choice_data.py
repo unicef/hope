@@ -42,8 +42,16 @@ class UserRolesTest(APITestCase):
         partner_no_perms = {}
         PartnerFactory(name="Partner Without Access", permissions=partner_no_perms)
 
+        for partner in Partner.objects.all():
+            partner.allowed_business_areas.add(cls.business_area)
+
     def test_user_choice_data(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.USER_CHOICE_DATA_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug
+                }
+            },
         )

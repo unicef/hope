@@ -103,19 +103,34 @@ class PartnerForGrievanceTest(APITestCase):
     def test_partner_choices_without_program_but_with_household(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.PARTNER_FOR_GRIEVANCE_CHOICES_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug
+                }
+            },
             variables={"householdId": self.id_to_base64(self.household.id, "HouseholdNode")},
         )
 
     def test_partner_choices_without_program_but_with_individual(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.PARTNER_FOR_GRIEVANCE_CHOICES_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug
+                }
+            },
             variables={"individualId": self.id_to_base64(self.individual.id, "IndividualNode")},
         )
 
     def test_partner_choices_without_program_and_without_household_and_individual(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.PARTNER_FOR_GRIEVANCE_CHOICES_QUERY,
-            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Business-Area": self.business_area.slug
+                }
+            },
         )

@@ -28,6 +28,7 @@ from hct_mis_api.apps.account.permissions import (
     Permissions,
 )
 from hct_mis_api.apps.account.utils import test_conditional
+from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import (
@@ -155,7 +156,7 @@ class PartnerPermission:
         return self._permissions[business_area_id]
 
 
-class Partner(MPTTModel, models.Model):
+class Partner(LimitBusinessAreaModelMixin, MPTTModel):
     name = CICharField(max_length=100, unique=True)
     parent = TreeForeignKey(
         "self",
