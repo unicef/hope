@@ -7106,6 +7106,7 @@ export type RoleChoiceObject = {
 export type RoleNode = {
   __typename?: 'RoleNode';
   createdAt: Scalars['DateTime']['output'];
+  expiryDate?: Maybe<Scalars['Date']['output']>;
   name: Scalars['String']['output'];
   permissions?: Maybe<Array<Scalars['String']['output']>>;
   subsystem: RoleSubsystem;
@@ -9842,7 +9843,7 @@ export type LoggedCheckerQuery = { __typename?: 'Query', me?: { __typename?: 'Us
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'UserNode', id: string, username: string, email: string, firstName: string, lastName: string, businessAreas?: { __typename?: 'UserBusinessAreaNodeConnection', edges: Array<{ __typename?: 'UserBusinessAreaNodeEdge', node?: { __typename?: 'UserBusinessAreaNode', id: string, name: string, slug: string, permissions?: Array<string | null> | null } | null } | null> } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'UserNode', id: string, username: string, email: string, firstName: string, lastName: string, isSuperuser: boolean, businessAreas?: { __typename?: 'UserBusinessAreaNodeConnection', edges: Array<{ __typename?: 'UserBusinessAreaNodeEdge', node?: { __typename?: 'UserBusinessAreaNode', id: string, name: string, slug: string, permissions?: Array<string | null> | null } | null } | null> } | null } | null };
 
 export type UserChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -16389,6 +16390,7 @@ export const MeDocument = gql`
     email
     firstName
     lastName
+    isSuperuser
     businessAreas {
       edges {
         node {
@@ -27127,6 +27129,7 @@ export type RoleChoiceObjectResolvers<ContextType = any, ParentType extends Reso
 
 export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleNode'] = ResolversParentTypes['RoleNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  expiryDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   permissions?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   subsystem?: Resolver<ResolversTypes['RoleSubsystem'], ParentType, ContextType>;
