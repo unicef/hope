@@ -48,10 +48,5 @@ class UserRolesTest(APITestCase):
     def test_user_choice_data(self) -> None:
         self.snapshot_graphql_request(
             request_string=self.USER_CHOICE_DATA_QUERY,
-            context={
-                "user": self.user,
-                "headers": {
-                    "Business-Area": self.business_area.slug
-                }
-            },
+            context={"user": self.user, "headers": {"Business-Area": self.business_area.slug}},
         )

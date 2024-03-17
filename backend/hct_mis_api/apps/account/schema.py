@@ -204,12 +204,13 @@ class Query(graphene.ObjectType):
 
     def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
         business_area_slug = info.context.headers.get("Business-Area")
-        return to_choice_object(list(
-            Partner.objects
-                .exclude(name="Default Empty Partner")
+        return to_choice_object(
+            list(
+                Partner.objects.exclude(name="Default Empty Partner")
                 .allowed_to(business_area_slug)
                 .values_list("id", "name")
-        ))
+            )
+        )
 
     def resolve_partner_for_grievance_choices(
         self, info: Any, household_id: Optional[str] = None, individual_id: Optional[str] = None
