@@ -105,15 +105,23 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     </TreeItem>
   );
 
-  function groupAreasByLevel(areas, level = 1) {
-    const grouped = { [level]: areas };
+  function groupAreasByLevel(areas, selectedAreas, level = 1) {
+    const grouped = { [level]: 0 };
 
     areas.forEach((area) => {
+      if (selectedAreas.includes(area.id)) {
+        grouped[level]++;
+      }
+
       if (area.areas && area.areas.length > 0) {
-        const subGrouped = groupAreasByLevel(area.areas, level + 1);
+        const subGrouped = groupAreasByLevel(
+          area.areas,
+          selectedAreas,
+          level + 1,
+        );
         Object.keys(subGrouped).forEach((key) => {
           if (grouped[key]) {
-            grouped[key] = [...grouped[key], ...subGrouped[key]];
+            grouped[key] += subGrouped[key];
           } else {
             grouped[key] = subGrouped[key];
           }
@@ -124,8 +132,13 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     return grouped;
   }
 
+  // Get selected admin areas
+  const selectedAdminAreas = values.partners[index]?.adminAreas || [];
+
+  // Group allAreasTreeData by level
   const allAreasTreeDataGroupedByLevel = groupAreasByLevel(
-    values.partners[index]?.adminAreas,
+    allAreasTreeData,
+    selectedAdminAreas,
   );
 
   const adminAreaOptionLabel = (
@@ -134,21 +147,24 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
         <Box>
           <BigText>{t('Admin Area')}</BigText>
           <SmallText>
-            {t('The partner has access to selected Admin Areas')}
+            {t(
+              "The partner will have access to the program's selected admin area(s):",
+            )}
           </SmallText>
-          {isAdminAreaExpanded && (
-            <Box display="flex" flexDirection="column" mt={2} mb={2}>
-              <SmallText>Selected Admin Areas: </SmallText>
-              {Object.keys(allAreasTreeDataGroupedByLevel).map((level) => (
-                <LabelizedField
-                  label={`Admin Areas ${Number(level + 1)}`}
-                  key={level}
-                >
-                  {allAreasTreeDataGroupedByLevel[level].length}
-                </LabelizedField>
-              ))}
-            </Box>
-          )}
+          {!isAdminAreaExpanded &&
+            Object.values(allAreasTreeDataGroupedByLevel).some(
+              (count) => count > 0,
+            ) && (
+              <Grid container>
+                {Object.keys(allAreasTreeDataGroupedByLevel).map((level) => (
+                  <Grid key={level} item xs={4}>
+                    <LabelizedField label={`Admin Areas ${level}`} key={level}>
+                      {allAreasTreeDataGroupedByLevel[level]}
+                    </LabelizedField>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
         </Box>
         <IconButton
           onClick={() => {
