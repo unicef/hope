@@ -103,6 +103,7 @@ class RdiMergeTask:
         "fchild_hoh",
         "child_hoh",
         "detail_id",
+        "collect_type",
     )
 
     INDIVIDUAL_FIELDS = (
