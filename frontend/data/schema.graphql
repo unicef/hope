@@ -192,7 +192,7 @@ type AreaTreeNode {
   name: String
   pCode: String
   areas: [AreaTreeNode]
-  number: Int
+  level: Int
 }
 
 type AreaTypeNode implements Node {
