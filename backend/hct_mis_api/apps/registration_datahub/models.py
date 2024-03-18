@@ -81,6 +81,10 @@ COLLECT_TYPES = (
 
 
 class ImportedHousehold(TimeStampedUUIDModel):
+    class CollectType(models.TextChoices):
+        STANDARD = "STANDARD", "Standard"
+        SINGLE = "SINGLE", "Single"
+
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
@@ -164,6 +168,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     program_id = models.UUIDField(
         null=True, db_index=True, blank=True
     )  # TODO temporary null=True until we migrate backward all data
+    collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
 
     @property
     def business_area(self) -> str:
