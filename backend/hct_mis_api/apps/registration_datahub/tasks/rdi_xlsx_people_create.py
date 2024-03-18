@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 from django.db import transaction
 
@@ -42,7 +42,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
 
     def __init__(self) -> None:
         super().__init__()
-        self.index_id = None
+        self.index_id: Optional[int] = None
         self.households_to_update = []
         self.COMBINED_FIELDS: Dict = {
             **FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area().to_dict_by("xlsx_field"),
@@ -74,7 +74,9 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                 collectors_to_create.append(collector)
         ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
-    def _create_hh_ind(self, obj_to_create: Any, row: Any, first_row: Any, complex_fields: Dict, complex_types: Dict, sheet_title: str) -> None:
+    def _create_hh_ind(
+        self, obj_to_create: Any, row: Any, first_row: Any, complex_fields: Dict, complex_types: Dict, sheet_title: str
+    ) -> None:
         registration_data_import = obj_to_create.registration_data_import
         excluded = ("pp_age", "pp_index_id")
         for cell, header_cell in zip(row, first_row):

@@ -79,9 +79,6 @@ class TemplateFileGenerator:
         fields = FieldFactory.from_scopes(
             [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID, Scope.COLLECTOR]
         ).apply_business_area(business_area_slug=business_area_slug)
-        people_fields = FieldFactory.from_scopes([Scope.XLSX_PEOPLE]).apply_business_area(
-            business_area_slug=business_area_slug
-        )
 
         households_fields = {
             **fields.associated_with_household().to_dict_by("xlsx_field"),
@@ -94,7 +91,10 @@ class TemplateFileGenerator:
         }
 
         people_fields = {
-            **people_fields.associated_with_individual().to_dict_by("xlsx_field"),
+            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
+            .apply_business_area(business_area_slug=business_area_slug)
+            .associated_with_individual()
+            .to_dict_by("xlsx_field"),
             **flex_fields[individuals_sheet_title.lower()],
         }
 
