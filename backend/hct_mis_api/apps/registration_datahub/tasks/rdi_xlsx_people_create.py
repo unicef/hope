@@ -129,11 +129,11 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                         continue
 
                     if sheet_title == "individuals":
-                        if header == "pp_relationship_i_c" and value == HEAD:
-                            household = self.households[self.index_id]
-                            if household is not None:
-                                household.head_of_household = obj_to_create
-                                self.households_to_update.append(household)
+                        # if header == "pp_relationship_i_c" and value == HEAD:
+                        household = self.households[self.index_id]
+                        if household is not None:
+                            household.head_of_household = obj_to_create
+                            self.households_to_update.append(household)
                     setattr(
                         obj_to_create,
                         combined_fields[header]["name"],
