@@ -4,7 +4,7 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class BaseComponents(Common):
     navProgrammeManagement = 'a[data-cy="nav-Programme Management"]'
-    navGrievance = 'div[data-cy="nav-Grievance"]'
+    navGrievance = 'a[data-cy="nav-Grievance"]'
     navFeedback = 'a[data-cy="nav-Feedback"]'
     navGrievanceTicket = 'a[data-cy="nav-Grievance Tickets"]'
     navGrievanceDashboard = 'a[data-cy="nav-Grievance Dashboard"]'
