@@ -6,18 +6,22 @@ export const ALL_AREAS_TREE_QUERY = gql`
       id
       name
       pCode
+      level
       areas {
         id
         name
         pCode
+        level
         areas {
           id
           name
           pCode
+          level
           areas {
             id
             name
             pCode
+            level
           }
         }
       }
