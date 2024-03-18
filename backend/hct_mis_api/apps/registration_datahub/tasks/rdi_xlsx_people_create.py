@@ -13,7 +13,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldF
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import SheetImageLoader, serialize_flex_attributes
-from hct_mis_api.apps.household.models import HEAD, ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -129,7 +129,6 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
                         continue
 
                     if sheet_title == "individuals":
-                        # if header == "pp_relationship_i_c" and value == HEAD:
                         household = self.households[self.index_id]
                         if household is not None:
                             household.head_of_household = obj_to_create
@@ -279,7 +278,7 @@ class RdiXlsxPeopleCreateTask(RdiXlsxCreateTask):
         registration_data_import.save()
         old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         if not self.business_area.postpone_deduplication:
-            # TODO: not sure about deduplication for people?
+            # TODO: not sure about deduplication for people??
             logger.info("Starting deduplication of %s", registration_data_import.id)
             rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
             rdi_mis.status = RegistrationDataImport.DEDUPLICATION
