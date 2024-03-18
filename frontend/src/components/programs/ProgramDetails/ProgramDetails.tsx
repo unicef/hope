@@ -12,6 +12,7 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { DividerLine } from '@core/DividerLine';
+import { Missing } from '@components/core/Missing';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)};
@@ -37,16 +38,44 @@ interface ProgramDetailsProps {
   choices: ProgrammeChoiceDataQuery;
 }
 
-export function ProgramDetails({
+export const ProgramDetails = ({
   program,
   choices,
-}: ProgramDetailsProps): React.ReactElement {
+}: ProgramDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const { programFrequencyOfPaymentsChoices, programSectorChoices } = choices;
   const programFrequencyOfPaymentsChoicesDict = choicesToDict(
     programFrequencyOfPaymentsChoices,
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
+  const adminAreasCountDisplay = (
+    <Grid container>
+      <Grid item xs={3}>
+        <LabelizedField label={t('Admin Area 1')}>
+          {/* {totaladmin1Number} */}
+          <Missing />
+        </LabelizedField>
+      </Grid>
+      <Grid item xs={3}>
+        <LabelizedField label={t('Admin Area 2')}>
+          {/* {totaladmin2Number} */}
+          <Missing />
+        </LabelizedField>
+      </Grid>
+      <Grid item xs={3}>
+        <LabelizedField label={t('Admin Area 3')}>
+          {/* {totaladmin3Number} */}
+          <Missing />
+        </LabelizedField>
+      </Grid>
+      <Grid item xs={3}>
+        <LabelizedField label={t('Admin Area 4')}>
+          {/* {totaladmin4Number} */}
+          <Missing />
+        </LabelizedField>
+      </Grid>
+    </Grid>
+  );
 
   return (
     <ContainerColumnWithBorder data-cy="program-details-container">
@@ -140,19 +169,22 @@ export function ProgramDetails({
           <OverviewContainer>
             <Grid container spacing={6}>
               {program.partners.map((partner) => (
-                <Grid key={partner.id} item xs={3}>
+                <Grid
+                  key={partner.id}
+                  item
+                  xs={partner.areaAccess === 'BUSINESS_AREA' ? 3 : 6}
+                >
                   <StyledBox p={6} flexDirection="column">
                     <Typography data-cy="label-partner-name" variant="h6">
                       {partner.name}
                     </Typography>
-                    <LabelizedField
-                      label={t('Area Access')}
-                      value={
-                        partner.areaAccess === 'BUSINESS_AREA'
-                          ? t('Business Area')
-                          : `Admin Areas: ${partner.adminAreas?.length || 0}`
-                      }
-                    />
+                    {partner.areaAccess === 'BUSINESS_AREA' ? (
+                      <LabelizedField label={t('Area Access')}>
+                        {t('Business Area')}
+                      </LabelizedField>
+                    ) : (
+                      adminAreasCountDisplay
+                    )}
                   </StyledBox>
                 </Grid>
               ))}
@@ -162,4 +194,4 @@ export function ProgramDetails({
       )}
     </ContainerColumnWithBorder>
   );
-}
+};

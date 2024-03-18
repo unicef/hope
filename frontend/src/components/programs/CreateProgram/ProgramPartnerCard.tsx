@@ -52,10 +52,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
   setFieldValue,
 }): React.ReactElement => {
   const { t } = useTranslation();
-  const selectedAreasLength = values.partners[index]?.adminAreas?.length;
-  const initialExpanded = selectedAreasLength > 0;
-  const [isAdminAreaExpanded, setIsAdminAreaExpanded] =
-    useState(initialExpanded);
+  const [isAdminAreaExpanded, setIsAdminAreaExpanded] = useState(false);
 
   const [allAreasTree, setAllAreasTree] = React.useState<AreaTreeNode[]>(() =>
     AreaTreeNode.buildTree(
