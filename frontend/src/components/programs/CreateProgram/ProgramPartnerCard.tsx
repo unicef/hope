@@ -14,6 +14,7 @@ import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import { DividerLine } from '@core/DividerLine';
 import { DeleteProgramPartner } from './DeleteProgramPartner';
 import { AreaTreeNode } from './AreaTreeNode';
+import { LabelizedField } from '@components/core/LabelizedField';
 
 interface ProgramPartnerCardProps {
   values;
@@ -81,7 +82,7 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     setFieldValue(`partners[${index}].areaAccess`, 'ADMIN_AREA');
     setAllAreasTree([...allAreasTree]);
   };
-  
+
   const renderNode = (node: AreaTreeNode): React.ReactElement => (
     <TreeItem
       key={node.id}
@@ -104,6 +105,29 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
     </TreeItem>
   );
 
+  function groupAreasByLevel(areas, level = 1) {
+    const grouped = { [level]: areas };
+
+    areas.forEach((area) => {
+      if (area.areas && area.areas.length > 0) {
+        const subGrouped = groupAreasByLevel(area.areas, level + 1);
+        Object.keys(subGrouped).forEach((key) => {
+          if (grouped[key]) {
+            grouped[key] = [...grouped[key], ...subGrouped[key]];
+          } else {
+            grouped[key] = subGrouped[key];
+          }
+        });
+      }
+    });
+
+    return grouped;
+  }
+
+  const allAreasTreeDataGroupedByLevel = groupAreasByLevel(
+    values.partners[index]?.adminAreas,
+  );
+
   const adminAreaOptionLabel = (
     <Box display="flex" flexDirection="column">
       <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -112,12 +136,19 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
           <SmallText>
             {t('The partner has access to selected Admin Areas')}
           </SmallText>
-          <Box mt={2} mb={2}>
-            <SmallText>
-              Selected Admin Areas:{' '}
-              {AreaTreeNode.getAllSelectedIds(allAreasTree).length || 0}
-            </SmallText>
-          </Box>
+          {isAdminAreaExpanded && (
+            <Box display="flex" flexDirection="column" mt={2} mb={2}>
+              <SmallText>Selected Admin Areas: </SmallText>
+              {Object.keys(allAreasTreeDataGroupedByLevel).map((level) => (
+                <LabelizedField
+                  label={`Admin Areas ${Number(level + 1)}`}
+                  key={level}
+                >
+                  {allAreasTreeDataGroupedByLevel[level].length}
+                </LabelizedField>
+              ))}
+            </Box>
+          )}
         </Box>
         <IconButton
           onClick={() => {
