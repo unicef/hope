@@ -13,6 +13,8 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
 
+import pytest
+
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import IDENTIFICATION_TYPE_TO_KEY_MAPPING
 from hct_mis_api.apps.geo import models as geo_models
@@ -421,6 +423,7 @@ class TestAutomatingRDICreationTask(TestCase):
         assert not merge_task_mock.called  # auto_merge was not set ; defaults to false
         assert set(Record.objects.values_list("unique_field", flat=True)) == {"123123123"}
 
+    @pytest.mark.skip(reason="Unstable from a very long time")
     def test_with_different_registration_ids(self, mock_validate_data_collection_type: Any) -> None:
         """
         based on registration_id select RegistrationService

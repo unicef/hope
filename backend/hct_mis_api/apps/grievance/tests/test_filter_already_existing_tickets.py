@@ -135,19 +135,28 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         GrievanceComplaintTicketFactory.create_batch(5)
         SensitiveGrievanceTicketFactory.create_batch(5)
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [
-                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                ],
-            ),
-            ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
-        ]
-    )
-    def test_filter_existing_tickets_by_payment_record(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_filter_existing_tickets_by_payment_record(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
+                "issueType": str(self.ticket.ticket.issue_type),
+                "household": self.household.id,
+                "individual": self.individuals[0].id,
+                "paymentRecord": [self.payment_record.id],
+            },
+        )
+
+    def test_filter_existing_tickets_by_payment_record_without_permission(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
@@ -187,19 +196,10 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             },
         )
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [
-                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                ],
-            ),
-            ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
-        ]
-    )
-    def test_filter_existing_tickets_by_household(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_filter_existing_tickets_by_household_with_permission(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
@@ -213,19 +213,43 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             },
         )
 
-    @parameterized.expand(
-        [
-            (
-                "with_permission",
-                [
-                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
-                ],
-            ),
-            ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
-        ]
-    )
-    def test_filter_existing_tickets_by_individual(self, _: Any, permissions: List[Permissions]) -> None:
-        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+    def test_filter_existing_tickets_by_household_without_permission(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
+                "issueType": str(self.ticket.ticket.issue_type),
+                "household": self.household.id,
+                "individual": self.individuals[0].id,
+            },
+        )
+
+    def test_filter_existing_tickets_by_individual_without_permission(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
+            context={"user": self.user},
+            variables={
+                "businessArea": "afghanistan",
+                "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
+                "issueType": str(self.ticket.ticket.issue_type),
+                "individual": self.individuals[0].id,
+            },
+        )
+
+    def test_filter_existing_tickets_by_individual_with_permission(self) -> None:
+        self.create_user_role_with_permissions(
+            self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
+        )
 
         self.snapshot_graphql_request(
             request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,

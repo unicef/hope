@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_0_with_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_with_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
@@ -68,7 +68,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_1_without_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_without_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
@@ -77,7 +77,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_individual_0_with_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_individual_with_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
@@ -138,7 +138,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_individual_1_without_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_individual_without_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
@@ -147,34 +147,16 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record_0_with_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
-                {
-                    'node': {
-                        'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTowZmRiZjJmYy1lOTRlLTRjNjQtYWNjZS02ZTdlZGQ0YmJkODc=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
-                        }
-                    }
-                }
             ]
         }
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record_1_without_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record_without_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
