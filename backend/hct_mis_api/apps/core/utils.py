@@ -76,12 +76,12 @@ def encode_id_base64(id_string: Optional[str], model_name: str) -> Optional[str]
     return encode_id_base64_required(id_string, model_name)
 
 
-def get_program_id_from_headers(info_context_headers: Dict) -> Optional[str]:
+def get_program_id_from_headers(headers: Dict) -> Optional[str]:
     # TODO: need to double check if program_id is str or uuid?
     #  decoded/encoded ??
     # sometimes it get from info.context.headers or kwargs["Program"]: str
 
-    program_id = info_context_headers.get("Program")
+    program_id = headers.get("Program")
     program_id = decode_id_string(program_id) if program_id != "all" and program_id != "undefined" else None
     return program_id
 

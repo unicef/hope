@@ -64,6 +64,7 @@ class Permissions(Enum):
     TARGETING_UNLOCK = auto()
     TARGETING_SEND = auto()
 
+    PAYMENT_VIEW_LIST_NO_GPF = auto()
     # Payment Verification
     PAYMENT_VERIFICATION_VIEW_LIST = auto()
     PAYMENT_VERIFICATION_VIEW_DETAILS = auto()
@@ -298,7 +299,9 @@ def compare_program_id_with_url(
 def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: Any) -> bool:
     if not user.is_authenticated:
         return False
-    business_area_arg = kwargs.get("business_area")
+
+    # "Business-Area" if the request is for rest api
+    business_area_arg = kwargs.get("business_area") or kwargs.get("Business-Area")
     if business_area_arg is None:
         return False
 

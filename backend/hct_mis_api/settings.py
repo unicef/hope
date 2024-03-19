@@ -435,6 +435,7 @@ OTHER_APPS = [
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    "django_filters",
     "explorer",
     "import_export",
     "rest_framework",
@@ -1107,6 +1108,15 @@ LOGGING: Dict[str, Any] = {
         },
         "elasticsearch": {"handlers": ["file"], "level": "CRITICAL", "propagate": True},
     },
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 10,
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
 # overwrite Azure logs
