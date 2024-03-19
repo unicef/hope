@@ -2,6 +2,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
@@ -207,7 +208,7 @@ class Query(graphene.ObjectType):
         unicef = Partner.objects.get(name="UNICEF")
         return to_choice_object(
             list(
-                Partner.objects.exclude(name="Default Empty Partner")
+                Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
                 .allowed_to(business_area_slug)
                 .values_list("id", "name")
             )

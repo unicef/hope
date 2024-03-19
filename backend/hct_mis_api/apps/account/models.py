@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from uuid import UUID
 
 from django import forms
+from django.conf import settings
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.postgres.fields import ArrayField, CICharField
@@ -196,11 +197,11 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
 
     @classmethod
     def get_partners_as_choices(cls) -> List:
-        return [(partner.id, partner.name) for partner in cls.objects.exclude(name="Default Empty Partner")]
+        return [(partner.id, partner.name) for partner in cls.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)]
 
     @classmethod
     def get_partners_for_program_as_choices(cls, business_area_id: str, program_id: Optional[str] = None) -> List:
-        partners = cls.objects.exclude(name="Default Empty Partner")
+        partners = cls.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
         if program_id:
             return [
                 (partner.id, partner.name)
@@ -220,7 +221,7 @@ class Partner(LimitBusinessAreaModelMixin, MPTTModel):
 
     @property
     def is_default(self) -> bool:
-        return self.name == "Default Empty Partner"
+        return self.name == settings.DEFAULT_EMPTY_PARTNER
 
     @property
     def is_editable(self) -> bool:
@@ -281,7 +282,7 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.partner:
-            self.partner, _ = Partner.objects.get_or_create(name="Default Empty Partner")
+            self.partner, _ = Partner.objects.get_or_create(name=settings.DEFAULT_EMPTY_PARTNER)
         if not self.partner.pk:
             self.partner.save()
         super().save(*args, **kwargs)
