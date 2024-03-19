@@ -10,7 +10,8 @@ import factory
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 
-from hct_mis_api.apps.core.models import BusinessArea, DataCollectingType
+from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import Program, ProgramCycle
 
 
@@ -83,7 +84,7 @@ class ProgramFactory(DjangoModelFactory):
         ext_word_list=None,
     )
     individual_data_needed = fuzzy.FuzzyChoice((True, False))
-    data_collecting_type = factory.LazyAttribute(lambda o: DataCollectingType.objects.first())
+    data_collecting_type = factory.SubFactory(DataCollectingTypeFactory)
     programme_code = factory.LazyAttribute(
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     )
