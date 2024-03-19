@@ -7,7 +7,7 @@ from django.core.files import File
 from django.forms import model_to_dict
 from django.test import TestCase
 
-from hct_mis_api.apps.core.fixtures import DataCollectingTypeFactory, create_afghanistan
+from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.program.models import Program
@@ -45,8 +45,7 @@ class TestRdiXlsxPeople(TestCase):
             number_of_households=0,
             number_of_individuals=4,
         )
-        dct = DataCollectingTypeFactory(label="Test", code="test", weight=1, type=DataCollectingType.Type.SOCIAL)
-        cls.program = ProgramFactory(status=Program.ACTIVE, data_collecting_type=dct)
+        cls.program = ProgramFactory(status=Program.ACTIVE, data_collecting_type__type=DataCollectingType.Type.SOCIAL)
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug, hct_id=None
         )
