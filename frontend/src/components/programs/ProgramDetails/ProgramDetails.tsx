@@ -12,7 +12,6 @@ import { StatusBox } from '@core/StatusBox';
 import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { DividerLine } from '@core/DividerLine';
-import { Missing } from '@components/core/Missing';
 
 const NumberOfHouseHolds = styled.div`
   padding: ${({ theme }) => theme.spacing(8)};
@@ -48,32 +47,15 @@ export const ProgramDetails = ({
     programFrequencyOfPaymentsChoices,
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
-  const adminAreasCountDisplay = (
-    <Grid container>
-      <Grid item xs={3}>
-        <LabelizedField label={t('Admin Area 1')}>
-          {/* {totaladmin1Number} */}
-          <Missing />
-        </LabelizedField>
-      </Grid>
-      <Grid item xs={3}>
-        <LabelizedField label={t('Admin Area 2')}>
-          {/* {totaladmin2Number} */}
-          <Missing />
-        </LabelizedField>
-      </Grid>
-      <Grid item xs={3}>
-        <LabelizedField label={t('Admin Area 3')}>
-          {/* {totaladmin3Number} */}
-          <Missing />
-        </LabelizedField>
-      </Grid>
-      <Grid item xs={3}>
-        <LabelizedField label={t('Admin Area 4')}>
-          {/* {totaladmin4Number} */}
-          <Missing />
-        </LabelizedField>
-      </Grid>
+  const renderAdminAreasCount = (partner): React.ReactElement => (
+    <Grid container spacing={6}>
+      {partner.adminAreas?.map((area) => (
+        <Grid item xs={3} key={area.level}>
+          <LabelizedField label={t(`Admin Area ${area.level}`)}>
+            {area.totalCount}
+          </LabelizedField>
+        </Grid>
+      ))}
     </Grid>
   );
 
@@ -183,7 +165,7 @@ export const ProgramDetails = ({
                         {t('Business Area')}
                       </LabelizedField>
                     ) : (
-                      adminAreasCountDisplay
+                      renderAdminAreasCount(partner)
                     )}
                   </StyledBox>
                 </Grid>

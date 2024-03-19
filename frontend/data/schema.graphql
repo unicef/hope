@@ -151,6 +151,12 @@ type ApprovalProcessNodeEdge {
   cursor: String!
 }
 
+type AreaGroupNode {
+  ids: [ID]
+  level: Int
+  totalCount: Int
+}
+
 type AreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -2791,7 +2797,7 @@ type PartnerNodeForProgram {
   userSet(offset: Int, before: String, after: String, first: Int, last: Int): UserNodeConnection!
   individualIdentities(offset: Int, before: String, after: String, first: Int, last: Int): IndividualIdentityNodeConnection!
   grievanceticketSet(offset: Int, before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  adminAreas: [String]
+  adminAreas: [AreaGroupNode]
   areaAccess: String
 }
 
