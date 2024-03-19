@@ -115,9 +115,17 @@ class TemplateFileGenerator:
 
     @classmethod
     def _add_import_helper(cls, wb: openpyxl.Workbook) -> openpyxl.Workbook:
+        default_helper_text = """
+        Sheets and their purposes:
+        - Households: Use this sheet to enter details about the households you want to import.
+        - Individuals: Use this sheet to enter information about the individuals within the households you want to import.
+        - People: Use this sheet to enter data about individuals without households.
+        
+        Please note that you must decide whether to fill out the data in the Households and Individuals sheets or the People sheet, as these options are mutually exclusive.
+        
+        """
         ws_import_helper = wb["Import helper"]
-        ws_import_helper.append(["Some data will be added soon"])
-        # TODO: add info for Import helper
+        ws_import_helper.append([default_helper_text])
         return wb
 
     @classmethod

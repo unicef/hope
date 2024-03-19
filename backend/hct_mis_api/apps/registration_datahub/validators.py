@@ -37,7 +37,12 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    NON_BENEFICIARY,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+)
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo
@@ -779,9 +784,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if errors:
                 # return error if WS do not exist in the import file
                 return errors
-            # TODO: update 'validate_collectors_size', 'validate_collectors'
+            errors.extend(self.validate_index_id(wb))
             errors.extend(self.validate_collectors_size(wb))
             errors.extend(self.validate_collectors(wb))
+            errors.extend(self.validate_people_collectors(wb))
 
             if not self.is_social_worker_program:
                 individuals_sheet = wb["Individuals"]
@@ -903,6 +909,111 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             "message": f"Individual from row: {row} cannot be the primary and the alternate collector for households: {', '.join(households_ids)} at the same time.",
                         }
                     )
+            return errors
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+    def validate_index_id(self, wb: Workbook) -> List[Dict[str, Any]]:
+        try:
+            errors = []
+            if self.is_social_worker_program:
+                people_sheet = wb["People"]
+                header_row = people_sheet[1]
+                index_id_col = 1  # by default
+                for header in header_row:
+                    if header.value == "pp_index_id":
+                        index_id_col = int(header.column)
+
+                index_ids = list(
+                    people_sheet.iter_cols(min_col=index_id_col, max_col=index_id_col, min_row=3, values_only=True)
+                )[0]
+                duplicates = list(set([i for i in index_ids if index_ids.count(i) > 1 and i is not None]))
+                if duplicates:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": f"There are duplicates with id(s): {duplicates}. Number have to be unique in the field pp_index_id.",
+                        }
+                    )
+
+            return errors
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+    def validate_people_collectors(self, wb: Workbook) -> List[Dict[str, Any]]:
+        try:
+            errors, index_ids, primary_collector_ids, alternate_collector_ids, relationship_column = [], [], [], [], []
+            people_sheet = wb["People"]
+            first_row = people_sheet[1]
+
+            for header in first_row:
+                if header.value == "pp_index_id":
+                    index_id_col = int(header.column)
+                    index_ids = list(
+                        people_sheet.iter_cols(min_col=index_id_col, max_col=index_id_col, min_row=3, values_only=True)
+                    )[0]
+                if header.value == "pp_primary_collector_id":
+                    pr_collector_id_col = int(header.column)
+                    primary_collector_ids = list(
+                        people_sheet.iter_cols(
+                            min_col=pr_collector_id_col, max_col=pr_collector_id_col, min_row=3, values_only=True
+                        )
+                    )[0]
+                if header.value == "pp_alternate_collector_id":
+                    alt_collector_id_col = int(header.column)
+                    alternate_collector_ids = list(
+                        people_sheet.iter_cols(
+                            min_col=alt_collector_id_col, max_col=alt_collector_id_col, min_row=3, values_only=True
+                        )
+                    )[0]
+                if header.value == "pp_relationship_i_c":
+                    relationship_col = int(header.column)
+                    relationship_column = list(
+                        people_sheet.iter_cols(
+                            min_col=relationship_col, max_col=relationship_col, min_row=3, values_only=True
+                        )
+                    )[0]
+            alt_ids = [int(i) for i in alternate_collector_ids if i is not None]
+            pr_ids = [int(i) for i in primary_collector_ids if i is not None]
+            for index_id, relationship, pr_col, alt_col in zip(
+                index_ids, relationship_column, primary_collector_ids, alternate_collector_ids
+            ):
+                if relationship not in [HEAD, NON_BENEFICIARY] and index_id is not None:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": f"Invalid value in field 'pp_relationship_i_c' with index_id {index_id}. "
+                            f"Value can be {HEAD} or {NON_BENEFICIARY}",
+                        }
+                    )
+                if (
+                    relationship == HEAD
+                    and index_id is not None
+                    and int(index_id) not in pr_ids
+                    and int(index_id) not in alt_ids
+                ):
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": f"Individual with index_id {index_id} have to has an external collector.",
+                        }
+                    )
+                if relationship == NON_BENEFICIARY and (pr_col is None and alt_col is None):
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": f"Invalid value in field 'pp_primary_collector_id' or "
+                            f"'pp_alternate_collector_id' for Individual with index_id {index_id}. "
+                            f"Both fields can't be empty.",
+                        }
+                    )
+
             return errors
         except Exception as e:
             logger.exception(e)

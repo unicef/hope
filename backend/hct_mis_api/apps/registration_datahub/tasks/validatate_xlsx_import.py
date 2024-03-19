@@ -48,7 +48,6 @@ class ValidateXlsxImport:
                         continue
                     number_of_individuals += 1
         else:
-            # TODO: or store data in separate field like 'people_number'?
             if people_sheet:
                 for row in people_sheet.iter_rows(min_row=3):
                     if not any([cell.value for cell in row]):
