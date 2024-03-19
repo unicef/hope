@@ -185,6 +185,13 @@ export type ApprovalProcessNodeEdge = {
   node?: Maybe<ApprovalProcessNode>;
 };
 
+export type AreaGroupNode = {
+  __typename?: 'AreaGroupNode';
+  ids?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
+  level?: Maybe<Scalars['Int']['output']>;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
 export type AreaNode = Node & {
   __typename?: 'AreaNode';
   areaSet: AreaNodeConnection;
@@ -4406,7 +4413,7 @@ export type PaginatedPaymentRecordsAndPaymentsNode = {
 
 export type PartnerNodeForProgram = {
   __typename?: 'PartnerNodeForProgram';
-  adminAreas?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  adminAreas?: Maybe<Array<Maybe<AreaGroupNode>>>;
   areaAccess?: Maybe<Scalars['String']['output']>;
   grievanceticketSet: GrievanceTicketNodeConnection;
   id?: Maybe<Scalars['ID']['output']>;
@@ -9525,7 +9532,7 @@ export type UpdateProgramMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<string | null> | null } | null> | null } | null } | null };
+export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<{ __typename?: 'AreaGroupNode', ids?: Array<string | null> | null, level?: number | null, totalCount?: number | null } | null> | null } | null> | null } | null } | null };
 
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
@@ -10484,7 +10491,7 @@ export type ProgramQueryVariables = Exact<{
 }>;
 
 
-export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<string | null> | null } | null> | null } | null };
+export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<{ __typename?: 'AreaGroupNode', ids?: Array<string | null> | null, level?: number | null, totalCount?: number | null } | null> | null } | null> | null } | null };
 
 export type ProgrammeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -14521,7 +14528,11 @@ export const UpdateProgramDocument = gql`
         id
         name
         areaAccess
-        adminAreas
+        adminAreas {
+          ids
+          level
+          totalCount
+        }
       }
     }
     validationErrors
@@ -20878,7 +20889,11 @@ export const ProgramDocument = gql`
       id
       name
       areaAccess
-      adminAreas
+      adminAreas {
+        ids
+        level
+        totalCount
+      }
     }
   }
 }
@@ -23222,6 +23237,7 @@ export type ResolversTypes = {
   ApprovalProcessNode: ResolverTypeWrapper<ApprovalProcessNode>;
   ApprovalProcessNodeConnection: ResolverTypeWrapper<ApprovalProcessNodeConnection>;
   ApprovalProcessNodeEdge: ResolverTypeWrapper<ApprovalProcessNodeEdge>;
+  AreaGroupNode: ResolverTypeWrapper<AreaGroupNode>;
   AreaNode: ResolverTypeWrapper<AreaNode>;
   AreaNodeConnection: ResolverTypeWrapper<AreaNodeConnection>;
   AreaNodeEdge: ResolverTypeWrapper<AreaNodeEdge>;
@@ -23737,6 +23753,7 @@ export type ResolversParentTypes = {
   ApprovalProcessNode: ApprovalProcessNode;
   ApprovalProcessNodeConnection: ApprovalProcessNodeConnection;
   ApprovalProcessNodeEdge: ApprovalProcessNodeEdge;
+  AreaGroupNode: AreaGroupNode;
   AreaNode: AreaNode;
   AreaNodeConnection: AreaNodeConnection;
   AreaNodeEdge: AreaNodeEdge;
@@ -24226,6 +24243,13 @@ export type ApprovalProcessNodeConnectionResolvers<ContextType = any, ParentType
 export type ApprovalProcessNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApprovalProcessNodeEdge'] = ResolversParentTypes['ApprovalProcessNodeEdge']> = {
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   node?: Resolver<Maybe<ResolversTypes['ApprovalProcessNode']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AreaGroupNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaGroupNode'] = ResolversParentTypes['AreaGroupNode']> = {
+  ids?: Resolver<Maybe<Array<Maybe<ResolversTypes['ID']>>>, ParentType, ContextType>;
+  level?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -26229,7 +26253,7 @@ export type PaginatedPaymentRecordsAndPaymentsNodeResolvers<ContextType = any, P
 };
 
 export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerNodeForProgram'] = ResolversParentTypes['PartnerNodeForProgram']> = {
-  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaGroupNode']>>>, ParentType, ContextType>;
   areaAccess?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<PartnerNodeForProgramGrievanceticketSetArgs>>;
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
@@ -28202,6 +28226,7 @@ export type Resolvers<ContextType = any> = {
   ApprovalProcessNode?: ApprovalProcessNodeResolvers<ContextType>;
   ApprovalProcessNodeConnection?: ApprovalProcessNodeConnectionResolvers<ContextType>;
   ApprovalProcessNodeEdge?: ApprovalProcessNodeEdgeResolvers<ContextType>;
+  AreaGroupNode?: AreaGroupNodeResolvers<ContextType>;
   AreaNode?: AreaNodeResolvers<ContextType>;
   AreaNodeConnection?: AreaNodeConnectionResolvers<ContextType>;
   AreaNodeEdge?: AreaNodeEdgeResolvers<ContextType>;
