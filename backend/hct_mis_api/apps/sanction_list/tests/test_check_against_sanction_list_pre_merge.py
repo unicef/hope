@@ -46,6 +46,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
             region_code="64",
             region_name="SAR",
             has_data_sharing_agreement=True,
+            screen_beneficiary=False,
         )
         cls.program = ProgramFactory(business_area=cls.business_area)
         cls.registration_data_import = RegistrationDataImportFactory(
