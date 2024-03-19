@@ -29,16 +29,21 @@ urlpatterns = [
     path(r"(<str:format>\.json|\.yaml)", schema_view.without_ui(cache_timeout=0), name="schema-json"),
     path(r"", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("<slug:business_area>/rdi/upload/", endpoints.rdi.UploadRDIView().as_view(), name="rdi-upload"),
-    path(
-        "<slug:business_area>/rdi/upload/people/",
-        endpoints.rdi.UploadPeopleRDIView().as_view(),
-        name="rdi-upload-people",
-    ),
     path("<slug:business_area>/rdi/create/", endpoints.rdi.CreateRDIView().as_view(), name="rdi-create"),
+    path(
+        "<slug:business_area>/rdi/<uuid:rdi>/push/people/",
+        endpoints.rdi.PushPeopleToRDIView().as_view(),
+        name="rdi-push-people",
+    ),
     path(
         "<slug:business_area>/rdi/<uuid:rdi>/push/lax/", endpoints.rdi.PushLaxToRDIView().as_view(), name="rdi-push-lax"
     ),
     path("<slug:business_area>/rdi/<uuid:rdi>/push/", endpoints.rdi.PushToRDIView().as_view(), name="rdi-push"),
+    path(
+        "<slug:business_area>/rdi/<uuid:rdi>/delegate/people/",
+        endpoints.rdi.DelegatePeopleRDIView().as_view(),
+        name="rdi-delegate-people",
+    ),
     path(
         "<slug:business_area>/rdi/<uuid:rdi>/completed/", endpoints.rdi.CompleteRDIView().as_view(), name="rdi-complete"
     ),
