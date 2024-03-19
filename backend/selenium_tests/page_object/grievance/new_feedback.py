@@ -24,6 +24,7 @@ class NewFeedback(BaseComponents):
     adminAreaAutocomplete = 'div[data-cy="input-admin2"]'
     inputLanguage = 'textarea[data-cy="input-language"]'
     inputArea = 'input[data-cy="input-area"]'
+    programmeSelect = 'div[data-cy="select-program"]'
 
     # Texts
     textTitle = "New Feedback"
@@ -89,6 +90,13 @@ class NewFeedback(BaseComponents):
 
     def getInputIssueType(self) -> WebElement:
         return self.wait_for(self.inputIssueType)
+
+    def getProgrammeSelect(self) -> WebElement:
+        return self.wait_for(self.programmeSelect)
+
+    def selectProgramme(self, name: str) -> WebElement:
+        self.getProgrammeSelect().click()
+        return self.select_listbox_element(name)
 
     def checkElementsOnPage(self) -> None:
         assert self.textTitle in self.getTitlePage()
