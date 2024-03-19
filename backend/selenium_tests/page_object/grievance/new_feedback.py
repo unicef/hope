@@ -20,7 +20,7 @@ class NewFeedback(BaseComponents):
     receivedConsent = 'span[data-cy="input-consent"]'
     description = 'textarea[data-cy="input-description"]'
     comments = 'textarea[data-cy="input-comments"]'
-    adminAreaAutocomplete = 'div[data-cy="input-admin2"]'
+    adminAreaAutocomplete = 'div[data-cy="admin-area-autocomplete"]'
     inputLanguage = 'textarea[data-cy="input-language"]'
     inputArea = 'input[data-cy="input-area"]'
     programmeSelect = 'div[data-cy="select-program"]'
@@ -91,6 +91,10 @@ class NewFeedback(BaseComponents):
 
     def getAdminAreaAutocomplete(self) -> WebElement:
         return self.wait_for(self.adminAreaAutocomplete)
+
+    def selectArea(self, name: str) -> WebElement:
+        self.getAdminAreaAutocomplete().click()
+        return self.select_listbox_element(name)
 
     def getIssueType(self) -> WebElement:
         return self.wait_for(self.issueType)

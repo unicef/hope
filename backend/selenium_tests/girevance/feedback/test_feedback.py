@@ -6,6 +6,7 @@ from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
+from selenium.webdriver import Keys
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -331,17 +332,22 @@ class TestFeedback:
         pageFeedback.getRows()[0].click()
         assert "-" in pageFeedbackDetails.getProgramme().text
         pageFeedbackDetails.getButtonEdit().click()
-        pageNewFeedback.selectProgramme("Draft Programm").click()
-        pageNewFeedback.getDescription().clear()
+        pageNewFeedback.selectProgramme("Draft Programme").click()
+        pageNewFeedback.getDescription().click()
+        pageNewFeedback.getDescription().send_keys(Keys.CONTROL, "a")
         pageNewFeedback.getDescription().send_keys("New description")
-        pageNewFeedback.getComments().clear()
         pageNewFeedback.getComments().send_keys("New comment, new comment. New comment?")
-        pageNewFeedback.getInputArea().clear()
         pageNewFeedback.getInputArea().send_keys("Abkamari")
-        pageNewFeedback.getInputLanguage().clear()
         pageNewFeedback.getInputLanguage().send_keys("English")
-        pageNewFeedback.getAdminAreaAutocomplete().click()
-        pageNewFeedback.screenshot("tutu")
+        # ToDo: Enable after Fix bug
+        # pageNewFeedback.selectArea("Abband").click()
+        pageNewFeedback.getButtonNext().click()
+        # Check edited Feedback
+        assert "Test Programm" in pageFeedbackDetails.getProgramme().text
+        assert "New description" in pageFeedbackDetails.getDescription().text
+        assert "New comment, new comment. New comment?" in pageFeedbackDetails.getComments().text
+        assert "Abkamari" in pageFeedbackDetails.getAreaVillagePayPoint().text
+        assert "English" in pageFeedbackDetails.getLanguagesSpoken().text
 
     @pytest.mark.skip(reason="Create during Grievance tickets creation tests")
     def test_create_linked_ticket(
