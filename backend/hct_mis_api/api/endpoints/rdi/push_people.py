@@ -85,13 +85,12 @@ class PeopleUploadMixin:
             return None
         household_fields = [field.name for field in ImportedHousehold._meta.get_fields()]
         household_data = {field: value for field, value in person_data.items() if field in household_fields}
-        hh = ImportedHousehold.objects.create(
+        return ImportedHousehold.objects.create(
             registration_data_import=rdi,
             program_id=program_id,
             collect_type=ImportedHousehold.CollectType.SINGLE.value,
             **household_data,
         )
-        return hh
 
     def _create_individual(
         self,

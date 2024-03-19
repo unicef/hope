@@ -1,10 +1,9 @@
-from typing import Any, Dict
+from typing import Dict
 from uuid import UUID
 
 from django.db.transaction import atomic
 
 from rest_framework import serializers, status
-from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -22,12 +21,7 @@ class DelegateSerializer(serializers.Serializer):
 
 
 class DelegatePeopleSerializer(serializers.Serializer):
-    delegates = DelegateSerializer(many=True, required=True)
-
-    def validate_delegates(self, value: Any) -> Any:
-        if not value:
-            raise ValidationError("This field is required.")
-        return value
+    delegates = DelegateSerializer(many=True, required=True, allow_empty=False, allow_null=False)
 
     def create(self, validated_data: Dict) -> Dict:
         delegates = validated_data.pop("delegates")
