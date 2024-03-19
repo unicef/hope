@@ -6,7 +6,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 
 class LimitBusinessAreaModelQuerySet(QuerySet):
     def allowed_to(self, business_area_slug: str) -> QuerySet:
-        return self.filter(allowed_business_areas__slug__in=[business_area_slug])
+        return self.filter(allowed_business_areas__slug=business_area_slug)
 
 
 class LimitBusinessAreaModelManager(models.Manager):

@@ -204,12 +204,14 @@ class Query(graphene.ObjectType):
 
     def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
         business_area_slug = info.context.headers.get("Business-Area")
+        unicef = Partner.objects.get(name="UNICEF")
         return to_choice_object(
             list(
                 Partner.objects.exclude(name="Default Empty Partner")
                 .allowed_to(business_area_slug)
                 .values_list("id", "name")
             )
+            + [(unicef.id, unicef.name)]  # unicef partner is always available
         )
 
     def resolve_partner_for_grievance_choices(
