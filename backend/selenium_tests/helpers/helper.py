@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Common:
-    DEFAULT_TIMEOUT = 60
+    DEFAULT_TIMEOUT = 100
 
     def __init__(self, driver: Chrome):
         self.driver = driver
@@ -23,8 +23,14 @@ class Common:
     def get(self, locator: str, element_type: str = By.CSS_SELECTOR) -> WebElement:
         return self.driver.find_element(element_type, locator)
 
-    def get_elements(self, locator: str, element_type: str = By.CSS_SELECTOR) -> list[WebElement]:
-        return self.driver.find_elements(element_type, locator)
+    def get_elements(self, locator: str, element_type: str = By.CSS_SELECTOR, attempts: int = 1) -> list[WebElement]:
+        for _ in range(attempts):
+            try:
+                return self.driver.find_elements(element_type, locator)
+            except:
+                sleep(1)
+        else:
+            raise Exception("No elements found")
 
     def wait_for(self, locator: str, element_type: str = By.CSS_SELECTOR, timeout: int = DEFAULT_TIMEOUT) -> WebElement:
         return self._wait(timeout).until(EC.visibility_of_element_located((element_type, locator)))

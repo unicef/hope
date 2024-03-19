@@ -24,6 +24,7 @@ class Feedback(BaseComponents):
     dateTitleFilterPopup = 'div[class="MuiPaper-root MuiPopover-paper MuiPaper-elevation8 MuiPaper-rounded"]'
     issueTypeFilter = 'div[data-cy="filters-issue-type"]'
     option = 'li[role="option"]'
+    tableRowLoading = 'tr[data-cy="table-row"]'
 
     # Texts
     textTitle = "Feedback"
@@ -101,6 +102,9 @@ class Feedback(BaseComponents):
 
     def getIssueTypeFilter(self) -> WebElement:
         return self.wait_for(self.issueTypeFilter)
+
+    def disappearTableRowLoading(self) -> WebElement:
+        return self.wait_for_disappear(self.tableRowLoading)
 
     def getOption(self) -> WebElement:
         return self.wait_for(self.option)

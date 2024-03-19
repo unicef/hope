@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -14,7 +16,7 @@ class NewFeedback(BaseComponents):
     buttonNext = 'button[data-cy="button-submit"]'
     option = 'li[role="option"]'
     householdTableRow = 'tr[data-cy="household-table-row"]'
-    individualTableRow = 'tr[data-cy="individual-table-row"'
+    individualTableRow = 'tr[data-cy="individual-table-row"]'
     lookUpTabsHouseHold = 'button[role="tab"]'
     lookUpTabsIndividual = 'button[role="tab"]'
     receivedConsent = 'span[data-cy="input-consent"]'
@@ -25,6 +27,7 @@ class NewFeedback(BaseComponents):
     inputArea = 'input[data-cy="input-area"]'
     programmeSelect = 'div[data-cy="select-program"]'
     hhRadioButton = 'span[data-cy="input-radio-household"]'
+    individualRadioButton = 'span[data-cy="input-radio-individual"]'
 
     # Texts
     textTitle = "New Feedback"
@@ -61,16 +64,17 @@ class NewFeedback(BaseComponents):
         return household_tab
 
     def getIndividualTab(self) -> WebElement:
-        individual_tab = self.get_elements(self.lookUpTabsIndividual)[1]
+        individual_tab = self.get_elements(self.lookUpTabsIndividual, attempts=5)[1]
         assert self.textLookUpIndividual in individual_tab.text
         return individual_tab
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
         self.get_elements(self.hhRadioButton)
-        return self.get_elements(self.householdTableRow)[number]
+        return self.get_elements(self.householdTableRow, attempts=5)[number]
 
     def getIndividualTableRow(self, number: int) -> WebElement:
-        return self.get_elements(self.individualTableRow)[number]
+        self.get_elements(self.individualRadioButton)
+        return self.get_elements(self.individualTableRow, attempts=5)[number]
 
     def getReceivedConsent(self) -> WebElement:
         return self.wait_for(self.receivedConsent)
