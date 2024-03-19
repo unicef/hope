@@ -42,6 +42,12 @@ class AreaTreeNode(ObjectType):
         return parent.area_type.area_level
 
 
+class AreaGroupNode(ObjectType):
+    ids = graphene.List(graphene.ID)
+    level = graphene.Int()
+    total_count = graphene.Int()
+
+
 class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AreaNode)
     all_admin_areas = DjangoFilterConnectionField(AreaNode, filterset_class=AreaFilter)
