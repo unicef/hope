@@ -211,15 +211,15 @@ export function CreateFeedbackPage(): React.ReactElement {
   };
 
   const prepareVariables = (values): CreateFeedbackInput => ({
-    issueType: values.issueType,
+    area: values.area,
+    comments: values.comments,
+    consent: values.consent,
+    description: values.description,
     householdLookup: values.selectedHousehold?.id,
     individualLookup: values.selectedIndividual?.id,
-    description: values.description,
-    comments: values.comments,
-    admin2: values.admin2?.node?.id,
-    area: values.area,
+    issueType: values.issueType,
+    admin2: values.admin2,
     language: values.language,
-    consent: values.consent,
     program: values.program,
   });
 
