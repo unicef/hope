@@ -119,10 +119,8 @@ class TemplateFileGenerator:
         Sheets and their purposes:
         - Households: Use this sheet to enter details about the households you want to import.
         - Individuals: Use this sheet to enter information about the individuals within the households you want to import.
-        - People: Use this sheet to enter data about individuals without households.
-        
+        - People: Use this sheet to enter data about individuals without households.\n
         Please note that you must decide whether to fill out the data in the Households and Individuals sheets or the People sheet, as these options are mutually exclusive.
-        
         """
         ws_import_helper = wb["Import helper"]
         ws_import_helper.append([default_helper_text])
