@@ -1,7 +1,5 @@
 from page_object.base_components import BaseComponents
-from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.select import Select
 
 
 class NewFeedback(BaseComponents):
@@ -17,7 +15,8 @@ class NewFeedback(BaseComponents):
     option = 'li[role="option"]'
     householdTableRow = 'tr[data-cy="household-table-row"]'
     individualTableRow = 'tr[data-cy="individual-table-row"'
-    lookUpTabs = 'button[role="tab"]'
+    lookUpTabsHouseHold = 'button[role="tab"]'
+    lookUpTabsIndividual = 'button[role="tab"]'
     receivedConsent = 'span[data-cy="input-consent"]'
     description = 'textarea[data-cy="input-description"]'
     comments = 'textarea[data-cy="input-comments"]'
@@ -25,6 +24,7 @@ class NewFeedback(BaseComponents):
     inputLanguage = 'textarea[data-cy="input-language"]'
     inputArea = 'input[data-cy="input-area"]'
     programmeSelect = 'div[data-cy="select-program"]'
+    hhRadioButton = 'span[data-cy="input-radio-household"]'
 
     # Texts
     textTitle = "New Feedback"
@@ -56,12 +56,17 @@ class NewFeedback(BaseComponents):
         return self.get_elements(self.option)
 
     def getHouseholdTab(self) -> None:
-        assert self.textLookUpHousehold in self.wait_for(self.lookUpTabs).text
+        household_tab = self.get_elements(self.lookUpTabsHouseHold)[0]
+        assert self.textLookUpHousehold in household_tab.text
+        return household_tab
 
-    def getLookUpIndividual(self) -> None:
-        assert self.textLookUpIndividual in self.wait_for(self.lookUpTabs).text
+    def getIndividualTab(self) -> WebElement:
+        individual_tab = self.get_elements(self.lookUpTabsIndividual)[1]
+        assert self.textLookUpIndividual in individual_tab.text
+        return individual_tab
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
+        self.get_elements(self.hhRadioButton)
         return self.get_elements(self.householdTableRow)[number]
 
     def getIndividualTableRow(self, number: int) -> WebElement:
@@ -99,8 +104,8 @@ class NewFeedback(BaseComponents):
         return self.select_listbox_element(name)
 
     def checkElementsOnPage(self) -> None:
-        assert self.textTitle in self.getTitlePage()
-        assert self.textCategory in self.getLabelCategory()
+        assert self.textTitle in self.getTitlePage().text
+        assert self.textCategory in self.getLabelCategory().text
         self.getSelectIssueType()
         self.getButtonCancel()
         self.getButtonBack()

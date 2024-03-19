@@ -1,25 +1,30 @@
-import random
+from django.conf import settings
+from django.core.management import call_command
 
 import pytest
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
 from page_object.grievance.new_feedback import NewFeedback
-from django.conf import settings
-from django.core.management import call_command
-
 from page_object.programme_details.programme_details import ProgrammeDetails
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture
-def add_feedbacks():
+def add_feedbacks() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/accountability/fixtures/data-cypress.json")
     return
 
 
 @pytest.fixture
-def create_programs():
+def add_households() -> None:
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/registration_data/fixtures/data-cypress.json")
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/household/fixtures/data-cypress.json")
+    return
+
+
+@pytest.fixture
+def create_programs() -> None:
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/core/fixtures/data-selenium.json")
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/program/fixtures/data-cypress.json")
     return
@@ -28,8 +33,8 @@ def create_programs():
 @pytest.mark.usefixtures("login")
 class TestSmokeFeedback:
     def test_check_feedback_page(
-            self,
-            pageFeedback: Feedback,
+        self,
+        pageFeedback: Feedback,
     ) -> None:
         """
         Go to Grievance page
@@ -58,10 +63,10 @@ class TestSmokeFeedback:
         assert pageFeedback.textCreationDate in pageFeedback.getCreationDate().text
 
     def test_check_feedback_details_page(
-            self,
-            add_feedbacks: None,
-            pageFeedback: Feedback,
-            pageFeedbackDetails: FeedbackDetailsPage,
+        self,
+        add_feedbacks: None,
+        pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
     ) -> None:
         """
         Go to Grievance page
@@ -114,14 +119,13 @@ class TestFeedbackFilters:
 
 @pytest.mark.usefixtures("login")
 class TestFeedback:
-
     @pytest.mark.parametrize("issue_type", ["Positive", "Negative"])
     def test_create_feedback_mandatory_fields(
-            self,
-            issue_type: None,
-            pageFeedback: Feedback,
-            pageFeedbackDetails: FeedbackDetailsPage,
-            pageNewFeedback: NewFeedback,
+        self,
+        issue_type: None,
+        pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
+        pageNewFeedback: NewFeedback,
     ) -> None:
         # Go to Feedback
         pageFeedback.getNavGrievance().click()
@@ -149,11 +153,11 @@ class TestFeedback:
 
     @pytest.mark.skip(reason="ToDo")
     def test_create_feedback_optional_fields(
-            self,
-            issue_type: None,
-            pageFeedback: Feedback,
-            pageFeedbackDetails: FeedbackDetailsPage,
-            pageNewFeedback: NewFeedback,
+        self,
+        issue_type: None,
+        pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
+        pageNewFeedback: NewFeedback,
     ) -> None:
         # Go to Feedback
         pageFeedback.getNavGrievance().click()
@@ -181,13 +185,13 @@ class TestFeedback:
         pageFeedbackDetails.getAdministrativeLevel2()
 
     def test_check_feedback_filtering_by_chosen_programme(
-            self,
-            create_programs: None,
-            add_feedbacks: None,
-            pageFeedback: Feedback,
-            pageFeedbackDetails: FeedbackDetailsPage,
-            pageNewFeedback: NewFeedback,
-            pageProgrammeDetails: ProgrammeDetails,
+        self,
+        create_programs: None,
+        add_feedbacks: None,
+        pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
+        pageNewFeedback: NewFeedback,
+        pageProgrammeDetails: ProgrammeDetails,
     ) -> None:
         # Go to Feedback
         pageFeedback.getNavGrievance().click()
@@ -207,7 +211,7 @@ class TestFeedback:
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         assert 1 == len(pageFeedback.getRows())
-        assert "Negative Feedback" in pageFeedback.getRows()[0].find_elements("tag name", 'td')[1].text
+        assert "Negative Feedback" in pageFeedback.getRows()[0].find_elements("tag name", "td")[1].text
 
         pageFeedback.selectGlobalProgramFilter("Draft Program").click()
         assert "Draft Program" in pageProgrammeDetails.getHeaderTitle().text
@@ -224,21 +228,24 @@ class TestFeedback:
         assert 2 == len(pageFeedback.getRows())
 
     def test_create_feedback_with_household(
-            self,
-            create_programs: None,
-            pageFeedback: Feedback,
-            pageFeedbackDetails: FeedbackDetailsPage,
-            pageNewFeedback: NewFeedback,
+        self,
+        create_programs: None,
+        add_households: None,
+        pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
+        pageNewFeedback: NewFeedback,
     ) -> None:
         # Go to Feedback
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         # Create Feedback
         pageFeedback.getButtonSubmitNewFeedback().click()
-        pageNewFeedback.chooseOptionByName("Negative Feedback")
+        pageNewFeedback.chooseOptionByName("Negative feedback")
         pageNewFeedback.getButtonNext().click()
         pageNewFeedback.getHouseholdTab()
-        pageNewFeedback.getHouseholdTableRows()[0].click()
+        pageNewFeedback.getHouseholdTableRows(1).click()
+        pageNewFeedback.getIndividualTab().click()
+        pageNewFeedback.screenshot("0")
         pageNewFeedback.getButtonNext().click()
         pageNewFeedback.getReceivedConsent().click()
         pageNewFeedback.getButtonNext().click()
@@ -249,26 +256,26 @@ class TestFeedback:
 
     @pytest.mark.skip(reason="ToDo")
     def test_create_feedback_with_individual(
-            self,
-            pageFeedback: Feedback,
+        self,
+        pageFeedback: Feedback,
     ) -> None:
         # Go to Feedback
         pageFeedback.getNavFeedback().click()
 
     @pytest.mark.skip(reason="ToDo")
     def test_create_linked_ticket(
-            self,
-            pageFeedback: Feedback,
-            pageFeedbackDetails: FeedbackDetailsPage,
+        self,
+        pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
     ) -> None:
         # Go to Feedback
         pageFeedback.getNavFeedback().click()
 
     @pytest.mark.skip(reason="ToDo")
     def test_edit_feedback(
-            self,
-            pageFeedback: Feedback,
-            pageFeedbackDetails: FeedbackDetailsPage,
+        self,
+        pageFeedback: Feedback,
+        pageFeedbackDetails: FeedbackDetailsPage,
     ) -> None:
         # Go to Feedback
         pageFeedback.getNavFeedback().click()
