@@ -981,7 +981,7 @@ PEOPLE_FIELDS_ATTRIBUTES = [
         "get_query": get_other_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "pp_other_id_no_i_c",
-        "scope": [Scope.GLOBAL, Scope.TARGETING, Scope.KOBO_IMPORT],
+        "scope": [Scope.XLSX_PEOPLE],
         "lookup_function": get_other_id_no,
     },
     {

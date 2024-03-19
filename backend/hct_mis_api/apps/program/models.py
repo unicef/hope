@@ -166,6 +166,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.programme_code:
             self.programme_code = self._generate_programme_code()
+        if self.data_collecting_type_id is None and self.data_collecting_type:
+            # save the related object before saving Program
+            self.data_collecting_type.save()
         super().save(*args, **kwargs)
 
     def _generate_programme_code(self) -> str:
