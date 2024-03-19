@@ -332,7 +332,7 @@ class TestFeedback:
         pageFeedback.getRows()[0].click()
         assert "-" in pageFeedbackDetails.getProgramme().text
         pageFeedbackDetails.getButtonEdit().click()
-        pageNewFeedback.selectProgramme("Draft Programme").click()
+        pageNewFeedback.selectProgramme("Draft Program").click()
         pageNewFeedback.getDescription().click()
         pageNewFeedback.getDescription().send_keys(Keys.CONTROL, "a")
         pageNewFeedback.getDescription().send_keys("New description")
@@ -343,7 +343,7 @@ class TestFeedback:
         # pageNewFeedback.selectArea("Abband").click()
         pageNewFeedback.getButtonNext().click()
         # Check edited Feedback
-        assert "Test Programm" in pageFeedbackDetails.getProgramme().text
+        assert "Draft Program" in pageFeedbackDetails.getProgramme().text
         assert "New description" in pageFeedbackDetails.getDescription().text
         assert "New comment, new comment. New comment?" in pageFeedbackDetails.getComments().text
         assert "Abkamari" in pageFeedbackDetails.getAreaVillagePayPoint().text

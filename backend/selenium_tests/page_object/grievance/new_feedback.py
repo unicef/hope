@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -68,11 +70,19 @@ class NewFeedback(BaseComponents):
 
     def getHouseholdTableRows(self, number: int) -> WebElement:
         self.get_elements(self.hhRadioButton)
-        return self.get_elements(self.householdTableRow, attempts=5)[number]
+        try:
+            return self.get_elements(self.householdTableRow, attempts=5)[number]
+        except IndexError:
+            sleep(1)
+            return self.get_elements(self.householdTableRow, attempts=5)[number]
 
     def getIndividualTableRow(self, number: int) -> WebElement:
         self.get_elements(self.individualRadioButton)
-        return self.get_elements(self.individualTableRow, attempts=5)[number]
+        try:
+            return self.get_elements(self.individualTableRow, attempts=5)[number]
+        except IndexError:
+            sleep(1)
+            return self.get_elements(self.individualTableRow, attempts=5)[number]
 
     def getReceivedConsent(self) -> WebElement:
         return self.wait_for(self.receivedConsent)
