@@ -27,7 +27,7 @@ class Common:
         for _ in range(attempts):
             try:
                 return self.driver.find_elements(element_type, locator)
-            except:
+            except BaseException:
                 sleep(1)
         else:
             raise Exception("No elements found")
