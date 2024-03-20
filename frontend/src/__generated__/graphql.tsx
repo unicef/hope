@@ -7106,6 +7106,7 @@ export type RoleChoiceObject = {
 export type RoleNode = {
   __typename?: 'RoleNode';
   createdAt: Scalars['DateTime']['output'];
+  expiryDate?: Maybe<Scalars['Date']['output']>;
   name: Scalars['String']['output'];
   permissions?: Maybe<Array<Scalars['String']['output']>>;
   subsystem: RoleSubsystem;
@@ -27127,6 +27128,7 @@ export type RoleChoiceObjectResolvers<ContextType = any, ParentType extends Reso
 
 export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleNode'] = ResolversParentTypes['RoleNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  expiryDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   permissions?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   subsystem?: Resolver<ResolversTypes['RoleSubsystem'], ParentType, ContextType>;

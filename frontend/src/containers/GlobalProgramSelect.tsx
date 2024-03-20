@@ -85,14 +85,13 @@ export function GlobalProgramSelect(): React.ReactElement {
       const program = getCurrentProgram();
       if (!selectedProgram || selectedProgram?.id !== programId) {
         if (program && isMounted.current) {
-          const { id, name, status, individualDataNeeded, dataCollectingType } =
+          const { id, name, status, dataCollectingType } =
             program;
 
           setSelectedProgram({
             id,
             name,
             status,
-            individualDataNeeded,
             dataCollectingType: {
               id: dataCollectingType?.id,
               code: dataCollectingType?.code,
