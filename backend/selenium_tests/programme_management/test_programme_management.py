@@ -443,7 +443,8 @@ class TestAdminAreas:
         # Check Details page
         assert "details" in pageProgrammeDetails.wait_for_new_url(programme_creation_url).split("/")
         assert "UNHCR" in pageProgrammeDetails.getLabelPartnerName().text
-        assert "16" in pageProgrammeDetails.getLabelAreaAccess().text
+        assert "1" in pageProgrammeDetails.getLabelAdminArea1().text
+        assert "15" in pageProgrammeDetails.getLabelAdminArea2().text
 
 
 @pytest.mark.usefixtures("login")
