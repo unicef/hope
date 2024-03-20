@@ -224,7 +224,11 @@ class TestPaymentPlansListView(APITestCase):
     def test_bulk_action(self) -> None:
         self.create_user_role_with_permissions(
             self.user,
-            [Permissions.PM_ACCEPTANCE_PROCESS_APPROVE],
+            [
+                Permissions.PM_VIEW_LIST,
+                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                Permissions.PAYMENT_VIEW_LIST_NO_GPF,
+            ],
             self.business_area,
             self.program1,
         )

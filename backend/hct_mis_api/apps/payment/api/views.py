@@ -1,7 +1,7 @@
 from typing import Any, Iterable, Optional
 
 from django.contrib.postgres.fields import ArrayField
-from django.db import models
+from django.db import models, transaction
 from django.db.models import (
     Case,
     CharField,
@@ -102,7 +102,6 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
         methods=["post"],
         url_path="bulk-action",
         serializer_class=PaymentPlanBulkActionSerializer,
-        permission_classes=[IsAuthenticated],
     )
     def bulk_action(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
@@ -112,13 +111,14 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
             input_data = {"action": action_name, "comment": comment}
             business_area = get_object_or_404(BusinessArea, slug=self.request.headers.get("Business-Area"))
 
-            for payment_plan_id_str in serializer.validated_data["ids"]:
-                self._perform_payment_plan_status_action(
-                    payment_plan_id_str,
-                    input_data,
-                    business_area,
-                    request,
-                )
+            with transaction.atomic():
+                for payment_plan_id_str in serializer.validated_data["ids"]:
+                    self._perform_payment_plan_status_action(
+                        payment_plan_id_str,
+                        input_data,
+                        business_area,
+                        request,
+                    )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
