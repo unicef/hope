@@ -65,7 +65,6 @@ def registration_xlsx_import_task(
     self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
 ) -> bool:
     try:
-        from hct_mis_api.apps.core.models import DataCollectingType
         from hct_mis_api.apps.program.models import Program
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
