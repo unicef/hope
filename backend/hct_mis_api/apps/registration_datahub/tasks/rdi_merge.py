@@ -9,7 +9,6 @@ from django.forms import model_to_dict
 from hct_mis_api.apps.account.models import Partner
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.geo.models import Area, Country
 from hct_mis_api.apps.grievance.services.needs_adjudication_ticket_services import (
     create_needs_adjudication_tickets,
@@ -279,7 +278,7 @@ class RdiMergeTask:
                 individual.registration_id = household.registration_id
             individuals_dict[imported_individual.id] = individual
 
-            is_social_worker_program = obj_hct.program.data_collecting_type.type == DataCollectingType.Type.SOCIAL
+            is_social_worker_program = obj_hct.program.is_social_worker_program
 
             if is_social_worker_program:
                 # every household for Social DCT type program has HoH
