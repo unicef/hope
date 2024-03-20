@@ -11,7 +11,7 @@ import {
 import * as React from 'react';
 import styled from 'styled-components';
 import { MeQuery } from '@generated/graphql';
-import { clearCache } from '@utils/utils';
+import {clearCache, generateAdminRedirect} from '@utils/utils';
 import { getClient } from '../apollo/client';
 import SendIcon from '@mui/icons-material/Send';
 
@@ -95,61 +95,8 @@ export function UserProfileMenu({
     return null;
   }
 
-  const handleUrlAdminRedirect = () => {
-    const urlObj = new URL(document.location.href);
-    console.log(urlObj);
-
-    const urlParts = urlObj.pathname.split('/');
-    const encodedObjId = urlParts.pop();
-    const objPathname = urlParts.pop();
-
-    switch (objPathname) {
-      case 'registration-data-import':
-        console.log('registration-data-import');
-        break;
-      case 'household':
-        console.log('household');
-        break;
-      case 'individuals':
-        console.log('individuals');
-        break;
-      case 'details':
-        console.log('programme');
-        break;
-      case 'target-population':
-        console.log('target-population');
-        break;
-      case 'payment-module/payment-plans':
-        console.log('payment-plans');
-        break;
-      case 'payment-module/payments':
-        console.log('payments');
-        break;
-      case 'payment-verification/payment-plan':
-        console.log('verification-items');
-        break;
-      case 'verification/payment':
-        console.log('verification/payment');
-        break;
-      case 'grievance/tickets/user-generated':
-        console.log('grievance/tickets/user-generated');
-        break;
-      case 'grievance/tickets/system-generated':
-        console.log('grievance/tickets/user-generated');
-        break;
-      case 'grievance/feedback':
-        console.log('grievance/feedback');
-        break;
-      case 'accountability/communication':
-        console.log('grievance/feedback');
-        break;
-      case 'accountability/surveys':
-        console.log('grievance/feedback');
-        break;
-    }
-  };
-
-  const adminUrl = handleUrlAdminRedirect();
+  const adminRedirectUrl = generateAdminRedirect(document.location.href);
+  console.log(adminRedirectUrl);
 
   return (
     <>
@@ -160,16 +107,15 @@ export function UserProfileMenu({
       >
         <Avatar alt={meData.me.email} src="/static/images/avatar/1.jpg" />
         <MenuButtonText> {meData.me.email}</MenuButtonText>
-        {meData.me.isSuperuser ? (
+        {(meData.me.isSuperuser && adminRedirectUrl) ? (
           <Button
             variant="outlined"
             size="small"
             color="success"
-            href="#outlined-buttons"
+            href={adminRedirectUrl}
             endIcon={<SendIcon />}
             sx={{ ml: 2 }}
         >
-          Go to admin
         </Button>
         ) : null }
       </UserProfileButton>
