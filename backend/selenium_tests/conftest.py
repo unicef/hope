@@ -90,27 +90,8 @@ def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
 
 
 @pytest.fixture
-def change_super_user() -> None:
-    user = User.objects.filter(email="test@example.com").first()
-    user.partner = Partner.objects.get(name="UNHCR")
-    user.save()
-
-
-@pytest.fixture(autouse=True)
-def create_super_user() -> User:
-    Partner.objects.get_or_create(name="TEST")
-    Partner.objects.get_or_create(name="UNICEF")
-    Partner.objects.get_or_create(name="UNHCR")
-
-    partner = Partner.objects.get(name="UNICEF")
-
-    permission_list = [role.value for role in Permissions]
-
-    role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
-
-    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
-    country = Country.objects.get(name="Afghanistan")
-    business_area = BusinessArea.objects.create(
+def business_area() -> BusinessArea:
+    business_area, _ = BusinessArea.objects.get_or_create(
         **{
             "code": "0060",
             "name": "Afghanistan",
@@ -123,8 +104,32 @@ def create_super_user() -> User:
             "kobo_token": "XXX",
         },
     )
-    business_area.countries.add(country)
+    return business_area
 
+
+@pytest.fixture
+def change_super_user(business_area: BusinessArea) -> None:
+    user = User.objects.filter(email="test@example.com").first()
+    user.partner = Partner.objects.get(name="UNHCR")
+    user.partner.allowed_business_areas.add(business_area)
+    user.save()
+
+
+@pytest.fixture(autouse=True)
+def create_super_user(business_area: BusinessArea) -> User:
+    Partner.objects.get_or_create(name="TEST")
+    Partner.objects.get_or_create(name="UNICEF")
+    Partner.objects.get_or_create(name="UNHCR")
+
+    partner = Partner.objects.get(name="UNICEF")
+
+    permission_list = [role.value for role in Permissions]
+
+    role, _ = Role.objects.update_or_create(name="Role", defaults={"permissions": permission_list})
+
+    call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
+    country = Country.objects.get(name="Afghanistan")
+    business_area.countries.add(country)
     user = UserFactory.create(
         is_superuser=True,
         is_staff=True,
@@ -138,6 +143,10 @@ def create_super_user() -> User:
         role=Role.objects.get(name="Role"),
         business_area=BusinessArea.objects.get(name="Afghanistan"),
     )
+
+    for partner in Partner.objects.exclude(name="UNICEF"):
+        partner.allowed_business_areas.add(business_area)
+
     assert User.objects.filter(email="test@example.com").first()
     assert user.is_superuser
 

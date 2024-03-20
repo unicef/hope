@@ -21,7 +21,6 @@ export const PROGRAM_QUERY = gql`
       totalNumberOfHouseholds
       totalNumberOfHouseholdsWithTpInProgram
       administrativeAreasOfImplementation
-      individualDataNeeded
       version
       dataCollectingType {
         id
