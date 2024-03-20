@@ -155,7 +155,11 @@ export const ProgramPartnerCard: React.FC<ProgramPartnerCardProps> = ({
               <Grid container>
                 {Object.keys(allAreasTreeDataGroupedByLevel).map((level) => (
                   <Grid key={level} item xs={4}>
-                    <LabelizedField label={`Admin Areas ${level}`} key={level}>
+                    <LabelizedField
+                      dataCy={`Admin-Areas-${level}-field`}
+                      label={`Admin Areas ${level}`}
+                      key={level}
+                    >
                       {allAreasTreeDataGroupedByLevel[level]}
                     </LabelizedField>
                   </Grid>
