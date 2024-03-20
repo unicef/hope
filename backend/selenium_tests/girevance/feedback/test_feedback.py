@@ -168,6 +168,8 @@ class TestFeedback:
         pageNewFeedback.chooseOptionByName(issue_type)
         pageNewFeedback.getButtonNext().click()
         pageNewFeedback.getHouseholdTab()
+        pageNewFeedback.getIndividualTab()
+        pageFeedback.getTableRowLoading()
         pageNewFeedback.getButtonNext().click()
         pageNewFeedback.getReceivedConsent().click()
         pageNewFeedback.getButtonNext().click()

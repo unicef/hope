@@ -106,5 +106,8 @@ class Feedback(BaseComponents):
     def disappearTableRowLoading(self) -> WebElement:
         return self.wait_for_disappear(self.tableRowLoading)
 
+    def getTableRowLoading(self) -> WebElement:
+        return self.wait_for(self.tableRowLoading)
+
     def getOption(self) -> WebElement:
         return self.wait_for(self.option)

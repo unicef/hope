@@ -24,7 +24,7 @@ class Common:
         return self.driver.find_element(element_type, locator)
 
     def get_elements(self, locator: str, element_type: str = By.CSS_SELECTOR, attempts: int = 1) -> list[WebElement]:
-        for i in range(attempts):
+        for _ in range(attempts):
             try:
                 elements = self.driver.find_elements(element_type, locator)
             except (ValueError, IndexError):
