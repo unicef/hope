@@ -123,7 +123,7 @@ urlpatterns = (
     ]
 )
 
-if settings.DEBUG:
+if settings.DEBUG and not settings.IS_TEST:
     import debug_toolbar
 
     urlpatterns = [
