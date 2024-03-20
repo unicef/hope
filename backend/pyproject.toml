@@ -178,6 +178,7 @@ pytest-cov = "^4.1.0"
 coverage = "^7.3.2"
 tomli = "^2.0.1"
 sentry-sdk = "1.40.5"
+flaky = "^3.8.1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "0.982"

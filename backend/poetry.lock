@@ -2142,6 +2142,18 @@ flake8 = ">3.0.0"
 junit-xml = ">=1.8"
 
 [[package]]
+name = "flaky"
+version = "3.8.1"
+description = "Plugin for pytest that automatically reruns flaky tests."
+category = "main"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "flaky-3.8.1-py2.py3-none-any.whl", hash = "sha256:194ccf4f0d3a22b2de7130f4b62e45e977ac1b5ccad74d4d48f3005dcc38815e"},
+    {file = "flaky-3.8.1.tar.gz", hash = "sha256:47204a81ec905f3d5acfbd61daeabcada8f9d4031616d9bcb0618461729699f5"},
+]
+
+[[package]]
 name = "fonttools"
 version = "4.49.0"
 description = "Tools to manipulate font files"
@@ -5434,4 +5446,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.*"
-content-hash = "ca73ed2ab126c31393b8b0977ccf9a3c4f7f6315db0acd4352414e9d54f452e8"
+content-hash = "1a8b014dd002a9aea4071f1846dc3911299dee9d4d117913b30960c5ec55e5d5"
