@@ -3,6 +3,7 @@ from uuid import UUID
 
 from django.db.transaction import atomic
 
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -41,6 +42,7 @@ class DelegatePeopleSerializer(serializers.Serializer):
 class DelegatePeopleRDIView(HOPEAPIBusinessAreaView, HOPEAPIView):
     permission = Grant.API_RDI_UPLOAD
 
+    @swagger_auto_schema(request_body=DelegatePeopleSerializer)
     @atomic(using="registration_datahub")
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = DelegatePeopleSerializer(data=request.data)

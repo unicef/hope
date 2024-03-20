@@ -6,6 +6,7 @@ from django.http import Http404
 from django.utils import timezone
 from django.utils.functional import cached_property
 
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -64,6 +65,10 @@ class PeopleSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "mis_unicef_id",
+            "household",
+            "kobo_asset_id",
+            "row_id",
+            "detail_id",
         ]
 
 
@@ -147,6 +152,7 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
         except RegistrationDataImportDatahub.DoesNotExist:
             raise Http404
 
+    @swagger_auto_schema(request_body=PeopleSerializer)
     @atomic(using="registration_datahub")
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
         serializer = PeopleSerializer(data=request.data, many=True)
