@@ -188,9 +188,6 @@ export function TargetingCriteria({
             open={isOpen}
             onClose={() => closeModal()}
             addCriteria={addCriteria}
-            shouldShowWarningForIndividualFilter={
-              selectedProgram && !selectedProgram.individualDataNeeded
-            }
             individualFiltersAvailable={individualFiltersAvailable}
             householdFiltersAvailable={householdFiltersAvailable}
           />

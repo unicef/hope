@@ -317,7 +317,6 @@ class TestPaymentPlanReconciliation(APITestCase):
                     "frequencyOfPayments": "REGULAR",
                     "sector": "MULTI_PURPOSE",
                     "cashPlus": True,
-                    "individualDataNeeded": False,
                     "businessAreaSlug": self.business_area.slug,
                     "dataCollectingTypeCode": self.data_collecting_type.code,
                 }

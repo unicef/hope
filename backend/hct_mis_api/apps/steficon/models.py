@@ -109,8 +109,6 @@ class Rule(LimitBusinessAreaModelMixin):
         using: Optional[Any] = None,
         update_fields: Optional[Any] = None,
     ) -> None:
-        if "individual_data_needed" not in self.flags:
-            self.flags["individual_data_needed"] = False
         with atomic():
             super().save(force_insert, force_update, using, update_fields)
             self.commit()
