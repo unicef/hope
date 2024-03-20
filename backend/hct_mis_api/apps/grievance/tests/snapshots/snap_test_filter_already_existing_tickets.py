@@ -14,24 +14,6 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                 {
                     'node': {
                         'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTowZmRiZjJmYy1lOTRlLTRjNjQtYWNjZS02ZTdlZGQ0YmJkODc=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'category': 3,
                         'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToxMjM5OGM3MS04MWVmLTRlMjQtOTY0ZC1mNzdlODUzOTcxYWI=',
                         'issueType': 1,
                         'sensitiveTicketDetails': {
@@ -39,27 +21,9 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                                 'size': 1
                             },
                             'individual': {
-                                'fullName': 'John Doe'
+                                'fullName': 'Frank Sinatra'
                             },
                             'paymentRecord': None
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTpjOThkMDM3My0xYjIwLTQ4ZWItOGI4Ny03MjM3NDc3ZWQ3ODI=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
                         }
                     }
                 }
@@ -84,24 +48,6 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                 {
                     'node': {
                         'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTowZmRiZjJmYy1lOTRlLTRjNjQtYWNjZS02ZTdlZGQ0YmJkODc=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'category': 3,
                         'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToxMjM5OGM3MS04MWVmLTRlMjQtOTY0ZC1mNzdlODUzOTcxYWI=',
                         'issueType': 1,
                         'sensitiveTicketDetails': {
@@ -109,27 +55,9 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                                 'size': 1
                             },
                             'individual': {
-                                'fullName': 'John Doe'
+                                'fullName': 'Frank Sinatra'
                             },
                             'paymentRecord': None
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTpjOThkMDM3My0xYjIwLTQ4ZWItOGI4Ny03MjM3NDc3ZWQ3ODI=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
                         }
                     }
                 }
@@ -147,10 +75,28 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record_with_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
+                {
+                    'node': {
+                        'category': 3,
+                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTowZmRiZjJmYy1lOTRlLTRjNjQtYWNjZS02ZTdlZGQ0YmJkODc=',
+                        'issueType': 1,
+                        'sensitiveTicketDetails': {
+                            'household': {
+                                'size': 1
+                            },
+                            'individual': {
+                                'fullName': 'John Doe'
+                            },
+                            'paymentRecord': {
+                                'fullName': 'John Doe'
+                            }
+                        }
+                    }
+                }
             ]
         }
     }
@@ -173,24 +119,6 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_two
                     'node': {
                         'category': 3,
                         'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTowZmRiZjJmYy1lOTRlLTRjNjQtYWNjZS02ZTdlZGQ0YmJkODc=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTpjOThkMDM3My0xYjIwLTQ4ZWItOGI4Ny03MjM3NDc3ZWQ3ODI=',
                         'issueType': 1,
                         'sensitiveTicketDetails': {
                             'household': {
