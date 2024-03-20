@@ -79,7 +79,7 @@ class TestSmokeFeedback:
         pageFeedback.driver.refresh()
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
-        pageFeedback.getRows()[0].click()
+        pageFeedback.getRow(0).click()
         # Check Feedback details page
         assert pageFeedbackDetails.textTitle in pageFeedbackDetails.getTitlePage().text
         pageFeedbackDetails.getButtonEdit()
@@ -199,7 +199,7 @@ class TestFeedback:
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         # Edit field Programme in Feedback
-        pageFeedback.getRows()[0].click()
+        pageFeedback.getRow(0).click()
         assert "-" in pageFeedbackDetails.getProgramme().text
         pageFeedbackDetails.getButtonEdit().click()
         pageNewFeedback.selectProgramme("Test Programm").click()
@@ -214,7 +214,7 @@ class TestFeedback:
         pageFeedback.getNavFeedback().click()
         pageFeedback.disappearTableRowLoading()
         assert 1 == len(pageFeedback.getRows())
-        assert "Negative Feedback" in pageFeedback.getRows()[0].find_elements("tag name", "td")[1].text
+        assert "Negative Feedback" in pageFeedback.getRow(0).find_elements("tag name", "td")[1].text
 
         pageFeedback.selectGlobalProgramFilter("Draft Program").click()
         assert "Draft Program" in pageProgrammeDetails.getHeaderTitle().text
@@ -331,7 +331,7 @@ class TestFeedback:
         pageFeedback.getNavGrievance().click()
         pageFeedback.getNavFeedback().click()
         # Edit field Programme in Feedback
-        pageFeedback.getRows()[0].click()
+        pageFeedback.getRow(0).click()
         assert "-" in pageFeedbackDetails.getProgramme().text
         pageFeedbackDetails.getButtonEdit().click()
         pageNewFeedback.selectProgramme("Draft Program").click()
