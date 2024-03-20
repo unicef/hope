@@ -52,7 +52,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             "cash_plus",
             "population_goal",
             "administrative_areas_of_implementation",
-            "individual_data_needed",
         ],
         {"admin_areas_log": "admin_areas"},
     )
@@ -145,13 +144,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         max_length=255,
         blank=True,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
-    )
-    individual_data_needed = models.BooleanField(
-        default=False,
-        help_text="""
-        This boolean decides whether the target population sync will send
-        all individuals of a household that's part of the population or only
-        the relevant ones (collectors etc.)""",
     )
     data_collecting_type = models.ForeignKey(
         "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
