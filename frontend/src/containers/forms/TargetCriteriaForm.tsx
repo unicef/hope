@@ -107,7 +107,6 @@ interface TargetCriteriaFormPropTypes {
   addCriteria: (values) => void;
   open: boolean;
   onClose: () => void;
-  shouldShowWarningForIndividualFilter?: boolean;
   individualFiltersAvailable: boolean;
   householdFiltersAvailable: boolean;
 }
@@ -115,15 +114,14 @@ interface TargetCriteriaFormPropTypes {
 const associatedWith = (type) => (item) => item.associatedWith === type;
 const isNot = (type) => (item) => item.type !== type;
 
-export function TargetCriteriaForm({
+export const TargetCriteriaForm = ({
   criteria,
   addCriteria,
   open,
   onClose,
-  shouldShowWarningForIndividualFilter,
   individualFiltersAvailable,
   householdFiltersAvailable,
-}: TargetCriteriaFormPropTypes): React.ReactElement {
+}: TargetCriteriaFormPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const {
@@ -322,13 +320,6 @@ export function TargetCriteriaForm({
                       <AndDividerLabel>And</AndDividerLabel>
                     </AndDivider>
                   ) : null}
-                  {values.individualsFiltersBlocks.length &&
-                  shouldShowWarningForIndividualFilter ? (
-                    <DialogDescription>
-                      In your programme, individual rules can only be applied to
-                      head of households.
-                    </DialogDescription>
-                  ) : null}
                   <FieldArray
                     name="individualsFiltersBlocks"
                     render={(arrayHelpers) => (
@@ -400,4 +391,4 @@ export function TargetCriteriaForm({
       </Formik>
     </DialogContainer>
   );
-}
+};

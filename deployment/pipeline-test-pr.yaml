@@ -2,6 +2,7 @@ trigger: none
 pr:
   - master
   - develop
+  - staging
   - global-program-filter
   - feature/*
 resources:

@@ -29,6 +29,8 @@ class MailjetClient:
     def send_email(self) -> bool:
         if not config.ENABLE_MAILJET:
             return False
+        if settings.CATCH_ALL_EMAIL:
+            self.recipients = [settings.CATCH_ALL_EMAIL]
         data = {
             "Messages": [
                 {
