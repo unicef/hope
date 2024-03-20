@@ -73,7 +73,6 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     total_undelivered_quantity = graphene.Decimal()
     total_number_of_households = graphene.Int()
     total_number_of_households_with_tp_in_program = graphene.Int()
-    individual_data_needed = graphene.Boolean()
     data_collecting_type = graphene.Field(DataCollectingTypeNode, source="data_collecting_type")
     partners = graphene.List(PartnerNodeForProgram)
 
