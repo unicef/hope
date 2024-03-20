@@ -38,7 +38,6 @@ export function TargetPopulationProgramme({
   const mappedPrograms = allProgramsEdges.map((edge) => ({
     name: edge.node.name,
     value: edge.node.id,
-    individualDataNeeded: edge.node.individualDataNeeded,
   }));
 
   return (
