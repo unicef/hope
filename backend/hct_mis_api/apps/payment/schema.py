@@ -55,6 +55,7 @@ from hct_mis_api.apps.core.utils import (
     chart_permission_decorator,
     decode_id_string,
     encode_id_base64,
+    get_program_id_from_headers,
     to_choice_object,
 )
 from hct_mis_api.apps.geo.models import Area
@@ -109,6 +110,7 @@ from hct_mis_api.apps.payment.utils import (
 )
 from hct_mis_api.apps.targeting.graphql_types import TargetPopulationNode
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.utils.exceptions import log_and_raise
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
@@ -566,6 +568,24 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         model = PaymentPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    @classmethod
+    def check_node_permission(cls, info: Any, object_instance: PaymentPlan) -> None:
+        super().check_node_permission(info, object_instance)
+        business_area = object_instance.business_area
+        user = info.context.user
+        program_id = get_program_id_from_headers(info.context.headers)
+        payment_plan_program_id = str(object_instance.program.id)
+
+        if program_id and payment_plan_program_id != program_id:
+            log_and_raise("Payment Plan does not belong to the selected program")
+
+        if not program_id:
+            permission = Permissions.PAYMENT_VIEW_LIST_NO_GPF.value
+            if user.has_permission(permission, business_area, payment_plan_program_id):
+                return None
+
+            log_and_raise(f"User does not have '{permission}' permission to show payment plans without program filter.")
 
     def resolve_split_choices(self, info: Any, **kwargs: Any) -> List[Dict[str, Any]]:
         return to_choice_object(PaymentPlanSplit.SplitType.choices)
