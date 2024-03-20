@@ -56,7 +56,6 @@ export const ALL_PROGRAMS_QUERY = gql`
           populationGoal
           sector
           totalNumberOfHouseholds
-          individualDataNeeded
           totalNumberOfHouseholdsWithTpInProgram
         }
       }

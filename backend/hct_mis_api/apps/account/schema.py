@@ -2,6 +2,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
@@ -209,7 +210,16 @@ class Query(graphene.ObjectType):
         return to_choice_object(USER_STATUS_CHOICES)
 
     def resolve_user_partner_choices(self, info: Any) -> List[Dict[str, Any]]:
-        return to_choice_object(Partner.get_partners_as_choices())
+        business_area_slug = info.context.headers.get("Business-Area")
+        unicef = Partner.objects.get(name="UNICEF")
+        return to_choice_object(
+            list(
+                Partner.objects.exclude(name=settings.DEFAULT_EMPTY_PARTNER)
+                .allowed_to(business_area_slug)
+                .values_list("id", "name")
+            )
+            + [(unicef.id, unicef.name)]  # unicef partner is always available
+        )
 
     def resolve_partner_for_grievance_choices(
         self, info: Any, household_id: Optional[str] = None, individual_id: Optional[str] = None

@@ -92,6 +92,7 @@ SECURE_HSTS_SECONDS = False
 CACHE_ENABLED = False
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = False
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+CATCH_ALL_EMAIL = ""
 
 LOGGING_DISABLED = True
 IS_TEST = True

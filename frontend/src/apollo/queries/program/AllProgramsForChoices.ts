@@ -45,7 +45,6 @@ export const AllProgramsForChoices = gql`
           id
           name
           status
-          individualDataNeeded
           dataCollectingType {
             id
             code

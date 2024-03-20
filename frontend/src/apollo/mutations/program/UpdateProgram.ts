@@ -22,7 +22,6 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         totalNumberOfHouseholds
         totalNumberOfHouseholdsWithTpInProgram
         administrativeAreasOfImplementation
-        individualDataNeeded
         version
         dataCollectingType {
           id
