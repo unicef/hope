@@ -1,3 +1,5 @@
+from django.db.models import QuerySet
+
 import django_filters
 from django_filters import FilterSet
 
@@ -20,5 +22,5 @@ class PaymentPlanFilter(FilterSet):
             "is_follow_up": ["exact"],
         }
 
-    def filter_by_program(self, qs, name, value):
+    def filter_by_program(self, qs: QuerySet, name: str, value: str) -> QuerySet:
         return qs.filter(program_id=decode_id_string_required(value))

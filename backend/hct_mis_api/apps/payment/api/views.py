@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Any, Iterable, Optional
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -18,13 +18,13 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 
 from django_filters import rest_framework as filters
-from requests import Request
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
@@ -38,13 +38,13 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
+from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
     PaymentPlanSerializer,
     PaymentVerificationSerializer,
 )
 from hct_mis_api.apps.payment.filters import (
-    PaymentPlanFilter,
     cash_plan_and_payment_plan_filter,
     cash_plan_and_payment_plan_ordering,
 )
@@ -85,8 +85,8 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
     def get_queryset(self) -> QuerySet:
         business_area = get_object_or_404(BusinessArea, slug=self.request.headers.get("Business-Area"))
         queryset = PaymentPlan.objects.filter(business_area=business_area)
-        if get_program_id_from_headers(self.request.headers):
-            return queryset
+        if program_id := get_program_id_from_headers(self.request.headers):  # type: ignore
+            return queryset.filter(program_id=program_id)
         program_ids = self.request.user.partner.get_program_ids_for_business_area(str(business_area.id))
         return queryset.filter(
             status__in=[
@@ -99,44 +99,12 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        methods=["get"],
-        url_path="status-action-mapping",
-        permission_classes=[],
-    )
-    def status_action_mapping(self, request, *args, **kwargs):
-        return Response(
-            {
-                PaymentPlan.Status.IN_APPROVAL.name: "Approve",
-                PaymentPlan.Status.IN_AUTHORIZATION.name: "Authorize",
-                PaymentPlan.Status.IN_REVIEW.name: "Release",
-            },
-            status=status.HTTP_200_OK,
-        )
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path="has-none-program-permission",
-        permission_classes=[],
-    )
-    def has_none_program_permission(self, request, *args, **kwargs):
-        return Response(
-            {
-                "has-none-program-permission": request.user.has_permission(
-                    Permissions.PAYMENT_VIEW_LIST_NO_GPF,
-                    business_area=get_object_or_404(BusinessArea, slug=self.request.headers.get("Business-Area")),
-                )
-            },
-            status=status.HTTP_200_OK,
-        )
-
-    @action(
-        detail=False,
         methods=["post"],
         url_path="bulk-action",
         serializer_class=PaymentPlanBulkActionSerializer,
+        permission_classes=[IsAuthenticated],
     )
-    def bulk_action(self, request, *args, **kwargs):
+    def bulk_action(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             action_name = serializer.validated_data["action"]
@@ -152,7 +120,7 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
                     request,
                 )
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _perform_payment_plan_status_action(
         self,
@@ -160,7 +128,7 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
         input_data: dict,
         business_area: BusinessArea,
         request: Request,
-    ):
+    ) -> None:
         payment_plan_id = decode_id_string(payment_plan_id_str)
         payment_plan = get_object_or_404(PaymentPlan, id=payment_plan_id)
 
@@ -183,7 +151,7 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
             )
 
         payment_plan = PaymentPlanService(payment_plan).execute_update_status_action(
-            input_data=input_data, user=request.user
+            input_data=input_data, user=request.user  # type: ignore
         )
         log_create(
             mapping=PaymentPlan.ACTIVITY_LOG_MAPPING,
@@ -194,7 +162,7 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
             new_object=payment_plan,
         )
 
-    def _get_action_permission(self, action_name: str) -> Permissions:
+    def _get_action_permission(self, action_name: str) -> Optional[str]:
         action_to_permissions_map = {
             PaymentPlan.Action.APPROVE.name: Permissions.PM_ACCEPTANCE_PROCESS_APPROVE.name,
             PaymentPlan.Action.AUTHORIZE.name: Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE.name,
@@ -212,7 +180,7 @@ class PaymentVerificationListView(mixins.ListModelMixin, GenericViewSet):
     serializer_class = PaymentVerificationSerializer
     queryset = PaymentVerification.objects.none()
 
-    def list(self, request, *args, **kwargs) -> Response:
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         service_provider_qs = ServiceProvider.objects.filter(cash_plans=OuterRef("pk")).distinct()
         fsp_qs = FinancialServiceProvider.objects.filter(
             delivery_mechanisms_per_payment_plan__payment_plan=OuterRef("pk")
@@ -289,9 +257,9 @@ class PaymentVerificationListView(mixins.ListModelMixin, GenericViewSet):
 
         # ordering
         if order_by_value := self.request.query_params.get("order_by"):
-            queryset = cash_plan_and_payment_plan_ordering(queryset, order_by_value)
+            queryset = cash_plan_and_payment_plan_ordering(queryset, order_by_value)  # type: ignore
 
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(queryset)  # type: ignore
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)

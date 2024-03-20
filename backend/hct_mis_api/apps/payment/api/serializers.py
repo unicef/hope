@@ -1,9 +1,10 @@
-from typing import Optional
+from datetime import datetime
+from typing import Optional, Union
 
 from rest_framework import serializers
 
-from hct_mis_api.apps.core.utils import encode_id_base64, encode_id_base64_required
-from hct_mis_api.apps.payment.models import PaymentPlan
+from hct_mis_api.apps.core.utils import encode_id_base64_required
+from hct_mis_api.apps.payment.models import Approval, CashPlan, PaymentPlan
 
 
 class FollowUpPaymentPlanSerializer(serializers.ModelSerializer):
@@ -23,12 +24,15 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
     follow_ups = FollowUpPaymentPlanSerializer(many=True, read_only=True)
     program = serializers.CharField(source="program.name")
     program_id = serializers.SerializerMethodField()
+    last_modified_date = serializers.SerializerMethodField()
+    last_modified_by = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentPlan
         fields = (
             "id",
             "unicef_id",
+            "name",
             "status",
             "target_population",
             "total_households_count",
@@ -42,13 +46,50 @@ class PaymentPlanSerializer(serializers.ModelSerializer):
             "follow_ups",
             "program",
             "program_id",
+            "last_modified_date",
+            "last_modified_by",
         )
 
-    def get_program_id(self, obj):
-        return encode_id_base64(obj.program.id, "Program")
+    def get_program_id(self, obj: PaymentPlan) -> str:
+        return encode_id_base64_required(obj.program.id, "Program")
 
-    def get_id(self, obj) -> str:
+    def get_id(self, obj: PaymentPlan) -> str:
         return encode_id_base64_required(str(obj.id), "PaymentPlan")
+
+    def _get_last_modified_data(self, obj: PaymentPlan) -> dict:
+        approval_process = obj.approval_process.first()
+        if approval_process:
+            if obj.status == PaymentPlan.Status.IN_APPROVAL:
+                return {
+                    "modified_date": approval_process.sent_for_approval_date,
+                    "modified_by": approval_process.sent_for_approval_by.username,
+                }
+            if obj.status == PaymentPlan.Status.IN_AUTHORIZATION:
+                if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
+                    return {
+                        "modified_date": approval.created_at,
+                        "modified_by": approval.created_by.username,
+                    }
+            if obj.status == PaymentPlan.Status.IN_REVIEW:
+                if (
+                    approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
+                    .order_by("created_at")
+                    .last()
+                ):
+                    return {
+                        "modified_date": approval.created_at,
+                        "modified_by": approval.created_by.username,
+                    }
+        return {
+            "modified_date": obj.updated_at,
+            "modified_by": None,
+        }
+
+    def get_last_modified_date(self, obj: PaymentPlan) -> Optional[datetime]:
+        return self._get_last_modified_data(obj)["modified_date"]
+
+    def get_last_modified_by(self, obj: PaymentPlan) -> Optional[str]:
+        return self._get_last_modified_data(obj)["modified_by"]
 
 
 class PaymentPlanBulkActionSerializer(serializers.Serializer):
@@ -74,17 +115,17 @@ class PaymentVerificationSerializer(serializers.Serializer):
     total_undelivered_quantity = serializers.DecimalField(max_digits=20, decimal_places=2)
     program_id = serializers.SerializerMethodField()
 
-    def get_id(self, obj) -> str:
+    def get_id(self, obj: Union[PaymentPlan, CashPlan]) -> str:
         return encode_id_base64_required(str(obj.id), obj.__class__.__name__)
 
-    def get_obj_type(self, obj) -> str:
+    def get_obj_type(self, obj: Union[PaymentPlan, CashPlan]) -> str:
         return obj.__class__.__name__
 
-    def get_total_number_of_households(self, obj) -> int:
+    def get_total_number_of_households(self, obj: Union[PaymentPlan, CashPlan]) -> int:
         return obj.payment_items.count()
 
-    def get_verification_status(self, obj) -> Optional[str]:
+    def get_verification_status(self, obj: Union[PaymentPlan, CashPlan]) -> Optional[str]:
         return obj.get_payment_verification_summary.status if obj.get_payment_verification_summary else None
 
-    def get_program_id(self, obj) -> str:
-        return encode_id_base64(str(obj.program.id), "Program")
+    def get_program_id(self, obj: Union[PaymentPlan, CashPlan]) -> str:
+        return encode_id_base64_required(str(obj.program.id), "Program")
