@@ -111,6 +111,7 @@ def pageNewFeedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
 def business_area() -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         **{
+            "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
             "code": "0060",
             "name": "Afghanistan",
             "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
