@@ -14,6 +14,7 @@ import { Title } from '@core/Title';
 import { UniversalMoment } from '@core/UniversalMoment';
 import { VerificationPlanActions } from './VerificationPlanActions';
 import { VerificationPlanDetailsChart } from './VerificationPlanChart';
+import { VerificationAdminButton } from '@core/AdminButton';
 
 const Container = styled.div`
   display: flex;
@@ -50,6 +51,7 @@ export function VerificationPlanDetails({
         <Title>
           <Typography variant="h6">
             {t('Verification Plan')} #{verificationPlan.unicefId}
+            <VerificationAdminButton currentUrl={document.location.href} id={verificationPlan.id} />
           </Typography>
         </Title>
         <VerificationPlanActions

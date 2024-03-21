@@ -16,6 +16,7 @@ import { targetPopulationBuildStatusToColor } from '@utils/utils';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
+import { GenericAdminButton } from "@core/AdminButton";
 
 const HeaderWrapper = styled.div`
   display: flex;
@@ -121,6 +122,7 @@ export function TargetPopulationPageHeader({
         </HeaderWrapper>
       }
       breadCrumbs={breadCrumbsItems}
+      flags={<GenericAdminButton currentUrl={document.location.href} />}
     >
       {buttons}
     </PageHeader>

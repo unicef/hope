@@ -18,6 +18,7 @@ import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymen
 import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
+import { GenericAdminButton } from '@core/AdminButton';
 
 const StatusWrapper = styled(Box)`
   width: 150px;
@@ -199,6 +200,7 @@ export function PaymentPlanDetailsHeader({
           ? breadCrumbsItems
           : null
       }
+      flags={<GenericAdminButton currentUrl={document.location.href} />}
     >
       {buttons}
     </PageHeader>

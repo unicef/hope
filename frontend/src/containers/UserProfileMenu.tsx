@@ -11,9 +11,8 @@ import {
 import * as React from 'react';
 import styled from 'styled-components';
 import { MeQuery } from '@generated/graphql';
-import {clearCache, generateAdminRedirect} from '@utils/utils';
+import { clearCache } from '@utils/utils';
 import { getClient } from '../apollo/client';
-import SendIcon from '@mui/icons-material/Send';
 
 const UserProfileButton = styled(Button)`
   && {
@@ -95,9 +94,6 @@ export function UserProfileMenu({
     return null;
   }
 
-  const adminRedirectUrl = generateAdminRedirect(document.location.href);
-  console.log(adminRedirectUrl);
-
   return (
     <>
       <UserProfileButton
@@ -107,17 +103,6 @@ export function UserProfileMenu({
       >
         <Avatar alt={meData.me.email} src="/static/images/avatar/1.jpg" />
         <MenuButtonText> {meData.me.email}</MenuButtonText>
-        {(meData.me.isSuperuser && adminRedirectUrl) ? (
-          <Button
-            variant="outlined"
-            size="small"
-            color="success"
-            href={adminRedirectUrl}
-            endIcon={<SendIcon />}
-            sx={{ ml: 2 }}
-        >
-        </Button>
-        ) : null }
       </UserProfileButton>
       <Popper
         open={open}

@@ -13,6 +13,7 @@ import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTabl
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
+import { GenericAdminButton } from '@core/AdminButton';
 
 const initialFilter = {
   search: '',
@@ -45,7 +46,7 @@ export function PaymentModulePage(): React.ReactElement {
 
   return (
     <>
-      <PageHeader title={t('Payment Module')}>
+      <PageHeader title={t('Payment Module')} flags={<GenericAdminButton currentUrl={document.location.href} />}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
           <ButtonTooltip
             variant="contained"

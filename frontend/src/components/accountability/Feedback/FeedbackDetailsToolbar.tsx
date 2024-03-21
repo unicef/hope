@@ -9,6 +9,7 @@ import { PageHeader } from '@core/PageHeader';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
+import { GenericAdminButton } from '@core/AdminButton';
 
 interface FeedbackDetailsToolbarProps {
   feedback: FeedbackQuery['feedback'];
@@ -41,6 +42,7 @@ export function FeedbackDetailsToolbar({
     <PageHeader
       title={`Feedback ID: ${feedback.unicefId}`}
       breadCrumbs={breadCrumbsItems}
+      flags={<GenericAdminButton currentUrl={document.location.href} />}
     >
       <Box display="flex" alignItems="center">
         {canEdit && (

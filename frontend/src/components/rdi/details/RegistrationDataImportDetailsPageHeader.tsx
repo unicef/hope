@@ -18,6 +18,8 @@ import { useProgramContext } from '../../../programContext';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
 import { RerunDedupe } from './RerunDedupe';
 import { RefuseRdiForm } from './refuseRdiForm';
+import { GenericAdminButton } from '@core/AdminButton';
+import * as React from 'react';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
@@ -140,6 +142,7 @@ export function RegistrationDataImportDetailsPageHeader({
         title={registration.name}
         breadCrumbs={canViewList ? breadCrumbsItems : null}
         handleBack={() => navigate(`/${baseUrl}/registration-data-import/`)}
+        flags={<GenericAdminButton currentUrl={document.location.href} />}
       >
         {registration.erased ? null : buttons}
       </PageHeader>

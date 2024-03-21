@@ -22,6 +22,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
+import { GenericAdminButton } from '@core/AdminButton';
 
 export function SurveyDetailsPage(): React.ReactElement {
   const { showMessage } = useSnackbar();
@@ -125,6 +126,7 @@ export function SurveyDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
+        flags={<GenericAdminButton currentUrl={document.location.href} />}
       >
         {renderActions()}
       </PageHeader>

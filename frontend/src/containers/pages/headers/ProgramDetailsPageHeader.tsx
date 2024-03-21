@@ -7,6 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
+import { GenericAdminButton } from '@core/AdminButton';
 
 export interface ProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
@@ -72,7 +73,11 @@ export function ProgramDetailsPageHeader({
   }
 
   return (
-    <PageHeader title={program.name} breadCrumbs={breadCrumbsItems}>
+    <PageHeader
+        title={program.name}
+        breadCrumbs={breadCrumbsItems}
+        flags={<GenericAdminButton currentUrl={document.location.href} />}
+    >
       {buttons}
     </PageHeader>
   );

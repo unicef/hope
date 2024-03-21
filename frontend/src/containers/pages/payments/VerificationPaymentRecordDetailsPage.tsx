@@ -16,6 +16,7 @@ import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
 import { isPermissionDeniedError } from '@utils/utils';
+import { VerificationAdminButton } from '@core/AdminButton';
 
 export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -64,6 +65,13 @@ export function VerificationPaymentRecordDetailsPage(): React.ReactElement {
     <PageHeader
       title={`${t('Payment Record ID')} ${paymentRecord.caId}`}
       breadCrumbs={breadCrumbsItems}
+      flags={
+        <VerificationAdminButton
+          currentUrl={document.location.href}
+          id={paymentRecord.verification.id}
+          isPlan={false}
+        />
+      }
     >
       {verification?.verificationChannel === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) &&
