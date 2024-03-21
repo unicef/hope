@@ -9,6 +9,9 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from page_object.admin_panel.admin_panel import AdminPanel
+from page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from page_object.grievance.feedback import Feedback
+from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from pytest_django.live_server_helper import LiveServer
@@ -90,9 +93,25 @@ def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
 
 
 @pytest.fixture
+def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
+    yield Feedback(browser)
+
+
+@pytest.fixture
+def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
+    yield FeedbackDetailsPage(browser)
+
+
+@pytest.fixture
+def pageNewFeedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
+    yield NewFeedback(browser)
+
+
+@pytest.fixture
 def business_area() -> BusinessArea:
     business_area, _ = BusinessArea.objects.get_or_create(
         **{
+            "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
             "code": "0060",
             "name": "Afghanistan",
             "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
@@ -131,6 +150,7 @@ def create_super_user(business_area: BusinessArea) -> User:
     country = Country.objects.get(name="Afghanistan")
     business_area.countries.add(country)
     user = UserFactory.create(
+        pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
         is_superuser=True,
         is_staff=True,
         username="superuser",
