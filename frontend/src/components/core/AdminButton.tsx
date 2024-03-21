@@ -1,6 +1,6 @@
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
-import Button from '@mui/material/Button';
 import { useCachedMe } from '@hooks/useCachedMe';
+import * as React from 'react';
 
 
 export const generateBaseAdminRedirect = (url: string) => {
@@ -61,7 +61,7 @@ interface VerificationAdminButtonProps extends GenericAdminButtonProps {
     isPlan?: boolean;
 }
 
-export const GenericAdminButton: Button<GenericAdminButtonProps> = ({
+export const GenericAdminButton: React.FC<GenericAdminButtonProps> = ({
     currentUrl,
 }) => {
     const { data } = useCachedMe();
@@ -74,7 +74,7 @@ export const GenericAdminButton: Button<GenericAdminButtonProps> = ({
     return null;
 };
 
-export const VerificationAdminButton: Button<VerificationAdminButtonProps> = ({
+export const VerificationAdminButton: React.FC<VerificationAdminButtonProps> = ({
     id,
     currentUrl,
     isPlan = true,
