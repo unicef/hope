@@ -1,10 +1,11 @@
-from datetime import date
+# from datetime import date
 from io import BytesIO
 from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
-from django.forms import model_to_dict
+
+# from django.forms import model_to_dict
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -15,10 +16,8 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
 )
-from hct_mis_api.apps.registration_datahub.models import (
+from hct_mis_api.apps.registration_datahub.models import (  # ImportedHousehold,; ImportedIndividual,
     ImportData,
-    ImportedHousehold,
-    ImportedIndividual,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
     RdiXlsxPeopleCreateTask,
