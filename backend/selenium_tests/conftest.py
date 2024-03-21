@@ -8,6 +8,8 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
+
+from page_object.registration_data_import.registration_data_import import RegistrationDataImport
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
@@ -105,6 +107,11 @@ def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDet
 @pytest.fixture
 def pageNewFeedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
     yield NewFeedback(browser)
+
+
+@pytest.fixture
+def pageRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RegistrationDataImport:
+    yield RegistrationDataImport(browser)
 
 
 @pytest.fixture

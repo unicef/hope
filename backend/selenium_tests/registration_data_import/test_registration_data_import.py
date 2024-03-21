@@ -11,3 +11,4 @@ class TestRegistrationDataImport:
     def test_smoke_registration_data_import(self, pageRegistrationDataImport: RegistrationDataImport) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
+        pageRegistrationDataImport.screenshot("1")
