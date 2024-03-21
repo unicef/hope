@@ -2145,7 +2145,7 @@ junit-xml = ">=1.8"
 name = "flaky"
 version = "3.8.1"
 description = "Plugin for pytest that automatically reruns flaky tests."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 files = [
@@ -5446,4 +5446,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.*"
-content-hash = "1a8b014dd002a9aea4071f1846dc3911299dee9d4d117913b30960c5ec55e5d5"
+content-hash = "059022b133aee6fcec3bb95bee076468bf4af9e66b416e0d578c238b26d9043a"

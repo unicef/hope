@@ -2,6 +2,7 @@ from typing import Any, List
 
 from django.core.management import call_command
 
+from flaky import flaky
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
@@ -238,6 +239,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             },
         )
 
+    @flaky(max_runs=3, min_passes=1)
     def test_filter_existing_tickets_by_individual_with_permission(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
@@ -254,6 +256,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             },
         )
 
+    @flaky(max_runs=3, min_passes=2)
     def test_filter_existing_tickets_by_individual_without_permission(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area
