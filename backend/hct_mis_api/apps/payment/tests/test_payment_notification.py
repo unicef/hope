@@ -1,6 +1,7 @@
 from typing import Any
 from unittest import mock
 
+from django.test import override_settings
 from django.utils import timezone
 
 from constance.test import override_config
@@ -267,5 +268,52 @@ class TestPaymentNotification(APITestCase):
         payment_notification.send_email_notification()
         self.assertEqual(
             mock_send.call_count,
+            3,
+        )
+
+    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
+    @override_config(ENABLE_MAILJET=True)
+    @override_settings(CATCH_ALL_EMAIL="catchallemail@email.com")
+    def test_send_email_notification_catch_all_email(self, mock_post: Any) -> None:
+        payment_notification = PaymentNotification(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
+        )
+        payment_notification.send_email_notification()
+        for mailjet_client in payment_notification.emails:
+            self.assertEqual(
+                mailjet_client.recipients,
+                ["catchallemail@email.com"],
+            )
+        self.assertEqual(
+            mock_post.call_count,
+            3,
+        )
+
+    @mock.patch("hct_mis_api.apps.utils.mailjet.requests.post")
+    @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
+    @override_config(ENABLE_MAILJET=True)
+    def test_send_email_notification_without_catch_all_email(self, mock_post: Any) -> None:
+        payment_notification = PaymentNotification(
+            self.payment_plan,
+            PaymentPlan.Action.SEND_FOR_APPROVAL.name,
+            self.user_action_user,
+            f"{timezone.now():%-d %B %Y}",
+        )
+        payment_notification.send_email_notification()
+        for mailjet_client in payment_notification.emails:
+            self.assertIn(
+                mailjet_client.recipients[0],
+                [
+                    self.user_with_approval_permission_partner_unicef.email,
+                    self.user_with_approval_permission_partner_with_program_access.email,
+                    self.user_with_partner_action_permissions_and_program_access.email,
+                ],
+            )
+        self.assertEqual(
+            mock_post.call_count,
             3,
         )

@@ -66,11 +66,9 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
         admin_area = AreaFactory(name="City Test", area_type=area_type, p_code="asdfgfhghkjltr")
 
         cls.program_individual_data_needed_true = ProgramFactory(
-            individual_data_needed=True,
             business_area=business_area_with_data_sharing,
         )
         cls.program_individual_data_needed_false = ProgramFactory(
-            individual_data_needed=False,
             business_area=business_area_with_data_sharing,
         )
 
@@ -268,7 +266,7 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
             dh_models.Individual.objects.filter(
                 mis_id__in=[self.individual_no_role_first.id, self.individual_no_role_second.id]
             ).count(),
-            2,
+            0,
             "All individuals for first household should be in datahub",
         )
         self.assertEqual(
@@ -348,8 +346,8 @@ class TestExternalCollectorSendTpToDatahub(TestCase):
 
         self.assertEqual(
             dh_models.Individual.objects.count(),
-            7,
-            "Only 7 individuals should be copied",
+            5,
+            "Only 5 individuals should be copied",
         )
         self.assertEqual(
             dh_models.IndividualRoleInHousehold.objects.count(),

@@ -5,7 +5,6 @@ export interface ProgramInterface {
   id: string;
   name: string;
   status: ProgramStatus;
-  individualDataNeeded: boolean;
   dataCollectingType: {
     id: string;
     householdFiltersAvailable: boolean;

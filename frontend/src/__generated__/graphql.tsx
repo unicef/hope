@@ -185,6 +185,13 @@ export type ApprovalProcessNodeEdge = {
   node?: Maybe<ApprovalProcessNode>;
 };
 
+export type AreaGroupNode = {
+  __typename?: 'AreaGroupNode';
+  ids?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
+  level?: Maybe<Scalars['Int']['output']>;
+  totalCount?: Maybe<Scalars['Int']['output']>;
+};
+
 export type AreaNode = Node & {
   __typename?: 'AreaNode';
   areaSet: AreaNodeConnection;
@@ -284,6 +291,7 @@ export type AreaTreeNode = {
   __typename?: 'AreaTreeNode';
   areas?: Maybe<Array<Maybe<AreaTreeNode>>>;
   id?: Maybe<Scalars['ID']['output']>;
+  level?: Maybe<Scalars['Int']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   pCode?: Maybe<Scalars['String']['output']>;
 };
@@ -442,7 +450,9 @@ export type BusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int']['output'];
   deduplicationIgnoreWithdraw: Scalars['Boolean']['output'];
   deduplicationPossibleDuplicateScore: Scalars['Float']['output'];
+  enableEmailNotification: Scalars['Boolean']['output'];
   feedbackSet: FeedbackNodeConnection;
+  financialserviceproviderSet: FinancialServiceProviderNodeConnection;
   hasDataSharingAgreement: Scalars['Boolean']['output'];
   householdSet: HouseholdNodeConnection;
   id: Scalars['ID']['output'];
@@ -458,6 +468,7 @@ export type BusinessAreaNode = Node & {
   messageSet: CommunicationMessageNodeConnection;
   name: Scalars['String']['output'];
   parent?: Maybe<UserBusinessAreaNode>;
+  partnerSet: Array<PartnerNodeForProgram>;
   paymentSet: PaymentNodeConnection;
   paymentplanSet: PaymentPlanNodeConnection;
   paymentrecordSet: PaymentRecordNodeConnection;
@@ -471,6 +482,7 @@ export type BusinessAreaNode = Node & {
   regionName: Scalars['String']['output'];
   registrationdataimportSet: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
+  ruleSet: SteficonRuleNodeConnection;
   screenBeneficiary: Scalars['Boolean']['output'];
   serviceproviderSet: ServiceProviderNodeConnection;
   slug: Scalars['String']['output'];
@@ -511,6 +523,15 @@ export type BusinessAreaNodeDataCollectingTypesArgs = {
 
 
 export type BusinessAreaNodeFeedbackSetArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type BusinessAreaNodeFinancialserviceproviderSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -602,6 +623,15 @@ export type BusinessAreaNodeRegistrationdataimportSetArgs = {
 
 
 export type BusinessAreaNodeReportsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type BusinessAreaNodeRuleSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -1028,7 +1058,6 @@ export type CopyProgramInput = {
   endDate?: InputMaybe<Scalars['Date']['input']>;
   frequencyOfPayments?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['String']['input'];
-  individualDataNeeded?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   partners?: InputMaybe<Array<InputMaybe<PartnerProgramInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
@@ -1202,7 +1231,6 @@ export type CreateProgramInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   endDate?: InputMaybe<Scalars['Date']['input']>;
   frequencyOfPayments?: InputMaybe<Scalars['String']['input']>;
-  individualDataNeeded?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   partners?: InputMaybe<Array<InputMaybe<PartnerProgramInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
@@ -1766,6 +1794,7 @@ export enum FinancialServiceProviderCommunicationChannel {
 
 export type FinancialServiceProviderNode = Node & {
   __typename?: 'FinancialServiceProviderNode';
+  allowedBusinessAreas: UserBusinessAreaNodeConnection;
   communicationChannel: FinancialServiceProviderCommunicationChannel;
   createdAt: Scalars['DateTime']['output'];
   createdBy?: Maybe<UserNode>;
@@ -1783,6 +1812,16 @@ export type FinancialServiceProviderNode = Node & {
   updatedAt: Scalars['DateTime']['output'];
   visionVendorNumber: Scalars['String']['output'];
   xlsxTemplates: FinancialServiceProviderXlsxTemplateNodeConnection;
+};
+
+
+export type FinancialServiceProviderNodeAllowedBusinessAreasArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['UUID']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2160,6 +2199,11 @@ export enum HouseholdCollectIndividualData {
   A_3 = 'A_3'
 }
 
+export enum HouseholdCollectType {
+  Single = 'SINGLE',
+  Standard = 'STANDARD'
+}
+
 export type HouseholdDataChangeApproveMutation = {
   __typename?: 'HouseholdDataChangeApproveMutation';
   grievanceTicket?: Maybe<GrievanceTicketNode>;
@@ -2190,6 +2234,7 @@ export type HouseholdNode = Node & {
   childrenCount?: Maybe<Scalars['Int']['output']>;
   childrenDisabledCount?: Maybe<Scalars['Int']['output']>;
   collectIndividualData: HouseholdCollectIndividualData;
+  collectType: HouseholdCollectType;
   complaintTicketDetails: TicketComplaintDetailsNodeConnection;
   consent?: Maybe<Scalars['Boolean']['output']>;
   consentSharing?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -2690,6 +2735,11 @@ export enum ImportedHouseholdCollectIndividualData {
   A_2 = 'A_2'
 }
 
+export enum ImportedHouseholdCollectType {
+  Single = 'SINGLE',
+  Standard = 'STANDARD'
+}
+
 export enum ImportedHouseholdConsentSharing {
   A = 'A_',
   GovernmentPartner = 'GOVERNMENT_PARTNER',
@@ -2878,6 +2928,7 @@ export type ImportedHouseholdNode = Node & {
   adminAreaTitle: Scalars['String']['output'];
   childHoh?: Maybe<Scalars['Boolean']['output']>;
   collectIndividualData: ImportedHouseholdCollectIndividualData;
+  collectType: ImportedHouseholdCollectType;
   consent?: Maybe<Scalars['Boolean']['output']>;
   consentSharing: ImportedHouseholdConsentSharing;
   consentSign: Scalars['String']['output'];
@@ -4392,7 +4443,8 @@ export type PaginatedPaymentRecordsAndPaymentsNode = {
 
 export type PartnerNodeForProgram = {
   __typename?: 'PartnerNodeForProgram';
-  adminAreas?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  adminAreas?: Maybe<Array<Maybe<AreaGroupNode>>>;
+  allowedBusinessAreas: UserBusinessAreaNodeConnection;
   areaAccess?: Maybe<Scalars['String']['output']>;
   grievanceticketSet: GrievanceTicketNodeConnection;
   id?: Maybe<Scalars['ID']['output']>;
@@ -4407,6 +4459,16 @@ export type PartnerNodeForProgram = {
   rght: Scalars['Int']['output'];
   treeId: Scalars['Int']['output'];
   userSet: UserNodeConnection;
+};
+
+
+export type PartnerNodeForProgramAllowedBusinessAreasArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['UUID']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -4444,6 +4506,7 @@ export type PartnerProgramInput = {
 
 export type PartnerType = {
   __typename?: 'PartnerType';
+  allowedBusinessAreas: UserBusinessAreaNodeConnection;
   grievanceticketSet: GrievanceTicketNodeConnection;
   id: Scalars['ID']['output'];
   individualIdentities: IndividualIdentityNodeConnection;
@@ -4457,6 +4520,16 @@ export type PartnerType = {
   rght: Scalars['Int']['output'];
   treeId: Scalars['Int']['output'];
   userSet: UserNodeConnection;
+};
+
+
+export type PartnerTypeAllowedBusinessAreasArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['UUID']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -5276,7 +5349,6 @@ export type ProgramNode = Node & {
   households: HouseholdNodeConnection;
   id: Scalars['ID']['output'];
   individualCount: Scalars['Int']['output'];
-  individualDataNeeded?: Maybe<Scalars['Boolean']['output']>;
   individuals: IndividualNodeConnection;
   isRemoved: Scalars['Boolean']['output'];
   isVisible: Scalars['Boolean']['output'];
@@ -7514,6 +7586,7 @@ export type SplitPaymentPlanMutation = {
 
 export type SteficonRuleNode = Node & {
   __typename?: 'SteficonRuleNode';
+  allowedBusinessAreas: UserBusinessAreaNodeConnection;
   createdAt: Scalars['DateTime']['output'];
   createdBy?: Maybe<UserNode>;
   definition: Scalars['String']['output'];
@@ -7529,6 +7602,16 @@ export type SteficonRuleNode = Node & {
   type: RuleType;
   updatedAt: Scalars['DateTime']['output'];
   updatedBy?: Maybe<UserNode>;
+};
+
+
+export type SteficonRuleNodeAllowedBusinessAreasArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  id?: InputMaybe<Scalars['UUID']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -8369,7 +8452,6 @@ export type UpdateProgramInput = {
   endDate?: InputMaybe<Scalars['Date']['input']>;
   frequencyOfPayments?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['String']['input'];
-  individualDataNeeded?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   partners?: InputMaybe<Array<InputMaybe<PartnerProgramInput>>>;
   populationGoal?: InputMaybe<Scalars['Int']['input']>;
@@ -8418,7 +8500,9 @@ export type UserBusinessAreaNode = Node & {
   deduplicationGoldenRecordDuplicatesPercentage: Scalars['Int']['output'];
   deduplicationIgnoreWithdraw: Scalars['Boolean']['output'];
   deduplicationPossibleDuplicateScore: Scalars['Float']['output'];
+  enableEmailNotification: Scalars['Boolean']['output'];
   feedbackSet: FeedbackNodeConnection;
+  financialserviceproviderSet: FinancialServiceProviderNodeConnection;
   hasDataSharingAgreement: Scalars['Boolean']['output'];
   householdSet: HouseholdNodeConnection;
   id: Scalars['ID']['output'];
@@ -8434,6 +8518,7 @@ export type UserBusinessAreaNode = Node & {
   messageSet: CommunicationMessageNodeConnection;
   name: Scalars['String']['output'];
   parent?: Maybe<UserBusinessAreaNode>;
+  partnerSet: Array<PartnerNodeForProgram>;
   paymentSet: PaymentNodeConnection;
   paymentplanSet: PaymentPlanNodeConnection;
   paymentrecordSet: PaymentRecordNodeConnection;
@@ -8448,6 +8533,7 @@ export type UserBusinessAreaNode = Node & {
   regionName: Scalars['String']['output'];
   registrationdataimportSet: RegistrationDataImportNodeConnection;
   reports: ReportNodeConnection;
+  ruleSet: SteficonRuleNodeConnection;
   screenBeneficiary: Scalars['Boolean']['output'];
   serviceproviderSet: ServiceProviderNodeConnection;
   slug: Scalars['String']['output'];
@@ -8488,6 +8574,15 @@ export type UserBusinessAreaNodeDataCollectingTypesArgs = {
 
 
 export type UserBusinessAreaNodeFeedbackSetArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type UserBusinessAreaNodeFinancialserviceproviderSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -8579,6 +8674,15 @@ export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
 
 
 export type UserBusinessAreaNodeReportsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type UserBusinessAreaNodeRuleSetArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -9495,7 +9599,7 @@ export type CreateProgramMutationVariables = Exact<{
 }>;
 
 
-export type CreateProgramMutation = { __typename?: 'Mutations', createProgram?: { __typename?: 'CreateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, status: ProgramStatus, startDate: any, endDate: any, caId?: string | null, budget?: any | null, description: string, frequencyOfPayments: ProgramFrequencyOfPayments, sector: ProgramSector, scope?: ProgramScope | null, cashPlus: boolean, populationGoal: number, individualDataNeeded?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean } | null } | null } | null };
+export type CreateProgramMutation = { __typename?: 'Mutations', createProgram?: { __typename?: 'CreateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, status: ProgramStatus, startDate: any, endDate: any, caId?: string | null, budget?: any | null, description: string, frequencyOfPayments: ProgramFrequencyOfPayments, sector: ProgramSector, scope?: ProgramScope | null, cashPlus: boolean, populationGoal: number, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean } | null } | null } | null };
 
 export type DeleteProgramMutationVariables = Exact<{
   programId: Scalars['String']['input'];
@@ -9510,7 +9614,7 @@ export type UpdateProgramMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<string | null> | null } | null> | null } | null } | null };
+export type UpdateProgramMutation = { __typename?: 'Mutations', updateProgram?: { __typename?: 'UpdateProgram', validationErrors?: any | null, program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<{ __typename?: 'AreaGroupNode', ids?: Array<string | null> | null, level?: number | null, totalCount?: number | null } | null> | null } | null> | null } | null } | null };
 
 export type CreateRegistrationKoboImportMutationVariables = Exact<{
   registrationDataImportData: RegistrationKoboImportMutationInput;
@@ -9741,7 +9845,7 @@ export type AllAreasTreeQueryVariables = Exact<{
 }>;
 
 
-export type AllAreasTreeQuery = { __typename?: 'Query', allAreasTree?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null, areas?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null, areas?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null, areas?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null } | null> | null } | null> | null } | null> | null } | null> | null };
+export type AllAreasTreeQuery = { __typename?: 'Query', allAreasTree?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, pCode?: string | null, name?: string | null, level?: number | null, areas?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, level?: number | null, pCode?: string | null, areas?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null, areas?: Array<{ __typename?: 'AreaTreeNode', id?: string | null, name?: string | null, pCode?: string | null } | null> | null } | null> | null } | null> | null } | null> | null };
 
 export type AllBusinessAreasQueryVariables = Exact<{
   slug?: InputMaybe<Scalars['String']['input']>;
@@ -10443,7 +10547,7 @@ export type AllProgramsQueryVariables = Exact<{
 }>;
 
 
-export type AllProgramsQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, populationGoal: number, sector: ProgramSector, totalNumberOfHouseholds?: number | null, individualDataNeeded?: boolean | null, totalNumberOfHouseholdsWithTpInProgram?: number | null } | null } | null> } | null };
+export type AllProgramsQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, populationGoal: number, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null } | null } | null> } | null };
 
 export type AllProgramsForChoicesQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
@@ -10462,14 +10566,14 @@ export type AllProgramsForChoicesQueryVariables = Exact<{
 }>;
 
 
-export type AllProgramsForChoicesQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, individualDataNeeded?: boolean | null, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, type?: DataCollectingTypeType | null, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null } | null } | null> } | null };
+export type AllProgramsForChoicesQuery = { __typename?: 'Query', allPrograms?: { __typename?: 'ProgramNodeConnection', totalCount?: number | null, edgeCount?: number | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, endCursor?: string | null, startCursor?: string | null }, edges: Array<{ __typename?: 'ProgramNodeEdge', cursor: string, node?: { __typename?: 'ProgramNode', id: string, name: string, status: ProgramStatus, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, type?: DataCollectingTypeType | null, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null } | null } | null> } | null };
 
 export type ProgramQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, individualDataNeeded?: boolean | null, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<string | null> | null } | null> | null } | null };
+export type ProgramQuery = { __typename?: 'Query', program?: { __typename?: 'ProgramNode', id: string, name: string, programmeCode?: string | null, startDate: any, endDate: any, status: ProgramStatus, caId?: string | null, caHashId?: string | null, description: string, budget?: any | null, frequencyOfPayments: ProgramFrequencyOfPayments, cashPlus: boolean, populationGoal: number, scope?: ProgramScope | null, sector: ProgramSector, totalNumberOfHouseholds?: number | null, totalNumberOfHouseholdsWithTpInProgram?: number | null, administrativeAreasOfImplementation: string, version: any, dataCollectingType?: { __typename?: 'DataCollectingTypeNode', id: string, code: string, label: string, active: boolean, individualFiltersAvailable: boolean, householdFiltersAvailable: boolean, description: string } | null, partners?: Array<{ __typename?: 'PartnerNodeForProgram', id?: string | null, name?: string | null, areaAccess?: string | null, adminAreas?: Array<{ __typename?: 'AreaGroupNode', ids?: Array<string | null> | null, level?: number | null, totalCount?: number | null } | null> | null } | null> | null } | null };
 
 export type ProgrammeChoiceDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -14397,7 +14501,6 @@ export const CreateProgramDocument = gql`
       scope
       cashPlus
       populationGoal
-      individualDataNeeded
       dataCollectingType {
         id
         code
@@ -14491,7 +14594,6 @@ export const UpdateProgramDocument = gql`
       totalNumberOfHouseholds
       totalNumberOfHouseholdsWithTpInProgram
       administrativeAreasOfImplementation
-      individualDataNeeded
       version
       dataCollectingType {
         id
@@ -14506,7 +14608,11 @@ export const UpdateProgramDocument = gql`
         id
         name
         areaAccess
-        adminAreas
+        adminAreas {
+          ids
+          level
+          totalCount
+        }
       }
     }
     validationErrors
@@ -15727,11 +15833,13 @@ export const AllAreasTreeDocument = gql`
     query AllAreasTree($businessArea: String!) {
   allAreasTree(businessArea: $businessArea) {
     id
-    name
     pCode
+    name
+    level
     areas {
       id
       name
+      level
       pCode
       areas {
         id
@@ -20680,7 +20788,6 @@ export const AllProgramsDocument = gql`
         populationGoal
         sector
         totalNumberOfHouseholds
-        individualDataNeeded
         totalNumberOfHouseholdsWithTpInProgram
       }
     }
@@ -20764,7 +20871,6 @@ export const AllProgramsForChoicesDocument = gql`
         id
         name
         status
-        individualDataNeeded
         dataCollectingType {
           id
           code
@@ -20846,7 +20952,6 @@ export const ProgramDocument = gql`
     totalNumberOfHouseholds
     totalNumberOfHouseholdsWithTpInProgram
     administrativeAreasOfImplementation
-    individualDataNeeded
     version
     dataCollectingType {
       id
@@ -20861,7 +20966,11 @@ export const ProgramDocument = gql`
       id
       name
       areaAccess
-      adminAreas
+      adminAreas {
+        ids
+        level
+        totalCount
+      }
     }
   }
 }
@@ -23205,6 +23314,7 @@ export type ResolversTypes = {
   ApprovalProcessNode: ResolverTypeWrapper<ApprovalProcessNode>;
   ApprovalProcessNodeConnection: ResolverTypeWrapper<ApprovalProcessNodeConnection>;
   ApprovalProcessNodeEdge: ResolverTypeWrapper<ApprovalProcessNodeEdge>;
+  AreaGroupNode: ResolverTypeWrapper<AreaGroupNode>;
   AreaNode: ResolverTypeWrapper<AreaNode>;
   AreaNodeConnection: ResolverTypeWrapper<AreaNodeConnection>;
   AreaNodeEdge: ResolverTypeWrapper<AreaNodeEdge>;
@@ -23372,6 +23482,7 @@ export type ResolversTypes = {
   GrievanceTicketNodeEdge: ResolverTypeWrapper<GrievanceTicketNodeEdge>;
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>;
   HouseholdCollectIndividualData: HouseholdCollectIndividualData;
+  HouseholdCollectType: HouseholdCollectType;
   HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>;
   HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras;
   HouseholdDeleteIssueTypeExtras: HouseholdDeleteIssueTypeExtras;
@@ -23394,6 +23505,7 @@ export type ResolversTypes = {
   ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>;
   ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>;
   ImportedHouseholdCollectIndividualData: ImportedHouseholdCollectIndividualData;
+  ImportedHouseholdCollectType: ImportedHouseholdCollectType;
   ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing;
   ImportedHouseholdCurrency: ImportedHouseholdCurrency;
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>;
@@ -23718,6 +23830,7 @@ export type ResolversParentTypes = {
   ApprovalProcessNode: ApprovalProcessNode;
   ApprovalProcessNodeConnection: ApprovalProcessNodeConnection;
   ApprovalProcessNodeEdge: ApprovalProcessNodeEdge;
+  AreaGroupNode: AreaGroupNode;
   AreaNode: AreaNode;
   AreaNodeConnection: AreaNodeConnection;
   AreaNodeEdge: AreaNodeEdge;
@@ -24146,25 +24259,6 @@ export type ResolversParentTypes = {
   _TableTotalCashTransferredDataNode: _TableTotalCashTransferredDataNode;
 };
 
-export type ClientDirectiveArgs = {
-  always?: Maybe<Scalars['Boolean']['input']>;
-};
-
-export type ClientDirectiveResolver<Result, Parent, ContextType = any, Args = ClientDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
-
-export type ConnectionDirectiveArgs = {
-  filter?: Maybe<Array<Scalars['String']['input']>>;
-  key: Scalars['String']['input'];
-};
-
-export type ConnectionDirectiveResolver<Result, Parent, ContextType = any, Args = ConnectionDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
-
-export type ExportDirectiveArgs = {
-  as: Scalars['String']['input'];
-};
-
-export type ExportDirectiveResolver<Result, Parent, ContextType = any, Args = ExportDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
-
 export type AccountabilitySampleSizeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AccountabilitySampleSizeNode'] = ResolversParentTypes['AccountabilitySampleSizeNode']> = {
   numberOfRecipients?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -24229,6 +24323,13 @@ export type ApprovalProcessNodeEdgeResolvers<ContextType = any, ParentType exten
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type AreaGroupNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaGroupNode'] = ResolversParentTypes['AreaGroupNode']> = {
+  ids?: Resolver<Maybe<Array<Maybe<ResolversTypes['ID']>>>, ParentType, ContextType>;
+  level?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type AreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaNode'] = ResolversParentTypes['AreaNode']> = {
   areaSet?: Resolver<ResolversTypes['AreaNodeConnection'], ParentType, ContextType, Partial<AreaNodeAreaSetArgs>>;
   areaType?: Resolver<ResolversTypes['AreaTypeNode'], ParentType, ContextType>;
@@ -24271,6 +24372,7 @@ export type AreaNodeEdgeResolvers<ContextType = any, ParentType extends Resolver
 export type AreaTreeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AreaTreeNode'] = ResolversParentTypes['AreaTreeNode']> = {
   areas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaTreeNode']>>>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  level?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   pCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -24392,7 +24494,9 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  enableEmailNotification?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeFeedbackSetArgs>>;
+  financialserviceproviderSet?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeFinancialserviceproviderSetArgs>>;
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeHouseholdSetArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -24408,6 +24512,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   messageSet?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeMessageSetArgs>>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>;
+  partnerSet?: Resolver<Array<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>;
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodePaymentSetArgs>>;
   paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodePaymentplanSetArgs>>;
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodePaymentrecordSetArgs>>;
@@ -24421,6 +24526,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeRegistrationdataimportSetArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeReportsArgs>>;
+  ruleSet?: Resolver<ResolversTypes['SteficonRuleNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeRuleSetArgs>>;
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, Partial<BusinessAreaNodeServiceproviderSetArgs>>;
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -25108,6 +25214,7 @@ export type FinalizeTargetPopulationMutationResolvers<ContextType = any, ParentT
 };
 
 export type FinancialServiceProviderNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinancialServiceProviderNode'] = ResolversParentTypes['FinancialServiceProviderNode']> = {
+  allowedBusinessAreas?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<FinancialServiceProviderNodeAllowedBusinessAreasArgs>>;
   communicationChannel?: Resolver<ResolversTypes['FinancialServiceProviderCommunicationChannel'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
@@ -25395,6 +25502,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   childrenCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   childrenDisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   collectIndividualData?: Resolver<ResolversTypes['HouseholdCollectIndividualData'], ParentType, ContextType>;
+  collectType?: Resolver<ResolversTypes['HouseholdCollectType'], ParentType, ContextType>;
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, Partial<HouseholdNodeComplaintTicketDetailsArgs>>;
   consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   consentSharing?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
@@ -25616,6 +25724,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   adminAreaTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   childHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   collectIndividualData?: Resolver<ResolversTypes['ImportedHouseholdCollectIndividualData'], ParentType, ContextType>;
+  collectType?: Resolver<ResolversTypes['ImportedHouseholdCollectType'], ParentType, ContextType>;
   consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   consentSharing?: Resolver<ResolversTypes['ImportedHouseholdConsentSharing'], ParentType, ContextType>;
   consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -26225,7 +26334,8 @@ export type PaginatedPaymentRecordsAndPaymentsNodeResolvers<ContextType = any, P
 };
 
 export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerNodeForProgram'] = ResolversParentTypes['PartnerNodeForProgram']> = {
-  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  adminAreas?: Resolver<Maybe<Array<Maybe<ResolversTypes['AreaGroupNode']>>>, ParentType, ContextType>;
+  allowedBusinessAreas?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<PartnerNodeForProgramAllowedBusinessAreasArgs>>;
   areaAccess?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<PartnerNodeForProgramGrievanceticketSetArgs>>;
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
@@ -26244,6 +26354,7 @@ export type PartnerNodeForProgramResolvers<ContextType = any, ParentType extends
 };
 
 export type PartnerTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PartnerType'] = ResolversParentTypes['PartnerType']> = {
+  allowedBusinessAreas?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<PartnerTypeAllowedBusinessAreasArgs>>;
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, Partial<PartnerTypeGrievanceticketSetArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualIdentities?: Resolver<ResolversTypes['IndividualIdentityNodeConnection'], ParentType, ContextType, Partial<PartnerTypeIndividualIdentitiesArgs>>;
@@ -26673,7 +26784,6 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<ProgramNodeHouseholdsArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   individualCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, Partial<ProgramNodeIndividualsArgs>>;
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   isVisible?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -27388,6 +27498,7 @@ export type SplitPaymentPlanMutationResolvers<ContextType = any, ParentType exte
 };
 
 export type SteficonRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNode'] = ResolversParentTypes['SteficonRuleNode']> = {
+  allowedBusinessAreas?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, Partial<SteficonRuleNodeAllowedBusinessAreasArgs>>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   definition?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -28024,7 +28135,9 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   deduplicationGoldenRecordDuplicatesPercentage?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   deduplicationIgnoreWithdraw?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   deduplicationPossibleDuplicateScore?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  enableEmailNotification?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   feedbackSet?: Resolver<ResolversTypes['FeedbackNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeFeedbackSetArgs>>;
+  financialserviceproviderSet?: Resolver<ResolversTypes['FinancialServiceProviderNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeFinancialserviceproviderSetArgs>>;
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeHouseholdSetArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -28040,6 +28153,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   messageSet?: Resolver<ResolversTypes['CommunicationMessageNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeMessageSetArgs>>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>;
+  partnerSet?: Resolver<Array<ResolversTypes['PartnerNodeForProgram']>, ParentType, ContextType>;
   paymentSet?: Resolver<ResolversTypes['PaymentNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodePaymentSetArgs>>;
   paymentplanSet?: Resolver<ResolversTypes['PaymentPlanNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodePaymentplanSetArgs>>;
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodePaymentrecordSetArgs>>;
@@ -28054,6 +28168,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeRegistrationdataimportSetArgs>>;
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeReportsArgs>>;
+  ruleSet?: Resolver<ResolversTypes['SteficonRuleNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeRuleSetArgs>>;
   screenBeneficiary?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, Partial<UserBusinessAreaNodeServiceproviderSetArgs>>;
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -28197,6 +28312,7 @@ export type Resolvers<ContextType = any> = {
   ApprovalProcessNode?: ApprovalProcessNodeResolvers<ContextType>;
   ApprovalProcessNodeConnection?: ApprovalProcessNodeConnectionResolvers<ContextType>;
   ApprovalProcessNodeEdge?: ApprovalProcessNodeEdgeResolvers<ContextType>;
+  AreaGroupNode?: AreaGroupNodeResolvers<ContextType>;
   AreaNode?: AreaNodeResolvers<ContextType>;
   AreaNodeConnection?: AreaNodeConnectionResolvers<ContextType>;
   AreaNodeEdge?: AreaNodeEdgeResolvers<ContextType>;
@@ -28553,8 +28669,3 @@ export type Resolvers<ContextType = any> = {
   _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>;
 };
 
-export type DirectiveResolvers<ContextType = any> = {
-  client?: ClientDirectiveResolver<any, any, ContextType>;
-  connection?: ConnectionDirectiveResolver<any, any, ContextType>;
-  export?: ExportDirectiveResolver<any, any, ContextType>;
-};
