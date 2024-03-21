@@ -3,6 +3,7 @@ import {
   ApolloClient,
   NormalizedCacheObject,
 } from '@apollo/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { ReactNode, useEffect, useState } from 'react';
@@ -23,6 +24,7 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
     ApolloClient<NormalizedCacheObject> | undefined
   >();
+  const queryClient = new QueryClient();
 
   useEffect(() => {
     getClient().then((client) => {
@@ -35,19 +37,21 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   }
 
   return (
-    <ApolloProvider client={apolloClient}>
-      <MuiThemeProvider theme={theme}>
-        <StyledThemeProvider theme={theme}>
-          <ConfirmationDialogProvider>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <CssBaseline />
-              <ProgramProvider>
-                <SnackbarProvider>{children}</SnackbarProvider>
-              </ProgramProvider>
-            </LocalizationProvider>
-          </ConfirmationDialogProvider>
-        </StyledThemeProvider>
-      </MuiThemeProvider>
-    </ApolloProvider>
+    <QueryClientProvider client={queryClient}>
+      <ApolloProvider client={apolloClient}>
+        <MuiThemeProvider theme={theme}>
+          <StyledThemeProvider theme={theme}>
+            <ConfirmationDialogProvider>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <CssBaseline />
+                <ProgramProvider>
+                  <SnackbarProvider>{children}</SnackbarProvider>
+                </ProgramProvider>
+              </LocalizationProvider>
+            </ConfirmationDialogProvider>
+          </StyledThemeProvider>
+        </MuiThemeProvider>
+      </ApolloProvider>
+    </QueryClientProvider>
   );
 };
