@@ -26,13 +26,11 @@ from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 logger = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass(init=False)
-class FlexibleArgumentsDataclass:
-    def __init__(self, **kwargs: Any) -> None:
-        names = set([f.name for f in dataclasses.fields(self)])
-        for k, v in kwargs.items():
-            if k in names:
-                setattr(self, k, v)
+class FlexibleArgumentsDataclassMixin:
+    @classmethod
+    def create_from_dict(cls, _dict: Dict) -> Any:
+        class_fields = {f.name for f in dataclasses.fields(cls)}
+        return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 
 
 class ReadOnlyModelSerializer(serializers.ModelSerializer):
@@ -138,7 +136,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         ]
 
 
-class PaymentRecordData(FlexibleArgumentsDataclass):
+@dataclasses.dataclass()
+class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     id: int
     remote_id: str
     created: str
@@ -152,7 +151,8 @@ class PaymentRecordData(FlexibleArgumentsDataclass):
     message: Optional[str] = None
 
 
-class PaymentInstructionData(FlexibleArgumentsDataclass):
+@dataclasses.dataclass()
+class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
     remote_id: str
     unicef_id: str
     status: str  # "DRAFT"
@@ -163,7 +163,8 @@ class PaymentInstructionData(FlexibleArgumentsDataclass):
     id: Optional[int] = None
 
 
-class FspData(FlexibleArgumentsDataclass):
+@dataclasses.dataclass()
+class FspData(FlexibleArgumentsDataclassMixin):
     id: int
     remote_id: str
     name: str
@@ -172,7 +173,8 @@ class FspData(FlexibleArgumentsDataclass):
     payload: dict
 
 
-class AddRecordsResponseData(FlexibleArgumentsDataclass):
+@dataclasses.dataclass()
+class AddRecordsResponseData(FlexibleArgumentsDataclassMixin):
     remote_id: str  # payment instruction id
     records: Optional[dict] = None  # {"record_code": "remote_id"}
     errors: Optional[dict] = None  # {index: "error_message"}
@@ -227,11 +229,11 @@ class PaymentGatewayAPI:
 
     def get_fsps(self) -> List[FspData]:
         response_data = self._get(self.Endpoints.GET_FSPS)
-        return [FspData(**fsp_data) for fsp_data in response_data]
+        return [FspData.create_from_dict(**fsp_data) for fsp_data in response_data]
 
     def create_payment_instruction(self, data: dict) -> PaymentInstructionData:
         response_data = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
-        return PaymentInstructionData(**response_data)
+        return PaymentInstructionData.create_from_dict(**response_data)
 
     def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
@@ -257,13 +259,13 @@ class PaymentGatewayAPI:
             serializer.data,
             validate_response=validate_response,
         )
-        return AddRecordsResponseData(**response_data)
+        return AddRecordsResponseData.create_from_dict(**response_data)
 
     def get_records_for_payment_instruction(self, payment_instruction_remote_id: str) -> List[PaymentRecordData]:
         response_data = self._get(
             f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}"
         )
-        return [PaymentRecordData(**record_data) for record_data in response_data]
+        return [PaymentRecordData.create_from_dict(**record_data) for record_data in response_data]
 
 
 class PaymentGatewayService:
