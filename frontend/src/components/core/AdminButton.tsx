@@ -58,7 +58,7 @@ interface GenericAdminButtonProps {
 
 interface VerificationAdminButtonProps extends GenericAdminButtonProps {
     id: string;
-    isPlan: boolean;
+    isPlan?: boolean;
 }
 
 export const GenericAdminButton: Button<GenericAdminButtonProps> = ({
