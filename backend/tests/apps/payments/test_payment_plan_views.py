@@ -49,17 +49,6 @@ class PaymentPlanTestMixin:
         self.payment_plan2.refresh_from_db()
         self.payment_plan3.refresh_from_db()
 
-        self.url = reverse(
-            "api:payments:payment-plans-managerial-list", kwargs={"business_area": self.afghanistan.slug}
-        )
-        self.url = reverse(
-            "api:payments:payment-plans-list",
-            kwargs={
-                "business_area": self.afghanistan.slug,
-                "program_id": id_to_base64(self.program1.id, "Program"),
-            },
-        )
-
 
 class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
     def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:

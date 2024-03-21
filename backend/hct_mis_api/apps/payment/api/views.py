@@ -37,6 +37,7 @@ from hct_mis_api.apps.account.api.permissions import (
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
+from hct_mis_api.apps.core.api.mixins import BusinessAreaMixin, BusinessAreaProgramMixin
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -66,12 +67,9 @@ from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanS
 from hct_mis_api.apps.program.models import Program
 
 
-class PaymentPlanViewSet(viewsets.ModelViewSet):
+class PaymentPlanMixin:
     serializer_class = PaymentPlanSerializer
-    permission_classes = [
-        IsAuthenticated,
-        PMViewListPermission,
-    ]
+    permission_classes = []
     filter_backends = (
         filters.DjangoFilterBackend,
         SearchFilter,
@@ -84,33 +82,28 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
         "^name",
     )
 
+
+class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, viewsets.ModelViewSet):
+    permission_classes = [
+        IsAuthenticated,
+        PMViewListPermission,
+    ]
+
     def get_queryset(self) -> QuerySet:
-        business_area = get_object_or_404(BusinessArea, slug=self.kwargs.get("business_area"))
-        program = get_object_or_404(Program, id=decode_id_string(self.kwargs.get("program_id")))
+        business_area = self.get_business_area()
+        program = self.get_program()
         return PaymentPlan.objects.filter(business_area=business_area, program=program)
 
 
-class PaymentPlanManagerialViewSet(viewsets.ModelViewSet):
-    serializer_class = PaymentPlanSerializer
+class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, viewsets.ModelViewSet):
     permission_classes = [
         IsAuthenticated,
         PMViewListPermission,
         PaymentViewListManagerialPermission,
     ]
-    filter_backends = (
-        filters.DjangoFilterBackend,
-        SearchFilter,
-        OrderingFilter,
-    )
-    filterset_class = PaymentPlanFilter
-    search_fields = (
-        "unicef_id",
-        "id",
-        "^name",
-    )
 
     def get_queryset(self) -> QuerySet:
-        business_area = get_object_or_404(BusinessArea, slug=self.kwargs.get("business_area"))
+        business_area = self.get_business_area()
         queryset = PaymentPlan.objects.filter(business_area=business_area)
         program_ids = self.request.user.partner.get_program_ids_for_business_area(str(business_area.id))
         return queryset.filter(
@@ -134,7 +127,7 @@ class PaymentPlanManagerialViewSet(viewsets.ModelViewSet):
             action_name = serializer.validated_data["action"]
             comment = serializer.validated_data.get("comment", "")
             input_data = {"action": action_name, "comment": comment}
-            business_area = get_object_or_404(BusinessArea, slug=self.kwargs.get("business_area"))
+            business_area = self.get_business_area()
 
             with transaction.atomic():
                 for payment_plan_id_str in serializer.validated_data["ids"]:
