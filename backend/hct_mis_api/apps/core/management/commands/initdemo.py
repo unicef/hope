@@ -1,3 +1,4 @@
+import logging
 import time
 from argparse import ArgumentParser
 from typing import Any
@@ -19,6 +20,8 @@ from hct_mis_api.apps.payment.fixtures import (
 from hct_mis_api.apps.registration_datahub.management.commands.fix_unicef_id_imported_individuals_and_households import (
     update_mis_unicef_id_individual_and_household,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -74,7 +77,7 @@ class Command(BaseCommand):
         try:
             call_command("search_index", "--rebuild", "-f")
         except elasticsearch.exceptions.RequestError:
-            pass
+            logger.error("Elasticsearch request error")
 
         update_mis_unicef_id_individual_and_household()
         generate_payment_plan()
