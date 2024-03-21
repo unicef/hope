@@ -25,7 +25,7 @@ from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
 
 
 class TestRdiXlsxPeople(TestCase):
-    databases = ("default", "registration_datahub")
+    databases = {"default", "registration_datahub"}
     fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
 
     @classmethod
