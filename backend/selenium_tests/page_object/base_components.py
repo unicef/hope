@@ -4,6 +4,7 @@ from selenium.webdriver.remote.webelement import WebElement
 
 class BaseComponents(Common):
     globalProgramFilter = 'div[data-cy="global-program-filter"]'
+    navRegistrationDataImport = 'a[data-cy="nav-Registration Data Import"]'
     navProgrammeManagement = 'a[data-cy="nav-Programme Management"]'
     navGrievance = 'a[data-cy="nav-Grievance"]'
     navFeedback = 'a[data-cy="nav-Feedback"]'
@@ -14,6 +15,9 @@ class BaseComponents(Common):
 
     def getNavProgrammeManagement(self) -> WebElement:
         return self.wait_for(self.navProgrammeManagement)
+
+    def getNavRegistrationDataImport(self) -> WebElement:
+        return self.wait_for(self.navRegistrationDataImport)
 
     def getNavFeedback(self) -> WebElement:
         return self.wait_for(self.navFeedback)
