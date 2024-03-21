@@ -126,7 +126,7 @@ export const EditProgramPage = (): ReactElement => {
     frequencyOfPayments,
     partners: partners.map((partner) => ({
       id: partner.id,
-      adminAreas: partner.adminAreas,
+      adminAreas: partner.adminAreas.flatMap((area) => area.ids),
       areaAccess: partner.areaAccess,
     })),
   };
