@@ -53,15 +53,23 @@ urlpatterns = [
                 path("payments/", include("hct_mis_api.apps.payment.api.urls", namespace="payments")),
                 path("program/", endpoints.rdi.ProgramViewSet.as_view({"get": "list"}), name="program-list"),
                 path(
-                    "program/create/", endpoints.rdi.ProgramViewSet.as_view({"post": "create"}), name="program-create",
+                    "program/create/",
+                    endpoints.rdi.ProgramViewSet.as_view({"post": "create"}),
+                    name="program-create",
                 ),
                 path("rdi/create/", endpoints.rdi.CreateRDIView().as_view(), name="rdi-create"),
                 path("rdi/upload/", endpoints.rdi.UploadRDIView().as_view(), name="rdi-upload"),
                 path("rdi/upload/people/", endpoints.rdi.UploadPeopleRDIView().as_view(), name="rdi-upload-people"),
                 path("rdi/<uuid:rdi>/completed/", endpoints.rdi.CompleteRDIView().as_view(), name="rdi-complete"),
-                path("rdi/<uuid:rdi>/delegate/people/", endpoints.rdi.DelegatePeopleRDIView().as_view(), name="rdi-delegate-people"),
+                path(
+                    "rdi/<uuid:rdi>/delegate/people/",
+                    endpoints.rdi.DelegatePeopleRDIView().as_view(),
+                    name="rdi-delegate-people",
+                ),
                 path("rdi/<uuid:rdi>/push/", endpoints.rdi.PushToRDIView().as_view(), name="rdi-push"),
-                path("rdi/<uuid:rdi>/push/people/", endpoints.rdi.PushPeopleToRDIView().as_view(), name="rdi-push-people"),
+                path(
+                    "rdi/<uuid:rdi>/push/people/", endpoints.rdi.PushPeopleToRDIView().as_view(), name="rdi-push-people"
+                ),
                 path("rdi/<uuid:rdi>/push/lax/", endpoints.rdi.PushLaxToRDIView().as_view(), name="rdi-push-lax"),
             ]
         ),

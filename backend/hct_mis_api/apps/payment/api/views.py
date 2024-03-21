@@ -18,7 +18,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 
 from django_filters import rest_framework as filters
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -64,7 +64,6 @@ from hct_mis_api.apps.payment.models import (
     ServiceProvider,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
-from hct_mis_api.apps.program.models import Program
 
 
 class PaymentPlanMixin:
@@ -83,7 +82,7 @@ class PaymentPlanMixin:
     )
 
 
-class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, viewsets.ModelViewSet):
+class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):
     permission_classes = [
         IsAuthenticated,
         PMViewListPermission,
@@ -95,7 +94,7 @@ class PaymentPlanViewSet(BusinessAreaProgramMixin, PaymentPlanMixin, viewsets.Mo
         return PaymentPlan.objects.filter(business_area=business_area, program=program)
 
 
-class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, viewsets.ModelViewSet):
+class PaymentPlanManagerialViewSet(BusinessAreaMixin, PaymentPlanMixin, mixins.ListModelMixin, GenericViewSet):
     permission_classes = [
         IsAuthenticated,
         PMViewListPermission,
