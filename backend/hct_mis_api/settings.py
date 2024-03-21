@@ -778,6 +778,7 @@ Clear Cache,clear-cache/
         "The schedule (in days) which is applied to task clean_old_record_files_task",
         "positive_integers",
     ),
+    "SHOW_TOOLBAR": (False, "Show debug toolbar", bool),
 }
 
 CONSTANCE_DBS = ("default",)
@@ -1081,11 +1082,13 @@ logger_azure.setLevel(logging.WARNING)
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 
 if DEBUG and not IS_TEST:
+    from constance import config
+
     INSTALLED_APPS += ["debug_toolbar", "graphiql_debug_toolbar"]
     MIDDLEWARE.append("graphiql_debug_toolbar.middleware.DebugToolbarMiddleware")
 
     DEBUG_TOOLBAR_CONFIG = {
-        "SHOW_TOOLBAR_CALLBACK": lambda request: env("SHOW_TOOLBAR", default=True),
+        "SHOW_TOOLBAR_CALLBACK": lambda request: config.SHOW_TOOLBAR,
         "JQUERY_URL": "",
     }
     DEBUG_TOOLBAR_PANELS = [
