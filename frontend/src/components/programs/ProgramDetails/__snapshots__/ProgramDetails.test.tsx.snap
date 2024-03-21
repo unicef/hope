@@ -298,7 +298,9 @@ exports[`components/ProgramDetails should render 1`] = `
               class="MuiTypography-root MuiTypography-h6 css-1j53xw6-MuiTypography-root"
               data-cy="label-partner-name"
             />
-            <div>
+            <div
+              data-cy="labelized-field-container-area-access-field"
+            >
               <span
                 class="sc-guDLey RwNuC"
                 color="textSecondary"
@@ -308,12 +310,7 @@ exports[`components/ProgramDetails should render 1`] = `
               <div
                 data-cy="label-Area Access"
               >
-                <span
-                  class="sc-dmyCSP bGPBYf"
-                  color="textSecondary"
-                >
-                  Business Area
-                </span>
+                Business Area
               </div>
             </div>
           </div>

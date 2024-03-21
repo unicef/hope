@@ -31,10 +31,21 @@ class AreaTreeNode(ObjectType):
     name = graphene.String()
     p_code = graphene.String()
     areas = graphene.List(lambda: AreaTreeNode)
+    level = graphene.Int()
 
     @staticmethod
     def resolve_areas(parent: Area, info: Any, **kwargs: Any) -> List[Area]:
         return parent.get_children()
+
+    @staticmethod
+    def resolve_level(parent: Area, info: Any, **kwargs: Any) -> int:
+        return parent.area_type.area_level
+
+
+class AreaGroupNode(ObjectType):
+    ids = graphene.List(graphene.ID)
+    level = graphene.Int()
+    total_count = graphene.Int()
 
 
 class Query(graphene.ObjectType):
