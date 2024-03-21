@@ -1,6 +1,6 @@
+import dataclasses
 import logging
 import os
-from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -24,6 +24,15 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 
 logger = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass(init=False)
+class FlexibleArgumentsDataclass:
+    def __init__(self, **kwargs: Any) -> None:
+        names = set([f.name for f in dataclasses.fields(self)])
+        for k, v in kwargs.items():
+            if k in names:
+                setattr(self, k, v)
 
 
 class ReadOnlyModelSerializer(serializers.ModelSerializer):
@@ -56,6 +65,7 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
     def get_extra(self, obj: Any) -> Dict:
         return {
             "user": self.context["user_email"],
+            "business_area": obj.payment_plan.business_area.code,
             "config_key": obj.payment_plan.business_area.code,
         }
 
@@ -128,8 +138,7 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         ]
 
 
-@dataclass
-class PaymentRecordData:
+class PaymentRecordData(FlexibleArgumentsDataclass):
     id: int
     remote_id: str
     created: str
@@ -143,8 +152,7 @@ class PaymentRecordData:
     message: Optional[str] = None
 
 
-@dataclass
-class PaymentInstructionData:
+class PaymentInstructionData(FlexibleArgumentsDataclass):
     remote_id: str
     unicef_id: str
     status: str  # "DRAFT"
@@ -155,8 +163,7 @@ class PaymentInstructionData:
     id: Optional[int] = None
 
 
-@dataclass
-class FspData:
+class FspData(FlexibleArgumentsDataclass):
     id: int
     remote_id: str
     name: str
@@ -165,8 +172,7 @@ class FspData:
     payload: dict
 
 
-@dataclass
-class AddRecordsResponseData:
+class AddRecordsResponseData(FlexibleArgumentsDataclass):
     remote_id: str  # payment instruction id
     records: Optional[dict] = None  # {"record_code": "remote_id"}
     errors: Optional[dict] = None  # {index: "error_message"}
@@ -274,19 +280,21 @@ class PaymentGatewayService:
             data = _serializer(_object, context={"user_email": user_email}).data
             response = self.api.create_payment_instruction(data)
             assert response.remote_id == str(_object.id), f"{response}, _object_id: {_object.id}"
-            status = self.api.change_payment_instruction_status(
-                status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
-            )
+            status = response.status
+            if status == PaymentInstructionStatus.DRAFT.value:
+                status = self.api.change_payment_instruction_status(
+                    status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
+                )
             assert status == PaymentInstructionStatus.OPEN.value, status
 
         if payment_plan.splits.exists():
-            for split in payment_plan.splits.all().order_by("order"):
+            for split in payment_plan.splits.filter(sent_to_payment_gateway=False).order_by("order"):
                 if split.financial_service_provider.is_payment_gateway:
                     _create_payment_instruction(PaymentInstructionFromSplitSerializer, split)
 
         else:
             # for each sfp, create payment instruction
-            for delivery_mechanism in payment_plan.delivery_mechanisms.all():
+            for delivery_mechanism in payment_plan.delivery_mechanisms.filter(sent_to_payment_gateway=False):
                 if delivery_mechanism.financial_service_provider.is_payment_gateway:
                     _create_payment_instruction(
                         PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer, delivery_mechanism
@@ -320,9 +328,9 @@ class PaymentGatewayService:
                     add_records_error = True
                     _handle_errors(response, payments_chunk)
 
-            _container.sent_to_payment_gateway = True
-            _container.save(update_fields=["sent_to_payment_gateway"])
             if not add_records_error:
+                _container.sent_to_payment_gateway = True
+                _container.save(update_fields=["sent_to_payment_gateway"])
                 self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, _container)
                 self.change_payment_instruction_status(PaymentInstructionStatus.READY, _container)
 
@@ -333,7 +341,7 @@ class PaymentGatewayService:
                     _add_records(payments, split)
 
         else:
-            for delivery_mechanism in payment_plan.delivery_mechanisms.all():
+            for delivery_mechanism in payment_plan.delivery_mechanisms.filter(sent_to_payment_gateway=False):
                 if delivery_mechanism.financial_service_provider.is_payment_gateway:
                     payments = list(
                         payment_plan.eligible_payments.filter(
