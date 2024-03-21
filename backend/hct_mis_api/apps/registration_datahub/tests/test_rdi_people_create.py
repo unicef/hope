@@ -1,11 +1,10 @@
-# from datetime import date
+from datetime import date
 from io import BytesIO
 from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
-
-# from django.forms import model_to_dict
+from django.forms import model_to_dict
 from django.test import TestCase
 
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -16,8 +15,10 @@ from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFa
 from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
 )
-from hct_mis_api.apps.registration_datahub.models import (  # ImportedHousehold,; ImportedIndividual,
+from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
+    ImportedHousehold,
+    ImportedIndividual,
 )
 from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
     RdiXlsxPeopleCreateTask,
@@ -30,6 +31,7 @@ class TestRdiXlsxPeople(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        super().setUpTestData()
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/rdi_people_test.xlsx"
         ).read_bytes()
@@ -54,57 +56,54 @@ class TestRdiXlsxPeople(TestCase):
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
 
-        super().setUpTestData()
-
     def test_execute(self) -> None:
-        pass
-        # self.RdiXlsxPeopleCreateTask().execute(
-        #     self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id
-        # )
-        # households_count = ImportedHousehold.objects.count()
-        # individuals_count = ImportedIndividual.objects.count()
-        #
-        # self.assertEqual(4, households_count)
-        # self.assertEqual(4, individuals_count)
-        #
-        # individual_data = {
-        #     "full_name": "Derek Index4",
-        #     "given_name": "Derek",
-        #     "middle_name": "",
-        #     "family_name": "Index4",
-        #     "sex": "MALE",
-        #     "relationship": "HEAD",
-        #     "birth_date": date(2000, 8, 22),
-        #     "marital_status": "MARRIED",
-        # }
-        # matching_individuals = ImportedIndividual.objects.filter(**individual_data)
-        #
-        # self.assertEqual(matching_individuals.count(), 1)
-        #
-        # household_data = {
-        #     "residence_status": "REFUGEE",
-        #     "country": "IM",
-        #     "zip_code": "002",
-        #     "flex_fields": {},
-        # }
-        # household = matching_individuals.first().household
-        # household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
-        #
-        # roles = household.individuals_and_roles.all()
-        # self.assertEqual(roles.count(), 1)
-        # role = roles.first()
-        # self.assertEqual(role.role, "ALTERNATE")
-        # self.assertEqual(role.individual.full_name, "WorkerCollector ForDerekIndex_4")
-        # self.assertEqual(household_obj_data, household_data)
-        #
-        # role_primary = (
-        #     ImportedIndividual.objects.filter(given_name="Jan", family_name="Index3")
-        #     .first()
-        #     .household.individuals_and_roles.all()
-        #     .first()
-        # )
-        # self.assertEqual(role_primary.role, "PRIMARY")
-        # self.assertEqual(role_primary.individual.full_name, "Collector ForJanIndex_3")
-        #
-        # worker_individuals = ImportedIndividual.objects.filter(relationship="NON_BENEFICIARY")
-        # self.assertEqual(worker_individuals.count(), 2)
+        self.RdiXlsxPeopleCreateTask().execute(
+            self.registration_data_import.id, self.import_data.id, self.business_area.id, self.program.id
+        )
+        households_count = ImportedHousehold.objects.count()
+        individuals_count = ImportedIndividual.objects.count()
+
+        self.assertEqual(4, households_count)
+        self.assertEqual(4, individuals_count)
+
+        individual_data = {
+            "full_name": "Derek Index4",
+            "given_name": "Derek",
+            "middle_name": "",
+            "family_name": "Index4",
+            "sex": "MALE",
+            "relationship": "HEAD",
+            "birth_date": date(2000, 8, 22),
+            "marital_status": "MARRIED",
+        }
+        matching_individuals = ImportedIndividual.objects.filter(**individual_data)
+
+        self.assertEqual(matching_individuals.count(), 1)
+
+        household_data = {
+            "residence_status": "REFUGEE",
+            "country": "IM",
+            "zip_code": "002",
+            "flex_fields": {},
+        }
+        household = matching_individuals.first().household
+        household_obj_data = model_to_dict(household, ("residence_status", "country", "zip_code", "flex_fields"))
+
+        roles = household.individuals_and_roles.all()
+        self.assertEqual(roles.count(), 1)
+        role = roles.first()
+        self.assertEqual(role.role, "ALTERNATE")
+        self.assertEqual(role.individual.full_name, "WorkerCollector ForDerekIndex_4")
+        self.assertEqual(household_obj_data, household_data)
+
+        role_primary = (
+            ImportedIndividual.objects.filter(given_name="Jan", family_name="Index3")
+            .first()
+            .household.individuals_and_roles.all()
+            .first()
+        )
+        self.assertEqual(role_primary.role, "PRIMARY")
+        self.assertEqual(role_primary.individual.full_name, "Collector ForJanIndex_3")
+
+        worker_individuals = ImportedIndividual.objects.filter(relationship="NON_BENEFICIARY")
+        self.assertEqual(worker_individuals.count(), 2)
