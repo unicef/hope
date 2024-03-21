@@ -159,7 +159,7 @@ class TestCopyProgram(APITestCase):
             context={"user": user},
             variables=self.copy_data,
         )
-        copied_program = Program.objects.exclude(id=self.program.id).order_by("created_at").last()
+        copied_program = Program.objects.filter(name="copied name").first()
         self.assertEqual(copied_program.status, Program.DRAFT)
         self.assertEqual(copied_program.name, "copied name")
         self.assertEqual(copied_program.household_set.count(), 2)
