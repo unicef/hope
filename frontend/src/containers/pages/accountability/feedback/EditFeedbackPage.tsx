@@ -101,7 +101,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
     selectedIndividual: feedback.individualLookup || null,
     description: feedback.description || null,
     comments: feedback.comments || null,
-    admin2: feedback.admin2?.name || null,
+    admin2: feedback.admin2?.id || null,
     area: feedback.area || null,
     language: feedback.language || null,
     consent: false,
@@ -115,7 +115,7 @@ export const EditFeedbackPage = (): React.ReactElement => {
     individualLookup: values.selectedIndividual?.id,
     description: values.description,
     comments: values.comments,
-    admin2: values.admin2?.node.id,
+    admin2: values.admin2,
     area: values.area,
     language: values.language,
     consent: values.consent,
@@ -218,13 +218,13 @@ export const EditFeedbackPage = (): React.ReactElement => {
                               >
                                 {feedback.householdLookup?.unicefId}
                               </BlackLink>
-                              ) : (
+                            ) : (
                               <div>
                                 {feedback.householdLookup?.id
                                   ? feedback.householdLookup?.unicefId
                                   : '-'}
                               </div>
-                              )}
+                            )}
                           </LabelizedField>
                         </Grid>
                         <Grid item xs={6}>
@@ -237,13 +237,13 @@ export const EditFeedbackPage = (): React.ReactElement => {
                               >
                                 {feedback.individualLookup?.unicefId}
                               </BlackLink>
-                              ) : (
+                            ) : (
                               <div>
                                 {feedback.individualLookup?.id
                                   ? feedback.individualLookup?.unicefId
                                   : '-'}
                               </div>
-                              )}
+                            )}
                           </LabelizedField>
                         </Grid>
                       </Grid>
