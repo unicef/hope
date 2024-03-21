@@ -1,0 +1,327 @@
+from typing import Any, Callable
+
+from django.utils import timezone
+
+import pytest
+from rest_framework import status
+from rest_framework.reverse import reverse
+
+from hct_mis_api.apps.account.fixtures import (
+    BusinessAreaFactory,
+    PartnerFactory,
+    UserFactory,
+)
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.payment.fixtures import (
+    ApprovalFactory,
+    ApprovalProcessFactory,
+    PaymentPlanFactory,
+)
+from hct_mis_api.apps.payment.models import Approval, PaymentPlan
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+
+
+class PaymentPlanTestMixin:
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+        self.partner = PartnerFactory(name="TestPartner")
+        self.user = UserFactory(partner=self.partner)
+        self.client = api_client(self.user)
+        self.afghanistan = afghanistan
+        self.program1 = ProgramFactory(business_area=self.afghanistan)
+        self.program2 = ProgramFactory(business_area=self.afghanistan)
+        self.payment_plan1 = PaymentPlanFactory(
+            program=self.program1,
+            business_area=self.afghanistan,
+            status=PaymentPlan.Status.IN_APPROVAL,
+        )
+        self.payment_plan2 = PaymentPlanFactory(
+            program=self.program2,
+            business_area=self.afghanistan,
+            status=PaymentPlan.Status.IN_APPROVAL,
+        )
+        self.payment_plan3 = PaymentPlanFactory(
+            program=self.program2,
+            business_area=self.afghanistan,
+            status=PaymentPlan.Status.OPEN,
+        )
+        self.payment_plan1.refresh_from_db()
+        self.payment_plan2.refresh_from_db()
+        self.payment_plan3.refresh_from_db()
+
+        self.url = reverse(
+            "api:payments:payment-plans-managerial-list", kwargs={"business_area": self.afghanistan.slug}
+        )
+        self.url = reverse(
+            "api:payments:payment-plans-list",
+            kwargs={
+                "business_area": self.afghanistan.slug,
+                "program_id": id_to_base64(self.program1.id, "Program"),
+            },
+        )
+
+
+class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+        super().set_up(api_client, afghanistan, id_to_base64)
+        self.url = reverse(
+            "api:payments:payment-plans-managerial-list", kwargs={"business_area": self.afghanistan.slug}
+        )
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([], status.HTTP_403_FORBIDDEN),
+            ([Permissions.PM_VIEW_LIST], status.HTTP_403_FORBIDDEN),
+            ([Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL], status.HTTP_200_OK),
+        ],
+    )
+    def test_list_payment_plans_permission(
+        self,
+        permissions: list,
+        expected_status: str,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+            self.program1,
+        )
+        response = self.client.get(self.url)
+        assert response.status_code == expected_status
+
+    def test_list_payment_plans(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        update_user_partner_perm_for_program: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            self.afghanistan,
+            self.program1,
+        )
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 1
+        assert response_json[0]["unicef_id"] == self.payment_plan1.unicef_id
+
+        update_user_partner_perm_for_program(self.user, self.afghanistan, self.program2)
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 2
+        assert self.payment_plan1.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+        assert self.payment_plan2.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+        assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
+
+    def test_list_payment_plans_last_modified_data(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        approval_process = ApprovalProcessFactory(
+            payment_plan=self.payment_plan1,
+            sent_for_approval_date=timezone.datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc),
+            sent_for_approval_by=self.user,
+        )
+        approval_approval = ApprovalFactory(approval_process=approval_process, type=Approval.APPROVAL)
+        approval_authorization = ApprovalFactory(approval_process=approval_process, type=Approval.AUTHORIZATION)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            self.afghanistan,
+            self.program1,
+        )
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 1
+        assert response_json[0]["last_modified_date"] == approval_process.sent_for_approval_date.strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
+        assert response_json[0]["last_modified_by"] == approval_process.sent_for_approval_by.username
+
+        self.payment_plan1.status = PaymentPlan.Status.IN_AUTHORIZATION
+        self.payment_plan1.save()
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 1
+        assert response_json[0]["last_modified_date"] == approval_approval.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        assert response_json[0]["last_modified_by"] == approval_approval.created_by.username
+
+        self.payment_plan1.status = PaymentPlan.Status.IN_REVIEW
+        self.payment_plan1.save()
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 1
+        assert response_json[0]["last_modified_date"] == approval_authorization.created_at.strftime(
+            "%Y-%m-%dT%H:%M:%S.%fZ"
+        )
+        assert response_json[0]["last_modified_by"] == approval_authorization.created_by.username
+
+    def _bulk_approve_action_response(self) -> Any:
+        ApprovalProcessFactory(payment_plan=self.payment_plan1)
+        ApprovalProcessFactory(payment_plan=self.payment_plan2)
+        response = self.client.post(
+            reverse(
+                "api:payments:payment-plans-managerial-bulk-action", kwargs={"business_area": self.afghanistan.slug}
+            ),
+            data={
+                "ids": [
+                    encode_id_base64(self.payment_plan1.id, "PaymentPlan"),
+                    encode_id_base64(self.payment_plan2.id, "PaymentPlan"),
+                ],
+                "action": PaymentPlan.Action.APPROVE.value,
+                "comment": "Test comment",
+            },
+        )
+        return response
+
+    def test_bulk_action(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        update_user_partner_perm_for_program: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.PM_VIEW_LIST,
+                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                Permissions.PAYMENT_VIEW_LIST_MANAGERIAL,
+            ],
+            self.afghanistan,
+            self.program1,
+        )
+        update_user_partner_perm_for_program(self.user, self.afghanistan, self.program2)
+        response = self._bulk_approve_action_response()
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        self.payment_plan1.refresh_from_db()
+        self.payment_plan2.refresh_from_db()
+        assert self.payment_plan1.status == PaymentPlan.Status.IN_AUTHORIZATION
+        assert self.payment_plan2.status == PaymentPlan.Status.IN_AUTHORIZATION
+
+    def test_bulk_action_no_approve_permissions(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        update_user_partner_perm_for_program: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            self.afghanistan,
+            self.program1,
+        )
+        update_user_partner_perm_for_program(self.user, self.afghanistan, self.program2)
+        response = self._bulk_approve_action_response()
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        self.payment_plan1.refresh_from_db()
+        self.payment_plan2.refresh_from_db()
+        assert self.payment_plan1.status == PaymentPlan.Status.IN_APPROVAL
+        assert self.payment_plan2.status == PaymentPlan.Status.IN_APPROVAL
+
+
+class TestPaymentPlanList(PaymentPlanTestMixin):
+    def set_up(self, api_client: Callable, afghanistan: BusinessAreaFactory, id_to_base64: Callable) -> None:
+        super().set_up(api_client, afghanistan, id_to_base64)
+        self.url = reverse(
+            "api:payments:payment-plans-list",
+            kwargs={
+                "business_area": self.afghanistan.slug,
+                "program_id": id_to_base64(self.program1.id, "Program"),
+            },
+        )
+
+    @pytest.mark.parametrize(
+        "permissions, expected_status",
+        [
+            ([], status.HTTP_403_FORBIDDEN),
+            ([Permissions.PAYMENT_VIEW_LIST_MANAGERIAL], status.HTTP_403_FORBIDDEN),
+            ([Permissions.PM_VIEW_LIST], status.HTTP_200_OK),
+            ([Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL], status.HTTP_200_OK),
+        ],
+    )
+    def test_list_payment_plans_permissions(
+        self,
+        permissions: list,
+        expected_status: str,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            permissions,
+            self.afghanistan,
+            self.program1,
+        )
+        response = self.client.get(self.url)
+        assert response.status_code == expected_status
+
+    def test_list_payment_plans(
+        self,
+        api_client: Callable,
+        afghanistan: BusinessAreaFactory,
+        create_user_role_with_permissions: Callable,
+        update_user_partner_perm_for_program: Callable,
+        id_to_base64: Callable,
+    ) -> None:
+        self.set_up(api_client, afghanistan, id_to_base64)
+        create_user_role_with_permissions(
+            self.user,
+            [Permissions.PM_VIEW_LIST, Permissions.PAYMENT_VIEW_LIST_MANAGERIAL],
+            self.afghanistan,
+            self.program1,
+        )
+        update_user_partner_perm_for_program(self.user, self.afghanistan, self.program2)
+        response = self.client.get(self.url)
+        assert response.status_code == status.HTTP_200_OK
+        response_json = response.json()["results"]
+        assert len(response_json) == 1
+
+        assert response_json[0] == {
+            "id": encode_id_base64(self.payment_plan1.id, "PaymentPlan"),
+            "unicef_id": self.payment_plan1.unicef_id,
+            "name": self.payment_plan1.name,
+            "status": self.payment_plan1.get_status_display(),
+            "target_population": self.payment_plan1.target_population.name,
+            "total_households_count": self.payment_plan1.total_households_count,
+            "currency": self.payment_plan1.get_currency_display(),
+            "total_entitled_quantity": str(self.payment_plan1.total_entitled_quantity),
+            "total_delivered_quantity": str(self.payment_plan1.total_delivered_quantity),
+            "total_undelivered_quantity": str(self.payment_plan1.total_undelivered_quantity),
+            "dispersion_start_date": self.payment_plan1.dispersion_start_date.strftime("%Y-%m-%d"),
+            "dispersion_end_date": self.payment_plan1.dispersion_end_date.strftime("%Y-%m-%d"),
+            "is_follow_up": self.payment_plan1.is_follow_up,
+            "follow_ups": [],
+            "program": self.program1.name,
+            "program_id": encode_id_base64(self.program1.id, "Program"),
+            "last_modified_date": self.payment_plan1.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "last_modified_by": None,
+        }

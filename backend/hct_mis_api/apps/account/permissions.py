@@ -64,7 +64,7 @@ class Permissions(Enum):
     TARGETING_UNLOCK = auto()
     TARGETING_SEND = auto()
 
-    PAYMENT_VIEW_LIST_NO_GPF = auto()
+    PAYMENT_VIEW_LIST_MANAGERIAL = auto()
     # Payment Verification
     PAYMENT_VERIFICATION_VIEW_LIST = auto()
     PAYMENT_VERIFICATION_VIEW_DETAILS = auto()
@@ -300,8 +300,7 @@ def check_permissions(user: Any, permissions: Iterable[Permissions], **kwargs: A
     if not user.is_authenticated:
         return False
 
-    # "Business-Area" if the request is for rest api
-    business_area_arg = kwargs.get("business_area") or kwargs.get("Business-Area")
+    business_area_arg = kwargs.get("business_area")
     if business_area_arg is None:
         return False
 

@@ -103,7 +103,6 @@ api_patterns = [
     path("hh-status", hct_mis_api.apps.household.views.HouseholdStatusView.as_view()),
     path("upload-file/", UploadFile.as_view(), name="upload-file"),
     path("aurora/", include("hct_mis_api.aurora.urls", namespace="aurora")),
-    path("payments/", include("hct_mis_api.apps.payment.api.urls", namespace="payments")),
 ]
 
 if settings.PROFILING:

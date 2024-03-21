@@ -581,7 +581,7 @@ class PaymentPlanNode(BaseNodePermissionMixin, DjangoObjectType):
             log_and_raise("Payment Plan does not belong to the selected program")
 
         if not program_id:
-            permission = Permissions.PAYMENT_VIEW_LIST_NO_GPF.value
+            permission = Permissions.PAYMENT_VIEW_LIST_MANAGERIAL.value
             if user.has_permission(permission, business_area, payment_plan_program_id):
                 return None
 

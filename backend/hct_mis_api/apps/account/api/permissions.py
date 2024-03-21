@@ -1,33 +1,35 @@
-from typing import Any, Type
+from typing import Any
 
 from rest_framework.permissions import BasePermission
 
 from hct_mis_api.apps.account.permissions import Permissions, check_permissions
-from hct_mis_api.apps.core.utils import get_program_id_from_headers
 
 
 class BaseRestPermission(BasePermission):
+    PERMISSIONS = []
+
     def has_permission(self, request: Any, view: Any) -> bool:
-        return False
+        user = request.user
+        permissions = self.PERMISSIONS
+        kwargs = {
+            "business_area": request.parser_context.get("kwargs", {}).get("business_area"),
+            "Program": request.parser_context.get("kwargs", {}).get("program_id"),
+        }
+
+        return check_permissions(user, permissions, **kwargs)
 
 
-def hopeRestPermissionClass(permission: Permissions) -> Type[BaseRestPermission]:
-    class PermissionClass(BaseRestPermission):
-        def has_permission(self, request: Any, view: Any) -> bool:
-            user = request.user
-            permissions = [permission]
-            return check_permissions(user, permissions, **request.headers)
-
-    return PermissionClass
+class PMViewListPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PM_VIEW_LIST]
 
 
-def hopeRestPermissionNoGPFClass(permission: Permissions) -> Type[BaseRestPermission]:
-    class PermissionClass(BaseRestPermission):
-        def has_permission(self, request: Any, view: Any) -> bool:
-            user = request.user
-            permissions = [permission]
-            if get_program_id_from_headers(request.headers):
-                return True
-            return check_permissions(user, permissions, **request.headers)
+class PaymentVerificationViewDetailsPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS]
 
-    return PermissionClass
+
+class ProgrammeViewListAndDetailsPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS]
+
+
+class PaymentViewListManagerialPermission(BaseRestPermission):
+    PERMISSIONS = [Permissions.PAYMENT_VIEW_LIST_MANAGERIAL]

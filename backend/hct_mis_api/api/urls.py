@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
@@ -80,4 +80,12 @@ urlpatterns = [
     ),
     path("lookups/role/", endpoints.lookups.Roles().as_view(), name="role-list"),
     path("lookups/sex/", endpoints.lookups.Sex().as_view(), name="sex-list"),
+    path(
+        "<slug:business_area>/",
+        include(
+            [
+                path("payments/", include("hct_mis_api.apps.payment.api.urls", namespace="payments")),
+            ]
+        ),
+    ),
 ]

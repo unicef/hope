@@ -29,15 +29,17 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from hct_mis_api.apps.account.api.permissions import (
-    hopeRestPermissionClass,
-    hopeRestPermissionNoGPFClass,
+    PaymentVerificationViewDetailsPermission,
+    PaymentViewListManagerialPermission,
+    PMViewListPermission,
+    ProgrammeViewListAndDetailsPermission,
 )
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
-from hct_mis_api.apps.core.utils import decode_id_string, get_program_id_from_headers
+from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.api.filters import PaymentPlanFilter
 from hct_mis_api.apps.payment.api.serializers import (
     PaymentPlanBulkActionSerializer,
@@ -61,14 +63,14 @@ from hct_mis_api.apps.payment.models import (
     ServiceProvider,
 )
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.program.models import Program
 
 
 class PaymentPlanViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentPlanSerializer
     permission_classes = [
         IsAuthenticated,
-        hopeRestPermissionClass(Permissions.PM_VIEW_LIST),
-        hopeRestPermissionNoGPFClass(Permissions.PAYMENT_VIEW_LIST_NO_GPF),
+        PMViewListPermission,
     ]
     filter_backends = (
         filters.DjangoFilterBackend,
@@ -83,10 +85,33 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
     )
 
     def get_queryset(self) -> QuerySet:
-        business_area = get_object_or_404(BusinessArea, slug=self.request.headers.get("Business-Area"))
+        business_area = get_object_or_404(BusinessArea, slug=self.kwargs.get("business_area"))
+        program = get_object_or_404(Program, id=decode_id_string(self.kwargs.get("program_id")))
+        return PaymentPlan.objects.filter(business_area=business_area, program=program)
+
+
+class PaymentPlanManagerialViewSet(viewsets.ModelViewSet):
+    serializer_class = PaymentPlanSerializer
+    permission_classes = [
+        IsAuthenticated,
+        PMViewListPermission,
+        PaymentViewListManagerialPermission,
+    ]
+    filter_backends = (
+        filters.DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    )
+    filterset_class = PaymentPlanFilter
+    search_fields = (
+        "unicef_id",
+        "id",
+        "^name",
+    )
+
+    def get_queryset(self) -> QuerySet:
+        business_area = get_object_or_404(BusinessArea, slug=self.kwargs.get("business_area"))
         queryset = PaymentPlan.objects.filter(business_area=business_area)
-        if program_id := get_program_id_from_headers(self.request.headers):  # type: ignore
-            return queryset.filter(program_id=program_id)
         program_ids = self.request.user.partner.get_program_ids_for_business_area(str(business_area.id))
         return queryset.filter(
             status__in=[
@@ -109,7 +134,7 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
             action_name = serializer.validated_data["action"]
             comment = serializer.validated_data.get("comment", "")
             input_data = {"action": action_name, "comment": comment}
-            business_area = get_object_or_404(BusinessArea, slug=self.request.headers.get("Business-Area"))
+            business_area = get_object_or_404(BusinessArea, slug=self.kwargs.get("business_area"))
 
             with transaction.atomic():
                 for payment_plan_id_str in serializer.validated_data["ids"]:
@@ -173,9 +198,9 @@ class PaymentPlanViewSet(viewsets.ModelViewSet):
 
 class PaymentVerificationListView(mixins.ListModelMixin, GenericViewSet):
     permission_classes = [
-        hopeRestPermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
-        hopeRestPermissionClass(Permissions.PROGRAMME_VIEW_LIST_AND_DETAILS),
-        hopeRestPermissionNoGPFClass(Permissions.PAYMENT_VIEW_LIST_NO_GPF),
+        PaymentVerificationViewDetailsPermission,
+        ProgrammeViewListAndDetailsPermission,
+        PaymentViewListManagerialPermission,
     ]
     serializer_class = PaymentVerificationSerializer
     queryset = PaymentVerification.objects.none()
