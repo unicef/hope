@@ -8,10 +8,10 @@
         "updated_at": "2023-06-19T14:47:57.490Z",
         "last_sync_at": null,
         "version": 1687185130805339,
-        "name": "initial_program",
+        "name": "initial_program (sw)",
         "status": "ACTIVE",
         "start_date": "2023-06-19",
-        "end_date": "2023-12-24",
+        "end_date": "2029-12-24",
         "description": "qwerty",
         "ca_id": null,
         "ca_hash_id": null,
@@ -25,7 +25,7 @@
         "administrative_areas_of_implementation": "",
         "individual_data_needed": false,
         "admin_areas": [],
-        "data_collecting_type": 1,
+        "data_collecting_type": 2,
         "programme_code": "ABC1"
     }
 },

@@ -103,6 +103,7 @@ class RdiMergeTask:
         "fchild_hoh",
         "child_hoh",
         "detail_id",
+        "collect_type",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -276,8 +277,15 @@ class RdiMergeTask:
             if household:
                 individual.registration_id = household.registration_id
             individuals_dict[imported_individual.id] = individual
-            if imported_individual.relationship == HEAD and household:
+
+            is_social_worker_program = obj_hct.program.is_social_worker_program
+
+            if is_social_worker_program:
+                # every household for Social DCT type program has HoH
                 household.head_of_household = individual
+            else:
+                if imported_individual.relationship == HEAD and household:
+                    household.head_of_household = individual
 
             (
                 documents,
