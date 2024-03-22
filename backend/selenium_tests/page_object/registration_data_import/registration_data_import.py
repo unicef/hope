@@ -25,86 +25,50 @@ class RegistrationDataImport(BaseComponents):
 
     # Elements
 
-    def MaingetContent(self) -> WebElement:
+    def getMainContent(self) -> WebElement:
         return self.wait_for(self.mainContent)
 
-    def PagegetHeadergetContainer(self) -> WebElement:
+    def getPageHeaderContainer(self) -> WebElement:
         return self.wait_for(self.pageHeaderContainer)
 
-    def PagegetHeadergetTitle(self) -> WebElement:
+    def getPageHeaderTitle(self) -> WebElement:
         return self.wait_for(self.pageHeaderTitle)
 
-    def ButtongetNewgetProgram(self) -> WebElement:
-        return self.wait_for(self.buttonNewProgram)
+    def getButtonImport(self) -> WebElement:
+        return self.wait_for(self.buttonImport)
 
-    def FiltersgetSearch(self) -> WebElement:
-        return self.wait_for(self.filtersSearch)
+    def getFilterSearch(self) -> WebElement:
+        return self.wait_for(self.filterSearch)
 
-    def FiltersgetStatus(self) -> WebElement:
-        return self.wait_for(self.filtersStatus)
+    def getImportedByInput(self) -> WebElement:
+        return self.wait_for(self.importedByInput)
 
-    def DategetPickergetFilter(self) -> WebElement:
+    def getFilterStatus(self) -> WebElement:
+        return self.wait_for(self.filterStatus)
+
+    def getFilterSizeMin(self) -> WebElement:
+        return self.wait_for(self.filterSizeMin)
+
+    def getFilterSizeMax(self) -> WebElement:
+        return self.wait_for(self.filterSizeMax)
+
+    def getDatePickerFilter(self) -> WebElement:
         return self.wait_for(self.datePickerFilter)
 
-    def DategetPickergetFilter(self) -> WebElement:
-        return self.wait_for(self.datePickerFilter)
-
-    def FiltersgetSector(self) -> WebElement:
-        return self.wait_for(self.filtersSector)
-
-    def FiltersgetNumbergetOfgetHouseholdsgetMin(self) -> WebElement:
-        return self.wait_for(self.filtersNumberOfHouseholdsMin)
-
-    def FiltersgetNumbergetOfgetHouseholdsgetMax(self) -> WebElement:
-        return self.wait_for(self.filtersNumberOfHouseholdsMax)
-
-    def FiltersgetBudgetgetMin(self) -> WebElement:
-        return self.wait_for(self.filtersBudgetMin)
-
-    def FiltersgetBudgetgetMax(self) -> WebElement:
-        return self.wait_for(self.filtersBudgetMax)
-
-    def FiltersgetDatagetCollectinggetType(self) -> WebElement:
-        return self.wait_for(self.filtersDataCollectingType)
-
-    def ButtongetFiltersgetClear(self) -> WebElement:
+    def getButtonFiltersClear(self) -> WebElement:
         return self.wait_for(self.buttonFiltersClear)
 
-    def ButtongetFiltersgetApply(self) -> WebElement:
+    def getButtonFiltersApply(self) -> WebElement:
         return self.wait_for(self.buttonFiltersApply)
 
-    def TablegetTitle(self) -> WebElement:
+    def getTableTitle(self) -> WebElement:
         return self.wait_for(self.tableTitle)
 
-    def TablegetLabel(self) -> WebElement:
+    def getTableLabel(self) -> WebElement:
         return self.wait_for(self.tableLabel)
 
-    def TablegetLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
-
-    def TablegetLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
-
-    def TablegetLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
-
-    def TablegetLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
-
-    def TablegetLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
-
-    def TablegetRowgetDraftgetProgram(self) -> WebElement:
-        return self.wait_for(self.tableRowDraftProgram)
-
-    def StatusgetContainer(self) -> WebElement:
+    def getStatusContainer(self) -> WebElement:
         return self.wait_for(self.statusContainer)
 
-    def TablegetRowgetTestgetProgramm(self) -> WebElement:
-        return self.wait_for(self.tableRowTestProgramm)
-
-    def StatusgetContainer(self) -> WebElement:
-        return self.wait_for(self.statusContainer)
-
-    def TablegetPagination(self) -> WebElement:
+    def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
