@@ -1113,9 +1113,6 @@ LOGGING: Dict[str, Any] = {
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-    ],
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
