@@ -25,6 +25,12 @@ from hct_mis_api.conftest import disabled_locally_test
 
 @disabled_locally_test
 class TestRdiXlsxPeople(BaseElasticSearchTestCase):
+    databases = {
+        "default",
+        "registration_datahub",
+    }
+    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
+
     @classmethod
     def setUpTestData(cls) -> None:
         content = Path(
