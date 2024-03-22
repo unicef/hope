@@ -12,10 +12,14 @@ class TemplateFileGenerator:
     @classmethod
     def _create_workbook(cls) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
-        ws_households = wb.active
-        ws_households.title = "Households"
+        ws_import_helper = wb.active
+        ws_import_helper.title = "Import helper"
+        wb.create_sheet("Households")
         wb.create_sheet("Individuals")
+        wb.create_sheet("People")
         wb.create_sheet("Choices")
+
+        wb = cls._add_import_helper(wb)
 
         return wb
 
@@ -57,13 +61,17 @@ class TemplateFileGenerator:
 
     @classmethod
     def _add_template_columns(
-        cls, wb: openpyxl.Workbook, business_area_slug: Optional[str] = None
+        cls,
+        wb: openpyxl.Workbook,
+        business_area_slug: Optional[str] = None,
     ) -> openpyxl.Workbook:
         households_sheet_title = "Households"
         individuals_sheet_title = "Individuals"
+        people_sheet_title = "People"
 
         ws_households = wb[households_sheet_title]
         ws_individuals = wb[individuals_sheet_title]
+        ws_people = wb[people_sheet_title]
         ws_choices = wb["Choices"]
 
         flex_fields = serialize_flex_attributes()
@@ -82,17 +90,40 @@ class TemplateFileGenerator:
             **flex_fields[individuals_sheet_title.lower()],
         }
 
+        people_fields = {
+            **FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
+            .apply_business_area(business_area_slug=business_area_slug)
+            .associated_with_individual()
+            .to_dict_by("xlsx_field"),
+            **flex_fields[individuals_sheet_title.lower()],
+        }
+
         households_rows = cls._handle_name_and_label_row(households_fields)
         individuals_rows = cls._handle_name_and_label_row(individuals_fields)
+        people_rows = cls._handle_name_and_label_row(people_fields)
 
-        for h_row, i_row in zip(households_rows, individuals_rows):
+        for h_row, i_row, p_row in zip(households_rows, individuals_rows, people_rows):
             ws_households.append(h_row)
             ws_individuals.append(i_row)
+            ws_people.append(p_row)
 
         choices = cls._handle_choices({**households_fields, **individuals_fields})
         for row in choices:
             ws_choices.append(row)
 
+        return wb
+
+    @classmethod
+    def _add_import_helper(cls, wb: openpyxl.Workbook) -> openpyxl.Workbook:
+        default_helper_text = """
+        Sheets and their purposes:
+        - Households: Use this sheet to enter details about the households you want to import.
+        - Individuals: Use this sheet to enter information about the individuals within the households you want to import.
+        - People: Use this sheet to enter data about individuals without households.\n
+        Please note that you must decide whether to fill out the data in the Households and Individuals sheets or the People sheet, as these options are mutually exclusive.
+        """
+        ws_import_helper = wb["Import helper"]
+        ws_import_helper.append([default_helper_text])
         return wb
 
     @classmethod
