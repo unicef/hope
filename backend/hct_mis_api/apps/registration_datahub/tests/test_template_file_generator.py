@@ -9,7 +9,7 @@ class TestTemplateFileGenerator(TestCase):
     def test_create_workbook(self) -> None:
         wb = TemplateFileGenerator._create_workbook()
 
-        expected_sheet_names = ["Households", "Individuals"].sort()
+        expected_sheet_names = ["Households", "Individuals", "Import helper", "People"].sort()
         result_sheet_names = wb.sheetnames.sort()
 
         self.assertEqual(expected_sheet_names, result_sheet_names)
