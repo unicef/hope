@@ -121,8 +121,8 @@ class GenerateReportContentHelpers:
         }
         if report.admin_area.all().exists():
             filter_vars["admin_area__in"] = report.admin_area.all()
-        # if report.program:  # TODO Uncomment after add program to household
-        # filter_vars["program"] = report.program
+        if report.program:
+            filter_vars["program"] = report.program
         return Household.objects.filter(**filter_vars)
 
     @classmethod
