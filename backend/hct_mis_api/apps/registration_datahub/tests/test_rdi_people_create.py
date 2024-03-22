@@ -5,8 +5,8 @@ from pathlib import Path
 from django.conf import settings
 from django.core.files import File
 from django.forms import model_to_dict
-from django.test import TestCase
 
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
 from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.program.fixtures import ProgramFactory
@@ -20,23 +20,23 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
 )
-from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
-    RdiXlsxPeopleCreateTask,
-)
+from hct_mis_api.conftest import disabled_locally_test
 
 
-class TestRdiXlsxPeople(TestCase):
-    databases = {"default", "registration_datahub"}
-    fixtures = (f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json",)
-
+@disabled_locally_test
+class TestRdiXlsxPeople(BaseElasticSearchTestCase):
     @classmethod
     def setUpTestData(cls) -> None:
-        super().setUpTestData()
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/rdi_people_test.xlsx"
         ).read_bytes()
         file = File(BytesIO(content), name="rdi_people_test.xlsx")
         cls.business_area = create_afghanistan()
+
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
+            RdiXlsxPeopleCreateTask,
+        )
+
         cls.RdiXlsxPeopleCreateTask = RdiXlsxPeopleCreateTask
         cls.import_data = ImportData.objects.create(
             file=file,
@@ -55,6 +55,8 @@ class TestRdiXlsxPeople(TestCase):
         )
         cls.registration_data_import.hct_id = hct_rdi.id
         cls.registration_data_import.save()
+
+        super().setUpTestData()
 
     def test_execute(self) -> None:
         self.RdiXlsxPeopleCreateTask().execute(
