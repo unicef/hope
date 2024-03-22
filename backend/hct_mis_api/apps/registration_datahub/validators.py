@@ -37,7 +37,12 @@ from hct_mis_api.apps.core.utils import (
 )
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.geo.models import Area
-from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    NON_BENEFICIARY,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+)
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list
 from hct_mis_api.apps.registration_datahub.utils import find_attachment_in_kobo
@@ -106,11 +111,15 @@ class ImportDataInstanceValidator:
         "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
     }
 
-    def __init__(self) -> None:
+    def __init__(self, is_social_worker_program: bool = False) -> None:
+        self.is_social_worker_program = is_social_worker_program
         self.all_fields = self.get_all_fields()
 
     def get_combined_attributes(self) -> Dict:
-        fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID]).apply_business_area()
+        scope_list = (
+            [Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID] if not self.is_social_worker_program else [Scope.XLSX_PEOPLE]
+        )
+        fields = FieldFactory.from_scopes(scope_list).apply_business_area()
 
         for field in fields:
             field["choices"] = [x.get("value") for x in field["choices"]]
@@ -264,25 +273,39 @@ class ImportDataInstanceValidator:
 
 
 class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, is_social_worker_program: bool = False) -> None:
+        super().__init__(is_social_worker_program)
+        self.is_social_worker_program = is_social_worker_program
         self.head_of_household_count = defaultdict(int)
         self.combined_fields = self.get_combined_fields()
         self.household_ids = []
 
     def get_combined_fields(self) -> Dict:
-        core_fields = FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
+        core_fields = (
+            FieldFactory.from_scopes([Scope.GLOBAL, Scope.XLSX, Scope.HOUSEHOLD_ID])
+            if not self.is_social_worker_program
+            else FieldFactory.from_scopes([Scope.XLSX_PEOPLE])
+        )
+        # TODO: update flex field for People
         flex_fields = serialize_flex_attributes()
-        return {
-            "households": {
-                **core_fields.associated_with_household().to_dict_by("xlsx_field"),
-                **flex_fields["households"],
-            },
-            "individuals": {
-                **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
-                **flex_fields["individuals"],
-            },
-        }
+        if self.is_social_worker_program:
+            return {
+                "people": {
+                    **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                    **flex_fields["individuals"],
+                },
+            }
+        else:
+            return {
+                "households": {
+                    **core_fields.associated_with_household().to_dict_by("xlsx_field"),
+                    **flex_fields["households"],
+                },
+                "individuals": {
+                    **core_fields.associated_with_individual().to_dict_by("xlsx_field"),
+                    **flex_fields["individuals"],
+                },
+            }
 
     def string_validator(self, value: Any, header: str, *args: Any, **kwargs: Any) -> Optional[bool]:
         try:
@@ -486,6 +509,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 "PHONE_NUMBER": self.phone_validator,
                 "GEOPOINT": self.geolocation_validator,
                 "IMAGE": self.image_validator,
+                "LIST_OF_IDS": self.integer_validator,
             }
 
             invalid_rows = []
@@ -760,15 +784,23 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             if errors:
                 # return error if WS do not exist in the import file
                 return errors
+            errors.extend(self.validate_index_id(wb))
             errors.extend(self.validate_collectors_size(wb))
             errors.extend(self.validate_collectors(wb))
-            individuals_sheet = wb["Individuals"]
-            household_sheet = wb["Households"]
+            if self.is_social_worker_program:
+                errors.extend(self.validate_people_collectors(wb))
 
-            self.image_loader = SheetImageLoader(household_sheet)
-            errors.extend(self.rows_validator(household_sheet, business_area_slug))
-            self.image_loader = SheetImageLoader(individuals_sheet)
-            errors.extend(self.rows_validator(individuals_sheet))
+            if not self.is_social_worker_program:
+                individuals_sheet = wb["Individuals"]
+                household_sheet = wb["Households"]
+                self.image_loader = SheetImageLoader(household_sheet)
+                errors.extend(self.rows_validator(household_sheet, business_area_slug))
+                self.image_loader = SheetImageLoader(individuals_sheet)
+                errors.extend(self.rows_validator(individuals_sheet))
+            else:
+                people_sheet = wb["People"]
+                self.image_loader = SheetImageLoader(people_sheet)
+                errors.extend(self.rows_validator(people_sheet))
             return errors
         except Exception as e:
             logger.exception(e)
@@ -883,33 +915,150 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
+    def validate_index_id(self, wb: Workbook) -> List[Dict[str, Any]]:
+        try:
+            errors = []
+            if self.is_social_worker_program:
+                people_sheet = wb["People"]
+                header_row = people_sheet[1]
+                index_id_col = 1  # by default
+                for header in header_row:
+                    if header.value == "pp_index_id":
+                        index_id_col = int(header.column)
+
+                index_ids = list(
+                    people_sheet.iter_cols(min_col=index_id_col, max_col=index_id_col, min_row=3, values_only=True)
+                )[0]
+                duplicates = list(set([i for i in index_ids if index_ids.count(i) > 1 and i is not None]))
+                if duplicates:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": f"There are duplicates with id(s): {duplicates}. Number have to be unique in the field pp_index_id.",
+                        }
+                    )
+
+            return errors
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+    def validate_people_collectors(self, wb: Workbook) -> List[Dict[str, Any]]:
+        try:
+            errors, index_ids, primary_collector_ids, alternate_collector_ids, relationship_column = [], [], [], [], []
+            people_sheet = wb["People"]
+            first_row = people_sheet[1]
+
+            for header in first_row:
+                if header.value == "pp_index_id":
+                    index_id_col = int(header.column)
+                    index_ids = list(
+                        people_sheet.iter_cols(min_col=index_id_col, max_col=index_id_col, min_row=3, values_only=True)
+                    )[0]
+                if header.value == "pp_primary_collector_id":
+                    pr_collector_id_col = int(header.column)
+                    primary_collector_ids = list(
+                        people_sheet.iter_cols(
+                            min_col=pr_collector_id_col, max_col=pr_collector_id_col, min_row=3, values_only=True
+                        )
+                    )[0]
+                if header.value == "pp_alternate_collector_id":
+                    alt_collector_id_col = int(header.column)
+                    alternate_collector_ids = list(
+                        people_sheet.iter_cols(
+                            min_col=alt_collector_id_col, max_col=alt_collector_id_col, min_row=3, values_only=True
+                        )
+                    )[0]
+                if header.value == "pp_relationship_i_c":
+                    relationship_col = int(header.column)
+                    relationship_column = list(
+                        people_sheet.iter_cols(
+                            min_col=relationship_col, max_col=relationship_col, min_row=3, values_only=True
+                        )
+                    )[0]
+            alt_ids = [int(i) for i in alternate_collector_ids if i is not None]
+            pr_ids = [int(i) for i in primary_collector_ids if i is not None]
+            for index_id, relationship, pr_col, alt_col in zip(
+                index_ids, relationship_column, primary_collector_ids, alternate_collector_ids
+            ):
+                if relationship not in [HEAD, NON_BENEFICIARY] and index_id is not None:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": f"Invalid value in field 'pp_relationship_i_c' with index_id {index_id}. "
+                            f"Value can be {HEAD} or {NON_BENEFICIARY}",
+                        }
+                    )
+                if (
+                    relationship == HEAD
+                    and index_id is not None
+                    and int(index_id) not in pr_ids
+                    and int(index_id) not in alt_ids
+                ):
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": f"Individual with index_id {index_id} have to has an external collector.",
+                        }
+                    )
+                if relationship == NON_BENEFICIARY and (pr_col is None and alt_col is None):
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": f"Invalid value in field 'pp_primary_collector_id' or "
+                            f"'pp_alternate_collector_id' for Individual with index_id {index_id}. "
+                            f"Both fields can't be empty.",
+                        }
+                    )
+
+            return errors
+        except Exception as e:
+            logger.exception(e)
+            raise
+
     def validate_collectors_size(self, wb: Workbook) -> List[Dict[str, Any]]:
         try:
             errors = []
 
-            individuals_sheet = wb["Individuals"]
-            households_sheet = wb["Households"]
+            if not self.is_social_worker_program:
+                individuals_sheet = wb["Individuals"]
+                households_sheet = wb["Households"]
 
-            household_count = self._count_households(households_sheet)
-            individuals_count = self._count_individuals(individuals_sheet)
+                household_count = self._count_households(households_sheet)
+                individuals_count = self._count_individuals(individuals_sheet)
 
-            if household_count == 0:
-                errors.append(
-                    {
-                        "row_number": 1,
-                        "header": "Households",
-                        "message": "There aren't households in the file.",
-                    }
-                )
+                if household_count == 0:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "Households",
+                            "message": "There aren't households in the file.",
+                        }
+                    )
 
-            if individuals_count == 0:
-                errors.append(
-                    {
-                        "row_number": 1,
-                        "header": "Individuals",
-                        "message": "There aren't individuals in the file.",
-                    }
-                )
+                if individuals_count == 0:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "Individuals",
+                            "message": "There aren't individuals in the file.",
+                        }
+                    )
+            else:
+                people_sheet = wb["People"]
+                people_count = self._count_individuals(people_sheet)
+                if people_count == 0:
+                    errors.append(
+                        {
+                            "row_number": 1,
+                            "header": "People",
+                            "message": "There aren't people in the file.",
+                        }
+                    )
 
             return errors
         except Exception as e:
@@ -920,7 +1069,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
         first_row = individuals_sheet[1]
         individuals_count = 0
         for cell in first_row:
-            if cell.value == "full_name_i_c":
+            if cell.value in ["full_name_i_c", "pp_full_name_i_c"]:
                 for c in individuals_sheet[cell.column_letter][2:]:
                     if c.value:
                         individuals_count += 1
