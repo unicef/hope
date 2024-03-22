@@ -28,8 +28,8 @@ export function LookUpHouseholdIndividualSelection({
 
   useEffect(() => {
     if (selectedHousehold?.admin2) {
-      onValueChange('admin', { node: selectedHousehold.admin2 });
-      onValueChange('admin2', { node: selectedHousehold.admin2 });
+      onValueChange('admin', selectedHousehold.admin2.id);
+      onValueChange('admin2', selectedHousehold.admin2.id);
     } else {
       onValueChange('admin', null);
       onValueChange('admin2', null);
@@ -73,7 +73,7 @@ export function LookUpHouseholdIndividualSelection({
         {isInvalid('selectedHousehold', errors, touched) &&
           !selectedHousehold && (
             <FormHelperText error>{errors?.selectedHousehold}</FormHelperText>
-        )}
+          )}
       </Box>
     </>
   );
