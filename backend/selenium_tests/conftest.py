@@ -8,14 +8,15 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
-
-from page_object.registration_data_import.registration_data_import import RegistrationDataImport
 from page_object.admin_panel.admin_panel import AdminPanel
 from page_object.grievance.details_feedback_page import FeedbackDetailsPage
 from page_object.grievance.feedback import Feedback
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
+from page_object.registration_data_import.registration_data_import import (
+    RegistrationDataImport,
+)
 from pytest_django.live_server_helper import LiveServer
 from requests import Session
 from selenium import webdriver

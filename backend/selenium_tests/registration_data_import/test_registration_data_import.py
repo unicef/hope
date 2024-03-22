@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
-
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
@@ -20,9 +19,7 @@ def create_programs() -> None:
 @pytest.mark.usefixtures("login")
 class TestRegistrationDataImport:
     def test_smoke_registration_data_import(
-            self,
-            create_programs: None,
-            pageRegistrationDataImport: RegistrationDataImport
+        self, create_programs: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
