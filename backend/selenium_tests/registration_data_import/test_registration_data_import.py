@@ -25,5 +25,6 @@ class TestRegistrationDataImport:
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
         # Check Elements on Page
-        pageRegistrationDataImport.getButtonImport()
+        assert "Import" in pageRegistrationDataImport.getButtonImport().text
+
         pageRegistrationDataImport.screenshot("1")
