@@ -574,3 +574,47 @@ class TestXLSXValidatorsMethods(APITestCase):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
         self.assertEqual(result, expected_result)
+
+    def test_validate_people_sheet_invalid(self) -> None:
+        file_path = f"{self.FILES_DIR_PATH}/rdi_people_test_invalid.xlsx"
+
+        expected_result = [
+            {
+                "row_number": 1,
+                "header": "People",
+                "message": "There are duplicates with id(s): [1]. Number have to be unique in the field pp_index_id.",
+            },
+            {
+                "row_number": 1,
+                "header": "People",
+                "message": "Invalid value in field 'pp_primary_collector_id' or 'pp_alternate_collector_id' for Individual with index_id 1. Both fields can't be empty.",
+            },
+            {
+                "row_number": 1,
+                "header": "People",
+                "message": "Individual with index_id 1 have to has an external collector.",
+            },
+            {
+                "row_number": 1,
+                "header": "People",
+                "message": "Invalid value in field 'pp_relationship_i_c' with index_id 99. Value can be HEAD or NON_BENEFICIARY",
+            },
+            {
+                "row_number": 3,
+                "header": "pp_index_id",
+                "message": "Sheet: 'People', Unexpected value: None for type integer of field pp_index_id",
+            },
+        ]
+
+        with open(file_path, "rb") as file:
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
+            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+        self.assertEqual(result, expected_result)
+
+    def test_validate_people_sheet_valid(self) -> None:
+        file_path = f"{self.FILES_DIR_PATH}/rdi_people_test.xlsx"
+
+        with open(file_path, "rb") as file:
+            upload_xlsx_instance_validator = UploadXLSXInstanceValidator(is_social_worker_program=True)
+            result = upload_xlsx_instance_validator.validate_everything(file, "afghanistan")
+        self.assertEqual(result, [])
