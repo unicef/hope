@@ -229,11 +229,11 @@ class PaymentGatewayAPI:
 
     def get_fsps(self) -> List[FspData]:
         response_data = self._get(self.Endpoints.GET_FSPS)
-        return [FspData.create_from_dict(**fsp_data) for fsp_data in response_data]
+        return [FspData.create_from_dict(fsp_data) for fsp_data in response_data]
 
     def create_payment_instruction(self, data: dict) -> PaymentInstructionData:
         response_data = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
-        return PaymentInstructionData.create_from_dict(**response_data)
+        return PaymentInstructionData.create_from_dict(response_data)
 
     def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
@@ -259,13 +259,13 @@ class PaymentGatewayAPI:
             serializer.data,
             validate_response=validate_response,
         )
-        return AddRecordsResponseData.create_from_dict(**response_data)
+        return AddRecordsResponseData.create_from_dict(response_data)
 
     def get_records_for_payment_instruction(self, payment_instruction_remote_id: str) -> List[PaymentRecordData]:
         response_data = self._get(
             f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}"
         )
-        return [PaymentRecordData.create_from_dict(**record_data) for record_data in response_data]
+        return [PaymentRecordData.create_from_dict(record_data) for record_data in response_data]
 
 
 class PaymentGatewayService:
