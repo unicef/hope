@@ -158,10 +158,12 @@ export const CreateSurveyPage = (): React.ReactElement => {
       fetchPolicy: 'network-only',
     });
 
-  const [loadAvailableFlows, { data: flowsData, loading: flowsLoading }] =
-    useSurveyAvailableFlowsLazyQuery({
-      fetchPolicy: 'network-only',
-    });
+  const [
+    loadAvailableFlows,
+    { data: flowsData, loading: flowsLoading, error: flowsError },
+  ] = useSurveyAvailableFlowsLazyQuery({
+    fetchPolicy: 'network-only',
+  });
 
   useEffect(() => {
     if (category === SurveyCategory.RapidPro) {
@@ -200,18 +202,19 @@ export const CreateSurveyPage = (): React.ReactElement => {
   useEffect(() => {
     // Redirect to error page if no flows available
     if (
-      !flowsData?.surveyAvailableFlows?.length &&
-      category === SurveyCategory.RapidPro
+      (flowsData?.surveyAvailableFlows === null || flowsError) &&
+      !flowsLoading
     ) {
       navigate(`/error/${businessArea}`, {
         state: {
           errorMessage: t(
             'RapidPro is not set up in your country, please contact your Roll Out Focal Point',
           ),
+          lastSuccessfulPage: `/${baseUrl}/accountability/surveys`,
         },
       });
     }
-  }, [flowsData, category, businessArea, navigate, t]);
+  }, [flowsData, category, businessArea, navigate, t, baseUrl, flowsError]);
 
   if (permissions === null || !adminAreasData) return null;
   if (
