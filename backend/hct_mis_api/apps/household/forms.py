@@ -47,8 +47,8 @@ class UpdateByXlsxStage1Form(forms.Form):
         return program
 
     def clean_registration_data_import(self) -> Optional[RegistrationDataImport]:
-        data = self.cleaned_data.get("registration_data_import")
-        program = self.cleaned_data.get("program")
+        data: Optional[RegistrationDataImport] = self.cleaned_data.get("registration_data_import")
+        program: Program = self.cleaned_data["program"]
 
         if not data:
             return None
