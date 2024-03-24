@@ -3417,6 +3417,7 @@ type PaymentVerificationPlanNode implements Node {
   xlsxFileImported: Boolean!
   error: String
   paymentRecordVerifications(offset: Int, before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  adminUrl: String
   xlsxFileWasDownloaded: Boolean
   hasXlsxFile: Boolean
   paymentPlan: PaymentPlanNode

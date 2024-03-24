@@ -18,7 +18,7 @@ import { InReviewPaymentPlanHeaderButtons } from './HeaderButtons/InReviewPaymen
 import { LockedFspPaymentPlanHeaderButtons } from './HeaderButtons/LockedFspPaymentPlanHeaderButtons';
 import { LockedPaymentPlanHeaderButtons } from './HeaderButtons/LockedPaymentPlanHeaderButtons';
 import { OpenPaymentPlanHeaderButtons } from './HeaderButtons/OpenPaymentPlanHeaderButtons';
-import { GenericAdminButton } from '@core/AdminButton';
+import { AdminButton } from '@core/AdminButton';
 
 const StatusWrapper = styled(Box)`
   width: 150px;
@@ -42,6 +42,8 @@ export function PaymentPlanDetailsHeader({
       to: `/${baseUrl}/payment-module/`,
     },
   ];
+
+
 
   const canRemove = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
   const canEdit = hasPermissions(PERMISSIONS.PM_CREATE, permissions);
@@ -200,7 +202,7 @@ export function PaymentPlanDetailsHeader({
           ? breadCrumbsItems
           : null
       }
-      flags={<GenericAdminButton adminUrl={paymentPlan.adminUrl} />}
+      flags={<AdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>

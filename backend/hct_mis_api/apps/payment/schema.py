@@ -30,6 +30,7 @@ from graphql_relay import to_global_id
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
 
 from hct_mis_api.apps.account.permissions import (
+    AdminUrlNodeMixin,
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
@@ -706,7 +707,7 @@ class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
         return self.get_payment
 
 
-class PaymentVerificationPlanNode(DjangoObjectType):
+class PaymentVerificationPlanNode(AdminUrlNodeMixin, DjangoObjectType):
     excluded_admin_areas_filter = graphene.List(graphene.String)
     age_filter = graphene.Field(AgeFilterObject)
     xlsx_file_was_downloaded = graphene.Boolean()

@@ -18,7 +18,7 @@ import { PaymentDetails } from '@components/paymentmodule/PaymentDetails';
 import { RevertForceFailedButton } from '@components/paymentmodule/RevertForceFailedButton';
 import { ForceFailedButton } from '@components/paymentmodule/ForceFailedButton';
 import { useBaseUrl } from '@hooks/useBaseUrl';
-import { GenericAdminButton } from '@core/AdminButton';
+import { AdminButton } from '@core/AdminButton';
 
 export function PaymentDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -81,7 +81,7 @@ export function PaymentDetailsPage(): React.ReactElement {
       <PageHeader
         title={`Payment ${payment.unicefId}`}
         breadCrumbs={breadCrumbsItems}
-        flags={<GenericAdminButton adminUrl={payment.adminUrl} />}
+        flags={<AdminButton adminUrl={payment.adminUrl} />}
       >
         {renderButton()}
       </PageHeader>

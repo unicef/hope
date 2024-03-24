@@ -26,6 +26,7 @@ export const Payment = gql`
         statusDate
         receivedAmount
         isManuallyEditable
+        adminUrl
       }
       currency
       entitlementQuantity

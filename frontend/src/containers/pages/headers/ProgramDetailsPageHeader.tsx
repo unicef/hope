@@ -7,7 +7,7 @@ import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ActiveProgramDetailsPageHeaderButtons } from './ActiveProgramDetailsPageHeaderButtons';
 import { DraftProgramDetailsPageHeaderButtons } from './DraftProgramDetailsPageHeaderButtons';
 import { FinishedProgramDetailsPageHeaderButtons } from './FinishedProgramDetailsPageHeaderButtons';
-import { GenericAdminButton } from '@core/AdminButton';
+import { AdminButton } from '@core/AdminButton';
 
 export interface ProgramDetailsPageHeaderPropTypes {
   program: ProgramQuery['program'];
@@ -76,7 +76,7 @@ export function ProgramDetailsPageHeader({
     <PageHeader
         title={program.name}
         breadCrumbs={breadCrumbsItems}
-        flags={<GenericAdminButton adminUrl={program.adminUrl} />}
+        flags={<AdminButton adminUrl={program.adminUrl} />}
     >
       {buttons}
     </PageHeader>

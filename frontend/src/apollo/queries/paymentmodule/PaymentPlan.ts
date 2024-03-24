@@ -175,6 +175,7 @@ export const PAYMENT_PLAN_QUERY = gql`
           node {
             id
             unicefId
+            adminUrl
             status
             sampleSize
             receivedCount

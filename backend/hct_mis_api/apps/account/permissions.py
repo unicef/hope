@@ -5,10 +5,10 @@ from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 from urllib.parse import urlparse
 
-import graphene
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
 
+import graphene
 from graphene import Mutation
 from graphene.relay import ClientIDMutation
 from graphene.types.argument import to_arguments

@@ -13,7 +13,6 @@ import { PaymentPlansFilters } from '../../tables/paymentmodule/PaymentPlansTabl
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../programContext';
-import { GenericAdminButton } from '@core/AdminButton';
 
 const initialFilter = {
   search: '',

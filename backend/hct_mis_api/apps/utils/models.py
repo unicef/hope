@@ -126,10 +126,9 @@ class SoftDeletableIsOriginalModel(models.Model):
 
 
 class AdminUrlMixin:
-
     @property
-    def admin_url(self):
-        return reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=[self.id])
+    def admin_url(self) -> str:
+        return reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=[self.id])
 
 
 class TimeStampedUUIDModel(AdminUrlMixin, UUIDModel):
