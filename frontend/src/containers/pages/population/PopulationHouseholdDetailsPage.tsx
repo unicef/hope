@@ -150,7 +150,7 @@ export const PopulationHouseholdDetailsPage = (): React.ReactElement => {
                 />
               )}
             </Box>
-            <GenericAdminButton currentUrl={document.location.href} />
+            <GenericAdminButton adminUrl={household?.adminUrl} />
           </>
         }
       />

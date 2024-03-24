@@ -81,7 +81,7 @@ export function PaymentDetailsPage(): React.ReactElement {
       <PageHeader
         title={`Payment ${payment.unicefId}`}
         breadCrumbs={breadCrumbsItems}
-        flags={<GenericAdminButton currentUrl={document.location.href} />}
+        flags={<GenericAdminButton adminUrl={payment.adminUrl} />}
       >
         {renderButton()}
       </PageHeader>

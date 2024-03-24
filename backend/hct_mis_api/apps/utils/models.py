@@ -18,6 +18,7 @@ from typing import (
 from django.conf import settings
 from django.db import models
 from django.http import HttpRequest
+from django.urls import reverse
 from django.utils import timezone
 
 from concurrency.fields import IntegerVersionField
@@ -124,7 +125,14 @@ class SoftDeletableIsOriginalModel(models.Model):
             return super().delete(using=using, *args, **kwargs)
 
 
-class TimeStampedUUIDModel(UUIDModel):
+class AdminUrlMixin:
+
+    @property
+    def admin_url(self):
+        return reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=[self.id])
+
+
+class TimeStampedUUIDModel(AdminUrlMixin, UUIDModel):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 

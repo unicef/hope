@@ -332,7 +332,6 @@ export const CreateCommunicationPage = (): React.ReactElement => {
                 ? breadCrumbsItems
                 : null
             }
-            flags={<GenericAdminButton currentUrl={document.location.href} />}
           />
           <PaperContainer>
             <Grid xs={9} item>

@@ -200,7 +200,7 @@ export function PaymentPlanDetailsHeader({
           ? breadCrumbsItems
           : null
       }
-      flags={<GenericAdminButton currentUrl={document.location.href} />}
+      flags={<GenericAdminButton adminUrl={paymentPlan.adminUrl} />}
     >
       {buttons}
     </PageHeader>

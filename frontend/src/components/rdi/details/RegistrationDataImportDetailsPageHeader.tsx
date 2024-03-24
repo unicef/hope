@@ -142,7 +142,7 @@ export function RegistrationDataImportDetailsPageHeader({
         title={registration.name}
         breadCrumbs={canViewList ? breadCrumbsItems : null}
         handleBack={() => navigate(`/${baseUrl}/registration-data-import/`)}
-        flags={<GenericAdminButton currentUrl={document.location.href} />}
+        flags={<GenericAdminButton adminUrl={registration.adminUrl} />}
       >
         {registration.erased ? null : buttons}
       </PageHeader>

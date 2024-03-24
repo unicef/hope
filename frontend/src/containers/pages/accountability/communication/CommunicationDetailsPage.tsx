@@ -15,6 +15,7 @@ import { CommunicationDetails } from '@components/accountability/Communication/C
 import { CommunicationMessageDetails } from '@components/accountability/Communication/CommunicationMessageDetails';
 import { RecipientsTable } from '../../../tables/Communication/RecipientsTable/RecipientsTable';
 import { useBaseUrl } from '@hooks/useBaseUrl';
+import {GenericAdminButton} from "@core/AdminButton";
 
 export function CommunicationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
@@ -52,6 +53,7 @@ export function CommunicationDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
+        flags={<GenericAdminButton adminUrl={message.adminUrl} />}
       />
       <Box display="flex" flexDirection="column">
         <CommunicationDetails message={message} />

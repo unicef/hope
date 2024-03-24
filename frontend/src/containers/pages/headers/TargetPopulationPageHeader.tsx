@@ -122,7 +122,7 @@ export function TargetPopulationPageHeader({
         </HeaderWrapper>
       }
       breadCrumbs={breadCrumbsItems}
-      flags={<GenericAdminButton currentUrl={document.location.href} />}
+      flags={<GenericAdminButton adminUrl={targetPopulation.adminUrl} />}
     >
       {buttons}
     </PageHeader>

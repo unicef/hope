@@ -126,7 +126,7 @@ export function SurveyDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
-        flags={<GenericAdminButton currentUrl={document.location.href} />}
+        flags={<GenericAdminButton adminUrl={survey.adminUrl} />}
       >
         {renderActions()}
       </PageHeader>

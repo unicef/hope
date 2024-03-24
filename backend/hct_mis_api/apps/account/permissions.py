@@ -5,6 +5,7 @@ from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 from urllib.parse import urlparse
 
+import graphene
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model
 
@@ -345,7 +346,14 @@ def hopeOneOfPermissionClass(*permissions: Permissions) -> Type[BasePermission]:
     return XDPerm
 
 
-class BaseNodePermissionMixin:
+class AdminUrlNodeMixin:
+    admin_url = graphene.String()
+
+    def resolve_admin_url(self, info: Any, **kwargs: Any) -> graphene.String:
+        return self.admin_url
+
+
+class BaseNodePermissionMixin(AdminUrlNodeMixin):
     permission_classes: Tuple[Type[BasePermission], ...] = (AllowAny,)
 
     @classmethod

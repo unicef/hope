@@ -3,78 +3,23 @@ import { useCachedMe } from '@hooks/useCachedMe';
 import * as React from 'react';
 
 
-export const generateBaseAdminRedirect = (url: string) => {
-    const urlObject = new URL(url);
-    const urlPathnameElements = urlObject.pathname.split('/');
-    const encodedUUID = urlPathnameElements.pop();
-
-    if (urlPathnameElements.length === 1) {
-        return null;
-    }
-
-    let decodedUUID;
-    try {
-        decodedUUID = atob(encodedUUID).split(':')[1];
-    } catch (e) {
-        return null;
-    }
-
-    const urlPathSwitch = urlPathnameElements.slice(4).join('/');
-    const adminBaseUrl = `${urlObject.origin}/api/unicorn`;
-
-    switch (urlPathSwitch) {
-      case 'registration-data-import':
-        return `${adminBaseUrl}/registration_data/registrationdataimport/${decodedUUID}/change`;
-      case 'population/household':
-        return `${adminBaseUrl}/household/household/${decodedUUID}/change`;
-      case 'population/individuals':
-        return `${adminBaseUrl}/household/individual/${decodedUUID}/change`;
-      case 'details':
-        return `${adminBaseUrl}/program/program/${decodedUUID}/change`;
-      case 'target-population':
-        return `${adminBaseUrl}/targeting/targetpopulation/${decodedUUID}/change`;
-      case 'payment-module/payment-plans':
-        return `${adminBaseUrl}/payment/paymentplan/${decodedUUID}/change`;
-      case 'payment-module/payments':
-        return `${adminBaseUrl}/payment/payment/${decodedUUID}/change`;
-      case 'grievance/tickets/user-generated':
-        return `${adminBaseUrl}/grievance/grievanceticket/${decodedUUID}/change`;
-      case 'grievance/tickets/system-generated':
-        return `${adminBaseUrl}/grievance/grievanceticket/${decodedUUID}/change`;
-      case 'grievance/feedback':
-        return `${adminBaseUrl}/accountability/feedback/${decodedUUID}/change`;
-      case 'accountability/communication':
-        return `${adminBaseUrl}/accountability/message/${decodedUUID}/change`;
-      case 'accountability/surveys':
-        return `${adminBaseUrl}/accountability/survey/${decodedUUID}/change`;
-      default:
-        return null;
-    }
-  };
-
 interface GenericAdminButtonProps {
-    currentUrl: string;
-}
-
-interface VerificationAdminButtonProps extends GenericAdminButtonProps {
-    id: string;
-    isPlan?: boolean;
+    adminUrl: string;
 }
 
 export const GenericAdminButton: React.FC<GenericAdminButtonProps> = ({
-    currentUrl,
+    adminUrl,
 }) => {
     const { data } = useCachedMe();
     const isSuperUser = data.me.isSuperuser;
-    const redirectUrl = generateBaseAdminRedirect(currentUrl);
 
-    if (isSuperUser && redirectUrl) {
-        return <a href={redirectUrl}><ArrowCircleRightIcon color="primary"/></a>;
+    if (isSuperUser) {
+        return <a href={adminUrl}><ArrowCircleRightIcon color="primary"/></a>;
     }
     return null;
 };
 
-export const VerificationAdminButton: React.FC<VerificationAdminButtonProps> = ({
+export const VerificationAdminButton: React.FC = ({
     id,
     currentUrl,
     isPlan = true,

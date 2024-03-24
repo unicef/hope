@@ -46,7 +46,7 @@ export function PaymentModulePage(): React.ReactElement {
 
   return (
     <>
-      <PageHeader title={t('Payment Module')} flags={<GenericAdminButton currentUrl={document.location.href} />}>
+      <PageHeader title={t('Payment Module')}>
         {hasPermissions(PERMISSIONS.PM_CREATE, permissions) && (
           <ButtonTooltip
             variant="contained"

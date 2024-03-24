@@ -76,7 +76,7 @@ export function ProgramDetailsPageHeader({
     <PageHeader
         title={program.name}
         breadCrumbs={breadCrumbsItems}
-        flags={<GenericAdminButton currentUrl={document.location.href} />}
+        flags={<GenericAdminButton adminUrl={program.adminUrl} />}
     >
       {buttons}
     </PageHeader>

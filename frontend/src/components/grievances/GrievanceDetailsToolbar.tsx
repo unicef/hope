@@ -339,7 +339,7 @@ export function GrievanceDetailsToolbar({
     <PageHeader
       title={`Ticket ID: ${ticket.unicefId}`}
       breadCrumbs={breadCrumbsItems}
-      flags={<GenericAdminButton currentUrl={document.location.href} />}
+      flags={<GenericAdminButton adminUrl={ticket.adminUrl} />}
     >
       <Box display="flex" alignItems="center">
         {isEditable && canEdit && (

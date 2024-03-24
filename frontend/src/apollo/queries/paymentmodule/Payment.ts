@@ -86,6 +86,7 @@ export const Payment = gql`
       additionalDocumentNumber
       reasonForUnsuccessfulPayment
       snapshotCollectorFullName
+      adminUrl
     }
   }
 `;

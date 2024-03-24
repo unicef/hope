@@ -28,6 +28,7 @@ export const PAYMENT_PLAN_QUERY = gql`
         id
         name
       }
+      adminUrl
       currency
       currencyName
       startDate

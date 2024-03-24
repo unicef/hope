@@ -42,7 +42,7 @@ export function FeedbackDetailsToolbar({
     <PageHeader
       title={`Feedback ID: ${feedback.unicefId}`}
       breadCrumbs={breadCrumbsItems}
-      flags={<GenericAdminButton currentUrl={document.location.href} />}
+      flags={<GenericAdminButton adminUrl={feedback.adminUrl} />}
     >
       <Box display="flex" alignItems="center">
         {canEdit && (

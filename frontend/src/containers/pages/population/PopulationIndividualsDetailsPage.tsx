@@ -99,7 +99,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         flags={
           <>
             <IndividualFlags individual={individual} />
-            <GenericAdminButton currentUrl={document.location.href} />
+            <GenericAdminButton adminUrl={individual?.adminUrl} />
           </>
         }
       >
