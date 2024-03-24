@@ -22,7 +22,6 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         totalNumberOfHouseholds
         totalNumberOfHouseholdsWithTpInProgram
         administrativeAreasOfImplementation
-        individualDataNeeded
         version
         dataCollectingType {
           id
@@ -37,7 +36,11 @@ export const UPDATE_PROGRAM_MUTATION = gql`
           id
           name
           areaAccess
-          adminAreas
+          adminAreas {
+            ids
+            level
+            totalCount
+          }
         }
       }
       validationErrors

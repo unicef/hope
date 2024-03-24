@@ -9,6 +9,9 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from _pytest.runner import CallInfo
 from page_object.admin_panel.admin_panel import AdminPanel
+from page_object.grievance.details_feedback_page import FeedbackDetailsPage
+from page_object.grievance.feedback import Feedback
+from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
 from pytest_django.live_server_helper import LiveServer
@@ -90,14 +93,49 @@ def pageAdminPanel(request: FixtureRequest, browser: Chrome) -> AdminPanel:
 
 
 @pytest.fixture
-def change_super_user() -> None:
+def pageFeedback(request: FixtureRequest, browser: Chrome) -> Feedback:
+    yield Feedback(browser)
+
+
+@pytest.fixture
+def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDetailsPage:
+    yield FeedbackDetailsPage(browser)
+
+
+@pytest.fixture
+def pageNewFeedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
+    yield NewFeedback(browser)
+
+
+@pytest.fixture
+def business_area() -> BusinessArea:
+    business_area, _ = BusinessArea.objects.get_or_create(
+        **{
+            "pk": "c259b1a0-ae3a-494e-b343-f7c8eb060c68",
+            "code": "0060",
+            "name": "Afghanistan",
+            "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
+            "region_code": "64",
+            "region_name": "SAR",
+            "slug": "afghanistan",
+            "has_data_sharing_agreement": True,
+            "is_payment_plan_applicable": False,
+            "kobo_token": "XXX",
+        },
+    )
+    return business_area
+
+
+@pytest.fixture
+def change_super_user(business_area: BusinessArea) -> None:
     user = User.objects.filter(email="test@example.com").first()
     user.partner = Partner.objects.get(name="UNHCR")
+    user.partner.allowed_business_areas.add(business_area)
     user.save()
 
 
 @pytest.fixture(autouse=True)
-def create_super_user() -> User:
+def create_super_user(business_area: BusinessArea) -> User:
     Partner.objects.get_or_create(name="TEST")
     Partner.objects.get_or_create(name="UNICEF")
     Partner.objects.get_or_create(name="UNHCR")
@@ -110,22 +148,9 @@ def create_super_user() -> User:
 
     call_command("loaddata", f"{settings.PROJECT_ROOT}/apps/geo/fixtures/data.json")
     country = Country.objects.get(name="Afghanistan")
-    business_area = BusinessArea.objects.create(
-        **{
-            "code": "0060",
-            "name": "Afghanistan",
-            "long_name": "THE ISLAMIC REPUBLIC OF AFGHANISTAN",
-            "region_code": "64",
-            "region_name": "SAR",
-            "slug": "afghanistan",
-            "has_data_sharing_agreement": True,
-            "is_payment_plan_applicable": False,
-            "kobo_token": "XXX",
-        },
-    )
     business_area.countries.add(country)
-
     user = UserFactory.create(
+        pk="4196c2c5-c2dd-48d2-887f-3a9d39e78916",
         is_superuser=True,
         is_staff=True,
         username="superuser",
@@ -138,6 +163,10 @@ def create_super_user() -> User:
         role=Role.objects.get(name="Role"),
         business_area=BusinessArea.objects.get(name="Afghanistan"),
     )
+
+    for partner in Partner.objects.exclude(name="UNICEF"):
+        partner.allowed_business_areas.add(business_area)
+
     assert User.objects.filter(email="test@example.com").first()
     assert user.is_superuser
 
