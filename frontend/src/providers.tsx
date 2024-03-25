@@ -4,6 +4,7 @@ import {
   NormalizedCacheObject,
 } from '@apollo/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { ReactNode, useEffect, useState } from 'react';
@@ -52,6 +53,7 @@ export const Providers: React.FC<ProvidersProps> = ({ children }) => {
           </StyledThemeProvider>
         </MuiThemeProvider>
       </ApolloProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 };
