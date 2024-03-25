@@ -853,5 +853,10 @@
   "Debit Card Number": "Debit Card Number",
   "Debit Card Issuer": "Debit Card Issuer",
   "Account Holder Name": "Account Holder Name",
-  "Payment Plan Verification": "Payment Plan Verification"
+  "Payment Plan Verification": "Payment Plan Verification",
+  "Managerial Console": "Managerial Console",
+  "Payment Plans pending for Approval": "Payment Plans pending for Approval",
+  "Payment Plans pending for Authorization": "Payment Plans pending for Authorization",
+  "Payment Plans pending for Release": "Payment Plans pending for Release",
+  "Payment Verification Plans Overview": "Payment Verification Plans Overview"
 }
