@@ -23,9 +23,9 @@ interface RerunDedupeProps {
   registration: RegistrationDetailedFragment;
 }
 
-export function RerunDedupe({
+export const RerunDedupe = ({
   registration,
-}: RerunDedupeProps): React.ReactElement {
+}: RerunDedupeProps): React.ReactElement => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -49,6 +49,7 @@ export function RerunDedupe({
         variant="contained"
         onClick={() => setOpen(true)}
         disabled={!isActiveProgram}
+        data-cy="button-rerun-dedupe"
       >
         {t('Rerun Deduplication')}
       </Button>
@@ -74,6 +75,7 @@ export function RerunDedupe({
               type="submit"
               color="primary"
               variant="contained"
+              data-cy="button-rerun-dedupe-confirm"
               onClick={rerunDedupe}
             >
               {t('Rerun')}
@@ -83,4 +85,4 @@ export function RerunDedupe({
       </Dialog>
     </span>
   );
-}
+};
