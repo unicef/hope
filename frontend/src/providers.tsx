@@ -21,11 +21,12 @@ interface ProvidersProps {
   children: ReactNode[];
 }
 
+const queryClient = new QueryClient();
+
 export const Providers: React.FC<ProvidersProps> = ({ children }) => {
   const [apolloClient, setApolloClient] = useState<
     ApolloClient<NormalizedCacheObject> | undefined
   >();
-  const queryClient = new QueryClient();
 
   useEffect(() => {
     getClient().then((client) => {
