@@ -22,7 +22,7 @@ import { useSnackbar } from '@hooks/useSnackBar';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { ButtonTooltip } from '@components/core/ButtonTooltip';
 import { useProgramContext } from '../../../../programContext';
-import { GenericAdminButton } from '@core/AdminButton';
+import { AdminButton } from '@core/AdminButton';
 
 export function SurveyDetailsPage(): React.ReactElement {
   const { showMessage } = useSnackbar();
