@@ -1,22 +1,41 @@
 {% extends "admin/base.html" %}
 
 {% block extrahead %}
-<script>
-    document.addEventListener("DOMContentLoaded", function (event) {
-        const url = window.location.href;
-        let color = '';
-        if (window.location.hostname === 'localhost') {
-            color = '#FF6600';
-        } else if (url.includes('trn')) {
-            color = '#BF360C';
-        } else if (url.includes('stg')) {
-            color = '#673AB7';
-        } else if (url.includes('dev')) {
-            color = '#00796B';
-        } else {
-            color = '#00ADEF';
-        }
-        document.getElementById("header").style.backgroundColor = color;
+  <script>
+    document.addEventListener('DOMContentLoaded', function(event) {
+      const url = window.location.href;
+      let color = '';
+      if (window.location.hostname === 'localhost') {
+        color = '#FF6600';
+      } else if (url.includes('trn')) {
+        color = '#BF360C';
+      } else if (url.includes('stg')) {
+        color = '#673AB7';
+      } else if (url.includes('dev')) {
+        color = '#00796B';
+      } else {
+        color = '#00ADEF';
+      }
+      document.getElementById('header').style.backgroundColor = color;
     });
-</script>
+  </script>
+  {% if MATOMO_TRACKER_URL and MATOMO_SITE_ID %}
+    <!-- Matomo -->
+    <script>
+      var _paq = window._paq = window._paq || [];
+      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        var u = '{{ MATOMO_TRACKER_URL }}';
+        _paq.push(['setTrackerUrl', u + 'matomo.php']);
+        _paq.push(['setSiteId', '{{ MATOMO_SITE_ID }}']);
+        var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+        g.async = true;
+        g.src = u + 'matomo.js';
+        s.parentNode.insertBefore(g, s);
+      })();
+    </script>
+    <!-- End Matomo Code -->
+  {% endif %}
 {% endblock %}
