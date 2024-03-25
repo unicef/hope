@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 import pytest
+from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
 from page_object.registration_data_import.registration_data_import import (
     RegistrationDataImport,
 )
@@ -63,7 +64,11 @@ class TestSmokeRegistrationDataImport:
         pageRegistrationDataImport.getInputName()
 
     def test_smoke_registration_data_details_page(
-        self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
+        self,
+        create_programs: None,
+        add_rdi: None,
+        pageRegistrationDataImport: RegistrationDataImport,
+        pageDetailsRegistrationDataImport: RDIDetailsPage,
     ) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
@@ -71,4 +76,18 @@ class TestSmokeRegistrationDataImport:
         assert str(len(pageRegistrationDataImport.getRows())) in pageRegistrationDataImport.getTableTitle().text
         pageRegistrationDataImport.getRows()[0].click()
         # Check Elements on Details page
-        pageRegistrationDataImport.screenshot("1")
+        assert "Test Other Status" in pageDetailsRegistrationDataImport.getPageHeaderTitle().text
+        assert "IN REVIEW" in pageDetailsRegistrationDataImport.getLabelStatus().text
+        assert "KOBO" in pageDetailsRegistrationDataImport.getLabelSourceOfData().text
+        assert "21 Mar 2023 9:22 AM" in pageDetailsRegistrationDataImport.getLabelImportDate().text
+        pageDetailsRegistrationDataImport.getLabelImportedBy()
+        assert (
+            "TOTAL NUMBER OF HOUSEHOLDS"
+            in pageDetailsRegistrationDataImport.getLabelizedFieldContainerHouseholds().text
+        )
+        assert "3" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
+        assert (
+            "TOTAL NUMBER OF INDIVIDUALS"
+            in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
+        )
+        assert "9" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
