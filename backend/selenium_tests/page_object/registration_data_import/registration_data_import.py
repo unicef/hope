@@ -37,7 +37,7 @@ class RegistrationDataImport(BaseComponents):
     downloadTemplateText = "DOWNLOAD TEMPLATE"
     koboItemText = "Kobo"
     excelItemText = "Excel"
-    inputFileText = 'UPLOAD FILE'
+    inputFileText = "UPLOAD FILE"
 
     # Elements
 

@@ -55,7 +55,7 @@ class TestSmokeRegistrationDataImport:
         assert pageRegistrationDataImport.downloadTemplateText in pageRegistrationDataImport.getDownloadTemplate().text
         assert pageRegistrationDataImport.importText in pageRegistrationDataImport.getButtonImportFile().text
         assert not pageRegistrationDataImport.getButtonImportFile().is_enabled()
-        assert pageRegistrationDataImport.getButtonImportFile().get_property('disabled')
+        assert pageRegistrationDataImport.getButtonImportFile().get_property("disabled")
         pageRegistrationDataImport.getImportTypeSelect().click()
         assert pageRegistrationDataImport.koboItemText in pageRegistrationDataImport.getKoboItem().text
         assert pageRegistrationDataImport.excelItemText in pageRegistrationDataImport.getExcelItem().text
@@ -63,7 +63,7 @@ class TestSmokeRegistrationDataImport:
         pageRegistrationDataImport.getInputName()
 
     def test_smoke_registration_data_details_page(
-            self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
+        self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
