@@ -20,8 +20,24 @@ class RegistrationDataImport(BaseComponents):
     tableLabel = 'span[data-cy="table-label"]'
     statusContainer = 'div[data-cy="status-container"]'
     tablePagination = 'div[data-cy="table-pagination"]'
+    tableRow = 'tr[role="checkbox"]'
+    importTypeSelect = 'div[data-cy="import-type-select"]'
+    downloadTemplate = 'a[data-cy="a-download-template"]'
+    buttonImportRDI = 'button[data-cy="button-import-rdi"]'
+    excelItem = 'li[data-cy="excel-menu-item"]'
+    koboItem = 'li[data-cy="kobo-menu-item"]'
+    inputName = 'input[data-cy="input-name"]'
+    inputFile = 'input[data-cy="file-input"]'
 
     # Texts
+    titleText = "Registration Data Import"
+    importText = "IMPORT"
+    tableTitleText = "List of Imports"
+    importTypeSelectText = "Import From"
+    downloadTemplateText = "DOWNLOAD TEMPLATE"
+    koboItemText = "Kobo"
+    excelItemText = "Excel"
+    inputFileText = 'UPLOAD FILE'
 
     # Elements
 
@@ -65,10 +81,34 @@ class RegistrationDataImport(BaseComponents):
         return self.wait_for(self.tableTitle)
 
     def getTableLabel(self) -> WebElement:
-        return self.wait_for(self.tableLabel)
+        return self.get_elements(self.tableLabel)
 
     def getStatusContainer(self) -> WebElement:
         return self.wait_for(self.statusContainer)
 
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
+
+    def getRows(self) -> list[WebElement]:
+        return self.get_elements(self.tableRow)
+
+    def getImportTypeSelect(self) -> WebElement:
+        return self.wait_for(self.importTypeSelect)
+
+    def getDownloadTemplate(self) -> WebElement:
+        return self.wait_for(self.downloadTemplate)
+
+    def getButtonImportFile(self) -> WebElement:
+        return self.wait_for(self.buttonImportRDI)
+
+    def getExcelItem(self) -> WebElement:
+        return self.wait_for(self.excelItem)
+
+    def getKoboItem(self) -> WebElement:
+        return self.wait_for(self.koboItem)
+
+    def getInputName(self) -> WebElement:
+        return self.wait_for(self.inputName)
+
+    def getInputFile(self) -> WebElement:
+        return self.wait_for(self.inputFile)
