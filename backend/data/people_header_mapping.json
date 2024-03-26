@@ -1,0 +1,367 @@
+[
+  {
+    "column_name": "pp_index_id",
+    "type": "autoincrement",
+    "value": null
+  },
+  {
+    "column_name": "pp_age",
+    "type": "age",
+    "value": null
+  },
+  {
+    "column_name": "pp_relationship_i_c",
+    "type": "special",
+    "value": "HEAD"
+  },
+  {
+    "column_name": "pp_full_name_i_c",
+    "type": "name",
+    "value": null
+  },
+  {
+    "column_name": "pp_given_name_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_middle_name_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_family_name_i_c",
+    "type": "name",
+    "value": null
+  },
+  {
+    "column_name": "pp_gender_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_birth_date_i_c",
+    "type": "date",
+    "value": null
+  },
+  {
+    "column_name": "pp_first_registration_date_i_c",
+    "type": "date",
+    "value": null
+  },
+  {
+    "column_name": "pp_estimated_birth_date_i_c",
+    "type": "constant",
+    "value": false
+  },
+  {
+    "column_name": "pp_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_marital_status_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_phone_no_i_c",
+    "type": "phone_number",
+    "value": null
+  },
+  {
+    "column_name": "pp_phone_no_alternative_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_birth_certificate_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "pp_birth_certificate_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_birth_certificate_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_drivers_license_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "pp_drivers_license_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_drivers_license_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_electoral_card_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "pp_electoral_card_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_electoral_card_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_unhcr_id_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "pp_unhcr_id_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_unhcr_id_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_national_passport_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "pp_national_passport_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_national_passport_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_national_id_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "pp_national_id_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_national_id_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_scope_id_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "pp_scope_id_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_scope_id_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_other_id_type_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_other_id_no_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_other_id_issuer_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_pregnant_i_c",
+    "type": "constant",
+    "value": false
+  },
+  {
+    "column_name": "pp_work_status_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_observed_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_seeing_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_hearing_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_physical_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_memory_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_selfcare_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_comms_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_who_answers_phone_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_who_answers_alt_phone_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_primary_collector_id",
+    "type": "special",
+    "value": null
+  },
+  {
+    "column_name": "pp_alternate_collector_id",
+    "type": "special",
+    "value": null
+  },
+  {
+    "column_name": "pp_photo_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_id_type_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_other_id_type_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_id_no_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_seeing_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_hearing_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_physical_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_memory_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_selfcare_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_comms_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_child_marital_status_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_marriage_age_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_school_enrolled_before_i_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_school_enrolled_i_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_school_type_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_years_in_school_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_minutes_to_school_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pp_admin1_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_admin2_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "pp_address_i_c",
+    "type": "constant",
+    "value": ""
+  },
+  {
+    "column_name": "pp_country_i_c",
+    "type": "choice",
+    "value": null
+  }
+]

@@ -1,0 +1,362 @@
+[
+  {
+    "column_name": "household_id",
+    "type": "autoincrement",
+    "value": null
+  },
+  {
+    "column_name": "residence_status_h_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "consent_h_c",
+    "type": "constant",
+    "value": "TRUE"
+  },
+  {
+    "column_name": "consent_sign_h_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "country_origin_h_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "country_h_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "address_h_c",
+    "type": "constant",
+    "value": ""
+  },
+  {
+    "column_name": "admin1_h_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "admin2_h_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "hh_geopoint_h_c",
+    "type": "constant",
+    "value": "70.210209, 172.085021"
+  },
+  {
+    "column_name": "unhcr_hh_id_h_c",
+    "type": "constant",
+    "value": "UN <3"
+  },
+  {
+    "column_name": "returnee_h_c",
+    "type": "constant",
+    "value": false
+  },
+  {
+    "column_name": "size_h_c",
+    "type": "constant",
+    "value": 1
+  },
+  {
+    "column_name": "first_registration_date_h_c",
+    "type": "date",
+    "value": null
+  },
+  {
+    "column_name": "pregnant_member_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "f_0_5_age_group_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "f_6_11_age_group_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "f_12_17_age_group_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "f_adults_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "f_pregnant_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "m_0_5_age_group_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "m_6_11_age_group_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "m_12_17_age_group_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "m_adults_h_c",
+    "type": "constant",
+    "value": 1
+  },
+  {
+    "column_name": "f_0_5_disability_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "f_6_11_disability_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "f_12_17_disability_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "f_adults_disability_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "m_0_5_disability_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "m_6_11_disability_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "m_12_17_disability_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "m_adults_disability_h_c",
+    "type": "constant",
+    "value": 0
+  },
+  {
+    "column_name": "fchild_hoh_h_c",
+    "type": "constant",
+    "value": false
+  },
+  {
+    "column_name": "child_hoh_h_c",
+    "type": "constant",
+    "value": false
+  },
+  {
+    "column_name": "village_h_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "start_h_c",
+    "type": "date",
+    "value": null
+  },
+  {
+    "column_name": "end_h_c",
+    "type": "date",
+    "value": null
+  },
+  {
+    "column_name": "deviceid_h_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "name_enumerator_h_c",
+    "type": "name",
+    "value": null
+  },
+  {
+    "column_name": "org_enumerator_h_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "consent_sharing_h_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "org_name_enumerator_h_c",
+    "type": "constant",
+    "value": "UNICEF"
+  },
+  {
+    "column_name": "unaccompanied_child_h_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "recent_illness_child_h_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "difficulty_breathing_h_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "treatment_h_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "treatment_facility_h_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "other_treatment_facility_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "living_situation_h_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "number_of_rooms_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "total_dwellers_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "one_room_dwellers_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "total_households_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "water_source_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "sufficient_water_h_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "latrine_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "meals_yesterday_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "food_consumption_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "cereals_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "tubers_roots_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "vegetables_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "fruits_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "meat_fish_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pulses_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "dairy_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "months_displaced_h_f",
+    "type": "constant",
+    "value": 6
+  },
+  {
+    "column_name": "oilfat_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "sugarsweet_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "condiments_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "assistance_type_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "assistance_source_h_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "collect_individual_data_h_c",
+    "type": "constant",
+    "value": "1"
+  }
+]

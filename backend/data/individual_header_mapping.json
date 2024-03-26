@@ -1,0 +1,347 @@
+[
+  {
+    "column_name": "household_id",
+    "type": "special",
+    "value": null
+  },
+  {
+    "column_name": "age",
+    "type": "age",
+    "value": null
+  },
+  {
+    "column_name": "relationship_i_c",
+    "type": "special",
+    "value": null
+  },
+  {
+    "column_name": "full_name_i_c",
+    "type": "name",
+    "value": null
+  },
+  {
+    "column_name": "given_name_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "middle_name_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "family_name_i_c",
+    "type": "name",
+    "value": null
+  },
+  {
+    "column_name": "gender_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "birth_date_i_c",
+    "type": "date",
+    "value": null
+  },
+  {
+    "column_name": "first_registration_date_i_c",
+    "type": "date",
+    "value": null
+  },
+  {
+    "column_name": "estimated_birth_date_i_c",
+    "type": "constant",
+    "value": false
+  },
+  {
+    "column_name": "photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "marital_status_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "phone_no_i_c",
+    "type": "phone_number",
+    "value": null
+  },
+  {
+    "column_name": "phone_no_alternative_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "birth_certificate_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "birth_certificate_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "birth_certificate_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "drivers_license_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "drivers_license_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "drivers_license_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "electoral_card_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "electoral_card_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "electoral_card_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "unhcr_id_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "unhcr_id_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "unhcr_id_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "national_passport_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "national_passport_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "national_passport_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "national_id_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "national_id_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "national_id_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "scope_id_no_i_c",
+    "type": "document_number",
+    "value": null
+  },
+  {
+    "column_name": "scope_id_issuer_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "scope_id_photo_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "other_id_type_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "other_id_no_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "other_id_issuer_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "pregnant_i_c",
+    "type": "constant",
+    "value": false
+  },
+  {
+    "column_name": "work_status_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "observed_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "seeing_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "hearing_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "physical_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "memory_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "selfcare_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "comms_disability_i_c",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "who_answers_phone_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "who_answers_alt_phone_i_c",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "primary_collector_id",
+    "type": "special",
+    "value": null
+  },
+  {
+    "column_name": "alternate_collector_id",
+    "type": "special",
+    "value": null
+  },
+  {
+    "column_name": "photo_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "id_type_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "other_id_type_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "id_no_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "seeing_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "hearing_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "physical_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "memory_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "selfcare_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "comms_disability_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "child_marital_status_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "marriage_age_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "school_enrolled_before_i_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "school_enrolled_i_f",
+    "type": "choice",
+    "value": null
+  },
+  {
+    "column_name": "school_type_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "years_in_school_i_f",
+    "type": "constant",
+    "value": null
+  },
+  {
+    "column_name": "minutes_to_school_i_f",
+    "type": "constant",
+    "value": null
+  }
+]
