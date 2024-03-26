@@ -16,6 +16,7 @@ from hct_mis_api.apps.payment.fixtures import (
     generate_payment_plan,
     generate_real_cash_plans,
     generate_reconciled_payment_plan,
+    update_fsps,
 )
 from hct_mis_api.apps.registration_datahub.management.commands.fix_unicef_id_imported_individuals_and_households import (
     update_mis_unicef_id_individual_and_household,
@@ -83,6 +84,7 @@ class Command(BaseCommand):
         generate_payment_plan()
         generate_real_cash_plans()
         generate_reconciled_payment_plan()
+        update_fsps()
 
         email_list = [
             "jan.romaniak@kellton.com",

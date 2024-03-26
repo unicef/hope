@@ -113,7 +113,6 @@ django-constance = { version = "^2.9", extras = ["redis"] }
 django-cors-headers = "^3.13.0"
 django-countries = "^7.3.2"
 django-csp = "^3.7"
-django-debug-toolbar = "^3.7.0"
 django-elasticsearch-dsl = "^7.2.2"
 django-environ = "^0.10.0"
 django-extensions = "^3.1.5"
@@ -142,7 +141,7 @@ django_compressor = "^4.0"
 django-querysetsequence = "^0.16"
 djangorestframework = "^3.13.1"
 drf-jwt = "^1.19.2"
-drf-yasg = "^1"
+drf-spectacular = { version = "^0.27", extras = ["sidecar"] }
 elasticsearch-dsl ="^7.0.0"
 factory-boy = "^3"
 gevent = "^23.9"  # error installing
@@ -178,6 +177,8 @@ pytest-cov = "^4.1.0"
 coverage = "^7.3.2"
 tomli = "^2.0.1"
 sentry-sdk = "1.40.5"
+django-debug-toolbar = "^4.3.0"
+django-graphiql-debug-toolbar = "^0.2.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "0.982"

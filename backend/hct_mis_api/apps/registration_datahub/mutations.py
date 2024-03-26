@@ -428,7 +428,6 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
     class Arguments:
         file = Upload(required=True)
         business_area_slug = graphene.String(required=True)
-        program_id = graphene.String()  # TODO when program added to population, this needs to be required
 
     @classmethod
     @transaction.atomic(using="default")
@@ -436,6 +435,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
     @is_authenticated
     def mutate(cls, root: Any, info: Any, file: IO, business_area_slug: str) -> "UploadImportDataXLSXFileAsync":
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
+        program_id: str = decode_id_string_required(info.context.headers.get("Program"))
         import_data = ImportData.objects.create(
             file=file,
             data_type=ImportData.XLSX,
@@ -443,7 +443,7 @@ class UploadImportDataXLSXFileAsync(PermissionMutation):
             created_by_id=info.context.user.id,
             business_area_slug=business_area_slug,
         )
-        transaction.on_commit(partial(validate_xlsx_import_task.delay, import_data.id))
+        transaction.on_commit(partial(validate_xlsx_import_task.delay, import_data.id, program_id))
         return UploadImportDataXLSXFileAsync(import_data, [])
 
 

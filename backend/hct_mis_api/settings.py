@@ -438,7 +438,8 @@ OTHER_APPS = [
     "explorer",
     "import_export",
     "rest_framework",
-    "drf_yasg",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     "flags",
     "admin_cursor_paginator",
     "markdownify.apps.MarkdownifyConfig",
@@ -778,6 +779,7 @@ Clear Cache,clear-cache/
         "The schedule (in days) which is applied to task clean_old_record_files_task",
         "positive_integers",
     ),
+    "SHOW_TOOLBAR": (False, "Show debug toolbar", bool),
 }
 
 CONSTANCE_DBS = ("default",)
@@ -1006,41 +1008,6 @@ FLAGS = {
     "NEW_RECORD_MODEL": [{"condition": "boolean", "value": False}],
 }
 
-if DEBUG:
-    INSTALLED_APPS += [
-        "debug_toolbar",
-    ]
-    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
-
-    # DEBUG TOOLBAR
-    def show_ddt(request: HttpRequest) -> None:  # pragma: no-cover
-        from flags.state import flag_enabled
-
-        return flag_enabled("DEVELOP_DEBUG_TOOLBAR", request=request)
-
-    DEBUG_TOOLBAR_CONFIG = {
-        "SHOW_TOOLBAR_CALLBACK": show_ddt,
-        "JQUERY_URL": "",
-    }
-    DEBUG_TOOLBAR_PANELS = [
-        "debug_toolbar.panels.history.HistoryPanel",
-        "debug_toolbar.panels.versions.VersionsPanel",
-        "debug_toolbar.panels.timer.TimerPanel",
-        "flags.panels.FlagsPanel",
-        "flags.panels.FlagChecksPanel",
-        "debug_toolbar.panels.settings.SettingsPanel",
-        "debug_toolbar.panels.headers.HeadersPanel",
-        "debug_toolbar.panels.request.RequestPanel",
-        "debug_toolbar.panels.sql.SQLPanel",
-        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
-        "debug_toolbar.panels.templates.TemplatesPanel",
-        "debug_toolbar.panels.cache.CachePanel",
-        "debug_toolbar.panels.signals.SignalsPanel",
-        "debug_toolbar.panels.logging.LoggingPanel",
-        "debug_toolbar.panels.redirects.RedirectsPanel",
-        "debug_toolbar.panels.profiling.ProfilingPanel",
-    ]
-
 MARKDOWNIFY = {
     "default": {
         "WHITELIST_TAGS": ["a", "abbr", "acronym", "b", "blockquote", "em", "i", "li", "ol", "p", "strong", "ul" "br"]
@@ -1114,3 +1081,46 @@ logger_azure = logging.getLogger("azure.core.pipeline.policies.http_logging_poli
 logger_azure.setLevel(logging.WARNING)
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
+
+if DEBUG and not IS_TEST:
+    from constance import config
+
+    INSTALLED_APPS += ["debug_toolbar", "graphiql_debug_toolbar"]
+    MIDDLEWARE.append("graphiql_debug_toolbar.middleware.DebugToolbarMiddleware")
+
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: config.SHOW_TOOLBAR,
+        "JQUERY_URL": "",
+    }
+    DEBUG_TOOLBAR_PANELS = [
+        "debug_toolbar.panels.history.HistoryPanel",
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "flags.panels.FlagsPanel",
+        "flags.panels.FlagChecksPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        "debug_toolbar.panels.logging.LoggingPanel",
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+    ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "HOPE API",
+    "DESCRIPTION": "HOPE REST AOI Swagger Documentation",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": True,
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
+}
