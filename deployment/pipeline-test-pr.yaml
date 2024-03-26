@@ -7,6 +7,7 @@ pr:
 resources:
   - repo: self
 
+
 variables:
   # ========================================================================
   #                          Mandatory variables 
