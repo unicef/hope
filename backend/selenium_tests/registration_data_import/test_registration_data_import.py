@@ -91,3 +91,11 @@ class TestSmokeRegistrationDataImport:
             in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
         )
         assert "9" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
+        assert (
+            pageDetailsRegistrationDataImport.buttonMergeRdiText
+            in pageDetailsRegistrationDataImport.getButtonMergeRdi().text
+        )
+        assert (
+            pageDetailsRegistrationDataImport.buttonRefuseRdiText
+            in pageDetailsRegistrationDataImport.getButtonRefuseRdi().text
+        )

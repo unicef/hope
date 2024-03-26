@@ -19,6 +19,12 @@ class RDIDetailsPage(BaseComponents):
     tablePagination = 'div[data-cy="table-pagination"]'
     importedIndividualsTable = 'div[data-cy="imported-individuals-table"]'
     tableRow = 'tr[data-cy="table-row"]'
+    buttonRefuseRdi = 'button[data-cy="button-refuse-rdi"]'
+    buttonMergeRdi = 'button[data-cy="button-merge-rdi"]'
+
+    # Texts
+    buttonRefuseRdiText = "REFUSE IMPORT"
+    buttonMergeRdiText = "MERGE"
 
     def getMainContent(self) -> WebElement:
         return self.wait_for(self.mainContent)
@@ -62,8 +68,14 @@ class RDIDetailsPage(BaseComponents):
     def getTableRow(self) -> WebElement:
         return self.wait_for(self.tableRow)
 
+    def getButtonRefuseRdi(self) -> WebElement:
+        return self.wait_for(self.buttonRefuseRdi)
+
     def getTablePagination(self) -> WebElement:
         return self.wait_for(self.tablePagination)
+
+    def getButtonMergeRdi(self) -> WebElement:
+        return self.wait_for(self.buttonMergeRdi)
 
     def getImportedIndividualsTable(self) -> WebElement:
         return self.wait_for(self.importedIndividualsTable)
