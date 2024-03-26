@@ -112,7 +112,6 @@ export const DrawerItems = ({
     }
     // When GlobalProgramFilter not applied show some pages only
     if (isAllPrograms) {
-      console.log(updatedMenuItems);
       const pagesAvailableForAllPrograms = [
         'Country Dashboard',
         'Programme Management',
