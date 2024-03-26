@@ -35,7 +35,8 @@ class TestSmokeRegistrationDataImport:
         assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
         assert pageRegistrationDataImport.importText in pageRegistrationDataImport.getButtonImport().text
         assert pageRegistrationDataImport.tableTitleText in pageRegistrationDataImport.getTableTitle().text
-        assert str(len(pageRegistrationDataImport.getRows())) in pageRegistrationDataImport.getTableTitle().text
+        assert pageRegistrationDataImport.expectedRows(2)
+        assert "2" in pageRegistrationDataImport.getTableTitle().text
         assert "Title" in pageRegistrationDataImport.getTableLabel()[0].text
         assert "Status" in pageRegistrationDataImport.getTableLabel()[1].text
         assert "Import Date" in pageRegistrationDataImport.getTableLabel()[2].text

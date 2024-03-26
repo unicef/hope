@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -91,6 +93,13 @@ class RegistrationDataImport(BaseComponents):
 
     def getRows(self) -> list[WebElement]:
         return self.get_elements(self.tableRow)
+
+    def expectedRows(self, number: int) -> bool:
+        for _ in range(15):
+            if str(len(self.getRows())) == number:
+                return True
+            sleep(1)
+        return False
 
     def getImportTypeSelect(self) -> WebElement:
         return self.wait_for(self.importTypeSelect)
