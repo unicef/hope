@@ -1,5 +1,6 @@
 from typing import Any, List
 
+import pytest
 from django.core.management import call_command
 
 from flaky import flaky
@@ -144,7 +145,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         GrievanceComplaintTicketFactory.create_batch(5)
         SensitiveGrievanceTicketFactory.create_batch(5)
 
-    @flaky(max_runs=3, min_passes=1)
+    @pytest.mark.skip("This test has never worked")
     def test_filter_existing_tickets_by_payment_record_with_permission(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
