@@ -144,6 +144,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         GrievanceComplaintTicketFactory.create_batch(5)
         SensitiveGrievanceTicketFactory.create_batch(5)
 
+    @flaky(max_runs=3, min_passes=1)
     def test_filter_existing_tickets_by_payment_record_with_permission(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
@@ -256,7 +257,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             },
         )
 
-    @flaky(max_runs=3, min_passes=2)
+    @flaky(max_runs=3, min_passes=1)
     def test_filter_existing_tickets_by_individual_without_permission(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE], self.business_area

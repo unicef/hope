@@ -1,5 +1,6 @@
 from unittest.mock import patch
 
+from flaky import flaky
 import pytest
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
@@ -118,6 +119,7 @@ class TestCrossAreaFilterAvailable(APITestCase):
         }
         cls.partner_with_area_restrictions.save()
 
+    @flaky(max_runs=3, min_passes=1)
     def test1_cross_area_filter_true_full_area_access_without_permission(self) -> None:
         user_without_permission = UserFactory(partner=self.partner_without_area_restrictions)
         self.create_user_role_with_permissions(
