@@ -89,16 +89,19 @@ class DocumentSerializer(serializers.ModelSerializer):
     type = serializers.ChoiceField(
         choices=[(IDENTIFICATION_TYPE_TO_KEY_MAPPING[value], label) for (value, label) in IDENTIFICATION_TYPE_CHOICE],
         allow_blank=True,
-        required=False,
+        required=True,
     )
     country = serializers.ChoiceField(choices=Countries())
     image = serializers.CharField(allow_blank=True, required=False)
+    doc_number = serializers.CharField(required=True)
+    doc_date = serializers.DateField(required=True)
 
     class Meta:
         model = ImportedDocument
         exclude = [
             "individual",
             "photo",
+            "document_number",
         ]
 
 
