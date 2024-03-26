@@ -123,6 +123,10 @@ DEFAULTS = {
         str,
         "",
     ),
+    "MATOMO_SCRIPT_URL": (
+        str,
+        "",
+    ),
     "MATOMO_SITE_ID": (
         str,
         "",
@@ -1122,6 +1126,7 @@ if DEBUG and not IS_TEST:
     ]
 
 MATOMO_TRACKER_URL = env("MATOMO_TRACKER_URL")
+MATOMO_SCRIPT_URL = env("MATOMO_SCRIPT_URL")
 MATOMO_SITE_ID = env("MATOMO_SITE_ID")
 
 REST_FRAMEWORK = {

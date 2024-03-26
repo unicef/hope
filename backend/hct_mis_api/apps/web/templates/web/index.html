@@ -21,7 +21,7 @@
     {% endif %}
   </script>
 
-  {% if MATOMO_TRACKER_URL and MATOMO_SITE_ID %}
+  {% if MATOMO_TRACKER_URL and MATOMO_SITE_ID and MATOMO_SCRIPT_URL %}
     <!-- Matomo -->
     <script>
       var _paq = window._paq = window._paq || [];
@@ -29,12 +29,11 @@
       _paq.push(['trackPageView']);
       _paq.push(['enableLinkTracking']);
       (function() {
-        var u = '{{ MATOMO_TRACKER_URL }}';
-        _paq.push(['setTrackerUrl', u + 'matomo.php']);
+        _paq.push(['setTrackerUrl', '{{ MATOMO_TRACKER_URL }}']);
         _paq.push(['setSiteId', '{{ MATOMO_SITE_ID }}']);
         var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
         g.async = true;
-        g.src = u + 'matomo.js';
+        g.src = '{{ MATOMO_SCRIPT_URL }}';
         s.parentNode.insertBefore(g, s);
       })();
     </script>
