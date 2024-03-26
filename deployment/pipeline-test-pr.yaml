@@ -294,4 +294,4 @@ stages:
             displayName: 'Publish Test Report Artifacts'
             condition: always()
             inputs:
-              PathtoPublish: './backend/screenshot/'
+              PathtoPublish: './backend/report/'
