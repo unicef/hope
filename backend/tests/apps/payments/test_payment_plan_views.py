@@ -115,7 +115,7 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert self.payment_plan2.unicef_id in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
         assert self.payment_plan3.unicef_id not in [response_json[0]["unicef_id"], response_json[1]["unicef_id"]]
 
-    def test_list_payment_plans_last_modified_data(
+    def test_list_payment_plans_approval_process_data(
         self,
         api_client: Callable,
         afghanistan: BusinessAreaFactory,
@@ -140,10 +140,10 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()["results"]
         assert len(response_json) == 1
-        assert response_json[0]["last_modified_date"] == approval_process.sent_for_approval_date.strftime(
+        assert response_json[0]["last_approval_process_date"] == approval_process.sent_for_approval_date.strftime(
             "%Y-%m-%dT%H:%M:%SZ"
         )
-        assert response_json[0]["last_modified_by"] == approval_process.sent_for_approval_by.username
+        assert response_json[0]["last_approval_process_by"] == approval_process.sent_for_approval_by.username
 
         self.payment_plan1.status = PaymentPlan.Status.IN_AUTHORIZATION
         self.payment_plan1.save()
@@ -151,8 +151,10 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()["results"]
         assert len(response_json) == 1
-        assert response_json[0]["last_modified_date"] == approval_approval.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        assert response_json[0]["last_modified_by"] == approval_approval.created_by.username
+        assert response_json[0]["last_approval_process_date"] == approval_approval.created_at.strftime(
+            "%Y-%m-%dT%H:%M:%S.%fZ"
+        )
+        assert response_json[0]["last_approval_process_by"] == approval_approval.created_by.username
 
         self.payment_plan1.status = PaymentPlan.Status.IN_REVIEW
         self.payment_plan1.save()
@@ -160,10 +162,10 @@ class TestPaymentPlanManagerialList(PaymentPlanTestMixin):
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()["results"]
         assert len(response_json) == 1
-        assert response_json[0]["last_modified_date"] == approval_authorization.created_at.strftime(
+        assert response_json[0]["last_approval_process_date"] == approval_authorization.created_at.strftime(
             "%Y-%m-%dT%H:%M:%S.%fZ"
         )
-        assert response_json[0]["last_modified_by"] == approval_authorization.created_by.username
+        assert response_json[0]["last_approval_process_by"] == approval_authorization.created_by.username
 
     def _bulk_approve_action_response(self) -> Any:
         ApprovalProcessFactory(payment_plan=self.payment_plan1)

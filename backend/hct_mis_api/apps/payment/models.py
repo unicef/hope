@@ -1015,6 +1015,43 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
         # TODO will update after add feature with 'program_cycle' and migrate all data
         return self.program_cycle.program if self.program_cycle else self.program
 
+    def _get_last_approval_process_data(self) -> dict:
+        approval_process = hasattr(self, "approval_process") and self.approval_process.first()
+        if approval_process:
+            if self.status == PaymentPlan.Status.IN_APPROVAL:
+                return {
+                    "modified_date": approval_process.sent_for_approval_date,
+                    "modified_by": approval_process.sent_for_approval_by.username,
+                }
+            if self.status == PaymentPlan.Status.IN_AUTHORIZATION:
+                if approval := approval_process.approvals.filter(type=Approval.APPROVAL).order_by("created_at").last():
+                    return {
+                        "modified_date": approval.created_at,
+                        "modified_by": approval.created_by.username,
+                    }
+            if self.status == PaymentPlan.Status.IN_REVIEW:
+                if (
+                    approval := approval_process.approvals.filter(type=Approval.AUTHORIZATION)
+                    .order_by("created_at")
+                    .last()
+                ):
+                    return {
+                        "modified_date": approval.created_at,
+                        "modified_by": approval.created_by.username,
+                    }
+        return {
+            "modified_date": self.updated_at,
+            "modified_by": None,
+        }
+
+    @property
+    def last_approval_process_date(self) -> Optional[datetime]:
+        return self._get_last_approval_process_data()["modified_date"]
+
+    @property
+    def last_approval_process_by(self) -> Optional[str]:
+        return self._get_last_approval_process_data()["modified_by"]
+
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
     COLUMNS_CHOICES = (

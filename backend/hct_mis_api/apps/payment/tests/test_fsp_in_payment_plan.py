@@ -22,6 +22,7 @@ from hct_mis_api.apps.payment.fixtures import (
 )
 from hct_mis_api.apps.payment.models import GenericPayment, PaymentPlan
 from hct_mis_api.apps.payment.services.payment_plan_services import PaymentPlanService
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.fixtures import (
     TargetingCriteriaFactory,
@@ -81,6 +82,14 @@ def base_setup(cls: Any) -> None:
         household=cls.household_3,
         role=ROLE_PRIMARY,
     )
+    cls.program = ProgramFactory()
+    cls.context = {
+        "user": cls.user,
+        "headers": {
+            "Business-Area": cls.business_area.slug,
+            "Program": encode_id_base64(cls.program.id, "Program"),
+        },
+    }
 
 
 def payment_plan_setup(cls: Any) -> None:
@@ -93,7 +102,10 @@ def payment_plan_setup(cls: Any) -> None:
     full_rebuild(target_population)
     target_population.save()
     cls.payment_plan = PaymentPlanFactory(
-        total_households_count=4, target_population=target_population, status=PaymentPlan.Status.LOCKED
+        total_households_count=4,
+        target_population=target_population,
+        status=PaymentPlan.Status.LOCKED,
+        program=cls.program,
     )
     cls.encoded_payment_plan_id = encode_id_base64(cls.payment_plan.id, "PaymentPlan")
 
@@ -187,7 +199,6 @@ query PaymentPlan($id: ID!) {
 }
 """
 
-
 AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY = """
 query AvailableFspsForDeliveryMechanisms($input: AvailableFspsForDeliveryMechanismsInput!) {
     availableFspsForDeliveryMechanisms(input: $input) {
@@ -207,7 +218,9 @@ class TestFSPSetup(APITestCase):
         base_setup(cls)
 
     def test_choosing_delivery_mechanism_order(self) -> None:
-        payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
+        payment_plan = PaymentPlanFactory(
+            total_households_count=1, status=PaymentPlan.Status.LOCKED, program=self.program
+        )
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         choose_dms_mutation_variables_mutation_variables_without_delivery_mechanisms = dict(
             input=dict(
@@ -217,7 +230,7 @@ class TestFSPSetup(APITestCase):
         )
         response_without_mechanisms = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=choose_dms_mutation_variables_mutation_variables_without_delivery_mechanisms,
         )
         assert response_without_mechanisms is not None and "data" in response_without_mechanisms
@@ -229,7 +242,7 @@ class TestFSPSetup(APITestCase):
 
         response_with_wrong_mechanism = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=dict(
                 input=dict(
                     paymentPlanId=encoded_payment_plan_id,
@@ -251,7 +264,7 @@ class TestFSPSetup(APITestCase):
         )
         response_with_mechanisms = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=choose_dms_mutation_variables_mutation_variables_with_delivery_mechanisms,
         )
         assert response_with_mechanisms is not None and "data" in response_with_mechanisms
@@ -277,7 +290,7 @@ class TestFSPSetup(APITestCase):
                 }
             }
         """
-        response = self.graphql_request(request_string=query, context={"user": self.user})
+        response = self.graphql_request(request_string=query, context=self.context)
         assert response is not None and "data" in response
         all_delivery_mechanisms = response["data"]["allDeliveryMechanisms"]
         assert all_delivery_mechanisms is not None, response
@@ -286,7 +299,9 @@ class TestFSPSetup(APITestCase):
         ), all_delivery_mechanisms
 
     def test_providing_non_unique_delivery_mechanisms(self) -> None:
-        payment_plan = PaymentPlanFactory(total_households_count=1, status=PaymentPlan.Status.LOCKED)
+        payment_plan = PaymentPlanFactory(
+            total_households_count=1, status=PaymentPlan.Status.LOCKED, program=self.program
+        )
         encoded_payment_plan_id = encode_id_base64(payment_plan.id, "PaymentPlan")
         choose_dms_mutation_variables_mutation_variables = dict(
             input=dict(
@@ -296,14 +311,14 @@ class TestFSPSetup(APITestCase):
         )
         response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=choose_dms_mutation_variables_mutation_variables,
         )
         assert "errors" not in response, response
 
         current_payment_plan_response = self.graphql_request(
             request_string=CURRENT_PAYMENT_PLAN_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={"id": encoded_payment_plan_id},
         )
         assert "errors" not in current_payment_plan_response, current_payment_plan_response
@@ -328,14 +343,14 @@ class TestFSPAssignment(APITestCase):
         )
         response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=choose_dms_mutation_variables_mutation_variables,
         )
         assert "errors" not in response, response
 
         query_response = self.graphql_request(
             request_string=AVAILABLE_FSPS_FOR_DELIVERY_MECHANISMS_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables=dict(
                 input={
                     "paymentPlanId": self.encoded_payment_plan_id,
@@ -356,7 +371,7 @@ class TestFSPAssignment(APITestCase):
 
         bad_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
@@ -376,7 +391,7 @@ class TestFSPAssignment(APITestCase):
 
         current_payment_plan_response = self.graphql_request(
             request_string=CURRENT_PAYMENT_PLAN_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={"id": self.encoded_payment_plan_id},
         )
         data = current_payment_plan_response["data"]["paymentPlan"]
@@ -386,7 +401,7 @@ class TestFSPAssignment(APITestCase):
 
         complete_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
@@ -410,7 +425,7 @@ class TestFSPAssignment(APITestCase):
 
         new_payment_plan_response = self.graphql_request(
             request_string=CURRENT_PAYMENT_PLAN_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={"id": self.encoded_payment_plan_id},
         )
         new_data = new_payment_plan_response["data"]["paymentPlan"]
@@ -427,14 +442,14 @@ class TestFSPAssignment(APITestCase):
         )
         response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=choose_dms_mutation_variables,
         )
         assert "errors" not in response, response
 
         complete_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
@@ -458,7 +473,7 @@ class TestFSPAssignment(APITestCase):
 
         payment_plan_response = self.graphql_request(
             request_string=CURRENT_PAYMENT_PLAN_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={"id": self.encoded_payment_plan_id},
         )
         new_data = payment_plan_response["data"]["paymentPlan"]
@@ -478,14 +493,14 @@ class TestFSPAssignment(APITestCase):
         )
         new_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=new_program_mutation_variables,
         )
         assert "errors" not in new_response
 
         edited_payment_plan_response = self.graphql_request(
             request_string=CURRENT_PAYMENT_PLAN_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={"id": self.encoded_payment_plan_id},
         )
         edited_payment_plan_data = edited_payment_plan_response["data"]["paymentPlan"]
@@ -494,7 +509,7 @@ class TestFSPAssignment(APITestCase):
     def test_editing_fsps_assignments_when_fsp_was_already_set_up(self) -> None:
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=dict(
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
@@ -506,7 +521,7 @@ class TestFSPAssignment(APITestCase):
 
         assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
@@ -527,7 +542,7 @@ class TestFSPAssignment(APITestCase):
 
         current_payment_plan_response = self.graphql_request(
             request_string=CURRENT_PAYMENT_PLAN_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={"id": self.encoded_payment_plan_id},
         )
         current_data = current_payment_plan_response["data"]["paymentPlan"]
@@ -537,7 +552,7 @@ class TestFSPAssignment(APITestCase):
 
         new_choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=dict(
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
@@ -552,7 +567,7 @@ class TestFSPAssignment(APITestCase):
 
         new_payment_plan_response = self.graphql_request(
             request_string=CURRENT_PAYMENT_PLAN_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={"id": self.encoded_payment_plan_id},
         )
         new_data = new_payment_plan_response["data"]["paymentPlan"]
@@ -563,7 +578,7 @@ class TestFSPAssignment(APITestCase):
     def test_choosing_different_fsps_for_the_same_delivery_mechanism(self) -> None:
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=dict(
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
@@ -579,7 +594,7 @@ class TestFSPAssignment(APITestCase):
 
         bad_assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
@@ -605,7 +620,7 @@ class TestFSPAssignment(APITestCase):
 
         another_bad_assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
@@ -635,7 +650,7 @@ class TestFSPAssignment(APITestCase):
 
         assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
@@ -674,7 +689,7 @@ class TestFSPAssignment(APITestCase):
         )
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=dict(
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
@@ -688,7 +703,7 @@ class TestFSPAssignment(APITestCase):
 
         assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
@@ -717,7 +732,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
     def test_getting_volume_by_delivery_mechanism(self) -> None:
         choose_dms_response = self.graphql_request(
             request_string=CHOOSE_DELIVERY_MECHANISMS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables=dict(
                 input=dict(
                     paymentPlanId=self.encoded_payment_plan_id,
@@ -751,7 +766,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
 
         too_early_get_volume_by_delivery_mechanism_response = self.graphql_request(
             request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
             },
@@ -766,7 +781,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
 
         assign_fsps_mutation_response = self.graphql_request(
             request_string=ASSIGN_FSPS_MUTATION,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
                 "mappings": [
@@ -792,7 +807,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
 
         get_volume_by_delivery_mechanism_response = self.graphql_request(
             request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
             },
@@ -851,7 +866,7 @@ class TestVolumeByDeliveryMechanism(APITestCase):
 
         new_get_volume_by_delivery_mechanism_response = self.graphql_request(
             request_string=GET_VOLUME_BY_DELIVERY_MECHANISM_QUERY,
-            context={"user": self.user},
+            context=self.context,
             variables={
                 "paymentPlanId": self.encoded_payment_plan_id,
             },
@@ -925,7 +940,7 @@ class TestValidateFSPPerDeliveryMechanism(APITestCase):
         # FSP with limit is used in other conflicting PP
         self.bank_of_america_fsp.distribution_limit = 1000
         self.bank_of_america_fsp.save()
-        new_payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED_FSP)
+        new_payment_plan = PaymentPlanFactory(status=PaymentPlan.Status.LOCKED_FSP, program=self.program)
         DeliveryMechanismPerPaymentPlanFactory(
             payment_plan=new_payment_plan,
             delivery_mechanism=GenericPayment.DELIVERY_TYPE_VOUCHER,

@@ -5,7 +5,6 @@ from rest_framework.routers import SimpleRouter
 from hct_mis_api.apps.payment.api.views import (
     PaymentPlanManagerialViewSet,
     PaymentPlanViewSet,
-    PaymentVerificationListView,
 )
 
 app_name = "payment"
@@ -25,11 +24,6 @@ program_related_router.register(
 )
 
 urlpatterns = [
-    path(
-        "payment-verifications/",
-        PaymentVerificationListView.as_view({"get": "list"}),
-        name="payment-verifications-list",
-    ),
     path("", include(program_unrelated_router.urls)),
     path("programs/<str:program_id>/", include(program_related_router.urls)),
 ]
