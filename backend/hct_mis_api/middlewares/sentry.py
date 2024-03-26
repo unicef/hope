@@ -1,3 +1,4 @@
+import re
 import sys
 from typing import Any, Callable
 
@@ -16,6 +17,8 @@ def is_country_name(country_name: str) -> bool:
 
 
 class SentryScopeMiddleware:
+    business_area: str = "NO_BA"
+
     def __init__(self, get_response: Callable) -> None:
         self.get_response = get_response
         super().__init__()
@@ -26,12 +29,11 @@ class SentryScopeMiddleware:
         with configure_scope() as scope:
             business_area = request.headers.get("Business-Area")
             if not business_area:
-                business_area = "NO_BA"
                 # example: api/rest/ukraine/rdi/upload/; api/admin/account/role/;
-                country_from_path = request.path.split("/")
-                country_name = country_from_path[3] if len(country_from_path) > 3 else None
-                if country_name:
-                    business_area = country_name if is_country_name(country_name) else "NO_BA"
+                # all api urls with BA has pattern 'api/rest/BA/etc'
+                pattern = r"api/rest/(?P<country>[^/]+)/"
+                match = re.search(pattern, request.path)
+                business_area = match.group("country") if match else self.business_area
             scope.set_tag("username", request.user.username)
             scope.set_tag("business_area", business_area)
             response = self.get_response(request)
