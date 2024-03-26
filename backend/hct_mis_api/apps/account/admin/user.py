@@ -335,3 +335,29 @@ class UserAdmin(HopeModelAdminMixin, KoboAccessMixin, BaseUserAdmin, ADUSerMixin
 
     def __init__(self, model: Type, admin_site: Any) -> None:
         super().__init__(model, admin_site)
+
+    @button(label="Import DOAP")
+    def import_doap(self, request: HttpRequest) -> TemplateResponse:
+        from django.contrib.admin.helpers import AdminForm
+        from openpyxl import load_workbook
+
+        context: Dict = self.get_common_context(request, processed=False)
+        if request.method == "GET":
+            form = ImportCSVForm(initial={"partner": account_models.Partner.objects.first()})
+            context["form"] = form
+        else:
+            form = ImportCSVForm(data=request.POST, files=request.FILES)
+            if form.is_valid():
+                context["processed"] = True
+                xlsx_file = form.cleaned_data["file"]
+                wb = load_workbook(filename=xlsx_file, data_only=True)
+                doap_worksheet = wb["DOAP"]
+
+                for row_cells in doap_worksheet.iter_rows(min_row=6):
+                    for cell in row_cells:
+                        print(cell.value)
+                    print("************")
+
+        fs = form._fieldsets or [(None, {"fields": form.base_fields})]
+        context["adminform"] = AdminForm(form, fieldsets=fs, prepopulated_fields={})  # type: ignore # FIXME
+        return TemplateResponse(request, "admin/account/user/import_csv.html", context)
