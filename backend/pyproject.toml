@@ -141,7 +141,7 @@ django_compressor = "^4.0"
 django-querysetsequence = "^0.16"
 djangorestframework = "^3.13.1"
 drf-jwt = "^1.19.2"
-drf-yasg = "^1"
+drf-spectacular = { version = "^0.27", extras = ["sidecar"] }
 elasticsearch-dsl ="^7.0.0"
 factory-boy = "^3"
 gevent = "^23.9"  # error installing

@@ -30,10 +30,12 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
         "rdi",
         "xlsx_match_columns",
         "uploaded_by",
+        "program",
     )
     list_filter = (
         ("business_area", AutoCompleteFilter),
         ("uploaded_by", AutoCompleteFilter),
+        ("program", AutoCompleteFilter),
     )
 
     def xlsx_update_stage2(self, request: HttpRequest, old_form: Form) -> TemplateResponse:
@@ -41,6 +43,7 @@ class XlsxUpdateFileAdmin(HOPEModelAdminBase):
             file=old_form.cleaned_data["file"],
             business_area=old_form.cleaned_data["business_area"],
             rdi=old_form.cleaned_data["registration_data_import"],
+            program=old_form.cleaned_data["program"],
             uploaded_by=request.user,
         )
         xlsx_update_file.save()
