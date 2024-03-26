@@ -60,6 +60,7 @@ class CreateRDIView(HOPEAPIBusinessAreaView, CreateAPIView):
         obj: RegistrationDataImportDatahub = serializer.save(
             business_area_slug=self.selected_business_area.slug, import_done=RegistrationDataImportDatahub.LOADING
         )
+        serializer.validated_data.pop("import_done")
         self.rdi: RegistrationDataImport = RegistrationDataImport.objects.create(
             **serializer.validated_data,
             status=RegistrationDataImport.LOADING,
