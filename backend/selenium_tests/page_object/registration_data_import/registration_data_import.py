@@ -96,7 +96,7 @@ class RegistrationDataImport(BaseComponents):
 
     def expectedRows(self, number: int) -> bool:
         for _ in range(15):
-            if str(len(self.getRows())) == number:
+            if len(self.getRows()) == number:
                 return True
             sleep(1)
         return False
