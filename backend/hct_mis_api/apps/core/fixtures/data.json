@@ -6676,9 +6676,9 @@
   "fields": {
     "created": "2023-09-25T17:57:16.282Z",
     "modified": "2023-09-25T17:57:16.282Z",
-    "label": "Partial",
+    "label": "Partial (SW)",
     "code": "partial",
-    "description": "Partial individuals collected",
+    "description": "Partial individuals collected (Social Worker)",
     "type": "SOCIAL",
     "active": true,
     "individual_filters_available": false,

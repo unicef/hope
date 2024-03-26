@@ -100,7 +100,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if value is None:
             return
 
-        name = header.replace("_i_c", "")
+        name = header.replace("_i_c", "").replace("pp_", "")
 
         self.bank_accounts[f"individual_{row_num}"]["individual"] = individual
         self.bank_accounts[f"individual_{row_num}"][name] = value
@@ -117,7 +117,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if value is None:
             return
 
-        header = header.replace("_no", "")
+        header = header.replace("_no", "").replace("pp_", "")
         common_header = f"individual_{row_num}_{header}"
         document_key = header.replace("_i_c", "").strip()
         document_data = self.documents.get(
@@ -143,7 +143,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if not self.image_loader.image_in(cell.coordinate):
             return
 
-        header = header.replace("_photo_i_c", "_i_c")
+        header = header.replace("_photo_i_c", "_i_c").replace("pp_", "")
         document_key = header.replace("_i_c", "").strip()
         common_header = f"individual_{row_num}_{header}"
         document_data = self.documents.get(
@@ -169,7 +169,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if value is None:
             return
 
-        header = header.replace("_issuer_i_c", "_i_c")
+        header = header.replace("_issuer_i_c", "_i_c").replace("pp_", "")
         document_key = header.replace("_i_c", "").strip()
         common_header = f"individual_{row_num}_{header}"
         document_data = self.documents.get(

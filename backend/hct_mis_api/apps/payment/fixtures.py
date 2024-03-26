@@ -1056,3 +1056,9 @@ def generate_payment_plan() -> None:
     )
 
     payment_plan.update_population_count_fields()
+
+
+def update_fsps() -> None:
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    for fsp in FinancialServiceProvider.objects.all():
+        fsp.allowed_business_areas.add(afghanistan)

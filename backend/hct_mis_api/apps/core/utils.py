@@ -36,6 +36,7 @@ from hct_mis_api.apps.utils.exceptions import log_and_raise
 
 if TYPE_CHECKING:
     from django.db.models import Model, QuerySet
+    from django.http import HttpHeaders
 
     from openpyxl.cell import Cell
     from openpyxl.worksheet.worksheet import Worksheet
@@ -76,7 +77,7 @@ def encode_id_base64(id_string: Optional[str], model_name: str) -> Optional[str]
     return encode_id_base64_required(id_string, model_name)
 
 
-def get_program_id_from_headers(headers: Dict) -> Optional[str]:
+def get_program_id_from_headers(headers: Union[Dict, "HttpHeaders"]) -> Optional[str]:
     # TODO: need to double check if program_id is str or uuid?
     #  decoded/encoded ??
     # sometimes it get from info.context.headers or kwargs["Program"]: str
