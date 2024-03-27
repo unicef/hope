@@ -60,8 +60,8 @@ jobs:
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dev \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dev \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-latest-dev \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-latest-dev \
             -f ./docker/Dockerfile \
             --target dev \
             --push \
@@ -164,8 +164,8 @@ jobs:
             --cache-from ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-${{ github.sha }}-dist \
             --cache-to ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:cache-core-latest-dist \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist \
-            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist \
+            -t ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }} \
             -f ./docker/Dockerfile \
             --target dist \
             --push \
@@ -174,7 +174,7 @@ jobs:
           # Builds from master branch are tagged with the version number
           if [ "${{ github.ref }}" = "refs/heads/master" ]; then
             version=$(python3 -c "import sys; version=None; [version:=line.split('=')[1].strip().strip('\"') for line in open('backend/pyproject.toml', 'r') if line.strip().startswith('version =')]; print(version if version else sys.exit(1))")
-            tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$(echo $version)
+            tagged_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-$version
             echo Will tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} as $tagged_image
             docker tag ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }} $tagged_image
             docker push $tagged_image
