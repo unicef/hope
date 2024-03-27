@@ -217,6 +217,7 @@ class CopyProgram(CommonValidator, ProgrammeCodeValidator, PermissionMutation, V
         program_data = CopyProgramInput(required=True)
 
     @classmethod
+    @transaction.atomic
     @is_authenticated
     def processed_mutate(cls, root: Any, info: Any, program_data: Dict) -> "CopyProgram":
         program_id = decode_id_string_required(program_data.pop("id"))
