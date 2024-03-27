@@ -81,9 +81,8 @@ jobs:
 
       - name: Check
         run: |
-          docker pull ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev
           docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
+            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             isort . --check-only
 
   black:
@@ -101,7 +100,7 @@ jobs:
       - name: Check
         run: |
           docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
+            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             black . --check
 
   flake8:
@@ -119,7 +118,7 @@ jobs:
       - name: Check
         run: |
           docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
+            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             flake8 .
 
   mypy:
@@ -137,7 +136,7 @@ jobs:
       - name: Check
         run: |
           docker run --rm -i \
-            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev \
+            ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev \
             mypy .
 
   build_and_push_dist:
@@ -195,7 +194,7 @@ jobs:
 
       - name: Unit tests
         run: |
-          backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev docker compose \
+          backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.tst.yml \
             run backend ./dev.sh test
 
@@ -213,7 +212,7 @@ jobs:
 
       - name: E2E tests
         run: |
-          dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dev docker compose \
+          dist_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist dev_backend_image=${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dev docker compose \
             -f ./deployment/docker-compose.selenium.yml \
             run selenium
 
@@ -232,7 +231,7 @@ jobs:
       - name: Trivy
         continue-on-error: true
         run: |
-          docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 -e TRIVY_SEVERITY=HIGH,CRITICAL aquasec/trivy:latest image ${{ vars.DOCKERHUB_ORGANIZATION }}/hope:core-${{ github.sha }}-dist
+          docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 -e TRIVY_SEVERITY=HIGH,CRITICAL aquasec/trivy:latest image ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist
 
   deploy:
     runs-on: ubuntu-latest
