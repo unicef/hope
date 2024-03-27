@@ -2,11 +2,11 @@ from datetime import datetime
 from typing import Any, List
 from unittest.mock import patch
 
-import pytest
 from django.core.cache import cache
 from django.core.management import call_command
 from django.utils import timezone
 
+import pytest
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory

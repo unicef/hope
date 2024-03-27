@@ -1,8 +1,8 @@
 from typing import Any, List
 
-import pytest
 from django.core.management import call_command
 
+import pytest
 from flaky import flaky
 from parameterized import parameterized
 

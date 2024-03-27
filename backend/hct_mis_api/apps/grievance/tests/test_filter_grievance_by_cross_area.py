@@ -1,6 +1,5 @@
 from unittest.mock import patch
 
-from flaky import flaky
 import pytest
 
 from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
