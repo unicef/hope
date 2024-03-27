@@ -225,7 +225,11 @@ class TestUploadPeople(HOPEApiTestCase):
             response.json(),
             {
                 "people": [
-                    {"birth_date": ["This field is required."], "collect_individual_data": ["This field is required."]},
+                    {
+                        "birth_date": ["This field is required."],
+                        "collect_individual_data": ["This field is required."],
+                        "documents": [{"document_number": ["This field is required."]}],
+                    },
                     {"birth_date": ["This field is required."]},
                 ],
                 "program": ["This field is required."],
