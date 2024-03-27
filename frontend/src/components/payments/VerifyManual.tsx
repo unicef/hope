@@ -21,12 +21,14 @@ export interface Props {
   paymentVerificationId: string;
   status: string;
   enabled: boolean;
+  receivedAmount: number;
 }
 
 export function VerifyManual({
   paymentVerificationId,
   status,
   enabled,
+  receivedAmount,
 }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
@@ -59,7 +61,7 @@ export function VerifyManual({
   const initialValues = {
     paymentVerificationId,
     status: 'RECEIVED',
-    receivedAmount: 0,
+    receivedAmount: receivedAmount ?? 0,
   };
 
   return (
