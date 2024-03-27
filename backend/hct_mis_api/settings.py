@@ -439,7 +439,8 @@ OTHER_APPS = [
     "explorer",
     "import_export",
     "rest_framework",
-    "drf_yasg",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     "flags",
     "admin_cursor_paginator",
     "markdownify.apps.MarkdownifyConfig",
@@ -1116,3 +1117,17 @@ if DEBUG and not IS_TEST:
         "debug_toolbar.panels.redirects.RedirectsPanel",
         "debug_toolbar.panels.profiling.ProfilingPanel",
     ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "HOPE API",
+    "DESCRIPTION": "HOPE REST AOI Swagger Documentation",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": True,
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
+}

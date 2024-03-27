@@ -4,7 +4,7 @@ from uuid import UUID
 from django.db.transaction import atomic
 from django.utils import timezone
 
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
@@ -139,6 +139,7 @@ class RDIPeopleSerializer(PeopleUploadMixin, serializers.ModelSerializer):
         rdi_datahub = RegistrationDataImportDatahub.objects.create(
             **validated_data, business_area_slug=self.business_area.slug
         )
+        validated_data.pop("import_done")
         rdi_mis = RegistrationDataImport.objects.create(
             **validated_data,
             imported_by=created_by,
@@ -159,7 +160,7 @@ class RDIPeopleSerializer(PeopleUploadMixin, serializers.ModelSerializer):
 class UploadPeopleRDIView(HOPEAPIBusinessAreaView):
     permission = Grant.API_RDI_UPLOAD
 
-    @swagger_auto_schema(request_body=RDIPeopleSerializer)
+    @extend_schema(request=RDIPeopleSerializer)
     @atomic()
     @atomic(using="registration_datahub")
     def post(self, request: "Request", business_area: "BusinessArea") -> Response:
