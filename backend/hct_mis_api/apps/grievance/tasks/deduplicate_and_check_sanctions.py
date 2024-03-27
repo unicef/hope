@@ -40,7 +40,7 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
             HardDocumentDeduplication().deduplicate(Document.objects.filter(individual_id__in=individuals_ids))
             return
 
-        DeduplicateTask(business_area.slug, program).deduplicate_individuals_from_other_source(individuals)
+        DeduplicateTask(business_area.slug, program.id).deduplicate_individuals_from_other_source(individuals)
 
         golden_record_duplicates = individuals.filter(deduplication_golden_record_status=DUPLICATE)
 
@@ -50,7 +50,7 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
 
         create_needs_adjudication_tickets(needs_adjudication, "possible_duplicates", business_area)
 
-        if not business_area.screen_beneficiary:
+        if business_area.screen_beneficiary:
             CheckAgainstSanctionListPreMergeTask.execute()
 
         HardDocumentDeduplication().deduplicate(Document.objects.filter(individual_id__in=individuals_ids))

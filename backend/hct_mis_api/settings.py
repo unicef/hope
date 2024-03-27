@@ -1082,7 +1082,22 @@ logger_azure.setLevel(logging.WARNING)
 
 ADMIN_SYNC_CONFIG = "admin_sync.conf.DjangoConstance"
 
-if DEBUG and not IS_TEST:
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "HOPE API",
+    "DESCRIPTION": "HOPE REST AOI Swagger Documentation",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": True,
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
+}
+
+# This part should be always last
+if not IS_TEST:
     from constance import config
 
     INSTALLED_APPS += ["debug_toolbar", "graphiql_debug_toolbar"]
@@ -1110,17 +1125,3 @@ if DEBUG and not IS_TEST:
         "debug_toolbar.panels.redirects.RedirectsPanel",
         "debug_toolbar.panels.profiling.ProfilingPanel",
     ]
-
-REST_FRAMEWORK = {
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-
-SPECTACULAR_SETTINGS = {
-    "TITLE": "HOPE API",
-    "DESCRIPTION": "HOPE REST AOI Swagger Documentation",
-    "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": True,
-    "SWAGGER_UI_DIST": "SIDECAR",
-    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
-    "REDOC_DIST": "SIDECAR",
-}
