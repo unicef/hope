@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import {
   AllImportedHouseholdsQueryVariables,
   AllMergedHouseholdsQueryVariables,
@@ -6,17 +6,17 @@ import {
   MergedHouseholdMinimalFragment,
   useAllImportedHouseholdsQuery,
   useAllMergedHouseholdsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells as importedHeadCells } from './ImportedHouseholdTableHeadCells';
 import { headCells as mergedHeadCells } from './MergedHouseholdTableHeadCells';
 
-export const ImportedHouseholdTable = ({
+export function ImportedHouseholdTable({
   rdi,
   businessArea,
   isMerged,
-}): ReactElement => {
+}): ReactElement {
   const initialVariables = {
     rdiId: rdi.id,
     businessArea,
@@ -25,12 +25,12 @@ export const ImportedHouseholdTable = ({
   if (isMerged) {
     return (
       <UniversalTable<
-        MergedHouseholdMinimalFragment,
-        AllMergedHouseholdsQueryVariables
+      MergedHouseholdMinimalFragment,
+      AllMergedHouseholdsQueryVariables
       >
         headCells={mergedHeadCells}
         query={useAllMergedHouseholdsQuery}
-        queriedObjectName='allMergedHouseholds'
+        queriedObjectName="allMergedHouseholds"
         rowsPerPageOptions={[10, 15, 20]}
         initialVariables={initialVariables}
         isOnPaper={false}
@@ -47,12 +47,12 @@ export const ImportedHouseholdTable = ({
   }
   return (
     <UniversalTable<
-      ImportedHouseholdMinimalFragment,
-      AllImportedHouseholdsQueryVariables
+    ImportedHouseholdMinimalFragment,
+    AllImportedHouseholdsQueryVariables
     >
       headCells={importedHeadCells}
       query={useAllImportedHouseholdsQuery}
-      queriedObjectName='allImportedHouseholds'
+      queriedObjectName="allImportedHouseholds"
       rowsPerPageOptions={[10, 15, 20]}
       initialVariables={initialVariables}
       isOnPaper={false}
@@ -66,4 +66,4 @@ export const ImportedHouseholdTable = ({
       )}
     />
   );
-};
+}

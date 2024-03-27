@@ -1,12 +1,12 @@
-import { Radio } from '@material-ui/core';
-import TableCell from '@material-ui/core/TableCell';
-import React from 'react';
-import { AllIndividualsForPopulationTableQuery } from '../../../../__generated__/graphql';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
-import { sexToCapitalize } from '../../../../utils/utils';
-import { BlackLink } from '../../../core/BlackLink';
-import { ClickableTableRow } from '../../../core/Table/ClickableTableRow';
-import { UniversalMoment } from '../../../core/UniversalMoment';
+import { Radio } from '@mui/material';
+import TableCell from '@mui/material/TableCell';
+import * as React from 'react';
+import { AllIndividualsForPopulationTableQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { sexToCapitalize } from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
+import { UniversalMoment } from '@core/UniversalMoment';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
@@ -16,11 +16,11 @@ interface LookUpIndividualTableRowProps {
   selectedIndividual: AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'];
 }
 
-export const LookUpIndividualTableRow = ({
+export function LookUpIndividualTableRow({
   individual,
   radioChangeHandler,
   selectedIndividual,
-}: LookUpIndividualTableRowProps): React.ReactElement => {
+}: LookUpIndividualTableRowProps): React.ReactElement {
   const { baseUrl, isAllPrograms } = useBaseUrl();
 
   return (
@@ -29,23 +29,23 @@ export const LookUpIndividualTableRow = ({
         radioChangeHandler(individual);
       }}
       hover
-      role='checkbox'
+      role="checkbox"
       key={individual.id}
-      data-cy='individual-table-row'
+      data-cy="individual-table-row"
     >
-      <TableCell padding='checkbox'>
+      <TableCell padding="checkbox">
         <Radio
-          color='primary'
+          color="primary"
           checked={selectedIndividual?.id === individual.id}
           onChange={() => {
             radioChangeHandler(individual);
           }}
           value={individual.id}
-          name='radio-button-household'
+          name="radio-button-household"
           inputProps={{ 'aria-label': individual.id }}
         />
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         {!isAllPrograms ? (
           <BlackLink to={`/${baseUrl}/population/individuals/${individual.id}`}>
             {individual.unicefId}
@@ -54,20 +54,20 @@ export const LookUpIndividualTableRow = ({
           <span>{individual.unicefId || '-'}</span>
         )}
       </TableCell>
-      <TableCell align='left'>{individual.fullName}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">{individual.fullName}</TableCell>
+      <TableCell align="left">
         {individual.household ? individual.household.unicefId : '-'}
       </TableCell>
-      <TableCell align='right'>{individual.age}</TableCell>
-      <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>
+      <TableCell align="right">{individual.age}</TableCell>
+      <TableCell align="left">{sexToCapitalize(individual.sex)}</TableCell>
+      <TableCell align="left">
         {individual?.household?.admin2?.name || '-'}
       </TableCell>
-      <TableCell align='left'>
+      <TableCell align="left">
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>
       </TableCell>
       {isAllPrograms && (
-        <TableCell align='left'>
+        <TableCell align="left">
           {individual.program ? (
             <BlackLink to={`/${baseUrl}/details/${individual.program.id}`}>
               {individual.program.name}
@@ -79,4 +79,4 @@ export const LookUpIndividualTableRow = ({
       )}
     </ClickableTableRow>
   );
-};
+}

@@ -103,6 +103,7 @@ class RdiMergeTask:
         "fchild_hoh",
         "child_hoh",
         "detail_id",
+        "collect_type",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -276,8 +277,15 @@ class RdiMergeTask:
             if household:
                 individual.registration_id = household.registration_id
             individuals_dict[imported_individual.id] = individual
-            if imported_individual.relationship == HEAD and household:
+
+            is_social_worker_program = obj_hct.program.is_social_worker_program
+
+            if is_social_worker_program:
+                # every household for Social DCT type program has HoH
                 household.head_of_household = individual
+            else:
+                if imported_individual.relationship == HEAD and household:
+                    household.head_of_household = individual
 
             (
                 documents,
@@ -440,7 +448,7 @@ class RdiMergeTask:
                         )
 
                     # SANCTION LIST CHECK
-                    if obj_hct.should_check_against_sanction_list():
+                    if obj_hct.should_check_against_sanction_list() and not obj_hct.business_area.screen_beneficiary:
                         logger.info(f"RDI:{registration_data_import_id} Checking against sanction list")
                         CheckAgainstSanctionListPreMergeTask.execute(registration_data_import=obj_hct)
                         logger.info(f"RDI:{registration_data_import_id} Checked against sanction list")

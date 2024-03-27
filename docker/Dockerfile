@@ -92,17 +92,16 @@ ENTRYPOINT ["entrypoint.sh"]
 
 
 # Frontend builder
-FROM node:16.20.0-buster-slim as frontend-builder
+FROM node:18.19.0-buster-slim AS frontend-builder
 
 WORKDIR /fe-build
-RUN mkdir -p /backend/hct_mis_api/apps/web/templates/web
 COPY ./frontend/package.json ./frontend/yarn.lock ./
 # Network timeout is needed by the cross-platform build
 RUN yarn install --frozen-lockfile --network-timeout 600000
 COPY ./frontend ./
-RUN NODE_ENV="production" yarn build
+RUN NODE_ENV="production" NODE_OPTIONS="--max-old-space-size=4096" yarn build
 
 
 FROM be-dist AS dist
 
-COPY --chown=hope:hope --from=frontend-builder /backend/hct_mis_api/apps/web/ ./hct_mis_api/apps/web/
+COPY --chown=hope:hope --from=frontend-builder /fe-build/build ./hct_mis_api/apps/web/static/web

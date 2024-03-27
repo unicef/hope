@@ -1,1 +1,1 @@
-import { LookUpProgrammesTableSurveys } from './LookUpProgrammesTableSurveys';
+export { LookUpProgrammesTableSurveys } from './LookUpProgrammesTableSurveys';

@@ -1,23 +1,20 @@
-import { Box, Grid, Typography } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import {
-  ProgramQuery,
-  ProgrammeChoiceDataQuery,
-} from '../../../__generated__/graphql';
+import { ProgramQuery, ProgrammeChoiceDataQuery } from '@generated/graphql';
 import { MiśTheme } from '../../../theme';
-import { choicesToDict, programStatusToColor } from '../../../utils/utils';
-import { ContainerColumnWithBorder } from '../../core/ContainerColumnWithBorder';
-import { LabelizedField } from '../../core/LabelizedField';
-import { OverviewContainer } from '../../core/OverviewContainer';
-import { StatusBox } from '../../core/StatusBox';
-import { Title } from '../../core/Title';
-import { UniversalMoment } from '../../core/UniversalMoment';
-import { DividerLine } from '../../core/DividerLine';
+import { choicesToDict, programStatusToColor } from '@utils/utils';
+import { ContainerColumnWithBorder } from '@core/ContainerColumnWithBorder';
+import { LabelizedField } from '@core/LabelizedField';
+import { OverviewContainer } from '@core/OverviewContainer';
+import { StatusBox } from '@core/StatusBox';
+import { Title } from '@core/Title';
+import { UniversalMoment } from '@core/UniversalMoment';
+import { DividerLine } from '@core/DividerLine';
 
 const NumberOfHouseHolds = styled.div`
-  padding: ${({ theme }) => theme.spacing(8)}px;
+  padding: ${({ theme }) => theme.spacing(8)};
   border-color: #b1b1b5;
   border-left-width: 1px;
   border-left-style: solid;
@@ -28,7 +25,7 @@ const NumberOfHouseHoldsValue = styled.div`
   color: #253b46;
   font-size: 36px;
   line-height: 32px;
-  margin-top: ${({ theme }) => theme.spacing(2)}px;
+  margin-top: ${({ theme }) => theme.spacing(2)};
 `;
 
 const StyledBox = styled(Box)`
@@ -50,11 +47,25 @@ export const ProgramDetails = ({
     programFrequencyOfPaymentsChoices,
   );
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
+  const renderAdminAreasCount = (partner): React.ReactElement => (
+    <Grid container spacing={6}>
+      {partner.adminAreas?.map((area) => (
+        <Grid item xs={3} key={area.level}>
+          <LabelizedField
+            dataCy={`admin-area-${area.level}-total-count`}
+            label={t(`Admin Area ${area.level}`)}
+          >
+            {area.totalCount}
+          </LabelizedField>
+        </Grid>
+      ))}
+    </Grid>
+  );
 
   return (
-    <ContainerColumnWithBorder data-cy='program-details-container'>
+    <ContainerColumnWithBorder data-cy="program-details-container">
       <Title>
-        <Typography variant='h6'>{t('Programme Details')}</Typography>
+        <Typography variant="h6">{t('Programme Details')}</Typography>
       </Title>
       <OverviewContainer>
         <Grid container spacing={6}>
@@ -138,24 +149,30 @@ export const ProgramDetails = ({
         <>
           <DividerLine />
           <Title>
-            <Typography variant='h6'>{t('Programme Partners')}</Typography>
+            <Typography variant="h6">{t('Programme Partners')}</Typography>
           </Title>
           <OverviewContainer>
             <Grid container spacing={6}>
               {program.partners.map((partner) => (
-                <Grid key={partner.id} item xs={3}>
-                  <StyledBox p={6} flexDirection='column'>
-                    <Typography data-cy='label-partner-name' variant='h6'>
+                <Grid
+                  key={partner.id}
+                  item
+                  xs={partner.areaAccess === 'BUSINESS_AREA' ? 3 : 6}
+                >
+                  <StyledBox p={6} flexDirection="column">
+                    <Typography data-cy="label-partner-name" variant="h6">
                       {partner.name}
                     </Typography>
-                    <LabelizedField
-                      label={t('Area Access')}
-                      value={
-                        partner.areaAccess === 'BUSINESS_AREA'
-                          ? t('Business Area')
-                          : `Admin Areas: ${partner.adminAreas?.length || 0}`
-                      }
-                    />
+                    {partner.areaAccess === 'BUSINESS_AREA' ? (
+                      <LabelizedField
+                        dataCy="area-access-field"
+                        label={t('Area Access')}
+                      >
+                        {t('Business Area')}
+                      </LabelizedField>
+                    ) : (
+                      renderAdminAreasCount(partner)
+                    )}
                   </StyledBox>
                 </Grid>
               ))}

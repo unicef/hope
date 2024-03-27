@@ -17,6 +17,7 @@ faker = Faker()
 class RegistrationDataImportFactory(DjangoModelFactory):
     class Meta:
         model = RegistrationDataImport
+        django_get_or_create = ("name",)
 
     name = factory.LazyFunction(
         lambda: f"{faker.sentence(nb_words=3, variable_nb_words=True, ext_word_list=None)} - {time.time_ns()}"

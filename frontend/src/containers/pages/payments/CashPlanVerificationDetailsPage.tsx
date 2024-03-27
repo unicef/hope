@@ -1,5 +1,6 @@
-import { Button } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Button } from '@mui/material';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -7,25 +8,25 @@ import {
   PaymentVerificationPlanStatus,
   useCashPlanQuery,
   useCashPlanVerificationSamplingChoicesQuery,
-} from '../../../__generated__/graphql';
-import { BlackLink } from '../../../components/core/BlackLink';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { CashPlanDetailsSection } from '../../../components/payments/CashPlanDetailsSection';
-import { CreateVerificationPlan } from '../../../components/payments/CreateVerificationPlan';
-import { VerificationPlanDetails } from '../../../components/payments/VerificationPlanDetails';
-import { VerificationPlansSummary } from '../../../components/payments/VerificationPlansSummary';
+} from '@generated/graphql';
+import { BlackLink } from '@components/core/BlackLink';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { CashPlanDetailsSection } from '@components/payments/CashPlanDetailsSection';
+import { CreateVerificationPlan } from '@components/payments/CreateVerificationPlan';
+import { VerificationPlanDetails } from '@components/payments/VerificationPlanDetails';
+import { VerificationPlansSummary } from '@components/payments/VerificationPlansSummary';
 import { PERMISSIONS, hasPermissions } from '../../../config/permissions';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { usePermissions } from '../../../hooks/usePermissions';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
 import {
   decodeIdString,
   getFilterFromQueryParams,
   isPermissionDeniedError,
-} from '../../../utils/utils';
+} from '@utils/utils';
 import { UniversalActivityLogTablePaymentVerification } from '../../tables/UniversalActivityLogTablePaymentVerification';
 import { VerificationRecordsTable } from '../../tables/payments/VerificationRecordsTable';
 import { VerificationRecordsFilters } from '../../tables/payments/VerificationRecordsTable/VerificationRecordsFilters';
@@ -35,8 +36,7 @@ const Container = styled.div`
   flex: 1;
   width: 100%;
   background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
+  padding: 32px 44px;
   flex-direction: column;
   border-color: #b1b1b5;
   border-bottom-width: 1px;
@@ -58,7 +58,7 @@ const initialFilter = {
   paymentVerificationPlan: '',
 };
 
-export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
+export function CashPlanVerificationDetailsPage(): React.ReactElement {
   const { t } = useTranslation();
   const permissions = usePermissions();
 
@@ -77,10 +77,8 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
     variables: { id },
     fetchPolicy: 'cache-and-network',
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useCashPlanVerificationSamplingChoicesQuery();
+  const { data: choicesData, loading: choicesLoading } =
+    useCashPlanVerificationSamplingChoicesQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
@@ -112,13 +110,10 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
 
     return showTable && statesArray.length > 0;
   };
-  const canSeeCreationMessage = (): boolean => {
-    return statesArray.length === 0;
-  };
+  const canSeeCreationMessage = (): boolean => statesArray.length === 0;
 
-  const canSeeActivationMessage = (): boolean => {
-    return !canSeeVerificationRecords() && !canSeeCreationMessage();
-  };
+  const canSeeActivationMessage = (): boolean =>
+    !canSeeVerificationRecords() && !canSeeCreationMessage();
 
   const isFinished =
     cashPlan?.paymentVerificationSummary?.status === 'FINISHED';
@@ -150,8 +145,8 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
         {isFinished &&
           (isAllPrograms ? (
             <Button
-              variant='contained'
-              color='primary'
+              variant="contained"
+              color="primary"
               component={Link}
               to={`/${baseUrl}/grievance/payment-verification/${decodeIdString(
                 cashPlan.id,
@@ -227,4 +222,4 @@ export const CashPlanVerificationDetailsPage = (): React.ReactElement => {
         )}
     </>
   );
-};
+}

@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ImportedIndividualFields = gql`
   query ImportedIndividualFields($businessAreaSlug: String, $programId: String) {

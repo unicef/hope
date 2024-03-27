@@ -1,39 +1,44 @@
-from django.urls import path
+from django.urls import path, re_path
 
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-from rest_framework import permissions
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 from hct_mis_api.api import endpoints
 from hct_mis_api.api.endpoints.base import ConstanceSettingsAPIView
 from hct_mis_api.api.router import APIRouter
 
 app_name = "api"
-
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Hope API documentation",
-        default_version="v1",
-        description="Hope API description",
-        # terms_of_service="",
-        # contact=openapi.Contact(email="contact@snippets.local"),
-        # license=openapi.License(name=""),
-    ),
-    public=True,
-    permission_classes=[permissions.IsAuthenticated],
-)
-
+urlpatterns = []
 router = APIRouter()
 
 urlpatterns = [
-    path(r"(<str:format>\.json|\.yaml)", schema_view.without_ui(cache_timeout=0), name="schema-json"),
-    path(r"", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    re_path("^$", SpectacularAPIView.as_view(), name="schema"),
+    re_path("^swagger/$", SpectacularSwaggerView.as_view(url_name="api:schema"), name="swagger-ui"),
+    re_path("^redoc/$", SpectacularRedocView.as_view(url_name="api:schema"), name="redoc"),
     path("<slug:business_area>/rdi/upload/", endpoints.rdi.UploadRDIView().as_view(), name="rdi-upload"),
+    path(
+        "<slug:business_area>/rdi/upload/people/",
+        endpoints.rdi.UploadPeopleRDIView().as_view(),
+        name="rdi-upload-people",
+    ),
     path("<slug:business_area>/rdi/create/", endpoints.rdi.CreateRDIView().as_view(), name="rdi-create"),
+    path(
+        "<slug:business_area>/rdi/<uuid:rdi>/push/people/",
+        endpoints.rdi.PushPeopleToRDIView().as_view(),
+        name="rdi-push-people",
+    ),
     path(
         "<slug:business_area>/rdi/<uuid:rdi>/push/lax/", endpoints.rdi.PushLaxToRDIView().as_view(), name="rdi-push-lax"
     ),
     path("<slug:business_area>/rdi/<uuid:rdi>/push/", endpoints.rdi.PushToRDIView().as_view(), name="rdi-push"),
+    path(
+        "<slug:business_area>/rdi/<uuid:rdi>/delegate/people/",
+        endpoints.rdi.DelegatePeopleRDIView().as_view(),
+        name="rdi-delegate-people",
+    ),
     path(
         "<slug:business_area>/rdi/<uuid:rdi>/completed/", endpoints.rdi.CompleteRDIView().as_view(), name="rdi-complete"
     ),

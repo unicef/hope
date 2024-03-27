@@ -1,0 +1,6 @@
+# Ignore artifacts:
+build
+coverage
+.eslintrc.cjs
+data
+src/__generated__

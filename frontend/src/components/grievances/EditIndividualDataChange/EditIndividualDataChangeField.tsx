@@ -1,25 +1,25 @@
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { Field } from 'formik';
 import { useLocation } from 'react-router-dom';
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import React from 'react';
-import { FormikDateField } from '../../../shared/Formik/FormikDateField';
-import { FormikDecimalField } from '../../../shared/Formik/FormikDecimalField';
-import { FormikFileField } from '../../../shared/Formik/FormikFileField';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import * as React from 'react';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
+import { FormikFileField } from '@shared/Formik/FormikFileField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { FormikBoolFieldGrievances } from '../FormikBoolFieldGrievances';
 import { GrievanceFlexFieldPhotoModalEditable } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModalEditable';
 
-export interface EditIndividualDataChangeField {
+export interface EditIndividualDataChangeFieldProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   name: string;
 }
 export const EditIndividualDataChangeField = ({
   name,
   field,
-}: EditIndividualDataChangeField): React.ReactElement => {
+}: EditIndividualDataChangeFieldProps): React.ReactElement => {
   const location = useLocation();
   const isNewTicket = location.pathname.indexOf('new-ticket') !== -1;
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
@@ -72,7 +72,7 @@ export const EditIndividualDataChangeField = ({
       fieldProps = {
         component: FormikDateField,
         fullWidth: true,
-        decoratorEnd: <CalendarTodayRoundedIcon color='disabled' />,
+        decoratorEnd: <CalendarTodayRoundedIcon color="disabled" />,
       };
       break;
 
@@ -95,18 +95,16 @@ export const EditIndividualDataChangeField = ({
       fieldProps = {};
   }
   return (
-    <>
-      <Grid item xs={4}>
-        <Field
-          name={name}
-          variant='outlined'
-          label={field.labelEn}
-          required={field.required}
-          data-cy={`input-individual-data-${field.labelEn}`}
-          disabled={isEditTicket}
-          {...fieldProps}
-        />
-      </Grid>
-    </>
+    <Grid item xs={4}>
+      <Field
+        name={name}
+        variant="outlined"
+        label={field.labelEn}
+        required={field.required}
+        data-cy={`input-individual-data-${field.labelEn}`}
+        disabled={isEditTicket}
+        {...fieldProps}
+      />
+    </Grid>
   );
 };

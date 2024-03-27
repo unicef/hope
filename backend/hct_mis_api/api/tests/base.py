@@ -10,6 +10,7 @@ from hct_mis_api.apps.account.fixtures import (
     RoleFactory,
     UserFactory,
 )
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class HOPEApiTestCase(APITestCase):
@@ -18,7 +19,8 @@ class HOPEApiTestCase(APITestCase):
         Grant.API_RDI_CREATE,
         Grant.API_RDI_UPLOAD,
     ]
-    token = None
+    token: APIToken
+    business_area: BusinessArea
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -32,7 +34,7 @@ class HOPEApiTestCase(APITestCase):
         )
         user.user_roles.create(role=cls.role, business_area=cls.business_area)
 
-        cls.token: APIToken = APITokenFactory(
+        cls.token = APITokenFactory(
             user=user,
             grants=[c.name for c in cls.user_permissions],
         )
@@ -47,7 +49,7 @@ class ConstanceSettingsAPITest(APITestCase):
     user_permissions = [
         Grant.API_READ_ONLY,
     ]
-    token = None
+    token: APIToken
 
     @classmethod
     def setUpTestData(cls) -> None:

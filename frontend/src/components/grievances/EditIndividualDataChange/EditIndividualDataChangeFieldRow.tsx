@@ -1,14 +1,15 @@
-import { Grid, IconButton } from '@material-ui/core';
+import { Grid, IconButton } from '@mui/material';
 import camelCase from 'lodash/camelCase';
-import { Delete } from '@material-ui/icons';
+import { Delete } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { useField, Field } from 'formik';
-import React, { useEffect } from 'react';
-import { FormikSelectField } from '../../../shared/Formik/FormikSelectField';
+import * as React from 'react';
+import { useEffect } from 'react';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
 import {
   AllAddIndividualFieldsQuery,
   IndividualQuery,
-} from '../../../__generated__/graphql';
+} from '@generated/graphql';
 import { EditIndividualDataChangeField } from './EditIndividualDataChangeField';
 import { CurrentValue } from './CurrentValue';
 
@@ -18,7 +19,7 @@ export interface EditIndividualDataChangeFieldRowProps {
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
-  onDelete: () => {};
+  onDelete: () => void;
   values;
 }
 export const EditIndividualDataChangeFieldRow = ({
@@ -33,7 +34,7 @@ export const EditIndividualDataChangeFieldRow = ({
   const location = useLocation();
   const isEditTicket = location.pathname.indexOf('edit-ticket') !== -1;
   const field = fields.find((item) => item.name === itemValue.fieldName);
-  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [fieldNotUsed, metaNotUsed, helpers] = useField(
     `individualDataUpdateFields[${index}].isFlexField`,
   );
@@ -42,13 +43,13 @@ export const EditIndividualDataChangeFieldRow = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemValue.fieldName]);
   return (
-    <>
+    <Grid container alignItems="center" spacing={3}>
       <Grid item xs={4}>
         <Field
           name={`individualDataUpdateFields[${index}].fieldName`}
           fullWidth
-          variant='outlined'
-          label='Field'
+          variant="outlined"
+          label="Field"
           required
           disabled={isEditTicket}
           component={FormikSelectField}
@@ -89,6 +90,6 @@ export const EditIndividualDataChangeFieldRow = ({
           </IconButton>
         </Grid>
       )}
-    </>
+    </Grid>
   );
 };

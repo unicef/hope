@@ -1,20 +1,20 @@
-import { Box, Grid } from '@material-ui/core';
-import React from 'react';
+import { Box, Grid } from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { PermissionDenied } from '../../../components/core/PermissionDenied';
-import { TableWrapper } from '../../../components/core/TableWrapper';
-import { GrievanceDashboardCard } from '../../../components/grievances/GrievancesDashboard/GrievanceDashboardCard';
-import { TicketsByCategorySection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByCategorySection/TicketsByCategorySection';
-import { TicketsByLocationAndCategorySection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
-import { TicketsByStatusSection } from '../../../components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { PermissionDenied } from '@components/core/PermissionDenied';
+import { TableWrapper } from '@components/core/TableWrapper';
+import { GrievanceDashboardCard } from '@components/grievances/GrievancesDashboard/GrievanceDashboardCard';
+import { TicketsByCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByCategorySection/TicketsByCategorySection';
+import { TicketsByLocationAndCategorySection } from '@components/grievances/GrievancesDashboard/sections/TicketsByLocationAndCategorySection/TicketsByLocationAndCategorySection';
+import { TicketsByStatusSection } from '@components/grievances/GrievancesDashboard/sections/TicketsByStatusSection/TicketsByStatusSection';
 import { hasPermissionInModule } from '../../../config/permissions';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { useAllGrievanceDashboardChartsQuery } from '../../../__generated__/graphql';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { useAllGrievanceDashboardChartsQuery } from '@generated/graphql';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
-export const GrievancesDashboardPage = (): React.ReactElement => {
+export function GrievancesDashboardPage(): React.ReactElement {
   const { t } = useTranslation();
   const { businessArea } = useBaseUrl();
   const permissions = usePermissions();
@@ -62,7 +62,7 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 topNumber={systemGeneratedCount + userGeneratedCount}
                 systemGenerated={systemGeneratedCount}
                 userGenerated={userGeneratedCount}
-                dataCy='total-number-of-tickets'
+                dataCy="total-number-of-tickets"
               />
             </Box>
             <Box mt={5}>
@@ -71,18 +71,23 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
                 topNumber={numberOfClosedTickets}
                 systemGenerated={closedSystemGeneratedCount}
                 userGenerated={closedUserGeneratedCount}
-                dataCy='total-number-of-closed-tickets'
+                dataCy="total-number-of-closed-tickets"
               />
             </Box>
             <Box mt={5}>
               <GrievanceDashboardCard
                 topLabel={t('TICKETS AVERAGE RESOLUTION')}
-                topNumber={`${numberOfClosedTickets > 0 ? (
-                  (userWeightedTime + systemWeightedTime) / numberOfClosedTickets
-                ).toFixed(2) : 0} days`}
+                topNumber={`${
+                  numberOfClosedTickets > 0
+                    ? (
+                      (userWeightedTime + systemWeightedTime) /
+                        numberOfClosedTickets
+                    ).toFixed(2)
+                    : 0
+                } days`}
                 systemGenerated={`${systemGeneratedAvgResolution} days`}
                 userGenerated={`${userGeneratedAvgResolution} days`}
-                dataCy='tickets-average-resolution'
+                dataCy="tickets-average-resolution"
               />
             </Box>
             <Box mt={5}>
@@ -103,4 +108,4 @@ export const GrievancesDashboardPage = (): React.ReactElement => {
       </TableWrapper>
     </>
   );
-};
+}

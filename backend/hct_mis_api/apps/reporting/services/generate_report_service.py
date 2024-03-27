@@ -115,13 +115,14 @@ class GenerateReportContentHelpers:
     def get_households(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
-            # "program": report.program # TODO Uncomment after add program to household
             "withdrawn": False,
             "last_registration_date__gte": timezone_datetime(report.date_from),
             "last_registration_date__lte": timezone_datetime(report.date_to),
         }
         if report.admin_area.all().exists():
             filter_vars["admin_area__in"] = report.admin_area.all()
+        if report.program:
+            filter_vars["program"] = report.program
         return Household.objects.filter(**filter_vars)
 
     @classmethod
@@ -288,10 +289,11 @@ class GenerateReportContentHelpers:
     def get_payment_plans(report: Report) -> QuerySet[PaymentPlan]:
         filter_vars = {
             "business_area": report.business_area,
-            "program_cycle__program": report.program,
             "dispersion_start_date__gte": report.date_from,
             "dispersion_end_date__lte": report.date_to,
         }
+        if report.program:
+            filter_vars["program_cycle__program"] = report.program
         return PaymentPlan.objects.filter(**filter_vars)
 
     @classmethod
@@ -312,7 +314,6 @@ class GenerateReportContentHelpers:
     def get_cash_plans(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
-            "program": report.program,
             "end_date__gte": report.date_from,
             "end_date__lte": report.date_to,
         }

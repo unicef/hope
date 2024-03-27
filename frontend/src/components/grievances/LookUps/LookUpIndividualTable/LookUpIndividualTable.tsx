@@ -1,14 +1,14 @@
-import React from 'react';
+import * as React from 'react';
 import styled from 'styled-components';
 import {
   AllIndividualsForPopulationTableQuery,
   AllIndividualsForPopulationTableQueryVariables,
   useAllIndividualsForPopulationTableQuery,
-} from '../../../../__generated__/graphql';
-import { UniversalTable } from '../../../../containers/tables/UniversalTable';
-import { decodeIdString } from '../../../../utils/utils';
-import { TableWrapper } from '../../../core/TableWrapper';
-import { useBaseUrl } from '../../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { UniversalTable } from '@containers/tables/UniversalTable';
+import { decodeIdString } from '@utils/utils';
+import { TableWrapper } from '@core/TableWrapper';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 import { headCells } from './LookUpIndividualTableHeadCells';
 import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
 
@@ -33,7 +33,7 @@ const NoTableStyling = styled.div`
   }
 `;
 
-export const LookUpIndividualTable = ({
+export function LookUpIndividualTable({
   businessArea,
   filter,
   setFieldValue,
@@ -44,7 +44,7 @@ export const LookUpIndividualTable = ({
   ticket,
   excludedId,
   noTableStyling = false,
-}: LookUpIndividualTableProps): React.ReactElement => {
+}: LookUpIndividualTableProps): React.ReactElement {
   const { programId, isAllPrograms } = useBaseUrl();
 
   const handleRadioChange = (individual): void => {
@@ -101,33 +101,31 @@ export const LookUpIndividualTable = ({
     ? headCellsWithProgramColumn
     : headCells;
 
-  const renderTable = (): React.ReactElement => {
-    return (
-      <UniversalTable<
-        AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
-        AllIndividualsForPopulationTableQueryVariables
-      >
-        headCells={preparedHeadcells}
-        allowSort={false}
-        rowsPerPageOptions={[5, 10, 15, 20]}
-        filterOrderBy={filter.orderBy}
-        query={useAllIndividualsForPopulationTableQuery}
-        queriedObjectName='allIndividuals'
-        initialVariables={initialVariables}
-        renderRow={(row) => (
-          <LookUpIndividualTableRow
-            radioChangeHandler={handleRadioChange}
-            selectedIndividual={selectedIndividual}
-            key={row.id}
-            individual={row}
-          />
-        )}
-      />
-    );
-  };
+  const renderTable = (): React.ReactElement => (
+    <UniversalTable<
+    AllIndividualsForPopulationTableQuery['allIndividuals']['edges'][number]['node'],
+    AllIndividualsForPopulationTableQueryVariables
+    >
+      headCells={preparedHeadcells}
+      allowSort={false}
+      rowsPerPageOptions={[5, 10, 15, 20]}
+      filterOrderBy={filter.orderBy}
+      query={useAllIndividualsForPopulationTableQuery}
+      queriedObjectName="allIndividuals"
+      initialVariables={initialVariables}
+      renderRow={(row) => (
+        <LookUpIndividualTableRow
+          radioChangeHandler={handleRadioChange}
+          selectedIndividual={selectedIndividual}
+          key={row.id}
+          individual={row}
+        />
+      )}
+    />
+  );
   return noTableStyling ? (
     <NoTableStyling>{renderTable()}</NoTableStyling>
   ) : (
     <TableWrapper>{renderTable()}</TableWrapper>
   );
-};
+}

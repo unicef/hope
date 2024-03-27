@@ -1,9 +1,9 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FormikSelectField } from '../../../../shared/Formik/FormikSelectField';
-import { LabelizedField } from '../../../core/LabelizedField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { LabelizedField } from '@core/LabelizedField';
 
 interface DeliveryMechanismRowProps {
   index: number;
@@ -15,25 +15,25 @@ interface DeliveryMechanismRowProps {
   permissions: string[];
 }
 
-export const DeliveryMechanismRow = ({
+export function DeliveryMechanismRow({
   index,
   step,
   values,
   deliveryMechanismsChoices,
   fspsChoices,
-}: DeliveryMechanismRowProps): React.ReactElement => {
+}: DeliveryMechanismRowProps): React.ReactElement {
   const { t } = useTranslation();
   return (
-    <Box flexDirection='column'>
+    <Box flexDirection="column">
       <Grid container>
         <Grid item xs={3}>
           <Grid item xs={12}>
-            <Box display='flex' alignItems='center'>
+            <Box display="flex" alignItems="center">
               {/* <Box mr={4}>{index + 1}</Box> */}
               {step === 0 && deliveryMechanismsChoices && (
                 <Field
                   name={`deliveryMechanisms[${index}].deliveryMechanism`}
-                  variant='outlined'
+                  variant="outlined"
                   label={t('Delivery Mechanism')}
                   component={FormikSelectField}
                   choices={deliveryMechanismsChoices}
@@ -53,7 +53,7 @@ export const DeliveryMechanismRow = ({
             <Grid item xs={8}>
               <Field
                 name={`deliveryMechanisms[${index}].fsp`}
-                variant='outlined'
+                variant="outlined"
                 label={t('FSP')}
                 component={FormikSelectField}
                 choices={fspsChoices}
@@ -76,4 +76,4 @@ export const DeliveryMechanismRow = ({
       </Grid>
     </Box>
   );
-};
+}

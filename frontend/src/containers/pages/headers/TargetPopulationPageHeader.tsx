@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import {
@@ -6,13 +6,13 @@ import {
   TargetPopulationQuery,
   TargetPopulationStatus,
   useBusinessAreaDataQuery,
-} from '../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
-import { LoadingComponent } from '../../../components/core/LoadingComponent';
-import { PageHeader } from '../../../components/core/PageHeader';
-import { StatusBox } from '../../../components/core/StatusBox';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
-import { targetPopulationBuildStatusToColor } from '../../../utils/utils';
+} from '@generated/graphql';
+import { BreadCrumbsItem } from '@components/core/BreadCrumbs';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { StatusBox } from '@components/core/StatusBox';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { targetPopulationBuildStatusToColor } from '@utils/utils';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { LockedTargetPopulationHeaderButtons } from './LockedTargetPopulationHeaderButtons';
 import { OpenTargetPopulationHeaderButtons } from './OpenTargetPopulationHeaderButtons';
@@ -22,7 +22,7 @@ const HeaderWrapper = styled.div`
   align-items: center;
   justify-content: center;
   div {
-    margin: 0 0 0 ${({ theme }) => theme.spacing(3)}px;
+    margin: 0 0 0 ${({ theme }) => theme.spacing(3)};
   }
 `;
 const StatusWrapper = styled.div`
@@ -41,7 +41,7 @@ export interface ProgramDetailsPageHeaderPropTypes {
   canSend: boolean;
 }
 
-export const TargetPopulationPageHeader = ({
+export function TargetPopulationPageHeader({
   targetPopulation,
   canEdit,
   canRemove,
@@ -49,15 +49,13 @@ export const TargetPopulationPageHeader = ({
   canLock,
   canUnlock,
   canSend,
-}: ProgramDetailsPageHeaderPropTypes): React.ReactElement => {
+}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const { baseUrl, businessArea } = useBaseUrl();
-  const {
-    data: businessAreaData,
-    loading: businessAreaDataLoading,
-  } = useBusinessAreaDataQuery({
-    variables: { businessAreaSlug: businessArea },
-  });
+  const { data: businessAreaData, loading: businessAreaDataLoading } =
+    useBusinessAreaDataQuery({
+      variables: { businessAreaSlug: businessArea },
+    });
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Targeting',
@@ -97,7 +95,7 @@ export const TargetPopulationPageHeader = ({
       );
       break;
     default:
-      //Ready for Cash Assist, Processing, Ready, Accepted
+      // Ready for Cash Assist, Processing, Ready, Accepted
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
@@ -108,26 +106,23 @@ export const TargetPopulationPageHeader = ({
       break;
   }
   return (
-    <>
-      <PageHeader
-        title={
-          <HeaderWrapper>
-            {t(`${targetPopulation.name}`)}
-            {targetPopulation.buildStatus !==
-              TargetPopulationBuildStatus.Ok && (
-              <StatusWrapper>
-                <StatusBox
-                  status={targetPopulation.buildStatus}
-                  statusToColor={targetPopulationBuildStatusToColor}
-                />
-              </StatusWrapper>
-            )}
-          </HeaderWrapper>
-        }
-        breadCrumbs={breadCrumbsItems}
-      >
-        {buttons}
-      </PageHeader>
-    </>
+    <PageHeader
+      title={
+        <HeaderWrapper>
+          {t(`${targetPopulation.name}`)}
+          {targetPopulation.buildStatus !== TargetPopulationBuildStatus.Ok && (
+            <StatusWrapper>
+              <StatusBox
+                status={targetPopulation.buildStatus}
+                statusToColor={targetPopulationBuildStatusToColor}
+              />
+            </StatusWrapper>
+          )}
+        </HeaderWrapper>
+      }
+      breadCrumbs={breadCrumbsItems}
+    >
+      {buttons}
+    </PageHeader>
   );
-};
+}

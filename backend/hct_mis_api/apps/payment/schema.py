@@ -189,6 +189,11 @@ class FinancialServiceProviderNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
+    @classmethod
+    def get_queryset(cls, queryset: QuerySet, info: Any) -> QuerySet:
+        business_area_slug = info.context.headers.get("Business-Area")
+        return queryset.all().allowed_to(business_area_slug)
+
 
 class ServiceProviderNode(DjangoObjectType):
     class Meta:

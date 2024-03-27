@@ -389,7 +389,6 @@ class RealProgramFactory(DjangoModelFactory):
         variable_nb_words=True,
         ext_word_list=None,
     )
-    individual_data_needed = factory.fuzzy.FuzzyChoice((True, False))
     programme_code = factory.LazyAttribute(
         lambda o: "".join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
     )
@@ -1057,3 +1056,9 @@ def generate_payment_plan() -> None:
     )
 
     payment_plan.update_population_count_fields()
+
+
+def update_fsps() -> None:
+    afghanistan = BusinessArea.objects.get(slug="afghanistan")
+    for fsp in FinancialServiceProvider.objects.all():
+        fsp.allowed_business_areas.add(afghanistan)

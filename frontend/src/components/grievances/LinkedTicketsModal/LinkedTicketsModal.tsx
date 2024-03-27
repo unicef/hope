@@ -10,23 +10,23 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
+} from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   AllGrievanceTicketQuery,
   useRelatedGrievanceTicketsLazyQuery,
-} from '../../../__generated__/graphql';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { grievanceTicketStatusToColor } from '../../../utils/utils';
-import { BlackLink } from '../../core/BlackLink';
-import { LoadingComponent } from '../../core/LoadingComponent';
-import { StatusBox } from '../../core/StatusBox';
-import { ClickableTableRow } from '../../core/Table/ClickableTableRow';
+} from '@generated/graphql';
+import { Dialog } from '@containers/dialogs/Dialog';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { grievanceTicketStatusToColor } from '@utils/utils';
+import { BlackLink } from '@core/BlackLink';
+import { LoadingComponent } from '@core/LoadingComponent';
+import { StatusBox } from '@core/StatusBox';
+import { ClickableTableRow } from '@core/Table/ClickableTableRow';
 import { getGrievanceDetailsPath } from '../utils/createGrievanceUtils';
 
 export const StyledLink = styled.div`
@@ -56,25 +56,23 @@ interface LinkedTicketsModalProps {
   issueTypeChoicesData;
 }
 
-export const LinkedTicketsModal = ({
+export function LinkedTicketsModal({
   ticket,
   categoryChoices,
   statusChoices,
   canViewDetails,
   baseUrl,
   issueTypeChoicesData,
-}: LinkedTicketsModalProps): React.ReactElement => {
+}: LinkedTicketsModalProps): React.ReactElement {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation();
-  const [
-    loadRelatedTickets,
-    { data, loading },
-  ] = useRelatedGrievanceTicketsLazyQuery({
-    variables: {
-      id: ticket.id,
-    },
-  });
+  const [loadRelatedTickets, { data, loading }] =
+    useRelatedGrievanceTicketsLazyQuery({
+      variables: {
+        id: ticket.id,
+      },
+    });
   useEffect(() => {
     if (dialogOpen) {
       loadRelatedTickets();
@@ -102,20 +100,20 @@ export const LinkedTicketsModal = ({
       <ClickableTableRow
         hover
         onClick={
-          canViewDetails ? () => history.push(grievanceDetailsPath) : undefined
+          canViewDetails ? () => navigate(grievanceDetailsPath) : undefined
         }
         key={row.id}
       >
-        <TableCell align='left'>
+        <TableCell align="left">
           {canViewDetails ? (
             <BlackLink to={grievanceDetailsPath}>{row.unicefId}</BlackLink>
           ) : (
             row.unicefId
           )}
         </TableCell>
-        <TableCell align='left'>{categoryChoices[row.category]}</TableCell>
-        <TableCell align='left'>{issueType || '-'}</TableCell>
-        <TableCell align='left'>
+        <TableCell align="left">{categoryChoices[row.category]}</TableCell>
+        <TableCell align="left">{issueType || '-'}</TableCell>
+        <TableCell align="left">
           <StatusBox
             status={statusChoices[row.status]}
             statusToColor={grievanceTicketStatusToColor}
@@ -147,7 +145,7 @@ export const LinkedTicketsModal = ({
     if (loading) return <LoadingComponent />;
     if (!data) return null;
 
-    const { relatedTickets } = data?.grievanceTicket;
+    const { relatedTickets } = data?.grievanceTicket || {};
     return (
       <>{relatedTickets.map((relatedTicket) => renderRow(relatedTicket))}</>
     );
@@ -159,9 +157,9 @@ export const LinkedTicketsModal = ({
       <StyledDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
-        maxWidth='lg'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
+        maxWidth="lg"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Related Tickets')}</DialogTitle>
@@ -169,17 +167,20 @@ export const LinkedTicketsModal = ({
         <DialogContent>
           <Box mt={2} mb={6}>
             <Typography>
-              <Bold>Ticket ID {ticket.unicefId} </Bold>
+              <Bold>
+                Ticket ID
+                {ticket.unicefId}
+              </Bold>
               is related to the following tickets.
             </Typography>
           </Box>
           <StyledTable>
             <TableHead>
               <TableRow>
-                <TableCell align='left'>{t('Ticket Id')}</TableCell>
-                <TableCell align='left'>{t('Category')}</TableCell>
-                <TableCell align='left'>{t('Issue Type')}</TableCell>
-                <TableCell align='left'>{t('Status')}</TableCell>
+                <TableCell align="left">{t('Ticket Id')}</TableCell>
+                <TableCell align="left">{t('Category')}</TableCell>
+                <TableCell align="left">{t('Issue Type')}</TableCell>
+                <TableCell align="left">{t('Status')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>{renderRows()}</TableBody>
@@ -200,4 +201,4 @@ export const LinkedTicketsModal = ({
       </StyledDialog>
     </>
   );
-};
+}

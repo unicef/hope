@@ -1,13 +1,13 @@
-import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FormikAutocomplete } from '../../shared/Formik/FormikAutocomplete';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import { FormikAutocomplete } from '@shared/Formik/FormikAutocomplete';
+import { FormikDateField } from '@shared/Formik/FormikDateField';
+import { FormikDecimalField } from '@shared/Formik/FormikDecimalField';
+import { FormikSelectField } from '@shared/Formik/FormikSelectField';
+import { FormikTextField } from '@shared/Formik/FormikTextField';
 
 const FlexWrapper = styled.div`
   display: flex;
@@ -17,7 +17,7 @@ const InlineField = styled.div`
   width: 48%;
 `;
 
-export const SubField = ({ field, index, baseName }): React.ReactElement => {
+export function SubField({ field, index, baseName }): React.ReactElement {
   const { t } = useTranslation();
   switch (field.fieldAttribute.type) {
     case 'DECIMAL':
@@ -27,20 +27,20 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
             <Field
               name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
-              variant='outlined'
+              variant="outlined"
               fullWidth
               component={FormikDecimalField}
-              data-cy='decimal-from'
+              data-cy="decimal-from"
             />
           </InlineField>
           <InlineField>
             <Field
               name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
-              variant='outlined'
+              variant="outlined"
               fullWidth
               component={FormikDecimalField}
-              data-cy='decimal-to'
+              data-cy="decimal-to"
             />
           </InlineField>
         </FlexWrapper>
@@ -54,8 +54,8 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               label={`${field.fieldAttribute.labelEn} from`}
               fullWidth
               component={FormikDateField}
-              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              data-cy='date-from'
+              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
+              data-cy="date-from"
             />
           </InlineField>
           <InlineField>
@@ -64,8 +64,8 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               label={`${field.fieldAttribute.labelEn} to`}
               fullWidth
               component={FormikDateField}
-              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-              data-cy='date-to'
+              decoratorEnd={<CalendarTodayRoundedIcon color="disabled" />}
+              data-cy="date-to"
             />
           </InlineField>
         </FlexWrapper>
@@ -77,24 +77,24 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
             <Field
               name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
-              type='number'
+              type="number"
               integer
-              variant='outlined'
+              variant="outlined"
               fullWidth
               component={FormikTextField}
-              data-cy='integer-from'
+              data-cy="integer-from"
             />
           </InlineField>
           <InlineField>
             <Field
               name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
-              type='number'
+              type="number"
               integer
-              variant='outlined'
+              variant="outlined"
               fullWidth
               component={FormikTextField}
-              data-cy='integer-to'
+              data-cy="integer-to"
             />
           </InlineField>
         </FlexWrapper>
@@ -107,7 +107,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           choices={field.fieldAttribute.choices}
           index={index}
           component={FormikAutocomplete}
-          data-cy='select-one-autocomplete'
+          data-cy="select-one-autocomplete"
         />
       ) : (
         <Field
@@ -116,7 +116,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           choices={field.fieldAttribute.choices}
           index={index}
           component={FormikSelectField}
-          data-cy='select-one-select'
+          data-cy="select-one-select"
         />
       );
     case 'SELECT_MANY':
@@ -128,7 +128,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           index={index}
           multiple
           component={FormikSelectField}
-          data-cy='select-many'
+          data-cy="select-many"
         />
       );
     case 'STRING':
@@ -137,9 +137,9 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           name={`${baseName}.value`}
           label={`${field.fieldAttribute.labelEn}`}
           fullWidth
-          variant='outlined'
+          variant="outlined"
           component={FormikTextField}
-          data-cy='string-textfield'
+          data-cy="string-textfield"
         />
       );
     case 'BOOL':
@@ -165,10 +165,10 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           ]}
           index={index}
           component={FormikSelectField}
-          data-cy='bool-field'
+          data-cy="bool-field"
         />
       );
     default:
       return <p>{field.fieldAttribute.type}</p>;
   }
-};
+}

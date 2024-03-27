@@ -19,6 +19,7 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.core.models import DataCollectingType
 from hct_mis_api.apps.core.querysets import ExtendedQuerySetSequence
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -52,7 +53,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
             "cash_plus",
             "population_goal",
             "administrative_areas_of_implementation",
-            "individual_data_needed",
         ],
         {"admin_areas_log": "admin_areas"},
     )
@@ -146,13 +146,6 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         blank=True,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    individual_data_needed = models.BooleanField(
-        default=False,
-        help_text="""
-        This boolean decides whether the target population sync will send
-        all individuals of a household that's part of the population or only
-        the relevant ones (collectors etc.)""",
-    )
     data_collecting_type = models.ForeignKey(
         "core.DataCollectingType", related_name="programs", on_delete=models.PROTECT, null=True, blank=True
     )
@@ -166,6 +159,9 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.programme_code:
             self.programme_code = self._generate_programme_code()
+        if self.data_collecting_type_id is None and self.data_collecting_type:
+            # save the related object before saving Program
+            self.data_collecting_type.save()
         super().save(*args, **kwargs)
 
     def _generate_programme_code(self) -> str:
@@ -198,6 +194,10 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     @property
     def admin_areas_log(self) -> str:
         return ", ".join(self.admin_areas.all())
+
+    @property
+    def is_social_worker_program(self) -> bool:
+        return self.data_collecting_type.type == DataCollectingType.Type.SOCIAL
 
     class Meta:
         constraints = [

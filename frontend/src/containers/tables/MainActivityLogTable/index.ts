@@ -1,1 +1,1 @@
-import { MainActivityLogTable } from './MainActivityLogTable';
+export { MainActivityLogTable } from './MainActivityLogTable';

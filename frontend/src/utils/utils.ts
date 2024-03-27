@@ -2,7 +2,7 @@ import { GraphQLError } from 'graphql';
 import localForage from 'localforage';
 import camelCase from 'lodash/camelCase';
 import moment from 'moment';
-import { LocationState, useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ValidationGraphQLError } from '../apollo/ValidationGraphQLError';
 import { theme as themeObj } from '../theme';
 import {
@@ -15,7 +15,7 @@ import {
   ProgramStatus,
   TargetPopulationBuildStatus,
   TargetPopulationStatus,
-} from '../__generated__/graphql';
+} from '@generated/graphql';
 import {
   GRIEVANCE_CATEGORIES,
   PAYMENT_PLAN_BACKGROUND_ACTION_STATES,
@@ -445,9 +445,9 @@ export function columnToOrderBy(
   return camelToUnderscore(`${orderDirection === 'desc' ? '-' : ''}${column}`);
 }
 
-export function choicesToDict(
-  choices: ChoiceObject[],
-): { [key: string]: string } {
+export function choicesToDict(choices: ChoiceObject[]): {
+  [key: string]: string;
+} {
   if (!choices) return {};
   return choices.reduce((previousValue, currentValue) => {
     const newDict = { ...previousValue };
@@ -647,9 +647,9 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
   if (!inputStr) return null;
   return shouldAnonymize
     ? inputStr
-        .split(' ')
-        .map((el) => el.substring(0, 2) + '*'.repeat(3))
-        .join(' ')
+      .split(' ')
+      .map((el) => el.substring(0, 2) + '*'.repeat(3))
+      .join(' ')
     : inputStr;
 };
 
@@ -732,9 +732,8 @@ export const formatAge = (age): string | number => {
   return '<1';
 };
 
-export const renderIndividualName = (individual): string => {
-  return individual?.fullName;
-};
+export const renderIndividualName = (individual): string =>
+  individual?.fullName;
 
 export async function clearCache(apolloClient = null): Promise<void> {
   if (apolloClient) apolloClient.resetStore();
@@ -742,9 +741,8 @@ export async function clearCache(apolloClient = null): Promise<void> {
   await localForage.clear();
 }
 
-export const round = (value: number, decimals = 2): number => {
-  return Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
-};
+export const round = (value: number, decimals = 2): number =>
+  Math.round((value + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
 
 type Location = ReturnType<typeof useLocation>;
 type FilterValue = string | string[] | boolean | null | undefined;
@@ -774,7 +772,7 @@ export const getFilterFromQueryParams = (
 export const setQueryParam = (
   key: string,
   value: string,
-  history: useHistory<LocationState>,
+  navigate: ReturnType<typeof useNavigate>,
   location: Location,
 ): void => {
   const params = new URLSearchParams(location.search);
@@ -785,12 +783,12 @@ export const setQueryParam = (
   // Add the new value for the given key
   params.append(key, value);
 
-  history.push({ search: params.toString() });
+  navigate({ search: params.toString() });
 };
 
 export const setFilterToQueryParams = (
   filter: { [key: string]: FilterValue },
-  history: useHistory<LocationState>,
+  navigate: ReturnType<typeof useNavigate>,
   location: Location,
 ): void => {
   const params = new URLSearchParams(location.search);
@@ -816,13 +814,13 @@ export const setFilterToQueryParams = (
     }
   });
   const search = params.toString();
-  history.push({ search });
+  navigate({ search });
 };
 
 export const createHandleFilterChange = (
   onFilterChange: (filter: { [key: string]: FilterValue }) => void,
   initialFilter: Filter,
-  history: useHistory<LocationState>,
+  navigate: ReturnType<typeof useNavigate>,
   location: Location,
 ): ((key: string, value: FilterValue) => void) => {
   let filterFromQueryParams = getFilterFromQueryParams(location, initialFilter);
@@ -857,7 +855,7 @@ export const createHandleFilterChange = (
     }
 
     const search = params.toString();
-    history.push({ search });
+    navigate({ search });
   };
 
   return handleFilterChange;
@@ -875,7 +873,7 @@ interface HandleFilterChangeFunctions {
 
 export const createHandleApplyFilterChange = (
   initialFilter: Filter,
-  history: useHistory<LocationState>,
+  navigate: ReturnType<typeof useNavigate>,
   location: Location,
   filter: Filter,
   setFilter: (filter: { [key: string]: FilterValue }) => void,
@@ -915,7 +913,7 @@ export const createHandleApplyFilterChange = (
     });
 
     const search = params.toString();
-    history.push({ search });
+    navigate({ search });
 
     setFilter(filter);
   };
@@ -926,7 +924,7 @@ export const createHandleApplyFilterChange = (
       params.delete(key);
     });
     const search = params.toString();
-    history.push({ search });
+    navigate({ search });
     setFilter(initialFilter);
     setAppliedFilter(initialFilter);
   };
@@ -947,21 +945,15 @@ type DateType = 'startOfDay' | 'endOfDay';
 export const dateToIsoString = (date: Date, type: DateType): string => {
   if (!date) return null;
   if (type === 'startOfDay') {
-    return moment
-      .utc(date)
-      .startOf('day')
-      .toISOString();
+    return moment.utc(date).startOf('day').toISOString();
   }
   if (type === 'endOfDay') {
-    return moment
-      .utc(date)
-      .endOf('day')
-      .toISOString();
+    return moment.utc(date).endOf('day').toISOString();
   }
   throw new Error('Invalid type specified');
 };
 
-//autocompletes utils
+// autocompletes utils
 export const handleAutocompleteChange = (
   name,
   value,
@@ -1046,7 +1038,8 @@ export const handleOptionSelected = (
 };
 
 export const isProgramNodeUuidFormat = (id: string): boolean => {
-  const regex = /^ProgramNode:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+  const regex =
+    /^ProgramNode:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
   try {
     const base64 = id.replace(/-/g, '+').replace(/_/g, '/');
     const decodedId = atob(base64);
@@ -1057,6 +1050,5 @@ export const isProgramNodeUuidFormat = (id: string): boolean => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const arraysHaveSameContent = (a: any[], b: any[]): boolean => {
-  return a.length === b.length && a.every((val, index) => val === b[index]);
-};
+export const arraysHaveSameContent = (a: any[], b: any[]): boolean =>
+  a.length === b.length && a.every((val, index) => val === b[index]);

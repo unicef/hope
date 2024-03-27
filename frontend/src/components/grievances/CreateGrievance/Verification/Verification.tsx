@@ -1,9 +1,9 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import { Field } from 'formik';
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { FormikCheckboxField } from '../../../../shared/Formik/FormikCheckboxField';
+import { FormikCheckboxField } from '@shared/Formik/FormikCheckboxField';
 import { Consent } from '../../Consent';
 import { HouseholdQuestionnaire } from '../../HouseholdQuestionnaire/HouseholdQuestionnaire';
 import { IndividualQuestionnaire } from '../../IndividualQuestionnnaire/IndividualQuestionnaire';
@@ -23,9 +23,9 @@ export interface VerificationProps {
   values;
 }
 
-export const Verification = ({
+export function Verification({
   values,
-}: VerificationProps): React.ReactElement => {
+}: VerificationProps): React.ReactElement {
   const { t } = useTranslation();
   return (
     <BoxWithBorders>
@@ -38,7 +38,7 @@ export const Verification = ({
         )} */}
         {values.selectedHousehold && (
           <Box py={4}>
-            <Typography variant='subtitle2'>
+            <Typography variant="subtitle2">
               {t('Household Questionnaire')}
             </Typography>
             <Box py={4}>
@@ -48,7 +48,7 @@ export const Verification = ({
         )}
         {values.selectedIndividual && (
           <>
-            <Typography variant='subtitle2'>
+            <Typography variant="subtitle2">
               {t('Individual Questionnaire')}
             </Typography>
             <Box py={4}>
@@ -60,13 +60,14 @@ export const Verification = ({
       </>
       <Consent />
       <Field
-        name='consent'
-        label={t('Received Consent*')}
-        color='primary'
+        name="consent"
+        label={t('Received Consent')}
+        color="primary"
+        required
         fullWidth
         container={false}
         component={FormikCheckboxField}
       />
     </BoxWithBorders>
   );
-};
+}

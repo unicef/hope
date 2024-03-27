@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING, Any
 
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 
@@ -33,19 +34,21 @@ class ProgramSerializer(serializers.ModelSerializer):
 class ProgramViewSet(CreateModelMixin, HOPEAPIBusinessAreaViewSet):
     serializer = ProgramSerializer
     model = Program
-    permission = Grant.API_PROGRAM_CREATE
+    permission = Grant.API_READ_ONLY
 
     def perform_create(self, serializer: "BaseSerializer") -> None:
         serializer.save(business_area=self.selected_business_area)
 
-    @swagger_auto_schema(request_body=ProgramSerializer)
+    @extend_schema(request=ProgramSerializer)
     def create(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         self.selected_business_area  # TODO does it work? It should be called
         serializer = ProgramSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        if Grant.API_PROGRAM_CREATE.name not in request.auth.grants:
+            raise PermissionDenied()
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def list(self, request: "Request", *args: Any, **kwargs: Any) -> Response:
         queryset = self.model.objects.filter(business_area=self.selected_business_area)

@@ -51,7 +51,7 @@ export const fakeApolloAllImportedHouseholds = [
                 hasDuplicates: false,
                 fchildHoh: false,
                 childHoh: false,
-                collectIndividualData: "A_1",
+                collectIndividualData: 'A_1',
                 __typename: 'ImportedHouseholdNode',
               },
               __typename: 'ImportedHouseholdNodeEdge',

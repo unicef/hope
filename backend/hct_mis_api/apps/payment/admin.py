@@ -420,6 +420,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
     )
     search_fields = ("name",)
     # filter_horizontal = ("delivery_mechanisms",)
+    filter_horizontal = ("allowed_business_areas",)
     autocomplete_fields = ("created_by",)
     list_select_related = ("created_by",)
     fields = (
@@ -428,6 +429,7 @@ class FinancialServiceProviderAdmin(HOPEModelAdminBase):
         ("distribution_limit",),
         ("communication_channel", "fsp_xlsx_templates"),
         ("data_transfer_configuration",),
+        ("allowed_business_areas",),
     )
 
     readonly_fields = ("fsp_xlsx_templates",)

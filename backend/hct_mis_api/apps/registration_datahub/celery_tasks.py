@@ -65,8 +65,12 @@ def registration_xlsx_import_task(
     self: Any, registration_data_import_id: str, import_data_id: str, business_area_id: str, program_id: "UUID"
 ) -> bool:
     try:
+        from hct_mis_api.apps.program.models import Program
         from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_create import (
             RdiXlsxCreateTask,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_xlsx_people_create import (
+            RdiXlsxPeopleCreateTask,
         )
 
         with locked_cache(key=f"registration_xlsx_import_task-{registration_data_import_id}") as locked:
@@ -80,12 +84,24 @@ def registration_xlsx_import_task(
                 raise WrongStatusException("Rdi is not in status IMPORT_SCHEDULED while trying to import")
             rdi.status = RegistrationDataImport.IMPORTING
             rdi.save()
-            RdiXlsxCreateTask().execute(
-                registration_data_import_id=registration_data_import_id,
-                import_data_id=import_data_id,
-                business_area_id=business_area_id,
-                program_id=str(program_id),
-            )
+
+            program = Program.objects.get(id=program_id)
+            is_social_worker_program = program.is_social_worker_program
+
+            if is_social_worker_program:
+                RdiXlsxPeopleCreateTask().execute(
+                    registration_data_import_id=registration_data_import_id,
+                    import_data_id=import_data_id,
+                    business_area_id=business_area_id,
+                    program_id=str(program_id),
+                )
+            else:
+                RdiXlsxCreateTask().execute(
+                    registration_data_import_id=registration_data_import_id,
+                    import_data_id=import_data_id,
+                    business_area_id=business_area_id,
+                    program_id=str(program_id),
+                )
             return True
     except (WrongStatusException, AlreadyRunningException) as e:
         logger.info(str(e))
@@ -292,16 +308,19 @@ def pull_kobo_submissions_task(self: Any, import_data_id: "UUID") -> Dict:
 @app.task(bind=True, default_retry_delay=60, max_retries=3)
 @log_start_and_end
 @sentry_tags
-def validate_xlsx_import_task(self: Any, import_data_id: "UUID") -> Dict:
+def validate_xlsx_import_task(self: Any, import_data_id: "UUID", program_id: "UUID") -> Dict:
+    from hct_mis_api.apps.program.models import Program
     from hct_mis_api.apps.registration_datahub.models import ImportData
     from hct_mis_api.apps.registration_datahub.tasks.validatate_xlsx_import import (
         ValidateXlsxImport,
     )
 
     import_data = ImportData.objects.get(id=import_data_id)
+    program = Program.objects.get(id=program_id)
+    is_social_worker_program = program.is_social_worker_program
     set_sentry_business_area_tag(import_data.business_area_slug)
     try:
-        return ValidateXlsxImport().execute(import_data)
+        return ValidateXlsxImport().execute(import_data, is_social_worker_program)
     except Exception as e:
         ImportData.objects.filter(
             id=import_data.id,
