@@ -14,6 +14,10 @@ from page_object.grievance.feedback import Feedback
 from page_object.grievance.new_feedback import NewFeedback
 from page_object.programme_details.programme_details import ProgrammeDetails
 from page_object.programme_management.programme_management import ProgrammeManagement
+from page_object.registration_data_import.rdi_details_page import RDIDetailsPage
+from page_object.registration_data_import.registration_data_import import (
+    RegistrationDataImport,
+)
 from pytest_django.live_server_helper import LiveServer
 from requests import Session
 from selenium import webdriver
@@ -105,6 +109,16 @@ def pageFeedbackDetails(request: FixtureRequest, browser: Chrome) -> FeedbackDet
 @pytest.fixture
 def pageNewFeedback(request: FixtureRequest, browser: Chrome) -> NewFeedback:
     yield NewFeedback(browser)
+
+
+@pytest.fixture
+def pageRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RegistrationDataImport:
+    yield RegistrationDataImport(browser)
+
+
+@pytest.fixture
+def pageDetailsRegistrationDataImport(request: FixtureRequest, browser: Chrome) -> RDIDetailsPage:
+    yield RDIDetailsPage(browser)
 
 
 @pytest.fixture
