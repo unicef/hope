@@ -26,7 +26,7 @@ def add_rdi() -> None:
 @pytest.mark.usefixtures("login")
 class TestSmokeRegistrationDataImport:
     def test_smoke_registration_data_import(
-        self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
+            self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
@@ -46,7 +46,7 @@ class TestSmokeRegistrationDataImport:
         assert "Data Source" in pageRegistrationDataImport.getTableLabel()[6].text
 
     def test_smoke_registration_data_import_select_file(
-        self, create_programs: None, pageRegistrationDataImport: RegistrationDataImport
+            self, create_programs: None, pageRegistrationDataImport: RegistrationDataImport
     ) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
@@ -65,11 +65,11 @@ class TestSmokeRegistrationDataImport:
         pageRegistrationDataImport.getInputName()
 
     def test_smoke_registration_data_details_page(
-        self,
-        create_programs: None,
-        add_rdi: None,
-        pageRegistrationDataImport: RegistrationDataImport,
-        pageDetailsRegistrationDataImport: RDIDetailsPage,
+            self,
+            create_programs: None,
+            add_rdi: None,
+            pageRegistrationDataImport: RegistrationDataImport,
+            pageDetailsRegistrationDataImport: RDIDetailsPage,
     ) -> None:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
@@ -83,20 +83,42 @@ class TestSmokeRegistrationDataImport:
         assert "21 Mar 2023 9:22 AM" in pageDetailsRegistrationDataImport.getLabelImportDate().text
         pageDetailsRegistrationDataImport.getLabelImportedBy()
         assert (
-            "TOTAL NUMBER OF HOUSEHOLDS"
-            in pageDetailsRegistrationDataImport.getLabelizedFieldContainerHouseholds().text
+                "TOTAL NUMBER OF HOUSEHOLDS"
+                in pageDetailsRegistrationDataImport.getLabelizedFieldContainerHouseholds().text
         )
         assert "3" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
         assert (
-            "TOTAL NUMBER OF INDIVIDUALS"
-            in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
+                "TOTAL NUMBER OF INDIVIDUALS"
+                in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
         )
         assert "9" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
         assert (
-            pageDetailsRegistrationDataImport.buttonMergeRdiText
-            in pageDetailsRegistrationDataImport.getButtonMergeRdi().text
+                pageDetailsRegistrationDataImport.buttonMergeRdiText
+                in pageDetailsRegistrationDataImport.getButtonMergeRdi().text
         )
         assert (
-            pageDetailsRegistrationDataImport.buttonRefuseRdiText
-            in pageDetailsRegistrationDataImport.getButtonRefuseRdi().text
+                pageDetailsRegistrationDataImport.buttonRefuseRdiText
+                in pageDetailsRegistrationDataImport.getButtonRefuseRdi().text
         )
+
+
+@pytest.mark.usefixtures("login")
+class TestRegistrationDataImport:
+    def test_smoke_registration_data_import_happy_path(
+            self, create_programs: None, add_rdi: None, pageRegistrationDataImport: RegistrationDataImport
+    ) -> None:
+        # Go to Registration Data Import
+        pageRegistrationDataImport.driver.get_log('browser')
+        pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
+        pageRegistrationDataImport.getNavRegistrationDataImport().click()
+        assert pageRegistrationDataImport.titleText in pageRegistrationDataImport.getPageHeaderTitle().text
+        pageRegistrationDataImport.getButtonImport().click()
+        pageRegistrationDataImport.getImportTypeSelect().click()
+        pageRegistrationDataImport.getExcelItem().click()
+        pageRegistrationDataImport.upload_file(f"{pytest.SELENIUM_PATH}/helpers/registration_data_import_template.xlsx")
+        pageRegistrationDataImport.screenshot("1", delay_sec=5)
+        logs = pageRegistrationDataImport.driver.get_log('browser')
+        print(logs)
+        for entry in logs:
+            print(entry)
+        pageRegistrationDataImport.getInputName().send_keys("Test 1234 !")

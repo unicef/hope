@@ -32,6 +32,7 @@ from hct_mis_api.apps.geo.models import Country
 
 
 def pytest_configure() -> None:
+    pytest.SELENIUM_PATH = os.path.dirname(__file__)
     pytest.CSRF = ""
     pytest.SESSION_ID = ""
     pytest.session = Session()
@@ -57,6 +58,11 @@ def driver() -> Chrome:
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
+    # chrome_options.add_argument("--allow-file-access-from-files")
+    # chrome_options.add_argument("--disable-dev-shm-usage")
+    # chrome_options.add_argument("--enable-resources-file-sharing")
+    # chrome_options.add_argument("--regulatory-label-dir")
+    chrome_options.add_argument('--enable-logging')
     chrome_options.add_argument("--window-size=1920,1080")
     return webdriver.Chrome(options=chrome_options)
 

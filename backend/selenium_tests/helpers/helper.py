@@ -2,6 +2,7 @@ import os
 from time import sleep
 from typing import Literal, Union
 
+import pytest
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -63,6 +64,9 @@ class Common:
         programme_creation_url = self.driver.current_url
         button.click()
         assert url_fragment in self.wait_for_new_url(programme_creation_url).split("/")[-1]
+
+    def upload_file(self, upload_file: str, xpath: str = "//input[@type='file']") -> None:
+        self._wait().until(EC.presence_of_element_located((By.XPATH, xpath))).send_keys(upload_file)
 
     @staticmethod
     def choose_option(list_options: list, name: str) -> bool:
