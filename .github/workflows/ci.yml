@@ -231,6 +231,7 @@ jobs:
       - name: Trivy
         continue-on-error: true
         run: |
+          docker pull ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist
           docker run -v /var/run/docker.sock:/var/run/docker.sock -e TRIVY_EXIT_CODE=2 -e TRIVY_SEVERITY=HIGH,CRITICAL aquasec/trivy:latest image ${{ vars.DOCKERHUB_ORGANIZATION }}/hope-support-images:core-${{ github.sha }}-dist
 
   deploy:
