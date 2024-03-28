@@ -44,6 +44,15 @@ export const SplitIntoPaymentLists = ({
   const [mutate, { loading }] = useSplitPpMutation();
   const { showMessage } = useSnackbar();
 
+  let minPaymentsNoMessage = 'Payments Number must be greater than 10';
+  let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.paymentItems.totalCount}`;
+
+  if (paymentPlan.paymentItems.totalCount <= 10) {
+    const msg = `Too small number of Payments (${paymentPlan.paymentItems.totalCount}) in order to split`;
+    minPaymentsNoMessage = msg;
+    maxPaymentsNoMessage = msg;
+  }
+
   const validationSchema = Yup.object().shape({
     splitType: Yup.string().required('Split Type is required'),
     paymentsNo: Yup.number().when('splitType', {
@@ -51,10 +60,10 @@ export const SplitIntoPaymentLists = ({
       then: (schema) =>
         schema
           .required('Payments Number is required')
-          .min(10, 'Payments Number must be greater than 10')
+          .min(10, minPaymentsNoMessage)
           .max(
             paymentPlan.paymentItems.totalCount,
-            `Payments Number must be less than ${paymentPlan.paymentItems.totalCount}`,
+            maxPaymentsNoMessage,
           ),
     }),
   });
