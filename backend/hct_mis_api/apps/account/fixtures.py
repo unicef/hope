@@ -1,3 +1,4 @@
+import random
 import time
 from typing import Any
 
@@ -37,14 +38,20 @@ class UserFactory(DjangoModelFactory):
     last_name = factory.Faker("last_name")
     partner = factory.SubFactory(PartnerFactory)
     email = factory.LazyAttribute(lambda o: f"{o.first_name.lower()}.{o.last_name.lower()}_{time.time_ns()}@unicef.com")
-    username = factory.LazyAttribute(lambda o: f"{o.first_name}{o.last_name}_{time.time_ns()}")
+    username = factory.LazyAttribute(
+        lambda o: f"{o.first_name}{o.last_name}_{time.time_ns()}{str(random.randint(111, 999))}"
+    )
 
     @classmethod
     def _create(cls, model_class: Any, *args: Any, **kwargs: Any) -> User:
+        user_model = get_user_model()
         manager = cls._get_manager(model_class)
         keyword_arguments = kwargs.copy()
         if "password" not in keyword_arguments:
             keyword_arguments["password"] = "password"
+        username = keyword_arguments["username"]
+        if user_model.objects.filter(username=username).exists():
+            keyword_arguments["username"] = username + str(random.randint(111, 999))
         return manager.create_user(*args, **keyword_arguments)
 
 

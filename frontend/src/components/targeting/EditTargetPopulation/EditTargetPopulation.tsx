@@ -1,3 +1,4 @@
+import { useHistory } from 'react-router-dom';
 import { Typography } from '@material-ui/core';
 import { FieldArray, Form, Formik } from 'formik';
 import React from 'react';
@@ -35,6 +36,7 @@ export const EditTargetPopulation = ({
   targetPopulation,
   screenBeneficiary,
 }: EditTargetPopulationProps): React.ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const initialValues = {
     id: targetPopulation.id,
@@ -118,10 +120,8 @@ export const EditTargetPopulation = ({
           },
         },
       });
-      showMessage(t('Target Population Updated'), {
-        pathname: `/${baseUrl}/target-population/${values.id}`,
-        historyMethod: 'push',
-      });
+      showMessage(t('Target Population Updated'));
+      history.push(`/${baseUrl}/target-population/${values.id}`);
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }

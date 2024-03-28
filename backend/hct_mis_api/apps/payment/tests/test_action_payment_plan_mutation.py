@@ -1,7 +1,10 @@
 from typing import Any, List
 from unittest.mock import patch
 
+from django.utils import timezone
+
 from constance.test import override_config
+from freezegun import freeze_time
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -21,7 +24,11 @@ from hct_mis_api.apps.payment.fixtures import (
     PaymentPlanFactory,
     RealProgramFactory,
 )
-from hct_mis_api.apps.payment.models import AcceptanceProcessThreshold, GenericPayment
+from hct_mis_api.apps.payment.models import (
+    AcceptanceProcessThreshold,
+    GenericPayment,
+    PaymentPlan,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
@@ -153,9 +160,16 @@ class TestActionPaymentPlanMutation(APITestCase):
         ]
     )
     @patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
+    @patch("hct_mis_api.apps.payment.notifications.MailjetClient.send_email")
     @override_config(PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS=True)
     def test_update_status_payment_plan(
-        self, name: Any, permissions: List[Permissions], status: str, actions: List[str], get_exchange_rate_mock: Any
+        self,
+        name: Any,
+        permissions: List[Permissions],
+        status: str,
+        actions: List[str],
+        get_exchange_rate_mock: Any,
+        send_mock: Any,
     ) -> None:
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         if status:
@@ -173,3 +187,58 @@ class TestActionPaymentPlanMutation(APITestCase):
                     }
                 },
             )
+
+    @freeze_time("2021-01-01")
+    @patch("hct_mis_api.apps.payment.notifications.PaymentNotification.__init__")
+    @override_config(SEND_PAYMENT_PLANS_NOTIFICATION=True)
+    @override_config(PM_ACCEPTANCE_PROCESS_USER_HAVE_MULTIPLE_APPROVALS=True)
+    def test_call_email_notification(self, mock_init: Any) -> None:
+        self.create_user_role_with_permissions(
+            self.user,
+            [
+                Permissions.PM_SEND_FOR_APPROVAL,
+                Permissions.PM_ACCEPTANCE_PROCESS_APPROVE,
+                Permissions.PM_ACCEPTANCE_PROCESS_AUTHORIZE,
+                Permissions.PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW,
+            ],
+            self.business_area,
+        )
+        self.payment_plan.status = "LOCKED_FSP"
+        self.payment_plan.save()
+        actions = [
+            "SEND_FOR_APPROVAL",
+            "APPROVE",
+            "APPROVE",
+            "AUTHORIZE",
+            "AUTHORIZE",
+            "REVIEW",
+            "REVIEW",
+            "REVIEW",
+        ]
+        for action in actions:
+            self.graphql_request(
+                request_string=self.MUTATION,
+                context={"user": self.user},
+                variables={
+                    "input": {
+                        "paymentPlanId": self.id_to_base64(self.payment_plan.id, "PaymentPlanNode"),
+                        "action": action,
+                    }
+                },
+            )
+        self.assertEqual(
+            mock_init.call_count,
+            4,
+        )
+        mock_init.assert_any_call(
+            self.payment_plan, PaymentPlan.Action.SEND_FOR_APPROVAL.value, self.user, f"{timezone.now():%-d %B %Y}"
+        )
+        mock_init.assert_any_call(
+            self.payment_plan, PaymentPlan.Action.APPROVE.value, self.user, f"{timezone.now():%-d %B %Y}"
+        )
+        mock_init.assert_any_call(
+            self.payment_plan, PaymentPlan.Action.AUTHORIZE.value, self.user, f"{timezone.now():%-d %B %Y}"
+        )
+        mock_init.assert_any_call(
+            self.payment_plan, PaymentPlan.Action.REVIEW.value, self.user, f"{timezone.now():%-d %B %Y}"
+        )

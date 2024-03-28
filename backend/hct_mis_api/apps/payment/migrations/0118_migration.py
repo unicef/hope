@@ -14,6 +14,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='paymentplan',
             name='name',
-            field=models.CharField(blank=True, max_length=255, null=True, validators=[django.core.validators.MinLengthValidator(3), django.core.validators.MaxLengthValidator(255)]),
+            field=models.CharField(blank=True, max_length=255, null=True,
+                                   validators=[django.core.validators.MinLengthValidator(3),
+                                               django.core.validators.MaxLengthValidator(255)]),
         ),
     ]

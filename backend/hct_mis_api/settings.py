@@ -39,6 +39,8 @@ DEFAULTS = {
     "EMAIL_HOST_USER": (str, ""),
     "EMAIL_HOST_PASSWORD": (str, ""),
     "EMAIL_USE_TLS": (bool, True),
+    "MAILJET_API_KEY": (str, ""),
+    "MAILJET_SECRET_KEY": (str, ""),
     "KOBO_KF_URL": (str, "https://kf-hope.unitst.org"),
     "KOBO_KC_URL": (str, "https://kc-hope.unitst.org"),
     "KOBO_MASTER_API_TOKEN": (str, "KOBO_TOKEN"),
@@ -149,8 +151,8 @@ AZURE_ACCOUNT_KEY = env("STORAGE_AZURE_ACCOUNT_KEY", default="")
 
 if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY:
     # STORAGE
-    STATIC_LOCATION = "static"
-    MEDIA_LOCATION = "media"
+    STATIC_LOCATION = env("STATIC_LOCATION", default="static")
+    MEDIA_LOCATION = env("MEDIA_LOCATION", default="media")
 
     MEDIA_STORAGE_AZURE_ACCOUNT_NAME = env("MEDIA_STORAGE_AZURE_ACCOUNT_NAME", default=AZURE_ACCOUNT_NAME)
     MEDIA_STORAGE_AZURE_ACCOUNT_KEY = env("MEDIA_STORAGE_AZURE_ACCOUNT_KEY", default=AZURE_ACCOUNT_KEY)
@@ -211,7 +213,6 @@ CSP_SCRIPT_SRC: Tuple[str, ...] = (
     "saunihopetrn.blob.core.windows.net",
     "saunihopeprd.blob.core.windows.net",
     "gov-bam.nr-data.net",
-    "js-agent.newrelic.com",
     "cdn.jsdelivr.net",
     "cdnjs.cloudflare.com",
     "unpkg.com",
@@ -263,6 +264,7 @@ if DEBUG:
     ALLOWED_HOSTS.extend(["backend", "localhost", "127.0.0.1", "10.0.2.2", env("DOMAIN", default="")])
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+CATCH_ALL_EMAIL = env("CATCH_ALL_EMAIL", default="")
 
 EMAIL_BACKEND = env("EMAIL_BACKEND") if not DEBUG else "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
@@ -270,6 +272,8 @@ EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+MAILJET_API_KEY = env("MAILJET_API_KEY")
+MAILJET_SECRET_KEY = env("MAILJET_SECRET_KEY")
 
 KOBO_KF_URL = env("KOBO_KF_URL")
 KOBO_KC_URL = env("KOBO_KC_URL")
@@ -350,8 +354,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
     "hct_mis_api.middlewares.version.VersionMiddleware",
-    "csp.contrib.rate_limiting.RateLimitedCSPMiddleware",
 ]
+if not DEBUG:
+    MIDDLEWARE.append("csp.contrib.rate_limiting.RateLimitedCSPMiddleware")
 
 TEMPLATES: List[Dict[str, Any]] = [
     {
@@ -713,6 +718,21 @@ CONSTANCE_CONFIG = {
         "Should send grievances notification",
         bool,
     ),
+    "SEND_PAYMENT_PLANS_NOTIFICATION": (
+        False,
+        "Should send payment plans notification",
+        bool,
+    ),
+    "ENABLE_MAILJET": (
+        False,
+        "Enable sending emails via Mailjet",
+        bool,
+    ),
+    "MAILJET_TEMPLATE_PAYMENT_PLAN_NOTIFICATION": (
+        0,
+        "Mailjet template id for payment plan notification",
+        int,
+    ),
     "IGNORED_USER_LINKED_OBJECTS": (
         "created_advanced_filters,advancedfilter,logentry,social_auth,query,querylog,logs",
         "list of relation to hide in 'linked objects' user page",
@@ -1062,7 +1082,7 @@ SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS")
 
 FLOWER_ADDRESS = env("FLOWER_ADDRESS")
 
-LOG_LEVEL = "DEBUG" if DEBUG and "test" not in sys.argv else "INFO"
+LOG_LEVEL = env("LOG_LEVEL", default="ERROR") if "test" not in sys.argv else "INFO"
 
 LOGGING: Dict[str, Any] = {
     "version": 1,

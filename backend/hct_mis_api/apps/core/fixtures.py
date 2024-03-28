@@ -89,6 +89,14 @@ def generate_data_collecting_types() -> None:
 class DataCollectingTypeFactory(DjangoModelFactory):
     class Meta:
         model = DataCollectingType
+        django_get_or_create = ("label", "code")
+
+    label = factory.Faker("text", max_nb_chars=30)
+    code = factory.Faker("text", max_nb_chars=30)
+    type = DataCollectingType.Type.STANDARD
+    description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
+    individual_filters_available = True
+    household_filters_available = True
 
     @factory.post_generation
     def business_areas(self, create: Any, extracted: List[Any], **kwargs: Any) -> None:

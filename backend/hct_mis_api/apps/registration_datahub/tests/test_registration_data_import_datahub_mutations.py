@@ -125,7 +125,13 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB,
-            context={"user": self.user},
+            context={
+                "user": self.user,
+                "headers": {
+                    "Program": self.id_to_base64(self.program.id, "ProgramNode"),
+                    "Business-Area": self.business_area.slug,
+                },
+            },
             variables={"file": self.valid_file, "businessAreaSlug": self.business_area_slug},
         )
 

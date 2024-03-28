@@ -142,10 +142,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         partner = user.partner
         has_partner_area_access = partner.is_unicef
         ticket_program_id = str(object_instance.programs.first().id) if object_instance.programs.first() else None
+        if program_id and ticket_program_id != program_id:
+            log_and_raise("Ticket does not belong to the selected program")
         if not partner.is_unicef:
-            if program_id and ticket_program_id != program_id:
-                log_and_raise(f"Program id mismatch: {object_instance.program_id} != {program_id}")
-
             if not object_instance.admin2 or not ticket_program_id:
                 # admin2 is empty or non-program ticket -> no restrictions for admin area
                 has_partner_area_access = True
@@ -655,7 +654,9 @@ class Query(graphene.ObjectType):
             .apply_business_area(business_area_slug)
         )
         all_options = list(fields) + list(
-            FlexibleAttribute.objects.filter(associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL)
+            FlexibleAttribute.objects.filter(
+                associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+            ).prefetch_related("choices")
         )
         return sort_by_attr(all_options, "label.English(EN)")
 

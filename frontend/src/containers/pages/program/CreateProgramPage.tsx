@@ -2,6 +2,7 @@ import { Box, Step, StepButton, Stepper } from '@material-ui/core';
 import { Formik } from 'formik';
 import React, { ReactElement, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
 import {
   AllProgramsForChoicesDocument,
   useAllAreasTreeQuery,
@@ -21,6 +22,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { BreadCrumbsItem } from '../../../components/core/BreadCrumbs';
 
 export const CreateProgramPage = (): ReactElement => {
+  const history = useHistory();
   const { t } = useTranslation();
   const permissions = usePermissions();
   const [step, setStep] = useState(0);
@@ -68,10 +70,10 @@ export const CreateProgramPage = (): ReactElement => {
           },
         ],
       });
-      showMessage('Programme created.', {
-        pathname: `/${baseUrl}/details/${response.data.createProgram.program.id}`,
-        historyMethod: 'push',
-      });
+      showMessage('Programme created.');
+      history.push(
+        `/${baseUrl}/details/${response.data.createProgram.program.id}`,
+      );
     } catch (e) {
       e.graphQLErrors.map((x) => showMessage(x.message));
     }
