@@ -39,6 +39,8 @@ class TestTargetPopulationQuery(APITestCase):
           targetPopulation(id:$id){
             name
             status
+            hasEmptyCriteria
+            hasEmptyIdsCriteria
             totalHouseholdsCount
             totalIndividualsCount
             targetingCriteria{

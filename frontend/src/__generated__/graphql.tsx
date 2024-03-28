@@ -4394,7 +4394,6 @@ export type MutationsUpdateTargetPopulationArgs = {
 export type MutationsUploadImportDataXlsxFileAsyncArgs = {
   businessAreaSlug: Scalars['String']['input'];
   file: Scalars['Upload']['input'];
-  programId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type NeedsAdjudicationApproveMutation = {
@@ -7731,6 +7730,7 @@ export type TargetPopulationNode = Node & {
   finalizedAt?: Maybe<Scalars['DateTime']['output']>;
   finalizedBy?: Maybe<UserNode>;
   hasEmptyCriteria?: Maybe<Scalars['Boolean']['output']>;
+  hasEmptyIdsCriteria?: Maybe<Scalars['Boolean']['output']>;
   householdList?: Maybe<HouseholdNodeConnection>;
   households?: Maybe<HouseholdNodeConnection>;
   id: Scalars['ID']['output'];
@@ -7848,7 +7848,9 @@ export type TargetingCriteriaNode = {
   createdAt: Scalars['DateTime']['output'];
   flagExcludeIfActiveAdjudicationTicket: Scalars['Boolean']['output'];
   flagExcludeIfOnSanctionList: Scalars['Boolean']['output'];
+  householdIds: Scalars['String']['output'];
   id: Scalars['UUID']['output'];
+  individualIds: Scalars['String']['output'];
   rules?: Maybe<Array<Maybe<TargetingCriteriaRuleNode>>>;
   targetPopulation?: Maybe<TargetPopulationNode>;
   updatedAt: Scalars['DateTime']['output'];
@@ -7857,6 +7859,8 @@ export type TargetingCriteriaNode = {
 export type TargetingCriteriaObjectType = {
   flagExcludeIfActiveAdjudicationTicket?: InputMaybe<Scalars['Boolean']['input']>;
   flagExcludeIfOnSanctionList?: InputMaybe<Scalars['Boolean']['input']>;
+  householdIds?: InputMaybe<Scalars['String']['input']>;
+  individualIds?: InputMaybe<Scalars['String']['input']>;
   rules?: InputMaybe<Array<InputMaybe<TargetingCriteriaRuleObjectType>>>;
 };
 
@@ -27597,6 +27601,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   finalizedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   finalizedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>;
   hasEmptyCriteria?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  hasEmptyIdsCriteria?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   householdList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, Partial<TargetPopulationNodeHouseholdListArgs>>;
   households?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, Partial<TargetPopulationNodeHouseholdsArgs>>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -27642,7 +27647,9 @@ export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   flagExcludeIfActiveAdjudicationTicket?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   flagExcludeIfOnSanctionList?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  householdIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>;
+  individualIds?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>;
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;

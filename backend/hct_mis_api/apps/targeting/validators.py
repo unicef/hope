@@ -1,11 +1,11 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict
 
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.field_attributes.core_fields_attributes import FieldFactory
 from hct_mis_api.apps.core.field_attributes.fields_types import Scope
-from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.models import DataCollectingType, FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.program.models import Program
@@ -135,10 +135,27 @@ class TargetingCriteriaRuleInputValidator:
 
 class TargetingCriteriaInputValidator:
     @staticmethod
-    def validate(targeting_criteria: Any) -> None:
-        rules = targeting_criteria.get("rules")
-        if len(rules) < 1:
+    def validate(targeting_criteria: Dict, program_dct: DataCollectingType) -> None:
+        rules = targeting_criteria.get("rules", [])
+        household_ids = targeting_criteria.get("household_ids")
+        individual_ids = targeting_criteria.get("individual_ids")
+        if rules and (household_ids or individual_ids):
+            logger.error("Target criteria can has only filters or ids, not possible to has both")
+            raise ValidationError("Target criteria can has only filters or ids, not possible to has both")
+
+        if household_ids and (
+            not program_dct.household_filters_available or program_dct.type == DataCollectingType.Type.SOCIAL
+        ):
+            logger.error("Target criteria can has only individual ids")
+            raise ValidationError("Target criteria can has only individual ids")
+        if individual_ids and not program_dct.individual_filters_available:
+            logger.error("Target criteria can has only household ids")
+            raise ValidationError("Target criteria can has only household ids")
+
+        if len(rules) < 1 and not household_ids and not individual_ids:
             logger.error("There should be at least 1 rule in target criteria")
             raise ValidationError("There should be at least 1 rule in target criteria")
-        for rule in rules:
-            TargetingCriteriaRuleInputValidator.validate(rule)
+
+        if not household_ids and not individual_ids:
+            for rule in rules:
+                TargetingCriteriaRuleInputValidator.validate(rule)

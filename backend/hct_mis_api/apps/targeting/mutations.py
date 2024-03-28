@@ -23,6 +23,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
 )
 from hct_mis_api.apps.core.validators import raise_program_status_is
+from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.models import Rule
@@ -91,8 +92,29 @@ class ValidatedMutation(PermissionMutation):
         return object
 
 
+def get_unicef_ids(ids_string: str, type_id: str, program: Program) -> str:
+    list_ids = []
+    ids_list = ids_string.split(",")
+    ids_list = [i.strip() for i in ids_list]
+    if type_id == "household":
+        hh_ids = [hh_id for hh_id in ids_list if hh_id.startswith("HH")]
+        list_ids = Household.objects.filter(unicef_id__in=hh_ids, program=program).values_list("unicef_id", flat=True)
+    if type_id == "individual":
+        ind_ids = [ind_id for ind_id in ids_list if ind_id.startswith("IND")]
+        list_ids = Individual.objects.filter(unicef_id__in=ind_ids, program=program).values_list("unicef_id", flat=True)
+
+    return ", ".join(list_ids)
+
+
 def from_input_to_targeting_criteria(targeting_criteria_input: Dict, program: Program) -> TargetingCriteria:
     rules = targeting_criteria_input.pop("rules", [])
+    household_ids = targeting_criteria_input.get("household_ids")
+    individual_ids = targeting_criteria_input.get("individual_ids")
+    if household_ids:
+        targeting_criteria_input["household_ids"] = get_unicef_ids(household_ids, "household", program)
+    if individual_ids:
+        targeting_criteria_input["individual_ids"] = get_unicef_ids(individual_ids, "individual", program)
+
     targeting_criteria = TargetingCriteria(**targeting_criteria_input)
     targeting_criteria.save()
     for rule_input in rules:
@@ -123,34 +145,35 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     @transaction.atomic
     def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "CreateTargetPopulationMutation":
         user = info.context.user
-        input = kwargs.pop("input")
-        program = get_object_or_404(Program, pk=decode_id_string(input.get("program_id")))
-        business_area = BusinessArea.objects.get(slug=input.get("business_area_slug"))
+        input_data = kwargs.pop("input")
+        program = get_object_or_404(Program, pk=decode_id_string(input_data.get("program_id")))
+        business_area = BusinessArea.objects.get(slug=input_data.get("business_area_slug"))
 
         cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
 
         if program.status != Program.ACTIVE:
             raise ValidationError("Only Active program can be assigned to Targeting")
 
-        tp_name = input.get("name", "").strip()
+        tp_name = input_data.get("name", "").strip()
         if TargetPopulation.objects.filter(
             name=tp_name, program=program, business_area=business_area, is_removed=False
         ).exists():
             raise ValidationError(
-                f"Target population with name: {tp_name}, program: {program.name} and business_area: {business_area.slug} already exists."
+                f"Target population with name: {tp_name}, program: {program.name} "
+                f"and business_area: {business_area.slug} already exists."
             )
 
-        targeting_criteria_input = input.get("targeting_criteria")
+        targeting_criteria_input = input_data.get("targeting_criteria")
 
-        business_area = BusinessArea.objects.get(slug=input.pop("business_area_slug"))
-        TargetingCriteriaInputValidator.validate(targeting_criteria_input)
+        business_area = BusinessArea.objects.get(slug=input_data.pop("business_area_slug"))
+        TargetingCriteriaInputValidator.validate(targeting_criteria_input, program.data_collecting_type)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
         target_population = TargetPopulation(
             name=tp_name,
             created_by=user,
             business_area=business_area,
-            excluded_ids=input.get("excluded_ids", "").strip(),
-            exclusion_reason=input.get("exclusion_reason", "").strip(),
+            excluded_ids=input_data.get("excluded_ids", "").strip(),
+            exclusion_reason=input_data.get("exclusion_reason", "").strip(),
         )
         target_population.targeting_criteria = targeting_criteria
         target_population.program = program
@@ -180,21 +203,21 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
     @raise_program_status_is(Program.FINISHED)
     @transaction.atomic
     def processed_mutate(cls, root: Any, info: Any, **kwargs: Any) -> "UpdateTargetPopulationMutation":
-        input = kwargs.get("input")
-        id = input.get("id")
-        target_population = cls.get_object_required(id)
+        input_data = kwargs.get("input")
+        tp_id = input_data.get("id")
+        target_population = cls.get_object_required(tp_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
-        old_target_population = cls.get_object(id)
+        old_target_population = cls.get_object(tp_id)
 
         cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
-        name = input.get("name", "").strip()
-        program_id_encoded = input.get("program_id")
-        vulnerability_score_min = input.get("vulnerability_score_min")
-        vulnerability_score_max = input.get("vulnerability_score_max")
-        excluded_ids = input.get("excluded_ids")
-        exclusion_reason = input.get("exclusion_reason")
-        targeting_criteria_input = input.get("targeting_criteria")
+        name = input_data.get("name", "").strip()
+        program_id_encoded = input_data.get("program_id")
+        vulnerability_score_min = input_data.get("vulnerability_score_min")
+        vulnerability_score_max = input_data.get("vulnerability_score_max")
+        excluded_ids = input_data.get("excluded_ids")
+        exclusion_reason = input_data.get("exclusion_reason")
+        targeting_criteria_input = input_data.get("targeting_criteria")
 
         should_rebuild_stats = False
         should_rebuild_list = False
@@ -203,7 +226,7 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             msg = "Name can't be changed when Target Population is in Locked status"
             logger.error(msg)
             raise ValidationError(msg)
-        if TargetPopulation.objects.filter(name=name).exclude(id=decode_id_string(id)).exists():
+        if TargetPopulation.objects.filter(name=name).exclude(id=decode_id_string(tp_id)).exists():
             raise ValidationError(f"Target population with name {name} already exists")
         if target_population.is_finalized():
             msg = "Finalized Target Population can't be changed"
@@ -224,11 +247,13 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             should_rebuild_list = True
             program = get_object_or_404(Program, pk=decode_id_string(program_id_encoded))
             target_population.program = program
+        else:
+            program = target_population.program
 
         if targeting_criteria_input:
             should_rebuild_list = True
-            TargetingCriteriaInputValidator.validate(targeting_criteria_input)
-            targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, target_population.program)
+            TargetingCriteriaInputValidator.validate(targeting_criteria_input, program.data_collecting_type)
+            targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input, program)
             if target_population.status == TargetPopulation.STATUS_OPEN:
                 if target_population.targeting_criteria:
                     target_population.targeting_criteria.delete()
