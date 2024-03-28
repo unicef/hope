@@ -92,7 +92,6 @@ export const ManagerialConsolePage: React.FC = () => {
         params.comment,
       ),
   });
-
   if (inApprovalLoading || inAuthorizationLoading || inReviewLoading) {
     return <LoadingComponent />;
   }

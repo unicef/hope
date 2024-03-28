@@ -68,7 +68,7 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {inAuthorizationData.results?.map((plan: any) => (
+          {inAuthorizationData?.results?.map((plan: any) => (
             <TableRow key={plan.id}>
               <TableCell padding="checkbox">
                 <Checkbox

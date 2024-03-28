@@ -69,7 +69,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {inApprovalData.results?.map((plan: any) => (
+          {inApprovalData?.results?.map((plan: any) => (
             <TableRow key={plan.id}>
               <TableCell padding="checkbox">
                 <Checkbox
