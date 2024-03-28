@@ -38,7 +38,7 @@ PEOPLE_TYPE_CHOICES = (
 )
 
 
-class PeopleSerializer(serializers.ModelSerializer):
+class PushPeopleSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     observed_disability = serializers.CharField(allow_blank=True, required=False)
@@ -153,10 +153,10 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
         except RegistrationDataImportDatahub.DoesNotExist:
             raise Http404
 
-    @extend_schema(request=PeopleSerializer)
+    @extend_schema(request=PushPeopleSerializer)
     @atomic(using="registration_datahub")
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
-        serializer = PeopleSerializer(data=request.data, many=True)
+        serializer = PushPeopleSerializer(data=request.data, many=True)
         program_id = RegistrationDataImport.objects.get(datahub_id=str(self.selected_rdi.id)).program_id
 
         if serializer.is_valid():
