@@ -1,5 +1,4 @@
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
-import { useCachedMe } from '@hooks/useCachedMe';
 import * as React from 'react';
 
 
@@ -12,10 +11,7 @@ export const AdminButton: React.FC<AdminButtonProps> = ({
     adminUrl,
     ...otherProps
 }) => {
-    const { data } = useCachedMe();
-    const isSuperUser = data.me.isSuperuser;
-
-    if (isSuperUser) {
+    if (adminUrl) {
         return <a href={adminUrl}><ArrowCircleRightIcon color="primary" {...otherProps}/></a>;
     }
     return null;

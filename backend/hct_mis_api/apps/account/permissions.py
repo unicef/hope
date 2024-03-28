@@ -349,11 +349,13 @@ def hopeOneOfPermissionClass(*permissions: Permissions) -> Type[BasePermission]:
 class AdminUrlNodeMixin:
     admin_url = graphene.String()
 
-    def resolve_admin_url(self, info: Any, **kwargs: Any) -> graphene.String:
-        return self.admin_url
+    def resolve_admin_url(self, info: Any, **kwargs: Any) -> Optional[graphene.String]:
+        if info.context.user.is_superuser:
+            return self.admin_url
+        return None
 
 
-class BaseNodePermissionMixin(AdminUrlNodeMixin):
+class BaseNodePermissionMixin:
     permission_classes: Tuple[Type[BasePermission], ...] = (AllowAny,)
 
     @classmethod
