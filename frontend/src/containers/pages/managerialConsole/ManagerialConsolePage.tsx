@@ -1,28 +1,20 @@
-import { BaseSection } from '@components/core/BaseSection';
-import { PageHeader } from '@components/core/PageHeader';
-import { usePermissions } from '@hooks/usePermissions';
 import {
   bulkActionPaymentPlansManagerial,
   fetchPaymentPlansManagerial,
 } from '@api/paymentModuleApi';
-import {
-  Box,
-  Checkbox,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+import { BaseSection } from '@components/core/BaseSection';
+import { LoadingComponent } from '@components/core/LoadingComponent';
+import { PageHeader } from '@components/core/PageHeader';
+import { ApprovalSection } from '@components/managerialConsole/ApprovalSection';
+import { AuthorizationSection } from '@components/managerialConsole/AuthorizationSection';
+import { ReleaseSection } from '@components/managerialConsole/ReleaseSection';
+import { useBaseUrl } from '@hooks/useBaseUrl';
+import { usePermissions } from '@hooks/usePermissions';
+import { Box } from '@mui/material';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hasPermissions } from 'src/config/permissions';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useBaseUrl } from '@hooks/useBaseUrl';
-import { LoadingComponent } from '@components/core/LoadingComponent';
-import { ApprovePaymentPlansModal } from '@components/managerialConsole/ApprovePaymentPlansModal';
-import { AuthorizePaymentPlansModal } from '@components/managerialConsole/AuthorizePaymentPlansModal';
-import { ReleasePaymentPlansModal } from '@components/managerialConsole/ReleasePaymentPlansModal';
 
 export const ManagerialConsolePage: React.FC = () => {
   const { t } = useTranslation();
@@ -44,6 +36,16 @@ export const ManagerialConsolePage: React.FC = () => {
     } else {
       setSelected([...selected, id]);
     }
+  };
+
+  const handleSelectAll = (
+    items: any[],
+    setSelected: {
+      (value: React.SetStateAction<any[]>): void;
+      (arg0: any[]): void;
+    },
+  ) => {
+    setSelected(items.map((item: any) => item.id));
   };
 
   const permissions = usePermissions();
@@ -100,155 +102,42 @@ export const ManagerialConsolePage: React.FC = () => {
       <PageHeader title={t('Managerial Console')} />
       {canApprove && (
         <Box mb={6}>
-          <BaseSection
-            title={t('Payment Plans pending for Approval')}
-            buttons={
-              <ApprovePaymentPlansModal
-                selectedPlans={selectedApproved}
-                onApprove={() =>
-                  bulkAction.mutateAsync({
-                    ids: selectedApproved,
-                    action: 'APPROVE',
-                    comment: 'Approved',
-                  })
-                }
+          {canApprove && (
+            <Box mb={6}>
+              <ApprovalSection
+                selectedApproved={selectedApproved}
+                setSelectedApproved={setSelectedApproved}
+                handleSelect={handleSelect}
+                handleSelectAll={handleSelectAll}
+                inApprovalData={inApprovalData}
+                bulkAction={bulkAction}
               />
-            }
-          >
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox />
-                  </TableCell>
-                  <TableCell>{t('Payment Plan ID')}</TableCell>
-                  <TableCell>{t('Status')}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {inApprovalData.results?.map((plan) => (
-                  <TableRow key={plan.unicef_id}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedApproved.includes(plan.unicef_id)}
-                        onChange={() =>
-                          handleSelect(
-                            selectedApproved,
-                            setSelectedApproved,
-                            plan.unicef_id,
-                          )
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>{plan.unicef_id}</TableCell>
-                    <TableCell>{plan.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </BaseSection>
+            </Box>
+          )}
         </Box>
       )}
       {canAuthorize && (
         <Box mb={6}>
-          <BaseSection
-            title={t('Payment Plans pending for Authorization')}
-            buttons={
-              <AuthorizePaymentPlansModal
-                selectedPlans={selectedAuthorized}
-                onAuthorize={() =>
-                  bulkAction.mutateAsync({
-                    ids: selectedAuthorized,
-                    action: 'AUTHORIZE',
-                    comment: 'Authorized',
-                  })
-                }
-              />
-            }
-          >
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox />
-                  </TableCell>
-                  <TableCell>{t('Payment Plan ID')}</TableCell>
-                  <TableCell>{t('Status')}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {inAuthorizationData?.results?.map((plan) => (
-                  <TableRow key={plan.unicef_id}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedAuthorized.includes(plan.unicef_id)}
-                        onChange={() =>
-                          handleSelect(
-                            selectedAuthorized,
-                            setSelectedAuthorized,
-                            plan.unicef_id,
-                          )
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>{plan.unicef_id}</TableCell>
-                    <TableCell>{plan.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </BaseSection>
+          <AuthorizationSection
+            selectedAuthorized={selectedAuthorized}
+            setSelectedAuthorized={setSelectedAuthorized}
+            handleSelect={handleSelect}
+            handleSelectAll={handleSelectAll}
+            inAuthorizationData={inAuthorizationData}
+            bulkAction={bulkAction}
+          />
         </Box>
       )}
       {canReview && (
         <Box mb={6}>
-          <BaseSection
-            title={t('Payment Plans pending for Release')}
-            buttons={
-              <ReleasePaymentPlansModal
-                selectedPlans={selectedInReview}
-                onRelease={() =>
-                  bulkAction.mutateAsync({
-                    ids: selectedInReview,
-                    action: 'RELEASE',
-                    comment: 'Released',
-                  })
-                }
-              />
-            }
-          >
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox />
-                  </TableCell>
-                  <TableCell>{t('Payment Plan ID')}</TableCell>
-                  <TableCell>{t('Status')}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {inReviewData?.results?.map((plan) => (
-                  <TableRow key={plan.unicef_id}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedInReview.includes(plan.unicef_id)}
-                        onChange={() =>
-                          handleSelect(
-                            selectedInReview,
-                            setSelectedInReview,
-                            plan.unicef_id,
-                          )
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>{plan.unicef_id}</TableCell>
-                    <TableCell>{plan.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </BaseSection>
+          <ReleaseSection
+            selectedInReview={selectedInReview}
+            setSelectedInReview={setSelectedInReview}
+            handleSelect={handleSelect}
+            handleSelectAll={handleSelectAll}
+            inReviewData={inReviewData}
+            bulkAction={bulkAction}
+          />
         </Box>
       )}
       <Box mb={6}>

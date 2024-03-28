@@ -10,6 +10,7 @@ import {
   DialogActions,
   Dialog,
   Table,
+  TextField,
 } from '@mui/material';
 import styled from 'styled-components';
 import { useState } from 'react';
@@ -41,7 +42,7 @@ interface ManagerialConsoleBaseModalProps {
   dialogTitle: string;
   title: string;
   children?: React.ReactNode;
-  onSave: (plans) => Promise<void>;
+  onSave: (plans, comment) => Promise<void>;
   disabledSave?: boolean;
 }
 
@@ -55,6 +56,7 @@ export const ManagerialConsoleBaseModal = ({
   disabledSave,
 }: ManagerialConsoleBaseModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [comment, setComment] = useState('');
   const { t } = useTranslation();
   const { isActiveProgram } = useProgramContext();
 
@@ -71,7 +73,7 @@ export const ManagerialConsoleBaseModal = ({
   );
   const onAccept = async (): Promise<void> => {
     try {
-      await onSave(selectedPlans);
+      await onSave(selectedPlans, comment);
       setDialogOpen(false);
     } catch (e) {
       // handled by inner function
@@ -93,14 +95,23 @@ export const ManagerialConsoleBaseModal = ({
         <DialogContent>
           <Box mt={2} mb={6}>
             <Typography>{title}</Typography>
-            <StyledTable>
-              <Typography>
-                {t('Selected Plans IDs')}:{' '}
-                <Bold data-cy="plans-ids">
-                  {selectedPlans.map((plan) => plan.unicefId).join(', ')}
-                </Bold>
-              </Typography>
-            </StyledTable>
+            <Typography>
+              {t('Selected Plans IDs')}:{' '}
+              <Bold data-cy="plans-ids">
+                {selectedPlans.map((plan) => plan.unicef_id).join(', ')}
+              </Bold>
+            </Typography>
+            <Box mt={4}>
+              <TextField
+                size="small"
+                label={t('Comment')}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                multiline
+                inputProps={{ maxLength: 500 }}
+                fullWidth
+              />
+            </Box>
           </Box>
           <StyledTable>
             <TableBody>{children}</TableBody>

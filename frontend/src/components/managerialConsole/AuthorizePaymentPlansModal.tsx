@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 interface AuthorizePaymentPlansModalProps {
   selectedPlans: any[];
-  onAuthorize: (plans: any[]) => Promise<void>;
+  onAuthorize: (plans: any[], comment: string) => Promise<void>;
 }
 
 export const AuthorizePaymentPlansModal = ({
