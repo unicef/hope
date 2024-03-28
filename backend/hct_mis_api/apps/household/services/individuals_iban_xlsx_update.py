@@ -145,20 +145,22 @@ class IndividualsIBANXlsxUpdate:
         }
 
     def send_failure_email(self) -> None:
-        email = self._prepare_email(context=self._get_email_context(message=str(self.validation_errors)))
-        try:
-            email.send()
-        except Exception as e:
-            logger.exception(e)
+        if self.business_area.enable_email_notification:
+            email = self._prepare_email(context=self._get_email_context(message=str(self.validation_errors)))
+            try:
+                email.send()
+            except Exception as e:
+                logger.exception(e)
 
     def send_success_email(self) -> None:
-        email = self._prepare_email(
-            context=self._get_email_context(message="All of the Individuals IBAN number we're updated successfully")
-        )
-        try:
-            email.send()
-        except Exception as e:
-            logger.exception(e)
+        if self.business_area.enable_email_notification:
+            email = self._prepare_email(
+                context=self._get_email_context(message="All of the Individuals IBAN number we're updated successfully")
+            )
+            try:
+                email.send()
+            except Exception as e:
+                logger.exception(e)
 
     @classmethod
     def send_error_email(cls, error_message: str, xlsx_update_file_id: str, uploaded_by: User) -> None:

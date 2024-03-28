@@ -156,23 +156,25 @@ def update_individuals_iban_from_xlsx_task(xlsx_update_file_id: UUID, uploaded_b
     )
 
     uploaded_by = User.objects.get(id=uploaded_by_id)
+    xlsx_update_file = XlsxUpdateFile.objects.get(id=xlsx_update_file_id)
+    enable_email_notification = xlsx_update_file.business_area.enable_email_notification
     try:
-        xlsx_update_file = XlsxUpdateFile.objects.get(id=xlsx_update_file_id)
-
         set_sentry_business_area_tag(xlsx_update_file.business_area.name)
         updater = IndividualsIBANXlsxUpdate(xlsx_update_file)
         updater.validate()
-        if updater.validation_errors:
+        if updater.validation_errors and enable_email_notification:
             updater.send_failure_email()
             return
 
         updater.update()
-        updater.send_success_email()
+        if enable_email_notification:
+            updater.send_success_email()
 
     except Exception as e:
-        IndividualsIBANXlsxUpdate.send_error_email(
-            error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
-        )
+        if enable_email_notification:
+            IndividualsIBANXlsxUpdate.send_error_email(
+                error_message=str(e), xlsx_update_file_id=str(xlsx_update_file_id), uploaded_by=uploaded_by
+            )
 
 
 @app.task()

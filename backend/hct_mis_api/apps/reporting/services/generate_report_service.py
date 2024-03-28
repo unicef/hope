@@ -2,7 +2,7 @@ import copy
 import logging
 from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Tuple
 
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import ArrayAgg
@@ -115,13 +115,14 @@ class GenerateReportContentHelpers:
     def get_households(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
-            # "program": report.program # TODO Uncomment after add program to household
             "withdrawn": False,
             "last_registration_date__gte": timezone_datetime(report.date_from),
             "last_registration_date__lte": timezone_datetime(report.date_to),
         }
         if report.admin_area.all().exists():
             filter_vars["admin_area__in"] = report.admin_area.all()
+        if report.program:
+            filter_vars["program"] = report.program
         return Household.objects.filter(**filter_vars)
 
     @classmethod
@@ -288,10 +289,11 @@ class GenerateReportContentHelpers:
     def get_payment_plans(report: Report) -> QuerySet[PaymentPlan]:
         filter_vars = {
             "business_area": report.business_area,
-            "program_cycle__program": report.program,
             "dispersion_start_date__gte": report.date_from,
             "dispersion_end_date__lte": report.date_to,
         }
+        if report.program:
+            filter_vars["program_cycle__program"] = report.program
         return PaymentPlan.objects.filter(**filter_vars)
 
     @classmethod
@@ -312,7 +314,6 @@ class GenerateReportContentHelpers:
     def get_cash_plans(report: Report) -> QuerySet:
         filter_vars = {
             "business_area": report.business_area,
-            "program": report.program,
             "end_date__gte": report.date_from,
             "end_date__lte": report.date_to,
         }
@@ -815,7 +816,7 @@ class GenerateReportService:
         self.ws_report.append(headers_row)
 
     def _add_rows(self) -> int:
-        get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report.report_type]
+        get_row_methods: Tuple = GenerateReportService.ROW_CONTENT_METHODS[self.report.report_type]
         all_instances = get_row_methods[0](self.report)
         self.report.number_of_records = all_instances.count()
         number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report.report_type])
@@ -865,7 +866,7 @@ class GenerateReportService:
             self.report.status = Report.FAILED
         self.report.save()
 
-        if self.report.file:
+        if self.report.file and self.report.business_area.enable_email_notification:
             self._send_email()
 
     def _send_email(self) -> None:

@@ -16,17 +16,24 @@ import { DialogTitleWrapper } from '../../containers/dialogs/DialogTitleWrapper'
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { useUpdatePaymentVerificationReceivedAndReceivedAmountMutation } from '../../__generated__/graphql';
+import {
+  PaymentVerificationStatus,
+  useUpdatePaymentVerificationReceivedAndReceivedAmountMutation,
+} from '../../__generated__/graphql';
 import { AutoSubmitFormOnEnter } from '../core/AutoSubmitFormOnEnter';
 
 export interface Props {
   paymentVerificationId: string;
+  status: string;
   enabled: boolean;
+  receivedAmount: number;
 }
 
 export function VerifyManual({
   paymentVerificationId,
+  status,
   enabled,
+  receivedAmount,
 }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [verifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
@@ -61,7 +68,7 @@ export function VerifyManual({
   const initialValues = {
     paymentVerificationId,
     status: 'RECEIVED',
-    receivedAmount: 0,
+    receivedAmount: receivedAmount ?? 0,
   };
 
   return (
@@ -77,7 +84,7 @@ export function VerifyManual({
               data-cy='button-ed-plan'
               disabled={!enabled}
             >
-              {t('Verify')}
+              {status === PaymentVerificationStatus.Pending ? t('Verify') : t('Edit')}
             </Button>
           </Box>
           <Dialog

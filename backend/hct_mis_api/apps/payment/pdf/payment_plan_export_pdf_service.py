@@ -2,10 +2,11 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from django.conf import settings
+from django.db.models import Count, Q, Sum
 from django.urls import reverse
 
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.payment.models import Approval, PaymentPlan
+from hct_mis_api.apps.payment.models import Approval, GenericPayment, PaymentPlan
 from hct_mis_api.apps.utils.pdf_generator import generate_pdf_from_html
 
 if TYPE_CHECKING:
@@ -69,6 +70,15 @@ class PaymentPlanPDFExportSevice:
         authorization = approval_process.approvals.filter(type=Approval.AUTHORIZATION).first()
         release = approval_process.approvals.filter(type=Approval.FINANCE_RELEASE).first()
 
+        reconciliation_qs = self.payment_plan.eligible_payments.aggregate(
+            pending=Count("id", filter=Q(status=GenericPayment.STATUS_PENDING)),
+            pending_usd=Sum("entitlement_quantity_usd", filter=Q(status=GenericPayment.STATUS_PENDING)),
+            pending_local=Sum("entitlement_quantity", filter=Q(status=GenericPayment.STATUS_PENDING)),
+            reconciled=Count("id", filter=~Q(status=GenericPayment.STATUS_PENDING)),
+            reconciled_usd=Sum("delivered_quantity_usd", filter=~Q(status=GenericPayment.STATUS_PENDING)),
+            reconciled_local=Sum("delivered_quantity", filter=~Q(status=GenericPayment.STATUS_PENDING)),
+        )
+
         pdf_context_data = {
             "title": self.payment_plan.unicef_id,
             "payment_plan": self.payment_plan,
@@ -79,6 +89,7 @@ class PaymentPlanPDFExportSevice:
             "approval": approval,
             "authorization": authorization,
             "release": release,
+            "reconciliation": reconciliation_qs,
         }
 
         pdf = generate_pdf_from_html(

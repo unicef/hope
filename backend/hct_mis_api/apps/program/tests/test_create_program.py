@@ -112,7 +112,6 @@ class TestCreateProgram(APITestCase):
         dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Deprecated", "code": "deprecated", "description": "Deprecated", "deprecated": True}
         )
-        dct.limit_to.add(self.business_area)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         program_data = self.program_data
@@ -126,7 +125,6 @@ class TestCreateProgram(APITestCase):
         dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Inactive", "code": "inactive", "description": "Inactive", "active": False}
         )
-        dct.limit_to.add(self.business_area)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         program_data = self.program_data
@@ -137,9 +135,11 @@ class TestCreateProgram(APITestCase):
         )
 
     def test_create_program_with_dct_from_other_ba(self) -> None:
-        DataCollectingType.objects.update_or_create(
+        other_ba = BusinessAreaFactory()
+        dct, _ = DataCollectingType.objects.update_or_create(
             **{"label": "Test Wrong BA", "code": "test_wrong_ba", "description": "Test Wrong BA", "active": True}
         )
+        dct.limit_to.add(other_ba)
         self.create_user_role_with_permissions(self.user, [Permissions.PROGRAMME_CREATE], self.business_area)
 
         program_data = self.program_data

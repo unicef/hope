@@ -38,6 +38,7 @@ class GrievanceNotification:
         self.extra_data = kwargs
         self.user_recipients = self._prepare_user_recipients()
         self.emails = self._prepare_emails()
+        self.enable_email_notification = grievance_ticket.business_area.enable_email_notification
 
     def _prepare_default_context(self, user_recipient: "User") -> Dict[str, Any]:
         protocol = "https" if settings.SOCIAL_AUTH_REDIRECT_IS_HTTPS else "http"
@@ -71,13 +72,14 @@ class GrievanceNotification:
         return email
 
     def send_email_notification(self) -> None:
-        if not config.SEND_GRIEVANCES_NOTIFICATION:
-            return
-        try:
-            for email in self.emails:
-                email.send()
-        except Exception as e:
-            logger.exception(e)
+        if self.enable_email_notification:
+            if not config.SEND_GRIEVANCES_NOTIFICATION:
+                return
+            try:
+                for email in self.emails:
+                    email.send()
+            except Exception as e:
+                logger.exception(e)
 
     def _prepare_universal_category_created_bodies(self, user_recipient: "User") -> Tuple[str, str, str]:
         context = self._prepare_default_context(user_recipient)
@@ -99,7 +101,7 @@ class GrievanceNotification:
         user_roles = UserRole.objects.filter(
             role__name=action_roles_dict[self.action],
             business_area=self.grievance_ticket.business_area,
-        )
+        ).exclude(expiry_date__lt=timezone.now())
         queryset = User.objects.filter(user_roles__in=user_roles).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
@@ -109,7 +111,7 @@ class GrievanceNotification:
         user_roles = UserRole.objects.filter(
             role__name="Approver",
             business_area=self.grievance_ticket.business_area,
-        )
+        ).exclude(expiry_date__lt=timezone.now())
         queryset = User.objects.filter(user_roles__in=user_roles).distinct()
         if self.grievance_ticket.assigned_to:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)

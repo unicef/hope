@@ -333,6 +333,10 @@ class Household(
     ConcurrencyModel,
     UnicefIdentifiedModel,
 ):
+    class CollectType(models.TextChoices):
+        STANDARD = "STANDARD", "Standard"
+        SINGLE = "SINGLE", "Single"
+
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "withdrawn",
@@ -528,10 +532,11 @@ class Household(
         "this field will contain the household it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(default=False)
+    is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     is_recalculated_group_ages = models.BooleanField(default=False)  # TODO remove after migration
+    collect_type = models.CharField(choices=CollectType.choices, default=CollectType.STANDARD.value, max_length=8)
 
     class Meta:
         verbose_name = "Household"
@@ -764,7 +769,6 @@ class IndividualIdentity(SoftDeletableIsOriginalModel, TimeStampedModel):
         on_delete=models.PROTECT,
     )
     country = models.ForeignKey("geo.Country", null=True, on_delete=models.PROTECT)
-    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
@@ -798,7 +802,6 @@ class IndividualRoleInHousehold(SoftDeletableIsOriginalModel, TimeStampedUUIDMod
         blank=True,
         choices=ROLE_CHOICE,
     )
-    is_original = models.BooleanField(default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
     copied_from = models.ForeignKey(
@@ -1009,7 +1012,7 @@ class Individual(
         "this field will contain the individual it was copied from.",
     )
     origin_unicef_id = models.CharField(max_length=100, blank=True, null=True)
-    is_original = models.BooleanField(default=False)
+    is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     migrated_at = models.DateTimeField(null=True, blank=True)
 
@@ -1225,7 +1228,7 @@ class EntitlementCard(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         null=True,
     )
-    is_original = models.BooleanField(default=False)
+    is_original = models.BooleanField(db_index=True, default=False)
 
     objects = RepresentationManager()
     original_and_repr_objects = models.Manager()
@@ -1250,7 +1253,7 @@ class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, Abstract
     debit_card_number = models.CharField(max_length=255, blank=True, default="")
     bank_branch_name = models.CharField(max_length=255, blank=True, default="")
     account_holder_name = models.CharField(max_length=255, blank=True, default="")
-    is_original = models.BooleanField(default=False)
+    is_original = models.BooleanField(db_index=True, default=False)
     is_migration_handled = models.BooleanField(default=False)
     copied_from = models.ForeignKey(
         "self",
