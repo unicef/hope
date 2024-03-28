@@ -1462,6 +1462,11 @@ class CashPlan(ConcurrencyModel, GenericPaymentPlan):
         # TODO: maybe 'ca_id' rename to 'unicef_id'?
         return self.ca_id
 
+    @property
+    def verification_status(self) -> Optional[str]:
+        summary = self.payment_verification_summary.first()
+        return getattr(summary, "status", None)
+
     class Meta:
         verbose_name = "Cash Plan"
         ordering = ["created_at"]
