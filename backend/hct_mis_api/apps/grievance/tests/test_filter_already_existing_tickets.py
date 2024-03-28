@@ -145,7 +145,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         GrievanceComplaintTicketFactory.create_batch(5)
         SensitiveGrievanceTicketFactory.create_batch(5)
 
-    @pytest.mark.skip("This test has never worked")
+    @pytest.mark.skip("This test has never worked with pytest")
     def test_filter_existing_tickets_by_payment_record_with_permission(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
@@ -241,7 +241,7 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             },
         )
 
-    @pytest.mark.skip(reason="This test has never worked")
+    @pytest.mark.skip(reason="This test has never worked with pytest")
     def test_filter_existing_tickets_by_individual_with_permission(self) -> None:
         self.create_user_role_with_permissions(
             self.user, [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE], self.business_area
