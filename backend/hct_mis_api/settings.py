@@ -1082,8 +1082,9 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 10,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "api.utils.CsrfExemptSessionAuthentication",
+        "hct_mis_api.api.utils.CsrfExemptSessionAuthentication",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 # overwrite Azure logs
@@ -1120,10 +1121,6 @@ if DEBUG and not IS_TEST:
         "debug_toolbar.panels.redirects.RedirectsPanel",
         "debug_toolbar.panels.profiling.ProfilingPanel",
     ]
-
-REST_FRAMEWORK = {
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "HOPE API",
