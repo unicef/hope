@@ -1,5 +1,3 @@
-from io import BytesIO
-
 from django.contrib.admin import AdminSite
 from django.contrib.admin.options import ModelAdmin
 from django.test import RequestFactory, override_settings
@@ -33,7 +31,6 @@ class TestGeoApp(WebTest):
         self.client.force_login(
             User.objects.get_or_create(username="testuser", partner=Partner.objects.get_or_create(name="UNICEF")[0])[0]
         )
-        self.file = BytesIO(b"Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\n")
 
     def test_modeladmin_str(self) -> None:
         ma = ModelAdmin(Area, self.site)
@@ -54,10 +51,10 @@ class TestGeoApp(WebTest):
         form = resp.form
         form["file"] = Upload(
             "file.csv",
-            b"Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\n",
+            b"Country,Province,District,Admin0,Adm1,Adm2\nAfghanistan,Prov1,Distr1,AF,AF99,AF9999\nAfghanistan,Prov1,Distr1,AF,AF99,AF9988\n",
             "text/csv",
         )
         resp = form.submit("Import")
         assert resp.status_int == 302, "The form is not good"
         self.assertEqual(AreaType.objects.count(), 4, "Two new area types created")
-        self.assertEqual(Area.objects.count(), 7, "Two new area created")
+        self.assertEqual(Area.objects.count(), 8, "Two new area created")

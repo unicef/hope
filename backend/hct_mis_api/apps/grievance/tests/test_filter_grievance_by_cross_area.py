@@ -2,7 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
-from hct_mis_api.apps.account.fixtures import PartnerFactory, UserFactory
+from hct_mis_api.apps.account.fixtures import PartnerFactory, RoleFactory, UserFactory
+from hct_mis_api.apps.account.models import UserRole
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.fixtures import create_afghanistan
@@ -38,13 +39,16 @@ query AllGrievanceTickets($isCrossArea: Boolean) {
 class TestCrossAreaFilterAvailable(APITestCase):
     @classmethod
     def setUpTestData(cls) -> None:
+        cls.business_area = create_afghanistan()
+        cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
+
         partner_unicef = PartnerFactory(name="UNICEF")
         cls.user = UserFactory(partner=partner_unicef)
+        role = RoleFactory(name="GRIEVANCES CROSS AREA FILTER", permissions=["GRIEVANCES_CROSS_AREA_FILTER"])
+        UserRole.objects.create(business_area=cls.business_area, user=cls.user, role=role)
 
         cls.admin_area1 = AreaFactory(name="Admin Area 1", level=2)
         cls.admin_area2 = AreaFactory(name="Admin Area 2", level=2)
-        cls.business_area = create_afghanistan()
-        cls.program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
 
         individual1_from_area1 = IndividualFactory(business_area=cls.business_area, household=None)
         individual2_from_area1 = IndividualFactory(business_area=cls.business_area, household=None)

@@ -94,6 +94,8 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
             if cell.value is None:
                 column += 1
                 continue
+            if column >= len(self.COLUMNS_TYPES):
+                break
             if cell.data_type != self.COLUMNS_TYPES[column]:
                 readable_cell_error = self.TYPES_READABLE_MAPPING[self.COLUMNS_TYPES[column]]
                 self.errors.append(
@@ -102,6 +104,22 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
                         cell.coordinate,
                         f"Wrong type off cell {readable_cell_error} "
                         f"expected, {self.TYPES_READABLE_MAPPING[cell.data_type]} given.",
+                    )
+                )
+            column += 1
+
+    def _validate_row_number(self, row: Row) -> None:
+        column = 0
+        for cell in row:
+            if cell.value is None:
+                column += 1
+                continue
+            if column >= len(self.COLUMNS_TYPES):
+                self.errors.append(
+                    XlsxError(
+                        self.TITLE,
+                        cell.coordinate,
+                        "Unexpected value",
                     )
                 )
             column += 1
@@ -142,6 +160,7 @@ class XlsxPaymentPlanImportService(XlsxPaymentPlanBaseService, XlsxImportBaseSer
         for row in self.ws_payments.iter_rows(min_row=2):
             if not any(cell.value for cell in row):
                 continue
+            self._validate_row_number(row)
             self._validate_row_types(row)
             self._validate_payment_id(row)
             self._validate_entitlement(row)
