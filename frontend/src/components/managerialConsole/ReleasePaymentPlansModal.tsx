@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 interface ReleasePaymentPlansModalProps {
   selectedPlans: any[];
-  onRelease: (plans: any[]) => Promise<void>;
+  onRelease: (plans: any[], comment: string) => Promise<void>;
 }
 
 export const ReleasePaymentPlansModal = ({

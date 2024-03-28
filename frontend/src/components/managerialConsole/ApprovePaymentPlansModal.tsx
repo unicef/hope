@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 interface ApprovePaymentPlansModalProps {
   selectedPlans: any[];
-  onApprove: (plans: any[]) => Promise<void>;
+  onApprove: (plans: any[], comment: string) => Promise<void>;
 }
 
 export const ApprovePaymentPlansModal = ({
