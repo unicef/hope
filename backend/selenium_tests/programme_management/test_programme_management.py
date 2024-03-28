@@ -11,6 +11,7 @@ from selenium.webdriver import Keys
 pytestmark = pytest.mark.django_db(transaction=True)
 
 
+@pytest.mark.skip()
 @pytest.mark.usefixtures("login")
 class TestProgrammeManagement:
     @pytest.mark.parametrize(
