@@ -1084,6 +1084,7 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_available_fsps_for_delivery_mechanisms(self, info: Any, input: Dict, **kwargs: Any) -> List:
+        business_area_slug = info.context.headers.get("Business-Area")
         payment_plan = get_object_or_404(PaymentPlan, id=decode_id_string(input["payment_plan_id"]))
         delivery_mechanisms = (
             DeliveryMechanismPerPaymentPlan.objects.filter(payment_plan=payment_plan)
@@ -1091,12 +1092,16 @@ class Query(graphene.ObjectType):
             .order_by("delivery_mechanism_order")
         )
 
-        def get_fsps_for_delivery_mechanism(mechanism: str) -> List:
-            fsps = FinancialServiceProvider.objects.filter(
-                Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism)
-                | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
-                delivery_mechanisms__contains=[mechanism],
-            ).distinct()
+        def get_fsps_for_delivery_mechanism(mechanism: str, business_area_slug: str) -> List:
+            fsps = (
+                FinancialServiceProvider.objects.filter(
+                    Q(fsp_xlsx_template_per_delivery_mechanisms__delivery_mechanism=mechanism)
+                    | Q(fsp_xlsx_template_per_delivery_mechanisms__isnull=True),
+                    delivery_mechanisms__contains=[mechanism],
+                )
+                .allowed_to(business_area_slug)
+                .distinct()
+            )
             return (
                 [
                     # This basically checks if FSP can accept ANY additional volume,
@@ -1110,7 +1115,7 @@ class Query(graphene.ObjectType):
             )
 
         return [
-            {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism)}
+            {"delivery_mechanism": mechanism, "fsps": get_fsps_for_delivery_mechanism(mechanism, business_area_slug)}
             for mechanism in delivery_mechanisms
         ]
 
