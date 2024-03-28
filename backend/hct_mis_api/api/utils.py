@@ -1,4 +1,6 @@
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
+
+from rest_framework.authentication import SessionAuthentication
 
 
 def humanize_errors(errors: Dict) -> Dict:
@@ -27,3 +29,8 @@ def humanize_errors(errors: Dict) -> Dict:
         return errs
     except (ValueError, AttributeError):
         return errors
+
+
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request: Any) -> None:
+        return
