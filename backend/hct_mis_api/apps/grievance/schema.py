@@ -586,6 +586,8 @@ class Query(graphene.ObjectType):
                 .prefetch_related(*to_prefetch)
                 .filter(business_area_id=business_area_id, programs=None)
             )
+        else:
+            queryset = queryset.filter(programs__id=program_id)
 
         return queryset.annotate(
             total=Case(
