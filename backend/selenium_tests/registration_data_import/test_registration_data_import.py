@@ -74,7 +74,8 @@ class TestSmokeRegistrationDataImport:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
-        assert str(len(pageRegistrationDataImport.getRows())) in pageRegistrationDataImport.getTableTitle().text
+        assert pageRegistrationDataImport.expectedRows(2)
+        assert "2" in pageRegistrationDataImport.getTableTitle().text
         pageRegistrationDataImport.getRows()[0].click()
         # Check Elements on Details page
         assert "Test Other Status" in pageDetailsRegistrationDataImport.getPageHeaderTitle().text
