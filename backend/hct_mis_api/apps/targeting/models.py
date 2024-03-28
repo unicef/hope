@@ -277,6 +277,10 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         return self.targeting_criteria is None or self.targeting_criteria.rules.count() == 0
 
     @property
+    def has_empty_ids_criteria(self) -> bool:
+        return not bool(self.targeting_criteria.household_ids) and not bool(self.targeting_criteria.individual_ids)
+
+    @property
     def allowed_steficon_rule(self) -> Union[Rule, None]:
         if not self.program:
             return None
@@ -368,6 +372,8 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
         default=False,
         help_text=_("Exclude households with individuals (members or collectors) on sanction list."),
     )
+    household_ids = models.TextField(blank=True)
+    individual_ids = models.TextField(blank=True)
 
     def get_rules(self) -> "QuerySet":
         return self.rules.all()
@@ -383,6 +389,18 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingBase):
             and self.target_population.program is not None
         ):
             query &= Q(size__gt=0)
+
+        q_hh_ids = Q(unicef_id__in=self.household_ids.split(", "))
+        q_ind_ids = Q(individuals__unicef_id__in=self.individual_ids.split(", "))
+
+        if self.household_ids and self.individual_ids:
+            query &= Q(q_hh_ids | q_ind_ids)
+            return query
+
+        if self.household_ids:
+            query &= q_hh_ids
+        if self.individual_ids:
+            query &= q_ind_ids
         return query
 
 

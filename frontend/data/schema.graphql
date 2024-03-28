@@ -2734,7 +2734,7 @@ type Mutations {
   updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
   copyProgram(programData: CopyProgramInput!): CopyProgram
-  uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!, programId: String): UploadImportDataXLSXFileAsync
+  uploadImportDataXlsxFileAsync(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFileAsync
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
@@ -4426,6 +4426,7 @@ type TargetPopulationNode implements Node {
   householdList(offset: Int, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   totalHouseholdsCountWithValidPhoneNo: Int
   hasEmptyCriteria: Boolean
+  hasEmptyIdsCriteria: Boolean
 }
 
 type TargetPopulationNodeConnection {
@@ -4460,6 +4461,8 @@ type TargetingCriteriaNode {
   updatedAt: DateTime!
   flagExcludeIfActiveAdjudicationTicket: Boolean!
   flagExcludeIfOnSanctionList: Boolean!
+  householdIds: String!
+  individualIds: String!
   targetPopulation: TargetPopulationNode
   rules: [TargetingCriteriaRuleNode]
 }
@@ -4468,6 +4471,8 @@ input TargetingCriteriaObjectType {
   rules: [TargetingCriteriaRuleObjectType]
   flagExcludeIfActiveAdjudicationTicket: Boolean
   flagExcludeIfOnSanctionList: Boolean
+  householdIds: String
+  individualIds: String
 }
 
 enum TargetingCriteriaRuleFilterComparisonMethod {

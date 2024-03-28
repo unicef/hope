@@ -339,3 +339,107 @@ class TestTargetingCriteriaIndividualRules(APITestCase):
             .count()
             == 2
         )
+
+
+class TestTargetingCriteriaByIdQuery(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        create_afghanistan()
+        cls.user = UserFactory.create()
+        cls.business_area = BusinessArea.objects.first()
+
+        cls.hh_1, individuals = create_household(
+            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
+        )
+        cls.hh_2, individuals = create_household(
+            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area},
+        )
+        cls.hh_3, individuals = create_household(
+            {"size": 3, "residence_status": "REFUGEE", "business_area": cls.business_area},
+        )
+
+        assert Household.objects.all().distinct().count() == 3
+
+    @classmethod
+    def create_criteria(cls, targeting_criteria_data: Dict) -> TargetingCriteria:
+        criteria = TargetingCriteria(**targeting_criteria_data)
+        criteria.save()
+        TargetPopulation(
+            name="tp",
+            created_by=cls.user,
+            business_area=cls.business_area,
+            targeting_criteria=criteria,
+        )
+        criteria.save()
+        return criteria
+
+    def test_household_ids(self) -> None:
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    {
+                        "household_ids": f"{self.hh_1.unicef_id}",
+                        "individual_ids": "",
+                    }
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 1
+        )
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    {
+                        "household_ids": f"{self.hh_3.unicef_id}, {self.hh_2.unicef_id}",
+                        "individual_ids": "",
+                    }
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 2
+        )
+
+    def test_individual_ids(self) -> None:
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    {
+                        "household_ids": "",
+                        "individual_ids": f"{self.hh_1.individuals.first().unicef_id}",
+                    }
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 1
+        )
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    {
+                        "household_ids": "",
+                        "individual_ids": f"{self.hh_2.individuals.first().unicef_id}, {self.hh_1.individuals.first().unicef_id}",
+                    }
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 2
+        )
+
+    def test_household_and_individual_ids(self) -> None:
+        assert (
+            Household.objects.filter(
+                self.create_criteria(
+                    {
+                        "household_ids": f"{self.hh_1.unicef_id}, {self.hh_2.unicef_id}",
+                        "individual_ids": f"{self.hh_3.individuals.first().unicef_id}",
+                    }
+                ).get_query()
+            )
+            .distinct()
+            .count()
+            == 3
+        )
