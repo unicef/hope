@@ -78,10 +78,8 @@ class ProgrammeManagement(BaseComponents):
 
     def choosePartnerOption(self, optionName: str) -> None:
         # Todo: Change undefined to name of Partner
-        selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(self.inputPartner).click()
-        self.wait_for(selectOption).click()
-        self.wait_for_disappear(selectOption)
+        self.select_option_by_name(optionName)
 
     def getInputProgrammeName(self) -> WebElement:
         return self.wait_for(self.inputProgrammeName)
@@ -144,19 +142,15 @@ class ProgrammeManagement(BaseComponents):
         return self.wait_for(self.buttonSave)
 
     def chooseOptionSelector(self, optionName: str) -> None:
-        selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(self.selectSelector).click()
-        self.wait_for(selectOption).click()
-        self.wait_for_disappear(selectOption)
+        self.select_option_by_name(optionName)
 
     def getLabelSelector(self) -> WebElement:
         return self.wait_for(self.labelSelector)
 
     def chooseOptionDataCollectingType(self, optionName: str) -> None:
-        selectOption = f'li[data-cy="select-option-{optionName}"]'
         self.wait_for(self.inputDataCollectingType).click()
-        self.wait_for(selectOption).click()
-        self.wait_for_disappear(selectOption)
+        self.select_option_by_name(optionName)
 
     def getLabelDataCollectingType(self) -> WebElement:
         return self.wait_for(self.labelDataCollectingType)
