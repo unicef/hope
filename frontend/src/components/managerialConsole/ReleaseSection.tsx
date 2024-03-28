@@ -19,6 +19,13 @@ interface ReleaseSectionProps {
     setSelected: (value: React.SetStateAction<any[]>) => void,
     id: any,
   ) => void;
+  handleSelectAll: (
+    items: any[],
+    setSelected: {
+      (value: React.SetStateAction<any[]>): void;
+      (arg0: any[]): void;
+    },
+  ) => void;
   inReviewData: any;
   bulkAction: any;
 }
@@ -59,7 +66,7 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {inReviewData.results?.map((plan: any) => (
+          {inReviewData?.results?.map((plan: any) => (
             <TableRow key={plan.id}>
               <TableCell padding="checkbox">
                 <Checkbox
