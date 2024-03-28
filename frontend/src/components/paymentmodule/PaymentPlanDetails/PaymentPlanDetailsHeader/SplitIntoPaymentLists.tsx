@@ -48,7 +48,7 @@ export const SplitIntoPaymentLists = ({
   let maxPaymentsNoMessage = `Payments Number must be less than ${paymentPlan.paymentItems.totalCount}`;
 
   if (paymentPlan.paymentItems.totalCount <= 10) {
-    const msg = `Too small number of Payments (${paymentPlan.paymentItems.totalCount}) in order to split`;
+    const msg = `There are too few payments (${paymentPlan.paymentItems.totalCount}) to split`;
     minPaymentsNoMessage = msg;
     maxPaymentsNoMessage = msg;
   }
