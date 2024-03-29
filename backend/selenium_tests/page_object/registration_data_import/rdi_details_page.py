@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -79,3 +81,10 @@ class RDIDetailsPage(BaseComponents):
 
     def getImportedIndividualsTable(self) -> WebElement:
         return self.wait_for(self.importedIndividualsTable)
+
+    def waitFotStatus(self, status: str, timeout: int = 60) -> None:
+        for _ in range(timeout):
+            sleep(1)
+            if self.getStatusContainer().text == status:
+                break
+            self.driver.refresh()

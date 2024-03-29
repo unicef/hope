@@ -2,7 +2,6 @@ import os
 from time import sleep
 from typing import Literal, Union
 
-import pytest
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By

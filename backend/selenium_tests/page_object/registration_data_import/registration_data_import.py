@@ -1,3 +1,5 @@
+from time import sleep
+
 from page_object.base_components import BaseComponents
 from selenium.webdriver.remote.webelement import WebElement
 
@@ -111,6 +113,9 @@ class RegistrationDataImport(BaseComponents):
     def getButtonImportFile(self) -> WebElement:
         return self.wait_for(self.buttonImportRDI)
 
+    def disappearButtonImportFile(self) -> None:
+        self.wait_for_disappear(self.buttonImportRDI)
+
     def getExcelItem(self) -> WebElement:
         return self.wait_for(self.excelItem)
 
@@ -131,3 +136,10 @@ class RegistrationDataImport(BaseComponents):
 
     def getErrorsContainer(self) -> WebElement:
         return self.wait_for(self.errorsContainer)
+
+    def buttonImportFileIsEnabled(self, timeout: int = 30) -> bool:
+        for _ in range(timeout):
+            if self.getButtonImportFile().is_enabled():
+                return True
+            sleep(1)
+        return False

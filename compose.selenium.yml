@@ -25,6 +25,7 @@ services:
       - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@db:5432/erp_datahub
       - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@db:5432/rdi_datahub
       - USE_DUMMY_EXCHANGE_RATES=yes
+      - CELERY_TASK_ALWAYS_EAGER=true
     build:
       context: ./
       dockerfile: docker/Dockerfile
@@ -42,6 +43,8 @@ services:
         waitforit -host=db -port=5432 -timeout=30 &&
         pytest -svvv selenium_tests
       "
+    ports:
+      - "8080:8080"
     depends_on:
       db:
         condition: service_started
