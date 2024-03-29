@@ -1,15 +1,4 @@
-trigger:
-  batch: true
-  branches:
-    include:
-    - develop
-    - staging
-    - master
-    - ephemeral-1
-    - ops/*
-  paths:
-    exclude:
-    -  docs/*
+trigger: none
 pr: none
 resources:
   - repo: self
