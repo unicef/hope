@@ -7,28 +7,10 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_0_with_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_with_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
-                {
-                    'node': {
-                        'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTowZmRiZjJmYy1lOTRlLTRjNjQtYWNjZS02ZTdlZGQ0YmJkODc=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
-                        }
-                    }
-                },
                 {
                     'node': {
                         'category': 3,
@@ -39,27 +21,9 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
                                 'size': 1
                             },
                             'individual': {
-                                'fullName': 'John Doe'
+                                'fullName': 'Frank Sinatra'
                             },
                             'paymentRecord': None
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTpjOThkMDM3My0xYjIwLTQ4ZWItOGI4Ny03MjM3NDc3ZWQ3ODI=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
                         }
                     }
                 }
@@ -68,7 +32,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_1_without_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_without_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
@@ -77,28 +41,10 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_hou
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_individual_0_with_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_individual_with_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
-                {
-                    'node': {
-                        'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTowZmRiZjJmYy1lOTRlLTRjNjQtYWNjZS02ZTdlZGQ0YmJkODc=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
-                        }
-                    }
-                },
                 {
                     'node': {
                         'category': 3,
@@ -109,27 +55,9 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
                                 'size': 1
                             },
                             'individual': {
-                                'fullName': 'John Doe'
+                                'fullName': 'Frank Sinatra'
                             },
                             'paymentRecord': None
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTpjOThkMDM3My0xYjIwLTQ4ZWItOGI4Ny03MjM3NDc3ZWQ3ODI=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
                         }
                     }
                 }
@@ -138,7 +66,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_individual_1_without_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_individual_without_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
@@ -147,7 +75,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_ind
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record_0_with_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record_with_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
@@ -174,7 +102,7 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_pay
     }
 }
 
-snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record_1_without_permission 1'] = {
+snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_payment_record_without_permission 1'] = {
     'data': {
         'existingGrievanceTickets': {
             'edges': [
@@ -191,24 +119,6 @@ snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_two
                     'node': {
                         'category': 3,
                         'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTowZmRiZjJmYy1lOTRlLTRjNjQtYWNjZS02ZTdlZGQ0YmJkODc=',
-                        'issueType': 1,
-                        'sensitiveTicketDetails': {
-                            'household': {
-                                'size': 1
-                            },
-                            'individual': {
-                                'fullName': 'John Doe'
-                            },
-                            'paymentRecord': {
-                                'fullName': 'John Doe'
-                            }
-                        }
-                    }
-                },
-                {
-                    'node': {
-                        'category': 3,
-                        'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTpjOThkMDM3My0xYjIwLTQ4ZWItOGI4Ny03MjM3NDc3ZWQ3ODI=',
                         'issueType': 1,
                         'sensitiveTicketDetails': {
                             'household': {

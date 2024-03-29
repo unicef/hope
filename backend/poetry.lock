@@ -2071,6 +2071,18 @@ flake8 = ">3.0.0"
 junit-xml = ">=1.8"
 
 [[package]]
+name = "flaky"
+version = "3.8.1"
+description = "Plugin for pytest that automatically reruns flaky tests."
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "flaky-3.8.1-py2.py3-none-any.whl", hash = "sha256:194ccf4f0d3a22b2de7130f4b62e45e977ac1b5ccad74d4d48f3005dcc38815e"},
+    {file = "flaky-3.8.1.tar.gz", hash = "sha256:47204a81ec905f3d5acfbd61daeabcada8f9d4031616d9bcb0618461729699f5"},
+]
+
+[[package]]
 name = "fonttools"
 version = "4.50.0"
 description = "Tools to manipulate font files"
@@ -3685,6 +3697,52 @@ files = [
 
 [package.dependencies]
 pytest = ">=2.2"
+
+[[package]]
+name = "pytest-randomly"
+version = "3.15.0"
+description = "Pytest plugin to randomly order tests and control random.seed."
+category = "dev"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pytest_randomly-3.15.0-py3-none-any.whl", hash = "sha256:0516f4344b29f4e9cdae8bce31c4aeebf59d0b9ef05927c33354ff3859eeeca6"},
+    {file = "pytest_randomly-3.15.0.tar.gz", hash = "sha256:b908529648667ba5e54723088edd6f82252f540cc340d748d1fa985539687047"},
+]
+
+[package.dependencies]
+pytest = "*"
+
+[[package]]
+name = "pytest-repeat"
+version = "0.9.3"
+description = "pytest plugin for repeating tests"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pytest_repeat-0.9.3-py3-none-any.whl", hash = "sha256:26ab2df18226af9d5ce441c858f273121e92ff55f5bb311d25755b8d7abdd8ed"},
+    {file = "pytest_repeat-0.9.3.tar.gz", hash = "sha256:ffd3836dfcd67bb270bec648b330e20be37d2966448c4148c4092d1e8aba8185"},
+]
+
+[package.dependencies]
+pytest = "*"
+
+[[package]]
+name = "pytest-rerunfailures"
+version = "13.0"
+description = "pytest plugin to re-run tests to eliminate flaky failures"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pytest-rerunfailures-13.0.tar.gz", hash = "sha256:e132dbe420bc476f544b96e7036edd0a69707574209b6677263c950d19b09199"},
+    {file = "pytest_rerunfailures-13.0-py3-none-any.whl", hash = "sha256:34919cb3fcb1f8e5d4b940aa75ccdea9661bade925091873b7c6fa5548333069"},
+]
+
+[package.dependencies]
+packaging = ">=17.1"
+pytest = ">=7"
 
 [[package]]
 name = "pytest-xdist"
@@ -5318,4 +5376,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.*"
-content-hash = "5b797f1b3588059e60f8ff4b50ce3cdd5bc3d35df4600191f68668712733509f"
+content-hash = "059022b133aee6fcec3bb95bee076468bf4af9e66b416e0d578c238b26d9043a"
