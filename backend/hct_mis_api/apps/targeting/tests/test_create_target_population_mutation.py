@@ -212,7 +212,7 @@ class TestCreateTargetPopulationMutation(APITestCase):
         ind_hh_3.save()
 
         targeting_criteria_list = [
-            {"householdIds": " HH-1,", "individualIds": "", "rules": []},
+            {"householdIds": "HH-1,", "individualIds": "", "rules": []},
             {"householdIds": "HH-1, HH-2, HH-3, ", "individualIds": "IND-33, IND-33, ", "rules": []},
             {"householdIds": "HH-1", "individualIds": "IND-33", "rules": []},
             {"householdIds": "", "individualIds": "IND-33", "rules": []},
