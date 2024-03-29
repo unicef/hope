@@ -49,12 +49,17 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
     selectedInReview.includes(plan.id),
   );
 
+  const selectedPlansUnicefIds = inReviewData?.results
+    .filter((plan) => selectedInReview.includes(plan.id))
+    .map((plan) => plan.unicef_id);
+
   return (
     <BaseSection
       title={t('Payment Plans pending for Release')}
       buttons={
         <ReleasePaymentPlansModal
-          selectedPlans={selectedInReview}
+          selectedPlansIds={selectedInReview}
+          selectedPlansUnicefIds={selectedPlansUnicefIds}
           onRelease={(_, comment) =>
             bulkAction.mutateAsync({
               ids: selectedInReview,
@@ -91,9 +96,11 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
                 />
               </TableCell>
               <TableCell>{plan.unicef_id}</TableCell>
-              <TableCell>{plan.program.name}</TableCell>
+              <TableCell>{plan.program}</TableCell>
               <TableCell>
-                <UniversalMoment>{plan.last_modified_date}</UniversalMoment>
+                <UniversalMoment>
+                  {plan.last_approval_process_date}
+                </UniversalMoment>
               </TableCell>
             </TableRow>
           ))}

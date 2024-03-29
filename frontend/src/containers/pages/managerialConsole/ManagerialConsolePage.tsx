@@ -10,6 +10,7 @@ import { AuthorizationSection } from '@components/managerialConsole/Authorizatio
 import { ReleaseSection } from '@components/managerialConsole/ReleaseSection';
 import { useBaseUrl } from '@hooks/useBaseUrl';
 import { usePermissions } from '@hooks/usePermissions';
+import { useSnackbar } from '@hooks/useSnackBar';
 import { Box } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
@@ -22,6 +23,7 @@ export const ManagerialConsolePage: React.FC = () => {
   const [selectedApproved, setSelectedApproved] = useState([]);
   const [selectedAuthorized, setSelectedAuthorized] = useState([]);
   const [selectedInReview, setSelectedInReview] = useState([]);
+  const { showMessage } = useSnackbar();
 
   const handleSelect = (
     selected: any[],
@@ -66,6 +68,11 @@ export const ManagerialConsolePage: React.FC = () => {
     permissions,
   );
 
+  const { refetch } = useQuery({
+    queryKey: ['paymentPlans', businessArea],
+    queryFn: () => fetchPaymentPlansManagerial(businessArea),
+  });
+
   const { data: inApprovalData, isLoading: inApprovalLoading } = useQuery({
     queryKey: ['paymentPlansInApproval', businessArea],
     queryFn: () =>
@@ -95,6 +102,10 @@ export const ManagerialConsolePage: React.FC = () => {
         params.action,
         params.comment,
       ),
+    onSuccess: (params) => {
+      refetch();
+      showMessage(`Action (${params.action}) completed successfully`);
+    },
   });
   if (inApprovalLoading || inAuthorizationLoading || inReviewLoading) {
     return <LoadingComponent />;

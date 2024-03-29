@@ -1,6 +1,9 @@
 import { api } from './api';
 
-export const fetchPaymentPlansManagerial = async (businessAreaSlug, params) => {
+export const fetchPaymentPlansManagerial = async (
+  businessAreaSlug,
+  params = {},
+) => {
   const response = await api.get(
     `/api/rest/${businessAreaSlug}/payments/payment-plans-managerial/`,
     params,

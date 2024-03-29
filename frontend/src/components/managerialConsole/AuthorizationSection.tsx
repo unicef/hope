@@ -50,12 +50,17 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
     selectedAuthorized.includes(plan.id),
   );
 
+  const selectedPlansUnicefIds = inAuthorizationData?.results
+    .filter((plan) => selectedAuthorized.includes(plan.id))
+    .map((plan) => plan.unicef_id);
+
   return (
     <BaseSection
       title={t('Payment Plans pending for Authorization')}
       buttons={
         <AuthorizePaymentPlansModal
-          selectedPlans={selectedAuthorized}
+          selectedPlansIds={selectedAuthorized}
+          selectedPlansUnicefIds={selectedPlansUnicefIds}
           onAuthorize={(_, comment) => {
             return bulkAction.mutateAsync({
               ids: selectedAuthorized,
@@ -96,9 +101,11 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                 />
               </TableCell>
               <TableCell>{plan.unicef_id}</TableCell>
-              <TableCell>{plan.program.name}</TableCell>
+              <TableCell>{plan.program}</TableCell>
               <TableCell>
-                <UniversalMoment>{plan.last_modified_date}</UniversalMoment>
+                <UniversalMoment>
+                  {plan.last_approval_process_date}
+                </UniversalMoment>
               </TableCell>
             </TableRow>
           ))}

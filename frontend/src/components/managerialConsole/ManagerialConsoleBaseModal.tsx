@@ -37,7 +37,8 @@ const Bold = styled.span`
 `;
 
 interface ManagerialConsoleBaseModalProps {
-  selectedPlans;
+  selectedPlansIds: string[];
+  selectedPlansUnicefIds: string[];
   buttonTitle: string;
   dialogTitle: string;
   title: string;
@@ -47,7 +48,8 @@ interface ManagerialConsoleBaseModalProps {
 }
 
 export const ManagerialConsoleBaseModal = ({
-  selectedPlans,
+  selectedPlansIds,
+  selectedPlansUnicefIds,
   buttonTitle,
   dialogTitle,
   title,
@@ -64,7 +66,7 @@ export const ManagerialConsoleBaseModal = ({
     <Button
       variant="outlined"
       color="primary"
-      disabled={!selectedPlans.length || !isActiveProgram}
+      disabled={!selectedPlansIds.length || !isActiveProgram}
       onClick={() => setDialogOpen(true)}
       data-cy={`${buttonTitle.toLowerCase()}-button`}
     >
@@ -73,10 +75,11 @@ export const ManagerialConsoleBaseModal = ({
   );
   const onAccept = async (): Promise<void> => {
     try {
-      await onSave(selectedPlans, comment);
-      setDialogOpen(false);
+      await onSave(selectedPlansIds, comment);
     } catch (e) {
       // handled by inner function
+    } finally {
+      setDialogOpen(false);
     }
   };
 
@@ -98,7 +101,7 @@ export const ManagerialConsoleBaseModal = ({
             <Typography>
               {t('Selected Plans IDs')}:{' '}
               <Bold data-cy="plans-ids">
-                {selectedPlans.map((plan) => plan.unicef_id).join(', ')}
+                {selectedPlansUnicefIds?.join(', ')}
               </Bold>
             </Typography>
             <Box mt={4}>

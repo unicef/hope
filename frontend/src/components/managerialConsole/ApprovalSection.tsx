@@ -50,12 +50,17 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
     selectedApproved.includes(plan.id),
   );
 
+  const selectedPlansUnicefIds = inApprovalData?.results
+    .filter((plan) => selectedApproved.includes(plan.id))
+    .map((plan) => plan.unicef_id);
+
   return (
     <BaseSection
       title={t('Payment Plans pending for Approval')}
       buttons={
         <ApprovePaymentPlansModal
-          selectedPlans={selectedApproved}
+          selectedPlansIds={selectedApproved}
+          selectedPlansUnicefIds={selectedPlansUnicefIds}
           onApprove={(_, comment) =>
             bulkAction.mutateAsync({
               ids: selectedApproved,
@@ -71,7 +76,7 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
           <TableRow>
             <TableCell padding="checkbox">
               <Checkbox
-                checked={allSelected === selectedApproved.length > 0}
+                checked={allSelected && selectedApproved.length > 0}
                 onClick={handleSelectAllApproved}
               />
             </TableCell>
@@ -85,18 +90,18 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
             <TableRow key={plan.id}>
               <TableCell padding="checkbox">
                 <Checkbox
-                  checked={selectedApproved.some(
-                    (selectedPlan) => selectedPlan.id === plan.id,
-                  )}
+                  checked={selectedApproved.includes(plan.id)}
                   onChange={() =>
                     handleSelect(selectedApproved, setSelectedApproved, plan.id)
                   }
                 />
               </TableCell>
               <TableCell>{plan.unicef_id}</TableCell>
-              <TableCell>{plan.program.name}</TableCell>
+              <TableCell>{plan.program}</TableCell>
               <TableCell>
-                <UniversalMoment>{plan.last_modified_date}</UniversalMoment>
+                <UniversalMoment>
+                  {plan.last_approval_process_date}
+                </UniversalMoment>
               </TableCell>
             </TableRow>
           ))}
