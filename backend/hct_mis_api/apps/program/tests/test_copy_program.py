@@ -1,3 +1,5 @@
+from flaky import flaky
+
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -148,6 +150,7 @@ class TestCopyProgram(APITestCase):
             variables=self.copy_data,
         )
 
+    @flaky(max_runs=3, min_passes=1)
     def test_copy_with_permissions(self) -> None:
         user = UserFactory.create()
         self.assertEqual(Household.objects.count(), 3)

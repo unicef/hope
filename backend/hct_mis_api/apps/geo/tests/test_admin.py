@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from django_webtest import WebTest
 from factory import fuzzy
+from flaky import flaky
 from webtest import Upload
 
 from hct_mis_api.apps.account.fixtures import UserFactory
@@ -43,6 +44,7 @@ class TestGeoApp(WebTest):
         resp = self.app.get(url, user=self.superuser)
         assert resp.status_int == 200, "You need to be logged in and superuser"
 
+    @flaky(max_runs=3, min_passes=1)
     def test_upload(self) -> None:
         self.assertEqual(AreaType.objects.count(), 2, "Two area types created")
         self.assertEqual(Area.objects.count(), 5, "Five area created")

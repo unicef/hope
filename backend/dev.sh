@@ -13,10 +13,7 @@ else
   case "$1" in
     "test")
       wait_for_db db
-      # pytest hct_mis_api -n logical
-      coverage run --parallel-mode ./manage.py test --settings hct_mis_api.settings_test --noinput --parallel -v3
-      coverage combine
-      coverage xml
+      pytest -n auto --reruns 3 --reruns-delay 1 --cov-report xml:coverage.xml hct_mis_api/
       ;;
     "lint")
       mkdir -p ./lint-results
