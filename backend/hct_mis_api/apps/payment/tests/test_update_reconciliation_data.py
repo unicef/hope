@@ -187,10 +187,12 @@ class TestDeliveryDate(APITestCase):
 
         payment_1 = PaymentFactory(parent=pp)
         payment_1.unicef_id = "RCPT-0060-24-0.000.665"
+        payment_1.entitlement_quantity = 212  # the same value like in file
         payment_1.save()
 
         payment_2 = PaymentFactory(parent=pp)
         payment_2.unicef_id = "RCPT-0060-24-0.000.666"
+        payment_2.entitlement_quantity = 212  # the same value like in file
         payment_2.save()
 
         file_with_reference_id = file_reference_id()
