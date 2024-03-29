@@ -99,11 +99,14 @@ class PartnerPermission:
         return instance
 
     def set_roles(self, business_area_id: str, roles: List[str]) -> None:
+        business_area_id = str(business_area_id)
         permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
         permissions.roles = roles
         self._permissions[business_area_id] = permissions
 
     def set_program_areas(self, business_area_id: str, program_id: str, areas_ids: List[str]) -> None:
+        business_area_id = str(business_area_id)
+        program_id = str(program_id)
         permissions = self._permissions.get(business_area_id, BusinessAreaPartnerPermission(business_area_id))
         permissions.programs[program_id] = areas_ids
         self._permissions[business_area_id] = permissions
@@ -379,30 +382,25 @@ class User(AbstractUser, NaturalKeyModel, UUIDModel):
     def has_permission(
         self, permission: str, business_area: BusinessArea, program_id: Optional[UUID] = None, write: bool = False
     ) -> bool:
-        has_program_access = True
-        has_partner_roles = False
-
-        if not self.partner.is_unicef:
-            if program_id:
-                has_program_access = str(program_id) in self.get_partner_programs_areas_dict(
-                    business_area_id=business_area.pk
-                )
-            has_partner_roles = self.cached_has_partner_roles_for_business_area_and_permission(
-                business_area=business_area,
-                permission=permission,
-            )
-
         has_user_roles = self.cached_has_user_roles_for_business_area_and_permission(
             business_area=business_area,
             permission=permission,
         )
 
         if self.partner.is_unicef:
-            return has_program_access and (
-                has_user_roles or permission in DEFAULT_PERMISSIONS_LIST_FOR_IS_UNICEF_PARTNER
-            )
-        else:
-            return has_program_access and (has_user_roles or has_partner_roles)
+            return has_user_roles
+
+        has_partner_roles = self.cached_has_partner_roles_for_business_area_and_permission(
+            business_area=business_area,
+            permission=permission,
+        )
+        has_role_access = has_user_roles or has_partner_roles
+
+        if not program_id:
+            return has_role_access
+
+        has_program_access = str(program_id) in self.get_partner_programs_areas_dict(business_area_id=business_area.pk)
+        return has_program_access and has_role_access
 
     def get_partner_areas_ids_per_program(self, program_id: UUID, business_area_id: UUID) -> List:
         partner_areas_ids_per_program = self.get_partner_programs_areas_dict(business_area_id=business_area_id).get(

@@ -1240,6 +1240,7 @@ class XlsxUpdateFile(TimeStampedUUIDModel):
     rdi = models.ForeignKey("registration_data.RegistrationDataImport", on_delete=models.CASCADE, null=True)
     xlsx_match_columns = ArrayField(models.CharField(max_length=32), null=True)
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.PROTECT)
+    program = models.ForeignKey("program.Program", null=True, on_delete=models.CASCADE)
 
 
 class BankAccountInfo(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable):
