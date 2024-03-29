@@ -74,7 +74,8 @@ class TestSmokeRegistrationDataImport:
         # Go to Registration Data Import
         pageRegistrationDataImport.selectGlobalProgramFilter("Test Programm").click()
         pageRegistrationDataImport.getNavRegistrationDataImport().click()
-        assert str(len(pageRegistrationDataImport.getRows())) in pageRegistrationDataImport.getTableTitle().text
+        assert pageRegistrationDataImport.expectedRows(2)
+        assert "2" in pageRegistrationDataImport.getTableTitle().text
         pageRegistrationDataImport.getRows()[0].click()
         # Check Elements on Details page
         assert "Test Other Status" in pageDetailsRegistrationDataImport.getPageHeaderTitle().text
@@ -83,22 +84,22 @@ class TestSmokeRegistrationDataImport:
         assert "21 Mar 2023 9:22 AM" in pageDetailsRegistrationDataImport.getLabelImportDate().text
         pageDetailsRegistrationDataImport.getLabelImportedBy()
         assert (
-                "TOTAL NUMBER OF HOUSEHOLDS"
-                in pageDetailsRegistrationDataImport.getLabelizedFieldContainerHouseholds().text
+            "TOTAL NUMBER OF HOUSEHOLDS"
+            in pageDetailsRegistrationDataImport.getLabelizedFieldContainerHouseholds().text
         )
         assert "3" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
         assert (
-                "TOTAL NUMBER OF INDIVIDUALS"
-                in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
+            "TOTAL NUMBER OF INDIVIDUALS"
+            in pageDetailsRegistrationDataImport.getLabelizedFieldContainerIndividuals().text
         )
         assert "9" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
         assert (
-                pageDetailsRegistrationDataImport.buttonMergeRdiText
-                in pageDetailsRegistrationDataImport.getButtonMergeRdi().text
+            pageDetailsRegistrationDataImport.buttonMergeRdiText
+            in pageDetailsRegistrationDataImport.getButtonMergeRdi().text
         )
         assert (
-                pageDetailsRegistrationDataImport.buttonRefuseRdiText
-                in pageDetailsRegistrationDataImport.getButtonRefuseRdi().text
+            pageDetailsRegistrationDataImport.buttonRefuseRdiText
+            in pageDetailsRegistrationDataImport.getButtonRefuseRdi().text
         )
 
 
