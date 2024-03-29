@@ -43,7 +43,7 @@ export function DedupeBox({ label, options }: Props): React.ReactElement {
       <Grid container>
         <Grid item xs={3}>
           <Box display="flex" alignItems="flex-start">
-            <Label color="textSecondary">{label}</Label>
+            <Label data-cy=`label-${label}` color="textSecondary">{label}</Label>
           </Box>
         </Grid>
         <Grid item xs={9}>
@@ -52,14 +52,14 @@ export function DedupeBox({ label, options }: Props): React.ReactElement {
               <Grid key={option.name} container>
                 <Grid item xs={4}>
                   <BoldGrey>
-                    <Small>{option.name}</Small>
+                    <Small data-cy=`label-${option.name}`>{option.name}</Small>
                   </BoldGrey>
                 </Grid>
                 <Grid item xs={4}>
-                  <Bold>{option.percent.toFixed(2)}%</Bold>
+                  <Bold data-cy=`percentage-${option.name}`>{option.percent.toFixed(2)}%</Bold>
                 </Grid>
                 <Grid item xs={4}>
-                  <BoldGrey>{option.value}</BoldGrey>
+                  <BoldGrey  data-cy=`value-${option.name}`>{option.value}</BoldGrey>
                 </Grid>
               </Grid>
             ))}
