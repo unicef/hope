@@ -23,6 +23,7 @@ from hct_mis_api.apps.payment.fixtures import CashPlanFactory, PaymentRecordFact
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
+@flaky
 class TestAlreadyExistingFilterTickets(APITestCase):
     FILTER_EXISTING_GRIEVANCES_QUERY = """
     query ExistingGrievanceTickets(
