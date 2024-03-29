@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { AuthorizePaymentPlansModal } from '@components/managerialConsole/AuthorizePaymentPlansModal';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 
 interface AuthorizationSectionProps {
   selectedAuthorized: any[];
@@ -20,7 +21,8 @@ interface AuthorizationSectionProps {
     id: any,
   ) => void;
   handleSelectAll: (
-    items: any[],
+    ids: any[],
+    selected: any[],
     setSelected: {
       (value: React.SetStateAction<any[]>): void;
       (arg0: any[]): void;
@@ -39,8 +41,15 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
   bulkAction,
 }) => {
   const { t } = useTranslation();
-  const handleSelectAllAuthorized = () =>
-    handleSelectAll(inAuthorizationData, setSelectedAuthorized);
+  const handleSelectAllAuthorized = () => {
+    const ids = inAuthorizationData.results.map((plan) => plan.id);
+    return handleSelectAll(ids, selectedAuthorized, setSelectedAuthorized);
+  };
+
+  const allSelected = inAuthorizationData?.results?.every((plan) =>
+    selectedAuthorized.includes(plan.id),
+  );
+
   return (
     <BaseSection
       title={t('Payment Plans pending for Authorization')}
@@ -61,10 +70,14 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
         <TableHead>
           <TableRow>
             <TableCell padding="checkbox">
-              <Checkbox onClick={handleSelectAllAuthorized} />
+              <Checkbox
+                checked={allSelected && selectedAuthorized.length > 0}
+                onClick={handleSelectAllAuthorized}
+              />
             </TableCell>
             <TableCell>{t('Payment Plan ID')}</TableCell>
-            <TableCell>{t('Status')}</TableCell>
+            <TableCell>{t('Programme Name')}</TableCell>
+            <TableCell>{t('Last Modified Date')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -77,13 +90,16 @@ export const AuthorizationSection: React.FC<AuthorizationSectionProps> = ({
                     handleSelect(
                       selectedAuthorized,
                       setSelectedAuthorized,
-                      plan,
+                      plan.id,
                     )
                   }
                 />
               </TableCell>
               <TableCell>{plan.unicef_id}</TableCell>
-              <TableCell>{plan.status}</TableCell>
+              <TableCell>{plan.program.name}</TableCell>
+              <TableCell>
+                <UniversalMoment>{plan.last_modified_date}</UniversalMoment>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -39,13 +39,17 @@ export const ManagerialConsolePage: React.FC = () => {
   };
 
   const handleSelectAll = (
-    items: any[],
-    setSelected: {
-      (value: React.SetStateAction<any[]>): void;
-      (arg0: any[]): void;
-    },
+    ids: any[],
+    selected: any[],
+    setSelected: (value: React.SetStateAction<any[]>) => void,
   ) => {
-    setSelected(items.map((item: any) => item.id));
+    let newSelected;
+    if (ids.every((id) => selected.includes(id))) {
+      newSelected = [];
+    } else {
+      newSelected = ids;
+    }
+    setSelected(newSelected);
   };
 
   const permissions = usePermissions();

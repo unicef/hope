@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ReleasePaymentPlansModal } from '@components/managerialConsole/ReleasePaymentPlansModal';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 
 interface ReleaseSectionProps {
   selectedInReview: any[];
@@ -20,7 +21,8 @@ interface ReleaseSectionProps {
     id: any,
   ) => void;
   handleSelectAll: (
-    items: any[],
+    ids: any[],
+    selected: any[],
     setSelected: {
       (value: React.SetStateAction<any[]>): void;
       (arg0: any[]): void;
@@ -34,10 +36,18 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
   selectedInReview,
   setSelectedInReview,
   handleSelect,
+  handleSelectAll,
   inReviewData,
   bulkAction,
 }) => {
   const { t } = useTranslation();
+  const handleSelectAllReviewed = () => {
+    const ids = inReviewData?.results?.map((plan) => plan.id);
+    handleSelectAll(ids, selectedInReview, setSelectedInReview);
+  };
+  const allSelected = inReviewData?.results?.every((plan) =>
+    selectedInReview.includes(plan.id),
+  );
 
   return (
     <BaseSection
@@ -48,7 +58,7 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
           onRelease={(_, comment) =>
             bulkAction.mutateAsync({
               ids: selectedInReview,
-              action: 'RELEASE',
+              action: 'REVIEW',
               comment: comment,
             })
           }
@@ -59,10 +69,14 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
         <TableHead>
           <TableRow>
             <TableCell padding="checkbox">
-              <Checkbox />
+              <Checkbox
+                checked={allSelected && selectedInReview.length > 0}
+                onClick={handleSelectAllReviewed}
+              />
             </TableCell>
             <TableCell>{t('Payment Plan ID')}</TableCell>
-            <TableCell>{t('Status')}</TableCell>
+            <TableCell>{t('Programme Name')}</TableCell>
+            <TableCell>{t('Last Modified Date')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -70,16 +84,17 @@ export const ReleaseSection: React.FC<ReleaseSectionProps> = ({
             <TableRow key={plan.id}>
               <TableCell padding="checkbox">
                 <Checkbox
-                  checked={selectedInReview.some(
-                    (selectedPlan) => selectedPlan.id === plan.id,
-                  )}
+                  checked={selectedInReview.includes(plan.id)}
                   onChange={() =>
-                    handleSelect(selectedInReview, setSelectedInReview, plan)
+                    handleSelect(selectedInReview, setSelectedInReview, plan.id)
                   }
                 />
               </TableCell>
               <TableCell>{plan.unicef_id}</TableCell>
-              <TableCell>{plan.status}</TableCell>
+              <TableCell>{plan.program.name}</TableCell>
+              <TableCell>
+                <UniversalMoment>{plan.last_modified_date}</UniversalMoment>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

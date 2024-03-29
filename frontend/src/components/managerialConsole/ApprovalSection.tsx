@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ApprovePaymentPlansModal } from '@components/managerialConsole/ApprovePaymentPlansModal';
+import { UniversalMoment } from '@components/core/UniversalMoment';
 
 interface ApprovalSectionProps {
   selectedApproved: any[];
@@ -20,7 +21,8 @@ interface ApprovalSectionProps {
     id: any,
   ) => void;
   handleSelectAll: (
-    items: any[],
+    ids: any[],
+    selected: any[],
     setSelected: {
       (value: React.SetStateAction<any[]>): void;
       (arg0: any[]): void;
@@ -39,8 +41,14 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
   bulkAction,
 }) => {
   const { t } = useTranslation();
-  const handleSelectAllApproved = () =>
-    handleSelectAll(inApprovalData, setSelectedApproved);
+  const handleSelectAllApproved = () => {
+    const ids = inApprovalData.results.map((plan) => plan.id);
+    handleSelectAll(ids, selectedApproved, setSelectedApproved);
+  };
+
+  const allSelected = inApprovalData?.results?.every((plan) =>
+    selectedApproved.includes(plan.id),
+  );
 
   return (
     <BaseSection
@@ -62,10 +70,14 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
         <TableHead>
           <TableRow>
             <TableCell padding="checkbox">
-              <Checkbox onClick={handleSelectAllApproved} />
+              <Checkbox
+                checked={allSelected === selectedApproved.length > 0}
+                onClick={handleSelectAllApproved}
+              />
             </TableCell>
             <TableCell>{t('Payment Plan ID')}</TableCell>
-            <TableCell>{t('Status')}</TableCell>
+            <TableCell>{t('Programme Name')}</TableCell>
+            <TableCell>{t('Last Modified Date')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -77,12 +89,15 @@ export const ApprovalSection: React.FC<ApprovalSectionProps> = ({
                     (selectedPlan) => selectedPlan.id === plan.id,
                   )}
                   onChange={() =>
-                    handleSelect(selectedApproved, setSelectedApproved, plan)
+                    handleSelect(selectedApproved, setSelectedApproved, plan.id)
                   }
                 />
               </TableCell>
               <TableCell>{plan.unicef_id}</TableCell>
-              <TableCell>{plan.status}</TableCell>
+              <TableCell>{plan.program.name}</TableCell>
+              <TableCell>
+                <UniversalMoment>{plan.last_modified_date}</UniversalMoment>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
