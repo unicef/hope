@@ -7,10 +7,10 @@ x-django-envs: &django_envs
     - POSTGRES_USER=postgres
     - POSTGRES_PASSWORD=postgres
     - DATABASE_URL=postgis://postgres:postgres@db:5432/postgres
-    - DATABASE_URL_HUB_MIS=postgis://postgres:postgres@mis_datahub_db:5432/postgres
-    - DATABASE_URL_HUB_CA=postgis://postgres:postgres@cash_assist_datahub_db:5432/postgres
-    - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@erp_datahub_db:5432/postgres
-    - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@registration_datahub_db:5432/postgres
+    - DATABASE_URL_HUB_MIS=postgis://postgres:postgres@db:5432/mis_datahub
+    - DATABASE_URL_HUB_CA=postgis://postgres:postgres@db:5432/ca_datahub
+    - DATABASE_URL_HUB_ERP=postgis://postgres:postgres@db:5432/erp_datahub
+    - DATABASE_URL_HUB_REGISTRATION=postgis://postgres:postgres@db:5432/rdi_datahub
     - POSTGRES_SSL_MODE=off
     - EMAIL_HOST=TBD
     - EMAIL_HOST_USER=TBD
@@ -37,31 +37,22 @@ services:
     depends_on:
       - db
       - redis
-      - cash_assist_datahub_db
-      - mis_datahub_db
-      - erp_datahub_db
-      - registration_datahub_db
       - elasticsearch
 
-  cash_assist_datahub_db:
-    image: postgis/postgis:11-3.3-alpine
-    <<: *django_envs
-
-  mis_datahub_db:
-    image: postgis/postgis:11-3.3-alpine
-    <<: *django_envs
-
-  erp_datahub_db:
-    image: postgis/postgis:11-3.3-alpine
-    <<: *django_envs
-
-  registration_datahub_db:
-    image: postgis/postgis:11-3.3-alpine
-    <<: *django_envs
-
   db:
-    image: postgis/postgis:11-3.3-alpine
-    <<: *django_envs
+    image: kartoza/postgis:14-3
+    volumes:
+      - ../postgres/init:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_MULTIPLE_DATABASES=unicef_hct_mis_cashassist,rdi_datahub,mis_datahub,erp_datahub,ca_datahub
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASS=postgres
+      - PGUSER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_SSL_MODE=off
+    ports:
+      - "5433:5432"
 
   celery_worker:
     <<: *django_envs
@@ -71,10 +62,6 @@ services:
     depends_on:
       - backend
       - db
-      - cash_assist_datahub_db
-      - mis_datahub_db
-      - erp_datahub_db
-      - registration_datahub_db
       - redis
       - elasticsearch
 
