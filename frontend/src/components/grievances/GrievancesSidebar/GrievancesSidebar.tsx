@@ -1,22 +1,22 @@
-import { Box, Grid } from '@material-ui/core';
+import { Box, Grid } from '@mui/material';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import * as React from 'react';
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
-} from '../../../utils/constants';
+} from '@utils/constants';
 import { OtherRelatedTickets } from '../OtherRelatedTickets';
 import { PaymentIds } from '../PaymentIds';
 import { ReassignMultipleRoleBox } from '../ReassignMultipleRoleBox';
 import { ReassignRoleBox } from '../ReassignRoleBox';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
+import { GrievanceTicketQuery } from '@generated/graphql';
 
-export const GrievancesSidebar = ({
+export function GrievancesSidebar({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-}): React.ReactElement => {
+}): React.ReactElement {
   const shouldShowReassignBoxDataChange = (): boolean => {
     let { individual, household } = ticket;
     const { category, issueType, status } = ticket;
@@ -73,9 +73,9 @@ export const GrievancesSidebar = ({
   const renderRightSection = (): React.ReactElement => {
     if (
       ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
-    )
+    ) {
       return (
-        <Box display='flex' flexDirection='column'>
+        <Box display="flex" flexDirection="column">
           <Box mt={3}>
             {ticket.paymentVerificationTicketDetails
               ?.hasMultiplePaymentVerifications ? (
@@ -89,17 +89,18 @@ export const GrievancesSidebar = ({
                   ) || []
                 }
               />
-            ) : null}
+              ) : null}
           </Box>
           <Box mt={3}>
             <OtherRelatedTickets ticket={ticket} />
           </Box>
         </Box>
       );
+    }
     if (shouldShowReassignBoxDataChange()) {
       return (
         <Box p={3}>
-          <Box display='flex' flexDirection='column'>
+          <Box display="flex" flexDirection="column">
             <ReassignRoleBox
               shouldDisplayButton
               shouldDisableButton={
@@ -115,7 +116,7 @@ export const GrievancesSidebar = ({
     if (shouldShowReassignMultipleBoxDataChange()) {
       return (
         <Box p={3}>
-          <Box display='flex' flexDirection='column'>
+          <Box display="flex" flexDirection="column">
             <ReassignMultipleRoleBox ticket={ticket} />
           </Box>
         </Box>
@@ -124,7 +125,7 @@ export const GrievancesSidebar = ({
 
     return (
       <Box p={3}>
-        <Box display='flex' flexDirection='column'>
+        <Box display="flex" flexDirection="column">
           <OtherRelatedTickets ticket={ticket} />
         </Box>
       </Box>
@@ -136,4 +137,4 @@ export const GrievancesSidebar = ({
       {renderRightSection()}
     </Grid>
   );
-};
+}

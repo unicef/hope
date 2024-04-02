@@ -1,5 +1,5 @@
 import { act } from '@testing-library/react';
-import React from 'react';
+import * as React from 'react';
 import wait from 'waait';
 import { MockedProvider } from '@apollo/react-testing';
 import { render } from '../../../../testUtils/testUtils';
@@ -16,7 +16,6 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspCore', () => {
         mocks={fakeChooseDeliveryMechForPaymentPlanMutation}
       >
         <SetUpFspCore
-          businessArea='afghanistan'
           permissions={[PERMISSIONS.PM_LOCK_AND_UNLOCK_FSP]}
           initialValues={{
             deliveryMechanisms: [
@@ -26,14 +25,6 @@ describe('components/paymentmodule/CreateSetUpFsp/SetUpFspCore', () => {
               },
             ],
           }}
-          setDeliveryMechanismsForQuery={(_deliveryMechanisms) => {
-            console.log(_deliveryMechanisms);
-          }}
-          deliveryMechanismsForQuery={fakeDeliveryMechanisms.allDeliveryMechanisms.map(
-            (dm) => {
-              return dm.name;
-            },
-          )}
         />
       </MockedProvider>,
     );

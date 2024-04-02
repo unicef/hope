@@ -1,10 +1,5 @@
 trigger: none
-pr:
-  - master
-  - develop
-  - staging
-  - global-program-filter
-  - feature/*
+pr: none
 resources:
   - repo: self
 
@@ -29,7 +24,7 @@ stages:
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: "16.x"
+              versionSpec: "18.19.x"
             displayName: "Install Node.js"
           - task: Cache@2
             inputs:

@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const PROGRAM_QUERY = gql`
   query Program($id: ID!) {
@@ -21,7 +21,6 @@ export const PROGRAM_QUERY = gql`
       totalNumberOfHouseholds
       totalNumberOfHouseholdsWithTpInProgram
       administrativeAreasOfImplementation
-      individualDataNeeded
       version
       dataCollectingType {
         id
@@ -36,7 +35,11 @@ export const PROGRAM_QUERY = gql`
         id
         name
         areaAccess
-        adminAreas
+        adminAreas {
+          ids
+          level
+          totalCount
+        }
       }
     }
   }

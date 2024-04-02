@@ -600,6 +600,8 @@ class Query(graphene.ObjectType):
 
     def resolve_cross_area_filter_available(self, info: Any, **kwargs: Any) -> bool:
         user = info.context.user
+        if not user.is_authenticated:
+            return False
         business_area = BusinessArea.objects.get(slug=info.context.headers.get("Business-Area"))
         program_id = get_program_id_from_headers(info.context.headers)
 

@@ -1,12 +1,12 @@
-import { Box, Grid, MenuItem } from '@material-ui/core';
-import React, { useEffect, useState } from 'react';
+import { Box, Grid, MenuItem } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SearchTextField } from '../../../../components/core/SearchTextField';
-import { SelectFilter } from '../../../../components/core/SelectFilter';
-import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
+import { SearchTextField } from '@components/core/SearchTextField';
+import { SelectFilter } from '@components/core/SelectFilter';
+import { useAllFieldsAttributesQuery } from '@generated/graphql';
 import { FlexFieldsTable } from '../../../tables/targeting/TargetPopulation/FlexFields';
 
-export const FlexFieldTab = (): React.ReactElement => {
+export function FlexFieldTab(): React.ReactElement {
   const { t } = useTranslation();
   const { data } = useAllFieldsAttributesQuery();
   const [searchValue, setSearchValue] = useState('');
@@ -34,7 +34,7 @@ export const FlexFieldTab = (): React.ReactElement => {
             label={t('Search')}
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            data-cy='filters-search'
+            data-cy="filters-search"
             fullWidth
           />
         </Grid>
@@ -42,22 +42,20 @@ export const FlexFieldTab = (): React.ReactElement => {
           {selectOptions.length && (
             <SelectFilter
               onChange={(e) => setSelectedOption(e.target.value)}
-              variant='outlined'
+              variant="outlined"
               label={t('Type')}
               value={selectedOption}
               fullWidth
               disableClearable
             >
-              <MenuItem value='All'>
+              <MenuItem value="All">
                 <em>{t('All')}</em>
               </MenuItem>
-              {selectOptions.map((type) => {
-                return (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                );
-              })}
+              {selectOptions.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
             </SelectFilter>
           )}
         </Grid>
@@ -69,19 +67,17 @@ export const FlexFieldTab = (): React.ReactElement => {
             fullWidth
             disableClearable
           >
-            <MenuItem value='All'>
+            <MenuItem value="All">
               <em>{t('All')}</em>
             </MenuItem>
             {[
               { name: 'Flex field', value: 'Flex field' },
               { name: 'Core field', value: 'Core field' },
-            ].map((el) => {
-              return (
-                <MenuItem key={el.name} value={el.value}>
-                  {el.name}
-                </MenuItem>
-              );
-            })}
+            ].map((el) => (
+              <MenuItem key={el.name} value={el.value}>
+                {el.name}
+              </MenuItem>
+            ))}
           </SelectFilter>
         </Grid>
       </Grid>
@@ -93,4 +89,4 @@ export const FlexFieldTab = (): React.ReactElement => {
       />
     </Box>
   );
-};
+}

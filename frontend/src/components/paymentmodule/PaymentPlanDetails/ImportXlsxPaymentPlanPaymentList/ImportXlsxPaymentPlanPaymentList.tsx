@@ -1,29 +1,24 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-} from '@material-ui/core';
-import { Publish } from '@material-ui/icons';
+import { Box, Button, Dialog, DialogActions, DialogTitle } from '@mui/material';
+import { Publish } from '@mui/icons-material';
 import get from 'lodash/get';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { DialogTitleWrapper } from '../../../../containers/dialogs/DialogTitleWrapper';
-import { ImportErrors } from '../../../../containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
-import { useSnackbar } from '../../../../hooks/useSnackBar';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { ImportErrors } from '@containers/tables/payments/VerificationRecordsTable/errors/ImportErrors';
+import { useSnackbar } from '@hooks/useSnackBar';
 import {
   ImportXlsxPpListMutation,
   PaymentPlanDocument,
   PaymentPlanQuery,
   PaymentPlanStatus,
   useImportXlsxPpListMutation,
-} from '../../../../__generated__/graphql';
-import { DropzoneField } from '../../../core/DropzoneField';
+} from '@generated/graphql';
+import { DropzoneField } from '@core/DropzoneField';
 import { useProgramContext } from '../../../../programContext';
-import { LoadingButton } from '../../../core/LoadingButton';
+import { LoadingButton } from '@core/LoadingButton';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};
@@ -35,25 +30,21 @@ interface ImportXlsxPaymentPlanPaymentListProps {
   permissions: string[];
 }
 
-export const ImportXlsxPaymentPlanPaymentList = ({
+export function ImportXlsxPaymentPlanPaymentList({
   paymentPlan,
   permissions,
-}: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement => {
+}: ImportXlsxPaymentPlanPaymentListProps): React.ReactElement {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState<File | null>(null);
   const { isActiveProgram } = useProgramContext();
   const { t } = useTranslation();
 
-  const [
-    mutate,
-    { data: uploadData, loading: fileLoading, error },
-  ] = useImportXlsxPpListMutation();
+  const [mutate, { data: uploadData, loading: fileLoading, error }] =
+    useImportXlsxPpListMutation();
 
-  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] = get(
-    uploadData,
-    'importXlsxPaymentPlanPaymentList.errors',
-  );
+  const xlsxErrors: ImportXlsxPpListMutation['importXlsxPaymentPlanPaymentList']['errors'] =
+    get(uploadData, 'importXlsxPaymentPlanPaymentList.errors');
 
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
@@ -94,11 +85,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
 
   return (
     <>
-      <Box key='import'>
+      <Box key="import">
         <Button
           startIcon={<Publish />}
-          color='primary'
-          data-cy='button-import'
+          color="primary"
+          data-cy="button-import"
           onClick={() => setOpenImport(true)}
           disabled={shouldDisableUpload}
         >
@@ -108,10 +99,10 @@ export const ImportXlsxPaymentPlanPaymentList = ({
       <Dialog
         open={open}
         onClose={() => setOpenImport(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
-        <DialogTitleWrapper data-cy='dialog-import'>
+        <DialogTitleWrapper data-cy="dialog-import">
           <DialogTitle>{t('Select File to Import')}</DialogTitle>
           <>
             <DropzoneField
@@ -135,18 +126,20 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             />
             {fileToImport &&
             (error?.graphQLErrors?.length || xlsxErrors?.length) ? (
-              <Error data-cy='error-list'>
+              <Error data-cy="error-list">
                 <p>Errors</p>
                 {error
-                  ? error.graphQLErrors.map((x) => <p>{x.message}</p>)
+                  ? error.graphQLErrors.map((x) => (
+                      <p key={x.message}>{x.message}</p>
+                  ))
                   : null}
                 <ImportErrors errors={xlsxErrors} />
               </Error>
-            ) : null}
+              ) : null}
           </>
           <DialogActions>
             <Button
-              data-cy='close-button'
+              data-cy="close-button"
               onClick={() => {
                 setOpenImport(false);
                 setFileToImport(null);
@@ -157,11 +150,11 @@ export const ImportXlsxPaymentPlanPaymentList = ({
             <LoadingButton
               loading={fileLoading}
               disabled={!fileToImport}
-              type='submit'
-              color='primary'
-              variant='contained'
+              type="submit"
+              color="primary"
+              variant="contained"
               onClick={() => handleImport()}
-              data-cy='button-import-entitlement'
+              data-cy="button-import-entitlement"
             >
               {t('IMPORT')}
             </LoadingButton>
@@ -170,4 +163,4 @@ export const ImportXlsxPaymentPlanPaymentList = ({
       </Dialog>
     </>
   );
-};
+}

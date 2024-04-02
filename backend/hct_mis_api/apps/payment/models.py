@@ -51,6 +51,7 @@ from hct_mis_api.apps.core.field_attributes.core_fields_attributes import (
     FieldFactory,
 )
 from hct_mis_api.apps.core.field_attributes.fields_types import _HOUSEHOLD, _INDIVIDUAL
+from hct_mis_api.apps.core.mixins import LimitBusinessAreaModelMixin
 from hct_mis_api.apps.core.models import BusinessArea, FileTemp
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
@@ -1199,7 +1200,7 @@ class FspXlsxTemplatePerDeliveryMechanism(TimeStampedUUIDModel):
         return f"{self.financial_service_provider.name} - {self.xlsx_template} - {self.delivery_mechanism}"
 
 
-class FinancialServiceProvider(TimeStampedUUIDModel):
+class FinancialServiceProvider(LimitBusinessAreaModelMixin, TimeStampedUUIDModel):
     COMMUNICATION_CHANNEL_API = "API"
     COMMUNICATION_CHANNEL_SFTP = "SFTP"
     COMMUNICATION_CHANNEL_XLSX = "XLSX"
@@ -1460,6 +1461,11 @@ class CashPlan(ConcurrencyModel, GenericPaymentPlan):
     def unicef_id(self) -> str:
         # TODO: maybe 'ca_id' rename to 'unicef_id'?
         return self.ca_id
+
+    @property
+    def verification_status(self) -> Optional[str]:
+        summary = self.payment_verification_summary.first()
+        return getattr(summary, "status", None)
 
     class Meta:
         verbose_name = "Cash Plan"

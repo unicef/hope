@@ -35,6 +35,9 @@ class TestUserFilter(APITestCase):
         # user with UNICEF partner
         partner_unicef = PartnerFactory(name="UNICEF")
         cls.user_with_unicef_partner = UserFactory(partner=partner_unicef, username="unicef_user")
+        cls.create_user_role_with_permissions(
+            cls.user_with_unicef_partner, [Permissions.USER_MANAGEMENT_VIEW_LIST], business_area
+        )
 
         # user with access to BA
         user_in_ba = UserFactory(username="user_in_ba", partner=None)

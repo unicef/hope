@@ -1,53 +1,92 @@
-import { Box } from '@material-ui/core';
-import { v4 as uuidv4 } from 'uuid';
-import Paper from '@material-ui/core/Paper';
-import Skeleton from '@material-ui/lab/Skeleton';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import FindInPageIcon from '@material-ui/icons/FindInPage';
-import React from 'react';
+import { KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import FindInPageIcon from '@mui/icons-material/FindInPage';
+import {
+  Box as MuiBox,
+  IconButton,
+  Paper as MuiPaper,
+  Skeleton,
+  Table as MuiTable,
+  TableBody as MuiTableBody,
+  TableCell as MuiTableCell,
+  TableContainer as MuiTableContainer,
+  TablePagination,
+  TableRow as MuiTableRow,
+} from '@mui/material';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
+import styled from 'styled-components';
 
 export type Order = 'asc' | 'desc';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: '100%',
-    },
-    paper: {
-      width: '100%',
-      marginBottom: theme.spacing(2),
-    },
-    table: {
-      minWidth: 750,
-    },
-    empty: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
-      color: 'rgba(0, 0, 0, 0.38)',
-      fontSize: '24px',
-      lineHeight: '28px',
-      textAlign: 'center',
-      padding: '70px',
-    },
-    smallerText: {
-      fontSize: '16px',
-    },
-    icon: {
-      fontSize: '50px',
-    },
-  }),
-);
+const Root = styled('div')`
+  width: 100%;
+`;
+
+const Paper = styled(MuiPaper)`
+  width: 100%;
+  margin-bottom: 8px;
+`;
+
+const Table = styled(MuiTable)`
+  min-width: 750px;
+`;
+
+const StyledTableRow = styled(MuiTableRow)`
+  height: 70px;
+  min-height: 70px;
+`;
+
+const StyledTableCell = styled(MuiTableCell)`
+  col-span: ${(props) => props.colSpan};
+  && {
+    white-space: nowrap;
+    overflow: auto;
+  }
+`;
+
+const StyledTableContainer = styled(MuiTableContainer)``;
+
+const StyledBox = styled(MuiBox)`
+  display: flex;
+  justify-content: space-between;
+`;
+
+const StyledTable = styled(Table)`
+  aria-labelledby: 'tableTitle';
+  size: 'medium';
+  aria-label: 'enhanced table';
+  data-cy: 'table-title';
+`;
+
+const EmptyMessage = styled.div`
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #a9a9a9;
+  font-size: 24px;
+  line-height: 28px;
+  text-align: center;
+  padding: 70px;
+`;
+
+const SmallerText = styled(MuiBox)`
+  font-size: 16px;
+  color: #a9a9a9;
+`;
+
+const IconContainer = styled(MuiBox)`
+  font-size: 50px;
+`;
+
+const Icon = styled(FindInPageIcon)`
+  & svg {
+    color: #9e9e9e;
+  }
+`;
 
 interface TableComponentProps<T> {
   data: T[];
@@ -88,83 +127,97 @@ export function TableComponent<T>({
   handleRequestSort,
   order,
   orderBy,
+  onSelectAllClick,
   loading = false,
   allowSort = true,
   isOnPaper = true,
   actions = [],
-  onSelectAllClick,
   numSelected = 0,
 }: TableComponentProps<T>): React.ReactElement {
   const { t } = useTranslation();
-  const classes = useStyles({});
+
+  const TablePaginationActions = () => {
+    const handleBackButtonClick = (event) => {
+      handleChangePage(event, page - 1);
+    };
+
+    const handleNextButtonClick = (event) => {
+      handleChangePage(event, page + 1);
+    };
+
+    return (
+      <MuiBox sx={{ flexShrink: 0, ml: 2.5 }}>
+        <IconButton
+          onClick={handleBackButtonClick}
+          disabled={page === 0 || loading}
+          aria-label="previous page"
+        >
+          <KeyboardArrowLeft />
+        </IconButton>
+        <IconButton
+          onClick={handleNextButtonClick}
+          disabled={page >= Math.ceil(itemsCount / rowsPerPage) - 1 || loading}
+          aria-label="next page"
+        >
+          <KeyboardArrowRight />
+        </IconButton>
+      </MuiBox>
+    );
+  };
 
   const emptyRows = itemsCount
     ? rowsPerPage - Math.min(rowsPerPage, itemsCount - page * rowsPerPage)
     : rowsPerPage;
+
   let body;
 
   if (loading) {
     body = Array.from({ length: rowsPerPage }).map(() => (
-      <TableRow
-        key={uuidv4()}
-        data-cy='table-row'
-        style={{ height: 70, minHeight: 70 }}
-      >
-        <TableCell colSpan={headCells.length}>
-          <Skeleton variant='rect' width='100%' height={70} />
-        </TableCell>
-      </TableRow>
+      <StyledTableRow key={crypto.randomUUID()} data-cy="table-row">
+        <StyledTableCell colSpan={headCells.length}>
+          <Skeleton variant="rectangular" width="100%" height={70} />
+        </StyledTableCell>
+      </StyledTableRow>
     ));
   } else if (!data?.length) {
     body = (
-      <TableRow
-        data-cy='table-row'
-        style={{ height: 70 * emptyRows, minHeight: 70 }}
-      >
-        <TableCell colSpan={headCells.length}>
-          <div className={classes.empty}>
-            <FindInPageIcon className={classes.icon} fontSize='inherit' />
-            <Box mt={2}>No results</Box>
-            <Box className={classes.smallerText} mt={2}>
+      <StyledTableRow data-cy="table-row" style={{ height: 70 * emptyRows }}>
+        <StyledTableCell colSpan={headCells.length}>
+          <EmptyMessage>
+            <IconContainer>
+              <Icon fontSize="inherit" />
+            </IconContainer>
+            <MuiBox mt={2}>No results</MuiBox>
+            <SmallerText mt={2}>
               {t(
                 'Try adjusting your search or your filters to find what you are looking for.',
               )}
-            </Box>
-          </div>
-        </TableCell>
-      </TableRow>
+            </SmallerText>
+          </EmptyMessage>
+        </StyledTableCell>
+      </StyledTableRow>
     );
   } else {
     body = (
       <>
-        {data.map((row) => {
-          return renderRow(row);
-        })}
+        {data.map((row) => renderRow(row))}
         {emptyRows > 0 && (
-          <TableRow style={{ height: 70 }}>
-            <TableCell colSpan={headCells.length} />
-          </TableRow>
+          <StyledTableRow style={{ height: 70 }}>
+            <StyledTableCell colSpan={headCells.length} />
+          </StyledTableRow>
         )}
       </>
     );
   }
   const table = (
     <>
-      <TableContainer>
-        <Box display='flex' justifyContent='space-between'>
+      <StyledTableContainer>
+        <StyledBox>
           {title ? <EnhancedTableToolbar title={title} /> : null}
-          <Box p={5} display='flex'>
-            {actions || null}
-          </Box>
-        </Box>
+          <StyledBox p={5}>{actions || null}</StyledBox>
+        </StyledBox>
 
-        <Table
-          className={classes.table}
-          aria-labelledby='tableTitle'
-          size='medium'
-          aria-label='enhanced table'
-          data-cy='table-title'
-        >
+        <StyledTable>
           <EnhancedTableHead<T>
             order={order}
             headCells={headCells}
@@ -176,27 +229,22 @@ export function TableComponent<T>({
             data={data}
             numSelected={numSelected}
           />
-          <TableBody>{body}</TableBody>
-        </Table>
-      </TableContainer>
+          <MuiTableBody>{body}</MuiTableBody>
+        </StyledTable>
+      </StyledTableContainer>
       <TablePagination
         rowsPerPageOptions={rowsPerPageOptions}
-        component='div'
+        component="div"
         count={itemsCount}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        backIconButtonProps={{ ...(loading && { disabled: true }) }}
-        nextIconButtonProps={{ ...(loading && { disabled: true }) }}
-        data-cy='table-pagination'
+        ActionsComponent={TablePaginationActions}
+        data-cy="table-pagination"
       />
     </>
   );
 
-  return (
-    <div className={classes.root}>
-      {isOnPaper ? <Paper className={classes.paper}>{table}</Paper> : table}
-    </div>
-  );
+  return <Root>{isOnPaper ? <Paper>{table}</Paper> : table}</Root>;
 }

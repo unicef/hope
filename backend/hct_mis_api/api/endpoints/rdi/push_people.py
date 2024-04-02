@@ -6,7 +6,7 @@ from django.http import Http404
 from django.utils import timezone
 from django.utils.functional import cached_property
 
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -38,7 +38,7 @@ PEOPLE_TYPE_CHOICES = (
 )
 
 
-class PeopleSerializer(serializers.ModelSerializer):
+class PushPeopleSerializer(serializers.ModelSerializer):
     first_registration_date = serializers.DateTimeField(default=timezone.now)
     last_registration_date = serializers.DateTimeField(default=timezone.now)
     observed_disability = serializers.CharField(allow_blank=True, required=False)
@@ -108,6 +108,7 @@ class PeopleUploadMixin:
         individual_fields = [field.name for field in ImportedIndividual._meta.get_fields()]
         individual_data = {field: value for field, value in person_data.items() if field in individual_fields}
         person_type = person_data.get("type")
+        individual_data.pop("relationship")
         relationship = NON_BENEFICIARY if person_type is NON_BENEFICIARY else HEAD
 
         ind = ImportedIndividual.objects.create(
@@ -152,10 +153,10 @@ class PushPeopleToRDIView(HOPEAPIBusinessAreaView, PeopleUploadMixin, HOPEAPIVie
         except RegistrationDataImportDatahub.DoesNotExist:
             raise Http404
 
-    @swagger_auto_schema(request_body=PeopleSerializer)
+    @extend_schema(request=PushPeopleSerializer)
     @atomic(using="registration_datahub")
     def post(self, request: "Request", business_area: str, rdi: UUID) -> Response:
-        serializer = PeopleSerializer(data=request.data, many=True)
+        serializer = PushPeopleSerializer(data=request.data, many=True)
         program_id = RegistrationDataImport.objects.get(datahub_id=str(self.selected_rdi.id)).program_id
 
         if serializer.is_valid():

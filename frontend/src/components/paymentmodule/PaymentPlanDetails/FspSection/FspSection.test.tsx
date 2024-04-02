@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { fakeApolloPaymentPlan } from '../../../../../fixtures/paymentmodule/fakeApolloPaymentPlan';
 import { render } from '../../../../testUtils/testUtils';
 import { FspSection } from './FspSection';

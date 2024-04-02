@@ -1,11 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableWrapper } from '../../../../components/core/TableWrapper';
+import { TableWrapper } from '@components/core/TableWrapper';
 import {
   AllAccountabilityCommunicationMessageRecipientsQueryVariables,
   CommunicationMessageRecipientMapNode,
   useAllAccountabilityCommunicationMessageRecipientsQuery,
-} from '../../../../__generated__/graphql';
+} from '@generated/graphql';
 import { UniversalTable } from '../../UniversalTable';
 import { headCells } from './RecipientsTableHeadCells';
 import { RecipientsTableRow } from './RecipientsTableRow';
@@ -15,26 +15,27 @@ interface RecipientsTableProps {
   canViewDetails: boolean;
 }
 
-export const RecipientsTable = ({
+export function RecipientsTable({
   id,
   canViewDetails,
-}: RecipientsTableProps): React.ReactElement => {
+}: RecipientsTableProps): React.ReactElement {
   const { t } = useTranslation();
-  const initialVariables: AllAccountabilityCommunicationMessageRecipientsQueryVariables = {
-    messageId: id,
-  };
+  const initialVariables: AllAccountabilityCommunicationMessageRecipientsQueryVariables =
+    {
+      messageId: id,
+    };
 
   return (
     <TableWrapper>
       <UniversalTable<
-        CommunicationMessageRecipientMapNode,
-        AllAccountabilityCommunicationMessageRecipientsQueryVariables
+      CommunicationMessageRecipientMapNode,
+      AllAccountabilityCommunicationMessageRecipientsQueryVariables
       >
         title={t('Recipients')}
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllAccountabilityCommunicationMessageRecipientsQuery}
-        queriedObjectName='allAccountabilityCommunicationMessageRecipients'
+        queriedObjectName="allAccountabilityCommunicationMessageRecipients"
         initialVariables={initialVariables}
         renderRow={(row) => (
           <RecipientsTableRow
@@ -47,4 +48,4 @@ export const RecipientsTable = ({
       />
     </TableWrapper>
   );
-};
+}

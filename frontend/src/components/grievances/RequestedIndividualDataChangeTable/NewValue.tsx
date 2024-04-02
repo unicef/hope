@@ -1,5 +1,5 @@
-import React from 'react';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import * as React from 'react';
+import { AllAddIndividualFieldsQuery } from '@generated/graphql';
 import { GrievanceFlexFieldPhotoModal } from '../GrievancesPhotoModals/GrievanceFlexFieldPhotoModal';
 
 export interface NewValueProps {

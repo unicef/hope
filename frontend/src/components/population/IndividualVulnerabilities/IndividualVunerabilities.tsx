@@ -1,23 +1,23 @@
-import { Typography } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import React from 'react';
+import { Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
+import { useArrayToDict } from '@hooks/useArrayToDict';
 import {
   AllIndividualsFlexFieldsAttributesQuery,
   IndividualNode,
-} from '../../../__generated__/graphql';
-import { LabelizedField } from '../../core/LabelizedField';
-import { Title } from '../../core/Title';
+} from '@generated/graphql';
+import { LabelizedField } from '@core/LabelizedField';
+import { Title } from '@core/Title';
 import { IndividualFlexFieldPhotoModal } from '../IndividualFlexFieldPhotoModal';
 
 const Overview = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  margin-top: ${({ theme }) => theme.spacing(6)}px;
-  margin-bottom: ${({ theme }) => theme.spacing(6)}px;
+  padding: ${({ theme }) => theme.spacing(8)}
+    ${({ theme }) => theme.spacing(11)};
+  margin-top: ${({ theme }) => theme.spacing(6)};
+  margin-bottom: ${({ theme }) => theme.spacing(6)};
 `;
 interface IndividualVulnerabilitesProps {
   individual: IndividualNode;
@@ -85,7 +85,7 @@ export function IndividualVulnerabilities({
     <div>
       <Overview>
         <Title>
-          <Typography variant='h6'>{t('Vulnerabilities')}</Typography>
+          <Typography variant="h6">{t('Vulnerabilities')}</Typography>
         </Title>
         <Grid container spacing={6}>
           {fields.map((field, i) => (

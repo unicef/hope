@@ -1,15 +1,4 @@
-trigger:
-  batch: true
-  branches:
-    include:
-    - develop
-    - staging
-    - master
-    - ephemeral-1
-    - ops/*
-  paths:
-    exclude:
-    -  docs/*
+trigger: none
 pr: none
 resources:
   - repo: self
@@ -58,7 +47,7 @@ stages:
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: "14.x"
+              versionSpec: "18.19.x"
             displayName: "Install Node.js"
           - task: Cache@2
             inputs:

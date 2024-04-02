@@ -4,27 +4,27 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import React, { useState } from 'react';
+} from '@mui/material';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import * as React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { BlackLink } from '../../core/BlackLink';
+import { BlackLink } from '@core/BlackLink';
 import { MiśTheme } from '../../../theme';
-import { decodeIdString } from '../../../utils/utils';
+import { decodeIdString } from '@utils/utils';
 import {
   DeduplicationResultNode,
   ImportedIndividualMinimalFragment,
-} from '../../../__generated__/graphql';
-import { DialogFooter } from '../../../containers/dialogs/DialogFooter';
-import { DialogTitleWrapper } from '../../../containers/dialogs/DialogTitleWrapper';
-import { DialogDescription } from '../../../containers/dialogs/DialogDescription';
-import { useBaseUrl } from '../../../hooks/useBaseUrl';
+} from '@generated/graphql';
+import { DialogFooter } from '@containers/dialogs/DialogFooter';
+import { DialogTitleWrapper } from '@containers/dialogs/DialogTitleWrapper';
+import { DialogDescription } from '@containers/dialogs/DialogDescription';
+import { useBaseUrl } from '@hooks/useBaseUrl';
 
 const Error = styled.span`
   color: ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.red};
@@ -35,6 +35,10 @@ const Error = styled.span`
 const Bold = styled.span`
   font-weight: bold;
   font-size: 16px;
+`;
+
+const StyledTable = styled(Table)`
+  min-width: 100;
 `;
 
 interface DedupeResultsProps {
@@ -53,12 +57,7 @@ export function DedupeResults({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { baseUrl } = useBaseUrl();
-  const useStyles = makeStyles(() => ({
-    table: {
-      minWidth: 100,
-    },
-  }));
-  const classes = useStyles();
+
   function createData(
     hitId,
     fullName,
@@ -67,25 +66,32 @@ export function DedupeResults({
     score,
     proximityToScore,
   ): {
-    hitId: number;
-    fullName: string;
-    age: number;
-    location: string;
-    score: number;
-    proximityToScore: number;
-  } {
-    return { hitId, fullName, age, location, score, proximityToScore };
+      hitId: number;
+      fullName: string;
+      age: number;
+      location: string;
+      score: number;
+      proximityToScore: number;
+    } {
+    return {
+      hitId,
+      fullName,
+      age,
+      location,
+      score,
+      proximityToScore,
+    };
   }
-  const rows = results.map((result) => {
-    return createData(
+  const rows = results.map((result) =>
+    createData(
       result.hitId,
       result.fullName,
       result.age,
       result.location,
       result.score,
       result.proximityToScore,
-    );
-  });
+    ),
+  );
   const handleClickBatch = (id): string => {
     const path = `/${baseUrl}/registration-data-import/individual/${id}`;
     return path;
@@ -106,12 +112,12 @@ export function DedupeResults({
         {status} ({results.length})
       </Error>
       <Dialog
-        maxWidth='md'
+        maxWidth="md"
         fullWidth
         open={open}
         onClose={() => setOpen(false)}
-        scroll='paper'
-        aria-labelledby='form-dialog-title'
+        scroll="paper"
+        aria-labelledby="form-dialog-title"
       >
         <DialogTitleWrapper>
           <DialogTitle>{t('Duplicates')}</DialogTitle>
@@ -127,7 +133,7 @@ export function DedupeResults({
               {t('are listed below.')}
             </div>
           </DialogDescription>
-          <Table className={classes.table}>
+          <StyledTable>
             <TableHead>
               <TableRow>
                 <TableCell style={{ width: 100 }}>
@@ -138,10 +144,10 @@ export function DedupeResults({
                 <TableCell style={{ width: 100 }}>
                   {t('Administrative Level 2')}
                 </TableCell>
-                <TableCell style={{ width: 100 }} align='left'>
+                <TableCell style={{ width: 100 }} align="left">
                   {t('Similarity Score')}
                 </TableCell>
-                <TableCell style={{ width: 100 }} align='left'>
+                <TableCell style={{ width: 100 }} align="left">
                   {t('Proximity to the Score')}
                 </TableCell>
               </TableRow>
@@ -160,19 +166,19 @@ export function DedupeResults({
                       {decodeIdString(row.hitId)}
                     </BlackLink>
                   </TableCell>
-                  <TableCell align='left'>{row.fullName}</TableCell>
-                  <TableCell align='left'>
+                  <TableCell align="left">{row.fullName}</TableCell>
+                  <TableCell align="left">
                     {row.age || t('Not provided')}
                   </TableCell>
-                  <TableCell align='left'>{row.location}</TableCell>
-                  <TableCell align='left'>{row.score}</TableCell>
-                  <TableCell align='left'>
+                  <TableCell align="left">{row.location}</TableCell>
+                  <TableCell align="left">{row.score}</TableCell>
+                  <TableCell align="left">
                     {row.proximityToScore > 0 && '+'} {row.proximityToScore}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+          </StyledTable>
         </DialogContent>
         <DialogFooter>
           <DialogActions>

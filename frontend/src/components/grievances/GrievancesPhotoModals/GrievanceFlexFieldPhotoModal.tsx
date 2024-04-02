@@ -1,11 +1,11 @@
-import { Box } from '@material-ui/core';
-import React from 'react';
+import { Box } from '@mui/material';
+import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import {
   AllAddIndividualFieldsQuery,
   useGrievanceTicketFlexFieldsQuery,
-} from '../../../__generated__/graphql';
-import { PhotoModal } from '../../core/PhotoModal/PhotoModal';
+} from '@generated/graphql';
+import { PhotoModal } from '@core/PhotoModal/PhotoModal';
 
 export interface GrievanceFlexFieldPhotoModalProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -13,11 +13,11 @@ export interface GrievanceFlexFieldPhotoModalProps {
   isIndividual?: boolean;
 }
 
-export const GrievanceFlexFieldPhotoModal = ({
+export function GrievanceFlexFieldPhotoModal({
   field,
   isCurrent,
   isIndividual,
-}: GrievanceFlexFieldPhotoModalProps): React.ReactElement => {
+}: GrievanceFlexFieldPhotoModalProps): React.ReactElement {
   const { id } = useParams();
   const { data } = useGrievanceTicketFlexFieldsQuery({
     variables: { id },
@@ -29,9 +29,9 @@ export const GrievanceFlexFieldPhotoModal = ({
 
   const flexFields = isIndividual
     ? data.grievanceTicket?.individualDataUpdateTicketDetails?.individualData
-        ?.flex_fields
+      ?.flex_fields
     : data.grievanceTicket?.householdDataUpdateTicketDetails?.householdData
-        ?.flex_fields;
+      ?.flex_fields;
 
   const picUrl: string = isCurrent
     ? flexFields[field.name]?.previous_value
@@ -39,8 +39,8 @@ export const GrievanceFlexFieldPhotoModal = ({
   return picUrl ? (
     <PhotoModal src={picUrl} />
   ) : (
-    <Box style={{ height: '100%' }} display='flex' alignItems='center'>
+    <Box style={{ height: '100%' }} display="flex" alignItems="center">
       -
     </Box>
   );
-};
+}

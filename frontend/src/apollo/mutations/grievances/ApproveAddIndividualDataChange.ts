@@ -1,8 +1,9 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
+
 export const ApproveAddIndividualDataChange = gql`
   mutation ApproveAddIndividualDataChange(
     $grievanceTicketId: ID!
-    $approveStatus:Boolean!
+    $approveStatus: Boolean!
   ) {
     approveAddIndividual(
       grievanceTicketId: $grievanceTicketId

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { render } from '../../../../testUtils/testUtils';
 import { fakeDeliveryMechanisms } from '../../../../../fixtures/paymentmodule/fakeDeliveryMechanisms';
 import { fakeFspsData } from '../../../../../fixtures/paymentmodule/fakeFspsData';
@@ -20,12 +20,11 @@ describe('components/paymentmodule/CreateSetUpFsp/DeliveryMechanismRow', () => {
       name: el.name,
       value: el.id,
     }));
-    const deliveryMechanismsChoices = fakeDeliveryMechanisms.allDeliveryMechanisms.map(
-      (el) => ({
+    const deliveryMechanismsChoices =
+      fakeDeliveryMechanisms.allDeliveryMechanisms.map((el) => ({
         name: el.name,
         value: el.value,
-      }),
-    );
+      }));
 
     const { container } = render(
       <DeliveryMechanismRow

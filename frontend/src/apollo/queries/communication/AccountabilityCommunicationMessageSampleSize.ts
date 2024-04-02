@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import { gql } from '@apollo/client';
 
 export const ACCOUNTABILITY_COMMUNICATION_MESSAGE_SAMPLE_SIZE = gql`
   query AccountabilityCommunicationMessageSampleSize(
