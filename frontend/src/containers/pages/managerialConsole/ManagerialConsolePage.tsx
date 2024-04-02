@@ -155,12 +155,6 @@ export const ManagerialConsolePage: React.FC = () => {
           />
         </Box>
       )}
-      <Box mb={6}>
-        <BaseSection
-          title={t('Payment Verification Plans Overview')}
-          buttons={null}
-        />
-      </Box>
     </>
   );
 };
