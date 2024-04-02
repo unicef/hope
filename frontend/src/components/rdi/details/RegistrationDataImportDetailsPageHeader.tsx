@@ -31,13 +31,13 @@ const MergeButtonContainer = styled.span`
   margin-left: ${({ theme }) => theme.spacing(4)};
 `;
 
-export function RegistrationDataImportDetailsPageHeader({
+export const RegistrationDataImportDetailsPageHeader = ({
   registration,
   canMerge,
   canRerunDedupe,
   canViewList,
   canRefuse,
-}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
+}: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement => {
   const { t } = useTranslation();
   const { baseUrl } = useBaseUrl();
   const confirm = useConfirmation();
@@ -67,6 +67,7 @@ export function RegistrationDataImportDetailsPageHeader({
       variant="contained"
       color="primary"
       disabled={!isActiveProgram}
+      data-cy="button-erase-rdi"
     >
       {t('Erase import')}
     </LoadingButton>
@@ -87,6 +88,7 @@ export function RegistrationDataImportDetailsPageHeader({
               variant="contained"
               color="primary"
               disabled={!isActiveProgram}
+              data-cy="button-refuse-rdi"
             >
               {t('Refuse Import')}
             </LoadingButton>
@@ -118,6 +120,7 @@ export function RegistrationDataImportDetailsPageHeader({
             variant="contained"
             color="primary"
             component={Link}
+            data-cy="button-view-tickets"
             to={`/${baseUrl}/grievance/rdi/${registration.id}`}
           >
             {t('View Tickets')}
@@ -151,4 +154,4 @@ export function RegistrationDataImportDetailsPageHeader({
       />
     </>
   );
-}
+};

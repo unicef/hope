@@ -147,17 +147,22 @@ export const CreateCommunicationPage = (): React.ReactElement => {
     }
   }, [activeStep, formValues, loadSampleSize]);
 
-  const [loadAvailableFlows, { data: flowsData }] =
-    useSurveyAvailableFlowsLazyQuery({
-      fetchPolicy: 'network-only',
-    });
+  const [
+    loadAvailableFlows,
+    { data: flowsData, loading: flowsLoading, error: flowsError },
+  ] = useSurveyAvailableFlowsLazyQuery({
+    fetchPolicy: 'network-only',
+  });
 
   useEffect(() => {
     loadAvailableFlows();
   }, [loadAvailableFlows]);
 
   useEffect(() => {
-    if (!flowsData?.surveyAvailableFlows?.length) {
+    if (
+      (flowsData?.surveyAvailableFlows === null || flowsError) &&
+      !flowsLoading
+    ) {
       navigate(`/error/${businessArea}`, {
         state: {
           errorMessage: t(
@@ -167,7 +172,7 @@ export const CreateCommunicationPage = (): React.ReactElement => {
         },
       });
     }
-  }, [flowsData, businessArea, baseUrl, navigate, t]);
+  }, [flowsData, flowsError, flowsLoading, businessArea, baseUrl, navigate, t]);
 
   const validationSchema = useCallback(() => {
     const datum = {

@@ -208,9 +208,7 @@ class TestPushPeople(HOPEApiTestCase):
                 "documents": [
                     {
                         "image": "",
-                        "doc_date": "2010-01-01",
                         "country": "AF",
-                        "type": IDENTIFICATION_TYPE_TO_KEY_MAPPING[IDENTIFICATION_TYPE_BIRTH_CERTIFICATE],
                     }
                 ],
             },
@@ -231,6 +229,13 @@ class TestPushPeople(HOPEApiTestCase):
                 {
                     "birth_date": ["This field is required."],
                     "collect_individual_data": ["This field is required."],
+                    "documents": [
+                        {
+                            "doc_date": ["This field is required."],
+                            "document_number": ["This field is required."],
+                            "type": ["This field is required."],
+                        }
+                    ],
                     "type": ["This field is required."],
                 },
                 {"birth_date": ["This field is required."], "type": ["This field is required."]},

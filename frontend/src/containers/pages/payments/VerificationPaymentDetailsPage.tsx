@@ -73,6 +73,7 @@ export function VerificationPaymentDetailsPage(): React.ReactElement {
           paymentVerificationId={payment.verification?.id}
           status={payment.verification?.status}
           enabled={payment.verification.isManuallyEditable}
+          receivedAmount={payment.verification.receivedAmount}
         />
         ) : null}
     </PageHeader>

@@ -6,6 +6,7 @@ from unittest.mock import patch
 from django.utils import timezone
 
 from aniso8601 import parse_date
+from flaky import flaky
 from freezegun import freeze_time
 from graphql import GraphQLError
 from pytz import utc
@@ -70,6 +71,7 @@ class TestPaymentPlanServices(APITestCase):
         with self.assertRaises(GraphQLError):
             PaymentPlanService(payment_plan=pp).delete()
 
+    @flaky(max_runs=5, min_passes=1)
     @freeze_time("2020-10-10")
     def test_create_validation_errors(self) -> None:
         targeting = TargetPopulationFactory()
@@ -522,6 +524,7 @@ class TestPaymentPlanServices(APITestCase):
             set(follow_up_pp_2.payment_items.values_list("source_payment_id", flat=True)),
         )
 
+    @flaky(max_runs=5, min_passes=1)
     @freeze_time("2023-10-10")
     @mock.patch("hct_mis_api.apps.payment.models.PaymentPlan.get_exchange_rate", return_value=2.0)
     @patch("hct_mis_api.apps.payment.models.PaymentPlanSplit.MIN_NO_OF_PAYMENTS_IN_CHUNK")

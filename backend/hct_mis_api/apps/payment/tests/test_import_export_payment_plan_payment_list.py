@@ -131,6 +131,18 @@ class ImportExportPaymentPlanPaymentListTest(APITestCase):
         service.validate()
         self.assertEqual(service.errors, error_msg)
 
+    def test_import_invalid_file_with_unexpected_column(self) -> None:
+        error_msg = XlsxError(sheet="Payment Plan - Payment List", coordinates="L3", message="Unexpected value")
+        content = Path(
+            f"{settings.PROJECT_ROOT}/apps/payment/tests/test_file/pp_payment_list_unexpected_column.xlsx"
+        ).read_bytes()
+        file = BytesIO(content)
+
+        service = XlsxPaymentPlanImportService(self.payment_plan, file)
+        service.open_workbook()
+        service.validate()
+        self.assertIn(error_msg, service.errors)
+
     @patch("hct_mis_api.apps.core.exchange_rates.api.ExchangeRateClientAPI.__init__")
     def test_import_valid_file(self, mock_parent_init: Any) -> None:
         mock_parent_init.return_value = None
