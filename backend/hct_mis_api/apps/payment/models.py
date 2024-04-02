@@ -391,6 +391,7 @@ class PaymentPlanSplitPayments(TimeStampedUUIDModel):
 
 class PaymentPlanSplit(TimeStampedUUIDModel):
     MAX_CHUNKS = 50
+    MIN_NO_OF_PAYMENTS_IN_CHUNK = 10
 
     class SplitType(models.TextChoices):
         BY_RECORDS = "BY_RECORDS", "By Records"
@@ -1051,6 +1052,28 @@ class PaymentPlan(ConcurrencyModel, SoftDeletableModel, GenericPaymentPlan, Unic
     @property
     def last_approval_process_by(self) -> Optional[str]:
         return self._get_last_approval_process_data()["modified_by"]
+
+    @property
+    def can_send_to_payment_gateway(self) -> bool:
+        status_accepted = self.status == PaymentPlan.Status.ACCEPTED
+        if self.splits.exists():
+            has_payment_gateway_fsp = self.delivery_mechanisms.filter(
+                financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                financial_service_provider__payment_gateway_id__isnull=False,
+            ).exists()
+            has_not_sent_to_payment_gateway_splits = self.splits.filter(
+                sent_to_payment_gateway=False,
+            ).exists()
+            return status_accepted and has_payment_gateway_fsp and has_not_sent_to_payment_gateway_splits
+        else:
+            return (
+                status_accepted
+                and self.delivery_mechanisms.filter(
+                    sent_to_payment_gateway=False,
+                    financial_service_provider__communication_channel=FinancialServiceProvider.COMMUNICATION_CHANNEL_API,
+                    financial_service_provider__payment_gateway_id__isnull=False,
+                ).exists()
+            )
 
 
 class FinancialServiceProviderXlsxTemplate(TimeStampedUUIDModel):
