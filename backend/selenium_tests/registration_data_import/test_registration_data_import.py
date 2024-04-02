@@ -130,4 +130,4 @@ class TestRegistrationDataImport:
         pageDetailsRegistrationDataImport.waitFotStatus("IN REVIEW")
         assert "50" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfHouseholds().text
         assert "208" in pageDetailsRegistrationDataImport.getLabelTotalNumberOfIndividuals().text
-        # pageDetailsRegistrationDataImport.screenshot("2")
+        pageDetailsRegistrationDataImport.screenshot("2")
