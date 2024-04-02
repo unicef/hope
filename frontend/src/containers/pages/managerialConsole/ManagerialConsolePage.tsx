@@ -55,18 +55,6 @@ export const ManagerialConsolePage: React.FC = () => {
   };
 
   const permissions = usePermissions();
-  const canApprove = hasPermissions(
-    'PM_ACCEPTANCE_PROCESS_APPROVE',
-    permissions,
-  );
-  const canAuthorize = hasPermissions(
-    'PM_ACCEPTANCE_PROCESS_AUTHORIZE',
-    permissions,
-  );
-  const canReview = hasPermissions(
-    'PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW',
-    permissions,
-  );
 
   const { refetch } = useQuery({
     queryKey: ['paymentPlans', businessArea],
@@ -108,9 +96,27 @@ export const ManagerialConsolePage: React.FC = () => {
     },
   });
 
-  if (inApprovalLoading || inAuthorizationLoading || inReviewLoading) {
+  if (
+    inApprovalLoading ||
+    inAuthorizationLoading ||
+    inReviewLoading ||
+    !permissions
+  ) {
     return <LoadingComponent />;
   }
+
+  const canApprove = hasPermissions(
+    'PM_ACCEPTANCE_PROCESS_APPROVE',
+    permissions,
+  );
+  const canAuthorize = hasPermissions(
+    'PM_ACCEPTANCE_PROCESS_AUTHORIZE',
+    permissions,
+  );
+  const canReview = hasPermissions(
+    'PM_ACCEPTANCE_PROCESS_FINANCIAL_REVIEW',
+    permissions,
+  );
 
   return (
     <>
