@@ -1,6 +1,6 @@
+import dataclasses
 import logging
 import os
-from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -24,6 +24,13 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.utils import get_quantity_in_usd
 
 logger = logging.getLogger(__name__)
+
+
+class FlexibleArgumentsDataclassMixin:
+    @classmethod
+    def create_from_dict(cls, _dict: Dict) -> Any:
+        class_fields = {f.name for f in dataclasses.fields(cls)}
+        return cls(**{k: v for k, v in _dict.items() if k in class_fields})
 
 
 class ReadOnlyModelSerializer(serializers.ModelSerializer):
@@ -56,6 +63,7 @@ class PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer(ReadOnlyMo
     def get_extra(self, obj: Any) -> Dict:
         return {
             "user": self.context["user_email"],
+            "business_area": obj.payment_plan.business_area.code,
             "config_key": obj.payment_plan.business_area.code,
         }
 
@@ -128,8 +136,8 @@ class PaymentSerializer(ReadOnlyModelSerializer):
         ]
 
 
-@dataclass
-class PaymentRecordData:
+@dataclasses.dataclass()
+class PaymentRecordData(FlexibleArgumentsDataclassMixin):
     id: int
     remote_id: str
     created: str
@@ -143,8 +151,8 @@ class PaymentRecordData:
     message: Optional[str] = None
 
 
-@dataclass
-class PaymentInstructionData:
+@dataclasses.dataclass()
+class PaymentInstructionData(FlexibleArgumentsDataclassMixin):
     remote_id: str
     unicef_id: str
     status: str  # "DRAFT"
@@ -155,8 +163,8 @@ class PaymentInstructionData:
     id: Optional[int] = None
 
 
-@dataclass
-class FspData:
+@dataclasses.dataclass()
+class FspData(FlexibleArgumentsDataclassMixin):
     id: int
     remote_id: str
     name: str
@@ -165,8 +173,8 @@ class FspData:
     payload: dict
 
 
-@dataclass
-class AddRecordsResponseData:
+@dataclasses.dataclass()
+class AddRecordsResponseData(FlexibleArgumentsDataclassMixin):
     remote_id: str  # payment instruction id
     records: Optional[dict] = None  # {"record_code": "remote_id"}
     errors: Optional[dict] = None  # {index: "error_message"}
@@ -221,11 +229,11 @@ class PaymentGatewayAPI:
 
     def get_fsps(self) -> List[FspData]:
         response_data = self._get(self.Endpoints.GET_FSPS)
-        return [FspData(**fsp_data) for fsp_data in response_data]
+        return [FspData.create_from_dict(fsp_data) for fsp_data in response_data]
 
     def create_payment_instruction(self, data: dict) -> PaymentInstructionData:
         response_data = self._post(self.Endpoints.CREATE_PAYMENT_INSTRUCTION, data)
-        return PaymentInstructionData(**response_data)
+        return PaymentInstructionData.create_from_dict(response_data)
 
     def change_payment_instruction_status(self, status: PaymentInstructionStatus, remote_id: str) -> str:
         if status.value not in [s.value for s in PaymentInstructionStatus]:
@@ -251,13 +259,13 @@ class PaymentGatewayAPI:
             serializer.data,
             validate_response=validate_response,
         )
-        return AddRecordsResponseData(**response_data)
+        return AddRecordsResponseData.create_from_dict(response_data)
 
     def get_records_for_payment_instruction(self, payment_instruction_remote_id: str) -> List[PaymentRecordData]:
         response_data = self._get(
             f"{self.Endpoints.GET_PAYMENT_RECORDS}?parent__remote_id={payment_instruction_remote_id}"
         )
-        return [PaymentRecordData(**record_data) for record_data in response_data]
+        return [PaymentRecordData.create_from_dict(record_data) for record_data in response_data]
 
 
 class PaymentGatewayService:
@@ -274,19 +282,21 @@ class PaymentGatewayService:
             data = _serializer(_object, context={"user_email": user_email}).data
             response = self.api.create_payment_instruction(data)
             assert response.remote_id == str(_object.id), f"{response}, _object_id: {_object.id}"
-            status = self.api.change_payment_instruction_status(
-                status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
-            )
+            status = response.status
+            if status == PaymentInstructionStatus.DRAFT.value:
+                status = self.api.change_payment_instruction_status(
+                    status=PaymentInstructionStatus.OPEN, remote_id=response.remote_id
+                )
             assert status == PaymentInstructionStatus.OPEN.value, status
 
         if payment_plan.splits.exists():
-            for split in payment_plan.splits.all().order_by("order"):
+            for split in payment_plan.splits.filter(sent_to_payment_gateway=False).order_by("order"):
                 if split.financial_service_provider.is_payment_gateway:
                     _create_payment_instruction(PaymentInstructionFromSplitSerializer, split)
 
         else:
             # for each sfp, create payment instruction
-            for delivery_mechanism in payment_plan.delivery_mechanisms.all():
+            for delivery_mechanism in payment_plan.delivery_mechanisms.filter(sent_to_payment_gateway=False):
                 if delivery_mechanism.financial_service_provider.is_payment_gateway:
                     _create_payment_instruction(
                         PaymentInstructionFromDeliveryMechanismPerPaymentPlanSerializer, delivery_mechanism
@@ -320,9 +330,9 @@ class PaymentGatewayService:
                     add_records_error = True
                     _handle_errors(response, payments_chunk)
 
-            _container.sent_to_payment_gateway = True
-            _container.save(update_fields=["sent_to_payment_gateway"])
             if not add_records_error:
+                _container.sent_to_payment_gateway = True
+                _container.save(update_fields=["sent_to_payment_gateway"])
                 self.change_payment_instruction_status(PaymentInstructionStatus.CLOSED, _container)
                 self.change_payment_instruction_status(PaymentInstructionStatus.READY, _container)
 
@@ -333,7 +343,7 @@ class PaymentGatewayService:
                     _add_records(payments, split)
 
         else:
-            for delivery_mechanism in payment_plan.delivery_mechanisms.all():
+            for delivery_mechanism in payment_plan.delivery_mechanisms.filter(sent_to_payment_gateway=False):
                 if delivery_mechanism.financial_service_provider.is_payment_gateway:
                     payments = list(
                         payment_plan.eligible_payments.filter(
